@@ -1,0 +1,145 @@
+@import './variables.scss';
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: $font-family-base;
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+  line-height: 1.6;
+  transition: background-color var(--transition-base), color var(--transition-base);
+}
+
+// Typography utilities
+h1, h2, h3, h4, h5, h6 {
+  font-family: $font-family-display;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+h1 {
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 700;
+}
+
+h2 {
+  font-size: clamp(2rem, 4vw, 3rem);
+}
+
+h3 {
+  font-size: clamp(1.5rem, 3vw, 2rem);
+}
+
+// Button base styles - Minimal
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--spacing-unit) * 1.5);
+  padding: calc(var(--spacing-unit) * 1.5) calc(var(--spacing-unit) * 3);
+  font-size: 1rem;
+  font-weight: 500;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-decoration: none;
+  white-space: nowrap;
+  
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
+  &-primary {
+    background: var(--color-accent);
+    color: white;
+    
+    &:hover:not(:disabled) {
+      background: var(--color-accent-hover);
+    }
+    
+    &:active:not(:disabled) {
+      transform: scale(0.98);
+    }
+  }
+  
+  &-secondary {
+    background: var(--color-surface);
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-border);
+    
+    &:hover:not(:disabled) {
+      background: var(--color-surface-elevated);
+      border-color: var(--color-text-tertiary);
+    }
+  }
+  
+  &-ghost {
+    background: transparent;
+    color: var(--color-text-secondary);
+    
+    &:hover:not(:disabled) {
+      color: var(--color-text-primary);
+      background: var(--color-surface);
+    }
+  }
+  
+  &-lg {
+    padding: calc(var(--spacing-unit) * 2) calc(var(--spacing-unit) * 4);
+    font-size: 1.125rem;
+    border-radius: var(--radius-lg);
+  }
+}
+
+// Container
+.container {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 calc(var(--spacing-unit) * 3);
+  
+  @media (max-width: $breakpoint-md) {
+    padding: 0 calc(var(--spacing-unit) * 2);
+  }
+}
+
+// Section spacing
+.section {
+  padding: calc(var(--spacing-unit) * 12) 0;
+  
+  @media (max-width: $breakpoint-md) {
+    padding: calc(var(--spacing-unit) * 8) 0;
+  }
+}
+
+// Card component - Minimal
+.card {
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: calc(var(--spacing-unit) * 3);
+  transition: border-color var(--transition-base);
+  
+  &:hover {
+    border-color: var(--color-text-tertiary);
+  }
+}
+
+// Focus styles
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
