@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ArrowRight, Layout, Palette, Rocket } from 'lucide-react';
 import TemplateGallery from '../components/TemplateGallery';
 import CustomizeModal from '../components/CustomizeModal';
@@ -9,6 +9,52 @@ import './Home.scss';
 function Home({ theme }) {
   const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Check screen size on mount and resize
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Responsive particle wave props
+  const particleProps = isMobile
+    ? {
+        particleCount: 15000,
+        minRadiusScale: 1.2,
+        baseSpeed: 0.8,
+        speedVariation: 0,
+        perspective: 600,
+        sizeMin: 5,
+        sizeMax: 8,
+        enableTilt: true,
+        tiltIntensity: 0.3,
+        baseRadius: 80,
+        morphSpeed: 0.04,
+        rotationSpeed: 0.3,
+        pulseSpeed: 0.01,
+      }
+    : {
+        particleCount: 10000,
+        minRadiusScale: 1.625,
+        baseSpeed: 1,
+        speedVariation: 0,
+        perspective: 800,
+        sizeMin: 7,
+        sizeMax: 10,
+        enableTilt: true,
+        tiltIntensity: 0.5,
+        baseRadius: 140,
+        morphSpeed: 0.044,
+        rotationSpeed: 0.34,
+        pulseSpeed: 0.01,
+      };
 
   const steps = [
     {
@@ -49,19 +95,7 @@ function Home({ theme }) {
       <section className="hero">
         <ParticleWave
           isDark={theme === 'dark'}
-          particleCount={10000}
-          minRadiusScale={1.625}
-          baseSpeed={1}
-          speedVariation={0}
-          perspective={800}
-          sizeMin={7}
-          sizeMax={10}
-          enableTilt={true}
-          tiltIntensity={0.5}
-          baseRadius={140}      
-          morphSpeed={0.044}
-          rotationSpeed={0.34}
-          pulseSpeed={0.01}    
+          {...particleProps}
         />
         <div className="container">
           <div className="hero__content">

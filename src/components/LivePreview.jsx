@@ -6,6 +6,19 @@ function LivePreview({ templateId, customization, images, onFieldClick }) {
   const iframeRef = useRef(null);
   const [iframeReady, setIframeReady] = useState(false);
   const lastCustomizationRef = useRef(null);
+  const [viewMode, setViewMode] = useState('desktop');
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Check if mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Initialize iframe
   useEffect(() => {
@@ -21,7 +34,7 @@ function LivePreview({ templateId, customization, images, onFieldClick }) {
     return () => {
       iframe.removeEventListener('load', handleLoad);
     };
-  }, [templateId]); // Only re-run when template changes
+  }, [templateId]);
 
   // Update iframe content
   useEffect(() => {
@@ -44,14 +57,11 @@ function LivePreview({ templateId, customization, images, onFieldClick }) {
       iframeDoc.write(html);
       iframeDoc.close();
 
-      // Store current customization
       lastCustomizationRef.current = customization;
 
-      // Apply interactivity after a short delay
       const timeoutId = setTimeout(() => {
         const visibility = customization.__visibility || {};
         
-        // Hide elements based on visibility settings
         Object.entries(visibility).forEach(([key, isVisible]) => {
           if (!isVisible) {
             const elements = iframeDoc.querySelectorAll(`[data-editable="${key}"]`);
@@ -91,12 +101,9 @@ function LivePreview({ templateId, customization, images, onFieldClick }) {
               e.stopPropagation();
               const fieldName = element.getAttribute('data-editable');
               
-              // Handle group fields (e.g., "contactInfo.0.value")
               if (fieldName.includes('.')) {
                 const parts = fieldName.split('.');
                 const groupKey = parts[0];
-                
-                // Just pass to parent - it will handle the expansion
                 onFieldClick(fieldName);
               } else {
                 onFieldClick(fieldName);
@@ -112,53 +119,53 @@ function LivePreview({ templateId, customization, images, onFieldClick }) {
     }
   }, [templateId, customization, images, onFieldClick]);
 
-  const [viewMode, setViewMode] = useState('desktop');
-
   return (
     <div className="live-preview">
-      <div className="live-preview__toolbar">
-        <div className="live-preview__controls">
-          <button 
-            className={`live-preview__control ${viewMode === 'desktop' ? 'active' : ''}`}
-            onClick={() => setViewMode('desktop')}
-            title="Desktop view"
-          >
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <rect x="2" y="4" width="16" height="10" rx="1" stroke="currentColor" strokeWidth="1.5"/>
-              <path d="M7 17H13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-              <path d="M10 14V17" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-            </svg>
-          </button>
-          <button 
-            className={`live-preview__control ${viewMode === 'tablet' ? 'active' : ''}`}
-            onClick={() => setViewMode('tablet')}
-            title="Tablet view"
-          >
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <rect x="5" y="2" width="10" height="16" rx="1" stroke="currentColor" strokeWidth="1.5"/>
-              <circle cx="10" cy="15.5" r="0.5" fill="currentColor"/>
-            </svg>
-          </button>
-          <button 
-            className={`live-preview__control ${viewMode === 'mobile' ? 'active' : ''}`}
-            onClick={() => setViewMode('mobile')}
-            title="Mobile view"
-          >
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <rect x="6" y="2" width="8" height="16" rx="1" stroke="currentColor" strokeWidth="1.5"/>
-              <circle cx="10" cy="15.5" r="0.5" fill="currentColor"/>
-            </svg>
-          </button>
+      {!isMobile && (
+        <div className="live-preview__toolbar">
+          <div className="live-preview__controls">
+            <button 
+              className={`live-preview__control ${viewMode === 'desktop' ? 'active' : ''}`}
+              onClick={() => setViewMode('desktop')}
+              title="Desktop view"
+            >
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <rect x="2" y="4" width="16" height="10" rx="1" stroke="currentColor" strokeWidth="1.5"/>
+                <path d="M7 17H13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                <path d="M10 14V17" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+              </svg>
+            </button>
+            <button 
+              className={`live-preview__control ${viewMode === 'tablet' ? 'active' : ''}`}
+              onClick={() => setViewMode('tablet')}
+              title="Tablet view"
+            >
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <rect x="5" y="2" width="10" height="16" rx="1" stroke="currentColor" strokeWidth="1.5"/>
+                <circle cx="10" cy="15.5" r="0.5" fill="currentColor"/>
+              </svg>
+            </button>
+            <button 
+              className={`live-preview__control ${viewMode === 'mobile' ? 'active' : ''}`}
+              onClick={() => setViewMode('mobile')}
+              title="Mobile view"
+            >
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <rect x="6" y="2" width="8" height="16" rx="1" stroke="currentColor" strokeWidth="1.5"/>
+                <circle cx="10" cy="15.5" r="0.5" fill="currentColor"/>
+              </svg>
+            </button>
+          </div>
+          <div className="live-preview__label">
+            Live Preview · Click to edit · 
+            <span className="live-preview__mode">
+              {viewMode === 'desktop' && ' Desktop'}
+              {viewMode === 'tablet' && ' Tablet'}
+              {viewMode === 'mobile' && ' Mobile'}
+            </span>
+          </div>
         </div>
-        <div className="live-preview__label">
-          Live Preview · Click to edit · 
-          <span className="live-preview__mode">
-            {viewMode === 'desktop' && ' Desktop'}
-            {viewMode === 'tablet' && ' Tablet'}
-            {viewMode === 'mobile' && ' Mobile'}
-          </span>
-        </div>
-      </div>
+      )}
       
       <div className="live-preview__content">
         <div className={`live-preview__frame-wrapper live-preview__frame-wrapper--${viewMode}`}>
