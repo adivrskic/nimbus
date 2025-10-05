@@ -38,10 +38,8 @@ function LivePreview({ templateId, customization, images, onFieldClick }) {
     const isMobile = window.innerWidth <= 1024;
 
     try {
-      // Generate HTML with current customization
       const html = generateHTML(templateId, customization, images);
       
-      // Write the HTML to iframe
       iframeDoc.open();
       iframeDoc.write(html);
       iframeDoc.close();
