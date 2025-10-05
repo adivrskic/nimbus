@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Star } from 'lucide-react';
 import './TemplateGallery.scss';
@@ -117,34 +117,45 @@ function TemplateGallery({ onTemplateSelect }) {
 
   const categories = ['All', ...new Set(templates.map(t => t.category))];
 
-  const filteredTemplates = activeFilter === 'All' 
-    ? templates 
-    : activeFilter === 'Featured'
-    ? templates.filter(t => t.featured)
-    : templates.filter(t => t.category === activeFilter);
+  // Memoize filtered templates - only recalculates when activeFilter changes
+  const filteredTemplates = useMemo(() => {
+    if (activeFilter === 'All') {
+      return templates;
+    }
+    if (activeFilter === 'Featured') {
+      return templates.filter(t => t.featured);
+    }
+    return templates.filter(t => t.category === activeFilter);
+  }, [activeFilter]);
 
-  const displayedTemplates = filteredTemplates.slice(0, displayCount);
+  const displayedTemplates = useMemo(() => 
+    filteredTemplates.slice(0, displayCount),
+    [filteredTemplates, displayCount]
+  );
+
   const hasMore = displayCount < filteredTemplates.length;
+  const featuredCount = useMemo(() => 
+    templates.filter(t => t.featured).length,
+    []
+  );
 
-  const handleTemplateClick = (templateId) => {
+  // Memoize callback to prevent re-renders
+  const handleTemplateClick = useCallback((templateId) => {
     if (onTemplateSelect) {
       onTemplateSelect(templateId);
     } else {
       navigate(`/customize/${templateId}`);
     }
-  };
+  }, [onTemplateSelect, navigate]);
 
-  const loadMore = () => {
+  const loadMore = useCallback(() => {
     setDisplayCount(prev => prev + 6);
-  };
+  }, []);
 
-  const featuredCount = templates.filter(t => t.featured).length;
-
-  // Reset display count when filter changes
-  const handleFilterChange = (category) => {
+  const handleFilterChange = useCallback((category) => {
     setActiveFilter(category);
-    setDisplayCount(6);
-  };
+    setDisplayCount(6); // Reset display count when filter changes
+  }, []);
 
   return (
     <div className="template-gallery">

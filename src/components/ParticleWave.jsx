@@ -304,4 +304,4 @@ const ParticleWave = ({
   );
 };
 
-export default ParticleWave;
+export default React.memo(ParticleWave);

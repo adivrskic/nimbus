@@ -1002,7 +1002,7 @@ function CustomizeModal({ templateId, isOpen, onClose, userTheme }) {
           
           <div className="customize-modal__actions">
             <button 
-              className="btn btn-ghost"
+              className="btn btn-secondary"
               onClick={handleOpenPreview}
               title="Open preview in new tab"
             >
