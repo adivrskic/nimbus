@@ -1,8 +1,11 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Moon, Sun, Cloudy } from 'lucide-react';
 import './Header.scss';
 
 function Header({ theme, toggleTheme }) {
+  const location = useLocation();
+  const isHomePage = location.pathname === '/';
+
   return (
     <header className="header">
       <div className="container">
@@ -13,8 +16,12 @@ function Header({ theme, toggleTheme }) {
           </Link>
 
           <nav className="header__nav">
-            <a href="#how-it-works" className="header__nav-link">How it Works</a>
-            <a href="#templates" className="header__nav-link">Templates</a>
+            {isHomePage && (
+              <>
+                <a href="#how-it-works" className="header__nav-link">How it Works</a>
+                <a href="#templates" className="header__nav-link">Templates</a>
+              </>
+            )}
 
             <button 
               className="header__theme-toggle"
