@@ -297,7 +297,7 @@ const ParticleWave = ({
         height: '100%',
         pointerEvents: enableMouseInteraction ? 'auto' : 'none',
         filter: 'blur(48px)',
-        opacity: 0.667,
+        opacity: 0.5,
         zIndex: 1,
       }}
     />
