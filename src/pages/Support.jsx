@@ -123,7 +123,7 @@ function Support() {
 
               <div className="faq-item">
                 <h3>Where can I get help?</h3>
-                <p>Email us at <a href="mailto:support@siteforge.com">support@siteforge.com</a> and we'll respond within 24 hours.</p>
+                <p>Email us at <a href="mailto:support@siteforge.com">suppor@nimbus.com</a> and we'll respond within 24 hours.</p>
               </div>
             </div>
           </div>

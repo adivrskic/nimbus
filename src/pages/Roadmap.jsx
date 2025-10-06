@@ -107,7 +107,7 @@ function Roadmap() {
 
         <div className="roadmap-cta">
           <h2>Have a feature request?</h2>
-          <p>We'd love to hear your ideas! Reach out to us at <a href="mailto:hello@siteforge.com">hello@siteforge.com</a></p>
+          <p>We'd love to hear your ideas! Reach out to us at <a href="mailto:hello@nimbus.com">hello@nimbus.com</a></p>
         </div>
       </div>
     </div>

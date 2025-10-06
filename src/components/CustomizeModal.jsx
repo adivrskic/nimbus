@@ -4,6 +4,7 @@ import CustomizationPanel from './CustomizationPanel';
 import LivePreview from './LivePreview';
 import { generateZip } from '../utils/generateZip';
 import { generateHTML } from '../utils/templateRenderer';
+import DeploymentModal from './DeploymentModal';
 import './CustomizeModal.scss';
 
 const templateConfigs = {
@@ -821,6 +822,7 @@ function CustomizeModal({ templateId, isOpen, onClose, userTheme }) {
   const [customization, setCustomization] = useState({});
   const [images, setImages] = useState({});
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isDeployModalOpen, setIsDeployModalOpen] = useState(false);
 
   // Load saved customization from localStorage
   useEffect(() => {
@@ -1019,7 +1021,7 @@ function CustomizeModal({ templateId, isOpen, onClose, userTheme }) {
             </button>
             <button 
               className="btn btn-primary"
-              onClick={handleDeploy}
+              onClick={() => setIsDeployModalOpen(true)}
               disabled
             >
               <Construction size={18} />
@@ -1047,6 +1049,14 @@ function CustomizeModal({ templateId, isOpen, onClose, userTheme }) {
           />
         </div>
       </div>
+
+      <DeploymentModal
+        isOpen={isDeployModalOpen}
+        onClose={() => setIsDeployModalOpen(false)}
+        templateId={templateId}
+        customization={customization}
+        images={images}
+      />
     </>
   );
 }
