@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Star } from 'lucide-react';
+import { ArrowRight, Star, Search, X } from 'lucide-react';
 import './TemplateGallery.scss';
 
 const templates = [
@@ -107,26 +107,104 @@ const templates = [
     category: 'Portfolio',
     featured: true,
     preview: 'https://images.unsplash.com/photo-1452587925148-ce544e77e70d?w=600&h=400&fit=crop'
-  }
+  },
+  {
+    id: 'wedding-invite',
+    name: 'Wedding Invitation',
+    description: 'Elegant wedding invitation and RSVP page',
+    category: 'Events',
+    featured: true,
+    preview: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=600&h=400&fit=crop'
+  },
+  {
+    id: 'event-landing',
+    name: 'Event Landing Page',
+    description: 'Professional event page with speakers, schedule, and tickets',
+    category: 'Events',
+    featured: true,
+    preview: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600&h=400&fit=crop'
+  },
+  {
+    id: 'baby-announcement',
+    name: 'Baby Announcement',
+    description: 'Beautiful announcement page for your new arrival',
+    category: 'Events',
+    featured: true,
+    preview: 'https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=600&h=400&fit=crop'
+  },
+  {
+    id: 'teacher-profile',
+    name: 'Teacher Profile',
+    description: 'Professional profile page for educators',
+    category: 'Education',
+    featured: true,
+    preview: 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=600&h=400&fit=crop'
+  },
+  {
+    id: 'student-portfolio',
+    name: 'Student Portfolio',
+    description: 'Showcase your academic achievements and projects',
+    category: 'Education',
+    featured: true,
+    preview: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=600&h=400&fit=crop'
+  },
+  {
+    id: 'fitness-trainer',
+    name: 'Fitness Trainer Profile',
+    description: 'Bold, energetic profile for personal trainers',
+    category: 'Health & Wellness',
+    featured: true,
+    preview: 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=600&h=400&fit=crop'
+  },
+  {
+  id: 'wellness-coach',
+  name: 'Wellness Coach',
+  description: 'Calm, holistic coaching page with zen aesthetic',
+  category: 'Health & Wellness',
+  featured: true,
+  preview: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=600&h=400&fit=crop'
+},
+{
+  id: 'musician-band',
+  name: 'Musician/Band Page',
+  description: 'Edgy, bold page for musicians and bands',
+  category: 'Creative',
+  featured: true,
+  preview: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600&h=400&fit=crop'
+}
 ];
 
 function TemplateGallery({ onTemplateSelect }) {
   const navigate = useNavigate();
   const [activeFilter, setActiveFilter] = useState('All');
   const [displayCount, setDisplayCount] = useState(6);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const categories = ['All', ...new Set(templates.map(t => t.category))];
 
-  // Memoize filtered templates - only recalculates when activeFilter changes
+  // Memoize filtered templates - filters by category AND search
   const filteredTemplates = useMemo(() => {
-    if (activeFilter === 'All') {
-      return templates;
-    }
+    let filtered = templates;
+
+    // Filter by category
     if (activeFilter === 'Featured') {
-      return templates.filter(t => t.featured);
+      filtered = filtered.filter(t => t.featured);
+    } else if (activeFilter !== 'All') {
+      filtered = filtered.filter(t => t.category === activeFilter);
     }
-    return templates.filter(t => t.category === activeFilter);
-  }, [activeFilter]);
+
+    // Filter by search query
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(t => 
+        t.name.toLowerCase().includes(query) ||
+        t.description.toLowerCase().includes(query) ||
+        t.category.toLowerCase().includes(query)
+      );
+    }
+
+    return filtered;
+  }, [activeFilter, searchQuery]);
 
   const displayedTemplates = useMemo(() => 
     filteredTemplates.slice(0, displayCount),
@@ -139,7 +217,6 @@ function TemplateGallery({ onTemplateSelect }) {
     []
   );
 
-  // Memoize callback to prevent re-renders
   const handleTemplateClick = useCallback((templateId) => {
     if (onTemplateSelect) {
       onTemplateSelect(templateId);
@@ -154,7 +231,11 @@ function TemplateGallery({ onTemplateSelect }) {
 
   const handleFilterChange = useCallback((category) => {
     setActiveFilter(category);
-    setDisplayCount(6); // Reset display count when filter changes
+    setDisplayCount(6);
+  }, []);
+
+  const clearSearch = useCallback(() => {
+    setSearchQuery('');
   }, []);
 
   return (
@@ -182,6 +263,28 @@ function TemplateGallery({ onTemplateSelect }) {
           Featured
           <span className="filter-count">{featuredCount}</span>
         </button>
+      </div>
+
+      <div className="template-search">
+        <div className="search-input-wrapper">
+          <Search size={18} className="search-icon" />
+          <input
+            type="text"
+            className="search-input"
+            placeholder="Search templates..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          {searchQuery && (
+            <button 
+              className="search-clear"
+              onClick={clearSearch}
+              aria-label="Clear search"
+            >
+              <X size={18} />
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="template-gallery__grid">
@@ -236,7 +339,11 @@ function TemplateGallery({ onTemplateSelect }) {
 
       {filteredTemplates.length === 0 && (
         <div className="template-gallery__empty">
-          <p>No templates found in this category.</p>
+          <Search size={48} />
+          <p>No templates found matching "{searchQuery}"</p>
+          <button className="btn btn-secondary" onClick={clearSearch}>
+            Clear Search
+          </button>
         </div>
       )}
     </div>

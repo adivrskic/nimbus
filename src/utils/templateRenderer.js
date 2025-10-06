@@ -18,6 +18,15 @@ export function generateHTML(templateId, customization, images = {}) {
     'split-profile': generateSplitProfile,
     'photography-grid': generatePhotographyGrid,
     'photography-masonry': generatePhotographyMasonry,
+    'wedding-invite': generateWeddingInvite,
+    'event-landing': generateEventLanding,
+    'baby-announcement': generateBabyAnnouncement,
+    'teacher-profile': generateTeacherProfile,
+    'student-portfolio': generateStudentPortfolio,
+    'fitness-trainer': generateFitnessTrainer,
+    'wellness-coach': generateWellnessCoach,
+    'musician-band': generateMusicianBand,
+
   };
 
   const generator = templates[templateId];
@@ -4987,6 +4996,4837 @@ function generatePhotographyMasonry(data) {
     ` : ''}
     <p class="footer-note">© ${new Date().getFullYear()} <span data-editable="name">${name}</span>. All photographs are available as limited edition prints.</p>
   </footer>
+</body>
+</html>`;
+}
+function generateWeddingInvite(data) {
+  const {
+    brideName = 'Sarah',
+    groomName = 'Michael',
+    weddingDate = 'June 15, 2025',
+    weddingTime = '4:00 PM',
+    venueName = 'The Grand Estate',
+    venueAddress = '123 Garden Lane\nNapa Valley, CA 94558',
+    ceremonyTitle = 'Ceremony',
+    ceremonyTime = '4:00 PM',
+    ceremonyLocation = 'Garden Terrace',
+    receptionTitle = 'Reception',
+    receptionTime = '6:00 PM',
+    receptionLocation = 'Grand Ballroom',
+    story = '',
+    rsvpDeadline = 'May 1, 2025',
+    rsvpEmail = 'rsvp@sarahandmichael.com',
+    rsvpPhone = '',
+    additionalInfo = '',
+    registryLinks = [],
+    accentColor = '#d4af37',
+    darkMode = 'Light'
+  } = data;
+
+  const themeClass = darkMode === 'Dark' ? 'dark' : darkMode === 'Light' ? 'light' : 'auto';
+  const heroImage = data.__images?.heroImage;
+
+  const registryHTML = registryLinks.map((registry, index) => {
+    const url = registry.url.startsWith('http') ? registry.url : `https://${registry.url}`;
+    return `
+    <a href="${url}" target="_blank" class="registry-link" data-editable="registryLinks.${index}">
+      <span data-editable="registryLinks.${index}.store">${registry.store}</span>
+      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+      </svg>
+    </a>
+    `;
+  }).join('');
+
+  return `<!DOCTYPE html>
+<html lang="en" class="${themeClass}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${brideName} & ${groomName} - Wedding</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    :root {
+      --accent: ${accentColor};
+      --bg: #fefefe;
+      --surface: #fafafa;
+      --text-primary: #2d2d2d;
+      --text-secondary: #666666;
+      --border: #e8e8e8;
+    }
+    
+    @media (prefers-color-scheme: dark) {
+      html.auto {
+        --bg: #1a1a1a;
+        --surface: #2a2a2a;
+        --text-primary: #f5f5f5;
+        --text-secondary: #a8a8a8;
+        --border: #3a3a3a;
+      }
+    }
+    
+    html.dark {
+      --bg: #1a1a1a;
+      --surface: #2a2a2a;
+      --text-primary: #f5f5f5;
+      --text-secondary: #a8a8a8;
+      --border: #3a3a3a;
+    }
+    
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background: var(--bg);
+      color: var(--text-primary);
+      line-height: 1.6;
+      transition: background 0.3s, color 0.3s;
+    }
+    
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 80px 40px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: 
+        radial-gradient(circle at 30% 50%, ${accentColor}08 0%, transparent 60%),
+        radial-gradient(circle at 70% 50%, ${accentColor}05 0%, transparent 60%);
+      pointer-events: none;
+    }
+    
+    .hero-content {
+      position: relative;
+      z-index: 1;
+      max-width: 800px;
+    }
+    
+    .ornament {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 48px;
+      color: var(--accent);
+      margin-bottom: 24px;
+    }
+    
+    .names {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(48px, 8vw, 80px);
+      font-weight: 300;
+      letter-spacing: 0.05em;
+      margin-bottom: 32px;
+      line-height: 1.2;
+    }
+    
+    .ampersand {
+      font-size: clamp(36px, 6vw, 60px);
+      color: var(--accent);
+      font-style: italic;
+      margin: 0 16px;
+    }
+    
+    .date {
+      font-size: clamp(20px, 3vw, 28px);
+      font-weight: 300;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+    }
+    
+    .venue {
+      font-size: clamp(16px, 2vw, 20px);
+      color: var(--text-secondary);
+      font-weight: 400;
+    }
+    
+    .divider {
+      width: 80px;
+      height: 1px;
+      background: var(--accent);
+      margin: 48px auto;
+    }
+    
+    .hero-image {
+      width: 300px;
+      height: 300px;
+      margin: 48px auto 0;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 4px solid var(--accent);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    }
+    
+    .hero-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .hero-image-placeholder {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, ${accentColor}15, ${accentColor}05);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 64px;
+      color: var(--accent);
+    }
+    
+    section {
+      padding: 80px 40px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    
+    @media (max-width: 768px) {
+      section {
+        padding: 60px 24px;
+      }
+    }
+    
+    .section-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(36px, 5vw, 48px);
+      font-weight: 400;
+      text-align: center;
+      margin-bottom: 48px;
+      color: var(--accent);
+      position: relative;
+    }
+    
+    .section-title::after {
+      content: '';
+      display: block;
+      width: 60px;
+      height: 1px;
+      background: var(--accent);
+      margin: 24px auto 0;
+    }
+    
+    .schedule {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 48px;
+      margin-bottom: 80px;
+    }
+    
+    @media (max-width: 768px) {
+      .schedule {
+        padding: 32px 24px;
+      }
+    }
+    
+    .schedule-items {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 48px;
+    }
+    
+    @media (max-width: 768px) {
+      .schedule-items {
+        grid-template-columns: 1fr;
+        gap: 32px;
+      }
+    }
+    
+    .schedule-item {
+      text-align: center;
+    }
+    
+    .schedule-icon {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 24px;
+      background: var(--accent);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 24px;
+      font-weight: 600;
+    }
+    
+    .schedule-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 28px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+    
+    .schedule-time {
+      font-size: 18px;
+      color: var(--accent);
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+    
+    .schedule-location {
+      font-size: 16px;
+      color: var(--text-secondary);
+    }
+    
+    .story {
+      max-width: 700px;
+      margin: 0 auto;
+    }
+    
+    .story-text {
+      font-size: 18px;
+      line-height: 1.8;
+      color: var(--text-secondary);
+      text-align: center;
+      font-style: italic;
+    }
+    
+    .rsvp {
+      background: var(--surface);
+      border: 2px solid var(--accent);
+      border-radius: 16px;
+      padding: 48px;
+      text-align: center;
+    }
+    
+    @media (max-width: 768px) {
+      .rsvp {
+        padding: 32px 24px;
+      }
+    }
+    
+    .rsvp-deadline {
+      font-size: 16px;
+      color: var(--accent);
+      font-weight: 600;
+      margin-bottom: 32px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    
+    .rsvp-contacts {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      align-items: center;
+      margin-bottom: 32px;
+    }
+    
+    .rsvp-contact {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 18px;
+      color: var(--text-primary);
+    }
+    
+    .rsvp-contact a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 500;
+    }
+    
+    .rsvp-contact a:hover {
+      text-decoration: underline;
+    }
+    
+    .info-text {
+      font-size: 15px;
+      line-height: 1.8;
+      color: var(--text-secondary);
+      white-space: pre-line;
+      text-align: center;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    
+    .registry {
+      text-align: center;
+    }
+    
+    .registry-links {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    
+    .registry-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 28px;
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      color: var(--text-primary);
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    
+    .registry-link:hover {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: white;
+      transform: translateY(-2px);
+    }
+    
+    .footer {
+      padding: 48px 40px;
+      text-align: center;
+      border-top: 1px solid var(--border);
+    }
+    
+    .footer-ornament {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 32px;
+      color: var(--accent);
+      margin-bottom: 16px;
+    }
+    
+    .footer-text {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+  </style>
+</head>
+<body>
+  <div class="hero">
+    <div class="hero-content">
+      <div class="ornament">❦</div>
+      
+      <h1 class="names">
+        <span data-editable="brideName">${brideName}</span>
+        <span class="ampersand">&</span>
+        <span data-editable="groomName">${groomName}</span>
+      </h1>
+      
+      <p class="date" data-editable="weddingDate">${weddingDate}</p>
+      <p class="venue">
+        <span data-editable="venueName">${venueName}</span><br>
+        <span data-editable="venueAddress">${venueAddress.replace(/\n/g, '<br>')}</span>
+      </p>
+      
+      ${heroImage ? `
+      <div class="hero-image">
+        <img src="${heroImage.url}" alt="${brideName} & ${groomName}" />
+      </div>
+      ` : `
+      <div class="hero-image">
+        <div class="hero-image-placeholder">♥</div>
+      </div>
+      `}
+    </div>
+  </div>
+
+  <section class="schedule">
+    <div class="schedule-items">
+      <div class="schedule-item">
+        <div class="schedule-icon">🌸</div>
+        <h2 class="schedule-title" data-editable="ceremonyTitle">${ceremonyTitle}</h2>
+        <p class="schedule-time" data-editable="ceremonyTime">${ceremonyTime}</p>
+        <p class="schedule-location" data-editable="ceremonyLocation">${ceremonyLocation}</p>
+      </div>
+      
+      <div class="schedule-item">
+        <div class="schedule-icon">🥂</div>
+        <h2 class="schedule-title" data-editable="receptionTitle">${receptionTitle}</h2>
+        <p class="schedule-time" data-editable="receptionTime">${receptionTime}</p>
+        <p class="schedule-location" data-editable="receptionLocation">${receptionLocation}</p>
+      </div>
+    </div>
+  </section>
+
+  ${story ? `
+  <section class="story">
+    <h2 class="section-title">Our Story</h2>
+    <p class="story-text" data-editable="story">${story}</p>
+  </section>
+  ` : ''}
+
+  <section>
+    <h2 class="section-title">RSVP</h2>
+    <div class="rsvp">
+      <p class="rsvp-deadline">Please respond by <span data-editable="rsvpDeadline">${rsvpDeadline}</span></p>
+      
+      <div class="rsvp-contacts">
+        <div class="rsvp-contact">
+          Email: <a href="mailto:${rsvpEmail}" data-editable="rsvpEmail">${rsvpEmail}</a>
+        </div>
+        ${rsvpPhone ? `
+        <div class="rsvp-contact">
+          Phone: <a href="tel:${rsvpPhone.replace(/\s/g, '')}" data-editable="rsvpPhone">${rsvpPhone}</a>
+        </div>
+        ` : ''}
+      </div>
+    </div>
+  </section>
+
+  ${additionalInfo ? `
+  <section>
+    <h2 class="section-title">Details</h2>
+    <p class="info-text" data-editable="additionalInfo">${additionalInfo}</p>
+  </section>
+  ` : ''}
+
+  ${registryLinks.length > 0 ? `
+  <section class="registry">
+    <h2 class="section-title">Registry</h2>
+    <div class="registry-links">
+      ${registryHTML}
+    </div>
+  </section>
+  ` : ''}
+
+  <footer class="footer">
+    <div class="footer-ornament">❦</div>
+    <p class="footer-text">
+      We can't wait to celebrate with you!<br>
+      <span data-editable="brideName">${brideName}</span> & <span data-editable="groomName">${groomName}</span>
+    </p>
+  </footer>
+</body>
+</html>`;
+}
+function generateEventLanding(data) {
+  const {
+    eventName = 'Tech Summit 2025',
+    tagline = 'The Future of Innovation',
+    eventDate = 'September 20-22, 2025',
+    eventLocation = 'San Francisco Convention Center',
+    description = '',
+    ctaPrimary = 'Get Tickets',
+    ctaSecondary = 'View Schedule',
+    ticketUrl = '#tickets',
+    speakers = [],
+    schedule = [],
+    tickets = [],
+    venue = [],
+    contactEmail = 'info@techsummit.com',
+    accentColor = '#eb1736',
+    darkMode = 'Dark'
+  } = data;
+
+  const themeClass = darkMode === 'Dark' ? 'dark' : darkMode === 'Light' ? 'light' : 'auto';
+
+  const speakersHTML = speakers.map((speaker, index) => {
+    const imageKey = `speakers.${index}.image`;
+    const speakerImage = data.__images?.[imageKey];
+    
+    return `
+    <div class="speaker-card">
+      <div class="speaker-image">
+        ${speakerImage ? `
+          <img src="${speakerImage.url}" alt="${speaker.name}" />
+        ` : `
+          <div class="speaker-placeholder">${speaker.name.charAt(0)}</div>
+        `}
+      </div>
+      <h3 class="speaker-name" data-editable="speakers.${index}.name">${speaker.name}</h3>
+      <p class="speaker-title" data-editable="speakers.${index}.title">${speaker.title}</p>
+      <p class="speaker-company" data-editable="speakers.${index}.company">${speaker.company}</p>
+    </div>
+    `;
+  }).join('');
+
+  const scheduleHTML = schedule.map((session, index) => `
+    <div class="schedule-item">
+      <div class="schedule-time" data-editable="schedule.${index}.time">${session.time}</div>
+      <div class="schedule-content">
+        <h3 class="schedule-title" data-editable="schedule.${index}.title">${session.title}</h3>
+        <p class="schedule-speaker" data-editable="schedule.${index}.speaker">${session.speaker}</p>
+        <p class="schedule-location" data-editable="schedule.${index}.location">${session.location}</p>
+      </div>
+    </div>
+  `).join('');
+
+  const ticketsHTML = tickets.map((ticket, index) => {
+    const features = ticket.features.split('\n').filter(f => f.trim());
+    const featuresHTML = features.map(feature => `<li>${feature}</li>`).join('');
+    
+    return `
+    <div class="ticket-card">
+      <h3 class="ticket-name" data-editable="tickets.${index}.name">${ticket.name}</h3>
+      <div class="ticket-price">
+        <span class="price-symbol">$</span>
+        <span class="price-amount" data-editable="tickets.${index}.price">${ticket.price}</span>
+      </div>
+      <ul class="ticket-features" data-editable="tickets.${index}.features">
+        ${featuresHTML}
+      </ul>
+      <a href="${ticketUrl}" class="btn btn-ticket">Buy Ticket</a>
+    </div>
+    `;
+  }).join('');
+
+  const venueHTML = venue.map((detail, index) => `
+    <div class="venue-detail">
+      <strong data-editable="venue.${index}.label">${detail.label}:</strong>
+      <span data-editable="venue.${index}.value">${detail.value}</span>
+    </div>
+  `).join('');
+
+  return `<!DOCTYPE html>
+<html lang="en" class="${themeClass}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${eventName}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    :root {
+      --accent: ${accentColor};
+      --bg: #ffffff;
+      --surface: #fafafa;
+      --text-primary: #0a0a0a;
+      --text-secondary: #666666;
+      --border: #e5e5e5;
+    }
+    
+    @media (prefers-color-scheme: dark) {
+      html.auto {
+        --bg: #0a0a0a;
+        --surface: #1a1a1a;
+        --text-primary: #fafafa;
+        --text-secondary: #a3a3a3;
+        --border: #2a2a2a;
+      }
+    }
+    
+    html.dark {
+      --bg: #0a0a0a;
+      --surface: #1a1a1a;
+      --text-primary: #fafafa;
+      --text-secondary: #a3a3a3;
+      --border: #2a2a2a;
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text-primary);
+      line-height: 1.6;
+      transition: background 0.3s, color 0.3s;
+    }
+    
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 120px 40px 80px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: 
+        radial-gradient(circle at 20% 50%, ${accentColor}15 0%, transparent 50%),
+        radial-gradient(circle at 80% 50%, ${accentColor}10 0%, transparent 50%);
+      pointer-events: none;
+    }
+    
+    .hero-content {
+      max-width: 900px;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .event-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 32px;
+    }
+    
+    .event-badge-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.2); }
+    }
+    
+    h1 {
+      font-size: clamp(48px, 8vw, 80px);
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      margin-bottom: 24px;
+    }
+    
+    .hero-tagline {
+      font-size: clamp(24px, 4vw, 36px);
+      color: var(--accent);
+      font-weight: 700;
+      margin-bottom: 24px;
+    }
+    
+    .hero-meta {
+      display: flex;
+      gap: 32px;
+      justify-content: center;
+      flex-wrap: wrap;
+      font-size: 18px;
+      color: var(--text-secondary);
+      margin-bottom: 32px;
+    }
+    
+    .hero-meta-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .hero-description {
+      font-size: clamp(16px, 2vw, 20px);
+      line-height: 1.7;
+      color: var(--text-secondary);
+      max-width: 700px;
+      margin: 0 auto 48px;
+    }
+    
+    .hero-cta {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 18px 36px;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s;
+      cursor: pointer;
+      border: none;
+    }
+    
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+      box-shadow: 0 4px 16px ${accentColor}40;
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px ${accentColor}50;
+    }
+    
+    .btn-secondary {
+      background: var(--surface);
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+    }
+    
+    .btn-secondary:hover {
+      background: var(--bg);
+      border-color: var(--text-secondary);
+    }
+    
+    section {
+      padding: 100px 40px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    
+    @media (max-width: 768px) {
+      section {
+        padding: 80px 24px;
+      }
+    }
+    
+    .section-header {
+      text-align: center;
+      margin-bottom: 64px;
+    }
+    
+    .section-title {
+      font-size: clamp(36px, 5vw, 48px);
+      font-weight: 800;
+      margin-bottom: 16px;
+    }
+    
+    .section-subtitle {
+      font-size: 18px;
+      color: var(--text-secondary);
+    }
+    
+    .speakers {
+      background: var(--surface);
+    }
+    
+    .speakers-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 40px;
+    }
+    
+    @media (max-width: 768px) {
+      .speakers-grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 32px;
+      }
+    }
+    
+    .speaker-card {
+      text-align: center;
+    }
+    
+    .speaker-image {
+      width: 180px;
+      height: 180px;
+      margin: 0 auto 24px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 4px solid var(--border);
+      transition: transform 0.3s;
+    }
+    
+    .speaker-card:hover .speaker-image {
+      transform: scale(1.05);
+    }
+    
+    .speaker-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .speaker-placeholder {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, ${accentColor}20, ${accentColor}10);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 64px;
+      font-weight: 900;
+      color: var(--accent);
+    }
+    
+    .speaker-name {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    
+    .speaker-title {
+      font-size: 15px;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+    }
+    
+    .speaker-company {
+      font-size: 14px;
+      color: var(--accent);
+      font-weight: 600;
+    }
+    
+    .schedule-list {
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    
+    .schedule-item {
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      gap: 32px;
+      padding: 24px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      transition: all 0.2s;
+    }
+    
+    @media (max-width: 768px) {
+      .schedule-item {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+    }
+    
+    .schedule-item:hover {
+      border-color: var(--accent);
+      transform: translateX(4px);
+    }
+    
+    .schedule-time {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    
+    .schedule-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    
+    .schedule-speaker {
+      font-size: 15px;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+    }
+    
+    .schedule-location {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+    
+    .tickets {
+      background: var(--surface);
+    }
+    
+    .tickets-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 32px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    
+    @media (max-width: 768px) {
+      .tickets-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    .ticket-card {
+      padding: 40px 32px;
+      background: var(--bg);
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      text-align: center;
+      transition: all 0.3s;
+    }
+    
+    .ticket-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-4px);
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.08);
+    }
+    
+    .ticket-name {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 24px;
+    }
+    
+    .ticket-price {
+      margin-bottom: 32px;
+    }
+    
+    .price-symbol {
+      font-size: 24px;
+      color: var(--text-secondary);
+      vertical-align: super;
+    }
+    
+    .price-amount {
+      font-size: 56px;
+      font-weight: 900;
+      color: var(--accent);
+    }
+    
+    .ticket-features {
+      list-style: none;
+      text-align: left;
+      margin-bottom: 32px;
+    }
+    
+    .ticket-features li {
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    
+    .ticket-features li:last-child {
+      border-bottom: none;
+    }
+    
+    .btn-ticket {
+      width: 100%;
+      justify-content: center;
+    }
+    
+    .venue-info {
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 40px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+    }
+    
+    .venue-detail {
+      padding: 16px 0;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      gap: 16px;
+      font-size: 16px;
+    }
+    
+    .venue-detail:last-child {
+      border-bottom: none;
+    }
+    
+    .venue-detail strong {
+      min-width: 100px;
+      color: var(--text-primary);
+    }
+    
+    .venue-detail span {
+      color: var(--text-secondary);
+    }
+    
+    .footer {
+      padding: 48px 40px;
+      text-align: center;
+      border-top: 1px solid var(--border);
+    }
+    
+    .footer-text {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+    }
+    
+    .footer-email {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    
+    .footer-email:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="hero">
+    <div class="hero-content">
+      <div class="event-badge">
+        <span class="event-badge-dot"></span>
+        <span>Register Now</span>
+      </div>
+      
+      <h1 data-editable="eventName">${eventName}</h1>
+      <p class="hero-tagline" data-editable="tagline">${tagline}</p>
+      
+      <div class="hero-meta">
+        <div class="hero-meta-item">
+          <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+          </svg>
+          <span data-editable="eventDate">${eventDate}</span>
+        </div>
+        <div class="hero-meta-item">
+          <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+          </svg>
+          <span data-editable="eventLocation">${eventLocation}</span>
+        </div>
+      </div>
+      
+      ${description ? `
+      <p class="hero-description" data-editable="description">${description}</p>
+      ` : ''}
+      
+      <div class="hero-cta">
+        <a href="${ticketUrl}" class="btn btn-primary" data-editable="ctaPrimary">${ctaPrimary}</a>
+        <a href="#schedule" class="btn btn-secondary" data-editable="ctaSecondary">${ctaSecondary}</a>
+      </div>
+    </div>
+  </div>
+
+  ${speakers.length > 0 ? `
+  <section class="speakers">
+    <div class="section-header">
+      <h2 class="section-title">Featured Speakers</h2>
+      <p class="section-subtitle">Learn from industry experts and thought leaders</p>
+    </div>
+    <div class="speakers-grid">
+      ${speakersHTML}
+    </div>
+  </section>
+  ` : ''}
+
+  ${schedule.length > 0 ? `
+  <section id="schedule">
+    <div class="section-header">
+      <h2 class="section-title">Schedule</h2>
+    </div>
+    <div class="schedule-list">
+      ${scheduleHTML}
+    </div>
+  </section>
+  ` : ''}
+
+  ${tickets.length > 0 ? `
+  <section class="tickets">
+    <div class="section-header">
+      <h2 class="section-title">Get Your Tickets</h2>
+      <p class="section-subtitle">Choose the pass that's right for you</p>
+    </div>
+    <div class="tickets-grid">
+      ${ticketsHTML}
+    </div>
+  </section>
+  ` : ''}
+
+  ${venue.length > 0 ? `
+  <section>
+    <div class="section-header">
+      <h2 class="section-title">Venue</h2>
+    </div>
+    <div class="venue-info">
+      ${venueHTML}
+    </div>
+  </section>
+  ` : ''}
+
+  <footer class="footer">
+    <p class="footer-text">
+      Questions? Contact us at <a href="mailto:${contactEmail}" class="footer-email" data-editable="contactEmail">${contactEmail}</a>
+    </p>
+  </footer>
+</body>
+</html>`;
+}
+function generateBabyAnnouncement(data) {
+  const {
+    babyName = 'Olivia Grace',
+    parentNames = 'Emma & James Peterson',
+    birthDate = 'March 15, 2025',
+    birthTime = '8:42 AM',
+    weight = '7 lbs 8 oz',
+    length = '20 inches',
+    announcement = '',
+    meaningOfName = '',
+    thankYouMessage = '',
+    accentColor = '#ffc0cb',
+    darkMode = 'Light'
+  } = data;
+
+  const themeClass = darkMode === 'Dark' ? 'dark' : darkMode === 'Light' ? 'light' : 'auto';
+  const babyPhoto = data.__images?.babyPhoto;
+  const galleryImages = data.__images?.gallery || [];
+
+  const galleryHTML = galleryImages.length > 0 ? galleryImages.map((img, index) => `
+    <div class="gallery-item">
+      <img src="${img.url}" alt="Baby photo ${index + 1}" />
+    </div>
+  `).join('') : '';
+
+  return `<!DOCTYPE html>
+<html lang="en" class="${themeClass}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${babyName} - Baby Announcement</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    :root {
+      --accent: ${accentColor};
+      --bg: #fdfcfc;
+      --surface: #f9f7f7;
+      --text-primary: #3d3d3d;
+      --text-secondary: #7a7a7a;
+      --border: #ede9e9;
+    }
+    
+    @media (prefers-color-scheme: dark) {
+      html.auto {
+        --bg: #1a1818;
+        --surface: #2a2626;
+        --text-primary: #f5f5f5;
+        --text-secondary: #b0b0b0;
+        --border: #3a3636;
+      }
+    }
+    
+    html.dark {
+      --bg: #1a1818;
+      --surface: #2a2626;
+      --text-primary: #f5f5f5;
+      --text-secondary: #b0b0b0;
+      --border: #3a3636;
+    }
+    
+    body {
+      font-family: 'Lato', sans-serif;
+      background: var(--bg);
+      color: var(--text-primary);
+      line-height: 1.6;
+      transition: background 0.3s, color 0.3s;
+    }
+    
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 80px 40px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: 
+        radial-gradient(circle at 30% 50%, ${accentColor}12 0%, transparent 60%),
+        radial-gradient(circle at 70% 50%, ${accentColor}08 0%, transparent 60%);
+      pointer-events: none;
+    }
+    
+    .hero-content {
+      max-width: 800px;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .announcement-label {
+      font-size: 14px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--accent);
+      margin-bottom: 24px;
+    }
+    
+    .baby-name {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(56px, 10vw, 96px);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+    
+    .parent-names {
+      font-size: clamp(18px, 3vw, 24px);
+      color: var(--text-secondary);
+      font-weight: 300;
+      margin-bottom: 48px;
+    }
+    
+    .baby-photo-container {
+      margin: 48px auto;
+      max-width: 400px;
+    }
+    
+    .baby-photo {
+      width: 100%;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 8px solid var(--accent);
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.12);
+      margin-bottom: 32px;
+    }
+    
+    .baby-photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .baby-photo-placeholder {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, ${accentColor}20, ${accentColor}10);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 80px;
+    }
+    
+    .birth-stats {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+    
+    @media (max-width: 480px) {
+      .birth-stats {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    .stat-item {
+      padding: 24px;
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: 16px;
+    }
+    
+    .stat-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+    
+    .stat-value {
+      font-family: 'Playfair Display', serif;
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--accent);
+    }
+    
+    section {
+      padding: 80px 40px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    @media (max-width: 768px) {
+      section {
+        padding: 60px 24px;
+      }
+    }
+    
+    .announcement-section {
+      text-align: center;
+    }
+    
+    .section-icon {
+      font-size: 48px;
+      margin-bottom: 24px;
+    }
+    
+    .announcement-text {
+      font-size: clamp(18px, 2.5vw, 22px);
+      line-height: 1.8;
+      color: var(--text-secondary);
+      margin-bottom: 48px;
+      font-style: italic;
+    }
+    
+    .name-meaning {
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      padding: 40px;
+      margin-bottom: 48px;
+    }
+    
+    .name-meaning-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 28px;
+      font-weight: 600;
+      text-align: center;
+      margin-bottom: 24px;
+      color: var(--accent);
+    }
+    
+    .name-meaning-text {
+      font-size: 16px;
+      line-height: 1.8;
+      color: var(--text-secondary);
+      text-align: center;
+    }
+    
+    .gallery {
+      background: var(--surface);
+    }
+    
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(32px, 5vw, 42px);
+      font-weight: 600;
+      text-align: center;
+      margin-bottom: 48px;
+      color: var(--accent);
+    }
+    
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 24px;
+    }
+    
+    @media (max-width: 768px) {
+      .gallery-grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+      }
+    }
+    
+    .gallery-item {
+      aspect-ratio: 1;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 3px solid var(--border);
+      transition: transform 0.3s;
+    }
+    
+    .gallery-item:hover {
+      transform: scale(1.02);
+    }
+    
+    .gallery-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .thank-you {
+      text-align: center;
+    }
+    
+    .thank-you-text {
+      font-size: 18px;
+      line-height: 1.8;
+      color: var(--text-secondary);
+      max-width: 700px;
+      margin: 0 auto;
+    }
+    
+    .footer {
+      padding: 48px 40px;
+      text-align: center;
+      border-top: 2px solid var(--border);
+    }
+    
+    .footer-hearts {
+      font-size: 32px;
+      margin-bottom: 16px;
+    }
+    
+    .footer-text {
+      font-size: 14px;
+      color: var(--text-secondary);
+      font-style: italic;
+    }
+    
+    .divider {
+      width: 80px;
+      height: 2px;
+      background: var(--accent);
+      margin: 48px auto;
+      border-radius: 2px;
+    }
+  </style>
+</head>
+<body>
+  <div class="hero">
+    <div class="hero-content">
+      <p class="announcement-label">Introducing</p>
+      
+      <h1 class="baby-name" data-editable="babyName">${babyName}</h1>
+      
+      <p class="parent-names">
+        Welcomed with love by<br>
+        <span data-editable="parentNames">${parentNames}</span>
+      </p>
+      
+      <div class="baby-photo-container">
+        <div class="baby-photo">
+          ${babyPhoto ? `
+            <img src="${babyPhoto.url}" alt="${babyName}" />
+          ` : `
+            <div class="baby-photo-placeholder">👶</div>
+          `}
+        </div>
+      </div>
+      
+      <div class="birth-stats">
+        <div class="stat-item">
+          <div class="stat-label">Born</div>
+          <div class="stat-value" data-editable="birthDate">${birthDate}</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Time</div>
+          <div class="stat-value" data-editable="birthTime">${birthTime}</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Weight</div>
+          <div class="stat-value" data-editable="weight">${weight}</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Length</div>
+          <div class="stat-value" data-editable="length">${length}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  ${announcement ? `
+  <section class="announcement-section">
+    <div class="section-icon">💕</div>
+    <p class="announcement-text" data-editable="announcement">${announcement}</p>
+  </section>
+  ` : ''}
+
+  ${meaningOfName ? `
+  <section>
+    <div class="name-meaning">
+      <h2 class="name-meaning-title">Meaning of the Name</h2>
+      <p class="name-meaning-text" data-editable="meaningOfName">${meaningOfName}</p>
+    </div>
+  </section>
+  ` : ''}
+
+  ${galleryImages.length > 0 ? `
+  <section class="gallery">
+    <h2 class="section-title">First Moments</h2>
+    <div class="gallery-grid">
+      ${galleryHTML}
+    </div>
+  </section>
+  ` : ''}
+
+  ${thankYouMessage ? `
+  <section class="thank-you">
+    <div class="divider"></div>
+    <p class="thank-you-text" data-editable="thankYouMessage">${thankYouMessage}</p>
+  </section>
+  ` : ''}
+
+  <footer class="footer">
+    <div class="footer-hearts">💗</div>
+    <p class="footer-text">
+      With love, <span data-editable="parentNames">${parentNames}</span>
+    </p>
+  </footer>
+</body>
+</html>`;
+}
+function generateTeacherProfile(data) {
+  const {
+    name = 'Ms. Jennifer Martinez',
+    title = 'High School English Teacher',
+    school = 'Lincoln High School',
+    yearsExperience = '12',
+    bio = '',
+    subjects = [],
+    education = [],
+    teachingPhilosophy = '',
+    classInfo = [],
+    officeHours = '',
+    contactEmail = 'jmartinez@lincolnhs.edu',
+    contactPhone = '',
+    accentColor = '#2563eb',
+    darkMode = 'Light'
+  } = data;
+
+  const themeClass = darkMode === 'Dark' ? 'dark' : darkMode === 'Light' ? 'light' : 'auto';
+  const profilePhoto = data.__images?.profilePhoto;
+
+  const subjectsHTML = subjects.map((subject, index) => `
+    <div class="subject-tag" data-editable="subjects.${index}">${subject}</div>
+  `).join('');
+
+  const educationHTML = education.map((edu, index) => `
+    <div class="education-item">
+      <h3 class="education-degree" data-editable="education.${index}.degree">${edu.degree}</h3>
+      <p class="education-school" data-editable="education.${index}.institution">${edu.institution}</p>
+      <p class="education-year" data-editable="education.${index}.year">${edu.year}</p>
+    </div>
+  `).join('');
+
+  const classInfoHTML = classInfo.map((cls, index) => `
+    <div class="class-item">
+      <h3 class="class-name" data-editable="classInfo.${index}.className">${cls.className}</h3>
+      <div class="class-details">
+        <span data-editable="classInfo.${index}.period">${cls.period}</span>
+        <span class="class-divider">•</span>
+        <span data-editable="classInfo.${index}.room">${cls.room}</span>
+      </div>
+    </div>
+  `).join('');
+
+  return `<!DOCTYPE html>
+<html lang="en" class="${themeClass}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${name} - ${title}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    :root {
+      --accent: ${accentColor};
+      --bg: #ffffff;
+      --surface: #f8fafc;
+      --text-primary: #0f172a;
+      --text-secondary: #64748b;
+      --border: #e2e8f0;
+    }
+    
+    @media (prefers-color-scheme: dark) {
+      html.auto {
+        --bg: #0f172a;
+        --surface: #1e293b;
+        --text-primary: #f1f5f9;
+        --text-secondary: #94a3b8;
+        --border: #334155;
+      }
+    }
+    
+    html.dark {
+      --bg: #0f172a;
+      --surface: #1e293b;
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --border: #334155;
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text-primary);
+      line-height: 1.6;
+      transition: background 0.3s, color 0.3s;
+    }
+    
+    .header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 60px 40px;
+    }
+    
+    @media (max-width: 768px) {
+      .header {
+        padding: 40px 24px;
+      }
+    }
+    
+    .header-content {
+      max-width: 1000px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      gap: 48px;
+      align-items: start;
+    }
+    
+    @media (max-width: 768px) {
+      .header-content {
+        grid-template-columns: 1fr;
+        text-align: center;
+        gap: 32px;
+      }
+    }
+    
+    .profile-photo {
+      width: 200px;
+      height: 200px;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 4px solid var(--accent);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    }
+    
+    @media (max-width: 768px) {
+      .profile-photo {
+        margin: 0 auto;
+      }
+    }
+    
+    .profile-photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .profile-placeholder {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, ${accentColor}20, ${accentColor}10);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 72px;
+      font-weight: 900;
+      color: var(--accent);
+    }
+    
+    .header-info h1 {
+      font-size: clamp(32px, 5vw, 42px);
+      font-weight: 800;
+      margin-bottom: 8px;
+      letter-spacing: -0.02em;
+    }
+    
+    .header-title {
+      font-size: 20px;
+      color: var(--accent);
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    
+    .header-school {
+      font-size: 18px;
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+    }
+    
+    .experience-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+    
+    .contact-links {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    
+    @media (max-width: 768px) {
+      .contact-links {
+        justify-content: center;
+      }
+    }
+    
+    .contact-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      background: var(--accent);
+      color: white;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    
+    .contact-link:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px ${accentColor}40;
+    }
+    
+    .contact-link svg {
+      width: 16px;
+      height: 16px;
+    }
+    
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 0 40px;
+    }
+    
+    @media (max-width: 768px) {
+      .container {
+        padding: 0 24px;
+      }
+    }
+    
+    section {
+      padding: 60px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    section:last-of-type {
+      border-bottom: none;
+    }
+    
+    .section-title {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 24px;
+      color: var(--text-primary);
+    }
+    
+    .bio-text {
+      font-size: 18px;
+      line-height: 1.8;
+      color: var(--text-secondary);
+    }
+    
+    .subjects-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    
+    .subject-tag {
+      padding: 10px 20px;
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.2s;
+      cursor: default;
+    }
+    
+    .subject-tag:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+    
+    .education-list {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    
+    .education-item {
+      padding: 24px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+    
+    .education-degree {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    
+    .education-school {
+      font-size: 16px;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+    }
+    
+    .education-year {
+      font-size: 14px;
+      color: var(--accent);
+      font-weight: 600;
+    }
+    
+    .philosophy-text {
+      font-size: 18px;
+      line-height: 1.8;
+      color: var(--text-secondary);
+      font-style: italic;
+      padding: 32px;
+      background: var(--surface);
+      border-left: 4px solid var(--accent);
+      border-radius: 8px;
+    }
+    
+    .classes-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+    }
+    
+    @media (max-width: 768px) {
+      .classes-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    .class-item {
+      padding: 24px;
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      transition: all 0.2s;
+    }
+    
+    .class-item:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+    
+    .class-name {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    
+    .class-details {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+    
+    .class-divider {
+      margin: 0 8px;
+    }
+    
+    .office-hours-box {
+      padding: 32px;
+      background: var(--surface);
+      border: 2px solid var(--accent);
+      border-radius: 12px;
+      max-width: 500px;
+    }
+    
+    .office-hours-text {
+      font-size: 16px;
+      line-height: 1.8;
+      color: var(--text-secondary);
+      white-space: pre-line;
+    }
+    
+    .footer {
+      padding: 48px 40px;
+      text-align: center;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+    }
+    
+    .footer-text {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="header-content">
+      <div class="profile-photo">
+        ${profilePhoto ? `
+          <img src="${profilePhoto.url}" alt="${name}" />
+        ` : `
+          <div class="profile-placeholder">${name.charAt(0)}</div>
+        `}
+      </div>
+      
+      <div class="header-info">
+        <h1 data-editable="name">${name}</h1>
+        <p class="header-title" data-editable="title">${title}</p>
+        <p class="header-school" data-editable="school">${school}</p>
+        
+        <div class="experience-badge">
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
+          </svg>
+          <span data-editable="yearsExperience">${yearsExperience}</span> Years Experience
+        </div>
+        
+        <div class="contact-links">
+          <a href="mailto:${contactEmail}" class="contact-link" data-editable="contactEmail">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+            </svg>
+            Email
+          </a>
+          ${contactPhone ? `
+          <a href="tel:${contactPhone.replace(/\s/g, '')}" class="contact-link" data-editable="contactPhone">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+            </svg>
+            Phone
+          </a>
+          ` : ''}
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    ${bio ? `
+    <section>
+      <h2 class="section-title">About Me</h2>
+      <p class="bio-text" data-editable="bio">${bio}</p>
+    </section>
+    ` : ''}
+
+    ${subjects.length > 0 ? `
+    <section>
+      <h2 class="section-title">Subjects I Teach</h2>
+      <div class="subjects-grid">
+        ${subjectsHTML}
+      </div>
+    </section>
+    ` : ''}
+
+    ${education.length > 0 ? `
+    <section>
+      <h2 class="section-title">Education</h2>
+      <div class="education-list">
+        ${educationHTML}
+      </div>
+    </section>
+    ` : ''}
+
+    ${teachingPhilosophy ? `
+    <section>
+      <h2 class="section-title">Teaching Philosophy</h2>
+      <blockquote class="philosophy-text" data-editable="teachingPhilosophy">${teachingPhilosophy}</blockquote>
+    </section>
+    ` : ''}
+
+    ${classInfo.length > 0 ? `
+    <section>
+      <h2 class="section-title">My Classes</h2>
+      <div class="classes-grid">
+        ${classInfoHTML}
+      </div>
+    </section>
+    ` : ''}
+
+    ${officeHours ? `
+    <section>
+      <h2 class="section-title">Office Hours</h2>
+      <div class="office-hours-box">
+        <p class="office-hours-text" data-editable="officeHours">${officeHours}</p>
+      </div>
+    </section>
+    ` : ''}
+  </div>
+
+  <footer class="footer">
+    <p class="footer-text">
+      Questions? Feel free to reach out at <a href="mailto:${contactEmail}" style="color: var(--accent); text-decoration: none;" data-editable="contactEmail">${contactEmail}</a>
+    </p>
+  </footer>
+</body>
+</html>`;
+}
+function generateStudentPortfolio(data) {
+  const {
+    studentName = 'Alex Johnson',
+    grade = 'Junior',
+    school = 'Riverside High School',
+    gradYear = '2026',
+    about = '',
+    interests = [],
+    projects = [],
+    achievements = [],
+    academics = [],
+    contactEmail = 'alex.johnson@email.com',
+    accentColor = '#8b5cf6',
+    darkMode = 'Auto'
+  } = data;
+
+  const themeClass = darkMode === 'Dark' ? 'dark' : darkMode === 'Light' ? 'light' : 'auto';
+  const profilePhoto = data.__images?.profilePhoto;
+
+  const interestsHTML = interests.map((interest, index) => `
+    <div class="interest-tag" data-editable="interests.${index}">${interest}</div>
+  `).join('');
+
+  const projectsHTML = projects.map((project, index) => {
+    const imageKey = `projects.${index}.image`;
+    const projectImage = data.__images?.[imageKey];
+    
+    return `
+    <div class="project-card">
+      <div class="project-image">
+        ${projectImage ? `
+          <img src="${projectImage.url}" alt="${project.title}" />
+        ` : `
+          <div class="project-placeholder">
+            <svg width="48" height="48" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+            </svg>
+          </div>
+        `}
+      </div>
+      <div class="project-content">
+        <h3 class="project-title" data-editable="projects.${index}.title">${project.title}</h3>
+        <p class="project-description" data-editable="projects.${index}.description">${project.description}</p>
+        ${project.skills ? `
+        <div class="project-skills" data-editable="projects.${index}.skills">${project.skills}</div>
+        ` : ''}
+      </div>
+    </div>
+    `;
+  }).join('');
+
+  const achievementsHTML = achievements.map((achievement, index) => `
+    <div class="achievement-item">
+      <div class="achievement-year" data-editable="achievements.${index}.year">${achievement.year}</div>
+      <div class="achievement-content">
+        <h3 class="achievement-title" data-editable="achievements.${index}.title">${achievement.title}</h3>
+        ${achievement.description ? `
+        <p class="achievement-description" data-editable="achievements.${index}.description">${achievement.description}</p>
+        ` : ''}
+      </div>
+    </div>
+  `).join('');
+
+  const academicsHTML = academics.map((academic, index) => `
+    <div class="academic-stat">
+      <div class="stat-label" data-editable="academics.${index}.label">${academic.label}</div>
+      <div class="stat-value" data-editable="academics.${index}.value">${academic.value}</div>
+    </div>
+  `).join('');
+
+  return `<!DOCTYPE html>
+<html lang="en" class="${themeClass}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${studentName} - Portfolio</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    :root {
+      --accent: ${accentColor};
+      --bg: #ffffff;
+      --surface: #fafafa;
+      --text-primary: #0a0a0a;
+      --text-secondary: #666666;
+      --border: #e5e5e5;
+    }
+    
+    @media (prefers-color-scheme: dark) {
+      html.auto {
+        --bg: #0a0a0a;
+        --surface: #1a1a1a;
+        --text-primary: #fafafa;
+        --text-secondary: #a3a3a3;
+        --border: #2a2a2a;
+      }
+    }
+    
+    html.dark {
+      --bg: #0a0a0a;
+      --surface: #1a1a1a;
+      --text-primary: #fafafa;
+      --text-secondary: #a3a3a3;
+      --border: #2a2a2a;
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text-primary);
+      line-height: 1.6;
+      transition: background 0.3s, color 0.3s;
+    }
+    
+    .hero {
+      min-height: 80vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 100px 40px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: 
+        radial-gradient(circle at 20% 50%, ${accentColor}12 0%, transparent 50%),
+        radial-gradient(circle at 80% 50%, ${accentColor}08 0%, transparent 50%);
+      pointer-events: none;
+    }
+    
+    .hero-content {
+      max-width: 1000px;
+      display: grid;
+      grid-template-columns: 250px 1fr;
+      gap: 60px;
+      align-items: center;
+      position: relative;
+      z-index: 1;
+    }
+    
+    @media (max-width: 768px) {
+      .hero-content {
+        grid-template-columns: 1fr;
+        text-align: center;
+        gap: 40px;
+      }
+    }
+    
+    .profile-photo-large {
+      width: 250px;
+      height: 250px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 6px solid var(--accent);
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.12);
+    }
+    
+    @media (max-width: 768px) {
+      .profile-photo-large {
+        margin: 0 auto;
+      }
+    }
+    
+    .profile-photo-large img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .profile-placeholder-large {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, ${accentColor}20, ${accentColor}10);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 96px;
+      font-weight: 900;
+      color: var(--accent);
+    }
+    
+    .hero-text {
+      min-width: 0;
+    }
+    
+    .hero-label {
+      font-size: 14px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+    
+    h1 {
+      font-size: clamp(40px, 6vw, 56px);
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+      margin-bottom: 16px;
+    }
+    
+    .hero-subtitle {
+      font-size: clamp(18px, 2.5vw, 22px);
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+    
+    .hero-meta {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 32px;
+    }
+    
+    @media (max-width: 768px) {
+      .hero-meta {
+        justify-content: center;
+      }
+    }
+    
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+    
+    .hero-about {
+      font-size: 16px;
+      line-height: 1.7;
+      color: var(--text-secondary);
+      margin-bottom: 32px;
+    }
+    
+    .contact-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 28px;
+      background: var(--accent);
+      color: white;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    
+    .contact-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px ${accentColor}40;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 40px;
+    }
+    
+    @media (max-width: 768px) {
+      .container {
+        padding: 0 24px;
+      }
+    }
+    
+    section {
+      padding: 80px 0;
+    }
+    
+    @media (max-width: 768px) {
+      section {
+        padding: 60px 0;
+      }
+    }
+    
+    .section-title {
+      font-size: clamp(32px, 5vw, 42px);
+      font-weight: 800;
+      margin-bottom: 48px;
+      text-align: center;
+    }
+    
+    .interests-section {
+      background: var(--surface);
+      margin: 0 -40px;
+      padding: 80px 40px;
+    }
+    
+    @media (max-width: 768px) {
+      .interests-section {
+        margin: 0 -24px;
+        padding: 60px 24px;
+      }
+    }
+    
+    .interests-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    .interest-tag {
+      padding: 12px 24px;
+      background: var(--bg);
+      border: 2px solid var(--border);
+      border-radius: 100px;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+    
+    .interest-tag:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+    
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 32px;
+    }
+    
+    @media (max-width: 768px) {
+      .projects-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    .project-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      transition: all 0.3s;
+    }
+    
+    .project-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.08);
+      border-color: var(--accent);
+    }
+    
+    .project-image {
+      aspect-ratio: 16/9;
+      background: linear-gradient(135deg, ${accentColor}10, ${accentColor}05);
+      overflow: hidden;
+    }
+    
+    .project-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .project-placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent);
+    }
+    
+    .project-content {
+      padding: 24px;
+    }
+    
+    .project-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    
+    .project-description {
+      font-size: 15px;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+    }
+    
+    .project-skills {
+      font-size: 13px;
+      color: var(--accent);
+      font-weight: 600;
+    }
+    
+    .achievements-list {
+      max-width: 800px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    
+    .achievement-item {
+      display: grid;
+      grid-template-columns: 80px 1fr;
+      gap: 24px;
+      padding: 24px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      transition: all 0.2s;
+    }
+    
+    @media (max-width: 768px) {
+      .achievement-item {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+    }
+    
+    .achievement-item:hover {
+      border-color: var(--accent);
+      transform: translateX(4px);
+    }
+    
+    .achievement-year {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    
+    .achievement-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    
+    .achievement-description {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+    
+    .academics-section {
+      background: var(--surface);
+      margin: 0 -40px;
+      padding: 80px 40px;
+    }
+    
+    @media (max-width: 768px) {
+      .academics-section {
+        margin: 0 -24px;
+        padding: 60px 24px;
+      }
+    }
+    
+    .academics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 24px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    .academic-stat {
+      text-align: center;
+      padding: 32px 24px;
+      background: var(--bg);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+    }
+    
+    .stat-label {
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+    
+    .stat-value {
+      font-size: 32px;
+      font-weight: 900;
+      color: var(--accent);
+    }
+    
+    .footer {
+      padding: 60px 40px;
+      text-align: center;
+      border-top: 1px solid var(--border);
+    }
+    
+    .footer-text {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+  </style>
+</head>
+<body>
+  <div class="hero">
+    <div class="hero-content">
+      <div class="profile-photo-large">
+        ${profilePhoto ? `
+          <img src="${profilePhoto.url}" alt="${studentName}" />
+        ` : `
+          <div class="profile-placeholder-large">${studentName.charAt(0)}</div>
+        `}
+      </div>
+      
+      <div class="hero-text">
+        <p class="hero-label">Student Portfolio</p>
+        <h1 data-editable="studentName">${studentName}</h1>
+        <p class="hero-subtitle">
+          <span data-editable="grade">${grade}</span> at <span data-editable="school">${school}</span>
+        </p>
+        
+        <div class="hero-meta">
+          <div class="meta-item">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222"/>
+            </svg>
+            Class of <span data-editable="gradYear">${gradYear}</span>
+          </div>
+        </div>
+        
+        ${about ? `
+        <p class="hero-about" data-editable="about">${about}</p>
+        ` : ''}
+        
+        <a href="mailto:${contactEmail}" class="contact-button" data-editable="contactEmail">
+          <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+          </svg>
+          Get in Touch
+        </a>
+      </div>
+    </div>
+  </div>
+
+  ${interests.length > 0 ? `
+  <div class="interests-section">
+    <div class="container">
+      <h2 class="section-title">Interests & Hobbies</h2>
+      <div class="interests-grid">
+        ${interestsHTML}
+      </div>
+    </div>
+  </div>
+  ` : ''}
+
+  ${projects.length > 0 ? `
+  <section>
+    <div class="container">
+      <h2 class="section-title">Projects</h2>
+      <div class="projects-grid">
+        ${projectsHTML}
+      </div>
+    </div>
+  </section>
+  ` : ''}
+
+  ${achievements.length > 0 ? `
+  <section>
+    <div class="container">
+      <h2 class="section-title">Achievements & Awards</h2>
+      <div class="achievements-list">
+        ${achievementsHTML}
+      </div>
+    </div>
+  </section>
+  ` : ''}
+
+  ${academics.length > 0 ? `
+  <div class="academics-section">
+    <div class="container">
+      <h2 class="section-title">Academics</h2>
+      <div class="academics-grid">
+        ${academicsHTML}
+      </div>
+    </div>
+  </div>
+  ` : ''}
+
+  <footer class="footer">
+    <p class="footer-text">
+      © ${new Date().getFullYear()} <span data-editable="studentName">${studentName}</span>
+    </p>
+  </footer>
+</body>
+</html>`;
+}
+function generateFitnessTrainer(data) {
+  const {
+    trainerName = 'Marcus Thompson',
+    tagline = 'Certified Personal Trainer & Nutrition Coach',
+    yearsExperience = '8+',
+    heroStatement = '',
+    bio = '',
+    specialties = [],
+    certifications = [],
+    trainingPackages = [],
+    testimonials = [],
+    schedule = '',
+    location = '',
+    phone = '',
+    email = '',
+    instagramHandle = '',
+    accentColor = '#f97316',
+    darkMode = 'Dark'
+  } = data;
+
+  const themeClass = darkMode === 'Dark' ? 'dark' : darkMode === 'Light' ? 'light' : 'auto';
+  const trainerPhoto = data.__images?.trainerPhoto;
+
+  const specialtiesHTML = specialties.map((specialty, index) => `
+    <div class="specialty-card" data-editable="specialties.${index}">
+      <div class="specialty-icon">💪</div>
+      <div class="specialty-name">${specialty}</div>
+    </div>
+  `).join('');
+
+  const certificationsHTML = certifications.map((cert, index) => `
+    <div class="cert-item">
+      <div class="cert-badge">✓</div>
+      <div class="cert-content">
+        <h3 class="cert-title" data-editable="certifications.${index}.title">${cert.title}</h3>
+        <p class="cert-org" data-editable="certifications.${index}.organization">${cert.organization}</p>
+        <p class="cert-year" data-editable="certifications.${index}.year">${cert.year}</p>
+      </div>
+    </div>
+  `).join('');
+
+  const packagesHTML = trainingPackages.map((pkg, index) => {
+    const features = pkg.features.split('\n').filter(f => f.trim());
+    const featuresHTML = features.map(feature => `<li>${feature}</li>`).join('');
+    
+    return `
+    <div class="package-card">
+      <div class="package-header">
+        <h3 class="package-name" data-editable="trainingPackages.${index}.name">${pkg.name}</h3>
+        <div class="package-sessions" data-editable="trainingPackages.${index}.sessions">${pkg.sessions}</div>
+      </div>
+      <div class="package-price">
+        <span class="price-symbol">$</span>
+        <span class="price-amount" data-editable="trainingPackages.${index}.price">${pkg.price}</span>
+        <span class="price-period">/month</span>
+      </div>
+      <ul class="package-features" data-editable="trainingPackages.${index}.features">
+        ${featuresHTML}
+      </ul>
+      <a href="mailto:${email}?subject=Interested in ${pkg.name} Package" class="package-button">Get Started</a>
+    </div>
+    `;
+  }).join('');
+
+  const testimonialsHTML = testimonials.map((testimonial, index) => `
+    <div class="testimonial-card">
+      <div class="testimonial-result" data-editable="testimonials.${index}.result">${testimonial.result}</div>
+      <p class="testimonial-quote" data-editable="testimonials.${index}.quote">"${testimonial.quote}"</p>
+      <p class="testimonial-author" data-editable="testimonials.${index}.name">— ${testimonial.name}</p>
+    </div>
+  `).join('');
+
+  return `<!DOCTYPE html>
+<html lang="en" class="${themeClass}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${trainerName} - Personal Trainer</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    :root {
+      --accent: ${accentColor};
+      --bg: #fafafa;
+      --surface: #ffffff;
+      --text-primary: #0f0f0f;
+      --text-secondary: #666666;
+      --border: #e5e5e5;
+    }
+    
+    @media (prefers-color-scheme: dark) {
+      html.auto {
+        --bg: #0a0a0a;
+        --surface: #151515;
+        --text-primary: #f5f5f5;
+        --text-secondary: #a0a0a0;
+        --border: #2a2a2a;
+      }
+    }
+    
+    html.dark {
+      --bg: #0a0a0a;
+      --surface: #151515;
+      --text-primary: #f5f5f5;
+      --text-secondary: #a0a0a0;
+      --border: #2a2a2a;
+    }
+    
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg);
+      color: var(--text-primary);
+      line-height: 1.6;
+      transition: background 0.3s, color 0.3s;
+    }
+    
+    .hero {
+      min-height: 100vh;
+      background: linear-gradient(135deg, ${accentColor}20 0%, var(--bg) 50%);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -20%;
+      width: 800px;
+      height: 800px;
+      background: radial-gradient(circle, ${accentColor}15 0%, transparent 70%);
+      border-radius: 50%;
+    }
+    
+    .hero-content {
+      position: relative;
+      z-index: 1;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 100px 40px;
+      display: grid;
+      grid-template-columns: 1fr 400px;
+      gap: 80px;
+      align-items: center;
+    }
+    
+    @media (max-width: 1024px) {
+      .hero-content {
+        grid-template-columns: 1fr;
+        padding: 80px 40px;
+        gap: 60px;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .hero-content {
+        padding: 60px 24px;
+      }
+    }
+    
+    .hero-text {
+      max-width: 700px;
+    }
+    
+    .experience-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 24px;
+      background: var(--accent);
+      color: white;
+      border-radius: 100px;
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 24px;
+    }
+    
+    .hero h1 {
+      font-size: clamp(48px, 8vw, 72px);
+      font-weight: 900;
+      line-height: 1;
+      margin-bottom: 16px;
+      letter-spacing: -0.03em;
+    }
+    
+    .hero-tagline {
+      font-size: clamp(18px, 2.5vw, 24px);
+      color: var(--accent);
+      font-weight: 700;
+      margin-bottom: 32px;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+    
+    .hero-statement {
+      font-size: clamp(18px, 2vw, 22px);
+      line-height: 1.6;
+      color: var(--text-secondary);
+      margin-bottom: 40px;
+      font-weight: 500;
+    }
+    
+    .hero-cta {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    
+    .cta-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 18px 36px;
+      background: var(--accent);
+      color: white;
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 16px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      transition: all 0.3s;
+      border: 2px solid var(--accent);
+    }
+    
+    .cta-button:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 32px ${accentColor}50;
+    }
+    
+    .cta-button.secondary {
+      background: transparent;
+      color: var(--text-primary);
+      border-color: var(--border);
+    }
+    
+    .cta-button.secondary:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    
+    .hero-photo {
+      position: relative;
+    }
+    
+    .trainer-photo {
+      width: 400px;
+      height: 500px;
+      border-radius: 24px;
+      overflow: hidden;
+      border: 6px solid var(--accent);
+      box-shadow: 0 24px 64px rgba(0, 0, 0, 0.15);
+      transform: rotate(3deg);
+      transition: transform 0.3s;
+    }
+    
+    @media (max-width: 1024px) {
+      .trainer-photo {
+        width: 100%;
+        max-width: 400px;
+        margin: 0 auto;
+      }
+    }
+    
+    .trainer-photo:hover {
+      transform: rotate(0deg);
+    }
+    
+    .trainer-photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .photo-placeholder {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, ${accentColor}30, ${accentColor}10);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 120px;
+    }
+    
+    section {
+      padding: 100px 40px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    
+    @media (max-width: 768px) {
+      section {
+        padding: 80px 24px;
+      }
+    }
+    
+    .section-header {
+      text-align: center;
+      margin-bottom: 64px;
+    }
+    
+    .section-label {
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--accent);
+      margin-bottom: 12px;
+    }
+    
+    .section-title {
+      font-size: clamp(36px, 5vw, 56px);
+      font-weight: 900;
+      letter-spacing: -0.02em;
+    }
+    
+    .about-section {
+      background: var(--surface);
+      border-top: 3px solid var(--accent);
+      border-bottom: 3px solid var(--accent);
+    }
+    
+    .about-content {
+      max-width: 800px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    
+    .about-text {
+      font-size: 20px;
+      line-height: 1.8;
+      color: var(--text-secondary);
+    }
+    
+    .specialties-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 24px;
+    }
+    
+    @media (max-width: 768px) {
+      .specialties-grid {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      }
+    }
+    
+    .specialty-card {
+      padding: 32px 24px;
+      background: var(--surface);
+      border: 3px solid var(--border);
+      border-radius: 16px;
+      text-align: center;
+      transition: all 0.3s;
+      cursor: default;
+    }
+    
+    .specialty-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-8px);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+    }
+    
+    .specialty-icon {
+      font-size: 40px;
+      margin-bottom: 16px;
+    }
+    
+    .specialty-name {
+      font-size: 16px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    
+    .certs-section {
+      background: var(--surface);
+    }
+    
+    .certs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    
+    .cert-item {
+      display: flex;
+      gap: 20px;
+      padding: 24px;
+      background: var(--bg);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+    }
+    
+    .cert-badge {
+      width: 48px;
+      height: 48px;
+      background: var(--accent);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: 900;
+      flex-shrink: 0;
+    }
+    
+    .cert-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    
+    .cert-org {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+    }
+    
+    .cert-year {
+      font-size: 13px;
+      color: var(--accent);
+      font-weight: 700;
+    }
+    
+    .packages-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 32px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    
+    @media (max-width: 768px) {
+      .packages-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    .package-card {
+      padding: 40px 32px;
+      background: var(--surface);
+      border: 3px solid var(--border);
+      border-radius: 20px;
+      display: flex;
+      flex-direction: column;
+      transition: all 0.3s;
+    }
+    
+    .package-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-8px);
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.1);
+    }
+    
+    .package-header {
+      margin-bottom: 24px;
+    }
+    
+    .package-name {
+      font-size: 28px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+      margin-bottom: 8px;
+    }
+    
+    .package-sessions {
+      font-size: 14px;
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+    
+    .package-price {
+      margin-bottom: 32px;
+    }
+    
+    .price-symbol {
+      font-size: 24px;
+      color: var(--text-secondary);
+      vertical-align: super;
+    }
+    
+    .price-amount {
+      font-size: 64px;
+      font-weight: 900;
+      color: var(--accent);
+      line-height: 1;
+    }
+    
+    .price-period {
+      font-size: 16px;
+      color: var(--text-secondary);
+    }
+    
+    .package-features {
+      list-style: none;
+      margin-bottom: 32px;
+      flex: 1;
+    }
+    
+    .package-features li {
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border);
+      font-weight: 500;
+    }
+    
+    .package-features li:last-child {
+      border-bottom: none;
+    }
+    
+    .package-button {
+      display: block;
+      padding: 16px;
+      background: var(--accent);
+      color: white;
+      text-align: center;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      transition: all 0.2s;
+    }
+    
+    .package-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px ${accentColor}50;
+    }
+    
+    .testimonials-section {
+      background: var(--surface);
+    }
+    
+    .testimonials-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 32px;
+    }
+    
+    @media (max-width: 768px) {
+      .testimonials-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    .testimonial-card {
+      padding: 40px;
+      background: var(--bg);
+      border-left: 5px solid var(--accent);
+      border-radius: 12px;
+    }
+    
+    .testimonial-result {
+      font-size: 20px;
+      font-weight: 900;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+      margin-bottom: 20px;
+    }
+    
+    .testimonial-quote {
+      font-size: 16px;
+      line-height: 1.7;
+      color: var(--text-secondary);
+      margin-bottom: 20px;
+      font-style: italic;
+    }
+    
+    .testimonial-author {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    
+    .contact-section {
+      text-align: center;
+    }
+    
+    .contact-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 32px;
+      max-width: 900px;
+      margin: 0 auto 48px;
+    }
+    
+    .contact-item {
+      padding: 32px;
+      background: var(--surface);
+      border: 3px solid var(--border);
+      border-radius: 16px;
+    }
+    
+    .contact-icon {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 16px;
+      background: var(--accent);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 28px;
+    }
+    
+    .contact-label {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+    
+    .contact-value {
+      font-size: 16px;
+      font-weight: 700;
+    }
+    
+    .contact-value a {
+      color: var(--text-primary);
+      text-decoration: none;
+    }
+    
+    .contact-value a:hover {
+      color: var(--accent);
+    }
+    
+    .schedule-box {
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 40px;
+      background: var(--surface);
+      border: 3px solid var(--accent);
+      border-radius: 16px;
+    }
+    
+    .schedule-text {
+      font-size: 18px;
+      line-height: 1.8;
+      white-space: pre-line;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="hero">
+    <div class="hero-content">
+      <div class="hero-text">
+        <div class="experience-badge">
+          <span data-editable="yearsExperience">${yearsExperience}</span> YEARS EXPERIENCE
+        </div>
+        
+        <h1 data-editable="trainerName">${trainerName}</h1>
+        <p class="hero-tagline" data-editable="tagline">${tagline}</p>
+        
+        ${heroStatement ? `
+        <p class="hero-statement" data-editable="heroStatement">${heroStatement}</p>
+        ` : ''}
+        
+        <div class="hero-cta">
+          <a href="mailto:${email}" class="cta-button">
+            Book Free Consultation
+          </a>
+          <a href="#packages" class="cta-button secondary">
+            View Packages
+          </a>
+        </div>
+      </div>
+      
+      <div class="hero-photo">
+        <div class="trainer-photo">
+          ${trainerPhoto ? `
+            <img src="${trainerPhoto.url}" alt="${trainerName}" />
+          ` : `
+            <div class="photo-placeholder">🏋️</div>
+          `}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  ${bio ? `
+  <section class="about-section">
+    <div class="section-header">
+      <div class="section-label">About</div>
+      <h2 class="section-title">My Story</h2>
+    </div>
+    <div class="about-content">
+      <p class="about-text" data-editable="bio">${bio}</p>
+    </div>
+  </section>
+  ` : ''}
+
+  ${specialties.length > 0 ? `
+  <section>
+    <div class="section-header">
+      <div class="section-label">What I Do</div>
+      <h2 class="section-title">Specialties</h2>
+    </div>
+    <div class="specialties-grid">
+      ${specialtiesHTML}
+    </div>
+  </section>
+  ` : ''}
+
+  ${certifications.length > 0 ? `
+  <section class="certs-section">
+    <div class="section-header">
+      <div class="section-label">Credentials</div>
+      <h2 class="section-title">Certifications</h2>
+    </div>
+    <div class="certs-grid">
+      ${certificationsHTML}
+    </div>
+  </section>
+  ` : ''}
+
+  ${trainingPackages.length > 0 ? `
+  <section id="packages">
+    <div class="section-header">
+      <div class="section-label">Pricing</div>
+      <h2 class="section-title">Training Packages</h2>
+    </div>
+    <div class="packages-grid">
+      ${packagesHTML}
+    </div>
+  </section>
+  ` : ''}
+
+  ${testimonials.length > 0 ? `
+  <section class="testimonials-section">
+    <div class="section-header">
+      <div class="section-label">Success Stories</div>
+      <h2 class="section-title">Client Results</h2>
+    </div>
+    <div class="testimonials-grid">
+      ${testimonialsHTML}
+    </div>
+  </section>
+  ` : ''}
+
+  <section class="contact-section">
+    <div class="section-header">
+      <div class="section-label">Get Started</div>
+      <h2 class="section-title">Contact Me</h2>
+    </div>
+    
+    <div class="contact-grid">
+      ${location ? `
+      <div class="contact-item">
+        <div class="contact-icon">📍</div>
+        <div class="contact-label">Location</div>
+        <div class="contact-value" data-editable="location">${location}</div>
+      </div>
+      ` : ''}
+      
+      <div class="contact-item">
+        <div class="contact-icon">📧</div>
+        <div class="contact-label">Email</div>
+        <div class="contact-value">
+          <a href="mailto:${email}" data-editable="email">${email}</a>
+        </div>
+      </div>
+      
+      ${phone ? `
+      <div class="contact-item">
+        <div class="contact-icon">📱</div>
+        <div class="contact-label">Phone</div>
+        <div class="contact-value">
+          <a href="tel:${phone.replace(/\s/g, '')}" data-editable="phone">${phone}</a>
+        </div>
+      </div>
+      ` : ''}
+      
+      ${instagramHandle ? `
+      <div class="contact-item">
+        <div class="contact-icon">📸</div>
+        <div class="contact-label">Instagram</div>
+        <div class="contact-value">
+          <a href="https://instagram.com/instagramHandle.replace(′@′,′′)"target="blank"data−editable="instagramHandle">{instagramHandle.replace('@', '')}" target="_blank" data-editable="instagramHandle">
+instagramHandle.replace(′@′,′′)"target="b​lank"data−editable="instagramHandle">{instagramHandle}
+</a>
+</div>
+</div>
+` : ''}
+</div>
+${schedule ? `
+<div class="schedule-box">
+  <h3 style="font-size: 24px; font-weight: 900; text-transform: uppercase; margin-bottom: 24px;">Availability</h3>
+  <p class="schedule-text" data-editable="schedule">${schedule}</p>
+</div>
+` : ''}
+</section>
+</body>
+</html>`;
+}
+function generateWellnessCoach(data) {
+  const {
+    coachName = 'Dr. Lisa Chen',
+    credentials = 'PhD, Certified Holistic Health Coach',
+    tagline = 'Find Balance. Nurture Wellness. Transform Your Life.',
+    welcomeMessage = '',
+    philosophy = '',
+    services = [],
+    approach = [],
+    backgrounds = [],
+    areasOfFocus = [],
+    sessionInfo = '',
+    bookingUrl = '#book',
+    email = '',
+    phone = '',
+    accentColor = '#10b981',
+    darkMode = 'Light'
+  } = data;
+
+  const themeClass = darkMode === 'Dark' ? 'dark' : darkMode === 'Light' ? 'light' : 'auto';
+  const coachPhoto = data.__images?.coachPhoto;
+
+  const servicesHTML = services.map((service, index) => `
+    <div class="service-card">
+      <div class="service-icon">✦</div>
+      <h3 class="service-name" data-editable="services.${index}.name">${service.name}</h3>
+      <p class="service-description" data-editable="services.${index}.description">${service.description}</p>
+      <p class="service-duration" data-editable="services.${index}.duration">${service.duration}</p>
+    </div>
+  `).join('');
+
+  const approachHTML = approach.map((item, index) => `
+    <div class="approach-item">
+      <div class="approach-dot"></div>
+      <span data-editable="approach.${index}">${item}</span>
+    </div>
+  `).join('');
+
+  const backgroundsHTML = backgrounds.map((bg, index) => `
+    <div class="background-item">
+      <h4 class="background-title" data-editable="backgrounds.${index}.title">${bg.title}</h4>
+      <p class="background-institution" data-editable="backgrounds.${index}.institution">${bg.institution}</p>
+      <p class="background-year" data-editable="backgrounds.${index}.year">${bg.year}</p>
+    </div>
+  `).join('');
+
+  const areasHTML = areasOfFocus.map((area, index) => `
+    <div class="area-tag" data-editable="areasOfFocus.${index}">${area}</div>
+  `).join('');
+
+  return `<!DOCTYPE html>
+<html lang="en" class="${themeClass}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${coachName} - Wellness Coach</title>
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:wght@400;600&family=Lato:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    :root {
+      --accent: ${accentColor};
+      --bg: #fefefe;
+      --surface: #f9faf9;
+      --text-primary: #2d3436;
+      --text-secondary: #636e72;
+      --border: #dfe6e9;
+    }
+    
+    @media (prefers-color-scheme: dark) {
+      html.auto {
+        --bg: #1a1d1a;
+        --surface: #242724;
+        --text-primary: #f0f4f0;
+        --text-secondary: #a8b2a8;
+        --border: #364036;
+      }
+    }
+    
+    html.dark {
+      --bg: #1a1d1a;
+      --surface: #242724;
+      --text-primary: #f0f4f0;
+      --text-secondary: #a8b2a8;
+      --border: #364036;
+    }
+    
+    body {
+      font-family: 'Lato', sans-serif;
+      background: var(--bg);
+      color: var(--text-primary);
+      line-height: 1.8;
+      transition: background 0.3s, color 0.3s;
+    }
+    
+    .hero {
+      min-height: 90vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 120px 60px;
+      position: relative;
+    }
+    
+    @media (max-width: 768px) {
+      .hero {
+        padding: 80px 24px;
+        min-height: auto;
+      }
+    }
+    
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at center, ${accentColor}03, transparent);
+      pointer-events: none;
+    }
+    
+    .hero-content {
+      max-width: 1100px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 100px;
+      align-items: center;
+      position: relative;
+      z-index: 1;
+    }
+    
+    @media (max-width: 968px) {
+      .hero-content {
+        grid-template-columns: 1fr;
+        gap: 60px;
+        text-align: center;
+      }
+    }
+    
+    .hero-text h1 {
+      font-family: 'Crimson Text', serif;
+      font-size: clamp(42px, 6vw, 64px);
+      font-weight: 400;
+      line-height: 1.2;
+      margin-bottom: 16px;
+      letter-spacing: -0.01em;
+    }
+    
+    .credentials {
+      font-size: 16px;
+      color: var(--accent);
+      font-weight: 600;
+      margin-bottom: 40px;
+      letter-spacing: 0.02em;
+    }
+    
+    .tagline {
+      font-family: 'Crimson Text', serif;
+      font-size: clamp(22px, 3vw, 28px);
+      line-height: 1.6;
+      color: var(--text-secondary);
+      margin-bottom: 48px;
+      font-style: italic;
+    }
+    
+    .welcome-message {
+      font-size: 18px;
+      line-height: 1.9;
+      color: var(--text-secondary);
+      margin-bottom: 40px;
+    }
+    
+    .cta-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 40px;
+      background: var(--accent);
+      color: white;
+      border-radius: 50px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 15px;
+      letter-spacing: 0.02em;
+      transition: all 0.3s;
+      border: 2px solid var(--accent);
+    }
+    
+    .cta-button:hover {
+      background: transparent;
+      color: var(--accent);
+      transform: translateY(-2px);
+    }
+    
+    .hero-photo {
+      position: relative;
+    }
+    
+    @media (max-width: 968px) {
+      .hero-photo {
+        order: -1;
+      }
+    }
+    
+    .photo-frame {
+      width: 400px;
+      height: 480px;
+      border-radius: 200px 200px 20px 20px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.06);
+      margin: 0 auto;
+    }
+    
+    @media (max-width: 968px) {
+      .photo-frame {
+        width: 300px;
+        height: 360px;
+      }
+    }
+    
+    .photo-frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .photo-placeholder {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, ${accentColor}10, ${accentColor}05);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 80px;
+    }
+    
+    .photo-ornament {
+      position: absolute;
+      top: -20px;
+      right: -20px;
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: var(--accent);
+      opacity: 0.1;
+    }
+    
+    section {
+      padding: 100px 60px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    
+    @media (max-width: 768px) {
+      section {
+        padding: 80px 24px;
+      }
+    }
+    
+    .section-divider {
+      width: 60px;
+      height: 1px;
+      background: var(--accent);
+      margin: 0 auto 32px;
+    }
+    
+    .section-title {
+      font-family: 'Crimson Text', serif;
+      font-size: clamp(36px, 5vw, 48px);
+      font-weight: 600;
+      text-align: center;
+      margin-bottom: 24px;
+      letter-spacing: -0.01em;
+    }
+    
+    .section-subtitle {
+      text-align: center;
+      font-size: 18px;
+      color: var(--text-secondary);
+      max-width: 700px;
+      margin: 0 auto 64px;
+      line-height: 1.8;
+    }
+    
+    .philosophy-section {
+      background: var(--surface);
+      border-radius: 32px;
+      padding: 80px 60px;
+      text-align: center;
+    }
+    
+    @media (max-width: 768px) {
+      .philosophy-section {
+        padding: 60px 32px;
+      }
+    }
+    
+    .philosophy-text {
+      font-size: 20px;
+      line-height: 2;
+      color: var(--text-secondary);
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 40px;
+    }
+    
+    @media (max-width: 768px) {
+      .services-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    .service-card {
+      padding: 48px 40px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      text-align: center;
+      transition: all 0.4s;
+    }
+    
+    .service-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.06);
+      border-color: var(--accent);
+    }
+    
+    .service-icon {
+      font-size: 32px;
+      color: var(--accent);
+      margin-bottom: 24px;
+    }
+    
+    .service-name {
+      font-family: 'Crimson Text', serif;
+      font-size: 28px;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+    
+    .service-description {
+      font-size: 16px;
+      line-height: 1.8;
+      color: var(--text-secondary);
+      margin-bottom: 20px;
+    }
+    
+    .service-duration {
+      font-size: 14px;
+      color: var(--accent);
+      font-weight: 600;
+    }
+    
+    .approach-section {
+      background: var(--surface);
+    }
+    
+    .approach-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 32px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .approach-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 18px;
+      font-weight: 400;
+    }
+    
+    .approach-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--accent);
+      flex-shrink: 0;
+    }
+    
+    .backgrounds-list {
+      max-width: 800px;
+      margin: 0 auto;
+      display: grid;
+      gap: 32px;
+    }
+    
+    .background-item {
+      padding: 32px 40px;
+      background: var(--surface);
+      border-left: 4px solid var(--accent);
+      border-radius: 12px;
+    }
+    
+    .background-title {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    
+    .background-institution {
+      font-size: 16px;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+    
+    .background-year {
+      font-size: 14px;
+      color: var(--accent);
+      font-weight: 600;
+    }
+    
+    .areas-cloud {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      justify-content: center;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .area-tag {
+      padding: 12px 28px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 50px;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-primary);
+      transition: all 0.3s;
+    }
+    
+    .area-tag:hover {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+    
+    .booking-section {
+      background: linear-gradient(135deg, ${accentColor}08, transparent);
+      border-radius: 32px;
+      padding: 80px 60px;
+      text-align: center;
+    }
+    
+    @media (max-width: 768px) {
+      .booking-section {
+        padding: 60px 32px;
+      }
+    }
+    
+    .session-info {
+      max-width: 500px;
+      margin: 0 auto 48px;
+      padding: 40px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+    }
+    
+    .session-info-text {
+      font-size: 16px;
+      line-height: 2;
+      white-space: pre-line;
+    }
+    
+    .contact-links {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 32px;
+    }
+    
+    .contact-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 24px;
+      background: transparent;
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+      border-radius: 50px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.3s;
+    }
+    
+    .contact-link:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    
+    .footer {
+      padding: 60px;
+      text-align: center;
+      border-top: 1px solid var(--border);
+    }
+    
+    .footer-text {
+      font-size: 14px;
+      color: var(--text-secondary);
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+  <div class="hero">
+    <div class="hero-content">
+      <div class="hero-text">
+        <h1 data-editable="coachName">${coachName}</h1>
+        <p class="credentials" data-editable="credentials">${credentials}</p>
+        <p class="tagline" data-editable="tagline">${tagline}</p>
+        
+        ${welcomeMessage ? `
+        <p class="welcome-message" data-editable="welcomeMessage">${welcomeMessage}</p>
+        ` : ''}
+        
+        <a href="${bookingUrl}" class="cta-button">
+          Schedule Consultation
+        </a>
+      </div>
+      
+      <div class="hero-photo">
+        <div class="photo-ornament"></div>
+        <div class="photo-frame">
+          ${coachPhoto ? `
+            <img src="${coachPhoto.url}" alt="${coachName}" />
+          ` : `
+            <div class="photo-placeholder">🌿</div>
+          `}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  ${philosophy ? `
+  <section>
+    <div class="philosophy-section">
+      <div class="section-divider"></div>
+      <h2 class="section-title">Philosophy</h2>
+      <p class="philosophy-text" data-editable="philosophy">${philosophy}</p>
+    </div>
+  </section>
+  ` : ''}
+
+  ${services.length > 0 ? `
+  <section>
+    <div class="section-divider"></div>
+    <h2 class="section-title">Services</h2>
+    <p class="section-subtitle">Personalized support for your wellness journey</p>
+    <div class="services-grid">
+      ${servicesHTML}
+    </div>
+  </section>
+  ` : ''}
+
+  ${approach.length > 0 ? `
+  <section class="approach-section">
+    <div class="section-divider"></div>
+    <h2 class="section-title">My Approach</h2>
+    <div class="approach-grid">
+      ${approachHTML}
+    </div>
+  </section>
+  ` : ''}
+
+  ${backgrounds.length > 0 ? `
+  <section>
+    <div class="section-divider"></div>
+    <h2 class="section-title">Background & Training</h2>
+    <div class="backgrounds-list">
+      ${backgroundsHTML}
+    </div>
+  </section>
+  ` : ''}
+
+  ${areasOfFocus.length > 0 ? `
+  <section>
+    <div class="section-divider"></div>
+    <h2 class="section-title">Areas of Focus</h2>
+    <div class="areas-cloud">
+      ${areasHTML}
+    </div>
+  </section>
+  ` : ''}
+
+  <section>
+    <div class="booking-section">
+      <div class="section-divider"></div>
+      <h2 class="section-title">Begin Your Journey</h2>
+      
+      ${sessionInfo ? `
+      <div class="session-info">
+        <p class="session-info-text" data-editable="sessionInfo">${sessionInfo}</p>
+      </div>
+      ` : ''}
+      
+      <a href="${bookingUrl}" class="cta-button">Book a Session</a>
+      
+      <div class="contact-links">
+        <a href="mailto:${email}" class="contact-link" data-editable="email">
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+          </svg>
+          ${email}
+        </a>
+        ${phone ? `
+        <a href="tel:${phone.replace(/\s/g, '')}" class="contact-link" data-editable="phone">
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+          </svg>
+          ${phone}
+        </a>
+        ` : ''}
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <p class="footer-text">Nurturing wellness, one step at a time</p>
+  </footer>
+</body>
+</html>`;
+}
+function generateMusicianBand(data) {
+  const {
+    artistName = 'The Midnight Collective',
+    genre = 'Indie Rock • Alternative',
+    location = 'Brooklyn, NY',
+    bio = '',
+    featuredVideo = '',
+    latestRelease = [],
+    upcomingShows = [],
+    bandMembers = [],
+    pressQuotes = [],
+    socialLinks = [],
+    contactEmail = '',
+    accentColor = '#dc2626',
+    darkMode = 'Dark'
+  } = data;
+
+  const themeClass = darkMode === 'Dark' ? 'dark' : darkMode === 'Light' ? 'light' : 'auto';
+  const bandPhoto = data.__images?.bandPhoto;
+
+  const release = latestRelease[0];
+  let releaseHTML = '';
+  
+  if (release) {
+    const imageKey = 'latestRelease.0.coverArt';
+    const coverArt = data.__images?.[imageKey];
+    const streamingLinks = release.streamingLinks ? release.streamingLinks.split('\n').filter(l => l.trim()) : [];
+    const linksHTML = streamingLinks.map(link => `<span class="streaming-link">${link}</span>`).join('');
+    
+    releaseHTML = `
+    <section class="release-section">
+      <div class="release-content">
+        <div class="release-cover">
+          ${coverArt ? `
+            <img src="${coverArt.url}" alt="${release.title}" />
+          ` : `
+            <div class="cover-placeholder">
+              <svg width="80" height="80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
+              </svg>
+            </div>
+          `}
+        </div>
+        <div class="release-info">
+          <div class="release-label">Latest Release</div>
+          <h2 class="release-title" data-editable="latestRelease.0.title">${release.title}</h2>
+          <p class="release-date" data-editable="latestRelease.0.releaseDate">${release.releaseDate}</p>
+          ${release.description ? `
+          <p class="release-description" data-editable="latestRelease.0.description">${release.description}</p>
+          ` : ''}
+          ${streamingLinks.length > 0 ? `
+          <div class="streaming-links" data-editable="latestRelease.0.streamingLinks">
+            <div class="streaming-label">Stream Now:</div>
+            ${linksHTML}
+          </div>
+          ` : ''}
+        </div>
+      </div>
+    </section>
+    `;
+  }
+
+  const showsHTML = upcomingShows.map((show, index) => `
+    <div class="show-item">
+      <div class="show-date" data-editable="upcomingShows.${index}.date">${show.date}</div>
+      <div class="show-details">
+        <h3 class="show-venue" data-editable="upcomingShows.${index}.venue">${show.venue}</h3>
+        <p class="show-city" data-editable="upcomingShows.${index}.city">${show.city}</p>
+      </div>
+      <a href="${show.ticketUrl}" class="show-tickets" data-editable="upcomingShows.${index}.ticketUrl">Tickets</a>
+    </div>
+  `).join('');
+
+  const membersHTML = bandMembers.map((member, index) => {
+    const imageKey = `bandMembers.${index}.photo`;
+    const memberPhoto = data.__images?.[imageKey];
+    
+    return `
+    <div class="member-card">
+      <div class="member-photo">
+        ${memberPhoto ? `
+          <img src="${memberPhoto.url}" alt="${member.name}" />
+        ` : `
+          <div class="member-placeholder">🎸</div>
+        `}
+      </div>
+      <h3 class="member-name" data-editable="bandMembers.${index}.name">${member.name}</h3>
+      <p class="member-role" data-editable="bandMembers.${index}.role">${member.role}</p>
+    </div>
+    `;
+  }).join('');
+
+  const quotesHTML = pressQuotes.map((quote, index) => `
+    <div class="press-quote">
+      <p class="quote-text" data-editable="pressQuotes.${index}.quote">"${quote.quote}"</p>
+      <p class="quote-source" data-editable="pressQuotes.${index}.source">— ${quote.source}</p>
+    </div>
+  `).join('');
+
+  const socialHTML = socialLinks.map((social, index) => {
+    const url = social.url.startsWith('http') ? social.url : social.url.startsWith('@') ? `#${social.url}` : `https://${social.url}`;
+    return `
+    <a href="${url}" target="_blank" class="social-button" data-editable="socialLinks.${index}.platform">
+      ${social.platform}
+    </a>
+    `;
+  }).join('');
+
+  return `<!DOCTYPE html>
+<html lang="en" class="${themeClass}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${artistName}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    :root {
+      --accent: ${accentColor};
+      --bg: #0a0a0a;
+      --surface: #1a1a1a;
+      --text-primary: #ffffff;
+      --text-secondary: #a0a0a0;
+      --border: #2a2a2a;
+    }
+    
+    html.light {
+      --bg: #ffffff;
+      --surface: #f5f5f5;
+      --text-primary: #0a0a0a;
+      --text-secondary: #666666;
+      --border: #e0e0e0;
+    }
+    
+    @media (prefers-color-scheme: light) {
+      html.auto {
+        --bg: #ffffff;
+        --surface: #f5f5f5;
+        --text-primary: #0a0a0a;
+        --text-secondary: #666666;
+        --border: #e0e0e0;
+      }
+    }
+    
+    body {
+      font-family: 'Space Grotesk', sans-serif;
+      background: var(--bg);
+      color: var(--text-primary);
+      line-height: 1.6;
+      transition: background 0.3s, color 0.3s;
+    }
+    
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      padding: 40px;
+    }
+    
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: 
+        linear-gradient(45deg, ${accentColor}20 0%, transparent 50%),
+        repeating-linear-gradient(90deg, ${accentColor}05 0px, transparent 2px, transparent 40px);
+    }
+    
+    .hero-content {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      max-width: 1200px;
+    }
+    
+    .band-photo-hero {
+      width: 600px;
+      height: 400px;
+      margin: 0 auto 60px;
+      border-radius: 0;
+      overflow: hidden;
+      border: 4px solid var(--accent);
+      box-shadow: 
+        20px 20px 0 ${accentColor}20,
+        -20px -20px 0 ${accentColor}10;
+      transform: rotate(-2deg);
+    }
+    
+    @media (max-width: 768px) {
+      .band-photo-hero {
+        width: 100%;
+        max-width: 400px;
+        height: 300px;
+      }
+    }
+    
+    .band-photo-hero img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .hero-placeholder {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, ${accentColor}30, ${accentColor}10);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 120px;
+    }
+    
+    h1 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(56px, 10vw, 120px);
+      font-weight: 400;
+      letter-spacing: 0.05em;
+      line-height: 0.9;
+      margin-bottom: 24px;
+      text-transform: uppercase;
+    }
+    
+    .hero-meta {
+      display: flex;
+      gap: 24px;
+      justify-content: center;
+      flex-wrap: wrap;
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 40px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+    
+    .hero-meta span {
+      color: var(--accent);
+    }
+    
+    .hero-meta-divider {
+      color: var(--text-secondary);
+    }
+    
+    .hero-bio {
+      font-size: 20px;
+      line-height: 1.7;
+      color: var(--text-secondary);
+      max-width: 800px;
+      margin: 0 auto 48px;
+    }
+    
+    .hero-actions {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    
+    .action-button {
+      padding: 16px 32px;
+      background: var(--accent);
+      color: white;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      border: 2px solid var(--accent);
+      transition: all 0.2s;
+      clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+    }
+    
+    .action-button:hover {
+      background: transparent;
+      color: var(--accent);
+    }
+    
+    .action-button.secondary {
+      background: transparent;
+      color: var(--text-primary);
+      border-color: var(--border);
+    }
+    
+    .action-button.secondary:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    
+    section {
+      padding: 100px 40px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    
+    @media (max-width: 768px) {
+      section {
+        padding: 80px 24px;
+      }
+    }
+    
+    .section-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(48px, 8vw, 72px);
+      font-weight: 400;
+      text-align: center;
+      margin-bottom: 64px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      position: relative;
+    }
+    
+    .section-title::after {
+      content: '';
+      display: block;
+      width: 100px;
+      height: 4px;
+      background: var(--accent);
+      margin: 24px auto 0;
+    }
+    
+    .release-section {
+      background: var(--surface);
+      padding: 100px 40px;
+      border-top: 4px solid var(--accent);
+      border-bottom: 4px solid var(--accent);
+    }
+    
+    @media (max-width: 768px) {
+      .release-section {
+        padding: 80px 24px;
+      }
+    }
+    
+    .release-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 400px 1fr;
+      gap: 80px;
+      align-items: center;
+    }
+    
+    @media (max-width: 968px) {
+      .release-content {
+        grid-template-columns: 1fr;
+        gap: 48px;
+        text-align: center;
+      }
+    }
+    
+    .release-cover {
+      width: 400px;
+      height: 400px;
+      border: 4px solid var(--accent);
+      overflow: hidden;
+      box-shadow: 20px 20px 0 ${accentColor}15;
+    }
+    
+    @media (max-width: 968px) {
+      .release-cover {
+        margin: 0 auto;
+        width: 100%;
+        max-width: 400px;
+        height: auto;
+        aspect-ratio: 1;
+      }
+    }
+    
+    .release-cover img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .cover-placeholder {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, ${accentColor}30, ${accentColor}10);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent);
+    }
+    
+    .release-label {
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--accent);
+      margin-bottom: 16px;
+    }
+    
+    .release-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(36px, 6vw, 56px);
+      font-weight: 400;
+      letter-spacing: 0.05em;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+    }
+    
+    .release-date {
+      font-size: 16px;
+      color: var(--text-secondary);
+      font-weight: 600;
+      margin-bottom: 24px;
+      text-transform: uppercase;
+    }
+    
+    .release-description {
+      font-size: 18px;
+      line-height: 1.7;
+      color: var(--text-secondary);
+      margin-bottom: 32px;
+    }
+    
+    .streaming-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+    }
+    
+    @media (max-width: 968px) {
+      .streaming-links {
+        justify-content: center;
+      }
+    }
+    
+    .streaming-label {
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-right: 8px;
+    }
+    
+    .streaming-link {
+      padding: 8px 16px;
+      background: var(--bg);
+      border: 2px solid var(--border);
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      transition: all 0.2s;
+    }
+    
+    .streaming-link:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    
+    .shows-list {
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    
+    .show-item {
+      display: grid;
+      grid-template-columns: 100px 1fr auto;
+      gap: 32px;
+      padding: 32px;
+      background: var(--surface);
+      align-items: center;
+      transition: all 0.2s;
+    }
+    
+    @media (max-width: 768px) {
+      .show-item {
+        grid-template-columns: 1fr;
+        gap: 16px;
+        text-align: center;
+      }
+    }
+    
+    .show-item:hover {
+      background: ${accentColor}10;
+      transform: translateX(8px);
+    }
+    
+    .show-date {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 36px;
+      color: var(--accent);
+      text-transform: uppercase;
+    }
+    
+    .show-venue {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    
+    .show-city {
+      font-size: 14px;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    
+    .show-tickets {
+      padding: 12px 24px;
+      background: var(--accent);
+      color: white;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      transition: all 0.2s;
+    }
+    
+    .show-tickets:hover {
+      background: var(--text-primary);
+      color: var(--bg);
+    }
+    
+    .members-section {
+      background: var(--surface);
+    }
+    
+    .members-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 40px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    
+    .member-card {
+      text-align: center;
+    }
+    
+    .member-photo {
+      width: 220px;
+      height: 220px;
+      margin: 0 auto 24px;
+      overflow: hidden;
+      border: 3px solid var(--accent);
+      clip-path: polygon(20% 0%, 80% 0%, 100% 20%, 100% 80%, 80% 100%, 20% 100%, 0% 80%, 0% 20%);
+    }
+    
+    .member-photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .member-placeholder {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, ${accentColor}30, ${accentColor}10);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 60px;
+    }
+    
+    .member-name {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 28px;
+      font-weight: 400;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    
+    .member-role {
+      font-size: 14px;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    
+    .press-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 32px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    
+    .press-quote {
+      padding: 40px;
+      background: var(--surface);
+      border-left: 4px solid var(--accent);
+    }
+    
+    .quote-text {
+      font-size: 20px;
+      line-height: 1.6;
+      margin-bottom: 20px;
+      font-style: italic;
+    }
+    
+    .quote-source {
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--accent);
+    }
+    
+    .contact-section {
+      text-align: center;
+      background: var(--surface);
+    }
+    
+    .social-grid {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 48px;
+    }
+    
+    .social-button {
+      padding: 14px 28px;
+      background: transparent;
+      color: var(--text-primary);
+      border: 2px solid var(--border);
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      transition: all 0.2s;
+    }
+    
+    .social-button:hover {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: white;
+    }
+    
+    .contact-email {
+      font-size: 16px;
+      color: var(--text-secondary);
+    }
+    
+    .contact-email a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 700;
+    }
+    
+    .contact-email a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="hero">
+    <div class="hero-content">
+      ${bandPhoto ? `
+      <div class="band-photo-hero">
+        <img src="${bandPhoto.url}" alt="${artistName}" />
+      </div>
+      ` : ''}
+      
+      <h1 data-editable="artistName">${artistName}</h1>
+      
+      <div class="hero-meta">
+        <span data-editable="genre">${genre}</span>
+        <span class="hero-meta-divider">•</span>
+        <span data-editable="location">${location}</span>
+      </div>
+      
+      ${bio ? `
+      <p class="hero-bio" data-editable="bio">${bio}</p>
+      ` : ''}
+      
+      <div class="hero-actions">
+        <a href="#shows" class="action-button">Upcoming Shows</a>
+        <a href="mailto:${contactEmail}" class="action-button secondary">Booking</a>
+      </div>
+    </div>
+  </div>
+
+  ${releaseHTML}
+
+  ${upcomingShows.length > 0 ? `
+  <section id="shows">
+    <h2 class="section-title">Live Shows</h2>
+    <div class="shows-list">
+      ${showsHTML}
+    </div>
+  </section>
+  ` : ''}
+
+  ${bandMembers.length > 0 ? `
+  <section class="members-section">
+    <h2 class="section-title">The Band</h2>
+    <div class="members-grid">
+      ${membersHTML}
+    </div>
+  </section>
+  ` : ''}
+
+  ${pressQuotes.length > 0 ? `
+  <section>
+    <h2 class="section-title">Press</h2>
+    <div class="press-grid">
+      ${quotesHTML}
+    </div>
+  </section>
+  ` : ''}
+
+  <section class="contact-section">
+    <h2 class="section-title">Connect</h2>
+    
+    ${socialLinks.length > 0 ? `
+    <div class="social-grid">
+      ${socialHTML}
+    </div>
+    ` : ''}
+    
+    <p class="contact-email">
+      Booking & Press: <a href="mailto:${contactEmail}" data-editable="contactEmail">${contactEmail}</a>
+    </p>
+  </section>
 </body>
 </html>`;
 }

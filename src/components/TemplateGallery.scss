@@ -282,3 +282,95 @@
   color: var(--color-text-secondary);
   font-size: 1rem;
 }
+
+// Add after .template-filters
+.template-search {
+  margin-bottom: calc(var(--spacing-unit) * 4);
+}
+
+.search-input-wrapper {
+  position: relative;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.search-input {
+  width: 100%;
+  padding: calc(var(--spacing-unit) * 1.5) calc(var(--spacing-unit) * 5);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  color: var(--color-text-primary);
+  font-size: 0.9375rem;
+  transition: all var(--transition-fast);
+
+  &:focus {
+    outline: none;
+    border-color: var(--color-text-primary);
+    background: var(--color-background);
+  }
+
+  &::placeholder {
+    color: var(--color-text-tertiary);
+  }
+}
+
+.search-icon {
+  position: absolute;
+  left: calc(var(--spacing-unit) * 2);
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-tertiary);
+  pointer-events: none;
+}
+
+.search-clear {
+  position: absolute;
+  right: calc(var(--spacing-unit) * 1);
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-tertiary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+
+  &:hover {
+    background: var(--color-border);
+    color: var(--color-text-primary);
+  }
+}
+
+.search-results-text {
+  text-align: center;
+  margin-top: calc(var(--spacing-unit) * 2);
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+// Update the empty state
+.template-gallery__empty {
+  text-align: center;
+  padding: calc(var(--spacing-unit) * 12) calc(var(--spacing-unit) * 3);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(var(--spacing-unit) * 2);
+
+  svg {
+    color: var(--color-text-tertiary);
+    opacity: 0.5;
+  }
+
+  p {
+    font-size: 1.125rem;
+    color: var(--color-text-secondary);
+  }
+}

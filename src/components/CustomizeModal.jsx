@@ -4,7 +4,7 @@ import CustomizationPanel from './CustomizationPanel';
 import LivePreview from './LivePreview';
 import { generateZip } from '../utils/generateZip';
 import { generateHTML } from '../utils/templateRenderer';
-import DeploymentModal from './DeploymentModal';
+import PaymentModal from './PaymentModal';
 import './CustomizeModal.scss';
 
 const templateConfigs = {
@@ -812,7 +812,795 @@ const templateConfigs = {
         label: 'Theme'
       }
     }
+  },
+  'wedding-invite': {
+  id: 'wedding-invite',
+  name: 'Wedding Invitation',
+  category: 'Events',
+  customizable: {
+    brideName: { type: 'text', default: 'Sarah', label: 'Bride\'s First Name' },
+    groomName: { type: 'text', default: 'Michael', label: 'Groom\'s First Name' },
+    weddingDate: { type: 'text', default: 'June 15, 2025', label: 'Wedding Date' },
+    weddingTime: { type: 'text', default: '4:00 PM', label: 'Ceremony Time' },
+    venueName: { type: 'text', default: 'The Grand Estate', label: 'Venue Name' },
+    venueAddress: { type: 'textarea', default: '123 Garden Lane\nNapa Valley, CA 94558', label: 'Venue Address' },
+    
+    ceremonyTitle: { type: 'text', default: 'Ceremony', label: 'Ceremony Section Title' },
+    ceremonyTime: { type: 'text', default: '4:00 PM', label: 'Ceremony Time' },
+    ceremonyLocation: { type: 'text', default: 'Garden Terrace', label: 'Ceremony Location' },
+    
+    receptionTitle: { type: 'text', default: 'Reception', label: 'Reception Section Title' },
+    receptionTime: { type: 'text', default: '6:00 PM', label: 'Reception Time' },
+    receptionLocation: { type: 'text', default: 'Grand Ballroom', label: 'Reception Location' },
+    
+    story: {
+      type: 'textarea',
+      default: 'We met in college during our senior year and have been inseparable ever since. After five wonderful years together, we\'re excited to begin our next chapter as husband and wife.',
+      label: 'Our Story'
+    },
+    
+    rsvpDeadline: { type: 'text', default: 'May 1, 2025', label: 'RSVP Deadline' },
+    rsvpEmail: { type: 'text', default: 'rsvp@sarahandmichael.com', label: 'RSVP Email' },
+    rsvpPhone: { type: 'text', default: '(555) 123-4567', label: 'RSVP Phone (Optional)' },
+    
+    additionalInfo: {
+      type: 'textarea',
+      default: 'Attire: Garden Formal\nParking: Valet available\nAccommodations: Room block at Napa Grand Hotel',
+      label: 'Additional Information'
+    },
+    
+    registryLinks: {
+      type: 'group',
+      label: 'Registry Links',
+      itemLabel: 'Registry',
+      min: 0,
+      max: 4,
+      fields: {
+        store: { type: 'text', label: 'Store Name', default: '' },
+        url: { type: 'text', label: 'Registry URL', default: '' }
+      },
+      default: [
+        { store: 'Amazon', url: 'amazon.com/wedding/registry' },
+        { store: 'Crate & Barrel', url: 'crateandbarrel.com/gift-registry' }
+      ]
+    },
+    
+    heroImage: { 
+      type: 'image', 
+      label: 'Engagement Photo',
+      accept: 'image/*'
+    },
+    
+    accentColor: { type: 'color', default: '#d4af37', label: 'Accent Color' },
+    darkMode: { 
+      type: 'select', 
+      options: ['Light', 'Dark', 'Auto'],
+      default: 'Light',
+      label: 'Theme'
+    }
   }
+},
+'event-landing': {
+  id: 'event-landing',
+  name: 'Event Landing Page',
+  category: 'Events',
+  customizable: {
+    eventName: { type: 'text', default: 'Tech Summit 2025', label: 'Event Name' },
+    tagline: { type: 'text', default: 'The Future of Innovation', label: 'Tagline' },
+    eventDate: { type: 'text', default: 'September 20-22, 2025', label: 'Event Date' },
+    eventLocation: { type: 'text', default: 'San Francisco Convention Center', label: 'Location' },
+    
+    description: { 
+      type: 'textarea',
+      default: 'Join industry leaders, innovators, and visionaries for three days of insights, networking, and inspiration. Discover the latest trends shaping technology and business.',
+      label: 'Event Description'
+    },
+    
+    ctaPrimary: { type: 'text', default: 'Get Tickets', label: 'Primary CTA Button' },
+    ctaSecondary: { type: 'text', default: 'View Schedule', label: 'Secondary CTA Button' },
+    ticketUrl: { type: 'text', default: '#tickets', label: 'Ticket URL' },
+    
+    speakers: {
+      type: 'group',
+      label: 'Speakers',
+      itemLabel: 'Speaker',
+      min: 0,
+      max: 8,
+      fields: {
+        image: { type: 'image', label: 'Photo', accept: 'image/*' },
+        name: { type: 'text', label: 'Name', default: '' },
+        title: { type: 'text', label: 'Title', default: '' },
+        company: { type: 'text', label: 'Company', default: '' }
+      },
+      default: [
+        { name: 'Dr. Sarah Chen', title: 'Chief Innovation Officer', company: 'TechCorp' },
+        { name: 'Marcus Johnson', title: 'CEO', company: 'FutureAI' },
+        { name: 'Emily Rodriguez', title: 'Head of Design', company: 'Creative Labs' }
+      ]
+    },
+    
+    schedule: {
+      type: 'group',
+      label: 'Schedule',
+      itemLabel: 'Session',
+      min: 0,
+      max: 12,
+      fields: {
+        time: { type: 'text', label: 'Time', default: '' },
+        title: { type: 'text', label: 'Session Title', default: '' },
+        speaker: { type: 'text', label: 'Speaker', default: '' },
+        location: { type: 'text', label: 'Location', default: '' }
+      },
+      default: [
+        { time: '9:00 AM', title: 'Opening Keynote', speaker: 'Dr. Sarah Chen', location: 'Main Stage' },
+        { time: '10:30 AM', title: 'The Future of AI', speaker: 'Marcus Johnson', location: 'Hall A' },
+        { time: '2:00 PM', title: 'Design Thinking Workshop', speaker: 'Emily Rodriguez', location: 'Workshop Room' }
+      ]
+    },
+    
+    tickets: {
+      type: 'group',
+      label: 'Ticket Types',
+      itemLabel: 'Ticket',
+      min: 1,
+      max: 4,
+      fields: {
+        name: { type: 'text', label: 'Ticket Name', default: '' },
+        price: { type: 'text', label: 'Price', default: '' },
+        features: { type: 'textarea', label: 'Features (one per line)', default: '' }
+      },
+      default: [
+        { name: 'General Admission', price: '299', features: 'All sessions\nNetworking events\nLunch included' },
+        { name: 'VIP Pass', price: '599', features: 'All sessions\nVIP lounge access\nMeet & greet with speakers\nAll meals included' }
+      ]
+    },
+    
+    venue: {
+      type: 'group',
+      label: 'Venue Details',
+      itemLabel: 'Detail',
+      min: 0,
+      max: 4,
+      fields: {
+        label: { type: 'text', label: 'Label', default: '' },
+        value: { type: 'text', label: 'Value', default: '' }
+      },
+      default: [
+        { label: 'Address', value: '747 Howard St, San Francisco, CA 94103' },
+        { label: 'Parking', value: 'Valet and self-parking available' },
+        { label: 'Transit', value: 'Powell St BART - 5 min walk' }
+      ]
+    },
+    
+    contactEmail: { type: 'text', default: 'info@techsummit.com', label: 'Contact Email' },
+    
+    accentColor: { type: 'color', default: '#eb1736', label: 'Accent Color' },
+    darkMode: { 
+      type: 'select', 
+      options: ['Light', 'Dark', 'Auto'],
+      default: 'Dark',
+      label: 'Theme'
+    }
+  }
+},
+'baby-announcement': {
+  id: 'baby-announcement',
+  name: 'Baby Announcement',
+  category: 'Events',
+  customizable: {
+    babyName: { type: 'text', default: 'Olivia Grace', label: 'Baby\'s Name' },
+    parentNames: { type: 'text', default: 'Emma & James Peterson', label: 'Parents\' Names' },
+    birthDate: { type: 'text', default: 'March 15, 2025', label: 'Birth Date' },
+    birthTime: { type: 'text', default: '8:42 AM', label: 'Birth Time' },
+    weight: { type: 'text', default: '7 lbs 8 oz', label: 'Weight' },
+    length: { type: 'text', default: '20 inches', label: 'Length' },
+    
+    announcement: {
+      type: 'textarea',
+      default: 'We are overjoyed to announce the arrival of our beautiful daughter. She has filled our hearts with love beyond measure.',
+      label: 'Announcement Message'
+    },
+    
+    meaningOfName: {
+      type: 'textarea',
+      default: 'Olivia means "olive tree" symbolizing peace and beauty. Grace represents elegance and divine favor.',
+      label: 'Meaning of Name (Optional)'
+    },
+    
+    thankYouMessage: {
+      type: 'textarea',
+      default: 'Thank you for all the love, support, and well wishes during this special time. We can\'t wait for you to meet her!',
+      label: 'Thank You Message'
+    },
+    
+    babyPhoto: { 
+      type: 'image', 
+      label: 'Baby Photo',
+      accept: 'image/*'
+    },
+    
+    gallery: {
+      type: 'images',
+      label: 'Additional Photos',
+      min: 0,
+      max: 6,
+      accept: 'image/*'
+    },
+    
+    accentColor: { type: 'color', default: '#ffc0cb', label: 'Accent Color' },
+    darkMode: { 
+      type: 'select', 
+      options: ['Light', 'Dark', 'Auto'],
+      default: 'Light',
+      label: 'Theme'
+    }
+  }
+},
+'teacher-profile': {
+  id: 'teacher-profile',
+  name: 'Teacher Profile',
+  category: 'Education',
+  customizable: {
+    name: { type: 'text', default: 'Ms. Jennifer Martinez', label: 'Your Name' },
+    title: { type: 'text', default: 'High School English Teacher', label: 'Title/Position' },
+    school: { type: 'text', default: 'Lincoln High School', label: 'School Name' },
+    yearsExperience: { type: 'text', default: '12', label: 'Years of Experience' },
+    
+    bio: {
+      type: 'textarea',
+      default: 'I am passionate about helping students discover the power of literature and effective communication. My goal is to create an engaging, supportive classroom where every student feels confident to express their ideas and grow as readers and writers.',
+      label: 'About Me'
+    },
+    
+    subjects: {
+      type: 'repeatable',
+      label: 'Subjects Taught',
+      itemLabel: 'Subject',
+      default: ['AP English Literature', 'Creative Writing', 'American Literature'],
+      max: 8
+    },
+    
+    education: {
+      type: 'group',
+      label: 'Education',
+      itemLabel: 'Degree',
+      min: 1,
+      max: 4,
+      fields: {
+        degree: { type: 'text', label: 'Degree', default: '' },
+        institution: { type: 'text', label: 'Institution', default: '' },
+        year: { type: 'text', label: 'Year', default: '' }
+      },
+      default: [
+        { degree: 'M.Ed. in English Education', institution: 'Boston University', year: '2015' },
+        { degree: 'B.A. in English Literature', institution: 'UCLA', year: '2012' }
+      ]
+    },
+    
+    teachingPhilosophy: {
+      type: 'textarea',
+      default: 'I believe every student has a unique voice worth hearing. My classroom is a space where mistakes are learning opportunities, questions are celebrated, and diverse perspectives enrich our understanding of literature and the world.',
+      label: 'Teaching Philosophy'
+    },
+    
+    classInfo: {
+      type: 'group',
+      label: 'Class Information',
+      itemLabel: 'Class',
+      min: 0,
+      max: 6,
+      fields: {
+        className: { type: 'text', label: 'Class Name', default: '' },
+        period: { type: 'text', label: 'Period/Time', default: '' },
+        room: { type: 'text', label: 'Room Number', default: '' }
+      },
+      default: [
+        { className: 'AP Literature', period: 'Period 1 (8:00 AM)', room: 'Room 204' },
+        { className: 'Creative Writing', period: 'Period 3 (10:30 AM)', room: 'Room 204' }
+      ]
+    },
+    
+    officeHours: {
+      type: 'textarea',
+      default: 'Monday & Wednesday: 3:00 PM - 4:00 PM\nTuesday & Thursday: 7:30 AM - 8:00 AM\nOr by appointment',
+      label: 'Office Hours'
+    },
+    
+    contactEmail: { type: 'text', default: 'jmartinez@lincolnhs.edu', label: 'Email' },
+    contactPhone: { type: 'text', default: '(555) 123-4567', label: 'Phone (Optional)' },
+    
+    profilePhoto: { 
+      type: 'image', 
+      label: 'Profile Photo',
+      accept: 'image/*'
+    },
+    
+    accentColor: { type: 'color', default: '#2563eb', label: 'Accent Color' },
+    darkMode: { 
+      type: 'select', 
+      options: ['Light', 'Dark', 'Auto'],
+      default: 'Light',
+      label: 'Theme'
+    }
+  }
+},
+'student-portfolio': {
+  id: 'student-portfolio',
+  name: 'Student Portfolio',
+  category: 'Education',
+  customizable: {
+    studentName: { type: 'text', default: 'Alex Johnson', label: 'Student Name' },
+    grade: { type: 'text', default: 'Junior', label: 'Grade Level' },
+    school: { type: 'text', default: 'Riverside High School', label: 'School Name' },
+    gradYear: { type: 'text', default: '2026', label: 'Expected Graduation Year' },
+    
+    about: {
+      type: 'textarea',
+      default: 'I\'m a passionate student interested in computer science, robotics, and creative problem-solving. I love taking on new challenges and working on projects that make a difference in my community.',
+      label: 'About Me'
+    },
+    
+    interests: {
+      type: 'repeatable',
+      label: 'Interests & Hobbies',
+      itemLabel: 'Interest',
+      default: ['Robotics', 'Web Development', 'Photography', 'Debate Team'],
+      max: 10
+    },
+    
+    projects: {
+      type: 'group',
+      label: 'Projects',
+      itemLabel: 'Project',
+      min: 0,
+      max: 8,
+      fields: {
+        image: { type: 'image', label: 'Project Image', accept: 'image/*' },
+        title: { type: 'text', label: 'Project Title', default: '' },
+        description: { type: 'textarea', label: 'Description', default: '' },
+        skills: { type: 'text', label: 'Skills Used', default: '' }
+      },
+      default: [
+        { 
+          title: 'School Website Redesign', 
+          description: 'Led a team to redesign our school\'s website, improving navigation and accessibility.',
+          skills: 'HTML, CSS, JavaScript, Figma'
+        },
+        { 
+          title: 'Community Garden App', 
+          description: 'Built a mobile app to help coordinate our local community garden volunteer schedules.',
+          skills: 'React Native, Firebase'
+        }
+      ]
+    },
+    
+    achievements: {
+      type: 'group',
+      label: 'Achievements & Awards',
+      itemLabel: 'Achievement',
+      min: 0,
+      max: 10,
+      fields: {
+        title: { type: 'text', label: 'Achievement', default: '' },
+        year: { type: 'text', label: 'Year', default: '' },
+        description: { type: 'text', label: 'Description', default: '' }
+      },
+      default: [
+        { title: 'Regional Science Fair - 1st Place', year: '2024', description: 'AI-powered recycling sorter' },
+        { title: 'National Merit Semifinalist', year: '2024', description: '' }
+      ]
+    },
+    
+    academics: {
+      type: 'group',
+      label: 'Academic Info',
+      itemLabel: 'Detail',
+      min: 0,
+      max: 6,
+      fields: {
+        label: { type: 'text', label: 'Label', default: '' },
+        value: { type: 'text', label: 'Value', default: '' }
+      },
+      default: [
+        { label: 'GPA', value: '3.95' },
+        { label: 'Class Rank', value: 'Top 5%' },
+        { label: 'AP Courses', value: '8' }
+      ]
+    },
+    
+    contactEmail: { type: 'text', default: 'alex.johnson@email.com', label: 'Email' },
+    
+    profilePhoto: { 
+      type: 'image', 
+      label: 'Profile Photo',
+      accept: 'image/*'
+    },
+    
+    accentColor: { type: 'color', default: '#8b5cf6', label: 'Accent Color' },
+    darkMode: { 
+      type: 'select', 
+      options: ['Light', 'Dark', 'Auto'],
+      default: 'Auto',
+      label: 'Theme'
+    }
+  }
+},
+'fitness-trainer': {
+  id: 'fitness-trainer',
+  name: 'Fitness Trainer Profile',
+  category: 'Health & Wellness',
+  customizable: {
+    trainerName: { type: 'text', default: 'Marcus Thompson', label: 'Your Name' },
+    tagline: { type: 'text', default: 'Certified Personal Trainer & Nutrition Coach', label: 'Tagline' },
+    yearsExperience: { type: 'text', default: '8+', label: 'Years of Experience' },
+    
+    heroStatement: {
+      type: 'textarea',
+      default: 'Transform your body, elevate your mind, and achieve goals you never thought possible. Let\'s build the strongest version of you together.',
+      label: 'Hero Statement'
+    },
+    
+    bio: {
+      type: 'textarea',
+      default: 'I\'ve dedicated my life to fitness and helping others reach their potential. From weight loss to muscle building, marathon training to injury recovery—I create personalized programs that deliver real results.',
+      label: 'About Me'
+    },
+    
+    specialties: {
+      type: 'repeatable',
+      label: 'Specialties',
+      itemLabel: 'Specialty',
+      default: ['Strength Training', 'Weight Loss', 'Sports Performance', 'Injury Prevention', 'Nutrition Coaching'],
+      max: 10
+    },
+    
+    certifications: {
+      type: 'group',
+      label: 'Certifications',
+      itemLabel: 'Certification',
+      min: 0,
+      max: 8,
+      fields: {
+        title: { type: 'text', label: 'Certification', default: '' },
+        organization: { type: 'text', label: 'Organization', default: '' },
+        year: { type: 'text', label: 'Year', default: '' }
+      },
+      default: [
+        { title: 'Certified Personal Trainer (CPT)', organization: 'NASM', year: '2016' },
+        { title: 'Precision Nutrition Level 1', organization: 'Precision Nutrition', year: '2018' }
+      ]
+    },
+    
+    trainingPackages: {
+      type: 'group',
+      label: 'Training Packages',
+      itemLabel: 'Package',
+      min: 0,
+      max: 4,
+      fields: {
+        name: { type: 'text', label: 'Package Name', default: '' },
+        sessions: { type: 'text', label: 'Sessions', default: '' },
+        price: { type: 'text', label: 'Price', default: '' },
+        features: { type: 'textarea', label: 'Features (one per line)', default: '' }
+      },
+      default: [
+        { 
+          name: 'Starter', 
+          sessions: '4 sessions/month',
+          price: '240',
+          features: 'Personalized workout plan\nForm coaching\nProgress tracking'
+        },
+        { 
+          name: 'Committed', 
+          sessions: '8 sessions/month',
+          price: '440',
+          features: 'Personalized workout plan\nNutrition guidance\nForm coaching\n24/7 text support\nProgress tracking'
+        }
+      ]
+    },
+    
+    testimonials: {
+      type: 'group',
+      label: 'Client Testimonials',
+      itemLabel: 'Testimonial',
+      min: 0,
+      max: 6,
+      fields: {
+        name: { type: 'text', label: 'Client Name', default: '' },
+        result: { type: 'text', label: 'Result Achieved', default: '' },
+        quote: { type: 'textarea', label: 'Testimonial', default: '' }
+      },
+      default: [
+        { 
+          name: 'Sarah K.', 
+          result: 'Lost 45 lbs in 6 months',
+          quote: 'Marcus completely transformed my relationship with fitness. His approach is tough but supportive, and the results speak for themselves!'
+        }
+      ]
+    },
+    
+    schedule: {
+      type: 'textarea',
+      default: 'Monday - Friday: 6:00 AM - 8:00 PM\nSaturday: 8:00 AM - 2:00 PM\nSunday: Closed',
+      label: 'Availability'
+    },
+    
+    location: { type: 'text', default: 'Gold\'s Gym Downtown + Virtual Training', label: 'Training Location' },
+    phone: { type: 'text', default: '(555) 789-0123', label: 'Phone' },
+    email: { type: 'text', default: 'marcus@fitnesstraining.com', label: 'Email' },
+    
+    instagramHandle: { type: 'text', default: '@marcusfitness', label: 'Instagram Handle (Optional)' },
+    
+    trainerPhoto: { 
+      type: 'image', 
+      label: 'Profile Photo',
+      accept: 'image/*'
+    },
+    
+    accentColor: { type: 'color', default: '#f97316', label: 'Accent Color' },
+    darkMode: { 
+      type: 'select', 
+      options: ['Light', 'Dark', 'Auto'],
+      default: 'Dark',
+      label: 'Theme'
+    }
+  }
+},
+'wellness-coach': {
+  id: 'wellness-coach',
+  name: 'Wellness Coach',
+  category: 'Health & Wellness',
+  customizable: {
+    coachName: { type: 'text', default: 'Dr. Lisa Chen', label: 'Your Name' },
+    credentials: { type: 'text', default: 'PhD, Certified Holistic Health Coach', label: 'Credentials' },
+    tagline: { 
+      type: 'text', 
+      default: 'Find Balance. Nurture Wellness. Transform Your Life.', 
+      label: 'Tagline' 
+    },
+    
+    welcomeMessage: {
+      type: 'textarea',
+      default: 'Welcome. I\'m here to guide you on a journey to holistic wellness—supporting your mind, body, and spirit as you discover what true health means for you.',
+      label: 'Welcome Message'
+    },
+    
+    philosophy: {
+      type: 'textarea',
+      default: 'I believe wellness is not a destination, but a lifelong journey of self-discovery and growth. Through mindful practices, compassionate support, and evidence-based approaches, I help you create sustainable habits that honor your unique needs and goals.',
+      label: 'Coaching Philosophy'
+    },
+    
+    services: {
+      type: 'group',
+      label: 'Services',
+      itemLabel: 'Service',
+      min: 0,
+      max: 6,
+      fields: {
+        name: { type: 'text', label: 'Service Name', default: '' },
+        description: { type: 'textarea', label: 'Description', default: '' },
+        duration: { type: 'text', label: 'Duration/Format', default: '' }
+      },
+      default: [
+        { 
+          name: 'One-on-One Coaching', 
+          description: 'Personalized sessions focused on your unique wellness goals, from stress management to nutrition and lifestyle changes.',
+          duration: '60 minutes • Virtual or In-Person'
+        },
+        { 
+          name: 'Mindfulness & Meditation', 
+          description: 'Learn practical techniques to reduce stress, increase presence, and cultivate inner peace in your daily life.',
+          duration: '45 minutes • Virtual'
+        },
+        { 
+          name: 'Holistic Wellness Programs', 
+          description: 'Comprehensive 12-week programs addressing nutrition, movement, sleep, stress, and emotional wellbeing.',
+          duration: '12 weeks • Includes weekly sessions'
+        }
+      ]
+    },
+    
+    approach: {
+      type: 'repeatable',
+      label: 'My Approach',
+      itemLabel: 'Principle',
+      default: [
+        'Whole-person wellness',
+        'Evidence-based practices',
+        'Compassionate guidance',
+        'Sustainable lifestyle changes',
+        'Mind-body connection'
+      ],
+      max: 8
+    },
+    
+    backgrounds: {
+      type: 'group',
+      label: 'Background & Training',
+      itemLabel: 'Credential',
+      min: 0,
+      max: 6,
+      fields: {
+        title: { type: 'text', label: 'Title', default: '' },
+        institution: { type: 'text', label: 'Institution', default: '' },
+        year: { type: 'text', label: 'Year', default: '' }
+      },
+      default: [
+        { title: 'PhD in Health Psychology', institution: 'Stanford University', year: '2015' },
+        { title: 'Certified Health Coach', institution: 'Institute for Integrative Nutrition', year: '2017' },
+        { title: 'Mindfulness-Based Stress Reduction', institution: 'UMASS Medical School', year: '2018' }
+      ]
+    },
+    
+    areasOfFocus: {
+      type: 'repeatable',
+      label: 'Areas of Focus',
+      itemLabel: 'Area',
+      default: [
+        'Stress Management',
+        'Sleep Optimization',
+        'Emotional Wellbeing',
+        'Nutrition & Lifestyle',
+        'Work-Life Balance',
+        'Mindfulness Practices'
+      ],
+      max: 10
+    },
+    
+    sessionInfo: {
+      type: 'textarea',
+      default: 'Initial Consultation (30 min): Complimentary\nSingle Session (60 min): $150\n4-Session Package: $540\n12-Week Program: $1,800',
+      label: 'Session Information'
+    },
+    
+    bookingUrl: { type: 'text', default: '#book', label: 'Booking URL' },
+    email: { type: 'text', default: 'lisa@wellnesscoaching.com', label: 'Email' },
+    phone: { type: 'text', default: '(555) 234-5678', label: 'Phone (Optional)' },
+    
+    coachPhoto: { 
+      type: 'image', 
+      label: 'Profile Photo',
+      accept: 'image/*'
+    },
+    
+    accentColor: { type: 'color', default: '#10b981', label: 'Accent Color' },
+    darkMode: { 
+      type: 'select', 
+      options: ['Light', 'Dark', 'Auto'],
+      default: 'Light',
+      label: 'Theme'
+    }
+  }
+},
+'musician-band': {
+  id: 'musician-band',
+  name: 'Musician/Band Page',
+  category: 'Creative',
+  customizable: {
+    artistName: { type: 'text', default: 'The Midnight Collective', label: 'Artist/Band Name' },
+    genre: { type: 'text', default: 'Indie Rock • Alternative', label: 'Genre' },
+    location: { type: 'text', default: 'Brooklyn, NY', label: 'Based In' },
+    
+    bio: {
+      type: 'textarea',
+      default: 'Four friends. One sound. Blending raw energy with introspective lyrics, we create music that hits you in the chest and stays in your head for days. Our latest album "Echoes After Dark" is out now.',
+      label: 'Bio'
+    },
+    
+    featuredVideo: { type: 'text', default: '', label: 'Featured Video URL (YouTube/Vimeo embed)' },
+    
+    latestRelease: {
+      type: 'group',
+      label: 'Latest Release',
+      itemLabel: 'Release',
+      min: 0,
+      max: 1,
+      fields: {
+        title: { type: 'text', label: 'Album/Single Title', default: '' },
+        releaseDate: { type: 'text', label: 'Release Date', default: '' },
+        coverArt: { type: 'image', label: 'Cover Art', accept: 'image/*' },
+        description: { type: 'textarea', label: 'Description', default: '' },
+        streamingLinks: { type: 'textarea', label: 'Streaming Links (one per line)', default: '' }
+      },
+      default: [
+        { 
+          title: 'Echoes After Dark',
+          releaseDate: 'March 2025',
+          description: '12 tracks exploring themes of memory, connection, and late-night introspection.',
+          streamingLinks: 'Spotify\nApple Music\nBandcamp\nSoundCloud'
+        }
+      ]
+    },
+    
+    upcomingShows: {
+      type: 'group',
+      label: 'Upcoming Shows',
+      itemLabel: 'Show',
+      min: 0,
+      max: 10,
+      fields: {
+        date: { type: 'text', label: 'Date', default: '' },
+        venue: { type: 'text', label: 'Venue', default: '' },
+        city: { type: 'text', label: 'City', default: '' },
+        ticketUrl: { type: 'text', label: 'Ticket URL', default: '' }
+      },
+      default: [
+        { date: 'Apr 15', venue: 'Music Hall of Williamsburg', city: 'Brooklyn, NY', ticketUrl: '#tickets' },
+        { date: 'Apr 22', venue: 'The Sinclair', city: 'Cambridge, MA', ticketUrl: '#tickets' },
+        { date: 'May 3', venue: 'Union Transfer', city: 'Philadelphia, PA', ticketUrl: '#tickets' }
+      ]
+    },
+    
+    bandMembers: {
+      type: 'group',
+      label: 'Band Members',
+      itemLabel: 'Member',
+      min: 0,
+      max: 8,
+      fields: {
+        name: { type: 'text', label: 'Name', default: '' },
+        role: { type: 'text', label: 'Role/Instrument', default: '' },
+        photo: { type: 'image', label: 'Photo', accept: 'image/*' }
+      },
+      default: [
+        { name: 'Maya Rodriguez', role: 'Vocals, Guitar' },
+        { name: 'Jake Wilson', role: 'Lead Guitar' },
+        { name: 'Sam Chen', role: 'Bass' },
+        { name: 'Alex Parker', role: 'Drums' }
+      ]
+    },
+    
+    pressQuotes: {
+      type: 'group',
+      label: 'Press Quotes',
+      itemLabel: 'Quote',
+      min: 0,
+      max: 6,
+      fields: {
+        quote: { type: 'textarea', label: 'Quote', default: '' },
+        source: { type: 'text', label: 'Source', default: '' }
+      },
+      default: [
+        { quote: 'Raw, honest, and utterly captivating', source: 'Rolling Stone' },
+        { quote: 'The most exciting new sound in indie rock', source: 'Pitchfork' }
+      ]
+    },
+    
+    socialLinks: {
+      type: 'group',
+      label: 'Social & Streaming',
+      itemLabel: 'Link',
+      min: 0,
+      max: 8,
+      fields: {
+        platform: { type: 'text', label: 'Platform', default: '' },
+        url: { type: 'text', label: 'URL', default: '' }
+      },
+      default: [
+        { platform: 'Instagram', url: '@midnightcollective' },
+        { platform: 'Spotify', url: 'spotify:artist:...' },
+        { platform: 'YouTube', url: 'youtube.com/...' }
+      ]
+    },
+    
+    contactEmail: { type: 'text', default: 'booking@midnightcollective.com', label: 'Contact/Booking Email' },
+    
+    bandPhoto: { 
+      type: 'image', 
+      label: 'Band Photo',
+      accept: 'image/*'
+    },
+    
+    accentColor: { type: 'color', default: '#dc2626', label: 'Accent Color' },
+    darkMode: { 
+      type: 'select', 
+      options: ['Light', 'Dark', 'Auto'],
+      default: 'Dark',
+      label: 'Theme'
+    }
+  }
+}
 };
 
 
@@ -822,7 +1610,7 @@ function CustomizeModal({ templateId, isOpen, onClose, userTheme }) {
   const [customization, setCustomization] = useState({});
   const [images, setImages] = useState({});
   const [isGenerating, setIsGenerating] = useState(false);
-  const [isDeployModalOpen, setIsDeployModalOpen] = useState(false);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
 
   // Load saved customization from localStorage
   useEffect(() => {
@@ -1021,8 +1809,7 @@ function CustomizeModal({ templateId, isOpen, onClose, userTheme }) {
             </button>
             <button 
               className="btn btn-primary"
-              onClick={() => setIsDeployModalOpen(true)}
-              disabled
+              onClick={() => setIsPaymentModalOpen(true)}
             >
               <Construction size={18} />
               Deploy
@@ -1050,9 +1837,9 @@ function CustomizeModal({ templateId, isOpen, onClose, userTheme }) {
         </div>
       </div>
 
-      <DeploymentModal
-        isOpen={isDeployModalOpen}
-        onClose={() => setIsDeployModalOpen(false)}
+      <PaymentModal
+        isOpen={isPaymentModalOpen}
+        onClose={() => setIsPaymentModalOpen(false)}
         templateId={templateId}
         customization={customization}
         images={images}
