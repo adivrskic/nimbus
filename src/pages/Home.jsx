@@ -35,7 +35,7 @@ function Home({ theme }) {
         sizeMax: 8,
         enableTilt: true,
         tiltIntensity: 0.3,
-        baseRadius: 80,
+        baseRadius: 55,
         morphSpeed: 0.04,
         rotationSpeed: 0.3,
         pulseSpeed: 0.01,
