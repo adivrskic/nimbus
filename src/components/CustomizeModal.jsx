@@ -1600,6 +1600,291 @@ const templateConfigs = {
       label: 'Theme'
     }
   }
+},
+'cleaning-service': {
+  id: 'cleaning-service',
+  name: 'Cleaning Service',
+  category: 'Business',
+  customizable: {
+    businessName: { type: 'text', default: 'Sparkle & Shine Cleaning', label: 'Business Name' },
+    tagline: { type: 'text', default: 'Professional Cleaning You Can Trust', label: 'Tagline' },
+    yearsInBusiness: { type: 'text', default: '15+', label: 'Years in Business' },
+    
+    heroText: {
+      type: 'textarea',
+      default: 'Experience the difference of a truly clean home. Our professional team delivers exceptional results with eco-friendly products and attention to detail.',
+      label: 'Hero Description'
+    },
+    
+    services: {
+      type: 'group',
+      label: 'Services',
+      itemLabel: 'Service',
+      min: 1,
+      max: 8,
+      fields: {
+        name: { type: 'text', label: 'Service Name', default: '' },
+        description: { type: 'textarea', label: 'Description', default: '' },
+        price: { type: 'text', label: 'Starting Price', default: '' }
+      },
+      default: [
+        { 
+          name: 'Residential Cleaning',
+          description: 'Complete home cleaning including all rooms, kitchen, and bathrooms. Customized to your needs.',
+          price: '$120'
+        },
+        { 
+          name: 'Deep Cleaning',
+          description: 'Thorough top-to-bottom cleaning including baseboards, inside appliances, and hard-to-reach areas.',
+          price: '$200'
+        },
+        { 
+          name: 'Move In/Out Cleaning',
+          description: 'Comprehensive cleaning for moving transitions. Perfect for landlords and tenants.',
+          price: '$250'
+        },
+        { 
+          name: 'Office Cleaning',
+          description: 'Professional commercial cleaning for offices, retail spaces, and business facilities.',
+          price: '$150'
+        }
+      ]
+    },
+    
+    whyChooseUs: {
+      type: 'repeatable',
+      label: 'Why Choose Us',
+      itemLabel: 'Reason',
+      default: [
+        'Eco-friendly products',
+        'Insured & bonded',
+        'Background-checked staff',
+        '100% satisfaction guarantee',
+        'Flexible scheduling',
+        'No contracts required'
+      ],
+      max: 10
+    },
+    
+    serviceAreas: {
+      type: 'repeatable',
+      label: 'Service Areas',
+      itemLabel: 'Area',
+      default: [
+        'Downtown',
+        'North End',
+        'West Side',
+        'Suburbs'
+      ],
+      max: 12
+    },
+    
+    testimonials: {
+      type: 'group',
+      label: 'Customer Reviews',
+      itemLabel: 'Review',
+      min: 0,
+      max: 6,
+      fields: {
+        name: { type: 'text', label: 'Customer Name', default: '' },
+        location: { type: 'text', label: 'Location', default: '' },
+        review: { type: 'textarea', label: 'Review', default: '' },
+        rating: { type: 'text', label: 'Rating (out of 5)', default: '5' }
+      },
+      default: [
+        { 
+          name: 'Jennifer M.',
+          location: 'Downtown',
+          review: 'Absolutely amazing service! My house has never been cleaner. The team was professional, thorough, and respectful of my home.',
+          rating: '5'
+        },
+        { 
+          name: 'Michael R.',
+          location: 'West Side',
+          review: 'I use them for my office every week. Always reliable, always spotless. Highly recommend!',
+          rating: '5'
+        }
+      ]
+    },
+    
+    phone: { type: 'text', default: '(555) 123-4567', label: 'Phone Number' },
+    email: { type: 'text', default: 'info@sparkleclean.com', label: 'Email' },
+    hours: { type: 'text', default: 'Mon-Sat: 8:00 AM - 6:00 PM', label: 'Business Hours' },
+    bookingUrl: { type: 'text', default: '#book', label: 'Booking URL' },
+    
+    accentColor: { type: 'color', default: '#06b6d4', label: 'Accent Color' },
+    darkMode: { 
+      type: 'select', 
+      options: ['Light', 'Dark', 'Auto'],
+      default: 'Light',
+      label: 'Theme'
+    }
+  }
+},
+'real-estate-agent': {
+  id: 'real-estate-agent',
+  name: 'Real Estate Agent',
+  category: 'Business',
+  customizable: {
+    agentName: { type: 'text', default: 'Sarah Mitchell', label: 'Your Name' },
+    title: { type: 'text', default: 'Licensed Real Estate Agent', label: 'Title/License' },
+    brokerage: { type: 'text', default: 'Prestige Realty Group', label: 'Brokerage/Company' },
+    tagline: { 
+      type: 'text', 
+      default: 'Helping You Find Your Dream Home', 
+      label: 'Tagline' 
+    },
+    
+    bio: {
+      type: 'textarea',
+      default: 'With over 10 years of experience in the local market, I specialize in helping families find their perfect home. My commitment to personalized service and market expertise ensures a smooth, successful transaction every time.',
+      label: 'Bio'
+    },
+    
+    yearsExperience: { type: 'text', default: '10+', label: 'Years of Experience' },
+    homesSold: { type: 'text', default: '500+', label: 'Homes Sold' },
+    
+    specializations: {
+      type: 'repeatable',
+      label: 'Specializations',
+      itemLabel: 'Specialization',
+      default: [
+        'First-Time Home Buyers',
+        'Luxury Properties',
+        'Investment Properties',
+        'Relocation Services'
+      ],
+      max: 8
+    },
+    
+    featuredListings: {
+      type: 'group',
+      label: 'Featured Listings',
+      itemLabel: 'Listing',
+      min: 0,
+      max: 6,
+      fields: {
+        image: { type: 'image', label: 'Property Image', accept: 'image/*' },
+        address: { type: 'text', label: 'Address', default: '' },
+        price: { type: 'text', label: 'Price', default: '' },
+        beds: { type: 'text', label: 'Bedrooms', default: '' },
+        baths: { type: 'text', label: 'Bathrooms', default: '' },
+        sqft: { type: 'text', label: 'Square Feet', default: '' },
+        status: { type: 'select', options: ['For Sale', 'Sold', 'Pending', 'Coming Soon'], label: 'Status', default: 'For Sale' }
+      },
+      default: [
+        { 
+          address: '123 Maple Avenue',
+          price: '$725,000',
+          beds: '4',
+          baths: '3',
+          sqft: '2,800',
+          status: 'For Sale'
+        },
+        { 
+          address: '456 Oak Street',
+          price: '$895,000',
+          beds: '5',
+          baths: '4',
+          sqft: '3,500',
+          status: 'Sold'
+        },
+        { 
+          address: '789 Pine Drive',
+          price: '$650,000',
+          beds: '3',
+          baths: '2.5',
+          sqft: '2,200',
+          status: 'Pending'
+        }
+      ]
+    },
+    
+    serviceAreas: {
+      type: 'repeatable',
+      label: 'Service Areas',
+      itemLabel: 'Area',
+      default: [
+        'Downtown',
+        'Westside',
+        'Eastside',
+        'Suburbs'
+      ],
+      max: 10
+    },
+    
+    testimonials: {
+      type: 'group',
+      label: 'Client Testimonials',
+      itemLabel: 'Testimonial',
+      min: 0,
+      max: 4,
+      fields: {
+        name: { type: 'text', label: 'Client Name', default: '' },
+        review: { type: 'textarea', label: 'Review', default: '' },
+        propertyType: { type: 'text', label: 'Property Type', default: '' }
+      },
+      default: [
+        { 
+          name: 'Jennifer & Mike Thompson',
+          review: 'Sarah made our home-buying experience effortless. She understood exactly what we were looking for and found us the perfect home within our budget.',
+          propertyType: 'Single Family Home'
+        },
+        { 
+          name: 'David Chen',
+          review: 'Professional, knowledgeable, and always available. Sarah sold our home in just 10 days for above asking price!',
+          propertyType: 'Condo'
+        }
+      ]
+    },
+    
+    certifications: {
+      type: 'repeatable',
+      label: 'Certifications',
+      itemLabel: 'Certification',
+      default: [
+        'NAR Member',
+        'Certified Luxury Home Specialist',
+        'Accredited Buyer Representative'
+      ],
+      max: 8
+    },
+    
+    phone: { type: 'text', default: '(555) 987-6543', label: 'Phone Number' },
+    email: { type: 'text', default: 'sarah@prestigerealty.com', label: 'Email' },
+    officeAddress: { type: 'text', default: '100 Main Street, Suite 200', label: 'Office Address' },
+    licenseNumber: { type: 'text', default: 'DRE #01234567', label: 'License Number' },
+    
+    socialLinks: {
+      type: 'group',
+      label: 'Social Links',
+      itemLabel: 'Social Link',
+      min: 0,
+      max: 6,
+      fields: {
+        platform: { type: 'text', label: 'Platform', default: '' },
+        url: { type: 'text', label: 'URL', default: '' }
+      },
+      default: [
+        { platform: 'LinkedIn', url: 'linkedin.com/in/sarahmitchell' },
+        { platform: 'Instagram', url: '@sarahmitchellrealestate' }
+      ]
+    },
+    
+    agentPhoto: { 
+      type: 'image', 
+      label: 'Professional Photo',
+      accept: 'image/*'
+    },
+    
+    accentColor: { type: 'color', default: '#2563eb', label: 'Accent Color' },
+    darkMode: { 
+      type: 'select', 
+      options: ['Light', 'Dark', 'Auto'],
+      default: 'Light',
+      label: 'Theme'
+    }
+  }
 }
 };
 

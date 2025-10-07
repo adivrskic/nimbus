@@ -26,7 +26,8 @@ export function generateHTML(templateId, customization, images = {}) {
     'fitness-trainer': generateFitnessTrainer,
     'wellness-coach': generateWellnessCoach,
     'musician-band': generateMusicianBand,
-
+    'cleaning-service': generateCleaningService,
+    'real-estate-agent': generateRealEstateAgent,
   };
 
   const generator = templates[templateId];
@@ -9827,6 +9828,1653 @@ function generateMusicianBand(data) {
       Booking & Press: <a href="mailto:${contactEmail}" data-editable="contactEmail">${contactEmail}</a>
     </p>
   </section>
+</body>
+</html>`;
+}
+function generateCleaningService(data) {
+  const {
+    businessName = 'Sparkle & Shine Cleaning',
+    tagline = 'Professional Cleaning You Can Trust',
+    yearsInBusiness = '15+',
+    heroText = '',
+    services = [],
+    whyChooseUs = [],
+    serviceAreas = [],
+    testimonials = [],
+    phone = '',
+    email = '',
+    hours = '',
+    bookingUrl = '#book',
+    accentColor = '#06b6d4',
+    darkMode = 'Light'
+  } = data;
+
+  const themeClass = darkMode === 'Dark' ? 'dark' : darkMode === 'Light' ? 'light' : 'auto';
+
+  const servicesHTML = services.map((service, index) => `
+    <div class="service-box">
+      <div class="service-icon">✨</div>
+      <h3 class="service-name" data-editable="services.${index}.name">${service.name}</h3>
+      <p class="service-description" data-editable="services.${index}.description">${service.description}</p>
+      <div class="service-price">
+        <span class="price-label">Starting at</span>
+        <span class="price-amount" data-editable="services.${index}.price">${service.price}</span>
+      </div>
+    </div>
+  `).join('');
+
+  const whyHTML = whyChooseUs.map((reason, index) => `
+    <div class="why-item">
+      <div class="why-check">✓</div>
+      <span data-editable="whyChooseUs.${index}">${reason}</span>
+    </div>
+  `).join('');
+
+  const areasHTML = serviceAreas.map((area, index) => `
+    <div class="area-badge" data-editable="serviceAreas.${index}">${area}</div>
+  `).join('');
+
+  const testimonialsHTML = testimonials.map((testimonial, index) => {
+    const stars = '★'.repeat(parseInt(testimonial.rating)) + '☆'.repeat(5 - parseInt(testimonial.rating));
+    
+    return `
+    <div class="testimonial-box">
+      <div class="testimonial-stars">${stars}</div>
+      <p class="testimonial-text" data-editable="testimonials.${index}.review">"${testimonial.review}"</p>
+      <div class="testimonial-author">
+        <strong data-editable="testimonials.${index}.name">${testimonial.name}</strong>
+        <span data-editable="testimonials.${index}.location">${testimonial.location}</span>
+      </div>
+    </div>
+    `;
+  }).join('');
+
+  return `<!DOCTYPE html>
+<html lang="en" class="${themeClass}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${businessName} - ${tagline}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    :root {
+      --accent: ${accentColor};
+      --bg: #ffffff;
+      --surface: #f8feff;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --border: #e2e8f0;
+    }
+    
+    @media (prefers-color-scheme: dark) {
+      html.auto {
+        --bg: #0f172a;
+        --surface: #1e293b;
+        --text-primary: #f1f5f9;
+        --text-secondary: #94a3b8;
+        --border: #334155;
+      }
+    }
+    
+    html.dark {
+      --bg: #0f172a;
+      --surface: #1e293b;
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --border: #334155;
+    }
+    
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: var(--bg);
+      color: var(--text-primary);
+      line-height: 1.6;
+      transition: background 0.3s, color 0.3s;
+    }
+    
+    .header {
+      padding: 24px 40px;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(10px);
+      background: rgba(255, 255, 255, 0.95);
+    }
+    
+    html.dark .header {
+      background: rgba(15, 23, 42, 0.95);
+    }
+    
+    @media (max-width: 768px) {
+      .header {
+        padding: 16px 24px;
+      }
+    }
+    
+    .header-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .logo {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .header-actions {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+    }
+    
+    .header-phone {
+      font-weight: 600;
+      color: var(--text-primary);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    @media (max-width: 768px) {
+      .header-phone span {
+        display: none;
+      }
+    }
+    
+    .hero {
+      padding: 100px 40px;
+      background: linear-gradient(135deg, ${accentColor}10 0%, var(--bg) 100%);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    @media (max-width: 768px) {
+      .hero {
+        padding: 80px 24px;
+      }
+    }
+    
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -20%;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, ${accentColor}08 0%, transparent 70%);
+      border-radius: 50%;
+    }
+    
+    .hero-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+      text-align: center;
+    }
+    
+    .years-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      background: var(--accent);
+      color: white;
+      border-radius: 100px;
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 24px;
+    }
+    
+    h1 {
+      font-size: clamp(40px, 7vw, 64px);
+      font-weight: 800;
+      line-height: 1.1;
+      margin-bottom: 16px;
+      letter-spacing: -0.02em;
+    }
+    
+    .tagline {
+      font-size: clamp(18px, 3vw, 24px);
+      color: var(--accent);
+      font-weight: 600;
+      margin-bottom: 32px;
+    }
+    
+    .hero-text {
+      font-size: clamp(16px, 2vw, 20px);
+      color: var(--text-secondary);
+      max-width: 700px;
+      margin: 0 auto 48px;
+      line-height: 1.8;
+    }
+    
+    .hero-cta {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 16px 32px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 16px;
+      text-decoration: none;
+      transition: all 0.3s;
+      border: 2px solid transparent;
+    }
+    
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+    
+    .btn-primary:hover {
+      background: transparent;
+      color: var(--accent);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px ${accentColor}30;
+    }
+    
+    .btn-secondary {
+      background: transparent;
+      color: var(--text-primary);
+      border-color: var(--border);
+    }
+    
+    .btn-secondary:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    
+    section {
+      padding: 100px 40px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    
+    @media (max-width: 768px) {
+      section {
+        padding: 80px 24px;
+      }
+    }
+    
+    .section-header {
+      text-align: center;
+      margin-bottom: 64px;
+    }
+    
+    .section-label {
+      display: inline-block;
+      padding: 8px 16px;
+      background: ${accentColor}15;
+      color: var(--accent);
+      border-radius: 100px;
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 16px;
+    }
+    
+    .section-title {
+      font-size: clamp(32px, 5vw, 48px);
+      font-weight: 800;
+      margin-bottom: 16px;
+      letter-spacing: -0.02em;
+    }
+    
+    .section-subtitle {
+      font-size: 18px;
+      color: var(--text-secondary);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    
+    .services-section {
+      background: var(--surface);
+    }
+    
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 32px;
+    }
+    
+    @media (max-width: 768px) {
+      .services-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    .service-box {
+      padding: 40px 32px;
+      background: var(--bg);
+      border: 2px solid var(--border);
+      border-radius: 20px;
+      transition: all 0.3s;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .service-box:hover {
+      transform: translateY(-8px);
+      border-color: var(--accent);
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.08);
+    }
+    
+    .service-icon {
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(135deg, var(--accent), ${accentColor}cc);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      margin-bottom: 24px;
+      box-shadow: 0 8px 24px ${accentColor}30;
+    }
+    
+    .service-name {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+    
+    .service-description {
+      font-size: 15px;
+      line-height: 1.7;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+      flex: 1;
+    }
+    
+    .service-price {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+    }
+    
+    .price-label {
+      font-size: 13px;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+    
+    .price-amount {
+      font-size: 32px;
+      font-weight: 800;
+      color: var(--accent);
+    }
+    
+    .why-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 24px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    
+    .why-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      font-weight: 500;
+    }
+    
+    .why-check {
+      width: 32px;
+      height: 32px;
+      background: var(--accent);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    
+    .areas-section {
+      background: var(--surface);
+    }
+    
+    .areas-cloud {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      justify-content: center;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    .area-badge {
+      padding: 12px 24px;
+      background: var(--bg);
+      border: 2px solid var(--border);
+      border-radius: 100px;
+      font-weight: 600;
+      font-size: 15px;
+      transition: all 0.2s;
+    }
+    
+    .area-badge:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      transform: translateY(-2px);
+    }
+    
+    .testimonials-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 32px;
+    }
+    
+    @media (max-width: 768px) {
+      .testimonials-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    .testimonial-box {
+      padding: 40px;
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    
+    .testimonial-stars {
+      font-size: 24px;
+      color: #fbbf24;
+      letter-spacing: 4px;
+    }
+    
+    .testimonial-text {
+      font-size: 16px;
+      line-height: 1.7;
+      color: var(--text-secondary);
+      font-style: italic;
+      flex: 1;
+    }
+    
+    .testimonial-author {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    
+    .testimonial-author strong {
+      font-size: 16px;
+      font-weight: 700;
+    }
+    
+    .testimonial-author span {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+    
+    .cta-section {
+      background: linear-gradient(135deg, var(--accent), ${accentColor}dd);
+      color: white;
+      text-align: center;
+      border-radius: 24px;
+      padding: 80px 40px;
+    }
+    
+    @media (max-width: 768px) {
+      .cta-section {
+        padding: 60px 24px;
+      }
+    }
+    
+    .cta-section h2 {
+      color: white;
+      margin-bottom: 16px;
+    }
+    
+    .cta-section p {
+      font-size: 18px;
+      margin-bottom: 32px;
+      opacity: 0.95;
+    }
+    
+    .cta-actions {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    
+    .btn-white {
+      background: white;
+      color: var(--accent);
+      border-color: white;
+    }
+    
+    .btn-white:hover {
+      background: transparent;
+      color: white;
+      border-color: white;
+    }
+    
+    .footer {
+      padding: 60px 40px;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+    }
+    
+    @media (max-width: 768px) {
+      .footer {
+        padding: 48px 24px;
+      }
+    }
+    
+    .footer-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      gap: 60px;
+    }
+    
+    @media (max-width: 968px) {
+      .footer-content {
+        grid-template-columns: 1fr;
+        gap: 40px;
+        text-align: center;
+      }
+    }
+    
+    .footer-brand {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    
+    @media (max-width: 968px) {
+      .footer-brand {
+        align-items: center;
+      }
+    }
+    
+    .footer-logo {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--accent);
+    }
+    
+    .footer-tagline {
+      color: var(--text-secondary);
+    }
+    
+    .footer-column h4 {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    
+    .footer-links {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    
+    .footer-link {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 15px;
+      transition: color 0.2s;
+    }
+    
+    .footer-link:hover {
+      color: var(--accent);
+    }
+    
+    .footer-bottom {
+      margin-top: 48px;
+      padding-top: 32px;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="header-content">
+      <div class="logo" data-editable="businessName">✨ ${businessName}</div>
+      <div class="header-actions">
+        <a href="tel:${phone.replace(/\s/g, '')}" class="header-phone">
+          <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+          </svg>
+          <span data-editable="phone">${phone}</span>
+        </a>
+        <a href="${bookingUrl}" class="btn btn-primary">Book Now</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="hero">
+    <div class="hero-content">
+      <div class="years-badge">
+        <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+        </svg>
+        <span data-editable="yearsInBusiness">${yearsInBusiness}</span> Years of Excellence
+      </div>
+      
+      <h1 data-editable="businessName">${businessName}</h1>
+      <p class="tagline" data-editable="tagline">${tagline}</p>
+      
+      ${heroText ? `
+      <p class="hero-text" data-editable="heroText">${heroText}</p>
+      ` : ''}
+      
+      <div class="hero-cta">
+        <a href="${bookingUrl}" class="btn btn-primary">
+          <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+          </svg>
+          Schedule Cleaning
+        </a>
+        <a href="tel:${phone.replace(/\s/g, '')}" class="btn btn-secondary">
+          <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+          </svg>
+          Call Now
+        </a>
+      </div>
+    </div>
+  </div>
+
+  ${services.length > 0 ? `
+  <section class="services-section">
+    <div class="section-header">
+      <span class="section-label">Our Services</span>
+      <h2 class="section-title">What We Offer</h2>
+      <p class="section-subtitle">Professional cleaning services tailored to your needs</p>
+    </div>
+    <div class="services-grid">
+      ${servicesHTML}
+    </div>
+  </section>
+  ` : ''}
+
+  ${whyChooseUs.length > 0 ? `
+  <section>
+    <div class="section-header">
+      <span class="section-label">Why Choose Us</span>
+      <h2 class="section-title">The Sparkle Difference</h2>
+    </div>
+    <div class="why-grid">
+      ${whyHTML}
+    </div>
+  </section>
+  ` : ''}
+
+  ${serviceAreas.length > 0 ? `
+  <section class="areas-section">
+    <div class="section-header">
+      <span class="section-label">Coverage</span>
+      <h2 class="section-title">Areas We Serve</h2>
+    </div>
+    <div class="areas-cloud">
+      ${areasHTML}
+    </div>
+  </section>
+  ` : ''}
+
+  ${testimonials.length > 0 ? `
+  <section>
+    <div class="section-header">
+      <span class="section-label">Testimonials</span>
+      <h2 class="section-title">What Our Customers Say</h2>
+    </div><div class="testimonials-grid">
+      ${testimonialsHTML}
+    </div>
+  </section>
+  ` : ''}
+  <section>
+    <div class="cta-section">
+      <h2 class="section-title">Ready for a Sparkling Clean Home?</h2>
+      <p>Book your cleaning service today and experience the difference</p>
+      <div class="cta-actions">
+        <a href="${bookingUrl}" class="btn btn-white">
+          Book Now
+        </a>
+        <a href="tel:${phone.replace(/\s/g, '')}" class="btn btn-white">
+          Call ${phone}
+        </a>
+      </div>
+    </div>
+  </section>
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-brand">
+        <div class="footer-logo" data-editable="businessName">${businessName}</div>
+        <p class="footer-tagline" data-editable="tagline">${tagline}</p>
+      </div><div class="footer-column">
+    <h4>Contact</h4>
+    <div class="footer-links">
+      <a href="tel:${phone.replace(/\s/g, '')}" class="footer-link" data-editable="phone">${phone}</a>
+      <a href="mailto:${email}" class="footer-link" data-editable="email">${email}</a>
+      <span class="footer-link" data-editable="hours">${hours}</span>
+    </div>
+  </div>
+  
+  <div class="footer-column">
+    <h4>Quick Links</h4>
+    <div class="footer-links">
+      <a href="#services" class="footer-link">Services</a>
+      <a href="#about" class="footer-link">About Us</a>
+      <a href="${bookingUrl}" class="footer-link">Book Now</a>
+    </div>
+  </div>
+</div>
+
+<div class="footer-bottom">
+  <p>© ${new Date().getFullYear()} <span data-editable="businessName">${businessName}</span>. All rights reserved.</p>
+</div></footer>
+</body>
+</html>`;
+}
+function generateRealEstateAgent(data) {
+  const {
+    agentName = 'Sarah Mitchell',
+    title = 'Licensed Real Estate Agent',
+    brokerage = 'Prestige Realty Group',
+    tagline = 'Helping You Find Your Dream Home',
+    bio = '',
+    yearsExperience = '10+',
+    homesSold = '500+',
+    specializations = [],
+    featuredListings = [],
+    serviceAreas = [],
+    testimonials = [],
+    certifications = [],
+    phone = '',
+    email = '',
+    officeAddress = '',
+    licenseNumber = '',
+    socialLinks = [],
+    accentColor = '#2563eb',
+    darkMode = 'Light'
+  } = data;
+
+  const themeClass = darkMode === 'Dark' ? 'dark' : darkMode === 'Light' ? 'light' : 'auto';
+  const agentPhoto = data.__images?.agentPhoto;
+
+  const specializationsHTML = specializations.map((spec, index) => `
+    <div class="spec-badge" data-editable="specializations.${index}">${spec}</div>
+  `).join('');
+
+  const listingsHTML = featuredListings.map((listing, index) => {
+    const imageKey = `featuredListings.${index}.image`;
+    const listingImage = data.__images?.[imageKey];
+    
+    const statusColors = {
+      'For Sale': '#10b981',
+      'Sold': '#ef4444',
+      'Pending': '#f59e0b',
+      'Coming Soon': '#6366f1'
+    };
+    
+    return `
+    <div class="listing-card">
+      <div class="listing-image">
+        ${listingImage ? `
+          <img src="${listingImage.url}" alt="${listing.address}" />
+        ` : `
+          <div class="listing-placeholder">
+            <svg width="60" height="60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+            </svg>
+          </div>
+        `}
+        <div class="listing-status" style="background: ${statusColors[listing.status] || '#10b981'};" data-editable="featuredListings.${index}.status">
+          ${listing.status}
+        </div>
+      </div>
+      <div class="listing-details">
+        <div class="listing-price" data-editable="featuredListings.${index}.price">${listing.price}</div>
+        <div class="listing-address" data-editable="featuredListings.${index}.address">${listing.address}</div>
+        <div class="listing-specs">
+          <div class="listing-spec">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+            </svg>
+            <span data-editable="featuredListings.${index}.beds">${listing.beds}</span> beds
+          </div>
+          <div class="listing-spec">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z"/>
+            </svg>
+            <span data-editable="featuredListings.${index}.baths">${listing.baths}</span> baths
+          </div>
+          <div class="listing-spec">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/>
+            </svg>
+            <span data-editable="featuredListings.${index}.sqft">${listing.sqft}</span> sqft
+          </div>
+        </div>
+      </div>
+    </div>
+    `;
+  }).join('');
+
+  const areasHTML = serviceAreas.map((area, index) => `
+    <div class="area-chip" data-editable="serviceAreas.${index}">${area}</div>
+  `).join('');
+
+  const testimonialsHTML = testimonials.map((testimonial, index) => `
+    <div class="testimonial-card">
+      <div class="testimonial-quote">
+        <svg width="32" height="32" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"/>
+        </svg>
+      </div>
+      <p class="testimonial-text" data-editable="testimonials.${index}.review">"${testimonial.review}"</p>
+      <div class="testimonial-author">
+        <strong data-editable="testimonials.${index}.name">${testimonial.name}</strong>
+        <span data-editable="testimonials.${index}.propertyType">${testimonial.propertyType}</span>
+      </div>
+    </div>
+  `).join('');
+
+  const certificationsHTML = certifications.map((cert, index) => `
+    <div class="cert-badge">
+      <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+      </svg>
+      <span data-editable="certifications.${index}">${cert}</span>
+    </div>
+  `).join('');
+
+  const socialHTML = socialLinks.map((social, index) => {
+    const href = social.url.startsWith('http') ? social.url : social.url.startsWith('@') ? `#${social.url}` : `https://${social.url}`;
+    return `
+    <a href="${href}" target="_blank" class="social-icon" title="${social.platform}" data-editable="socialLinks.${index}.platform">
+      <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/>
+      </svg>
+    </a>
+    `;
+  }).join('');
+
+  return `<!DOCTYPE html>
+<html lang="en" class="${themeClass}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${agentName} - ${title}</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    :root {
+      --accent: ${accentColor};
+      --bg: #ffffff;
+      --surface: #f9fafb;
+      --text-primary: #111827;
+      --text-secondary: #6b7280;
+      --border: #e5e7eb;
+    }
+    
+    @media (prefers-color-scheme: dark) {
+      html.auto {
+        --bg: #111827;
+        --surface: #1f2937;
+        --text-primary: #f9fafb;
+        --text-secondary: #9ca3af;
+        --border: #374151;
+      }
+    }
+    
+    html.dark {
+      --bg: #111827;
+      --surface: #1f2937;
+      --text-primary: #f9fafb;
+      --text-secondary: #9ca3af;
+      --border: #374151;
+    }
+    
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text-primary);
+      line-height: 1.6;
+      transition: background 0.3s, color 0.3s;
+    }
+    
+    .hero {
+      background: linear-gradient(135deg, ${accentColor}08, transparent);
+      padding: 100px 40px 80px;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    @media (max-width: 768px) {
+      .hero {
+        padding: 80px 24px 60px;
+      }
+    }
+    
+    .hero-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: 60px;
+      align-items: center;
+    }
+    
+    @media (max-width: 968px) {
+      .hero-content {
+        grid-template-columns: 1fr;
+        text-align: center;
+      }
+    }
+    
+    .agent-photo {
+      width: 300px;
+      height: 300px;
+      border-radius: 20px;
+      overflow: hidden;
+      border: 4px solid var(--accent);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+    }
+    
+    @media (max-width: 968px) {
+      .agent-photo {
+        margin: 0 auto;
+        width: 250px;
+        height: 250px;
+      }
+    }
+    
+    .agent-photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .photo-placeholder {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, ${accentColor}20, ${accentColor}10);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 80px;
+    }
+    
+    .agent-info h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(36px, 5vw, 48px);
+      font-weight: 700;
+      margin-bottom: 8px;
+      letter-spacing: -0.02em;
+    }
+    
+    .agent-title {
+      font-size: 18px;
+      color: var(--accent);
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    
+    .agent-brokerage {
+      font-size: 16px;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+    
+    .agent-tagline {
+      font-size: 20px;
+      font-style: italic;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+    
+    .agent-bio {
+      font-size: 16px;
+      line-height: 1.7;
+      color: var(--text-secondary);
+      margin-bottom: 32px;
+    }
+    
+    .agent-stats {
+      display: flex;
+      gap: 32px;
+      margin-bottom: 32px;
+    }
+    
+    @media (max-width: 968px) {
+      .agent-stats {
+        justify-content: center;
+      }
+    }
+    
+    .stat-box {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .stat-value {
+      font-size: 36px;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    
+    .stat-label {
+      font-size: 14px;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    
+    .agent-contact {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    
+    @media (max-width: 968px) {
+      .agent-contact {
+        justify-content: center;
+      }
+    }
+    
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 28px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 15px;
+      text-decoration: none;
+      transition: all 0.2s;
+      border: 2px solid;
+    }
+    
+    .btn-primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: transparent;
+      color: var(--accent);
+      transform: translateY(-2px);
+    }
+    
+    .btn-secondary {
+      background: transparent;
+      border-color: var(--border);
+      color: var(--text-primary);
+    }
+    
+    .btn-secondary:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    
+    section {
+      padding: 80px 40px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    
+    @media (max-width: 768px) {
+      section {
+        padding: 60px 24px;
+      }
+    }
+    
+    .section-header {
+      text-align: center;
+      margin-bottom: 60px;
+    }
+    
+    .section-label {
+      display: inline-block;
+      padding: 6px 16px;
+      background: ${accentColor}10;
+      color: var(--accent);
+      border-radius: 100px;
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 16px;
+    }
+    
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(32px, 5vw, 42px);
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    
+    .section-subtitle {
+      font-size: 18px;
+      color: var(--text-secondary);
+    }
+    
+    .spec-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .spec-badge {
+      padding: 14px 20px;
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      text-align: center;
+      font-weight: 600;
+      font-size: 15px;
+      transition: all 0.2s;
+    }
+    
+    .spec-badge:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    
+    .listings-section {
+      background: var(--surface);
+    }
+    
+    .listings-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 32px;
+    }
+    
+    @media (max-width: 768px) {
+      .listings-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    .listing-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      transition: all 0.3s;
+    }
+    
+    .listing-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.12);
+    }
+    
+    .listing-image {
+      position: relative;
+      height: 240px;
+      background: var(--surface);
+    }
+    
+    .listing-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .listing-placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-secondary);
+    }
+    
+    .listing-status {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      padding: 8px 16px;
+      background: #10b981;
+      color: white;
+      font-size: 13px;
+      font-weight: 700;
+      border-radius: 100px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    
+    .listing-details {
+      padding: 24px;
+    }
+    
+    .listing-price {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+    
+    .listing-address {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+    
+    .listing-specs {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    
+    .listing-spec {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+    
+    .listing-spec svg {
+      flex-shrink: 0;
+    }
+    
+    .areas-cloud {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    .area-chip {
+      padding: 10px 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      font-weight: 500;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+    
+    .area-chip:hover {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+    
+    .testimonials-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 32px;
+    }
+    
+    @media (max-width: 768px) {
+      .testimonials-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    .testimonial-card {
+      padding: 40px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    
+    .testimonial-quote {
+      color: var(--accent);
+      opacity: 0.3;
+    }
+    
+    .testimonial-text {
+      font-size: 16px;
+      line-height: 1.7;
+      color: var(--text-secondary);
+      font-style: italic;
+    }
+    
+    .testimonial-author strong {
+      display: block;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+    
+    .testimonial-author span {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+    
+    .certs-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      justify-content: center;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .cert-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    
+    .cert-badge svg {
+      color: var(--accent);
+    }
+    
+    .contact-section {
+      background: linear-gradient(135deg, var(--accent), ${accentColor}dd);
+      color: white;
+      text-align: center;
+      border-radius: 24px;
+      padding: 80px 40px;
+    }
+    
+    @media (max-width: 768px) {
+      .contact-section {
+        padding: 60px 24px;
+      }
+    }
+    
+    .contact-section .section-title {
+      color: white;
+    }
+    
+    .contact-section .section-subtitle {
+      color: rgba(255, 255, 255, 0.9);
+      margin-bottom: 40px;
+    }
+    
+    .contact-info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 32px;
+      margin-bottom: 40px;
+    }
+    
+    .contact-info-item {
+display: flex;
+flex-direction: column;
+gap: 8px;
+color: white;
+}
+.contact-info-item svg {
+  margin: 0 auto;
+  opacity: 0.9;
+}
+
+.contact-info-item strong {
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  opacity: 0.9;
+}
+
+.contact-info-item a {
+  color: white;
+  text-decoration: none;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.contact-info-item span {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.social-links {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 32px;
+}
+
+.social-icon {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  color: white;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.social-icon:hover {
+  background: white;
+  color: var(--accent);
+  transform: translateY(-2px);
+}
+
+.footer {
+  padding: 40px;
+  text-align: center;
+  border-top: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.footer a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+    </style>
+</head>
+<body>
+  <div class="hero">
+    <div class="hero-content">
+      <div class="agent-photo">
+        ${agentPhoto ? `
+          <img src="${agentPhoto.url}" alt="${agentName}" />
+        ` : `
+          <div class="photo-placeholder">🏡</div>
+        `}
+      </div>
+  <div class="agent-info">
+    <h1 data-editable="agentName">${agentName}</h1>
+    <div class="agent-title" data-editable="title">${title}</div>
+    <div class="agent-brokerage" data-editable="brokerage">${brokerage}</div>
+    <p class="agent-tagline" data-editable="tagline">"${tagline}"</p>
+    
+    ${bio ? `
+    <p class="agent-bio" data-editable="bio">${bio}</p>
+    ` : ''}
+    
+    <div class="agent-stats">
+      <div class="stat-box">
+        <div class="stat-value" data-editable="yearsExperience">${yearsExperience}</div>
+        <div class="stat-label">Years Experience</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-value" data-editable="homesSold">${homesSold}</div>
+        <div class="stat-label">Homes Sold</div>
+      </div>
+    </div>
+    
+    <div class="agent-contact">
+      <a href="tel:${phone.replace(/\s/g, '')}" class="btn btn-primary" data-editable="phone">
+        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+        </svg>
+        Call Me
+      </a>
+      <a href="mailto:${email}" class="btn btn-secondary" data-editable="email">
+        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+        </svg>
+        Email Me
+      </a>
+    </div>
+  </div>
+</div>
+  </div>
+${specializations.length > 0 ? `
+  <section>
+    <div class="section-header">
+      <span class="section-label">Expertise</span>
+      <h2 class="section-title">Specializations</h2>
+    </div>
+    <div class="spec-grid">
+      ${specializationsHTML}
+    </div>
+  </section>
+  ` : ''}
+${featuredListings.length > 0 ? `
+  <section class="listings-section">
+    <div class="section-header">
+      <span class="section-label">Properties</span>
+      <h2 class="section-title">Featured Listings</h2>
+    </div>
+    <div class="listings-grid">
+      ${listingsHTML}
+    </div>
+  </section>
+  ` : ''}
+${serviceAreas.length > 0 ? `
+  <section>
+    <div class="section-header">
+      <span class="section-label">Coverage</span>
+      <h2 class="section-title">Service Areas</h2>
+    </div>
+    <div class="areas-cloud">
+      ${areasHTML}
+    </div>
+  </section>
+  ` : ''}
+${testimonials.length > 0 ? `
+  <section>
+    <div class="section-header">
+      <span class="section-label">Reviews</span>
+      <h2 class="section-title">What Clients Say</h2>
+    </div>
+    <div class="testimonials-grid">
+      ${testimonialsHTML}
+    </div>
+  </section>
+  ` : ''}
+${certifications.length > 0 ? `
+  <section>
+    <div class="section-header">
+      <span class="section-label">Credentials</span>
+      <h2 class="section-title">Certifications & Memberships</h2>
+    </div>
+    <div class="certs-grid">
+      ${certificationsHTML}
+    </div>
+  </section>
+  ` : ''}
+  <section>
+    <div class="contact-section">
+      <h2 class="section-title">Ready to Find Your Dream Home?</h2>
+      <p class="section-subtitle">Let's discuss your real estate needs</p>
+  <div class="contact-info-grid">
+    <div class="contact-info-item">
+      <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+      </svg>
+      <strong>Phone</strong>
+      <a href="tel:${phone.replace(/\s/g, '')}" data-editable="phone">${phone}</a>
+    </div>
+    
+    <div class="contact-info-item">
+      <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+      </svg>
+      <strong>Email</strong>
+      <a href="mailto:${email}" data-editable="email">${email}</a>
+    </div>
+    
+    <div class="contact-info-item">
+      <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+      </svg>
+      <strong>Office</strong>
+      <span data-editable="officeAddress">${officeAddress}</span>
+    </div>
+  </div>
+  
+  ${socialLinks.length > 0 ? `
+  <div class="social-links">
+    ${socialHTML}
+  </div>
+  ` : ''}
+</div>
+  </section>
+  <footer class="footer">
+    <p>
+      <span data-editable="agentName">${agentName}</span> • 
+      <span data-editable="licenseNumber">${licenseNumber}</span> • 
+      <span data-editable="brokerage">${brokerage}</span>
+    </p>
+    <p style="margin-top: 8px; font-size: 12px;">
+      © ${new Date().getFullYear()} All rights reserved
+    </p>
+  </footer>
 </body>
 </html>`;
 }

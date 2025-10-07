@@ -109,14 +109,6 @@ const templates = [
     preview: 'https://images.unsplash.com/photo-1452587925148-ce544e77e70d?w=600&h=400&fit=crop'
   },
   {
-    id: 'wedding-invite',
-    name: 'Wedding Invitation',
-    description: 'Elegant wedding invitation and RSVP page',
-    category: 'Events',
-    featured: true,
-    preview: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=600&h=400&fit=crop'
-  },
-  {
     id: 'event-landing',
     name: 'Event Landing Page',
     description: 'Professional event page with speakers, schedule, and tickets',
@@ -146,7 +138,7 @@ const templates = [
     description: 'Showcase your academic achievements and projects',
     category: 'Education',
     featured: true,
-    preview: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=600&h=400&fit=crop'
+    preview: 'https://images.unsplash.com/photo-1523050854057-8df90110c9f1?w=600&h=400&fit=crop'
   },
   {
     id: 'fitness-trainer',
@@ -157,20 +149,36 @@ const templates = [
     preview: 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=600&h=400&fit=crop'
   },
   {
-  id: 'wellness-coach',
-  name: 'Wellness Coach',
-  description: 'Calm, holistic coaching page with zen aesthetic',
-  category: 'Health & Wellness',
+    id: 'wellness-coach',
+    name: 'Wellness Coach',
+    description: 'Calm, holistic coaching page with zen aesthetic',
+    category: 'Health & Wellness',
+    featured: true,
+    preview: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=600&h=400&fit=crop'
+  },
+  {
+    id: 'musician-band',
+    name: 'Musician/Band Page',
+    description: 'Edgy, bold page for musicians and bands',
+    category: 'Creative',
+    featured: true,
+    preview: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600&h=400&fit=crop'
+  },
+  {
+    id: 'cleaning-service',
+    name: 'Cleaning Service',
+    description: 'Professional service page for cleaning businesses',
+    category: 'Business',
+    featured: true,
+    preview: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=600&h=400&fit=crop'
+  },
+  {
+  id: 'real-estate-agent',
+  name: 'Real Estate Agent',
+  description: 'Professional real estate agent profile with listings',
+  category: 'Business',
   featured: true,
-  preview: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=600&h=400&fit=crop'
-},
-{
-  id: 'musician-band',
-  name: 'Musician/Band Page',
-  description: 'Edgy, bold page for musicians and bands',
-  category: 'Creative',
-  featured: true,
-  preview: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600&h=400&fit=crop'
+  preview: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=600&h=400&fit=crop'
 }
 ];
 
@@ -240,31 +248,35 @@ function TemplateGallery({ onTemplateSelect }) {
 
   return (
     <div className="template-gallery">
-      <div className="template-filters">
-        {categories.map((category) => (
+      {/* Horizontal Scrolling Filters */}
+      <div className="template-filters-wrapper">
+        <div className="template-filters">
+          {categories.map((category) => (
+            <button
+              key={category}
+              className={`filter-tab ${activeFilter === category ? 'active' : ''}`}
+              onClick={() => handleFilterChange(category)}
+            >
+              {category}
+              <span className="filter-count">
+                {category === 'All' 
+                  ? templates.length 
+                  : templates.filter(t => t.category === category).length}
+              </span>
+            </button>
+          ))}
           <button
-            key={category}
-            className={`filter-tab ${activeFilter === category ? 'active' : ''}`}
-            onClick={() => handleFilterChange(category)}
+            className={`filter-tab filter-tab--featured ${activeFilter === 'Featured' ? 'active' : ''}`}
+            onClick={() => handleFilterChange('Featured')}
           >
-            {category}
-            <span className="filter-count">
-              {category === 'All' 
-                ? templates.length 
-                : templates.filter(t => t.category === category).length}
-            </span>
+            <Star size={16} fill={activeFilter === 'Featured' ? 'currentColor' : 'none'} />
+            Featured
+            <span className="filter-count">{featuredCount}</span>
           </button>
-        ))}
-        <button
-          className={`filter-tab filter-tab--featured ${activeFilter === 'Featured' ? 'active' : ''}`}
-          onClick={() => handleFilterChange('Featured')}
-        >
-          <Star size={16} fill={activeFilter === 'Featured' ? 'currentColor' : 'none'} />
-          Featured
-          <span className="filter-count">{featuredCount}</span>
-        </button>
+        </div>
       </div>
 
+      {/* Search Bar */}
       <div className="template-search">
         <div className="search-input-wrapper">
           <Search size={18} className="search-icon" />
@@ -285,8 +297,14 @@ function TemplateGallery({ onTemplateSelect }) {
             </button>
           )}
         </div>
+        {searchQuery && (
+          <div className="search-results-text">
+            Found {filteredTemplates.length} template{filteredTemplates.length !== 1 ? 's' : ''} matching "{searchQuery}"
+          </div>
+        )}
       </div>
 
+      {/* Template Grid */}
       <div className="template-gallery__grid">
         {displayedTemplates.map((template) => (
           <div 
@@ -326,6 +344,7 @@ function TemplateGallery({ onTemplateSelect }) {
         ))}
       </div>
 
+      {/* Load More Button */}
       {hasMore && (
         <div className="template-gallery__load-more">
           <button className="btn btn-secondary btn-lg" onClick={loadMore}>
@@ -337,6 +356,7 @@ function TemplateGallery({ onTemplateSelect }) {
         </div>
       )}
 
+      {/* Empty State */}
       {filteredTemplates.length === 0 && (
         <div className="template-gallery__empty">
           <Search size={48} />
