@@ -11,6 +11,7 @@ function Footer() {
           <nav className="footer__links">
             <Link to="/roadmap" className="footer__link">Roadmap</Link>
             <Link to="/support" className="footer__link">Support</Link>
+            <Link to="/terms" className="footer__link">Terms & Legal</Link>
           </nav>
         </div>
       </div>

@@ -31,9 +31,9 @@ function Header({ theme, toggleTheme }) {
               {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
             </button>
             
-            {/* <button className="btn btn-primary">
+            <button className="btn btn-primary">
               Get Started
-            </button> */}
+            </button>
           </nav>
         </div>
       </div>

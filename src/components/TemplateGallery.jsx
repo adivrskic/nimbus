@@ -297,11 +297,6 @@ function TemplateGallery({ onTemplateSelect }) {
             </button>
           )}
         </div>
-        {searchQuery && (
-          <div className="search-results-text">
-            Found {filteredTemplates.length} template{filteredTemplates.length !== 1 ? 's' : ''} matching "{searchQuery}"
-          </div>
-        )}
       </div>
 
       {/* Template Grid */}
