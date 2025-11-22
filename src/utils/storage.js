@@ -1,38 +1,49 @@
-// utils/storage.js - Add storage quota management
-export const storage = {
-  set(key, value) {
-    try {
-      const serialized = JSON.stringify(value);
-      // Check size (rough estimate: 1 char ≈ 2 bytes)
-      const sizeInMB = (serialized.length * 2) / (1024 * 1024);
-      
-      if (sizeInMB > 4) { // Warn if approaching 5MB limit
-        console.warn(`Large storage item: ${sizeInMB.toFixed(2)}MB`);
-      }
-      
-      localStorage.setItem(key, serialized);
-      return true;
-    } catch (e) {
-      if (e.name === 'QuotaExceededError') {
-        // Clear old customizations
-        this.cleanup();
-        // Try again
-        try {
-          localStorage.setItem(key, JSON.stringify(value));
-        } catch {
-          alert('Storage full. Please download your work and refresh.');
-        }
-      }
-      return false;
-    }
-  },
+// storage.js
+export function saveCustomization(templateId, customization, theme = 'minimal') {
+  const data = {
+    templateId,
+    customization,
+    theme,
+    colorMode: customization.colorMode || 'auto',
+    timestamp: Date.now()
+  };
+  localStorage.setItem(`template_${templateId}`, JSON.stringify(data));
+}
+
+export function loadCustomization(templateId) {
+  const stored = localStorage.getItem(`template_${templateId}`);
+  if (!stored) return null;
   
-  cleanup() {
-    const keys = Object.keys(localStorage);
-    const customizationKeys = keys.filter(k => k.startsWith('template_customization_'));
-    // Keep only last 5 customizations
-    if (customizationKeys.length > 5) {
-      customizationKeys.slice(0, -5).forEach(k => localStorage.removeItem(k));
+  const data = JSON.parse(stored);
+  
+  // Migration for old data structure
+  if (!data.theme) {
+    data.theme = 'minimal';
+    data.colorMode = data.customization?.darkMode || 'auto';
+    if (data.customization?.darkMode) {
+      delete data.customization.darkMode;
+    }
+    if (data.customization?.accentColor) {
+      data.customization.accentOverride = data.customization.accentColor;
+      delete data.customization.accentColor;
     }
   }
-};
+  
+  return data;
+}
+
+export function getAllSavedCustomizations() {
+  const saved = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key.startsWith('template_')) {
+      const data = JSON.parse(localStorage.getItem(key));
+      saved.push(data);
+    }
+  }
+  return saved.sort((a, b) => b.timestamp - a.timestamp);
+}
+
+export function deleteCustomization(templateId) {
+  localStorage.removeItem(`template_${templateId}`);
+}

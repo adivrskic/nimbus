@@ -20,14 +20,32 @@
     text-align: center;
     position: relative;
     z-index: 1;
+    margin-top: 80px;
   }
   
   &__title {
     margin-bottom: calc(var(--spacing-unit) * 3);
+    text-transform: uppercase;
+    
+    // Red outline text effect for "Minutes"
+    &-outline {
+      -webkit-text-stroke: 2px var(--color-text-primary);
+      -webkit-text-fill-color: transparent;
+      color: transparent;
+      font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
     
     &-gradient {
       color: var(--color-accent);
     }
+  }
+
+  &__subtitle-container {
+    position: absolute;
+    top: 80%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    max-width: 680px;
   }
   
   &__subtitle {
@@ -35,6 +53,7 @@
     color: var(--color-text-secondary);
     margin-bottom: calc(var(--spacing-unit) * 5);
     line-height: 1.6;
+    text-align: center;
     
     @media (max-width: $breakpoint-md) {
       font-size: 1.125rem;
@@ -49,178 +68,111 @@
   }
 }
 
-// Steps Section - Alternating Fun Layout
+// Steps Section - Modern Clean 3-Column Layout
 .steps {
   background: var(--color-surface);
   
   &__heading {
     text-align: center;
-    margin-bottom: calc(var(--spacing-unit) * 10);
+    margin-bottom: calc(var(--spacing-unit) * 8);
   }
   
   &__grid {
-    display: flex;
-    flex-direction: column;
-    gap: calc(var(--spacing-unit) * 6);
-    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: calc(var(--spacing-unit) * 4);
     
-    @media (max-width: $breakpoint-md) {
-      gap: calc(var(--spacing-unit) * 4);
+    @media (max-width: $breakpoint-lg) {
+      grid-template-columns: 1fr;
+      gap: calc(var(--spacing-unit) * 3);
     }
   }
 }
 
 .step-card {
   position: relative;
-  display: grid;
-  grid-template-columns: 140px 1fr;
-  gap: calc(var(--spacing-unit) * 5);
-  padding: calc(var(--spacing-unit) * 6) calc(var(--spacing-unit) * 5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: calc(var(--spacing-unit) * 5);
   background: var(--color-background);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
-  overflow: hidden;
-  transition: border-color var(--transition-base);
-  
-  @media (max-width: $breakpoint-md) {
-    grid-template-columns: 1fr;
-    text-align: center;
-    padding: calc(var(--spacing-unit) * 5) calc(var(--spacing-unit) * 3);
-  }
+  transition: all var(--transition-base);
   
   &:hover {
-    border-color: var(--color-border-hover);
-  }
-  
-  // Reverse layout for alternating cards
-  &--reverse {
-    grid-template-columns: 1fr 140px;
-    
-    @media (max-width: $breakpoint-md) {
-      grid-template-columns: 1fr;
-    }
-    
-    .step-card__icon-wrapper {
-      order: 2;
-      
-      @media (max-width: $breakpoint-md) {
-        order: 1;
-      }
-    }
-    
-    .step-card__content {
-      order: 1;
-      text-align: right;
-      
-      @media (max-width: $breakpoint-md) {
-        order: 2;
-        text-align: center;
-      }
-    }
+    border-color: var(--color-accent);
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
     
     .step-card__number {
-      left: calc(var(--spacing-unit) * 2);
-      right: auto;
-      
-      @media (max-width: $breakpoint-md) {
-        left: 50%;
-        transform: translate(-50%, -50%);
-      }
+      color: var(--color-accent);
+    }
+    
+    .step-card__icon {
+      background: var(--color-accent);
+      color: white;
+      transform: scale(1.1);
     }
   }
   
   &__number {
     position: absolute;
-    top: 50%;
-    right: calc(var(--spacing-unit) * 2);
-    transform: translateY(-50%);
-    font-size: 360px;
+    top: calc(var(--spacing-unit) * 2);
+    left: calc(var(--spacing-unit) * 2);
+    font-size: 3rem;
     font-weight: 900;
     color: var(--color-surface);
     line-height: 1;
-    pointer-events: none;
-    user-select: none;
-    
-    @media (max-width: $breakpoint-lg) {
-      font-size: 240px;
-    }
-    
-    @media (max-width: $breakpoint-md) {
-      font-size: 200px;
-      top: 50%;
-      left: 50%;
-      right: auto;
-      transform: translate(-50%, -50%);
-    }
+    transition: color var(--transition-base);
   }
   
   &__icon-wrapper {
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    margin-bottom: calc(var(--spacing-unit) * 3);
     z-index: 1;
-    
-    @media (max-width: $breakpoint-md) {
-      order: 1;
-    }
   }
   
   &__icon {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 100px;
-    height: 100px;
-    background: var(--color-text-secondary);
-    color: var(--color-background);
+    width: 80px;
+    height: 80px;
+    background: var(--color-surface);
+    color: var(--color-text-primary);
     border-radius: var(--radius-lg);
+    transition: all var(--transition-base);
+    border: 1px solid var(--color-border);
     
-    @media (max-width: $breakpoint-md) {
-      width: 80px;
-      height: 80px;
-      
-      svg {
-        width: 32px;
-        height: 32px;
-      }
+    svg {
+      width: 36px;
+      height: 36px;
     }
   }
   
   &__content {
     z-index: 1;
-    
-    @media (max-width: $breakpoint-md) {
-      order: 2;
-    }
   }
   
   &__title {
-    font-size: 2.4rem;
+    font-size: 1.5rem;
     font-weight: 700;
-    margin-bottom: calc(var(--spacing-unit) * 1.5);
-    
-    @media (max-width: $breakpoint-lg) {
-      font-size: 1.75rem;
-    }
-    
-    @media (max-width: $breakpoint-md) {
-      font-size: 1.5rem;
-    }
+    margin-bottom: calc(var(--spacing-unit) * 2);
+    color: var(--color-text-primary);
   }
   
   &__description {
     color: var(--color-text-secondary);
     line-height: 1.6;
-    font-size: 1.125rem;
-    
-    @media (max-width: $breakpoint-md) {
-      font-size: 1rem;
-    }
+    font-size: 1rem;
   }
 }
 
 // Templates Section
 .templates {
+   background-color: var(--color-background);
+
   &__header {
     text-align: center;
     margin-bottom: calc(var(--spacing-unit) * 8);

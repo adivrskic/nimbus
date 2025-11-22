@@ -1,171 +1,123 @@
-import { useEffect, useRef, useState } from 'react';
-import { generateHTML } from '../utils/templateRenderer';
+import { useState, useEffect, useRef } from 'react';
+import { Monitor, Tablet, Smartphone, Sun, Moon } from 'lucide-react';
+import { renderTemplate } from '../utils/templateSystem';
+import { useTheme } from '../contexts/ThemeContext';
 import './LivePreview.scss';
 
-function LivePreview({ templateId, customization, images, onFieldClick }) {
-  const iframeRef = useRef(null);
-  const [iframeReady, setIframeReady] = useState(false);
-  const lastCustomizationRef = useRef(null);
+function LivePreview({ templateId, customization, images }) {
+  const { theme: globalTheme } = useTheme();
   const [viewMode, setViewMode] = useState('desktop');
-  const [isMobile, setIsMobile] = useState(false);
+  
+  // Local color mode state - doesn't affect global theme
+  const [localColorMode, setLocalColorMode] = useState(() => {
+    if (customization?.colorMode) {
+      return customization.colorMode.toLowerCase();
+    }
+    return 'auto';
+  });
+  
+  const iframeRef = useRef(null);
 
-  // Check if mobile
+  // Update local color mode when customization changes
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth <= 768);
-    };
+    if (customization?.colorMode) {
+      const normalized = customization.colorMode.toLowerCase();
+      setLocalColorMode(normalized);
+    }
+  }, [customization?.colorMode]);
 
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
-
-  // Initialize iframe
+  // Render the template with the current settings
   useEffect(() => {
-    const iframe = iframeRef.current;
-    if (!iframe) return;
+    if (!templateId || !customization) return;
 
-    const handleLoad = () => {
-      setIframeReady(true);
-    };
-
-    iframe.addEventListener('load', handleLoad);
+    // Determine the actual color mode to use
+    let effectiveColorMode = localColorMode;
     
-    return () => {
-      iframe.removeEventListener('load', handleLoad);
-    };
-  }, [templateId]);
-
-  // Update iframe content
-  useEffect(() => {
-    if (!iframeRef.current) return;
-
-    const iframe = iframeRef.current;
-    const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
-    
-    if (!iframeDoc) {
-      console.error('Cannot access iframe document');
-      return;
+    // If set to auto, use the global theme
+    if (localColorMode === 'auto') {
+      effectiveColorMode = globalTheme;
     }
 
-    const isMobile = window.innerWidth <= 1024;
+    // Generate HTML with theme system
+    const html = renderTemplate(
+      templateId, 
+      customization, 
+      customization.theme || 'minimal',
+      effectiveColorMode
+    );
 
-    try {
-      const html = generateHTML(templateId, customization, images);
-      
+    // Update iframe content
+    if (iframeRef.current) {
+      const iframe = iframeRef.current;
+      const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
       iframeDoc.open();
       iframeDoc.write(html);
       iframeDoc.close();
-
-      lastCustomizationRef.current = customization;
-
-      const timeoutId = setTimeout(() => {
-        const visibility = customization.__visibility || {};
-        
-        Object.entries(visibility).forEach(([key, isVisible]) => {
-          if (!isVisible) {
-            const elements = iframeDoc.querySelectorAll(`[data-editable="${key}"]`);
-            elements.forEach(el => {
-              const container = el.closest(
-                '.contact-item, .skill-tag, .service-card, .feature-card, ' +
-                '.stat, .stat-item, .project-card, .social-link, .social-item, ' +
-                '.menu-item, .info-item, .contact-list, .skills-grid, .group-item, ' +
-                '.pricing-card, .testimonial-content, .expertise-tag, .link-item, ' +
-                '.service-card, .menu-category'
-              );
-              if (container) {
-                container.style.display = 'none';
-              } else {
-                el.style.display = 'none';
-              }
-            });
-          }
-        });
-
-        if (onFieldClick && !isMobile) {
-          const editableElements = iframeDoc.querySelectorAll('[data-editable]');
-          editableElements.forEach(element => {
-            element.style.cursor = 'pointer';
-            element.style.transition = 'opacity 0.2s';
-            
-            element.addEventListener('mouseenter', () => {
-              element.style.opacity = '0.7';
-            });
-            
-            element.addEventListener('mouseleave', () => {
-              element.style.opacity = '1';
-            });
-            
-            element.addEventListener('click', (e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              const fieldName = element.getAttribute('data-editable');
-              
-              if (fieldName.includes('.')) {
-                const parts = fieldName.split('.');
-                const groupKey = parts[0];
-                onFieldClick(fieldName);
-              } else {
-                onFieldClick(fieldName);
-              }
-            });
-          });
-        }
-      }, 50);
-
-      return () => clearTimeout(timeoutId);
-    } catch (error) {
-      console.error('Error updating preview:', error);
     }
-  }, [templateId, customization, images, onFieldClick]);
+  }, [templateId, customization, images, localColorMode, globalTheme]);
+
+  // Handle color mode toggle - only affects preview, not global state
+  const handleColorModeChange = (mode) => {
+    setLocalColorMode(mode);
+  };
+
+  // Get the actual display mode considering 'auto'
+  const getDisplayMode = () => {
+    if (localColorMode === 'auto') {
+      return globalTheme;
+    }
+    return localColorMode;
+  };
 
   return (
     <div className="live-preview">
-      {!isMobile && (
-        <div className="live-preview__toolbar">
-          <div className="live-preview__controls">
-            <button 
-              className={`live-preview__control ${viewMode === 'desktop' ? 'active' : ''}`}
-              onClick={() => setViewMode('desktop')}
-              title="Desktop view"
-            >
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <rect x="2" y="4" width="16" height="10" rx="1" stroke="currentColor" strokeWidth="1.5"/>
-                <path d="M7 17H13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-                <path d="M10 14V17" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-              </svg>
-            </button>
-            <button 
-              className={`live-preview__control ${viewMode === 'tablet' ? 'active' : ''}`}
-              onClick={() => setViewMode('tablet')}
-              title="Tablet view"
-            >
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <rect x="5" y="2" width="10" height="16" rx="1" stroke="currentColor" strokeWidth="1.5"/>
-                <circle cx="10" cy="15.5" r="0.5" fill="currentColor"/>
-              </svg>
-            </button>
-            <button 
-              className={`live-preview__control ${viewMode === 'mobile' ? 'active' : ''}`}
-              onClick={() => setViewMode('mobile')}
-              title="Mobile view"
-            >
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <rect x="6" y="2" width="8" height="16" rx="1" stroke="currentColor" strokeWidth="1.5"/>
-                <circle cx="10" cy="15.5" r="0.5" fill="currentColor"/>
-              </svg>
-            </button>
-          </div>
-          <div className="live-preview__label">
-            Live Preview · Click to edit · 
-            <span className="live-preview__mode">
-              {viewMode === 'desktop' && ' Desktop'}
-              {viewMode === 'tablet' && ' Tablet'}
-              {viewMode === 'mobile' && ' Mobile'}
-            </span>
-          </div>
+      <div className="live-preview__toolbar">
+        <div className="live-preview__controls">
+          <button
+            className={`live-preview__control ${viewMode === 'desktop' ? 'active' : ''}`}
+            onClick={() => setViewMode('desktop')}
+            title="Desktop view"
+          >
+            <Monitor size={20} />
+          </button>
+          <button
+            className={`live-preview__control ${viewMode === 'tablet' ? 'active' : ''}`}
+            onClick={() => setViewMode('tablet')}
+            title="Tablet view"
+          >
+            <Tablet size={20} />
+          </button>
+          <button
+            className={`live-preview__control ${viewMode === 'mobile' ? 'active' : ''}`}
+            onClick={() => setViewMode('mobile')}
+            title="Mobile view"
+          >
+            <Smartphone size={20} />
+          </button>
         </div>
-      )}
+        
+        <div className="live-preview__controls">
+          <button
+            className={`live-preview__control ${getDisplayMode() === 'light' ? 'active' : ''}`}
+            onClick={() => handleColorModeChange('light')}
+            title="Light mode preview"
+          >
+            <Sun size={20} />
+          </button>
+          <button
+            className={`live-preview__control ${getDisplayMode() === 'dark' ? 'active' : ''}`}
+            onClick={() => handleColorModeChange('dark')}
+            title="Dark mode preview"
+          >
+            <Moon size={20} />
+          </button>
+        </div>
+
+        <div>
+          <span className="live-preview__label">Preview: </span>
+          <span className="live-preview__mode">{viewMode}</span>
+        </div>
+      </div>
       
       <div className="live-preview__content">
         <div className={`live-preview__frame-wrapper live-preview__frame-wrapper--${viewMode}`}>
@@ -173,8 +125,7 @@ function LivePreview({ templateId, customization, images, onFieldClick }) {
             ref={iframeRef}
             className="live-preview__iframe"
             title="Template Preview"
-            sandbox="allow-scripts allow-same-origin"
-            srcDoc="<!DOCTYPE html><html><head></head><body style='margin:0;padding:20px;font-family:sans-serif;'>Loading preview...</body></html>"
+            sandbox="allow-same-origin"
           />
         </div>
       </div>

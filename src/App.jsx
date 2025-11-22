@@ -3,6 +3,8 @@ import { useState, useEffect, lazy, Suspense } from 'react';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import ScrollToTop from './components/ScrollToTop';
+import { ThemeProvider } from './contexts/ThemeContext';
+import { AuthProvider } from './contexts/AuthContext';
 import './styles/global.scss';
 
 // Lazy load pages
@@ -41,18 +43,22 @@ function App() {
 
   return (
     <Router>
-      <ScrollToTop />
-      <div className="app">
-        <Header theme={theme} toggleTheme={toggleTheme} />
-        <Suspense fallback={<PageLoader />}>
-          <Routes>
-            <Route path="/" element={<Home theme={theme} />} />
-            <Route path="/roadmap" element={<Roadmap />} />
-            <Route path="/support" element={<Support />} />
-          </Routes>
-        </Suspense>
-        <Footer />
-      </div>
+      <AuthProvider>
+        <ThemeProvider>
+          <ScrollToTop />
+          <div className="app">
+            <Header theme={theme} toggleTheme={toggleTheme} />
+            <Suspense fallback={<PageLoader />}>
+              <Routes>
+                <Route path="/" element={<Home theme={theme} />} />
+                <Route path="/roadmap" element={<Roadmap />} />
+                <Route path="/support" element={<Support />} />
+              </Routes>
+            </Suspense>
+            <Footer />
+          </div>
+        </ThemeProvider>
+      </AuthProvider>
     </Router>
   );
 }
