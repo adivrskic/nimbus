@@ -70,7 +70,7 @@
 
 // Steps Section - Modern Clean 3-Column Layout
 .steps {
-  background: var(--color-surface);
+  background: var(--color-background);
   
   &__heading {
     text-align: center;
@@ -97,13 +97,13 @@
   text-align: center;
   padding: calc(var(--spacing-unit) * 5);
   background: var(--color-background);
-  border: 1px solid var(--color-border);
+  border: 2px solid var(--color-border);
   border-radius: var(--radius-lg);
   transition: all var(--transition-base);
   
   &:hover {
     border-color: var(--color-accent);
-    transform: translateY(-4px);
+    // transform: translateY(-4px);
     box-shadow: var(--shadow-lg);
     
     .step-card__number {
@@ -113,7 +113,7 @@
     .step-card__icon {
       background: var(--color-accent);
       color: white;
-      transform: scale(1.1);
+      // transform: scale(1.1);
     }
   }
   

@@ -48,6 +48,140 @@ const styles = [
   },
 ];
 
+// Comprehensive theme configurations for each style
+const styleThemes = {
+  minimal: {
+    light: {
+      bg: 'rgba(59, 130, 246, 0.03)',
+      surface: 'rgba(59, 130, 246, 0.05)',
+      border: 'rgba(59, 130, 246, 0.15)',
+      text: '#1e40af',
+      textSecondary: '#3b82f6',
+      accent: '#2563eb',
+    },
+    dark: {
+      bg: 'rgba(59, 130, 246, 0.12)',
+      surface: 'rgba(59, 130, 246, 0.15)',
+      border: 'rgba(59, 130, 246, 0.25)',
+      text: '#93c5fd',
+      textSecondary: '#60a5fa',
+      accent: '#3b82f6',
+    }
+  },
+  brutalist: {
+    light: {
+      bg: 'rgba(239, 68, 68, 0.04)',
+      surface: 'rgba(239, 68, 68, 0.06)',
+      border: 'rgba(239, 68, 68, 0.2)',
+      text: '#991b1b',
+      textSecondary: '#dc2626',
+      accent: '#ef4444',
+    },
+    dark: {
+      bg: 'rgba(239, 68, 68, 0.12)',
+      surface: 'rgba(239, 68, 68, 0.15)',
+      border: 'rgba(239, 68, 68, 0.3)',
+      text: '#fca5a5',
+      textSecondary: '#f87171',
+      accent: '#ef4444',
+    }
+  },
+  gradient: {
+    light: {
+      bg: 'rgba(147, 51, 234, 0.04)',
+      surface: 'rgba(147, 51, 234, 0.06)',
+      border: 'rgba(147, 51, 234, 0.2)',
+      text: '#6b21a8',
+      textSecondary: '#9333ea',
+      accent: '#a855f7',
+    },
+    dark: {
+      bg: 'rgba(147, 51, 234, 0.12)',
+      surface: 'rgba(147, 51, 234, 0.15)',
+      border: 'rgba(147, 51, 234, 0.3)',
+      text: '#d8b4fe',
+      textSecondary: '#c084fc',
+      accent: '#a855f7',
+    }
+  },
+  elegant: {
+    light: {
+      bg: 'rgba(168, 139, 95, 0.04)',
+      surface: 'rgba(168, 139, 95, 0.06)',
+      border: 'rgba(168, 139, 95, 0.2)',
+      text: '#78350f',
+      textSecondary: '#a16207',
+      accent: '#ca8a04',
+    },
+    dark: {
+      bg: 'rgba(168, 139, 95, 0.12)',
+      surface: 'rgba(168, 139, 95, 0.15)',
+      border: 'rgba(168, 139, 95, 0.3)',
+      text: '#fde68a',
+      textSecondary: '#fbbf24',
+      accent: '#f59e0b',
+    }
+  },
+  retro: {
+    light: {
+      bg: 'rgba(236, 72, 153, 0.05)',
+      surface: 'rgba(236, 72, 153, 0.07)',
+      border: 'rgba(236, 72, 153, 0.2)',
+      text: '#9f1239',
+      textSecondary: '#e11d48',
+      accent: '#ec4899',
+    },
+    dark: {
+      bg: 'rgba(236, 72, 153, 0.12)',
+      surface: 'rgba(236, 72, 153, 0.15)',
+      border: 'rgba(236, 72, 153, 0.3)',
+      text: '#fbcfe8',
+      textSecondary: '#f9a8d4',
+      accent: '#ec4899',
+    }
+  },
+  glassmorphism: {
+    light: {
+      bg: 'rgba(99, 102, 241, 0.04)',
+      surface: 'rgba(99, 102, 241, 0.06)',
+      border: 'rgba(99, 102, 241, 0.2)',
+      text: '#3730a3',
+      textSecondary: '#4f46e5',
+      accent: '#6366f1',
+    },
+    dark: {
+      bg: 'rgba(99, 102, 241, 0.12)',
+      surface: 'rgba(99, 102, 241, 0.15)',
+      border: 'rgba(99, 102, 241, 0.3)',
+      text: '#c7d2fe',
+      textSecondary: '#a5b4fc',
+      accent: '#6366f1',
+    }
+  },
+  neumorphism: {
+    light: {
+      bg: 'rgba(14, 165, 233, 0.03)',
+      surface: 'rgba(14, 165, 233, 0.05)',
+      border: 'rgba(14, 165, 233, 0.15)',
+      text: '#075985',
+      textSecondary: '#0284c7',
+      accent: '#0ea5e9',
+    },
+    dark: {
+      bg: 'rgba(14, 165, 233, 0.12)',
+      surface: 'rgba(14, 165, 233, 0.15)',
+      border: 'rgba(14, 165, 233, 0.25)',
+      text: '#7dd3fc',
+      textSecondary: '#38bdf8',
+      accent: '#0ea5e9',
+    }
+  },
+};
+
+// Get the current theme colors
+const getStyleTheme = (styleId, mode) => {
+  return styleThemes[styleId][mode];
+};
 // Generate custom preview HTML for each design style
 const generatePreviewHTML = (styleId, mode) => {
   const generators = {
@@ -1139,7 +1273,18 @@ function StyleShowcase() {
   }, [activeStyle, previewMode]);
 
   return (
-    <section className="style-showcase" id="styles">
+    <section 
+      className="style-showcase" 
+      id="styles"
+      style={{
+        '--style-bg': styleThemes[activeStyle][theme].bg,
+        '--style-surface': styleThemes[activeStyle][theme].surface,
+        '--style-border': styleThemes[activeStyle][theme].border,
+        '--style-text': styleThemes[activeStyle][theme].text,
+        '--style-text-secondary': styleThemes[activeStyle][theme].textSecondary,
+        '--style-accent': styleThemes[activeStyle][theme].accent,
+      }}
+    >
       <div className="container">
         <div className="style-showcase__header">
           <h2 className="style-showcase__title">Choose Your Style</h2>

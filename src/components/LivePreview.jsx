@@ -18,6 +18,15 @@ function LivePreview({ templateId, customization, images }) {
   
   const iframeRef = useRef(null);
 
+  // Cleanup blob URLs on unmount
+  useEffect(() => {
+    return () => {
+      if (iframeRef.current?.dataset.blobUrl) {
+        URL.revokeObjectURL(iframeRef.current.dataset.blobUrl);
+      }
+    };
+  }, []);
+
   // Update local color mode when customization changes
   useEffect(() => {
     if (customization?.colorMode) {
@@ -46,13 +55,26 @@ function LivePreview({ templateId, customization, images }) {
       effectiveColorMode
     );
 
-    // Update iframe content
+    // Update iframe content with proper UTF-8 encoding
     if (iframeRef.current) {
       const iframe = iframeRef.current;
-      const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-      iframeDoc.open();
-      iframeDoc.write(html);
-      iframeDoc.close();
+      
+      // First try using srcdoc for better UTF-8 handling
+      // srcdoc handles encoding better than blob URLs
+      iframe.srcdoc = html;
+      
+      // Fallback: Create a blob with proper UTF-8 encoding
+      // This is kept as backup but srcdoc should work better
+      const blob = new Blob([html], { type: 'text/html; charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      
+      // Clean up previous URL if it exists
+      if (iframe.dataset.blobUrl) {
+        URL.revokeObjectURL(iframe.dataset.blobUrl);
+      }
+      
+      // Store the URL for cleanup (even though we're using srcdoc)
+      iframe.dataset.blobUrl = url;
     }
   }, [templateId, customization, images, localColorMode, globalTheme]);
 
@@ -125,7 +147,6 @@ function LivePreview({ templateId, customization, images }) {
             ref={iframeRef}
             className="live-preview__iframe"
             title="Template Preview"
-            sandbox="allow-same-origin"
           />
         </div>
       </div>

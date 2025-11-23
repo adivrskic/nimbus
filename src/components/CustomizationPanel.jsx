@@ -1,5 +1,28 @@
-import { useState } from 'react';
-import { ChevronDown, ChevronRight, Plus, Trash2, Eye, EyeOff, X, Upload, Image } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { 
+  ChevronDown, 
+  ChevronRight, 
+  Plus, 
+  Trash2, 
+  Eye, 
+  EyeOff, 
+  X, 
+  Upload, 
+  Image as ImageIcon,
+  Palette,
+  User,
+  FileText,
+  Star,
+  Briefcase,
+  BarChart3,
+  MessageSquare,
+  Users,
+  DollarSign,
+  Megaphone,
+  Mail,
+  Share2,
+  Layout
+} from 'lucide-react';
 import { getAllThemes } from '../styles/themes';
 import { useTheme } from '../contexts/ThemeContext';
 import './CustomizationPanel.scss';
@@ -7,8 +30,185 @@ import './CustomizationPanel.scss';
 function CustomizationPanel({ fields, customization, onChange, onImageUpload }) {
   const [visibleFields, setVisibleFields] = useState({});
   const [collapsedGroups, setCollapsedGroups] = useState({});
+  const [activeSection, setActiveSection] = useState(null);
+  const sectionRefs = useRef({});
+  const contentRef = useRef(null);
   const themes = getAllThemes();
   const { setStyleTheme, toggleTheme } = useTheme();
+
+  // Icon mapping for sections
+  const sectionIcons = {
+    'Design Style': Palette,
+    'Basic Info': User,
+    'Images & Media': ImageIcon,
+    'Content': FileText,
+    'Features': Star,
+    'Portfolio': Briefcase,
+    'Statistics': BarChart3,
+    'Testimonials': MessageSquare,
+    'Team': Users,
+    'Pricing': DollarSign,
+    'Call to Action': Megaphone,
+    'Contact Info': Mail,
+    'Social Links': Share2,
+    'General': Layout
+  };
+
+  // Automatically categorize fields into sections
+  const categorizeField = (key, field) => {
+    // Check if field explicitly defines a section
+    if (field.section) return field.section;
+    
+    // Theme selector gets its own section
+    if (field.type === 'theme-selector') return 'Design Style';
+    
+    // Color mode selector
+    if (key === 'colorMode') return 'Design Style';
+    
+    // Images and visual content
+    if (field.type === 'image' || key.includes('image') || key.includes('photo') || key.includes('logo')) {
+      return 'Images & Media';
+    }
+    
+    // Group fields for structured content
+    if (field.type === 'group') {
+      // Categorize based on the label or key
+      if (key.includes('feature') || key.includes('service')) return 'Features';
+      if (key.includes('project') || key.includes('work') || key.includes('portfolio')) return 'Portfolio';
+      if (key.includes('testimonial') || key.includes('review')) return 'Testimonials';
+      if (key.includes('team') || key.includes('member') || key.includes('instructor')) return 'Team';
+      if (key.includes('pricing') || key.includes('plan')) return 'Pricing';
+      if (key.includes('stat') || key.includes('metric')) return 'Statistics';
+      if (key.includes('social') || key.includes('link')) return 'Social Links';
+      if (key.includes('curriculum') || key.includes('module')) return 'Content';
+      return 'Content';
+    }
+    
+    // Contact and social
+    if (key.includes('email') || key.includes('phone') || key.includes('contact') || key.includes('address')) {
+      return 'Contact Info';
+    }
+    
+    if (key.includes('social') || key.includes('twitter') || key.includes('linkedin')) {
+      return 'Social Links';
+    }
+    
+    // Main content fields
+    if (key.includes('title') || key.includes('headline') || key.includes('name') || 
+        key.includes('tagline') || key.includes('bio') || key.includes('description') ||
+        key.includes('about')) {
+      return 'Basic Info';
+    }
+    
+    // CTA and buttons
+    if (key.includes('cta') || key.includes('button')) {
+      return 'Call to Action';
+    }
+    
+    // Default section
+    return 'Basic Info';
+  };
+
+  // Group fields into sections with smart categorization
+  const sections = Object.entries(fields).reduce((acc, [key, field]) => {
+    const section = categorizeField(key, field);
+    if (!acc[section]) {
+      acc[section] = [];
+    }
+    acc[section].push({ key, field });
+    return acc;
+  }, {});
+
+  // Define a preferred order for sections
+  const sectionOrder = [
+    'Design Style',
+    'Basic Info',
+    'Images & Media',
+    'Content',
+    'Features',
+    'Portfolio',
+    'Statistics',
+    'Testimonials',
+    'Team',
+    'Pricing',
+    'Call to Action',
+    'Contact Info',
+    'Social Links'
+  ];
+
+  // Sort sections by preferred order
+  const orderedSections = {};
+  sectionOrder.forEach(sectionName => {
+    if (sections[sectionName]) {
+      orderedSections[sectionName] = sections[sectionName];
+    }
+  });
+  // Add any remaining sections not in the preferred order
+  Object.keys(sections).forEach(sectionName => {
+    if (!orderedSections[sectionName]) {
+      orderedSections[sectionName] = sections[sectionName];
+    }
+  });
+
+  const sectionKeys = Object.keys(orderedSections);
+
+  useEffect(() => {
+    if (sectionKeys.length > 0 && !activeSection) {
+      setActiveSection(sectionKeys[0]);
+    }
+  }, [sectionKeys, activeSection]);
+
+  // Handle scroll to update active section
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!contentRef.current) return;
+
+      const scrollTop = contentRef.current.scrollTop;
+      const scrollHeight = contentRef.current.scrollHeight;
+      const clientHeight = contentRef.current.clientHeight;
+      const offset = 100; // Offset for sticky header
+
+      // Check if we're at the bottom of the scroll container
+      const isAtBottom = scrollTop + clientHeight >= scrollHeight - 10; // 10px threshold
+
+      if (isAtBottom) {
+        // If at bottom, activate the last section
+        setActiveSection(sectionKeys[sectionKeys.length - 1]);
+        return;
+      }
+
+      for (let i = sectionKeys.length - 1; i >= 0; i--) {
+        const sectionKey = sectionKeys[i];
+        const sectionElement = sectionRefs.current[sectionKey];
+        
+        if (sectionElement) {
+          const sectionTop = sectionElement.offsetTop - offset;
+          if (scrollTop >= sectionTop) {
+            setActiveSection(sectionKey);
+            break;
+          }
+        }
+      }
+    };
+
+    const content = contentRef.current;
+    if (content) {
+      content.addEventListener('scroll', handleScroll);
+      return () => content.removeEventListener('scroll', handleScroll);
+    }
+  }, [sectionKeys]);
+
+  const scrollToSection = (sectionKey) => {
+    const sectionElement = sectionRefs.current[sectionKey];
+    if (sectionElement && contentRef.current) {
+      const offset = 60; // Account for sticky tabs
+      const elementPosition = sectionElement.offsetTop;
+      contentRef.current.scrollTo({
+        top: elementPosition - offset,
+        behavior: 'smooth'
+      });
+    }
+  };
 
   const handleThemeChange = (path, themeId) => {
     console.log(themeId);
@@ -362,7 +562,7 @@ function CustomizationPanel({ fields, customization, onChange, onImageUpload }) 
                   <img src={value} alt="Preview" />
                 ) : (
                   <div className="field__image-placeholder">
-                    <Image size={32} />
+                    <ImageIcon size={32} />
                     <span>Click to upload image</span>
                   </div>
                 )}
@@ -388,10 +588,36 @@ function CustomizationPanel({ fields, customization, onChange, onImageUpload }) 
 
   return (
     <div className="customization-panel">
-      <div className="customization-panel__content">
-        {Object.entries(fields).map(([key, field]) => 
-          renderField(key, field, customization[key], key)
-        )}
+      <div className="customization-panel__tabs">
+        {sectionKeys.map((sectionKey) => {
+          const IconComponent = sectionIcons[sectionKey] || Layout;
+          return (
+            <button
+              key={sectionKey}
+              className={`customization-panel__tab ${activeSection === sectionKey ? 'active' : ''}`}
+              onClick={() => scrollToSection(sectionKey)}
+              title={sectionKey}
+            >
+              <IconComponent size={20} />
+              {/* <span className="customization-panel__tab-label">{sectionKey}</span> */}
+            </button>
+          );
+        })}
+      </div>
+      
+      <div className="customization-panel__content" ref={contentRef}>
+        {sectionKeys.map((sectionKey) => (
+          <div
+            key={sectionKey}
+            className="customization-panel__section"
+            ref={(el) => sectionRefs.current[sectionKey] = el}
+          >
+            <h3 className="customization-panel__section-title">{sectionKey}</h3>
+            {orderedSections[sectionKey].map(({ key, field }) => 
+              renderField(key, field, customization[key], key)
+            )}
+          </div>
+        ))}
       </div>
     </div>
   );

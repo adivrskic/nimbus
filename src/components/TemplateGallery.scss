@@ -21,19 +21,83 @@
   }
 }
 
-// Filter Container with Gradient Fade
+// Filter Container with Sticky Filters and Scroll Arrows
 .template-filters-wrapper {
   position: relative;
   width: 100%;
+  display: flex;
+  gap: calc(var(--spacing-unit) * 2);
+  align-items: center;
 }
 
-// Filter Tabs - Horizontal Scroll
-.template-filters {
+// Sticky filters on the left (All Templates & Featured)
+.template-filters-sticky {
+  display: flex;
+  gap: calc(var(--spacing-unit) * 1.5);
+  flex-shrink: 0;
+  
+  @media (max-width: $breakpoint-md) {
+    display: none; // Hide on mobile to save space
+  }
+}
+
+// Scrollable filters container (holds arrows + scrollable area)
+.template-filters-scroll-container {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+
+// Scroll arrows
+.scroll-arrow {
+  position: absolute;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-md);
+  
+  &:hover {
+    background: var(--color-surface-elevated);
+    border-color: var(--color-text-tertiary);
+    transform: scale(1.05);
+  }
+  
+  &:active {
+    // transform: scale(0.98);
+  }
+  
+  &-left {
+    left: 1px;
+  }
+  
+  &-right {
+    right: 1px;
+  }
+}
+
+// Filter Tabs - Horizontal Scroll with drag support
+.template-filters-scrollable {
   display: flex;
   gap: calc(var(--spacing-unit) * 1.5);
   overflow-x: auto;
   overflow-y: hidden;
   width: 100%;
+  cursor: grab;
+  
+  &:active {
+    cursor: grabbing;
+  }
   
   // Hide scrollbar but keep functionality
   scrollbar-width: none; /* Firefox */
@@ -52,10 +116,23 @@
   // Prevent y-axis scrolling
   touch-action: pan-x;
   
+  // Add padding for arrows
+  padding: 0 26px;
+  
   @media (max-width: $breakpoint-sm) {
     gap: calc(var(--spacing-unit) * 1);
     padding: calc(var(--spacing-unit) * 1.5);
   }
+}
+
+// When there's no left arrow, remove left padding
+.template-filters-scroll-container:not(:has(.scroll-arrow-left)) .template-filters-scrollable {
+  padding-left: 0;
+}
+
+// When there's no right arrow, remove right padding
+.template-filters-scroll-container:not(:has(.scroll-arrow-right)) .template-filters-scrollable {
+  padding-right: 0;
 }
 
 .filter-tab {
@@ -263,14 +340,14 @@
 .template-card {
   position: relative;
   background: var(--color-background);
-  border: 1px solid var(--color-border);
+  border: 2px solid var(--color-border);
   border-radius: var(--radius-lg);
   overflow: hidden;
   cursor: pointer;
   transition: all var(--transition-base);
   
   &:hover {
-    transform: translateY(-2px);
+    // transform: translateY(-2px);
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
     border-color: var(--color-text-tertiary);
     

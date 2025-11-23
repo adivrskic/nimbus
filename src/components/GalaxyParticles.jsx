@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 
 const BlobParticles = ({
@@ -10,6 +10,7 @@ const BlobParticles = ({
 }) => {
   const mountRef = useRef(null);
   const animationRef = useRef();
+  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
     const mount = mountRef.current;
@@ -51,12 +52,20 @@ const BlobParticles = ({
         vNormal = normal;
         vec3 pos = position;
 
-        // Existing wavy deformation
-        float noise = sin(pos.x * 3.0 + u_time * 2.0)
-                    * sin(pos.y * 3.0 + u_time * 1.6)
-                    * sin(pos.z * 3.0 + u_time * 1.2);
+        // Cloud-like deformation with more varied noise
+        float noise1 = sin(pos.x * 2.0 + u_time * 0.8)
+                     * sin(pos.y * 2.5 + u_time * 0.6)
+                     * sin(pos.z * 2.2 + u_time * 0.5);
+        
+        float noise2 = sin(pos.x * 4.5 + u_time * 1.2)
+                     * cos(pos.y * 3.8 + u_time * 0.9)
+                     * sin(pos.z * 4.2 + u_time * 1.1);
+        
+        // Combine noises for more organic, cloud-like bumps
+        float combinedNoise = noise1 * 0.7 + noise2 * 0.3;
+        
         float freq = u_frequency / 255.0;
-        pos += normal * noise * (0.35 + freq * 0.25);
+        pos += normal * combinedNoise * (0.5 + freq * 0.3);
 
         // --- NEW STRETCH EFFECT ---
         // smooth variation over time
@@ -77,11 +86,12 @@ const BlobParticles = ({
       varying vec3 vNormal;
 
       void main() {
-        float intensity = dot(vNormal, vec3(0.0, 0.0, 1.0)) * 0.5 + 0.5;
+        // Softer lighting for cloud-like appearance
+        float intensity = dot(vNormal, vec3(0.0, 0.0, 1.0)) * 0.4 + 0.6;
         vec3 brightColor = vec3(u_red, u_green, u_blue);
-        vec3 darkColor = brightColor * 0.3;
+        vec3 darkColor = brightColor * 0.5;
         vec3 color = mix(darkColor, brightColor, intensity);
-        gl_FragColor = vec4(color, 1.0);
+        gl_FragColor = vec4(color, 0.85);
       }
     `;
 
@@ -93,7 +103,7 @@ const BlobParticles = ({
       u_blue: { value: 0 },
 
       // --- ADDED ---
-      u_stretchAmp: { value: 0.15 }, // adjust strength here
+      u_stretchAmp: { value: 0.2 }, // adjust strength here
       u_stretchSeed: { value: stretchSeed },
     };
 
@@ -112,16 +122,23 @@ const BlobParticles = ({
     });
 
     const mesh = new THREE.Mesh(geo, mat);
+    
+    // Make it wider than tall (scale x and z more than y)
+    mesh.scale.set(1.6, 1.0, 1.3);
+    
     scene.add(mesh);
+
+    // Trigger animation after a brief delay
+    setTimeout(() => setIsLoaded(true), 100);
 
     // Animation
     const animate = () => {
       const t = clock.getElapsedTime();
       uniforms.u_time.value = t;
 
-      // Existing auto-rotation
-      mesh.rotation.x += 0.003;
-      mesh.rotation.y += 0.004;
+      // Slower, more gentle rotation for cloud-like movement
+      mesh.rotation.x += 0.00015;
+      mesh.rotation.y += 0.0002;
 
       renderer.render(scene, camera);
       animationRef.current = requestAnimationFrame(animate);
@@ -146,9 +163,11 @@ const BlobParticles = ({
         width: "100%",
         height: "75%",
         zIndex: 1,
-        opacity: 0.9,
-        filter: "blur(18px)",
+        opacity: isLoaded ? 1 : 0,
+        filter: isLoaded ? "blur(26px)" : "blur(60px)",
+        transform: isLoaded ? "scale(1)" : "scale(1.3)",
         pointerEvents: "none",
+        transition: "opacity 1.2s ease-out, filter 1.2s ease-out, transform 1.2s ease-out",
       }}
     />
   );

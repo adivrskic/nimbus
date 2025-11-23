@@ -1,4 +1,4 @@
-// templateSystem.js - Quality over quantity approach
+// MVP Template System - Landing Page, Personal Profile, Restaurant
 import { generateThemeCSS, getTheme } from './styleThemes';
 
 class Template {
@@ -11,13 +11,16 @@ class Template {
     this.defaultTheme = config.defaultTheme || 'minimal';
     this.fields = config.fields;
     this.structure = config.structure;
+    this.image = config.image;
   }
 
   render(customization, theme, colorMode = 'auto') {
     const normalizedColorMode = (colorMode || 'auto').toLowerCase();
-    const themeCSS = generateThemeCSS(theme, normalizedColorMode === 'auto' ? 'light' : normalizedColorMode);
-    const darkModeCSS = normalizedColorMode === 'auto' ? generateThemeCSS(theme, 'dark') : '';
     const html = this.structure(customization, theme);
+    
+    // Generate CSS variables for light and dark modes
+    const lightColors = theme.colors.light;
+    const darkColors = theme.colors.dark;
     
     return `<!DOCTYPE html>
 <html lang="en">
@@ -29,10 +32,65 @@ class Template {
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     
-    ${themeCSS}
+    /* Light mode (default) */
+    :root {
+      /* Colors */
+      --color-bg: ${lightColors.bg};
+      --color-surface: ${lightColors.surface};
+      --color-text: ${lightColors.text};
+      --color-text-secondary: ${lightColors.textSecondary};
+      --color-border: ${lightColors.border};
+      --color-border-hover: ${lightColors.borderHover};
+      --color-accent: ${lightColors.accent};
+      
+      /* Typography */
+      --font-heading: ${theme.fonts?.heading};
+      --font-body: ${theme.fonts?.body};
+      --text-hero: ${theme.typography?.hero};
+      --text-h1: ${theme.typography?.h1};
+      --text-h2: ${theme.typography?.h2};
+      --text-h3: ${theme.typography?.h3};
+      --text-body: ${theme.typography?.body};
+      --text-small: ${theme.typography?.small};
+      
+      /* Spacing */
+      --space-xs: ${theme.spacing?.xs};
+      --space-sm: ${theme.spacing?.sm};
+      --space-md: ${theme.spacing?.md};
+      --space-lg: ${theme.spacing?.lg};
+      --space-xl: ${theme.spacing?.xl};
+      --space-xxl: ${theme.spacing?.xxl};
+      
+      /* Border Radius */
+      --radius-sm: ${theme.radius?.sm};
+      --radius-md: ${theme.radius?.md};
+      --radius-lg: ${theme.radius?.lg};
+      --radius-xl: ${theme.radius?.xl};
+      --radius-full: 9999px;
+      
+      /* Shadows */
+      --shadow-sm: ${theme.shadows?.sm};
+      --shadow-md: ${theme.shadows?.md};
+      --shadow-lg: ${theme.shadows?.lg};
+      ${theme.shadows?.glow ? `--shadow-glow: ${theme.shadows?.glow};` : ''}
+      ${theme.shadows?.inset ? `--shadow-inset: ${theme.shadows?.inset};` : ''}
+      
+      /* Gradients */
+      ${theme.gradients ? Object.entries(theme.gradients).map(([key, value]) => 
+        `--gradient-${key}: ${value};`
+      ).join('\n      ') : ''}
+    }
     
-    ${normalizedColorMode === 'auto' ? `@media (prefers-color-scheme: dark) { ${darkModeCSS} }` : ''}
-    ${normalizedColorMode === 'dark' ? darkModeCSS : ''}
+    /* Dark mode */
+    [data-theme="dark"] {
+      --color-bg: ${darkColors.bg};
+      --color-surface: ${darkColors.surface};
+      --color-text: ${darkColors.text};
+      --color-text-secondary: ${darkColors.textSecondary};
+      --color-border: ${darkColors.border};
+      --color-border-hover: ${darkColors.borderHover};
+      --color-accent: ${darkColors.accent};
+    }
     
     body {
       font-family: var(--font-body);
@@ -40,6 +98,7 @@ class Template {
       color: var(--color-text);
       font-size: var(--text-body);
       line-height: 1.6;
+      transition: background 0.3s ease, color 0.3s ease;
     }
     
     h1, h2, h3 {
@@ -63,6 +122,36 @@ class Template {
 </head>
 <body>
   ${html}
+  
+  <script>
+    // Theme management
+    function getStoredTheme() {
+      return localStorage.getItem('theme') || 'light';
+    }
+    
+    function setTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      localStorage.setItem('theme', theme);
+      
+      // Update all theme toggle icons
+      const icons = document.querySelectorAll('.theme-icon');
+      icons.forEach(icon => {
+        icon.textContent = theme === 'dark' ? '☀️' : '🌙';
+      });
+    }
+    
+    function toggleTheme() {
+      const currentTheme = getStoredTheme();
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      setTheme(newTheme);
+    }
+    
+    // Initialize theme on load
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedTheme = getStoredTheme();
+      setTheme(savedTheme);
+    });
+  </script>
 </body>
 </html>`;
   }
@@ -84,6 +173,78 @@ class Template {
 
   getThemeSpecificCSS(theme) {
     const base = `
+      /* Header Styles */
+      header {
+        background: var(--color-bg);
+        transition: background 0.3s ease;
+      }
+      
+      .theme-toggle-btn {
+        background: transparent;
+        border: none;
+        padding: 0;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+      
+      /* Toggle Switch */
+      .theme-toggle-switch-wrapper {
+        position: relative;
+        display: inline-block;
+        width: 48px;
+        height: 26px;
+      }
+      
+      .theme-toggle-switch {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+      
+      .theme-toggle-slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: var(--color-border);
+        transition: 0.3s;
+        border-radius: 26px;
+        border: 2px solid var(--color-border);
+      }
+      
+      .theme-toggle-slider:before {
+        position: absolute;
+        content: "";
+        height: 18px;
+        width: 18px;
+        left: 2px;
+        bottom: 2px;
+        background-color: var(--color-bg);
+        transition: 0.3s;
+        border-radius: 50%;
+      }
+      
+      .theme-toggle-switch:checked + .theme-toggle-slider {
+        background-color: var(--color-accent);
+        border-color: var(--color-accent);
+      }
+      
+      .theme-toggle-switch:checked + .theme-toggle-slider:before {
+        transform: translateX(22px);
+      }
+      
+      .theme-toggle-slider:hover {
+        opacity: 0.8;
+      }
+      
+      .theme-toggle-btn:active {
+        transform: translateY(0);
+      }
+      
       .btn {
         display: inline-block;
         padding: var(--space-sm) var(--space-md);
@@ -150,27 +311,10 @@ class Template {
           background: var(--gradient-primary);
           border: none;
         }
-        .hero::before {
-          content: '';
-          position: absolute;
-          inset: 0;
-          background: var(--gradient-primary);
-          opacity: 0.05;
-          z-index: 0;
-        }
       `,
       retro: `
         h1, h2 {
           text-shadow: 3px 3px 0 var(--color-accent);
-        }
-        .btn {
-          background: var(--gradient-vaporwave);
-          border: 2px solid var(--color-border);
-          box-shadow: 4px 4px 0 var(--color-text);
-        }
-        .btn:hover {
-          transform: translate(-2px, -2px);
-          box-shadow: 6px 6px 0 var(--color-text);
         }
       `,
       elegant: `
@@ -178,25 +322,10 @@ class Template {
           font-weight: 400;
           letter-spacing: -0.02em;
         }
-        .btn {
-          background: transparent;
-          border: 1px solid var(--color-border);
-          color: var(--color-text);
-        }
-        .btn:hover {
-          background: var(--color-text);
-          color: var(--color-bg);
-        }
       `,
       glassmorphism: `
         .card {
           background: rgba(255, 255, 255, 0.1);
-          backdrop-filter: blur(10px);
-          -webkit-backdrop-filter: blur(10px);
-          border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        .btn {
-          background: rgba(255, 255, 255, 0.2);
           backdrop-filter: blur(10px);
           -webkit-backdrop-filter: blur(10px);
           border: 1px solid rgba(255, 255, 255, 0.3);
@@ -209,13 +338,6 @@ class Template {
         .card:hover {
           box-shadow: var(--shadow-inset);
         }
-        .btn {
-          box-shadow: var(--shadow-sm);
-          border: none;
-        }
-        .btn:hover {
-          box-shadow: var(--shadow-inset);
-        }
       `,
     };
 
@@ -224,13 +346,18 @@ class Template {
 }
 
 // ============================================
-// TEMPLATE 1: LANDING PAGE
+// MVP TEMPLATES
 // ============================================
+
 export const templates = {
+  // ============================================
+  // TEMPLATE 1: LANDING PAGE
+  // ============================================
   'landing-page': new Template('landing-page', {
     name: 'Landing Page',
     description: 'Complete landing page with hero, features, and CTA',
     category: 'Landing Page',
+    image: '/templates/landing-page.png',
     fields: {
       companyName: { type: 'text', default: 'ACME', label: 'Company Name', required: true },
       headline: { type: 'text', default: 'Less is More', label: 'Headline', required: true },
@@ -284,14 +411,21 @@ export const templates = {
       testimonialRole: { type: 'text', default: 'Product Designer', label: 'Author Role' }
     },
     structure: (data) => `
-      <header style="padding: 1.5rem 0; border-bottom: 1px solid var(--color-border);">
+      <header style="padding: 1.5rem 0; border-bottom: 1px solid var(--color-border); position: sticky; top: 0; background: var(--color-bg); z-index: 100; backdrop-filter: blur(10px);">
         <div class="container">
           <nav style="display: flex; justify-content: space-between; align-items: center;">
             <div style="font-weight: 600; font-size: 1.125rem; letter-spacing: -0.02em;">${data.companyName || 'ACME'}</div>
-            <ul style="display: flex; gap: 2rem; list-style: none;">
-              <li><a href="#features" style="color: var(--color-text-secondary); text-decoration: none; font-size: 0.875rem;">Features</a></li>
-              <li><a href="#testimonial" style="color: var(--color-text-secondary); text-decoration: none; font-size: 0.875rem;">Reviews</a></li>
-            </ul>
+            <div style="display: flex; align-items: center; gap: 2rem;">
+              <ul style="display: flex; gap: 2rem; list-style: none; align-items: center;">
+                <li><a href="#features" style="color: var(--color-text-secondary); text-decoration: none; font-size: 0.875rem;">Features</a></li>
+                <li><a href="#testimonial" style="color: var(--color-text-secondary); text-decoration: none; font-size: 0.875rem;">Reviews</a></li>
+                <li>
+                  <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle theme">
+                    <span class="theme-icon">Ã°Å¸Å’â„¢</span>
+                  </button>
+                </li>
+              </ul>
+            </div>
           </nav>
         </div>
       </header>
@@ -371,18 +505,19 @@ export const templates = {
 
       <footer style="padding: 3rem 0; border-top: 1px solid var(--color-border); text-align: center; color: var(--color-text-secondary); font-size: 0.875rem;">
         <div class="container">
-          <p>Â© 2024 ${data.companyName || 'Company'}. All rights reserved.</p>
+          <p>Ã‚Â© 2024 ${data.companyName || 'Company'}. All rights reserved.</p>
         </div>
       </footer>
     `
   }),
 
   // ============================================
-  // TEMPLATE 2: PERSONAL PROFILE
+  // TEMPLATE 2: ENHANCED PERSONAL PROFILE
   // ============================================
   'personal-profile': new Template('personal-profile', {
     name: 'Personal Profile',
-    description: 'Elegant personal introduction page',
+    description: 'Enhanced personal page with timeline, stats, and testimonials',
+    image: '/templates/personal-profile.png',
     category: 'Personal',
     fields: {
       name: { type: 'text', default: 'Jordan Rivers', label: 'Your Name', required: true },
@@ -392,228 +527,105 @@ export const templates = {
         default: 'I create meaningful digital experiences that connect people and solve real problems. With a passion for clean design and user-centered thinking.',
         label: 'Bio'
       },
+      location: { type: 'text', default: 'San Francisco, CA', label: 'Location' },
+      availability: { type: 'text', default: 'Available for freelance', label: 'Availability Status' },
+      stats: {
+        type: 'group',
+        label: 'Statistics',
+        itemLabel: 'Stat',
+        min: 0,
+        max: 4,
+        fields: {
+          number: { type: 'text', label: 'Number', default: '' },
+          label: { type: 'text', label: 'Label', default: '' }
+        },
+        default: [
+          { number: '8+', label: 'Years Experience' },
+          { number: '50+', label: 'Projects Completed' },
+          { number: '20+', label: 'Happy Clients' }
+        ]
+      },
       skills: {
         type: 'repeatable',
         label: 'Skills',
         itemLabel: 'Skill',
-        default: ['UI Design', 'Prototyping', 'User Research', 'Design Systems'],
-        max: 8
+        default: ['UI Design', 'Prototyping', 'User Research', 'Design Systems', 'Figma', 'React'],
+        max: 12
       },
-      projects: {
+      experience: {
         type: 'group',
-        label: 'Featured Projects',
-        itemLabel: 'Project',
+        label: 'Work Experience',
+        itemLabel: 'Position',
         min: 0,
-        max: 3,
+        max: 5,
         fields: {
-          title: { type: 'text', label: 'Project Title', default: '' },
-          description: { type: 'textarea', label: 'Description', default: '' },
-          tags: { type: 'text', label: 'Tags (comma-separated)', default: '' }
-        },
-        default: [
-          { title: 'Mobile Banking App', description: 'Redesigned the core banking experience for 2M+ users', tags: 'UI/UX, Mobile' },
-          { title: 'E-commerce Platform', description: 'Built a design system that increased conversion by 40%', tags: 'Design System, Web' }
-        ]
-      },
-      contactEmail: { type: 'email', default: 'hello@jordan.com', label: 'Contact Email' },
-      socialLinks: {
-        type: 'group',
-        label: 'Social Links',
-        itemLabel: 'Link',
-        min: 0,
-        max: 4,
-        fields: {
-          platform: { type: 'text', label: 'Platform', default: '' },
-          url: { type: 'url', label: 'URL', default: '' }
-        },
-        default: [
-          { platform: 'Twitter', url: 'https://twitter.com' },
-          { platform: 'LinkedIn', url: 'https://linkedin.com' }
-        ]
-      }
-    },
-    structure: (data) => `
-      <!-- Hero Section -->
-      <section style="min-height: 80vh; display: flex; align-items: center; padding: var(--space-xxl) 0;">
-        <div class="container" style="max-width: 900px;">
-          <div style="margin-bottom: var(--space-xl);">
-            <h1 style="font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 700; margin-bottom: var(--space-md); letter-spacing: -0.02em;">
-              ${data.name || 'Your Name'}
-            </h1>
-            ${data.tagline ? `
-            <p style="font-size: clamp(1.25rem, 3vw, 1.75rem); color: var(--color-text-secondary); margin-bottom: var(--space-lg);">
-              ${data.tagline}
-            </p>
-            ` : ''}
-            ${data.bio ? `
-            <p style="font-size: 1.125rem; line-height: 1.8; color: var(--color-text-secondary); max-width: 700px; margin-bottom: var(--space-xl);">
-              ${data.bio}
-            </p>
-            ` : ''}
-
-            <!-- Social Links -->
-            ${data.socialLinks && data.socialLinks.length > 0 ? `
-            <div style="display: flex; gap: var(--space-md); flex-wrap: wrap; margin-bottom: var(--space-xl);">
-              ${data.socialLinks.map(link => `
-                <a href="${link.url}" target="_blank" class="btn btn-outline" style="font-size: 0.9375rem;">
-                  ${link.platform}
-                </a>
-              `).join('')}
-            </div>
-            ` : ''}
-          </div>
-
-          <!-- Skills -->
-          ${data.skills && data.skills.length > 0 ? `
-          <div style="margin-bottom: var(--space-xxl);">
-            <h2 style="font-size: 1.125rem; font-weight: 600; margin-bottom: var(--space-md); text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-secondary);">
-              Skills
-            </h2>
-            <div style="display: flex; flex-wrap: wrap; gap: var(--space-sm);">
-              ${data.skills.map(skill => `
-                <span style="padding: var(--space-sm) var(--space-md); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); font-weight: 500; font-size: 0.9375rem;">
-                  ${skill}
-                </span>
-              `).join('')}
-            </div>
-          </div>
-          ` : ''}
-
-          <!-- Projects -->
-          ${data.projects && data.projects.length > 0 ? `
-          <div style="margin-bottom: var(--space-xxl);">
-            <h2 style="font-size: 1.125rem; font-weight: 600; margin-bottom: var(--space-lg); text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-secondary);">
-              Featured Work
-            </h2>
-            <div style="display: grid; gap: var(--space-lg);">
-              ${data.projects.map(project => `
-                <div class="card" style="padding: var(--space-lg);">
-                  <h3 style="font-size: 1.5rem; font-weight: 600; margin-bottom: var(--space-sm);">
-                    ${project.title || 'Project'}
-                  </h3>
-                  <p style="color: var(--color-text-secondary); line-height: 1.7; margin-bottom: var(--space-md); font-size: 1rem;">
-                    ${project.description || ''}
-                  </p>
-                  ${project.tags ? `
-                  <div style="display: flex; flex-wrap: wrap; gap: var(--space-xs);">
-                    ${project.tags.split(',').map(tag => `
-                      <span style="padding: 0.375rem 0.75rem; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-sm); font-size: 0.8125rem; color: var(--color-text-secondary);">
-                        ${tag.trim()}
-                      </span>
-                    `).join('')}
-                  </div>
-                  ` : ''}
-                </div>
-              `).join('')}
-            </div>
-          </div>
-          ` : ''}
-
-          <!-- Contact CTA -->
-          ${data.contactEmail ? `
-          <div style="text-align: center; padding: var(--space-xxl) var(--space-xl); background: var(--color-surface); border-radius: var(--radius-xl); border: 1px solid var(--color-border);">
-            <h2 style="font-size: clamp(1.75rem, 4vw, 2.5rem); font-weight: 700; margin-bottom: var(--space-md);">
-              Let's Work Together
-            </h2>
-            <p style="color: var(--color-text-secondary); margin-bottom: var(--space-lg); font-size: 1.0625rem;">
-              Have a project in mind? I'd love to hear about it.
-            </p>
-            <a href="mailto:${data.contactEmail}" class="btn" style="font-size: 1rem; padding: var(--space-md) var(--space-xl);">
-              Get in Touch
-            </a>
-          </div>
-          ` : ''}
-        </div>
-      </section>
-
-      <footer style="padding: var(--space-xl) 0; border-top: 1px solid var(--color-border); text-align: center;">
-        <div class="container">
-          <p style="color: var(--color-text-secondary); font-size: 0.875rem;">
-            Â© 2024 ${data.name || 'Your Name'}
-          </p>
-        </div>
-      </footer>
-    `
-  }),
-
-  // ============================================
-  // TEMPLATE 3: PORTFOLIO SHOWCASE
-  // ============================================
-  'portfolio-showcase': new Template('portfolio-showcase', {
-    name: 'Portfolio Showcase',
-    description: 'Modern portfolio with project grid and detailed case studies',
-    category: 'Portfolio',
-    fields: {
-      name: { type: 'text', default: 'Alex Morgan', label: 'Your Name', required: true },
-      title: { type: 'text', default: 'Creative Developer & Designer', label: 'Professional Title' },
-      bio: { 
-        type: 'textarea',
-        default: 'I craft digital experiences that blend aesthetics with functionality. Specializing in interactive web applications and user-centered design.',
-        label: 'Bio'
-      },
-      heroImage: { type: 'text', default: '', label: 'Hero Image URL', optional: true },
-      
-      about: {
-        type: 'textarea',
-        default: 'With 5+ years of experience in digital design and development, I\'ve worked with startups and established brands to create compelling digital experiences. My approach combines technical expertise with creative problem-solving to deliver solutions that resonate with users.',
-        label: 'About Section'
-      },
-      
-      services: {
-        type: 'group',
-        label: 'Services',
-        itemLabel: 'Service',
-        min: 1,
-        max: 6,
-        fields: {
-          title: { type: 'text', label: 'Service Name', default: '' },
+          role: { type: 'text', label: 'Role', default: '' },
+          company: { type: 'text', label: 'Company', default: '' },
+          period: { type: 'text', label: 'Period', default: '' },
           description: { type: 'textarea', label: 'Description', default: '' }
         },
         default: [
-          { title: 'Web Development', description: 'Building responsive, performant websites with modern technologies' },
-          { title: 'UI/UX Design', description: 'Creating intuitive interfaces that users love' },
-          { title: 'Brand Identity', description: 'Developing cohesive visual identities that tell your story' }
+          { 
+            role: 'Senior Product Designer', 
+            company: 'TechCorp', 
+            period: '2020 - Present',
+            description: 'Leading design for core product features used by millions'
+          },
+          { 
+            role: 'Product Designer', 
+            company: 'StartupXYZ', 
+            period: '2018 - 2020',
+            description: 'Designed and launched the company\'s mobile app from 0 to 1'
+          }
         ]
       },
-      
       projects: {
         type: 'group',
         label: 'Featured Projects',
         itemLabel: 'Project',
-        min: 1,
-        max: 9,
-        fields: {
-          title: { type: 'text', label: 'Project Title', default: '' },
-          category: { type: 'text', label: 'Category', default: '' },
-          description: { type: 'textarea', label: 'Description', default: '' },
-          tags: { type: 'text', label: 'Tags (comma-separated)', default: '' },
-          year: { type: 'text', label: 'Year', default: '2024' }
-        },
-        default: [
-          { title: 'E-Commerce Platform', category: 'Web Development', description: 'Full-stack marketplace with real-time inventory management', tags: 'React, Node.js, MongoDB', year: '2024' },
-          { title: 'Brand Redesign', category: 'Design', description: 'Complete visual identity refresh for tech startup', tags: 'Branding, UI/UX', year: '2024' },
-          { title: 'Mobile Banking App', category: 'App Design', description: 'Intuitive banking experience for 100K+ users', tags: 'Mobile, Fintech', year: '2023' }
-        ]
-      },
-      
-      skills: {
-        type: 'group',
-        label: 'Skills',
-        itemLabel: 'Skill Category',
         min: 0,
         max: 4,
         fields: {
-          category: { type: 'text', label: 'Category', default: '' },
-          items: { type: 'text', label: 'Skills (comma-separated)', default: '' }
+          title: { type: 'text', label: 'Project Title', default: '' },
+          description: { type: 'textarea', label: 'Description', default: '' },
+          tags: { type: 'text', label: 'Tags (comma-separated)', default: '' },
+          link: { type: 'url', label: 'Project Link (optional)', default: '' }
         },
         default: [
-          { category: 'Design', items: 'Figma, Adobe XD, Sketch, Photoshop' },
-          { category: 'Development', items: 'React, Vue, Node.js, TypeScript' },
-          { category: 'Tools', items: 'Git, Webpack, Docker, AWS' }
+          { 
+            title: 'Mobile Banking App', 
+            description: 'Redesigned the core banking experience for 2M+ users, resulting in 45% increase in user satisfaction',
+            tags: 'UI/UX, Mobile, Finance',
+            link: ''
+          },
+          { 
+            title: 'E-commerce Platform', 
+            description: 'Built a comprehensive design system that increased conversion by 40% and reduced development time by 60%',
+            tags: 'Design System, Web, E-commerce',
+            link: ''
+          }
         ]
       },
-      
-      contactEmail: { type: 'email', default: 'hello@alexmorgan.com', label: 'Contact Email' },
+      testimonials: {
+        type: 'group',
+        label: 'Testimonials',
+        itemLabel: 'Testimonial',
+        min: 0,
+        max: 3,
+        fields: {
+          quote: { type: 'textarea', label: 'Quote', default: '' },
+          author: { type: 'text', label: 'Author', default: '' },
+          role: { type: 'text', label: 'Author Role', default: '' }
+        },
+        default: [
+          {
+            quote: 'Jordan is an exceptional designer who brings both creativity and strategic thinking to every project.',
+            author: 'Sarah Johnson',
+            role: 'CEO, TechCorp'
+          }
+        ]
+      },
+      contactEmail: { type: 'email', default: 'hello@jordan.com', label: 'Contact Email' },
       socialLinks: {
         type: 'group',
         label: 'Social Links',
@@ -625,69 +637,120 @@ export const templates = {
           url: { type: 'url', label: 'URL', default: '' }
         },
         default: [
-          { platform: 'GitHub', url: 'https://github.com' },
+          { platform: 'Twitter', url: 'https://twitter.com' },
           { platform: 'LinkedIn', url: 'https://linkedin.com' },
           { platform: 'Dribbble', url: 'https://dribbble.com' }
         ]
       }
     },
     structure: (data) => `
-      <!-- Navigation -->
-      <nav style="position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: var(--color-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid var(--color-border); padding: 1.25rem 0;">
-        <div class="container" style="max-width: 1400px;">
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <a href="#" style="font-weight: 700; font-size: 1.125rem; text-decoration: none; color: var(--color-text);">${data.name || 'Portfolio'}</a>
-            <div style="display: flex; gap: 2.5rem; align-items: center;">
-              <a href="#work" style="color: var(--color-text-secondary); text-decoration: none; font-size: 0.9375rem; font-weight: 500; transition: color 0.2s;">Work</a>
-              <a href="#about" style="color: var(--color-text-secondary); text-decoration: none; font-size: 0.9375rem; font-weight: 500; transition: color 0.2s;">About</a>
-              <a href="#contact" style="color: var(--color-text-secondary); text-decoration: none; font-size: 0.9375rem; font-weight: 500; transition: color 0.2s;">Contact</a>
-            </div>
+      <!-- Hero Section -->
+      <section style="min-height: 90vh; display: flex; align-items: center; padding: var(--space-xxl) 0; position: relative;">
+        <div class="container" style="max-width: 1000px;">
+          <!-- Availability Badge -->
+          ${data.availability ? `
+          <div style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-full); margin-bottom: var(--space-lg); font-size: 0.875rem;">
+            <span style="width: 8px; height: 8px; background: #10b981; border-radius: 50%; display: inline-block;"></span>
+            ${data.availability}
           </div>
-        </div>
-      </nav>
+          ` : ''}
+          
+          <div style="margin-bottom: var(--space-xl);">
+            <h1 style="font-size: clamp(3rem, 8vw, 5.5rem); font-weight: 800; margin-bottom: var(--space-md); letter-spacing: -0.03em; line-height: 1;">
+              ${data.name || 'Your Name'}
+            </h1>
+            ${data.tagline ? `
+            <p style="font-size: clamp(1.5rem, 4vw, 2.25rem); color: var(--color-text-secondary); margin-bottom: var(--space-md); font-weight: 500;">
+              ${data.tagline}
+            </p>
+            ` : ''}
+            ${data.location ? `
+            <p style="font-size: 1rem; color: var(--color-text-secondary); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: 0.5rem;">
+              Ã°Å¸â€œÂ ${data.location}
+            </p>
+            ` : ''}
+            ${data.bio ? `
+            <p style="font-size: 1.25rem; line-height: 1.8; color: var(--color-text-secondary); max-width: 700px; margin-bottom: var(--space-xl);">
+              ${data.bio}
+            </p>
+            ` : ''}
 
-      <!-- Hero -->
-      <section style="min-height: 100vh; display: flex; align-items: center; padding: 8rem 0 4rem; background: var(--color-bg);">
-        <div class="container" style="max-width: 1400px;">
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6rem; align-items: center;">
-            <div>
-              <div style="display: inline-block; padding: 0.5rem 1rem; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-sm); font-size: 0.8125rem; font-weight: 600; margin-bottom: 2rem; color: var(--color-text-secondary);">
-                AVAILABLE FOR WORK
-              </div>
-              <h1 style="font-size: clamp(2.5rem, 6vw, 5rem); font-weight: 800; line-height: 1.1; margin-bottom: 1.5rem; letter-spacing: -0.03em;">
-                ${data.name || 'Your Name'}
-              </h1>
-              <p style="font-size: clamp(1.25rem, 2.5vw, 1.75rem); color: var(--color-text-secondary); margin-bottom: 1rem; font-weight: 500;">
-                ${data.title || 'Your Title'}
-              </p>
-              <p style="font-size: 1.125rem; color: var(--color-text-secondary); line-height: 1.8; margin-bottom: 3rem; max-width: 600px;">
-                ${data.bio || ''}
-              </p>
-              <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                <a href="#contact" class="btn" style="padding: 1rem 2rem;">Get in Touch</a>
-                <a href="#work" class="btn btn-outline" style="padding: 1rem 2rem;">View Work</a>
-              </div>
+            <!-- CTA Buttons -->
+            <div style="display: flex; gap: var(--space-md); flex-wrap: wrap; margin-bottom: var(--space-xl);">
+              ${data.contactEmail ? `
+              <a href="mailto:${data.contactEmail}" class="btn" style="font-size: 1rem; padding: 1rem 2rem;">
+                Get in Touch
+              </a>
+              ` : ''}
+              ${data.socialLinks && data.socialLinks.length > 0 ? `
+              <a href="#contact" class="btn btn-outline" style="font-size: 1rem; padding: 1rem 2rem;">
+                View Work
+              </a>
+              ` : ''}
             </div>
-            <div style="position: relative;">
-              <div style="aspect-ratio: 1; background: linear-gradient(135deg, var(--color-accent, #667eea) 0%, var(--color-text-secondary) 100%); border-radius: var(--radius-xl); opacity: 0.1;"></div>
+
+            <!-- Social Links -->
+            ${data.socialLinks && data.socialLinks.length > 0 ? `
+            <div style="display: flex; gap: var(--space-sm); flex-wrap: wrap;">
+              ${data.socialLinks.map(link => `
+                <a href="${link.url}" target="_blank" class="btn btn-outline" style="font-size: 0.875rem; padding: 0.625rem 1.25rem;">
+                  ${link.platform}
+                </a>
+              `).join('')}
             </div>
+            ` : ''}
           </div>
+
+          <!-- Stats Section -->
+          ${data.stats && data.stats.length > 0 ? `
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--space-lg); padding: var(--space-xl) 0; border-top: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border); margin-top: var(--space-xxl);">
+            ${data.stats.map(stat => `
+              <div style="text-align: center;">
+                <div style="font-size: 2.5rem; font-weight: 800; margin-bottom: 0.5rem; color: var(--color-accent);">${stat.number}</div>
+                <div style="font-size: 0.875rem; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.05em;">${stat.label}</div>
+              </div>
+            `).join('')}
+          </div>
+          ` : ''}
         </div>
       </section>
 
-      <!-- Services -->
-      ${data.services && data.services.length > 0 ? `
-      <section style="padding: 6rem 0; background: var(--color-surface); border-top: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border);">
-        <div class="container" style="max-width: 1400px;">
-          <h2 style="font-size: clamp(1.75rem, 4vw, 2.5rem); font-weight: 700; margin-bottom: 4rem; text-align: center; letter-spacing: -0.02em;">What I Do</h2>
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
-            ${data.services.map((service, idx) => `
-              <div style="padding: 2.5rem; background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--radius-lg); transition: all 0.3s;">
-                <div style="width: 48px; height: 48px; background: var(--color-surface); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem; font-size: 1.5rem; font-weight: 700; color: var(--color-text-secondary);">
-                  ${(idx + 1).toString().padStart(2, '0')}
+      <!-- Experience Timeline -->
+      ${data.experience && data.experience.length > 0 ? `
+      <section style="padding: var(--space-xxl) 0; background: var(--color-surface);">
+        <div class="container" style="max-width: 900px;">
+          <h2 style="font-size: clamp(2rem, 5vw, 3rem); font-weight: 700; margin-bottom: var(--space-xl); letter-spacing: -0.02em;">
+            Experience
+          </h2>
+          <div style="display: flex; flex-direction: column; gap: var(--space-xl); position: relative; padding-left: var(--space-xl);">
+            <!-- Timeline Line -->
+            <div style="position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: var(--color-border);"></div>
+            
+            ${data.experience.map((job, index) => `
+              <div style="position: relative;">
+                <!-- Timeline Dot -->
+                <div style="position: absolute; left: calc(-1 * var(--space-xl) - 6px); top: 0.25rem; width: 14px; height: 14px; background: var(--color-accent); border: 3px solid var(--color-bg); border-radius: 50%; z-index: 1;"></div>
+                
+                <div class="card" style="padding: var(--space-lg);">
+                  <div style="display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: var(--space-sm); margin-bottom: var(--space-sm);">
+                    <div>
+                      <h3 style="font-size: 1.375rem; font-weight: 600; margin-bottom: 0.25rem;">
+                        ${job.role || 'Position'}
+                      </h3>
+                      <p style="font-size: 1rem; color: var(--color-accent); font-weight: 500;">
+                        ${job.company || 'Company'}
+                      </p>
+                    </div>
+                    <span style="font-size: 0.875rem; color: var(--color-text-secondary); font-weight: 500;">
+                      ${job.period || ''}
+                    </span>
+                  </div>
+                  ${job.description ? `
+                  <p style="color: var(--color-text-secondary); line-height: 1.7; font-size: 0.9375rem;">
+                    ${job.description}
+                  </p>
+                  ` : ''}
                 </div>
-                <h3 style="font-size: 1.375rem; font-weight: 600; margin-bottom: 1rem;">${service.title || ''}</h3>
-                <p style="color: var(--color-text-secondary); line-height: 1.8; font-size: 1rem;">${service.description || ''}</p>
               </div>
             `).join('')}
           </div>
@@ -695,408 +758,76 @@ export const templates = {
       </section>
       ` : ''}
 
-      <!-- Projects -->
-      <section id="work" style="padding: 8rem 0;">
-        <div class="container" style="max-width: 1400px;">
-          <div style="margin-bottom: 4rem;">
-            <h2 style="font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 700; margin-bottom: 1rem; letter-spacing: -0.02em;">Featured Work</h2>
-            <p style="font-size: 1.125rem; color: var(--color-text-secondary);">A selection of projects I'm proud of</p>
-          </div>
-          
-          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 2rem;">
-            ${data.projects && data.projects.length > 0 ? data.projects.map(project => `
-              <div class="card" style="overflow: hidden; cursor: pointer; padding: 0;">
-                <div style="aspect-ratio: 16/10; background: linear-gradient(135deg, var(--color-surface) 0%, var(--color-border) 100%); position: relative; overflow: hidden;">
-                  <div style="position: absolute; top: 1rem; right: 1rem; padding: 0.375rem 0.75rem; background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--radius-sm); font-size: 0.75rem; font-weight: 600;">
-                    ${project.year || '2024'}
-                  </div>
-                </div>
-                <div style="padding: 2rem;">
-                  ${project.category ? `
-                  <div style="font-size: 0.8125rem; font-weight: 600; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem;">
-                    ${project.category}
-                  </div>
-                  ` : ''}
-                  <h3 style="font-size: 1.5rem; font-weight: 600; margin-bottom: 0.75rem;">${project.title || ''}</h3>
-                  <p style="color: var(--color-text-secondary); line-height: 1.7; margin-bottom: 1rem; font-size: 0.9375rem;">${project.description || ''}</p>
-                  ${project.tags ? `
-                  <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
-                    ${project.tags.split(',').map(tag => `
-                      <span style="padding: 0.25rem 0.75rem; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-sm); font-size: 0.75rem; font-weight: 500;">
-                        ${tag.trim()}
-                      </span>
-                    `).join('')}
-                  </div>
-                  ` : ''}
-                </div>
-              </div>
-            `).join('') : ''}
-          </div>
-        </div>
-      </section>
-
-      <!-- About & Skills -->
-      <section id="about" style="padding: 8rem 0; background: var(--color-surface); border-top: 1px solid var(--color-border);">
-        <div class="container" style="max-width: 1200px;">
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6rem; align-items: start;">
-            <div>
-              <h2 style="font-size: clamp(2rem, 5vw, 3rem); font-weight: 700; margin-bottom: 2rem; letter-spacing: -0.02em;">About Me</h2>
-              <p style="font-size: 1.125rem; color: var(--color-text-secondary); line-height: 1.9; margin-bottom: 2rem;">
-                ${data.about || ''}
-              </p>
-              ${data.contactEmail ? `
-              <a href="mailto:${data.contactEmail}" class="btn" style="display: inline-flex; padding: 1rem 2rem;">
-                Let's Talk
-              </a>
-              ` : ''}
-            </div>
-            
-            ${data.skills && data.skills.length > 0 ? `
-            <div>
-              <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 2rem;">Skills & Tools</h3>
-              <div style="display: flex; flex-direction: column; gap: 2rem;">
-                ${data.skills.map(skill => `
-                  <div>
-                    <h4 style="font-size: 0.875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-secondary); margin-bottom: 1rem;">
-                      ${skill.category || ''}
-                    </h4>
-                    <div style="display: flex; flex-wrap: wrap; gap: 0.75rem;">
-                      ${skill.items ? skill.items.split(',').map(item => `
-                        <span style="padding: 0.5rem 1rem; background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--radius-md); font-size: 0.9375rem; font-weight: 500;">
-                          ${item.trim()}
-                        </span>
-                      `).join('') : ''}
-                    </div>
-                  </div>
-                `).join('')}
-              </div>
-            </div>
-            ` : ''}
-          </div>
-        </div>
-      </section>
-
-      <!-- Contact -->
-      <section id="contact" style="padding: 8rem 0;">
-        <div class="container" style="max-width: 800px; text-align: center;">
-          <h2 style="font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 700; margin-bottom: 2rem; letter-spacing: -0.02em;">
-            Let's Create Something Amazing
+      <!-- Skills -->
+      ${data.skills && data.skills.length > 0 ? `
+      <section style="padding: var(--space-xxl) 0;">
+        <div class="container" style="max-width: 900px;">
+          <h2 style="font-size: clamp(2rem, 5vw, 3rem); font-weight: 700; margin-bottom: var(--space-xl); letter-spacing: -0.02em;">
+            Skills & Expertise
           </h2>
-          <p style="font-size: 1.25rem; color: var(--color-text-secondary); margin-bottom: 3rem; line-height: 1.8;">
-            Have a project in mind? I'm always interested in hearing about new opportunities and collaborations.
-          </p>
-          
-          <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-bottom: 4rem;">
-            ${data.contactEmail ? `
-            <a href="mailto:${data.contactEmail}" class="btn" style="padding: 1.25rem 2.5rem; font-size: 1.0625rem;">
-              Send a Message
-            </a>
-            ` : ''}
-          </div>
-
-          ${data.socialLinks && data.socialLinks.length > 0 ? `
-          <div style="display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap;">
-            ${data.socialLinks.map(link => `
-              <a href="${link.url}" target="_blank" style="color: var(--color-text-secondary); text-decoration: none; font-size: 0.9375rem; font-weight: 500; transition: color 0.2s;" onmouseover="this.style.color='var(--color-text)'" onmouseout="this.style.color='var(--color-text-secondary)'">
-                ${link.platform}
-              </a>
+          <div style="display: flex; flex-wrap: wrap; gap: var(--space-sm);">
+            ${data.skills.map(skill => `
+              <span style="padding: var(--space-sm) var(--space-md); background: var(--color-surface); border: 2px solid var(--color-border); border-radius: var(--radius-md); font-weight: 600; font-size: 0.9375rem; transition: all 0.2s;">
+                ${skill}
+              </span>
             `).join('')}
           </div>
-          ` : ''}
         </div>
       </section>
+      ` : ''}
 
-      <!-- Footer -->
-      <footer style="padding: 3rem 0; border-top: 1px solid var(--color-border); text-align: center;">
-        <div class="container">
-          <p style="color: var(--color-text-secondary); font-size: 0.875rem;">
-            © 2024 ${data.name || 'Portfolio'}. Designed & Developed with passion.
-          </p>
-        </div>
-      </footer>
-
-      <style>
-        @media (max-width: 768px) {
-          nav > div > div:last-child { display: none; }
-          section > div > div[style*="grid-template-columns: 1fr 1fr"] { 
-            grid-template-columns: 1fr !important; 
-            gap: 3rem !important; 
-          }
-          .card { margin-bottom: 1rem; }
-        }
-        @media (max-width: 1024px) {
-          section > div > div[style*="grid-template-columns: 1fr 1fr"] { 
-            gap: 4rem !important; 
-          }
-        }
-      </style>
-    `
-  }),
-
-  // ============================================
-  // TEMPLATE 4: SAAS LANDING PAGE
-  // ============================================
-  'saas-landing': new Template('saas-landing', {
-    name: 'SaaS Landing Page',
-    description: 'Complete SaaS landing with features, pricing, and testimonials',
-    category: 'Landing Page',
-    fields: {
-      productName: { type: 'text', default: 'CloudFlow', label: 'Product Name', required: true },
-      tagline: { type: 'text', default: 'Workflow Automation Made Simple', label: 'Tagline' },
-      headline: { 
-        type: 'text',
-        default: 'Automate Your Workflow, Focus on What Matters',
-        label: 'Hero Headline',
-        required: true
-      },
-      subheadline: { 
-        type: 'textarea',
-        default: 'Connect your tools, automate repetitive tasks, and save hours every week. No coding required.',
-        label: 'Hero Subheadline'
-      },
-      ctaPrimary: { type: 'text', default: 'Start Free Trial', label: 'Primary CTA' },
-      ctaSecondary: { type: 'text', default: 'Watch Demo', label: 'Secondary CTA' },
-      
-      trustBadges: {
-        type: 'repeatable',
-        label: 'Trust Indicators',
-        itemLabel: 'Badge',
-        default: ['500K+ Users', 'SOC 2 Certified', '99.9% Uptime', '24/7 Support'],
-        max: 6
-      },
-      
-      features: {
-        type: 'group',
-        label: 'Key Features',
-        itemLabel: 'Feature',
-        min: 1,
-        max: 8,
-        fields: {
-          title: { type: 'text', label: 'Feature Title', default: '' },
-          description: { type: 'textarea', label: 'Description', default: '' },
-          icon: { type: 'text', label: 'Icon (emoji)', default: '⚡' }
-        },
-        default: [
-          { title: 'No-Code Automation', description: 'Build powerful workflows without writing a single line of code', icon: '🔧' },
-          { title: 'Pre-built Templates', description: 'Get started instantly with 100+ ready-to-use templates', icon: '📋' },
-          { title: 'Real-time Sync', description: 'Keep all your tools in perfect sync automatically', icon: '🔄' },
-          { title: 'Team Collaboration', description: 'Work together seamlessly with built-in collaboration tools', icon: '👥' },
-          { title: 'Advanced Analytics', description: 'Track performance and optimize your workflows with detailed insights', icon: '📊' },
-          { title: 'Enterprise Security', description: 'Bank-level encryption and compliance with industry standards', icon: '🔒' }
-        ]
-      },
-      
-      pricingPlans: {
-        type: 'group',
-        label: 'Pricing Plans',
-        itemLabel: 'Plan',
-        min: 1,
-        max: 4,
-        fields: {
-          name: { type: 'text', label: 'Plan Name', default: '' },
-          price: { type: 'text', label: 'Price', default: '' },
-          period: { type: 'text', label: 'Billing Period', default: '/month' },
-          description: { type: 'textarea', label: 'Description', default: '' },
-          features: { type: 'text', label: 'Features (comma-separated)', default: '' },
-          highlighted: { type: 'select', label: 'Highlight Plan', options: ['No', 'Yes'], default: 'No' }
-        },
-        default: [
-          { name: 'Starter', price: '$0', period: '/month', description: 'Perfect for trying out CloudFlow', features: '100 tasks/month, 5 workflows, Email support', highlighted: 'No' },
-          { name: 'Professional', price: '$29', period: '/month', description: 'For growing teams and businesses', features: '10,000 tasks/month, Unlimited workflows, Priority support, Advanced analytics', highlighted: 'Yes' },
-          { name: 'Enterprise', price: 'Custom', period: '', description: 'For large organizations', features: 'Unlimited everything, Dedicated account manager, Custom integrations, SLA guarantee', highlighted: 'No' }
-        ]
-      },
-      
-      testimonials: {
-        type: 'group',
-        label: 'Customer Testimonials',
-        itemLabel: 'Testimonial',
-        min: 0,
-        max: 6,
-        fields: {
-          quote: { type: 'textarea', label: 'Quote', default: '' },
-          author: { type: 'text', label: 'Author Name', default: '' },
-          role: { type: 'text', label: 'Role & Company', default: '' },
-          rating: { type: 'select', label: 'Rating', options: ['5', '4', '3'], default: '5' }
-        },
-        default: [
-          { quote: 'CloudFlow saved us 15 hours per week. The ROI was immediate and the team loves how easy it is to use.', author: 'Sarah Chen', role: 'Operations Manager, TechCorp', rating: '5' },
-          { quote: 'Best automation tool we\'ve used. The no-code approach means everyone on the team can create workflows.', author: 'Marcus Rodriguez', role: 'CTO, StartupXYZ', rating: '5' },
-          { quote: 'The customer support is outstanding. They helped us migrate our entire workflow in just a day.', author: 'Emily Watson', role: 'Product Lead, Innovate Inc', rating: '5' }
-        ]
-      },
-      
-      faqItems: {
-        type: 'group',
-        label: 'FAQ Items',
-        itemLabel: 'Question',
-        min: 0,
-        max: 8,
-        fields: {
-          question: { type: 'text', label: 'Question', default: '' },
-          answer: { type: 'textarea', label: 'Answer', default: '' }
-        },
-        default: [
-          { question: 'Do I need coding skills to use CloudFlow?', answer: 'Not at all! CloudFlow is designed for everyone. Our visual workflow builder makes it easy to create powerful automations without writing code.' },
-          { question: 'Can I cancel anytime?', answer: 'Yes, you can cancel your subscription at any time. No contracts, no commitments.' },
-          { question: 'What integrations do you support?', answer: 'We support 500+ integrations including Gmail, Slack, Salesforce, Google Sheets, and more. We\'re constantly adding new integrations.' }
-        ]
-      },
-      
-      contactEmail: { type: 'email', default: 'hello@cloudflow.com', label: 'Contact Email' }
-    },
-    structure: (data) => `
-      <!-- Navigation -->
-      <nav style="position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: var(--color-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid var(--color-border); padding: 1rem 0;">
-        <div class="container" style="max-width: 1400px;">
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <div style="display: flex; align-items: center; gap: 3rem;">
-              <a href="#" style="font-weight: 700; font-size: 1.25rem; text-decoration: none; color: var(--color-text);">${data.productName || 'Product'}</a>
-              <div style="display: flex; gap: 2rem;">
-                <a href="#features" style="color: var(--color-text-secondary); text-decoration: none; font-size: 0.9375rem; font-weight: 500;">Features</a>
-                <a href="#pricing" style="color: var(--color-text-secondary); text-decoration: none; font-size: 0.9375rem; font-weight: 500;">Pricing</a>
-                <a href="#testimonials" style="color: var(--color-text-secondary); text-decoration: none; font-size: 0.9375rem; font-weight: 500;">Reviews</a>
-              </div>
-            </div>
-            <div style="display: flex; gap: 1rem; align-items: center;">
-              <a href="#" style="color: var(--color-text-secondary); text-decoration: none; font-size: 0.9375rem; font-weight: 500;">Sign In</a>
-              <a href="#" class="btn" style="padding: 0.75rem 1.5rem; font-size: 0.9375rem;">${data.ctaPrimary || 'Get Started'}</a>
-            </div>
-          </div>
-        </div>
-      </nav>
-
-      <!-- Hero -->
-      <section style="padding: 10rem 0 6rem; background: var(--color-bg); position: relative; overflow: hidden;">
-        <div style="position: absolute; inset: 0; opacity: 0.03; background: radial-gradient(circle at 50% 50%, var(--color-accent, #667eea) 0%, transparent 50%);"></div>
-        <div class="container" style="max-width: 1200px; position: relative;">
-          <div style="text-align: center; max-width: 900px; margin: 0 auto;">
-            ${data.tagline ? `
-            <div style="display: inline-block; padding: 0.5rem 1.25rem; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-full); font-size: 0.875rem; font-weight: 600; margin-bottom: 2rem; color: var(--color-text-secondary);">
-              ${data.tagline}
-            </div>
-            ` : ''}
-            <h1 style="font-size: clamp(2.5rem, 7vw, 5.5rem); font-weight: 800; line-height: 1.1; margin-bottom: 2rem; letter-spacing: -0.03em;">
-              ${data.headline || 'Your Headline Here'}
-            </h1>
-            <p style="font-size: clamp(1.125rem, 2vw, 1.375rem); color: var(--color-text-secondary); margin-bottom: 3rem; line-height: 1.7;">
-              ${data.subheadline || ''}
-            </p>
-            <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-bottom: 4rem;">
-              ${data.ctaPrimary ? `<a href="#" class="btn" style="padding: 1.25rem 2.5rem; font-size: 1.0625rem;">${data.ctaPrimary}</a>` : ''}
-              ${data.ctaSecondary ? `<a href="#" class="btn btn-outline" style="padding: 1.25rem 2.5rem; font-size: 1.0625rem;">${data.ctaSecondary}</a>` : ''}
-            </div>
-            
-            ${data.trustBadges && data.trustBadges.length > 0 ? `
-            <div style="display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap; padding-top: 2rem; border-top: 1px solid var(--color-border);">
-              ${data.trustBadges.map(badge => `
-                <div style="font-size: 0.875rem; font-weight: 600; color: var(--color-text-secondary);">
-                  ${badge}
-                </div>
-              `).join('')}
-            </div>
-            ` : ''}
-          </div>
-        </div>
-      </section>
-
-      <!-- Features -->
-      <section id="features" style="padding: 8rem 0; background: var(--color-surface); border-top: 1px solid var(--color-border);">
-        <div class="container" style="max-width: 1400px;">
-          <div style="text-align: center; margin-bottom: 5rem; max-width: 700px; margin-left: auto; margin-right: auto;">
-            <h2 style="font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 700; margin-bottom: 1rem; letter-spacing: -0.02em;">
-              Everything You Need
-            </h2>
-            <p style="font-size: 1.125rem; color: var(--color-text-secondary); line-height: 1.7;">
-              Powerful features that help you work smarter, not harder
-            </p>
-          </div>
-          
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem;">
-            ${data.features && data.features.length > 0 ? data.features.map(feature => `
-              <div class="card" style="padding: 2.5rem; text-align: center;">
-                <div style="width: 64px; height: 64px; background: var(--color-surface); border-radius: var(--radius-lg); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; font-size: 2rem; border: 1px solid var(--color-border);">
-                  ${feature.icon || '✨'}
-                </div>
-                <h3 style="font-size: 1.375rem; font-weight: 600; margin-bottom: 1rem;">${feature.title || ''}</h3>
-                <p style="color: var(--color-text-secondary); line-height: 1.8; font-size: 1rem;">${feature.description || ''}</p>
-              </div>
-            `).join('') : ''}
-          </div>
-        </div>
-      </section>
-
-      <!-- Pricing -->
-      <section id="pricing" style="padding: 8rem 0;">
-        <div class="container" style="max-width: 1200px;">
-          <div style="text-align: center; margin-bottom: 5rem;">
-            <h2 style="font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 700; margin-bottom: 1rem; letter-spacing: -0.02em;">
-              Simple, Transparent Pricing
-            </h2>
-            <p style="font-size: 1.125rem; color: var(--color-text-secondary);">
-              Choose the perfect plan for your needs
-            </p>
-          </div>
-          
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; max-width: 1100px; margin: 0 auto;">
-            ${data.pricingPlans && data.pricingPlans.length > 0 ? data.pricingPlans.map(plan => `
-              <div class="card" style="padding: 3rem 2.5rem; text-align: center; ${plan.highlighted === 'Yes' ? 'border: 2px solid var(--color-accent, #667eea); box-shadow: 0 12px 40px rgba(0,0,0,0.12);' : ''}">
-                ${plan.highlighted === 'Yes' ? `
-                <div style="display: inline-block; padding: 0.375rem 1rem; background: var(--color-accent, #667eea); color: white; border-radius: var(--radius-full); font-size: 0.75rem; font-weight: 700; margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: 0.05em;">
-                  MOST POPULAR
-                </div>
-                ` : '<div style="height: 2.5rem;"></div>'}
-                <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem;">${plan.name || ''}</h3>
-                <div style="margin-bottom: 1rem;">
-                  <span style="font-size: 3.5rem; font-weight: 800; letter-spacing: -0.02em;">${plan.price || ''}</span>
-                  ${plan.period ? `<span style="font-size: 1.125rem; color: var(--color-text-secondary);">${plan.period}</span>` : ''}
-                </div>
-                <p style="color: var(--color-text-secondary); margin-bottom: 2rem; min-height: 3em; line-height: 1.6;">
-                  ${plan.description || ''}
+      <!-- Projects -->
+      ${data.projects && data.projects.length > 0 ? `
+      <section style="padding: var(--space-xxl) 0; background: var(--color-surface);">
+        <div class="container" style="max-width: 1100px;">
+          <h2 style="font-size: clamp(2rem, 5vw, 3rem); font-weight: 700; margin-bottom: var(--space-xl); letter-spacing: -0.02em;">
+            Featured Work
+          </h2>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: var(--space-xl);">
+            ${data.projects.map(project => `
+              <div class="card" style="padding: var(--space-xl); display: flex; flex-direction: column; height: 100%;">
+                <h3 style="font-size: 1.625rem; font-weight: 700; margin-bottom: var(--space-md); letter-spacing: -0.01em;">
+                  ${project.title || 'Project'}
+                </h3>
+                <p style="color: var(--color-text-secondary); line-height: 1.8; margin-bottom: var(--space-md); font-size: 1rem; flex-grow: 1;">
+                  ${project.description || ''}
                 </p>
-                <a href="#" class="btn ${plan.highlighted === 'Yes' ? '' : 'btn-outline'}" style="width: 100%; padding: 1rem; margin-bottom: 2rem; font-size: 1rem;">
-                  ${plan.highlighted === 'Yes' ? 'Start Free Trial' : 'Get Started'}
-                </a>
-                ${plan.features ? `
-                <div style="text-align: left; padding-top: 2rem; border-top: 1px solid var(--color-border);">
-                  ${plan.features.split(',').map(feature => `
-                    <div style="display: flex; gap: 0.75rem; margin-bottom: 1rem; font-size: 0.9375rem;">
-                      <span style="color: var(--color-accent, #667eea); font-weight: 700; flex-shrink: 0;">✓</span>
-                      <span style="color: var(--color-text-secondary); line-height: 1.6;">${feature.trim()}</span>
-                    </div>
+                ${project.tags ? `
+                <div style="display: flex; flex-wrap: wrap; gap: var(--space-xs); margin-bottom: var(--space-md);">
+                  ${project.tags.split(',').map(tag => `
+                    <span style="padding: 0.375rem 0.75rem; background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--radius-sm); font-size: 0.75rem; color: var(--color-text-secondary); font-weight: 600;">
+                      ${tag.trim()}
+                    </span>
                   `).join('')}
                 </div>
                 ` : ''}
+                ${project.link ? `
+                <a href="${project.link}" target="_blank" class="btn btn-outline" style="align-self: flex-start;">
+                  View Project Ã¢â€ â€™
+                </a>
+                ` : ''}
               </div>
-            `).join('') : ''}
+            `).join('')}
           </div>
         </div>
       </section>
+      ` : ''}
 
       <!-- Testimonials -->
       ${data.testimonials && data.testimonials.length > 0 ? `
-      <section id="testimonials" style="padding: 8rem 0; background: var(--color-surface); border-top: 1px solid var(--color-border);">
-        <div class="container" style="max-width: 1200px;">
-          <div style="text-align: center; margin-bottom: 5rem;">
-            <h2 style="font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 700; margin-bottom: 1rem; letter-spacing: -0.02em;">
-              Loved by Teams Worldwide
-            </h2>
-            <p style="font-size: 1.125rem; color: var(--color-text-secondary);">
-              See what our customers have to say
-            </p>
-          </div>
-          
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 2rem;">
+      <section style="padding: var(--space-xxl) 0;">
+        <div class="container" style="max-width: 1100px;">
+          <h2 style="font-size: clamp(2rem, 5vw, 3rem); font-weight: 700; margin-bottom: var(--space-xl); letter-spacing: -0.02em; text-align: center;">
+            What People Say
+          </h2>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: var(--space-lg);">
             ${data.testimonials.map(testimonial => `
-              <div class="card" style="padding: 2.5rem;">
-                <div style="display: flex; gap: 0.25rem; margin-bottom: 1.5rem;">
-                  ${Array(parseInt(testimonial.rating || 5)).fill('⭐').join('')}
-                </div>
-                <p style="font-size: 1.0625rem; line-height: 1.8; margin-bottom: 1.5rem; color: var(--color-text);">
+              <div class="card" style="padding: var(--space-xl);">
+                <p style="font-size: 1.125rem; line-height: 1.8; margin-bottom: var(--space-lg); font-style: italic; color: var(--color-text);">
                   "${testimonial.quote || ''}"
                 </p>
-                <div style="display: flex; align-items: center; gap: 1rem; padding-top: 1.5rem; border-top: 1px solid var(--color-border);">
-                  <div style="width: 48px; height: 48px; border-radius: 50%; background: var(--color-surface); border: 1px solid var(--color-border);"></div>
+                <div style="display: flex; align-items: center; gap: var(--space-md); padding-top: var(--space-md); border-top: 1px solid var(--color-border);">
+                  <div style="width: 48px; height: 48px; border-radius: 50%; background: var(--color-accent); opacity: 0.2;"></div>
                   <div>
                     <h4 style="font-weight: 600; margin-bottom: 0.25rem; font-size: 0.9375rem;">${testimonial.author || ''}</h4>
                     <p style="color: var(--color-text-secondary); font-size: 0.875rem;">${testimonial.role || ''}</p>
@@ -1109,21 +840,3062 @@ export const templates = {
       </section>
       ` : ''}
 
-      <!-- FAQ -->
-      ${data.faqItems && data.faqItems.length > 0 ? `
-      <section style="padding: 8rem 0;">
+      <!-- Contact CTA -->
+      <section id="contact" style="padding: var(--space-xxl) 0; background: var(--color-surface); text-align: center;">
+        <div class="container" style="max-width: 700px;">
+          <h2 style="font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 800; margin-bottom: var(--space-lg); letter-spacing: -0.03em;">
+            Let's Work Together
+          </h2>
+          <p style="font-size: 1.25rem; color: var(--color-text-secondary); margin-bottom: var(--space-xl); line-height: 1.7;">
+            Have a project in mind? Let's create something amazing together.
+          </p>
+          ${data.contactEmail ? `
+          <a href="mailto:${data.contactEmail}" class="btn" style="padding: 1.25rem 3rem; font-size: 1.125rem;">
+            Get in Touch
+          </a>
+          ` : ''}
+        </div>
+      </section>
+
+      <!-- Footer -->
+      <footer style="padding: var(--space-xl) 0; border-top: 1px solid var(--color-border); text-align: center; color: var(--color-text-secondary); font-size: 0.875rem;">
+        <div class="container">
+          <p>Ã‚Â© 2024 ${data.name || 'Your Name'}. Designed with care.</p>
+        </div>
+      </footer>
+    `
+  }),
+
+  // ============================================
+  // TEMPLATE 3: RESTAURANT
+  // ============================================
+  'restaurant': new Template('restaurant', {
+    name: 'Restaurant',
+    description: 'Beautiful restaurant website with menu and reservation',
+    image: '/templates/restaurant.png',
+    category: 'Restaurant',
+    fields: {
+      restaurantName: { type: 'text', default: 'Bella Cucina', label: 'Restaurant Name', required: true },
+      tagline: { type: 'text', default: 'Authentic Italian Cuisine', label: 'Tagline' },
+      description: {
+        type: 'textarea',
+        default: 'Experience the heart of Italy in every bite. Our chefs bring generations of tradition to your table.',
+        label: 'Restaurant Description'
+      },
+      address: { type: 'text', default: '123 Main Street, Downtown', label: 'Address' },
+      phone: { type: 'tel', default: '(555) 123-4567', label: 'Phone' },
+      email: { type: 'email', default: 'info@bellacucina.com', label: 'Email' },
+      hours: {
+        type: 'group',
+        label: 'Hours',
+        itemLabel: 'Day',
+        min: 0,
+        max: 7,
+        fields: {
+          day: { type: 'text', label: 'Day', default: '' },
+          hours: { type: 'text', label: 'Hours', default: '' }
+        },
+        default: [
+          { day: 'Mon-Thu', hours: '11:00 AM - 10:00 PM' },
+          { day: 'Fri-Sat', hours: '11:00 AM - 11:00 PM' },
+          { day: 'Sunday', hours: '12:00 PM - 9:00 PM' }
+        ]
+      },
+      menuCategories: {
+        type: 'group',
+        label: 'Menu Categories',
+        itemLabel: 'Category',
+        min: 1,
+        max: 6,
+        fields: {
+          category: { type: 'text', label: 'Category Name', default: '' },
+          items: {
+            type: 'group',
+            label: 'Items',
+            itemLabel: 'Item',
+            fields: {
+              name: { type: 'text', label: 'Item Name', default: '' },
+              description: { type: 'textarea', label: 'Description', default: '' },
+              price: { type: 'text', label: 'Price', default: '' }
+            }
+          }
+        },
+        default: [
+          {
+            category: 'Appetizers',
+            items: [
+              { name: 'Bruschetta', description: 'Toasted bread with tomatoes, basil, and olive oil', price: '$12' },
+              { name: 'Caprese Salad', description: 'Fresh mozzarella, tomatoes, and basil', price: '$14' }
+            ]
+          },
+          {
+            category: 'Main Courses',
+            items: [
+              { name: 'Spaghetti Carbonara', description: 'Classic Roman pasta with eggs, cheese, and pancetta', price: '$22' },
+              { name: 'Margherita Pizza', description: 'San Marzano tomatoes, mozzarella, and fresh basil', price: '$18' }
+            ]
+          }
+        ]
+      },
+      specialties: {
+        type: 'group',
+        label: 'Chef Specialties',
+        itemLabel: 'Specialty',
+        min: 0,
+        max: 3,
+        fields: {
+          name: { type: 'text', label: 'Dish Name', default: '' },
+          description: { type: 'textarea', label: 'Description', default: '' },
+          price: { type: 'text', label: 'Price', default: '' }
+        },
+        default: [
+          {
+            name: 'Osso Buco',
+            description: 'Slow-braised veal shanks with saffron risotto',
+            price: '$38'
+          }
+        ]
+      },
+      reservationUrl: { type: 'url', default: '', label: 'Reservation URL (optional)' }
+    },
+    structure: (data) => `
+      <header style="padding: 1.5rem 0; border-bottom: 1px solid var(--color-border); position: sticky; top: 0; background: var(--color-bg); z-index: 100; backdrop-filter: blur(10px);">
+        <div class="container">
+          <nav style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-weight: 700; font-size: 1.375rem; letter-spacing: -0.02em;">${data.restaurantName || 'Restaurant'}</div>
+            <ul style="display: flex; gap: 2rem; list-style: none;">
+              <li><a href="#menu" style="color: var(--color-text-secondary); text-decoration: none; font-size: 0.9375rem; font-weight: 500;">Menu</a></li>
+              <li><a href="#about" style="color: var(--color-text-secondary); text-decoration: none; font-size: 0.9375rem; font-weight: 500;">About</a></li>
+              <li><a href="#contact" style="color: var(--color-text-secondary); text-decoration: none; font-size: 0.9375rem; font-weight: 500;">Contact</a></li>
+            </ul>
+          </nav>
+        </div>
+      </header>
+
+      <main>
+        <!-- Hero -->
+        <section style="padding: 8rem 0 6rem; text-align: center; background: var(--color-surface); border-bottom: 1px solid var(--color-border);">
+          <div class="container" style="max-width: 900px;">
+            <h1 style="font-size: clamp(3rem, 8vw, 5.5rem); font-weight: 800; line-height: 1; letter-spacing: -0.03em; margin-bottom: 1.5rem;">
+              ${data.restaurantName || 'Restaurant'}
+            </h1>
+            ${data.tagline ? `
+            <p style="font-size: clamp(1.25rem, 3vw, 1.75rem); color: var(--color-accent); margin-bottom: 2rem; font-weight: 600;">
+              ${data.tagline}
+            </p>
+            ` : ''}
+            ${data.description ? `
+            <p style="font-size: 1.25rem; color: var(--color-text-secondary); max-width: 700px; margin: 0 auto 3rem; line-height: 1.8;">
+              ${data.description}
+            </p>
+            ` : ''}
+            <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+              ${data.reservationUrl ? `
+              <a href="${data.reservationUrl}" target="_blank" class="btn" style="padding: 1rem 2.5rem; font-size: 1rem;">Reserve a Table</a>
+              ` : ''}
+              <a href="#menu" class="btn btn-outline" style="padding: 1rem 2.5rem; font-size: 1rem;">View Menu</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- Chef's Specialties -->
+        ${data.specialties && data.specialties.length > 0 ? `
+        <section style="padding: 6rem 0; background: var(--color-bg);">
+          <div class="container" style="max-width: 1100px;">
+            <h2 style="font-size: clamp(2.5rem, 6vw, 3.5rem); font-weight: 700; text-align: center; margin-bottom: 1rem; letter-spacing: -0.02em;">
+              Chef's Specialties
+            </h2>
+            <p style="text-align: center; color: var(--color-text-secondary); max-width: 600px; margin: 0 auto 4rem; font-size: 1.125rem;">
+              Our signature dishes, crafted with passion
+            </p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem;">
+              ${data.specialties.map(dish => `
+                <div class="card" style="padding: var(--space-xl); text-align: center;">
+                  <div style="width: 80px; height: 80px; background: var(--color-accent); border-radius: 50%; margin: 0 auto 1.5rem; opacity: 0.1;"></div>
+                  <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem;">${dish.name || ''}</h3>
+                  <p style="color: var(--color-text-secondary); line-height: 1.7; margin-bottom: 1.5rem; font-size: 1rem;">
+                    ${dish.description || ''}
+                  </p>
+                  <div style="font-size: 1.5rem; font-weight: 700; color: var(--color-accent);">${dish.price || ''}</div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </section>
+        ` : ''}
+
+        <!-- Menu -->
+        <section id="menu" style="padding: 6rem 0; background: var(--color-surface);">
+          <div class="container" style="max-width: 1000px;">
+            <h2 style="font-size: clamp(2.5rem, 6vw, 3.5rem); font-weight: 700; text-align: center; margin-bottom: 4rem; letter-spacing: -0.02em;">
+              Our Menu
+            </h2>
+            ${data.menuCategories && data.menuCategories.length > 0 ? data.menuCategories.map(category => `
+              <div style="margin-bottom: 5rem;">
+                <h3 style="font-size: 2rem; font-weight: 700; margin-bottom: 2.5rem; padding-bottom: 1rem; border-bottom: 2px solid var(--color-border); letter-spacing: -0.01em;">
+                  ${category.category || 'Category'}
+                </h3>
+                <div style="display: grid; gap: 2rem;">
+                  ${category.items && category.items.length > 0 ? category.items.map(item => `
+                    <div style="display: flex; justify-content: space-between; align-items: start; gap: 2rem; padding-bottom: 2rem; border-bottom: 1px solid var(--color-border);">
+                      <div style="flex: 1;">
+                        <h4 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">${item.name || ''}</h4>
+                        <p style="color: var(--color-text-secondary); line-height: 1.7; font-size: 0.9375rem;">
+                          ${item.description || ''}
+                        </p>
+                      </div>
+                      <div style="font-size: 1.25rem; font-weight: 700; color: var(--color-accent); white-space: nowrap;">
+                        ${item.price || ''}
+                      </div>
+                    </div>
+                  `).join('') : ''}
+                </div>
+              </div>
+            `).join('') : ''}
+          </div>
+        </section>
+
+        <!-- About & Hours -->
+        <section id="about" style="padding: 6rem 0;">
+          <div class="container" style="max-width: 1000px;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 3rem;">
+              <!-- Hours -->
+              ${data.hours && data.hours.length > 0 ? `
+              <div class="card" style="padding: var(--space-xl);">
+                <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: var(--space-lg);">Hours</h3>
+                <div style="display: grid; gap: var(--space-sm);">
+                  ${data.hours.map(day => `
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-sm) 0;">
+                      <span style="font-weight: 600;">${day.day || ''}</span>
+                      <span style="color: var(--color-text-secondary);">${day.hours || ''}</span>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+              ` : ''}
+
+              <!-- Contact -->
+              <div class="card" id="contact" style="padding: var(--space-xl);">
+                <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: var(--space-lg);">Visit Us</h3>
+                <div style="display: grid; gap: var(--space-md); font-size: 0.9375rem;">
+                  ${data.address ? `
+                  <div>
+                    <div style="font-weight: 600; margin-bottom: 0.25rem; color: var(--color-text-secondary); font-size: 0.875rem;">Address</div>
+                    <div>${data.address}</div>
+                  </div>
+                  ` : ''}
+                  ${data.phone ? `
+                  <div>
+                    <div style="font-weight: 600; margin-bottom: 0.25rem; color: var(--color-text-secondary); font-size: 0.875rem;">Phone</div>
+                    <a href="tel:${data.phone}" style="color: var(--color-text); text-decoration: none;">${data.phone}</a>
+                  </div>
+                  ` : ''}
+                  ${data.email ? `
+                  <div>
+                    <div style="font-weight: 600; margin-bottom: 0.25rem; color: var(--color-text-secondary); font-size: 0.875rem;">Email</div>
+                    <a href="mailto:${data.email}" style="color: var(--color-text); text-decoration: none;">${data.email}</a>
+                  </div>
+                  ` : ''}
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Reservation CTA -->
+        <section style="padding: 6rem 0; background: var(--color-surface); text-align: center; border-top: 1px solid var(--color-border);">
+          <div class="container" style="max-width: 700px;">
+            <h2 style="font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 800; margin-bottom: 1.5rem; letter-spacing: -0.03em;">
+              Ready to Dine?
+            </h2>
+            <p style="font-size: 1.25rem; color: var(--color-text-secondary); margin-bottom: 2.5rem; line-height: 1.7;">
+              Reserve your table today and experience authentic Italian cuisine
+            </p>
+            ${data.reservationUrl ? `
+            <a href="${data.reservationUrl}" target="_blank" class="btn" style="padding: 1.25rem 3rem; font-size: 1.125rem;">
+              Make a Reservation
+            </a>
+            ` : data.phone ? `
+            <a href="tel:${data.phone}" class="btn" style="padding: 1.25rem 3rem; font-size: 1.125rem;">
+              Call to Reserve
+            </a>
+            ` : ''}
+          </div>
+        </section>
+      </main>
+
+      <footer style="padding: 3rem 0; border-top: 1px solid var(--color-border); text-align: center; color: var(--color-text-secondary); font-size: 0.875rem;">
+        <div class="container">
+          <p>Ã‚Â© 2024 ${data.restaurantName || 'Restaurant'}. All rights reserved.</p>
+        </div>
+      </footer>
+    `
+  }),
+
+  // ============================================
+  // TEMPLATE 4: DIGITAL BUSINESS CARD
+  // ============================================
+  'digital-card': new Template('digital-card', {
+    name: 'Digital Business Card',
+    description: 'Modern digital business card with QR code and instant contact sharing',
+    category: 'Personal',
+    fields: {
+      name: { type: 'text', default: 'Alex Morgan', label: 'Full Name', required: true },
+      title: { type: 'text', default: 'Senior Product Manager', label: 'Job Title' },
+      company: { type: 'text', default: 'TechCorp Inc.', label: 'Company' },
+      tagline: { 
+        type: 'text',
+        default: 'Building products people love',
+        label: 'Tagline'
+      },
+      email: { type: 'email', default: 'alex@techcorp.com', label: 'Email', required: true },
+      phone: { type: 'tel', default: '+1 (555) 123-4567', label: 'Phone' },
+      website: { type: 'url', default: 'https://alexmorgan.com', label: 'Website' },
+      location: { type: 'text', default: 'San Francisco, CA', label: 'Location' },
+      bio: {
+        type: 'textarea',
+        default: 'Passionate about creating user-centered products that make a difference. 10+ years in tech.',
+        label: 'Short Bio'
+      },
+      socialLinks: {
+        type: 'group',
+        label: 'Social Links',
+        itemLabel: 'Link',
+        min: 0,
+        max: 6,
+        fields: {
+          platform: { type: 'text', label: 'Platform', default: '' },
+          username: { type: 'text', label: 'Username', default: '' },
+          url: { type: 'url', label: 'URL', default: '' }
+        },
+        default: [
+          { platform: 'LinkedIn', username: '@alexmorgan', url: 'https://linkedin.com/in/alexmorgan' },
+          { platform: 'Twitter', username: '@alexmorgan', url: 'https://twitter.com/alexmorgan' },
+          { platform: 'GitHub', username: '@alexmorgan', url: 'https://github.com/alexmorgan' }
+        ]
+      },
+      skills: {
+        type: 'repeatable',
+        label: 'Key Skills',
+        itemLabel: 'Skill',
+        default: ['Product Strategy', 'User Research', 'Agile', 'Data Analysis'],
+        max: 6
+      }
+    },
+    structure: (data) => `
+      <!-- Card Container -->
+      <div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: var(--space-lg); background: var(--color-bg);">
+        <div style="max-width: 500px; width: 100%;">
+          <!-- Main Card -->
+          <div class="card" style="padding: var(--space-xxl); text-align: center; position: relative; overflow: hidden;">
+            <!-- Decorative Background -->
+            <div style="position: absolute; top: 0; left: 0; right: 0; height: 120px; background: var(--color-surface); opacity: 0.5; z-index: 0;"></div>
+            
+            <!-- Profile Section -->
+            <div style="position: relative; z-index: 1; margin-bottom: var(--space-xl);">
+              <!-- Avatar Placeholder -->
+              <div style="width: 120px; height: 120px; margin: 0 auto var(--space-lg); background: var(--color-accent); border-radius: 50%; border: 4px solid var(--color-bg); opacity: 0.2;"></div>
+              
+              <h1 style="font-size: 2rem; font-weight: 800; margin-bottom: 0.5rem; letter-spacing: -0.02em;">
+                ${data.name || 'Your Name'}
+              </h1>
+              
+              ${data.title ? `
+              <p style="font-size: 1.125rem; color: var(--color-accent); font-weight: 600; margin-bottom: 0.25rem;">
+                ${data.title}
+              </p>
+              ` : ''}
+              
+              ${data.company ? `
+              <p style="font-size: 1rem; color: var(--color-text-secondary); margin-bottom: var(--space-md);">
+                ${data.company}
+              </p>
+              ` : ''}
+              
+              ${data.tagline ? `
+              <p style="font-size: 0.9375rem; color: var(--color-text-secondary); font-style: italic; margin-bottom: var(--space-lg);">
+                "${data.tagline}"
+              </p>
+              ` : ''}
+              
+              ${data.location ? `
+              <p style="font-size: 0.875rem; color: var(--color-text-secondary); display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                Ã°Å¸â€œÂ ${data.location}
+              </p>
+              ` : ''}
+            </div>
+
+            <!-- Bio -->
+            ${data.bio ? `
+            <div style="padding: var(--space-lg) 0; border-top: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border); margin-bottom: var(--space-lg);">
+              <p style="font-size: 0.9375rem; line-height: 1.7; color: var(--color-text-secondary);">
+                ${data.bio}
+              </p>
+            </div>
+            ` : ''}
+
+            <!-- Contact Info -->
+            <div style="display: grid; gap: var(--space-sm); margin-bottom: var(--space-lg); text-align: left;">
+              ${data.email ? `
+              <a href="mailto:${data.email}" style="display: flex; align-items: center; gap: 0.75rem; padding: var(--space-sm); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); text-decoration: none; color: var(--color-text); transition: all 0.2s;">
+                <span style="font-size: 1.25rem;">Ã¢Å“â€°Ã¯Â¸Â</span>
+                <span style="font-size: 0.875rem; font-weight: 500;">${data.email}</span>
+              </a>
+              ` : ''}
+              
+              ${data.phone ? `
+              <a href="tel:${data.phone.replace(/\s/g, '')}" style="display: flex; align-items: center; gap: 0.75rem; padding: var(--space-sm); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); text-decoration: none; color: var(--color-text); transition: all 0.2s;">
+                <span style="font-size: 1.25rem;">Ã°Å¸â€œÅ¾</span>
+                <span style="font-size: 0.875rem; font-weight: 500;">${data.phone}</span>
+              </a>
+              ` : ''}
+              
+              ${data.website ? `
+              <a href="${data.website}" target="_blank" style="display: flex; align-items: center; gap: 0.75rem; padding: var(--space-sm); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); text-decoration: none; color: var(--color-text); transition: all 0.2s;">
+                <span style="font-size: 1.25rem;">Ã°Å¸Å’Â</span>
+                <span style="font-size: 0.875rem; font-weight: 500;">${data.website.replace('https://', '').replace('http://', '')}</span>
+              </a>
+              ` : ''}
+            </div>
+
+            <!-- Skills -->
+            ${data.skills && data.skills.length > 0 ? `
+            <div style="margin-bottom: var(--space-lg);">
+              <h3 style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--color-text-secondary); margin-bottom: var(--space-md);">
+                Expertise
+              </h3>
+              <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center;">
+                ${data.skills.map(skill => `
+                  <span style="padding: 0.375rem 0.875rem; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-full); font-size: 0.8125rem; font-weight: 600;">
+                    ${skill}
+                  </span>
+                `).join('')}
+              </div>
+            </div>
+            ` : ''}
+
+            <!-- Social Links -->
+            ${data.socialLinks && data.socialLinks.length > 0 ? `
+            <div style="margin-top: var(--space-lg); padding-top: var(--space-lg); border-top: 1px solid var(--color-border);">
+              <h3 style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--color-text-secondary); margin-bottom: var(--space-md);">
+                Connect
+              </h3>
+              <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center;">
+                ${data.socialLinks.map(link => `
+                  <a href="${link.url}" target="_blank" class="btn btn-outline" style="font-size: 0.8125rem; padding: 0.5rem 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <span>${link.platform}</span>
+                    ${link.username ? `<span style="opacity: 0.6; font-size: 0.75rem;">${link.username}</span>` : ''}
+                  </a>
+                `).join('')}
+              </div>
+            </div>
+            ` : ''}
+
+            <!-- Save Contact Button -->
+            <div style="margin-top: var(--space-xl);">
+              <button onclick="saveContact()" class="btn" style="width: 100%; padding: var(--space-md); font-size: 1rem; cursor: pointer;">
+                Ã°Å¸â€™Â¾ Save Contact
+              </button>
+            </div>
+          </div>
+
+          <!-- QR Code Section -->
+          <div class="card" style="margin-top: var(--space-md); padding: var(--space-lg); text-align: center;">
+            <p style="font-size: 0.875rem; color: var(--color-text-secondary); margin-bottom: var(--space-md);">
+              Scan to save contact
+            </p>
+            <div id="qr-code" style="width: 200px; height: 200px; margin: 0 auto; background: var(--color-surface); border: 2px solid var(--color-border); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; color: var(--color-text-secondary);">
+              QR Code
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <script>
+        function saveContact() {
+          // Create vCard data
+          const vcard = \`BEGIN:VCARD
+VERSION:3.0
+FN:${data.name || ''}
+TITLE:${data.title || ''}
+ORG:${data.company || ''}
+EMAIL:${data.email || ''}
+TEL:${data.phone || ''}
+URL:${data.website || ''}
+NOTE:${data.bio || ''}
+END:VCARD\`;
+          
+          // Create blob and download
+          const blob = new Blob([vcard], { type: 'text/vcard' });
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = '${(data.name || 'contact').replace(/\s/g, '_')}.vcf';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          window.URL.revokeObjectURL(url);
+        }
+
+        // Generate QR code URL (using a public API)
+        window.addEventListener('DOMContentLoaded', () => {
+          const qrData = encodeURIComponent(window.location.href);
+          const qrUrl = \`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=\${qrData}\`;
+          document.getElementById('qr-code').innerHTML = \`<img src="\${qrUrl}" alt="QR Code" style="width: 100%; height: 100%; border-radius: var(--radius-md);">\`;
+        });
+      </script>
+    `
+  }),
+
+  // ============================================
+  // TEMPLATE 5: RESUME/CV
+  // ============================================
+  'resume': new Template('resume', {
+    name: 'Resume/CV',
+    description: 'Professional resume with work experience, education, and skills',
+    category: 'Personal',
+    fields: {
+      name: { type: 'text', default: 'Sarah Johnson', label: 'Full Name', required: true },
+      title: { type: 'text', default: 'Software Engineer', label: 'Professional Title' },
+      email: { type: 'email', default: 'sarah.johnson@email.com', label: 'Email', required: true },
+      phone: { type: 'tel', default: '+1 (555) 987-6543', label: 'Phone' },
+      location: { type: 'text', default: 'Seattle, WA', label: 'Location' },
+      website: { type: 'url', default: 'https://sarahjohnson.dev', label: 'Website/Portfolio' },
+      linkedin: { type: 'url', default: 'https://linkedin.com/in/sarahjohnson', label: 'LinkedIn' },
+      github: { type: 'url', default: 'https://github.com/sarahjohnson', label: 'GitHub/Portfolio Link' },
+      summary: {
+        type: 'textarea',
+        default: 'Experienced software engineer with 7+ years building scalable web applications. Passionate about clean code, user experience, and mentoring junior developers. Proven track record of delivering high-impact features used by millions.',
+        label: 'Professional Summary'
+      },
+      experience: {
+        type: 'group',
+        label: 'Work Experience',
+        itemLabel: 'Position',
+        min: 1,
+        max: 8,
+        fields: {
+          role: { type: 'text', label: 'Job Title', default: '' },
+          company: { type: 'text', label: 'Company', default: '' },
+          location: { type: 'text', label: 'Location', default: '' },
+          period: { type: 'text', label: 'Period (e.g., Jan 2020 - Present)', default: '' },
+          achievements: {
+            type: 'repeatable',
+            label: 'Key Achievements',
+            itemLabel: 'Achievement',
+            default: [],
+            max: 5
+          }
+        },
+        default: [
+          {
+            role: 'Senior Software Engineer',
+            company: 'TechCorp',
+            location: 'Seattle, WA',
+            period: 'Jan 2021 - Present',
+            achievements: [
+              'Led development of core platform features serving 5M+ users',
+              'Reduced page load time by 40% through optimization',
+              'Mentored 3 junior engineers to mid-level positions'
+            ]
+          },
+          {
+            role: 'Software Engineer',
+            company: 'StartupXYZ',
+            location: 'San Francisco, CA',
+            period: 'Jun 2018 - Dec 2020',
+            achievements: [
+              'Built real-time collaboration features from scratch',
+              'Improved test coverage from 40% to 85%',
+              'Contributed to open-source projects used by the team'
+            ]
+          }
+        ]
+      },
+      education: {
+        type: 'group',
+        label: 'Education',
+        itemLabel: 'Degree',
+        min: 0,
+        max: 4,
+        fields: {
+          degree: { type: 'text', label: 'Degree', default: '' },
+          school: { type: 'text', label: 'School/University', default: '' },
+          location: { type: 'text', label: 'Location', default: '' },
+          year: { type: 'text', label: 'Graduation Year', default: '' },
+          details: { type: 'text', label: 'Additional Details (optional)', default: '' }
+        },
+        default: [
+          {
+            degree: 'Bachelor of Science in Computer Science',
+            school: 'University of Washington',
+            location: 'Seattle, WA',
+            year: '2018',
+            details: 'GPA: 3.8/4.0, Dean\'s List'
+          }
+        ]
+      },
+      skills: {
+        type: 'group',
+        label: 'Skills',
+        itemLabel: 'Category',
+        min: 1,
+        max: 6,
+        fields: {
+          category: { type: 'text', label: 'Category Name', default: '' },
+          items: {
+            type: 'repeatable',
+            label: 'Skills',
+            itemLabel: 'Skill',
+            default: []
+          }
+        },
+        default: [
+          {
+            category: 'Languages',
+            items: ['JavaScript', 'TypeScript', 'Python', 'Go']
+          },
+          {
+            category: 'Frontend',
+            items: ['React', 'Next.js', 'Vue', 'Tailwind CSS']
+          },
+          {
+            category: 'Backend',
+            items: ['Node.js', 'PostgreSQL', 'Redis', 'GraphQL']
+          },
+          {
+            category: 'Tools',
+            items: ['Git', 'Docker', 'AWS', 'CI/CD']
+          }
+        ]
+      },
+      certifications: {
+        type: 'group',
+        label: 'Certifications',
+        itemLabel: 'Certification',
+        min: 0,
+        max: 5,
+        fields: {
+          name: { type: 'text', label: 'Certification Name', default: '' },
+          issuer: { type: 'text', label: 'Issuing Organization', default: '' },
+          year: { type: 'text', label: 'Year', default: '' }
+        },
+        default: [
+          {
+            name: 'AWS Certified Solutions Architect',
+            issuer: 'Amazon Web Services',
+            year: '2023'
+          }
+        ]
+      },
+      languages: {
+        type: 'group',
+        label: 'Languages',
+        itemLabel: 'Language',
+        min: 0,
+        max: 5,
+        fields: {
+          language: { type: 'text', label: 'Language', default: '' },
+          proficiency: { type: 'text', label: 'Proficiency', default: '' }
+        },
+        default: [
+          { language: 'English', proficiency: 'Native' },
+          { language: 'Spanish', proficiency: 'Intermediate' }
+        ]
+      }
+    },
+    structure: (data) => `
+      <div style="min-height: 100vh; padding: var(--space-xl) var(--space-md); background: var(--color-bg);">
+        <div style="max-width: 900px; margin: 0 auto; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); box-shadow: var(--shadow-md);">
+          
+          <!-- Header Section -->
+          <header style="padding: var(--space-xxl) var(--space-xl); background: var(--color-bg); border-bottom: 3px solid var(--color-accent); border-radius: var(--radius-lg) var(--radius-lg) 0 0;">
+            <h1 style="font-size: 2.5rem; font-weight: 800; margin-bottom: 0.5rem; letter-spacing: -0.02em;">
+              ${data.name || 'Your Name'}
+            </h1>
+            ${data.title ? `
+            <p style="font-size: 1.25rem; color: var(--color-accent); font-weight: 600; margin-bottom: var(--space-lg);">
+              ${data.title}
+            </p>
+            ` : ''}
+            
+            <!-- Contact Info -->
+            <div style="display: flex; flex-wrap: wrap; gap: var(--space-md); font-size: 0.9375rem; color: var(--color-text-secondary);">
+              ${data.email ? `<span>Ã¢Å“â€°Ã¯Â¸Â ${data.email}</span>` : ''}
+              ${data.phone ? `<span>Ã°Å¸â€œÅ¾ ${data.phone}</span>` : ''}
+              ${data.location ? `<span>Ã°Å¸â€œÂ ${data.location}</span>` : ''}
+            </div>
+            
+            <!-- Links -->
+            ${(data.website || data.linkedin || data.github) ? `
+            <div style="display: flex; flex-wrap: wrap; gap: var(--space-sm); margin-top: var(--space-md);">
+              ${data.website ? `<a href="${data.website}" target="_blank" class="btn btn-outline" style="font-size: 0.875rem; padding: 0.5rem 1rem;">Ã°Å¸Å’Â Website</a>` : ''}
+              ${data.linkedin ? `<a href="${data.linkedin}" target="_blank" class="btn btn-outline" style="font-size: 0.875rem; padding: 0.5rem 1rem;">Ã°Å¸â€™Â¼ LinkedIn</a>` : ''}
+              ${data.github ? `<a href="${data.github}" target="_blank" class="btn btn-outline" style="font-size: 0.875rem; padding: 0.5rem 1rem;">Ã°Å¸â€™Â» GitHub</a>` : ''}
+            </div>
+            ` : ''}
+          </header>
+
+          <!-- Main Content -->
+          <div style="padding: var(--space-xl);">
+            
+            <!-- Summary -->
+            ${data.summary ? `
+            <section style="margin-bottom: var(--space-xxl);">
+              <h2 style="font-size: 1.375rem; font-weight: 700; margin-bottom: var(--space-md); color: var(--color-accent); text-transform: uppercase; letter-spacing: 0.05em; font-size: 1rem;">
+                Professional Summary
+              </h2>
+              <p style="font-size: 1rem; line-height: 1.8; color: var(--color-text-secondary);">
+                ${data.summary}
+              </p>
+            </section>
+            ` : ''}
+
+            <!-- Experience -->
+            ${data.experience && data.experience.length > 0 ? `
+            <section style="margin-bottom: var(--space-xxl);">
+              <h2 style="font-size: 1.375rem; font-weight: 700; margin-bottom: var(--space-lg); color: var(--color-accent); text-transform: uppercase; letter-spacing: 0.05em; font-size: 1rem;">
+                Work Experience
+              </h2>
+              <div style="display: flex; flex-direction: column; gap: var(--space-xl);">
+                ${data.experience.map(job => `
+                  <div>
+                    <div style="display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: var(--space-sm); margin-bottom: var(--space-sm);">
+                      <div style="flex: 1;">
+                        <h3 style="font-size: 1.125rem; font-weight: 700; margin-bottom: 0.25rem;">
+                          ${job.role || ''}
+                        </h3>
+                        <p style="font-size: 1rem; color: var(--color-text-secondary); font-weight: 600;">
+                          ${job.company || ''} ${job.location ? `Ã¢â‚¬Â¢ ${job.location}` : ''}
+                        </p>
+                      </div>
+                      <span style="font-size: 0.875rem; color: var(--color-text-secondary); font-weight: 600; white-space: nowrap;">
+                        ${job.period || ''}
+                      </span>
+                    </div>
+                    ${job.achievements && job.achievements.length > 0 ? `
+                    <ul style="margin: 0; padding-left: 1.25rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                      ${job.achievements.map(achievement => `
+                        <li style="font-size: 0.9375rem; line-height: 1.7; color: var(--color-text-secondary);">
+                          ${achievement}
+                        </li>
+                      `).join('')}
+                    </ul>
+                    ` : ''}
+                  </div>
+                `).join('')}
+              </div>
+            </section>
+            ` : ''}
+
+            <!-- Education -->
+            ${data.education && data.education.length > 0 ? `
+            <section style="margin-bottom: var(--space-xxl);">
+              <h2 style="font-size: 1.375rem; font-weight: 700; margin-bottom: var(--space-lg); color: var(--color-accent); text-transform: uppercase; letter-spacing: 0.05em; font-size: 1rem;">
+                Education
+              </h2>
+              <div style="display: flex; flex-direction: column; gap: var(--space-lg);">
+                ${data.education.map(edu => `
+                  <div>
+                    <div style="display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: var(--space-sm);">
+                      <div style="flex: 1;">
+                        <h3 style="font-size: 1.125rem; font-weight: 700; margin-bottom: 0.25rem;">
+                          ${edu.degree || ''}
+                        </h3>
+                        <p style="font-size: 1rem; color: var(--color-text-secondary); font-weight: 600;">
+                          ${edu.school || ''} ${edu.location ? `Ã¢â‚¬Â¢ ${edu.location}` : ''}
+                        </p>
+                        ${edu.details ? `
+                        <p style="font-size: 0.875rem; color: var(--color-text-secondary); margin-top: 0.25rem;">
+                          ${edu.details}
+                        </p>
+                        ` : ''}
+                      </div>
+                      <span style="font-size: 0.875rem; color: var(--color-text-secondary); font-weight: 600;">
+                        ${edu.year || ''}
+                      </span>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            </section>
+            ` : ''}
+
+            <!-- Skills -->
+            ${data.skills && data.skills.length > 0 ? `
+            <section style="margin-bottom: var(--space-xxl);">
+              <h2 style="font-size: 1.375rem; font-weight: 700; margin-bottom: var(--space-lg); color: var(--color-accent); text-transform: uppercase; letter-spacing: 0.05em; font-size: 1rem;">
+                Skills
+              </h2>
+              <div style="display: grid; gap: var(--space-md);">
+                ${data.skills.map(skillGroup => `
+                  <div>
+                    <h3 style="font-size: 0.875rem; font-weight: 700; margin-bottom: var(--space-sm); text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-secondary);">
+                      ${skillGroup.category || ''}
+                    </h3>
+                    <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                      ${skillGroup.items && skillGroup.items.length > 0 ? skillGroup.items.map(skill => `
+                        <span style="padding: 0.375rem 0.875rem; background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--radius-md); font-size: 0.875rem; font-weight: 600;">
+                          ${skill}
+                        </span>
+                      `).join('') : ''}
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            </section>
+            ` : ''}
+
+            <!-- Two Column Layout for Certifications and Languages -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--space-xl);">
+              
+              <!-- Certifications -->
+              ${data.certifications && data.certifications.length > 0 ? `
+              <section>
+                <h2 style="font-size: 1.375rem; font-weight: 700; margin-bottom: var(--space-lg); color: var(--color-accent); text-transform: uppercase; letter-spacing: 0.05em; font-size: 1rem;">
+                  Certifications
+                </h2>
+                <div style="display: flex; flex-direction: column; gap: var(--space-md);">
+                  ${data.certifications.map(cert => `
+                    <div>
+                      <h3 style="font-size: 0.9375rem; font-weight: 700; margin-bottom: 0.25rem;">
+                        ${cert.name || ''}
+                      </h3>
+                      <p style="font-size: 0.875rem; color: var(--color-text-secondary);">
+                        ${cert.issuer || ''} ${cert.year ? `Ã¢â‚¬Â¢ ${cert.year}` : ''}
+                      </p>
+                    </div>
+                  `).join('')}
+                </div>
+              </section>
+              ` : ''}
+
+              <!-- Languages -->
+              ${data.languages && data.languages.length > 0 ? `
+              <section>
+                <h2 style="font-size: 1.375rem; font-weight: 700; margin-bottom: var(--space-lg); color: var(--color-accent); text-transform: uppercase; letter-spacing: 0.05em; font-size: 1rem;">
+                  Languages
+                </h2>
+                <div style="display: flex; flex-direction: column; gap: var(--space-md);">
+                  ${data.languages.map(lang => `
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                      <span style="font-size: 0.9375rem; font-weight: 600;">
+                        ${lang.language || ''}
+                      </span>
+                      <span style="font-size: 0.875rem; color: var(--color-text-secondary);">
+                        ${lang.proficiency || ''}
+                      </span>
+                    </div>
+                  `).join('')}
+                </div>
+              </section>
+              ` : ''}
+            </div>
+
+          </div>
+
+          <!-- Footer -->
+          <footer style="padding: var(--space-lg) var(--space-xl); background: var(--color-bg); border-top: 1px solid var(--color-border); border-radius: 0 0 var(--radius-lg) var(--radius-lg); text-align: center;">
+            <button onclick="window.print()" class="btn" style="padding: var(--space-sm) var(--space-xl); cursor: pointer;">
+              Ã°Å¸â€“Â¨Ã¯Â¸Â Print / Save as PDF
+            </button>
+          </footer>
+
+        </div>
+      </div>
+
+      <style>
+        @media print {
+          body {
+            background: white;
+            padding: 0;
+          }
+          .theme-toggle {
+            display: none !important;
+          }
+          footer button {
+            display: none !important;
+          }
+          .card {
+            box-shadow: none !important;
+            border: 1px solid #e5e7eb !important;
+          }
+        }
+      </style>
+    `
+  }),
+
+  // ============================================
+  // TEMPLATE 6: PHOTOGRAPHY PORTFOLIO (MASONRY)
+  // ============================================
+  'photo-masonry': new Template('photo-masonry', {
+    name: 'Photography Portfolio (Masonry)',
+    description: 'Dynamic masonry grid photography portfolio',
+    category: 'Portfolio',
+    fields: {
+      photographerName: { type: 'text', default: 'Emma Wilson', label: 'Photographer Name', required: true },
+      tagline: { type: 'text', default: 'Fine Art & Portrait Photography', label: 'Tagline' },
+      bio: {
+        type: 'textarea',
+        default: 'Capturing moments that tell stories. Based in NYC, available worldwide for commissions.',
+        label: 'Bio'
+      },
+      email: { type: 'email', default: 'hello@emmawilson.com', label: 'Email' },
+      instagram: { type: 'text', default: '@emmawilsonphoto', label: 'Instagram Handle' },
+      categories: {
+        type: 'repeatable',
+        label: 'Gallery Categories',
+        itemLabel: 'Category',
+        default: ['All', 'Portraits', 'Landscapes', 'Street', 'Editorial'],
+        max: 8
+      },
+      photos: {
+        type: 'group',
+        label: 'Portfolio Photos',
+        itemLabel: 'Photo',
+        min: 4,
+        max: 50,
+        fields: {
+          title: { type: 'text', label: 'Title', default: '' },
+          category: { type: 'text', label: 'Category', default: '' },
+          description: { type: 'textarea', label: 'Description (optional)', default: '' },
+          imageUrl: { type: 'url', label: 'Image URL', default: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800' }
+        },
+        default: [
+          { title: 'Golden Hour', category: 'Landscapes', description: 'Sunset over the mountains', imageUrl: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800' },
+          { title: 'Urban Life', category: 'Street', description: 'City streets at night', imageUrl: 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=600' },
+          { title: 'Portrait Study', category: 'Portraits', description: 'Natural light portrait', imageUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=500' },
+          { title: 'Architecture', category: 'Editorial', description: 'Modern design', imageUrl: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=700' },
+          { title: 'Nature', category: 'Landscapes', description: 'Forest path', imageUrl: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=600' },
+          { title: 'City Lights', category: 'Street', description: 'Urban exploration', imageUrl: 'https://images.unsplash.com/photo-1514565131-fce0801e5785?w=800' }
+        ]
+      },
+      services: {
+        type: 'group',
+        label: 'Services',
+        itemLabel: 'Service',
+        min: 0,
+        max: 4,
+        fields: {
+          name: { type: 'text', label: 'Service Name', default: '' },
+          description: { type: 'textarea', label: 'Description', default: '' }
+        },
+        default: [
+          { name: 'Portrait Sessions', description: 'Professional portraits for individuals and families' },
+          { name: 'Event Photography', description: 'Coverage for weddings, parties, and corporate events' },
+          { name: 'Commercial Work', description: 'Product and editorial photography for brands' }
+        ]
+      }
+    },
+    structure: (data) => `
+      <!-- Header -->
+      <header style="padding: 1.5rem 0; border-bottom: 1px solid var(--color-border); position: sticky; top: 0; background: var(--color-bg); z-index: 100; backdrop-filter: blur(10px);">
+        <div class="container">
+          <nav style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-weight: 700; font-size: 1.25rem; letter-spacing: -0.02em;">${data.photographerName || 'Photographer'}</div>
+            <div style="display: flex; align-items: center; gap: 2rem;">
+              <ul style="display: flex; gap: 2rem; list-style: none; align-items: center;">
+                <li><a href="#gallery" style="color: var(--color-text-secondary); text-decoration: none; font-size: 0.9375rem; font-weight: 500;">Gallery</a></li>
+                <li><a href="#about" style="color: var(--color-text-secondary); text-decoration: none; font-size: 0.9375rem; font-weight: 500;">About</a></li>
+                <li><a href="#contact" style="color: var(--color-text-secondary); text-decoration: none; font-size: 0.9375rem; font-weight: 500;">Contact</a></li>
+                <li>
+                  <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle theme">
+                    <span class="theme-icon">Ã°Å¸Å’â„¢</span>
+                  </button>
+                </li>
+              </ul>
+            </div>
+          </nav>
+        </div>
+      </header>
+
+      <!-- Hero -->
+      <section style="padding: 6rem 0 4rem; text-align: center; background: var(--color-surface); border-bottom: 1px solid var(--color-border);">
+        <div class="container" style="max-width: 800px;">
+          <h1 style="font-size: clamp(2.5rem, 7vw, 4.5rem); font-weight: 800; margin-bottom: 1rem; letter-spacing: -0.03em;">
+            ${data.photographerName || 'Photographer'}
+          </h1>
+          ${data.tagline ? `
+          <p style="font-size: clamp(1.125rem, 3vw, 1.5rem); color: var(--color-accent); margin-bottom: 1.5rem; font-weight: 600;">
+            ${data.tagline}
+          </p>
+          ` : ''}
+          ${data.bio ? `
+          <p style="font-size: 1.125rem; color: var(--color-text-secondary); margin-bottom: 2rem; line-height: 1.8;">
+            ${data.bio}
+          </p>
+          ` : ''}
+        </div>
+      </section>
+
+      <!-- Gallery Filters -->
+      <section id="gallery" style="padding: 3rem 0 1.5rem; background: var(--color-bg);">
+        <div class="container">
+          <div style="display: flex; justify-content: center; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 2rem;">
+            ${data.categories && data.categories.length > 0 ? data.categories.map((cat, index) => `
+              <button 
+                class="filter-btn ${index === 0 ? 'active' : ''}" 
+                onclick="filterGallery('${cat.toLowerCase()}')"
+                style="padding: 0.625rem 1.5rem; background: ${index === 0 ? 'var(--color-text)' : 'var(--color-surface)'}; color: ${index === 0 ? 'var(--color-bg)' : 'var(--color-text)'}; border: 2px solid var(--color-border); border-radius: var(--radius-full); font-weight: 600; cursor: pointer; transition: all 0.2s; font-size: 0.9375rem;"
+              >
+                ${cat}
+              </button>
+            `).join('') : ''}
+          </div>
+        </div>
+      </section>
+
+      <!-- Masonry Gallery -->
+      <section style="padding: 0 0 4rem; background: var(--color-bg);">
+        <div class="container">
+          <div id="masonry-grid" style="column-count: 3; column-gap: 1.5rem;">
+            ${data.photos && data.photos.length > 0 ? data.photos.map((photo, index) => `
+              <div class="gallery-item" data-category="${(photo.category || '').toLowerCase()}" style="break-inside: avoid; margin-bottom: 1.5rem; cursor: pointer;" onclick="openLightbox(${index})">
+                <div style="position: relative; overflow: hidden; border-radius: var(--radius-lg); border: 1px solid var(--color-border); transition: all 0.3s;">
+                  <img 
+                    src="${photo.imageUrl || ''}" 
+                    alt="${photo.title || 'Photo'}"
+                    style="width: 100%; height: auto; display: block; transition: transform 0.3s;"
+                    onmouseover="this.style.transform='scale(1.05)'"
+                    onmouseout="this.style.transform='scale(1)'"
+                  />
+                  <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 1.5rem; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); color: white; opacity: 0; transition: opacity 0.3s;" class="photo-overlay">
+                    <h3 style="font-size: 1.125rem; font-weight: 700; margin-bottom: 0.25rem; color: white;">${photo.title || ''}</h3>
+                    ${photo.description ? `<p style="font-size: 0.875rem; opacity: 0.9; color: white;">${photo.description}</p>` : ''}
+                  </div>
+                </div>
+              </div>
+            `).join('') : ''}
+          </div>
+        </div>
+      </section>
+
+      <!-- About & Services -->
+      <section id="about" style="padding: 6rem 0; background: var(--color-surface); border-top: 1px solid var(--color-border);">
+        <div class="container" style="max-width: 1000px;">
+          ${data.services && data.services.length > 0 ? `
+          <div>
+            <h2 style="font-size: clamp(2rem, 5vw, 3rem); font-weight: 700; margin-bottom: 3rem; text-align: center; letter-spacing: -0.02em;">
+              Services
+            </h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem;">
+              ${data.services.map(service => `
+                <div class="card" style="padding: 2rem; text-align: center;">
+                  <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 1rem;">${service.name || ''}</h3>
+                  <p style="color: var(--color-text-secondary); line-height: 1.7;">${service.description || ''}</p>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+          ` : ''}
+        </div>
+      </section>
+
+      <!-- Contact -->
+      <section id="contact" style="padding: 6rem 0; text-align: center;">
+        <div class="container" style="max-width: 700px;">
+          <h2 style="font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 800; margin-bottom: 1.5rem; letter-spacing: -0.03em;">
+            Let's Work Together
+          </h2>
+          <p style="font-size: 1.25rem; color: var(--color-text-secondary); margin-bottom: 2.5rem; line-height: 1.7;">
+            Available for commissions and collaborations
+          </p>
+          <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+            ${data.email ? `
+            <a href="mailto:${data.email}" class="btn" style="padding: 1rem 2.5rem; font-size: 1rem;">
+              Get in Touch
+            </a>
+            ` : ''}
+            ${data.instagram ? `
+            <a href="https://instagram.com/${data.instagram.replace('@', '')}" target="_blank" class="btn btn-outline" style="padding: 1rem 2.5rem; font-size: 1rem;">
+              ${data.instagram}
+            </a>
+            ` : ''}
+          </div>
+        </div>
+      </section>
+
+      <!-- Footer -->
+      <footer style="padding: 3rem 0; border-top: 1px solid var(--color-border); text-align: center; color: var(--color-text-secondary); font-size: 0.875rem;">
+        <div class="container">
+          <p>Ã‚Â© 2024 ${data.photographerName || 'Photographer'}. All rights reserved.</p>
+        </div>
+      </footer>
+
+      <!-- Lightbox -->
+      <div id="lightbox" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.95); z-index: 10000; align-items: center; justify-content: center; padding: 2rem;" onclick="closeLightbox()">
+        <button onclick="closeLightbox()" style="position: absolute; top: 2rem; right: 2rem; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.3); color: white; width: 48px; height: 48px; border-radius: 50%; font-size: 1.5rem; cursor: pointer; backdrop-filter: blur(10px);">Ãƒâ€”</button>
+        <button onclick="event.stopPropagation(); prevPhoto()" style="position: absolute; left: 2rem; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.3); color: white; width: 48px; height: 48px; border-radius: 50%; font-size: 1.5rem; cursor: pointer; backdrop-filter: blur(10px);">Ã¢â‚¬Â¹</button>
+        <button onclick="event.stopPropagation(); nextPhoto()" style="position: absolute; right: 2rem; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.3); color: white; width: 48px; height: 48px; border-radius: 50%; font-size: 1.5rem; cursor: pointer; backdrop-filter: blur(10px);">Ã¢â‚¬Âº</button>
+        <div style="max-width: 90vw; max-height: 90vh; text-align: center;">
+          <img id="lightbox-img" src="" alt="" style="max-width: 100%; max-height: 85vh; object-fit: contain; border-radius: var(--radius-lg);" onclick="event.stopPropagation()">
+          <div id="lightbox-info" style="color: white; margin-top: 1.5rem; padding: 1rem;"></div>
+        </div>
+      </div>
+
+      <style>
+        .photo-overlay { pointer-events: none; }
+        .gallery-item:hover .photo-overlay { opacity: 1; }
+        
+        .filter-btn:hover {
+          border-color: var(--color-text) !important;
+          transform: translateY(-2px);
+        }
+        
+        .filter-btn.active {
+          background: var(--color-text) !important;
+          color: var(--color-bg) !important;
+          border-color: var(--color-text) !important;
+        }
+        
+        @media (max-width: 1024px) {
+          #masonry-grid { column-count: 2; }
+        }
+        
+        @media (max-width: 640px) {
+          #masonry-grid { column-count: 1; }
+        }
+      </style>
+
+      <script>
+        const photos = ${JSON.stringify(data.photos || [])};
+        let currentPhotoIndex = 0;
+        
+        function filterGallery(category) {
+          const items = document.querySelectorAll('.gallery-item');
+          const buttons = document.querySelectorAll('.filter-btn');
+          
+          buttons.forEach(btn => {
+            btn.classList.remove('active');
+            btn.style.background = 'var(--color-surface)';
+            btn.style.color = 'var(--color-text)';
+          });
+          
+          event.target.classList.add('active');
+          event.target.style.background = 'var(--color-text)';
+          event.target.style.color = 'var(--color-bg)';
+          
+          items.forEach(item => {
+            if (category === 'all' || item.dataset.category === category) {
+              item.style.display = 'block';
+            } else {
+              item.style.display = 'none';
+            }
+          });
+        }
+        
+        function openLightbox(index) {
+          currentPhotoIndex = index;
+          showPhoto(index);
+          document.getElementById('lightbox').style.display = 'flex';
+          document.body.style.overflow = 'hidden';
+        }
+        
+        function closeLightbox() {
+          document.getElementById('lightbox').style.display = 'none';
+          document.body.style.overflow = 'auto';
+        }
+        
+        function showPhoto(index) {
+          const photo = photos[index];
+          document.getElementById('lightbox-img').src = photo.imageUrl;
+          document.getElementById('lightbox-info').innerHTML = \`
+            <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem;">\${photo.title || ''}</h3>
+            \${photo.description ? \`<p style="font-size: 1rem; opacity: 0.8;">\${photo.description}</p>\` : ''}
+          \`;
+        }
+        
+        function prevPhoto() {
+          currentPhotoIndex = (currentPhotoIndex - 1 + photos.length) % photos.length;
+          showPhoto(currentPhotoIndex);
+        }
+        
+        function nextPhoto() {
+          currentPhotoIndex = (currentPhotoIndex + 1) % photos.length;
+          showPhoto(currentPhotoIndex);
+        }
+        
+        document.addEventListener('keydown', (e) => {
+          if (document.getElementById('lightbox').style.display === 'flex') {
+            if (e.key === 'Escape') closeLightbox();
+            if (e.key === 'ArrowLeft') prevPhoto();
+            if (e.key === 'ArrowRight') nextPhoto();
+          }
+        });
+      </script>
+    `
+  }),
+
+  // ============================================
+  // TEMPLATE 7: PHOTOGRAPHY PORTFOLIO (GRID)
+  // ============================================
+  'photo-grid': new Template('photo-grid', {
+    name: 'Photography Portfolio (Grid)',
+    description: 'Clean uniform grid photography portfolio',
+    category: 'Portfolio',
+    fields: {
+      photographerName: { type: 'text', default: 'Alex Chen', label: 'Photographer Name', required: true },
+      tagline: { type: 'text', default: 'Commercial & Lifestyle Photography', label: 'Tagline' },
+      bio: {
+        type: 'textarea',
+        default: 'Award-winning photographer specializing in commercial and lifestyle photography. Creating compelling visual stories for brands and editorial.',
+        label: 'Bio'
+      },
+      email: { type: 'email', default: 'hello@alexchen.com', label: 'Email' },
+      phone: { type: 'tel', default: '+1 (555) 123-4567', label: 'Phone (optional)' },
+      instagram: { type: 'text', default: '@alexchenphoto', label: 'Instagram Handle' },
+      categories: {
+        type: 'repeatable',
+        label: 'Gallery Categories',
+        itemLabel: 'Category',
+        default: ['All', 'Commercial', 'Lifestyle', 'Fashion', 'Travel'],
+        max: 8
+      },
+      photos: {
+        type: 'group',
+        label: 'Portfolio Photos',
+        itemLabel: 'Photo',
+        min: 4,
+        max: 50,
+        fields: {
+          title: { type: 'text', label: 'Title', default: '' },
+          category: { type: 'text', label: 'Category', default: '' },
+          description: { type: 'textarea', label: 'Description (optional)', default: '' },
+          imageUrl: { type: 'url', label: 'Image URL', default: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800' }
+        },
+        default: [
+          { title: 'Brand Campaign', category: 'Commercial', description: 'Product photography for luxury brand', imageUrl: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800' },
+          { title: 'Urban Style', category: 'Lifestyle', description: 'Editorial lifestyle shoot', imageUrl: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=800' },
+          { title: 'Fashion Week', category: 'Fashion', description: 'Backstage moments', imageUrl: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=800' },
+          { title: 'Wanderlust', category: 'Travel', description: 'Travel photography series', imageUrl: 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=800' },
+          { title: 'Product Line', category: 'Commercial', description: 'E-commerce photography', imageUrl: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800' },
+          { title: 'Daily Life', category: 'Lifestyle', description: 'Authentic moments', imageUrl: 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=800' },
+          { title: 'Runway', category: 'Fashion', description: 'Fashion show coverage', imageUrl: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800' },
+          { title: 'Destinations', category: 'Travel', description: 'Global adventures', imageUrl: 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=800' }
+        ]
+      },
+      awards: {
+        type: 'group',
+        label: 'Awards & Recognition',
+        itemLabel: 'Award',
+        min: 0,
+        max: 5,
+        fields: {
+          title: { type: 'text', label: 'Award Title', default: '' },
+          year: { type: 'text', label: 'Year', default: '' }
+        },
+        default: [
+          { title: 'International Photography Awards - Gold', year: '2023' },
+          { title: 'Best Commercial Photographer', year: '2022' }
+        ]
+      },
+      clients: {
+        type: 'repeatable',
+        label: 'Notable Clients',
+        itemLabel: 'Client',
+        default: ['Nike', 'Apple', 'Vogue', 'National Geographic'],
+        max: 10
+      }
+    },
+    structure: (data) => `
+      <!-- Header -->
+      <header style="padding: 1.5rem 0; border-bottom: 1px solid var(--color-border); position: sticky; top: 0; background: var(--color-bg); z-index: 100; backdrop-filter: blur(10px);">
+        <div class="container">
+          <nav style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-weight: 700; font-size: 1.25rem; letter-spacing: -0.02em;">${data.photographerName || 'Photographer'}</div>
+            <div style="display: flex; align-items: center; gap: 2rem;">
+              <ul style="display: flex; gap: 2rem; list-style: none; align-items: center;">
+                <li><a href="#gallery" style="color: var(--color-text-secondary); text-decoration: none; font-size: 0.9375rem; font-weight: 500;">Work</a></li>
+                <li><a href="#about" style="color: var(--color-text-secondary); text-decoration: none; font-size: 0.9375rem; font-weight: 500;">About</a></li>
+                <li><a href="#contact" style="color: var(--color-text-secondary); text-decoration: none; font-size: 0.9375rem; font-weight: 500;">Contact</a></li>
+                <li>
+                  <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle theme">
+                    <span class="theme-icon">Ã°Å¸Å’â„¢</span>
+                  </button>
+                </li>
+              </ul>
+            </div>
+          </nav>
+        </div>
+      </header>
+
+      <!-- Hero -->
+      <section style="padding: 8rem 0 5rem; text-align: center; background: var(--color-surface); border-bottom: 1px solid var(--color-border);">
+        <div class="container" style="max-width: 900px;">
+          <h1 style="font-size: clamp(3rem, 8vw, 5.5rem); font-weight: 800; margin-bottom: 1rem; letter-spacing: -0.03em; line-height: 1;">
+            ${data.photographerName || 'Photographer'}
+          </h1>
+          ${data.tagline ? `
+          <p style="font-size: clamp(1.25rem, 3vw, 1.75rem); color: var(--color-accent); margin-bottom: 2rem; font-weight: 600;">
+            ${data.tagline}
+          </p>
+          ` : ''}
+          ${data.bio ? `
+          <p style="font-size: 1.125rem; color: var(--color-text-secondary); max-width: 700px; margin: 0 auto 2.5rem; line-height: 1.8;">
+            ${data.bio}
+          </p>
+          ` : ''}
+          ${data.email ? `
+          <a href="mailto:${data.email}" class="btn" style="padding: 1rem 2.5rem; font-size: 1rem;">
+            Work With Me
+          </a>
+          ` : ''}
+        </div>
+      </section>
+
+      <!-- Gallery Filters -->
+      <section id="gallery" style="padding: 3rem 0 2rem; background: var(--color-bg);">
+        <div class="container">
+          <div style="display: flex; justify-content: center; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 3rem;">
+            ${data.categories && data.categories.length > 0 ? data.categories.map((cat, index) => `
+              <button 
+                class="filter-btn ${index === 0 ? 'active' : ''}" 
+                onclick="filterGallery('${cat.toLowerCase()}')"
+                style="padding: 0.625rem 1.5rem; background: ${index === 0 ? 'var(--color-text)' : 'var(--color-surface)'}; color: ${index === 0 ? 'var(--color-bg)' : 'var(--color-text)'}; border: 2px solid var(--color-border); border-radius: var(--radius-full); font-weight: 600; cursor: pointer; transition: all 0.2s; font-size: 0.9375rem;"
+              >
+                ${cat}
+              </button>
+            `).join('') : ''}
+          </div>
+        </div>
+      </section>
+
+      <!-- Uniform Grid Gallery -->
+      <section style="padding: 0 0 5rem; background: var(--color-bg);">
+        <div class="container">
+          <div id="grid-gallery" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem;">
+            ${data.photos && data.photos.length > 0 ? data.photos.map((photo, index) => `
+              <div class="gallery-item" data-category="${(photo.category || '').toLowerCase()}" style="cursor: pointer; aspect-ratio: 1; overflow: hidden; border-radius: var(--radius-lg); border: 1px solid var(--color-border); position: relative;" onclick="openLightbox(${index})">
+                <img 
+                  src="${photo.imageUrl || ''}" 
+                  alt="${photo.title || 'Photo'}"
+                  style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s;"
+                  onmouseover="this.style.transform='scale(1.05)'"
+                  onmouseout="this.style.transform='scale(1)'"
+                />
+                <div style="position: absolute; inset: 0; padding: 1.5rem; background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); color: white; opacity: 0; transition: opacity 0.3s; display: flex; flex-direction: column; justify-content: flex-end;" class="photo-overlay">
+                  <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem; color: white;">${photo.title || ''}</h3>
+                  ${photo.description ? `<p style="font-size: 0.875rem; opacity: 0.9; color: white;">${photo.description}</p>` : ''}
+                </div>
+              </div>
+            `).join('') : ''}
+          </div>
+        </div>
+      </section>
+
+      <!-- About Section -->
+      <section id="about" style="padding: 6rem 0; background: var(--color-surface); border-top: 1px solid var(--color-border);">
+        <div class="container" style="max-width: 1100px;">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 4rem;">
+            
+            ${data.clients && data.clients.length > 0 ? `
+            <div>
+              <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem; letter-spacing: -0.01em;">
+                Notable Clients
+              </h2>
+              <div style="display: flex; flex-wrap: wrap; gap: 1rem;">
+                ${data.clients.map(client => `
+                  <span style="padding: 0.75rem 1.25rem; background: var(--color-bg); border: 2px solid var(--color-border); border-radius: var(--radius-md); font-weight: 600; font-size: 0.9375rem;">
+                    ${client}
+                  </span>
+                `).join('')}
+              </div>
+            </div>
+            ` : ''}
+            
+            ${data.awards && data.awards.length > 0 ? `
+            <div>
+              <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem; letter-spacing: -0.01em;">
+                Awards & Recognition
+              </h2>
+              <div style="display: flex; flex-direction: column; gap: 1rem;">
+                ${data.awards.map(award => `
+                  <div style="padding: 1rem; background: var(--color-bg); border-left: 3px solid var(--color-accent); border-radius: var(--radius-md);">
+                    <h3 style="font-size: 1rem; font-weight: 700; margin-bottom: 0.25rem;">${award.title || ''}</h3>
+                    <p style="font-size: 0.875rem; color: var(--color-text-secondary); font-weight: 600;">${award.year || ''}</p>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+            ` : ''}
+          </div>
+        </div>
+      </section>
+
+      <!-- Contact -->
+      <section id="contact" style="padding: 6rem 0; text-align: center;">
+        <div class="container" style="max-width: 700px;">
+          <h2 style="font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 800; margin-bottom: 1.5rem; letter-spacing: -0.03em;">
+            Let's Create Together
+          </h2>
+          <p style="font-size: 1.25rem; color: var(--color-text-secondary); margin-bottom: 2.5rem; line-height: 1.7;">
+            Available for commissions, editorial work, and collaborations worldwide
+          </p>
+          <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+            ${data.email ? `
+            <a href="mailto:${data.email}" class="btn" style="padding: 1rem 2.5rem; font-size: 1rem;">
+              Email Me
+            </a>
+            ` : ''}
+            ${data.phone ? `
+            <a href="tel:${data.phone.replace(/\s/g, '')}" class="btn btn-outline" style="padding: 1rem 2.5rem; font-size: 1rem;">
+              ${data.phone}
+            </a>
+            ` : ''}
+            ${data.instagram ? `
+            <a href="https://instagram.com/${data.instagram.replace('@', '')}" target="_blank" class="btn btn-outline" style="padding: 1rem 2.5rem; font-size: 1rem;">
+              ${data.instagram}
+            </a>
+            ` : ''}
+          </div>
+        </div>
+      </section>
+
+      <!-- Footer -->
+      <footer style="padding: 3rem 0; border-top: 1px solid var(--color-border); text-align: center; color: var(--color-text-secondary); font-size: 0.875rem;">
+        <div class="container">
+          <p>Ã‚Â© 2024 ${data.photographerName || 'Photographer'}. All rights reserved.</p>
+        </div>
+      </footer>
+
+      <!-- Lightbox -->
+      <div id="lightbox" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.95); z-index: 10000; align-items: center; justify-content: center; padding: 2rem;" onclick="closeLightbox()">
+        <button onclick="closeLightbox()" style="position: absolute; top: 2rem; right: 2rem; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.3); color: white; width: 48px; height: 48px; border-radius: 50%; font-size: 1.5rem; cursor: pointer; backdrop-filter: blur(10px);">Ãƒâ€”</button>
+        <button onclick="event.stopPropagation(); prevPhoto()" style="position: absolute; left: 2rem; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.3); color: white; width: 48px; height: 48px; border-radius: 50%; font-size: 1.5rem; cursor: pointer; backdrop-filter: blur(10px);">Ã¢â‚¬Â¹</button>
+        <button onclick="event.stopPropagation(); nextPhoto()" style="position: absolute; right: 2rem; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.3); color: white; width: 48px; height: 48px; border-radius: 50%; font-size: 1.5rem; cursor: pointer; backdrop-filter: blur(10px);">Ã¢â‚¬Âº</button>
+        <div style="max-width: 90vw; max-height: 90vh; text-align: center;">
+          <img id="lightbox-img" src="" alt="" style="max-width: 100%; max-height: 85vh; object-fit: contain; border-radius: var(--radius-lg);" onclick="event.stopPropagation()">
+          <div id="lightbox-info" style="color: white; margin-top: 1.5rem; padding: 1rem;"></div>
+        </div>
+      </div>
+
+      <style>
+        .photo-overlay { pointer-events: none; }
+        .gallery-item:hover .photo-overlay { opacity: 1; }
+        
+        .filter-btn:hover {
+          border-color: var(--color-text) !important;
+          transform: translateY(-2px);
+        }
+        
+        .filter-btn.active {
+          background: var(--color-text) !important;
+          color: var(--color-bg) !important;
+          border-color: var(--color-text) !important;
+        }
+        
+        @media (max-width: 768px) {
+          #grid-gallery { grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); }
+        }
+        
+        @media (max-width: 480px) {
+          #grid-gallery { grid-template-columns: 1fr; }
+        }
+      </style>
+
+      <script>
+        const photos = ${JSON.stringify(data.photos || [])};
+        let currentPhotoIndex = 0;
+        
+        function filterGallery(category) {
+          const items = document.querySelectorAll('.gallery-item');
+          const buttons = document.querySelectorAll('.filter-btn');
+          
+          buttons.forEach(btn => {
+            btn.classList.remove('active');
+            btn.style.background = 'var(--color-surface)';
+            btn.style.color = 'var(--color-text)';
+          });
+          
+          event.target.classList.add('active');
+          event.target.style.background = 'var(--color-text)';
+          event.target.style.color = 'var(--color-bg)';
+          
+          items.forEach(item => {
+            if (category === 'all' || item.dataset.category === category) {
+              item.style.display = 'block';
+            } else {
+              item.style.display = 'none';
+            }
+          });
+        }
+        
+        function openLightbox(index) {
+          currentPhotoIndex = index;
+          showPhoto(index);
+          document.getElementById('lightbox').style.display = 'flex';
+          document.body.style.overflow = 'hidden';
+        }
+        
+        function closeLightbox() {
+          document.getElementById('lightbox').style.display = 'none';
+          document.body.style.overflow = 'auto';
+        }
+        
+        function showPhoto(index) {
+          const photo = photos[index];
+          document.getElementById('lightbox-img').src = photo.imageUrl;
+          document.getElementById('lightbox-info').innerHTML = \`
+            <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem;">\${photo.title || ''}</h3>
+            \${photo.description ? \`<p style="font-size: 1rem; opacity: 0.8;">\${photo.description}</p>\` : ''}
+          \`;
+        }
+        
+        function prevPhoto() {
+          currentPhotoIndex = (currentPhotoIndex - 1 + photos.length) % photos.length;
+          showPhoto(currentPhotoIndex);
+        }
+        
+        function nextPhoto() {
+          currentPhotoIndex = (currentPhotoIndex + 1) % photos.length;
+          showPhoto(currentPhotoIndex);
+        }
+        
+        document.addEventListener('keydown', (e) => {
+          if (document.getElementById('lightbox').style.display === 'flex') {
+            if (e.key === 'Escape') closeLightbox();
+            if (e.key === 'ArrowLeft') prevPhoto();
+            if (e.key === 'ArrowRight') nextPhoto();
+          }
+        });
+      </script>
+    `
+  }),
+
+  'local-business': new Template('local-business', {
+    name: 'Local Small Business',
+    description: 'Perfect for local shops, services, and small businesses',
+    category: 'business',
+    defaultTheme: 'minimal',
+    fields: [
+      { name: 'businessName', label: 'Business Name', type: 'text', required: true },
+      { name: 'tagline', label: 'Tagline', type: 'text', required: true },
+      { name: 'description', label: 'About Your Business', type: 'textarea', required: true },
+      { name: 'address', label: 'Street Address', type: 'text', required: false },
+      { name: 'city', label: 'City, State ZIP', type: 'text', required: false },
+      { name: 'phone', label: 'Phone Number', type: 'text', required: true },
+      { name: 'email', label: 'Email Address', type: 'email', required: true },
+      { name: 'hours', label: 'Business Hours', type: 'textarea', placeholder: 'Mon-Fri: 9am-6pm\nSat: 10am-4pm\nSun: Closed', required: false },
+      { name: 'services', label: 'Services/Products (one per line)', type: 'textarea', required: true },
+      { name: 'ctaText', label: 'Call-to-Action Button Text', type: 'text', required: false },
+      { name: 'ctaLink', label: 'Call-to-Action Link', type: 'url', required: false },
+      { name: 'facebook', label: 'Facebook URL', type: 'url', required: false },
+      { name: 'instagram', label: 'Instagram Handle', type: 'text', placeholder: '@yourbusiness', required: false },
+      { name: 'testimonials', label: 'Customer Testimonials (JSON format)', type: 'textarea', placeholder: '[{"name": "John Doe", "text": "Great service!", "rating": 5}]', required: false }
+    ],
+    structure: (data, theme) => `
+      <!-- Compact Header with Contact Info -->
+      <div style="background: var(--color-accent); color: var(--color-bg); padding: 0.75rem 0; text-align: center; font-size: 0.875rem; font-weight: 600;">
+        ${data.phone ? `📍 ${data.phone}` : ''} ${data.phone && data.email ? ' 📍 ' : ''} ${data.email ? `📍¸ ${data.email}` : ''}
+      </div>
+      
+      <header style="padding: 1rem 0; background: var(--color-bg); position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+        <div class="container">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <div style="font-size: 1.75rem; font-weight: 900; color: var(--color-accent);">${data.businessName || 'Business Name'}</div>
+            <div style="display: flex; gap: 2rem; align-items: center;">
+              <nav style="display: flex; gap: 2rem;">
+                <a href="#services" style="text-decoration: none; color: var(--color-text); font-weight: 600; font-size: 0.9375rem;">Services</a>
+                <a href="#reviews" style="text-decoration: none; color: var(--color-text); font-weight: 600; font-size: 0.9375rem;">Reviews</a>
+                <a href="#contact" style="text-decoration: none; color: var(--color-text); font-weight: 600; font-size: 0.9375rem;">Contact</a>
+              </nav>
+              <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle theme">
+                <span class="theme-icon">ðŸŒ™</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Hero Banner with Split Layout -->
+      <section style="background: var(--color-surface); padding: 0;">
+        <div class="container" style="max-width: 1400px;">
+          <div style="display: grid; grid-template-columns: 1.2fr 1fr; min-height: 500px; align-items: center; gap: 4rem;">
+            <div style="padding: 4rem 0;">
+              <div style="display: inline-block; background: var(--color-accent); color: var(--color-bg); padding: 0.5rem 1.25rem; border-radius: var(--radius-full); font-weight: 700; font-size: 0.875rem; margin-bottom: 1.5rem;">
+                LOCAL & TRUSTED
+              </div>
+              <h1 style="font-size: clamp(2.5rem, 5vw, 4rem); font-weight: 900; margin-bottom: 1.5rem; line-height: 1.1;">
+                ${data.tagline || 'Your Trusted Local Partner'}
+              </h1>
+              <p style="font-size: 1.25rem; color: var(--color-text-secondary); margin-bottom: 2.5rem; line-height: 1.7;">
+                ${data.description || 'Serving our community with quality service and dedication'}
+              </p>
+              <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                <a href="#contact" class="btn" style="padding: 1.125rem 2.5rem; font-size: 1.125rem; background: var(--color-accent); border-color: var(--color-accent); color: var(--color-bg);">
+                  ${data.ctaText || 'Get Started'}
+                </a>
+                ${data.phone ? `
+                <a href="tel:${data.phone.replace(/\s/g, '')}" class="btn btn-outline" style="padding: 1.125rem 2.5rem; font-size: 1.125rem;">
+                  Call Now
+                </a>
+                ` : ''}
+              </div>
+            </div>
+            <div style="background: linear-gradient(135deg, var(--color-accent), var(--color-text)); height: 100%; min-height: 500px; display: flex; align-items: center; justify-content: center; color: white; font-size: 5rem; opacity: 0.1;">
+              ðŸª
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Quick Info Cards -->
+      <section style="padding: 3rem 0; margin-top: -2rem; position: relative; z-index: 10;">
+        <div class="container">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; max-width: 1000px; margin: 0 auto;">
+            ${data.address || data.city ? `
+            <div style="background: var(--color-bg); padding: 2rem; border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); text-align: center; border: 3px solid var(--color-border);">
+              <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">ðŸ“</div>
+              <div style="font-weight: 700; font-size: 1rem; margin-bottom: 0.5rem;">Visit Us</div>
+              <div style="color: var(--color-text-secondary); font-size: 0.9375rem; line-height: 1.5;">
+                ${data.address ? data.address + '<br>' : ''}${data.city || ''}
+              </div>
+            </div>
+            ` : ''}
+            ${data.hours ? `
+            <div style="background: var(--color-bg); padding: 2rem; border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); text-align: center; border: 3px solid var(--color-border);">
+              <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">ðŸ•</div>
+              <div style="font-weight: 700; font-size: 1rem; margin-bottom: 0.5rem;">Hours</div>
+              <div style="color: var(--color-text-secondary); font-size: 0.9375rem; line-height: 1.5; white-space: pre-line;">
+                ${data.hours.split('\n')[0]}
+              </div>
+            </div>
+            ` : ''}
+            ${data.phone ? `
+            <div style="background: var(--color-bg); padding: 2rem; border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); text-align: center; border: 3px solid var(--color-border);">
+              <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">ðŸ“ž</div>
+              <div style="font-weight: 700; font-size: 1rem; margin-bottom: 0.5rem;">Call Us</div>
+              <a href="tel:${data.phone.replace(/\s/g, '')}" style="color: var(--color-accent); font-size: 1.125rem; text-decoration: none; font-weight: 700;">
+                ${data.phone}
+              </a>
+            </div>
+            ` : ''}
+          </div>
+        </div>
+      </section>
+
+      <!-- Services Grid -->
+      <section id="services" style="padding: 6rem 0;">
+        <div class="container">
+          <div style="text-align: center; margin-bottom: 4rem;">
+            <h2 style="font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: 900; margin-bottom: 1rem;">
+              Our Services
+            </h2>
+            <div style="width: 80px; height: 4px; background: var(--color-accent); margin: 0 auto;"></div>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+            ${(data.services || '').split('\n').filter(s => s.trim()).map((service, i) => `
+              <div class="service-box" style="background: var(--color-surface); padding: 2rem; border-radius: var(--radius-md); border-left: 4px solid var(--color-accent); transition: all 0.3s;">
+                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.75rem;">
+                  <div style="width: 40px; height: 40px; background: var(--color-accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--color-bg); font-weight: 900; font-size: 1.125rem; flex-shrink: 0;">
+                    ${i + 1}
+                  </div>
+                  <h3 style="font-size: 1.25rem; font-weight: 700; line-height: 1.3;">
+                    ${service.trim()}
+                  </h3>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      </section>
+
+      ${data.testimonials && data.testimonials.trim() !== '' ? `
+      <!-- Customer Reviews -->
+      <section id="reviews" style="padding: 6rem 0; background: var(--color-surface);">
+        <div class="container">
+          <div style="text-align: center; margin-bottom: 4rem;">
+            <h2 style="font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: 900; margin-bottom: 1rem;">
+              Customer Reviews
+            </h2>
+            <div style="width: 80px; height: 4px; background: var(--color-accent); margin: 0 auto;"></div>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; max-width: 1200px; margin: 0 auto;">
+            ${(() => {
+              try {
+                const testimonials = JSON.parse(data.testimonials);
+                return testimonials.map(t => `
+                  <div style="background: var(--color-bg); padding: 2.5rem; border-radius: var(--radius-lg); box-shadow: var(--shadow-md); border-top: 4px solid var(--color-accent);">
+                    ${t.rating ? `
+                    <div style="color: #FFB800; font-size: 1.5rem; margin-bottom: 1.25rem;">
+                      ${'â˜…'.repeat(t.rating)}${'â˜†'.repeat(5 - t.rating)}
+                    </div>
+                    ` : ''}
+                    <p style="font-size: 1.0625rem; line-height: 1.7; margin-bottom: 1.5rem; font-style: italic;">
+                      "${t.text}"
+                    </p>
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                      <div style="width: 48px; height: 48px; background: var(--color-accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--color-bg); font-weight: 900; font-size: 1.25rem;">
+                        ${t.name.charAt(0).toUpperCase()}
+                      </div>
+                      <div>
+                        <div style="font-weight: 700; font-size: 1rem;">${t.name}</div>
+                        <div style="font-size: 0.875rem; color: var(--color-text-secondary);">Verified Customer</div>
+                      </div>
+                    </div>
+                  </div>
+                `).join('');
+              } catch (e) {
+                return '';
+              }
+            })()}
+          </div>
+        </div>
+      </section>
+      ` : ''}
+
+      <!-- Contact CTA Section -->
+      <section id="contact" style="padding: 6rem 0; background: var(--color-accent); color: var(--color-bg); text-align: center;">
+        <div class="container" style="max-width: 800px;">
+          <h2 style="font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 900; margin-bottom: 1.5rem; color: var(--color-bg);">
+            Ready to Get Started?
+          </h2>
+          <p style="font-size: 1.375rem; margin-bottom: 3rem; opacity: 0.95; line-height: 1.6;">
+            Contact us today and experience the difference of working with a local business that cares
+          </p>
+          <div style="display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap;">
+            ${data.phone ? `
+            <a href="tel:${data.phone.replace(/\s/g, '')}" style="display: inline-block; padding: 1.25rem 3rem; background: var(--color-bg); color: var(--color-accent); text-decoration: none; font-weight: 700; font-size: 1.125rem; border-radius: var(--radius-md); transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+              ðŸ“ž Call ${data.phone}
+            </a>
+            ` : ''}
+            ${data.email ? `
+            <a href="mailto:${data.email}" style="display: inline-block; padding: 1.25rem 3rem; background: transparent; color: var(--color-bg); text-decoration: none; font-weight: 700; font-size: 1.125rem; border: 3px solid var(--color-bg); border-radius: var(--radius-md); transition: all 0.2s;" onmouseover="this.style.background='var(--color-bg)'; this.style.color='var(--color-accent)'" onmouseout="this.style.background='transparent'; this.style.color='var(--color-bg)'">
+              âœ‰ï¸ Email Us
+            </a>
+            ` : ''}
+          </div>
+          ${data.facebook || data.instagram ? `
+          <div style="margin-top: 3rem; padding-top: 3rem; border-top: 2px solid rgba(255,255,255,0.2);">
+            <div style="font-weight: 700; margin-bottom: 1rem; font-size: 1.125rem;">Follow Us</div>
+            <div style="display: flex; gap: 1rem; justify-content: center;">
+              ${data.facebook ? `
+              <a href="${data.facebook}" target="_blank" style="width: 48px; height: 48px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 1.25rem; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">f</a>
+              ` : ''}
+              ${data.instagram ? `
+              <a href="https://instagram.com/${data.instagram.replace('@', '')}" target="_blank" style="width: 48px; height: 48px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 1.25rem; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.3)'">ðŸ“·</a>
+              ` : ''}
+            </div>
+          </div>
+          ` : ''}
+        </div>
+      </section>
+
+      <!-- Footer -->
+      <footer style="padding: 2rem 0; background: var(--color-bg); text-align: center; color: var(--color-text-secondary); font-size: 0.875rem; border-top: 1px solid var(--color-border);">
+        <div class="container">
+          <p>Â© 2024 ${data.businessName || 'Business'}. Proudly serving our local community.</p>
+        </div>
+      </footer>
+
+      <style>
+        .service-box:hover {
+          transform: translateX(8px);
+          box-shadow: var(--shadow-md);
+        }
+        
+        @media (max-width: 968px) {
+          header > div > div:first-child > div:nth-child(2) > nav { display: none; }
+          section > div > div[style*="grid-template-columns: 1.2fr 1fr"] {
+            grid-template-columns: 1fr !important;
+          }
+          section > div > div[style*="grid-template-columns: 1.2fr 1fr"] > div:last-child {
+            display: none;
+          }
+        }
+      </style>
+    `
+  }),
+
+  'designer-portfolio': new Template('designer-portfolio', {
+    name: 'Designer Portfolio',
+    description: 'Showcase your design work with style',
+    category: 'portfolio',
+    defaultTheme: 'brutalist',
+    fields: [
+      { name: 'designerName', label: 'Your Name', type: 'text', required: true },
+      { name: 'title', label: 'Professional Title', type: 'text', placeholder: 'UI/UX Designer, Graphic Designer, etc.', required: true },
+      { name: 'bio', label: 'Bio', type: 'textarea', required: true },
+      { name: 'email', label: 'Email', type: 'email', required: true },
+      { name: 'portfolio', label: 'Portfolio Website', type: 'url', required: false },
+      { name: 'linkedin', label: 'LinkedIn URL', type: 'url', required: false },
+      { name: 'behance', label: 'Behance URL', type: 'url', required: false },
+      { name: 'dribbble', label: 'Dribbble URL', type: 'url', required: false },
+      { name: 'projects', label: 'Projects (JSON format)', type: 'textarea', placeholder: '[{"title": "Project Name", "description": "Brief description", "imageUrl": "https://...", "tags": ["UI", "Branding"], "link": "https://..."}]', required: true },
+      { name: 'skills', label: 'Skills (comma separated)', type: 'text', placeholder: 'Figma, Photoshop, Illustrator, Sketch', required: true },
+      { name: 'experience', label: 'Years of Experience', type: 'text', required: false },
+      { name: 'availability', label: 'Current Availability', type: 'text', placeholder: 'Available for freelance, Open to opportunities, etc.', required: false }
+    ],
+    structure: (data, theme) => `
+      <!-- Fixed Side Navigation -->
+      <nav style="position: fixed; left: 0; top: 0; bottom: 0; width: 80px; background: var(--color-text); color: var(--color-bg); z-index: 1000; display: flex; flex-direction: column; align-items: center; padding: 2rem 0;">
+        <div style="writing-mode: vertical-rl; font-weight: 900; font-size: 1.125rem; letter-spacing: 0.1em; margin-bottom: auto; transform: rotate(180deg);">
+          ${data.designerName?.split(' ')[0]?.toUpperCase() || 'DESIGNER'}
+        </div>
+        <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle theme" style="background: transparent; border: 2px solid var(--color-bg); color: var(--color-bg); margin-top: auto;">
+          <span class="theme-icon">ðŸŒ™</span>
+        </button>
+      </nav>
+
+      <!-- Main Content with Left Margin -->
+      <div style="margin-left: 80px;">
+        
+        <!-- Hero Section with Large Type -->
+        <section style="min-height: 100vh; display: flex; align-items: center; padding: 4rem 0; background: var(--color-bg);">
+          <div class="container" style="max-width: 1400px;">
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 4rem; align-items: start;">
+              <div>
+                <div style="overflow: hidden; margin-bottom: 2rem;">
+                  <div style="display: inline-block; background: var(--color-text); color: var(--color-bg); padding: 0.75rem 2rem; font-weight: 900; font-size: 0.875rem; letter-spacing: 0.15em; transform: skew(-5deg);">
+                    <span style="display: inline-block; transform: skew(5deg);">${data.title?.toUpperCase() || 'DESIGNER'}</span>
+                  </div>
+                </div>
+                <h1 style="font-size: clamp(4rem, 12vw, 8rem); font-weight: 900; line-height: 0.9; margin-bottom: 2rem; letter-spacing: -0.05em;">
+                  ${data.designerName?.toUpperCase() || 'YOUR NAME'}
+                </h1>
+                <div style="width: 200px; height: 8px; background: var(--color-accent); margin-bottom: 3rem;"></div>
+                <p style="font-size: 1.5rem; line-height: 1.6; max-width: 600px; font-weight: 500;">
+                  ${data.bio || 'Creating exceptional digital experiences through thoughtful design'}
+                </p>
+              </div>
+              <div style="position: sticky; top: 2rem;">
+                ${data.availability ? `
+                <div style="background: var(--color-accent); color: var(--color-bg); padding: 2rem; margin-bottom: 2rem; transform: rotate(2deg);">
+                  <div style="font-weight: 900; font-size: 0.875rem; letter-spacing: 0.1em; margin-bottom: 0.5rem;">STATUS</div>
+                  <div style="font-size: 1.25rem; font-weight: 700;">${data.availability}</div>
+                </div>
+                ` : ''}
+                <div style="background: var(--color-text); color: var(--color-bg); padding: 2rem;">
+                  <div style="font-weight: 900; font-size: 0.875rem; letter-spacing: 0.1em; margin-bottom: 1.5rem;">CONTACT</div>
+                  ${data.email ? `
+                  <a href="mailto:${data.email}" style="display: block; color: var(--color-bg); text-decoration: none; font-weight: 700; font-size: 1.125rem; margin-bottom: 1rem; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'">
+                    âœ‰ ${data.email}
+                  </a>
+                  ` : ''}
+                  <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1.5rem;">
+                    ${data.linkedin ? `<a href="${data.linkedin}" target="_blank" style="color: var(--color-bg); text-decoration: underline; font-size: 0.875rem; font-weight: 600;">LinkedIn</a>` : ''}
+                    ${data.behance ? `<a href="${data.behance}" target="_blank" style="color: var(--color-bg); text-decoration: underline; font-size: 0.875rem; font-weight: 600;">Behance</a>` : ''}
+                    ${data.dribbble ? `<a href="${data.dribbble}" target="_blank" style="color: var(--color-bg); text-decoration: underline; font-size: 0.875rem; font-weight: 600;">Dribbble</a>` : ''}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Projects Masonry Grid -->
+        <section style="background: var(--color-surface); padding: 6rem 0;">
+          <div class="container" style="max-width: 1400px;">
+            <div style="margin-bottom: 4rem;">
+              <div style="display: inline-block; background: var(--color-text); color: var(--color-bg); padding: 1rem 3rem; font-weight: 900; font-size: 3rem; letter-spacing: -0.03em;">
+                SELECTED WORK
+              </div>
+            </div>
+            
+            <div class="masonry-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 2rem;">
+              ${(() => {
+                try {
+                  const projects = JSON.parse(data.projects || '[]');
+                  return projects.map((project, i) => `
+                    <div class="project-item" style="break-inside: avoid; position: relative; overflow: hidden; background: var(--color-bg);">
+                      ${project.imageUrl ? `
+                      <div style="position: relative; overflow: hidden; aspect-ratio: ${i % 3 === 0 ? '4/5' : i % 3 === 1 ? '1/1' : '16/9'};">
+                        <img src="${project.imageUrl}" alt="${project.title}" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease;">
+                      </div>
+                      ` : `
+                      <div style="aspect-ratio: ${i % 3 === 0 ? '4/5' : i % 3 === 1 ? '1/1' : '16/9'}; background: var(--color-text); display: flex; align-items: center; justify-content: center; font-size: 4rem; color: var(--color-bg); opacity: 0.3;">
+                        ${['â—†', 'â—', 'â– '][i % 3]}
+                      </div>
+                      `}
+                      <div style="padding: 2rem; border: 4px solid var(--color-border); border-top: none;">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                          <h3 style="font-size: 1.75rem; font-weight: 900; letter-spacing: -0.02em; line-height: 1.2;">
+                            ${project.title || 'Project'}
+                          </h3>
+                          ${project.link ? `
+                          <a href="${project.link}" target="_blank" style="width: 40px; height: 40px; background: var(--color-text); color: var(--color-bg); display: flex; align-items: center; justify-content: center; text-decoration: none; font-weight: 900; font-size: 1.25rem; flex-shrink: 0;">â†’</a>
+                          ` : ''}
+                        </div>
+                        <p style="font-size: 1rem; line-height: 1.6; margin-bottom: 1.5rem; color: var(--color-text-secondary);">
+                          ${project.description || ''}
+                        </p>
+                        ${project.tags && project.tags.length > 0 ? `
+                        <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                          ${project.tags.map(tag => `
+                            <span style="background: var(--color-text); color: var(--color-bg); padding: 0.375rem 1rem; font-size: 0.75rem; font-weight: 900; letter-spacing: 0.05em; text-transform: uppercase;">
+                              ${tag}
+                            </span>
+                          `).join('')}
+                        </div>
+                        ` : ''}
+                      </div>
+                    </div>
+                  `).join('');
+                } catch (e) {
+                  return '<p style="text-align: center; color: var(--color-text-secondary); grid-column: 1/-1;">No projects to display</p>';
+                }
+              })()}
+            </div>
+          </div>
+        </section>
+
+        <!-- Skills & Experience -->
+        <section style="background: var(--color-bg); padding: 6rem 0;">
+          <div class="container" style="max-width: 1400px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6rem;">
+              <div>
+                <h2 style="font-size: 3.5rem; font-weight: 900; margin-bottom: 3rem; letter-spacing: -0.03em; line-height: 1;">
+                  CAPABILITIES
+                </h2>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+                  ${(data.skills || '').split(',').map(skill => `
+                    <div style="background: var(--color-surface); padding: 1.5rem; border-left: 4px solid var(--color-accent);">
+                      <div style="font-weight: 900; font-size: 1.125rem;">
+                        ${skill.trim()}
+                      </div>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+              
+              <div>
+                <h2 style="font-size: 3.5rem; font-weight: 900; margin-bottom: 3rem; letter-spacing: -0.03em; line-height: 1;">
+                  ABOUT
+                </h2>
+                <p style="font-size: 1.25rem; line-height: 1.8; margin-bottom: 2rem; font-weight: 500;">
+                  ${data.bio || 'Passionate designer focused on creating impactful experiences.'}
+                </p>
+                ${data.experience ? `
+                <div style="background: var(--color-accent); color: var(--color-bg); padding: 2rem; margin-top: 3rem;">
+                  <div style="font-size: 0.875rem; font-weight: 900; letter-spacing: 0.1em; margin-bottom: 0.5rem;">EXPERIENCE</div>
+                  <div style="font-size: 2.5rem; font-weight: 900; letter-spacing: -0.02em;">${data.experience}</div>
+                </div>
+                ` : ''}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Footer CTA -->
+        <section style="background: var(--color-text); color: var(--color-bg); padding: 8rem 0; text-align: center;">
+          <div class="container" style="max-width: 1000px;">
+            <h2 style="font-size: clamp(3rem, 8vw, 6rem); font-weight: 900; line-height: 1; margin-bottom: 2rem; letter-spacing: -0.04em;">
+              LET'S CREATE<br>TOGETHER
+            </h2>
+            <p style="font-size: 1.5rem; margin-bottom: 3rem; opacity: 0.9; font-weight: 500;">
+              Available for new projects and collaborations
+            </p>
+            ${data.email ? `
+            <a href="mailto:${data.email}" style="display: inline-block; background: var(--color-bg); color: var(--color-text); padding: 1.5rem 4rem; font-weight: 900; font-size: 1.25rem; text-decoration: none; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+              GET IN TOUCH â†’
+            </a>
+            ` : ''}
+          </div>
+        </section>
+
+        <!-- Footer -->
+        <footer style="background: var(--color-bg); padding: 2rem 0; text-align: center; color: var(--color-text-secondary); font-size: 0.875rem; border-top: 4px solid var(--color-border);">
+          <div class="container">
+            <p style="font-weight: 700;">Â© 2024 ${data.designerName || 'Designer'}</p>
+          </div>
+        </footer>
+      </div>
+
+      <style>
+        .project-item:hover img {
+          transform: scale(1.05);
+        }
+        
+        @media (max-width: 1024px) {
+          nav { width: 60px; padding: 1.5rem 0; }
+          nav > div:first-child { font-size: 0.875rem; }
+          div[style*="margin-left: 80px"] { margin-left: 60px !important; }
+          .masonry-grid { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)) !important; }
+          section > div > div[style*="grid-template-columns: 2fr 1fr"] {
+            grid-template-columns: 1fr !important;
+          }
+          section > div > div[style*="grid-template-columns: 1fr 1fr"] {
+            grid-template-columns: 1fr !important;
+          }
+        }
+        
+        @media (max-width: 768px) {
+          nav { display: none; }
+          div[style*="margin-left: 80px"] { margin-left: 0 !important; }
+          .masonry-grid { grid-template-columns: 1fr !important; }
+        }
+      </style>
+    `
+  }),
+
+  'writer-portfolio': new Template('writer-portfolio', {
+    name: 'Writer Portfolio',
+    description: 'Perfect for authors, journalists, and content creators',
+    category: 'portfolio',
+    defaultTheme: 'elegant',
+    fields: [
+      { name: 'writerName', label: 'Your Name', type: 'text', required: true },
+      { name: 'tagline', label: 'Tagline', type: 'text', placeholder: 'Freelance Writer, Author, Journalist, etc.', required: true },
+      { name: 'bio', label: 'Bio', type: 'textarea', required: true },
+      { name: 'email', label: 'Email', type: 'email', required: true },
+      { name: 'website', label: 'Personal Website', type: 'url', required: false },
+      { name: 'twitter', label: 'Twitter/X Handle', type: 'text', placeholder: '@username', required: false },
+      { name: 'medium', label: 'Medium URL', type: 'url', required: false },
+      { name: 'linkedin', label: 'LinkedIn URL', type: 'url', required: false },
+      { name: 'articles', label: 'Published Work (JSON format)', type: 'textarea', placeholder: '[{"title": "Article Title", "publication": "Publication Name", "date": "2024", "excerpt": "Brief excerpt...", "link": "https://..."}]', required: true },
+      { name: 'specialties', label: 'Writing Specialties (comma separated)', type: 'text', placeholder: 'Technology, Culture, Business, Travel', required: true },
+      { name: 'publications', label: 'Notable Publications (comma separated)', type: 'text', placeholder: 'The New York Times, Wired, Medium', required: false },
+      { name: 'books', label: 'Books (JSON format)', type: 'textarea', placeholder: '[{"title": "Book Title", "year": "2024", "description": "Brief description", "link": "https://..."}]', required: false }
+    ],
+    structure: (data, theme) => `
+      <!-- Minimal Header -->
+      <header style="padding: 2rem 0; background: var(--color-bg); border-bottom: 1px solid var(--color-border);">
+        <div class="container" style="max-width: 1200px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-family: serif; font-size: 1.75rem; font-weight: 400; font-style: italic;">
+              ${data.writerName || 'Writer Name'}
+            </div>
+            <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle theme">
+              <span class="theme-icon">ðŸŒ™</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Hero Masthead -->
+      <section style="padding: 8rem 0 6rem; background: var(--color-bg); text-align: center;">
+        <div class="container" style="max-width: 900px;">
+          <div style="font-size: 1rem; text-transform: uppercase; letter-spacing: 0.2em; margin-bottom: 2rem; color: var(--color-text-secondary); font-weight: 600;">
+            ${data.tagline || 'Writer & Storyteller'}
+          </div>
+          <h1 style="font-family: serif; font-size: clamp(4rem, 10vw, 7rem); font-weight: 400; margin-bottom: 3rem; line-height: 1.1;">
+            ${data.writerName || 'Your Name'}
+          </h1>
+          <div style="max-width: 2px; height: 60px; background: var(--color-accent); margin: 0 auto 3rem;"></div>
+          <p style="font-size: 1.375rem; line-height: 1.8; color: var(--color-text-secondary); max-width: 700px; margin: 0 auto; font-weight: 400;">
+            ${data.bio || 'Crafting stories and sharing insights through the written word'}
+          </p>
+        </div>
+      </section>
+
+      ${data.publications ? `
+      <!-- Publications Ribbon -->
+      <section style="background: var(--color-text); color: var(--color-bg); padding: 1.5rem 0; text-align: center; border-top: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border);">
+        <div class="container">
+          <div style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 0.75rem; opacity: 0.7; font-weight: 600;">
+            Featured In
+          </div>
+          <div style="font-family: serif; font-size: 1rem; font-style: italic; opacity: 0.95;">
+            ${data.publications.split(',').map(pub => pub.trim()).join(' Â· ')}
+          </div>
+        </div>
+      </section>
+      ` : ''}
+
+      <!-- Featured Article (First Article Large) -->
+      ${(() => {
+        try {
+          const articles = JSON.parse(data.articles || '[]');
+          const featured = articles[0];
+          if (!featured) return '';
+          
+          return `
+          <section style="padding: 6rem 0; background: var(--color-surface);">
+            <div class="container" style="max-width: 1000px;">
+              <div style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.15em; color: var(--color-accent); margin-bottom: 1rem; font-weight: 700;">
+                Featured Story
+              </div>
+              <article>
+                <h2 style="font-family: serif; font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 400; line-height: 1.2; margin-bottom: 2rem;">
+                  ${featured.link ? `<a href="${featured.link}" target="_blank" style="color: var(--color-text); text-decoration: none; transition: color 0.3s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">${featured.title}</a>` : featured.title}
+                </h2>
+                <div style="display: flex; gap: 2rem; align-items: center; margin-bottom: 2.5rem; font-size: 0.9375rem; color: var(--color-text-secondary);">
+                  <span style="font-weight: 600; color: var(--color-accent);">${featured.publication || 'Publication'}</span>
+                  ${featured.date ? `<span>${featured.date}</span>` : ''}
+                </div>
+                <p style="font-size: 1.375rem; line-height: 1.9; color: var(--color-text); margin-bottom: 2.5rem; font-weight: 400;">
+                  ${featured.excerpt || ''}
+                </p>
+                ${featured.link ? `
+                <a href="${featured.link}" target="_blank" style="display: inline-block; padding: 1rem 2.5rem; border: 2px solid var(--color-text); color: var(--color-text); text-decoration: none; font-weight: 600; font-size: 0.9375rem; letter-spacing: 0.05em; text-transform: uppercase; transition: all 0.3s;" onmouseover="this.style.background='var(--color-text)'; this.style.color='var(--color-bg)'" onmouseout="this.style.background='transparent'; this.style.color='var(--color-text)'">
+                  Read Full Article â†’
+                </a>
+                ` : ''}
+              </article>
+            </div>
+          </section>
+          `;
+        } catch (e) {
+          return '';
+        }
+      })()}
+
+      <!-- Recent Articles Grid -->
+      <section style="padding: 6rem 0; background: var(--color-bg);">
+        <div class="container" style="max-width: 1200px;">
+          <div style="text-align: center; margin-bottom: 5rem;">
+            <h2 style="font-family: serif; font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: 400; margin-bottom: 1.5rem;">
+              Recent Work
+            </h2>
+            <div style="width: 60px; height: 2px; background: var(--color-accent); margin: 0 auto;"></div>
+          </div>
+          
+          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 4rem;">
+            ${(() => {
+              try {
+                const articles = JSON.parse(data.articles || '[]');
+                return articles.slice(1).map(article => `
+                  <article style="padding-bottom: 3rem; border-bottom: 1px solid var(--color-border);">
+                    <div style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--color-accent); margin-bottom: 1rem; font-weight: 700;">
+                      ${article.publication || 'Publication'}
+                    </div>
+                    <h3 style="font-family: serif; font-size: 1.875rem; font-weight: 400; line-height: 1.3; margin-bottom: 1rem;">
+                      ${article.link ? `<a href="${article.link}" target="_blank" style="color: var(--color-text); text-decoration: none; transition: color 0.3s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">${article.title}</a>` : article.title}
+                    </h3>
+                    ${article.date ? `
+                    <div style="font-size: 0.875rem; color: var(--color-text-secondary); margin-bottom: 1rem;">
+                      ${article.date}
+                    </div>
+                    ` : ''}
+                    <p style="font-size: 1.0625rem; line-height: 1.75; color: var(--color-text-secondary); margin-bottom: 1.5rem;">
+                      ${article.excerpt || ''}
+                    </p>
+                    ${article.link ? `
+                    <a href="${article.link}" target="_blank" style="font-size: 0.875rem; font-weight: 600; color: var(--color-text); text-decoration: none; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 2px solid var(--color-text); padding-bottom: 2px; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'; this.style.borderColor='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'; this.style.borderColor='var(--color-text)'">
+                      Read More
+                    </a>
+                    ` : ''}
+                  </article>
+                `).join('');
+              } catch (e) {
+                return '<p style="text-align: center; color: var(--color-text-secondary); grid-column: 1/-1;">No articles to display</p>';
+              }
+            })()}
+          </div>
+        </div>
+      </section>
+
+      ${data.books && data.books.trim() !== '[]' && data.books.trim() !== '' ? `
+      <!-- Books Section -->
+      <section style="padding: 6rem 0; background: var(--color-surface);">
+        <div class="container" style="max-width: 1200px;">
+          <div style="text-align: center; margin-bottom: 5rem;">
+            <h2 style="font-family: serif; font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: 400; margin-bottom: 1.5rem;">
+              Books
+            </h2>
+            <div style="width: 60px; height: 2px; background: var(--color-accent); margin: 0 auto;"></div>
+          </div>
+          
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 4rem;">
+            ${(() => {
+              try {
+                const books = JSON.parse(data.books || '[]');
+                return books.map(book => `
+                  <div style="text-align: center;">
+                    <div style="width: 200px; height: 300px; background: linear-gradient(135deg, var(--color-text), var(--color-accent)); margin: 0 auto 2rem; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-lg); position: relative;">
+                      <div style="font-family: serif; font-size: 1.5rem; color: var(--color-bg); font-weight: 400; padding: 2rem; text-align: center; line-height: 1.3;">
+                        ${book.title}
+                      </div>
+                    </div>
+                    <h3 style="font-family: serif; font-size: 1.875rem; font-weight: 400; margin-bottom: 0.5rem;">
+                      ${book.title}
+                    </h3>
+                    ${book.year ? `
+                    <div style="font-size: 0.875rem; color: var(--color-text-secondary); margin-bottom: 1.5rem;">
+                      ${book.year}
+                    </div>
+                    ` : ''}
+                    <p style="font-size: 1rem; line-height: 1.7; color: var(--color-text-secondary); margin-bottom: 2rem;">
+                      ${book.description || ''}
+                    </p>
+                    ${book.link ? `
+                    <a href="${book.link}" target="_blank" style="display: inline-block; padding: 0.875rem 2rem; border: 2px solid var(--color-text); color: var(--color-text); text-decoration: none; font-weight: 600; font-size: 0.875rem; letter-spacing: 0.05em; text-transform: uppercase; transition: all 0.3s;" onmouseover="this.style.background='var(--color-text)'; this.style.color='var(--color-bg)'" onmouseout="this.style.background='transparent'; this.style.color='var(--color-text)'">
+                      Learn More
+                    </a>
+                    ` : ''}
+                  </div>
+                `).join('');
+              } catch (e) {
+                return '';
+              }
+            })()}
+          </div>
+        </div>
+      </section>
+      ` : ''}
+
+      <!-- About Section with Pull Quote Style -->
+      <section style="padding: 8rem 0; background: var(--color-bg);">
+        <div class="container" style="max-width: 800px;">
+          <div style="border-left: 4px solid var(--color-accent); padding-left: 3rem; margin-bottom: 4rem;">
+            <p style="font-family: serif; font-size: 2rem; line-height: 1.5; font-style: italic; color: var(--color-text);">
+              "${data.bio || 'Passionate about telling stories and sharing ideas through writing.'}"
+            </p>
+          </div>
+          
+          ${data.specialties ? `
+          <div style="margin-top: 4rem;">
+            <h3 style="font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 2rem; color: var(--color-text-secondary); font-weight: 700; text-align: center;">
+              Areas of Expertise
+            </h3>
+            <div style="display: flex; flex-wrap: wrap; gap: 1.5rem; justify-content: center;">
+              ${data.specialties.split(',').map(specialty => `
+                <div style="font-family: serif; font-size: 1.25rem; color: var(--color-text); font-style: italic;">
+                  ${specialty.trim()}
+                </div>
+              `).join('<div style="color: var(--color-text-secondary);">Â·</div>')}
+            </div>
+          </div>
+          ` : ''}
+        </div>
+      </section>
+
+      <!-- Contact Section -->
+      <section style="padding: 6rem 0; background: var(--color-surface); text-align: center; border-top: 1px solid var(--color-border);">
+        <div class="container" style="max-width: 700px;">
+          <h2 style="font-family: serif; font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 400; margin-bottom: 2rem;">
+            Get in Touch
+          </h2>
+          <div style="width: 60px; height: 2px; background: var(--color-accent); margin: 0 auto 3rem;"></div>
+          <p style="font-size: 1.125rem; color: var(--color-text-secondary); margin-bottom: 3rem; line-height: 1.7;">
+            Available for commissions, collaborations, and editorial projects
+          </p>
+          ${data.email ? `
+          <a href="mailto:${data.email}" style="display: inline-block; padding: 1.25rem 3rem; background: var(--color-text); color: var(--color-bg); text-decoration: none; font-weight: 600; font-size: 1rem; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 3rem; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+            ${data.email}
+          </a>
+          ` : ''}
+          
+          <div style="display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap; margin-top: 3rem; padding-top: 3rem; border-top: 1px solid var(--color-border);">
+            ${data.twitter ? `
+            <a href="https://twitter.com/${data.twitter.replace('@', '')}" target="_blank" style="color: var(--color-text); text-decoration: none; font-weight: 600; font-size: 0.9375rem; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">
+              Twitter
+            </a>
+            ` : ''}
+            ${data.medium ? `
+            <a href="${data.medium}" target="_blank" style="color: var(--color-text); text-decoration: none; font-weight: 600; font-size: 0.9375rem; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">
+              Medium
+            </a>
+            ` : ''}
+            ${data.linkedin ? `
+            <a href="${data.linkedin}" target="_blank" style="color: var(--color-text); text-decoration: none; font-weight: 600; font-size: 0.9375rem; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">
+              LinkedIn
+            </a>
+            ` : ''}
+            ${data.website ? `
+            <a href="${data.website}" target="_blank" style="color: var(--color-text); text-decoration: none; font-weight: 600; font-size: 0.9375rem; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">
+              Website
+            </a>
+            ` : ''}
+          </div>
+        </div>
+      </section>
+
+      <!-- Footer -->
+      <footer style="padding: 3rem 0; background: var(--color-bg); text-align: center; color: var(--color-text-secondary); font-size: 0.875rem; border-top: 1px solid var(--color-border);">
+        <div class="container">
+          <p style="font-family: serif; font-style: italic;">Â© 2024 ${data.writerName || 'Writer'}. All rights reserved.</p>
+        </div>
+      </footer>
+
+      <style>
+        @media (max-width: 768px) {
+          section > div > div[style*="grid-template-columns: repeat(2, 1fr)"] {
+            grid-template-columns: 1fr !important;
+          }
+        }
+      </style>
+    `
+  }),
+  // 'writer-portfolio': new Template('writer-portfolio', {
+  //   name: 'Writer Portfolio',
+  //   description: 'Perfect for authors, journalists, and content creators',
+  //   category: 'portfolio',
+  //   defaultTheme: 'elegant',
+  //   fields: [
+  //     { name: 'writerName', label: 'Your Name', type: 'text', required: true },
+  //     { name: 'tagline', label: 'Tagline', type: 'text', placeholder: 'Freelance Writer, Author, Journalist, etc.', required: true },
+  //     { name: 'bio', label: 'Bio', type: 'textarea', required: true },
+  //     { name: 'email', label: 'Email', type: 'email', required: true },
+  //     { name: 'website', label: 'Personal Website', type: 'url', required: false },
+  //     { name: 'twitter', label: 'Twitter/X Handle', type: 'text', placeholder: '@username', required: false },
+  //     { name: 'medium', label: 'Medium URL', type: 'url', required: false },
+  //     { name: 'linkedin', label: 'LinkedIn URL', type: 'url', required: false },
+  //     { name: 'articles', label: 'Published Work (JSON format)', type: 'textarea', placeholder: '[{"title": "Article Title", "publication": "Publication Name", "date": "2024", "excerpt": "Brief excerpt...", "link": "https://..."}]', required: true },
+  //     { name: 'specialties', label: 'Writing Specialties (comma separated)', type: 'text', placeholder: 'Technology, Culture, Business, Travel', required: true },
+  //     { name: 'publications', label: 'Notable Publications (comma separated)', type: 'text', placeholder: 'The New York Times, Wired, Medium', required: false },
+  //     { name: 'books', label: 'Books (JSON format)', type: 'textarea', placeholder: '[{"title": "Book Title", "year": "2024", "description": "Brief description", "link": "https://..."}]', required: false }
+  //   ],
+  //   structure: (data, theme) => `
+  //     <!-- Minimal Header -->
+  //     <header style="padding: 2rem 0; background: var(--color-bg); border-bottom: 1px solid var(--color-border);">
+  //       <div class="container" style="max-width: 1200px;">
+  //         <div style="display: flex; justify-content: space-between; align-items: center;">
+  //           <div style="font-family: serif; font-size: 1.75rem; font-weight: 400; font-style: italic;">
+  //             ${data.writerName || 'Writer Name'}
+  //           </div>
+  //           <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle theme">
+  //             <span class="theme-icon">ðŸŒ™</span>
+  //           </button>
+  //         </div>
+  //       </div>
+  //     </header>
+
+  //     <!-- Hero Masthead -->
+  //     <section style="padding: 8rem 0 6rem; background: var(--color-bg); text-align: center;">
+  //       <div class="container" style="max-width: 900px;">
+  //         <div style="font-size: 1rem; text-transform: uppercase; letter-spacing: 0.2em; margin-bottom: 2rem; color: var(--color-text-secondary); font-weight: 600;">
+  //           ${data.tagline || 'Writer & Storyteller'}
+  //         </div>
+  //         <h1 style="font-family: serif; font-size: clamp(4rem, 10vw, 7rem); font-weight: 400; margin-bottom: 3rem; line-height: 1.1;">
+  //           ${data.writerName || 'Your Name'}
+  //         </h1>
+  //         <div style="max-width: 2px; height: 60px; background: var(--color-accent); margin: 0 auto 3rem;"></div>
+  //         <p style="font-size: 1.375rem; line-height: 1.8; color: var(--color-text-secondary); max-width: 700px; margin: 0 auto; font-weight: 400;">
+  //           ${data.bio || 'Crafting stories and sharing insights through the written word'}
+  //         </p>
+  //       </div>
+  //     </section>
+
+  //     ${data.publications ? `
+  //     <!-- Publications Ribbon -->
+  //     <section style="background: var(--color-text); color: var(--color-bg); padding: 1.5rem 0; text-align: center; border-top: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border);">
+  //       <div class="container">
+  //         <div style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 0.75rem; opacity: 0.7; font-weight: 600;">
+  //           Featured In
+  //         </div>
+  //         <div style="font-family: serif; font-size: 1rem; font-style: italic; opacity: 0.95;">
+  //           ${data.publications.split(',').map(pub => pub.trim()).join(' Â· ')}
+  //         </div>
+  //       </div>
+  //     </section>
+  //     ` : ''}
+
+  //     <!-- Featured Article (First Article Large) -->
+  //     ${(() => {
+  //       try {
+  //         const articles = JSON.parse(data.articles || '[]');
+  //         const featured = articles[0];
+  //         if (!featured) return '';
+          
+  //         return `
+  //         <section style="padding: 6rem 0; background: var(--color-surface);">
+  //           <div class="container" style="max-width: 1000px;">
+  //             <div style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.15em; color: var(--color-accent); margin-bottom: 1rem; font-weight: 700;">
+  //               Featured Story
+  //             </div>
+  //             <article>
+  //               <h2 style="font-family: serif; font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 400; line-height: 1.2; margin-bottom: 2rem;">
+  //                 ${featured.link ? `<a href="${featured.link}" target="_blank" style="color: var(--color-text); text-decoration: none; transition: color 0.3s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">${featured.title}</a>` : featured.title}
+  //               </h2>
+  //               <div style="display: flex; gap: 2rem; align-items: center; margin-bottom: 2.5rem; font-size: 0.9375rem; color: var(--color-text-secondary);">
+  //                 <span style="font-weight: 600; color: var(--color-accent);">${featured.publication || 'Publication'}</span>
+  //                 ${featured.date ? `<span>${featured.date}</span>` : ''}
+  //               </div>
+  //               <p style="font-size: 1.375rem; line-height: 1.9; color: var(--color-text); margin-bottom: 2.5rem; font-weight: 400;">
+  //                 ${featured.excerpt || ''}
+  //               </p>
+  //               ${featured.link ? `
+  //               <a href="${featured.link}" target="_blank" style="display: inline-block; padding: 1rem 2.5rem; border: 2px solid var(--color-text); color: var(--color-text); text-decoration: none; font-weight: 600; font-size: 0.9375rem; letter-spacing: 0.05em; text-transform: uppercase; transition: all 0.3s;" onmouseover="this.style.background='var(--color-text)'; this.style.color='var(--color-bg)'" onmouseout="this.style.background='transparent'; this.style.color='var(--color-text)'">
+  //                 Read Full Article â†’
+  //               </a>
+  //               ` : ''}
+  //             </article>
+  //           </div>
+  //         </section>
+  //         `;
+  //       } catch (e) {
+  //         return '';
+  //       }
+  //     })()}
+
+  //     <!-- Recent Articles Grid -->
+  //     <section style="padding: 6rem 0; background: var(--color-bg);">
+  //       <div class="container" style="max-width: 1200px;">
+  //         <div style="text-align: center; margin-bottom: 5rem;">
+  //           <h2 style="font-family: serif; font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: 400; margin-bottom: 1.5rem;">
+  //             Recent Work
+  //           </h2>
+  //           <div style="width: 60px; height: 2px; background: var(--color-accent); margin: 0 auto;"></div>
+  //         </div>
+          
+  //         <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 4rem;">
+  //           ${(() => {
+  //             try {
+  //               const articles = JSON.parse(data.articles || '[]');
+  //               return articles.slice(1).map(article => `
+  //                 <article style="padding-bottom: 3rem; border-bottom: 1px solid var(--color-border);">
+  //                   <div style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--color-accent); margin-bottom: 1rem; font-weight: 700;">
+  //                     ${article.publication || 'Publication'}
+  //                   </div>
+  //                   <h3 style="font-family: serif; font-size: 1.875rem; font-weight: 400; line-height: 1.3; margin-bottom: 1rem;">
+  //                     ${article.link ? `<a href="${article.link}" target="_blank" style="color: var(--color-text); text-decoration: none; transition: color 0.3s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">${article.title}</a>` : article.title}
+  //                   </h3>
+  //                   ${article.date ? `
+  //                   <div style="font-size: 0.875rem; color: var(--color-text-secondary); margin-bottom: 1rem;">
+  //                     ${article.date}
+  //                   </div>
+  //                   ` : ''}
+  //                   <p style="font-size: 1.0625rem; line-height: 1.75; color: var(--color-text-secondary); margin-bottom: 1.5rem;">
+  //                     ${article.excerpt || ''}
+  //                   </p>
+  //                   ${article.link ? `
+  //                   <a href="${article.link}" target="_blank" style="font-size: 0.875rem; font-weight: 600; color: var(--color-text); text-decoration: none; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 2px solid var(--color-text); padding-bottom: 2px; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'; this.style.borderColor='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'; this.style.borderColor='var(--color-text)'">
+  //                     Read More
+  //                   </a>
+  //                   ` : ''}
+  //                 </article>
+  //               `).join('');
+  //             } catch (e) {
+  //               return '<p style="text-align: center; color: var(--color-text-secondary); grid-column: 1/-1;">No articles to display</p>';
+  //             }
+  //           })()}
+  //         </div>
+  //       </div>
+  //     </section>
+
+  //     ${data.books && data.books.trim() !== '[]' && data.books.trim() !== '' ? `
+  //     <!-- Books Section -->
+  //     <section style="padding: 6rem 0; background: var(--color-surface);">
+  //       <div class="container" style="max-width: 1200px;">
+  //         <div style="text-align: center; margin-bottom: 5rem;">
+  //           <h2 style="font-family: serif; font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: 400; margin-bottom: 1.5rem;">
+  //             Books
+  //           </h2>
+  //           <div style="width: 60px; height: 2px; background: var(--color-accent); margin: 0 auto;"></div>
+  //         </div>
+          
+  //         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 4rem;">
+  //           ${(() => {
+  //             try {
+  //               const books = JSON.parse(data.books || '[]');
+  //               return books.map(book => `
+  //                 <div style="text-align: center;">
+  //                   <div style="width: 200px; height: 300px; background: linear-gradient(135deg, var(--color-text), var(--color-accent)); margin: 0 auto 2rem; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-lg); position: relative;">
+  //                     <div style="font-family: serif; font-size: 1.5rem; color: var(--color-bg); font-weight: 400; padding: 2rem; text-align: center; line-height: 1.3;">
+  //                       ${book.title}
+  //                     </div>
+  //                   </div>
+  //                   <h3 style="font-family: serif; font-size: 1.875rem; font-weight: 400; margin-bottom: 0.5rem;">
+  //                     ${book.title}
+  //                   </h3>
+  //                   ${book.year ? `
+  //                   <div style="font-size: 0.875rem; color: var(--color-text-secondary); margin-bottom: 1.5rem;">
+  //                     ${book.year}
+  //                   </div>
+  //                   ` : ''}
+  //                   <p style="font-size: 1rem; line-height: 1.7; color: var(--color-text-secondary); margin-bottom: 2rem;">
+  //                     ${book.description || ''}
+  //                   </p>
+  //                   ${book.link ? `
+  //                   <a href="${book.link}" target="_blank" style="display: inline-block; padding: 0.875rem 2rem; border: 2px solid var(--color-text); color: var(--color-text); text-decoration: none; font-weight: 600; font-size: 0.875rem; letter-spacing: 0.05em; text-transform: uppercase; transition: all 0.3s;" onmouseover="this.style.background='var(--color-text)'; this.style.color='var(--color-bg)'" onmouseout="this.style.background='transparent'; this.style.color='var(--color-text)'">
+  //                     Learn More
+  //                   </a>
+  //                   ` : ''}
+  //                 </div>
+  //               `).join('');
+  //             } catch (e) {
+  //               return '';
+  //             }
+  //           })()}
+  //         </div>
+  //       </div>
+  //     </section>
+  //     ` : ''}
+
+  //     <!-- About Section with Pull Quote Style -->
+  //     <section style="padding: 8rem 0; background: var(--color-bg);">
+  //       <div class="container" style="max-width: 800px;">
+  //         <div style="border-left: 4px solid var(--color-accent); padding-left: 3rem; margin-bottom: 4rem;">
+  //           <p style="font-family: serif; font-size: 2rem; line-height: 1.5; font-style: italic; color: var(--color-text);">
+  //             "${data.bio || 'Passionate about telling stories and sharing ideas through writing.'}"
+  //           </p>
+  //         </div>
+          
+  //         ${data.specialties ? `
+  //         <div style="margin-top: 4rem;">
+  //           <h3 style="font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 2rem; color: var(--color-text-secondary); font-weight: 700; text-align: center;">
+  //             Areas of Expertise
+  //           </h3>
+  //           <div style="display: flex; flex-wrap: wrap; gap: 1.5rem; justify-content: center;">
+  //             ${data.specialties.split(',').map(specialty => `
+  //               <div style="font-family: serif; font-size: 1.25rem; color: var(--color-text); font-style: italic;">
+  //                 ${specialty.trim()}
+  //               </div>
+  //             `).join('<div style="color: var(--color-text-secondary);">Â·</div>')}
+  //           </div>
+  //         </div>
+  //         ` : ''}
+  //       </div>
+  //     </section>
+
+  //     <!-- Contact Section -->
+  //     <section style="padding: 6rem 0; background: var(--color-surface); text-align: center; border-top: 1px solid var(--color-border);">
+  //       <div class="container" style="max-width: 700px;">
+  //         <h2 style="font-family: serif; font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 400; margin-bottom: 2rem;">
+  //           Get in Touch
+  //         </h2>
+  //         <div style="width: 60px; height: 2px; background: var(--color-accent); margin: 0 auto 3rem;"></div>
+  //         <p style="font-size: 1.125rem; color: var(--color-text-secondary); margin-bottom: 3rem; line-height: 1.7;">
+  //           Available for commissions, collaborations, and editorial projects
+  //         </p>
+  //         ${data.email ? `
+  //         <a href="mailto:${data.email}" style="display: inline-block; padding: 1.25rem 3rem; background: var(--color-text); color: var(--color-bg); text-decoration: none; font-weight: 600; font-size: 1rem; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 3rem; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+  //           ${data.email}
+  //         </a>
+  //         ` : ''}
+          
+  //         <div style="display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap; margin-top: 3rem; padding-top: 3rem; border-top: 1px solid var(--color-border);">
+  //           ${data.twitter ? `
+  //           <a href="https://twitter.com/${data.twitter.replace('@', '')}" target="_blank" style="color: var(--color-text); text-decoration: none; font-weight: 600; font-size: 0.9375rem; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">
+  //             Twitter
+  //           </a>
+  //           ` : ''}
+  //           ${data.medium ? `
+  //           <a href="${data.medium}" target="_blank" style="color: var(--color-text); text-decoration: none; font-weight: 600; font-size: 0.9375rem; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">
+  //             Medium
+  //           </a>
+  //           ` : ''}
+  //           ${data.linkedin ? `
+  //           <a href="${data.linkedin}" target="_blank" style="color: var(--color-text); text-decoration: none; font-weight: 600; font-size: 0.9375rem; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">
+  //             LinkedIn
+  //           </a>
+  //           ` : ''}
+  //           ${data.website ? `
+  //           <a href="${data.website}" target="_blank" style="color: var(--color-text); text-decoration: none; font-weight: 600; font-size: 0.9375rem; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">
+  //             Website
+  //           </a>
+  //           ` : ''}
+  //         </div>
+  //       </div>
+  //     </section>
+
+  //     <!-- Footer -->
+  //     <footer style="padding: 3rem 0; background: var(--color-bg); text-align: center; color: var(--color-text-secondary); font-size: 0.875rem; border-top: 1px solid var(--color-border);">
+  //       <div class="container">
+  //         <p style="font-family: serif; font-style: italic;">Â© 2024 ${data.writerName || 'Writer'}. All rights reserved.</p>
+  //       </div>
+  //     </footer>
+
+  //     <style>
+  //       @media (max-width: 768px) {
+  //         section > div > div[style*="grid-template-columns: repeat(2, 1fr)"] {
+  //           grid-template-columns: 1fr !important;
+  //         }
+  //       }
+  //     </style>
+  //   `
+  // }),
+
+  'wedding': new Template('wedding', {
+    name: 'Wedding',
+    description: 'Elegant wedding invitation and details',
+    category: 'event',
+    defaultTheme: 'elegant',
+    fields: [
+      { name: 'coupleName', label: 'Couple Names', type: 'text', placeholder: 'Sarah & Michael', required: true },
+      { name: 'weddingDate', label: 'Wedding Date', type: 'text', placeholder: 'June 15, 2025', required: true },
+      { name: 'ceremony', label: 'Ceremony Details', type: 'textarea', placeholder: 'Time and location', required: true },
+      { name: 'reception', label: 'Reception Details', type: 'textarea', placeholder: 'Time and location', required: true },
+      { name: 'story', label: 'Your Story', type: 'textarea', required: false },
+      { name: 'rsvpLink', label: 'RSVP Link', type: 'url', required: false },
+      { name: 'registryLink', label: 'Registry Link', type: 'url', required: false },
+      { name: 'hotelInfo', label: 'Hotel Information', type: 'textarea', required: false },
+      { name: 'dressCode', label: 'Dress Code', type: 'text', placeholder: 'Formal Attire', required: false },
+      { name: 'schedule', label: 'Schedule (JSON format)', type: 'textarea', placeholder: '[{"time": "4:00 PM", "event": "Ceremony", "location": "Garden Terrace"}]', required: false }
+    ],
+    structure: (data, theme) => `
+      <!-- Decorative Header -->
+      <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, var(--color-border), transparent);"></div>
+      
+      <header style="padding: 2rem 0; background: var(--color-bg); text-align: center;">
+        <div class="container">
+          <div style="font-family: serif; font-size: 1rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--color-text-secondary);">
+            Wedding Celebration
+          </div>
+        </div>
+      </header>
+
+      <!-- Hero Invitation -->
+      <section style="padding: 8rem 0; background: var(--color-bg); text-align: center; position: relative;">
+        <div class="container" style="max-width: 800px;">
+          <!-- Decorative flourish -->
+          <div style="font-size: 3rem; color: var(--color-accent); margin-bottom: 2rem; opacity: 0.6;">â¦</div>
+          
+          <div style="font-family: serif; font-size: 1rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--color-text-secondary); margin-bottom: 2rem;">
+            Together with their families
+          </div>
+          
+          <h1 style="font-family: serif; font-size: clamp(3.5rem, 9vw, 6rem); font-weight: 400; margin-bottom: 2rem; line-height: 1.2; font-style: italic;">
+            ${data.coupleName || 'Sarah & Michael'}
+          </h1>
+          
+          <div style="width: 80px; height: 1px; background: var(--color-accent); margin: 3rem auto;"></div>
+          
+          <div style="font-family: serif; font-size: 1rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--color-text-secondary); margin-bottom: 1rem;">
+            Request the honor of your presence
+          </div>
+          
+          <div style="font-family: serif; font-size: 2.5rem; font-weight: 400; color: var(--color-accent); margin-bottom: 3rem;">
+            ${data.weddingDate || 'June 15, 2025'}
+          </div>
+          
+          ${data.rsvpLink ? `
+          <a href="${data.rsvpLink}" target="_blank" style="display: inline-block; padding: 1.25rem 3.5rem; border: 2px solid var(--color-accent); color: var(--color-accent); text-decoration: none; font-family: serif; font-size: 1rem; letter-spacing: 0.15em; text-transform: uppercase; transition: all 0.3s; margin-top: 1rem;" onmouseover="this.style.background='var(--color-accent)'; this.style.color='var(--color-bg)'" onmouseout="this.style.background='transparent'; this.style.color='var(--color-accent)'">
+            RSVP
+          </a>
+          ` : ''}
+          
+          <div style="font-size: 2rem; color: var(--color-accent); margin-top: 3rem; opacity: 0.6;">â¦</div>
+        </div>
+      </section>
+
+      <!-- Event Details -->
+      <section style="padding: 6rem 0; background: var(--color-surface);">
+        <div class="container" style="max-width: 1000px;">
+          <div style="text-align: center; margin-bottom: 5rem;">
+            <div style="font-size: 2rem; color: var(--color-accent); margin-bottom: 1rem; opacity: 0.6;">âœ¦</div>
+            <h2 style="font-family: serif; font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: 400; margin-bottom: 1rem;">
+              Celebration Details
+            </h2>
+            <div style="width: 60px; height: 1px; background: var(--color-accent); margin: 0 auto;"></div>
+          </div>
+          
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 4rem;">
+            <!-- Ceremony -->
+            <div style="text-align: center; padding: 3rem; background: var(--color-bg); border: 1px solid var(--color-border);">
+              <div style="font-size: 2rem; color: var(--color-accent); margin-bottom: 1.5rem;">ðŸ’’</div>
+              <h3 style="font-family: serif; font-size: 1.75rem; font-weight: 400; margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: 0.1em; font-size: 1.125rem; color: var(--color-text-secondary);">
+                Ceremony
+              </h3>
+              <div style="font-family: serif; font-size: 1.125rem; line-height: 1.8; color: var(--color-text); white-space: pre-line;">
+                ${data.ceremony || '4:00 PM\nGarden Terrace'}
+              </div>
+            </div>
+            
+            <!-- Reception -->
+            <div style="text-align: center; padding: 3rem; background: var(--color-bg); border: 1px solid var(--color-border);">
+              <div style="font-size: 2rem; color: var(--color-accent); margin-bottom: 1.5rem;">ðŸ¥‚</div>
+              <h3 style="font-family: serif; font-size: 1.75rem; font-weight: 400; margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: 0.1em; font-size: 1.125rem; color: var(--color-text-secondary);">
+                Reception
+              </h3>
+              <div style="font-family: serif; font-size: 1.125rem; line-height: 1.8; color: var(--color-text); white-space: pre-line;">
+                ${data.reception || '6:00 PM\nGrand Ballroom'}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      ${data.schedule && data.schedule.trim() !== '' && data.schedule !== '[]' ? `
+      <!-- Schedule -->
+      <section style="padding: 6rem 0; background: var(--color-bg);">
         <div class="container" style="max-width: 800px;">
           <div style="text-align: center; margin-bottom: 4rem;">
-            <h2 style="font-size: clamp(2rem, 5vw, 3rem); font-weight: 700; margin-bottom: 1rem; letter-spacing: -0.02em;">
-              Frequently Asked Questions
+            <h2 style="font-family: serif; font-size: clamp(2rem, 5vw, 3rem); font-weight: 400; margin-bottom: 1rem;">
+              Schedule of Events
+            </h2>
+            <div style="width: 60px; height: 1px; background: var(--color-accent); margin: 0 auto;"></div>
+          </div>
+          
+          <div style="position: relative;">
+            <div style="position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; background: var(--color-border);"></div>
+            
+            ${(() => {
+              try {
+                const schedule = JSON.parse(data.schedule || '[]');
+                return schedule.map((item, i) => `
+                  <div style="position: relative; padding: 2rem 0; display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                    <div style="text-align: ${i % 2 === 0 ? 'right' : 'left'}; ${i % 2 === 0 ? 'order: 1;' : 'order: 2;'}">
+                      <div style="font-family: serif; font-size: 1.5rem; font-weight: 600; color: var(--color-accent); margin-bottom: 0.5rem;">
+                        ${item.time || ''}
+                      </div>
+                      <div style="font-family: serif; font-size: 1.25rem; font-weight: 400; margin-bottom: 0.5rem;">
+                        ${item.event || ''}
+                      </div>
+                      <div style="font-size: 0.9375rem; color: var(--color-text-secondary); font-style: italic;">
+                        ${item.location || ''}
+                      </div>
+                    </div>
+                    <div style="${i % 2 === 0 ? 'order: 2;' : 'order: 1;'}"></div>
+                    <div style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 12px; height: 12px; background: var(--color-accent); border: 3px solid var(--color-bg); border-radius: 50%;"></div>
+                  </div>
+                `).join('');
+              } catch (e) {
+                return '';
+              }
+            })()}
+          </div>
+        </div>
+      </section>
+      ` : ''}
+
+      ${data.story ? `
+      <!-- Our Story -->
+      <section style="padding: 6rem 0; background: var(--color-surface);">
+        <div class="container" style="max-width: 700px; text-align: center;">
+          <div style="font-size: 2rem; color: var(--color-accent); margin-bottom: 1.5rem; opacity: 0.6;">â™¥</div>
+          <h2 style="font-family: serif; font-size: clamp(2rem, 5vw, 3rem); font-weight: 400; margin-bottom: 3rem;">
+            Our Story
+          </h2>
+          <div style="font-family: serif; font-size: 1.1875rem; line-height: 1.9; color: var(--color-text); font-style: italic; white-space: pre-line;">
+            ${data.story}
+          </div>
+        </div>
+      </section>
+      ` : ''}
+
+      <!-- Additional Information -->
+      <section style="padding: 6rem 0; background: var(--color-bg);">
+        <div class="container" style="max-width: 1000px;">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 3rem;">
+            
+            ${data.dressCode ? `
+            <div style="text-align: center; padding: 2.5rem; border: 1px solid var(--color-border);">
+              <div style="font-size: 1.75rem; margin-bottom: 1rem;">ðŸ‘”</div>
+              <h3 style="font-family: serif; font-size: 1.125rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--color-text-secondary); margin-bottom: 1rem;">
+                Dress Code
+              </h3>
+              <div style="font-family: serif; font-size: 1.125rem; color: var(--color-text);">
+                ${data.dressCode}
+              </div>
+            </div>
+            ` : ''}
+            
+            ${data.hotelInfo ? `
+            <div style="text-align: center; padding: 2.5rem; border: 1px solid var(--color-border);">
+              <div style="font-size: 1.75rem; margin-bottom: 1rem;">ðŸ¨</div>
+              <h3 style="font-family: serif; font-size: 1.125rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--color-text-secondary); margin-bottom: 1rem;">
+                Accommodations
+              </h3>
+              <div style="font-size: 1rem; line-height: 1.7; color: var(--color-text); white-space: pre-line;">
+                ${data.hotelInfo}
+              </div>
+            </div>
+            ` : ''}
+            
+            ${data.registryLink ? `
+            <div style="text-align: center; padding: 2.5rem; border: 1px solid var(--color-border);">
+              <div style="font-size: 1.75rem; margin-bottom: 1rem;">ðŸŽ</div>
+              <h3 style="font-family: serif; font-size: 1.125rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--color-text-secondary); margin-bottom: 1.5rem;">
+                Registry
+              </h3>
+              <a href="${data.registryLink}" target="_blank" style="display: inline-block; padding: 0.875rem 2rem; border: 2px solid var(--color-accent); color: var(--color-accent); text-decoration: none; font-family: serif; font-size: 0.9375rem; letter-spacing: 0.1em; text-transform: uppercase; transition: all 0.3s;" onmouseover="this.style.background='var(--color-accent)'; this.style.color='var(--color-bg)'" onmouseout="this.style.background='transparent'; this.style.color='var(--color-accent)'">
+                View Registry
+              </a>
+            </div>
+            ` : ''}
+          </div>
+        </div>
+      </section>
+
+      <!-- Final CTA -->
+      <section style="padding: 6rem 0; background: var(--color-surface); text-align: center;">
+        <div class="container" style="max-width: 600px;">
+          <div style="font-size: 2.5rem; color: var(--color-accent); margin-bottom: 2rem; opacity: 0.6;">â¦</div>
+          <h2 style="font-family: serif; font-size: clamp(2rem, 5vw, 3rem); font-weight: 400; margin-bottom: 2rem; line-height: 1.4;">
+            We can't wait to celebrate with you
+          </h2>
+          ${data.rsvpLink ? `
+          <a href="${data.rsvpLink}" target="_blank" style="display: inline-block; padding: 1.25rem 3.5rem; background: var(--color-accent); color: var(--color-bg); text-decoration: none; font-family: serif; font-size: 1rem; letter-spacing: 0.15em; text-transform: uppercase; transition: all 0.3s; margin-top: 2rem;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 16px rgba(0,0,0,0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+            RSVP Now
+          </a>
+          ` : ''}
+        </div>
+      </section>
+
+      <!-- Footer -->
+      <footer style="padding: 3rem 0; background: var(--color-bg); text-align: center; color: var(--color-text-secondary); font-size: 0.875rem; border-top: 1px solid var(--color-border);">
+        <div class="container">
+          <p style="font-family: serif; font-style: italic;">#${data.coupleName?.replace(/\s/g, '') || 'Wedding2025'}</p>
+        </div>
+      </footer>
+
+      <style>
+        @media (max-width: 768px) {
+          section > div > div[style*="grid-template-columns: 1fr 1fr"] > div {
+            order: 1 !important;
+            text-align: center !important;
+            grid-column: 1 / -1;
+          }
+          section > div > div[style*="position: absolute; left: 50%"] {
+            display: none;
+          }
+        }
+      </style>
+    `
+  }),
+
+  'conference': new Template('conference', {
+    name: 'Conference',
+    description: 'Professional conference or event website',
+    category: 'event',
+    defaultTheme: 'minimal',
+    fields: [
+      { name: 'conferenceName', label: 'Conference Name', type: 'text', required: true },
+      { name: 'tagline', label: 'Tagline', type: 'text', required: true },
+      { name: 'date', label: 'Date', type: 'text', placeholder: 'March 15-17, 2025', required: true },
+      { name: 'location', label: 'Location', type: 'text', placeholder: 'San Francisco, CA', required: true },
+      { name: 'description', label: 'Event Description', type: 'textarea', required: true },
+      { name: 'registerLink', label: 'Registration Link', type: 'url', required: true },
+      { name: 'speakers', label: 'Speakers (JSON format)', type: 'textarea', placeholder: '[{"name": "Jane Doe", "title": "CEO, Company", "bio": "Brief bio", "imageUrl": "https://..."}]', required: false },
+      { name: 'schedule', label: 'Schedule (JSON format)', type: 'textarea', placeholder: '[{"day": "Day 1", "date": "March 15", "sessions": [{"time": "9:00 AM", "title": "Keynote", "speaker": "John Smith"}]}]', required: false },
+      { name: 'sponsors', label: 'Sponsors (comma separated)', type: 'text', placeholder: 'Company A, Company B, Company C', required: false },
+      { name: 'venue', label: 'Venue Name', type: 'text', required: false },
+      { name: 'venueAddress', label: 'Venue Address', type: 'textarea', required: false },
+      { name: 'price', label: 'Ticket Price', type: 'text', placeholder: '$299', required: false },
+      { name: 'contact', label: 'Contact Email', type: 'email', required: false }
+    ],
+    structure: (data, theme) => `
+      <!-- Header with CTA -->
+      <header style="background: var(--color-bg); border-bottom: 3px solid var(--color-accent); position: sticky; top: 0; z-index: 100; box-shadow: var(--shadow-sm);">
+        <div class="container">
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 1.5rem 0;">
+            <div style="display: flex; align-items: center; gap: 1rem;">
+              <div style="font-size: 1.75rem; font-weight: 900; letter-spacing: -0.02em;">
+                ${data.conferenceName || 'CONFERENCE 2025'}
+              </div>
+              <div style="padding: 0.375rem 0.875rem; background: var(--color-accent); color: var(--color-bg); font-weight: 700; font-size: 0.75rem; letter-spacing: 0.05em; border-radius: var(--radius-sm);">
+                ${data.date || '2025'}
+              </div>
+            </div>
+            <div style="display: flex; gap: 2rem; align-items: center;">
+              <nav style="display: flex; gap: 2rem;">
+                <a href="#speakers" style="text-decoration: none; color: var(--color-text); font-weight: 600; font-size: 0.9375rem;">Speakers</a>
+                <a href="#schedule" style="text-decoration: none; color: var(--color-text); font-weight: 600; font-size: 0.9375rem;">Schedule</a>
+                <a href="#venue" style="text-decoration: none; color: var(--color-text); font-weight: 600; font-size: 0.9375rem;">Venue</a>
+              </nav>
+              ${data.registerLink ? `
+              <a href="${data.registerLink}" target="_blank" style="padding: 0.875rem 2rem; background: var(--color-accent); color: var(--color-bg); text-decoration: none; font-weight: 700; font-size: 0.9375rem; border-radius: var(--radius-sm); transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                Register Now
+              </a>
+              ` : ''}
+              <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle theme">
+                <span class="theme-icon">ðŸŒ™</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Hero -->
+      <section style="padding: 8rem 0 6rem; background: linear-gradient(135deg, var(--color-surface), var(--color-bg)); position: relative; overflow: hidden;">
+        <div style="position: absolute; top: 0; right: 0; width: 50%; height: 100%; background: var(--color-accent); opacity: 0.03; transform: skewX(-10deg) translateX(30%);"></div>
+        <div class="container" style="max-width: 1200px; position: relative;">
+          <div style="max-width: 800px;">
+            <div style="display: inline-flex; align-items: center; gap: 1rem; margin-bottom: 2rem; padding: 0.75rem 1.5rem; background: var(--color-bg); border: 2px solid var(--color-accent); border-radius: var(--radius-full);">
+              <div style="width: 8px; height: 8px; background: var(--color-accent); border-radius: 50%; animation: pulse 2s infinite;"></div>
+              <span style="font-weight: 700; font-size: 0.9375rem; text-transform: uppercase; letter-spacing: 0.05em;">
+                ${data.date || 'Coming Soon'} â€¢ ${data.location || 'Location TBA'}
+              </span>
+            </div>
+            
+            <h1 style="font-size: clamp(3rem, 8vw, 5.5rem); font-weight: 900; margin-bottom: 2rem; letter-spacing: -0.04em; line-height: 1.05;">
+              ${data.conferenceName || 'Conference 2025'}
+            </h1>
+            
+            <p style="font-size: 1.75rem; color: var(--color-text-secondary); margin-bottom: 3rem; line-height: 1.5; font-weight: 600;">
+              ${data.tagline || 'The Future of Innovation'}
+            </p>
+            
+            <p style="font-size: 1.125rem; color: var(--color-text-secondary); margin-bottom: 3rem; line-height: 1.7; max-width: 650px;">
+              ${data.description || 'Join industry leaders and innovators for three days of inspiring talks, networking, and hands-on workshops.'}
+            </p>
+            
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+              ${data.registerLink ? `
+              <a href="${data.registerLink}" target="_blank" style="padding: 1.25rem 3rem; background: var(--color-accent); color: var(--color-bg); text-decoration: none; font-weight: 700; font-size: 1.125rem; border-radius: var(--radius-sm); transition: all 0.2s; box-shadow: var(--shadow-md);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='var(--shadow-lg)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-md)'">
+                Register Now ${data.price ? `â€¢ ${data.price}` : ''}
+              </a>
+              ` : ''}
+              ${data.contact ? `
+              <a href="mailto:${data.contact}" style="padding: 1.25rem 3rem; background: var(--color-bg); color: var(--color-text); border: 2px solid var(--color-border); text-decoration: none; font-weight: 700; font-size: 1.125rem; border-radius: var(--radius-sm); transition: all 0.2s;" onmouseover="this.style.borderColor='var(--color-text)'" onmouseout="this.style.borderColor='var(--color-border)'">
+                Contact Us
+              </a>
+              ` : ''}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Stats Bar -->
+      <section style="background: var(--color-text); color: var(--color-bg); padding: 3rem 0;">
+        <div class="container">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 3rem; text-align: center;">
+            <div>
+              <div style="font-size: 3.5rem; font-weight: 900; margin-bottom: 0.5rem;">3</div>
+              <div style="font-size: 1rem; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.9;">Days</div>
+            </div>
+            <div>
+              <div style="font-size: 3.5rem; font-weight: 900; margin-bottom: 0.5rem;">50+</div>
+              <div style="font-size: 1rem; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.9;">Speakers</div>
+            </div>
+            <div>
+              <div style="font-size: 3.5rem; font-weight: 900; margin-bottom: 0.5rem;">100+</div>
+              <div style="font-size: 1rem; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.9;">Sessions</div>
+            </div>
+            <div>
+              <div style="font-size: 3.5rem; font-weight: 900; margin-bottom: 0.5rem;">2000+</div>
+              <div style="font-size: 1rem; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.9;">Attendees</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      ${data.speakers && data.speakers.trim() !== '' && data.speakers !== '[]' ? `
+      <!-- Speakers -->
+      <section id="speakers" style="padding: 6rem 0; background: var(--color-bg);">
+        <div class="container">
+          <div style="text-align: center; margin-bottom: 5rem;">
+            <div style="display: inline-block; padding: 0.5rem 1.25rem; background: var(--color-accent); color: var(--color-bg); font-weight: 700; font-size: 0.875rem; letter-spacing: 0.1em; text-transform: uppercase; border-radius: var(--radius-full); margin-bottom: 1.5rem;">
+              Featured Speakers
+            </div>
+            <h2 style="font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 900; margin-bottom: 1rem; letter-spacing: -0.03em;">
+              Learn from the Best
+            </h2>
+            <p style="font-size: 1.25rem; color: var(--color-text-secondary); max-width: 600px; margin: 0 auto;">
+              Industry leaders and innovators sharing their insights
+            </p>
+          </div>
+          
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 2rem;">
+            ${(() => {
+              try {
+                const speakers = JSON.parse(data.speakers || '[]');
+                return speakers.map(speaker => `
+                  <div style="background: var(--color-surface); border: 2px solid var(--color-border); border-radius: var(--radius-lg); overflow: hidden; transition: all 0.3s;" class="speaker-card">
+                    ${speaker.imageUrl ? `
+                    <div style="aspect-ratio: 1/1; overflow: hidden; background: var(--color-border);">
+                      <img src="${speaker.imageUrl}" alt="${speaker.name}" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    ` : `
+                    <div style="aspect-ratio: 1/1; background: linear-gradient(135deg, var(--color-accent), var(--color-text)); display: flex; align-items: center; justify-content: center; font-size: 4rem; color: var(--color-bg); opacity: 0.8;">
+                      ${speaker.name?.charAt(0) || '?'}
+                    </div>
+                    `}
+                    <div style="padding: 2rem;">
+                      <h3 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 0.5rem; letter-spacing: -0.01em;">
+                        ${speaker.name || 'Speaker Name'}
+                      </h3>
+                      <div style="font-size: 0.9375rem; color: var(--color-accent); font-weight: 700; margin-bottom: 1rem;">
+                        ${speaker.title || 'Title'}
+                      </div>
+                      <p style="font-size: 0.9375rem; line-height: 1.6; color: var(--color-text-secondary);">
+                        ${speaker.bio || ''}
+                      </p>
+                    </div>
+                  </div>
+                `).join('');
+              } catch (e) {
+                return '';
+              }
+            })()}
+          </div>
+        </div>
+      </section>
+      ` : ''}
+
+      ${data.schedule && data.schedule.trim() !== '' && data.schedule !== '[]' ? `
+      <!-- Schedule -->
+      <section id="schedule" style="padding: 6rem 0; background: var(--color-surface);">
+        <div class="container" style="max-width: 1200px;">
+          <div style="text-align: center; margin-bottom: 5rem;">
+            <div style="display: inline-block; padding: 0.5rem 1.25rem; background: var(--color-accent); color: var(--color-bg); font-weight: 700; font-size: 0.875rem; letter-spacing: 0.1em; text-transform: uppercase; border-radius: var(--radius-full); margin-bottom: 1.5rem;">
+              Event Schedule
+            </div>
+            <h2 style="font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 900; margin-bottom: 1rem; letter-spacing: -0.03em;">
+              Three Days of Innovation
             </h2>
           </div>
           
-          <div style="display: flex; flex-direction: column; gap: 1.5rem;">
-            ${data.faqItems.map(faq => `
-              <div style="padding: 2rem; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg);">
-                <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.75rem;">${faq.question || ''}</h3>
-                <p style="color: var(--color-text-secondary); line-height: 1.7; font-size: 1rem;">${faq.answer || ''}</p>
+          ${(() => {
+            try {
+              const schedule = JSON.parse(data.schedule || '[]');
+              return schedule.map((day, i) => `
+                <div style="margin-bottom: 4rem;">
+                  <div style="background: var(--color-accent); color: var(--color-bg); padding: 1.5rem 2rem; border-radius: var(--radius-md); margin-bottom: 2rem;">
+                    <div style="font-size: 1.75rem; font-weight: 900; margin-bottom: 0.25rem;">
+                      ${day.day || `Day ${i + 1}`}
+                    </div>
+                    <div style="font-size: 1.125rem; opacity: 0.95; font-weight: 600;">
+                      ${day.date || ''}
+                    </div>
+                  </div>
+                  
+                  <div style="display: grid; gap: 1rem;">
+                    ${(day.sessions || []).map(session => `
+                      <div style="background: var(--color-bg); border: 2px solid var(--color-border); border-radius: var(--radius-md); padding: 2rem; display: flex; gap: 2rem; align-items: start; transition: border-color 0.2s;" onmouseover="this.style.borderColor='var(--color-accent)'" onmouseout="this.style.borderColor='var(--color-border)'">
+                        <div style="min-width: 120px;">
+                          <div style="font-size: 1.5rem; font-weight: 900; color: var(--color-accent);">
+                            ${session.time || ''}
+                          </div>
+                        </div>
+                        <div style="flex: 1;">
+                          <h3 style="font-size: 1.375rem; font-weight: 800; margin-bottom: 0.5rem; letter-spacing: -0.01em;">
+                            ${session.title || ''}
+                          </h3>
+                          ${session.speaker ? `
+                          <div style="font-size: 1rem; color: var(--color-text-secondary); font-weight: 600;">
+                            ${session.speaker}
+                          </div>
+                          ` : ''}
+                          ${session.description ? `
+                          <p style="font-size: 0.9375rem; line-height: 1.6; color: var(--color-text-secondary); margin-top: 1rem;">
+                            ${session.description}
+                          </p>
+                          ` : ''}
+                        </div>
+                      </div>
+                    `).join('')}
+                  </div>
+                </div>
+              `).join('');
+            } catch (e) {
+              return '';
+            }
+          })()}
+        </div>
+      </section>
+      ` : ''}
+
+      <!-- Venue -->
+      <section id="venue" style="padding: 6rem 0; background: var(--color-bg);">
+        <div class="container" style="max-width: 1200px;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center;">
+            <div>
+              <div style="display: inline-block; padding: 0.5rem 1.25rem; background: var(--color-accent); color: var(--color-bg); font-weight: 700; font-size: 0.875rem; letter-spacing: 0.1em; text-transform: uppercase; border-radius: var(--radius-full); margin-bottom: 2rem;">
+                Venue
+              </div>
+              <h2 style="font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: 900; margin-bottom: 2rem; letter-spacing: -0.03em;">
+                ${data.venue || data.location || 'Conference Center'}
+              </h2>
+              ${data.venueAddress ? `
+              <div style="font-size: 1.125rem; line-height: 1.8; color: var(--color-text-secondary); margin-bottom: 2rem; white-space: pre-line;">
+                ${data.venueAddress}
+              </div>
+              ` : ''}
+              <div style="font-size: 1rem; color: var(--color-text-secondary); line-height: 1.7;">
+                ${data.location || ''}
+              </div>
+            </div>
+            <div style="aspect-ratio: 4/3; background: linear-gradient(135deg, var(--color-accent), var(--color-text)); border-radius: var(--radius-lg); display: flex; align-items: center; justify-content: center; font-size: 5rem; color: var(--color-bg); opacity: 0.8;">
+              ðŸ“
+            </div>
+          </div>
+        </div>
+      </section>
+
+      ${data.sponsors ? `
+      <!-- Sponsors -->
+      <section style="padding: 6rem 0; background: var(--color-surface); text-align: center;">
+        <div class="container">
+          <h2 style="font-size: 1.5rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 3rem; color: var(--color-text-secondary);">
+            Our Sponsors
+          </h2>
+          <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 3rem; align-items: center;">
+            ${data.sponsors.split(',').map(sponsor => `
+              <div style="font-size: 1.75rem; font-weight: 900; color: var(--color-text); opacity: 0.6; transition: opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'">
+                ${sponsor.trim()}
               </div>
             `).join('')}
           </div>
@@ -1132,1572 +3904,1230 @@ export const templates = {
       ` : ''}
 
       <!-- Final CTA -->
-      <section style="padding: 8rem 0; background: var(--color-surface); border-top: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border);">
-        <div class="container" style="max-width: 800px; text-align: center;">
-          <h2 style="font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 800; margin-bottom: 1.5rem; letter-spacing: -0.02em;">
-            Ready to Get Started?
+      <section style="padding: 8rem 0; background: var(--color-accent); color: var(--color-bg); text-align: center;">
+        <div class="container" style="max-width: 800px;">
+          <h2 style="font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 900; margin-bottom: 2rem; letter-spacing: -0.03em; line-height: 1.1;">
+            Don't Miss Out
           </h2>
-          <p style="font-size: 1.25rem; color: var(--color-text-secondary); margin-bottom: 3rem; line-height: 1.7;">
-            Join thousands of teams already using ${data.productName || 'our platform'} to automate their workflows
+          <p style="font-size: 1.375rem; margin-bottom: 3rem; opacity: 0.95; line-height: 1.6;">
+            Join us for ${data.conferenceName || 'the conference'} and connect with industry leaders
           </p>
-          <a href="#" class="btn" style="padding: 1.25rem 3rem; font-size: 1.125rem;">
-            ${data.ctaPrimary || 'Start Free Trial'}
+          ${data.registerLink ? `
+          <a href="${data.registerLink}" target="_blank" style="display: inline-block; padding: 1.5rem 4rem; background: var(--color-bg); color: var(--color-accent); text-decoration: none; font-weight: 900; font-size: 1.25rem; border-radius: var(--radius-sm); transition: all 0.2s; box-shadow: 0 8px 24px rgba(0,0,0,0.2);" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 12px 32px rgba(0,0,0,0.3)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 8px 24px rgba(0,0,0,0.2)'">
+            Register Today ${data.price ? `â€¢ ${data.price}` : ''}
           </a>
-          <p style="margin-top: 1.5rem; font-size: 0.875rem; color: var(--color-text-secondary);">
-            No credit card required • 14-day free trial • Cancel anytime
-          </p>
+          ` : ''}
         </div>
       </section>
 
       <!-- Footer -->
-      <footer style="padding: 4rem 0; background: var(--color-bg);">
-        <div class="container" style="max-width: 1400px;">
-          <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 4rem; margin-bottom: 3rem;">
-            <div>
-              <h3 style="font-weight: 700; font-size: 1.25rem; margin-bottom: 1rem;">${data.productName || 'Product'}</h3>
-              <p style="color: var(--color-text-secondary); font-size: 0.9375rem; line-height: 1.7; margin-bottom: 1.5rem;">
-                ${data.tagline || 'Making work simpler'}
-              </p>
-              ${data.contactEmail ? `
-              <a href="mailto:${data.contactEmail}" style="color: var(--color-text-secondary); text-decoration: none; font-size: 0.875rem;">${data.contactEmail}</a>
-              ` : ''}
-            </div>
-            <div>
-              <h4 style="font-weight: 600; margin-bottom: 1rem; font-size: 0.875rem;">Product</h4>
-              <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-                <a href="#features" style="color: var(--color-text-secondary); text-decoration: none; font-size: 0.875rem;">Features</a>
-                <a href="#pricing" style="color: var(--color-text-secondary); text-decoration: none; font-size: 0.875rem;">Pricing</a>
-                <a href="#" style="color: var(--color-text-secondary); text-decoration: none; font-size: 0.875rem;">Integrations</a>
-              </div>
-            </div>
-            <div>
-              <h4 style="font-weight: 600; margin-bottom: 1rem; font-size: 0.875rem;">Company</h4>
-              <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-                <a href="#" style="color: var(--color-text-secondary); text-decoration: none; font-size: 0.875rem;">About</a>
-                <a href="#" style="color: var(--color-text-secondary); text-decoration: none; font-size: 0.875rem;">Blog</a>
-                <a href="#" style="color: var(--color-text-secondary); text-decoration: none; font-size: 0.875rem;">Careers</a>
-              </div>
-            </div>
-            <div>
-              <h4 style="font-weight: 600; margin-bottom: 1rem; font-size: 0.875rem;">Legal</h4>
-              <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-                <a href="#" style="color: var(--color-text-secondary); text-decoration: none; font-size: 0.875rem;">Privacy</a>
-                <a href="#" style="color: var(--color-text-secondary); text-decoration: none; font-size: 0.875rem;">Terms</a>
-                <a href="#" style="color: var(--color-text-secondary); text-decoration: none; font-size: 0.875rem;">Security</a>
-              </div>
-            </div>
-          </div>
-          <div style="padding-top: 2rem; border-top: 1px solid var(--color-border); text-align: center;">
-            <p style="color: var(--color-text-secondary); font-size: 0.875rem;">
-              © 2024 ${data.productName || 'Product'}. All rights reserved.
-            </p>
-          </div>
-        </div>
-      </footer>
-
-      <style>
-        @media (max-width: 768px) {
-          nav > div > div:first-child > div:last-child,
-          nav > div > div:last-child > a:first-child { display: none; }
-          footer > div > div:first-child { 
-            grid-template-columns: 1fr !important; 
-            gap: 2rem !important; 
-          }
-        }
-        @media (max-width: 1024px) {
-          nav > div > div:first-child > div { display: none; }
-        }
-      </style>
-    `
-  }),
-
-  // ============================================
-  // TEMPLATE 5: BUSINESS CONSULTING
-  // ============================================
-  'business-consulting': new Template('business-consulting', {
-    name: 'Business Consulting',
-    description: 'Professional business consulting and services page',
-    category: 'Business',
-    fields: {
-      companyName: { type: 'text', default: 'Catalyst Consulting', label: 'Company Name', required: true },
-      tagline: { type: 'text', default: 'Strategic Growth Partners', label: 'Tagline' },
-      headline: { 
-        type: 'text',
-        default: 'Transform Your Business with Expert Guidance',
-        label: 'Hero Headline',
-        required: true
-      },
-      subheadline: { 
-        type: 'textarea',
-        default: 'We help ambitious companies unlock their full potential through strategic planning, operational excellence, and sustainable growth strategies.',
-        label: 'Hero Subheadline'
-      },
-      yearsExperience: { type: 'text', default: '15+', label: 'Years of Experience' },
-      clientsServed: { type: 'text', default: '200+', label: 'Clients Served' },
-      
-      services: {
-        type: 'group',
-        label: 'Services',
-        itemLabel: 'Service',
-        min: 1,
-        max: 8,
-        fields: {
-          title: { type: 'text', label: 'Service Name', default: '' },
-          description: { type: 'textarea', label: 'Description', default: '' },
-          keyPoints: { type: 'text', label: 'Key Points (comma-separated)', default: '' }
-        },
-        default: [
-          { title: 'Strategic Planning', description: 'Develop comprehensive strategies aligned with your business goals and market opportunities.', keyPoints: 'Market Analysis, Growth Strategy, Competitive Positioning' },
-          { title: 'Operational Excellence', description: 'Optimize processes and systems to improve efficiency and reduce costs.', keyPoints: 'Process Optimization, Resource Management, Quality Improvement' },
-          { title: 'Change Management', description: 'Guide your organization through transformation with minimal disruption.', keyPoints: 'Stakeholder Engagement, Training Programs, Implementation Support' },
-          { title: 'Financial Advisory', description: 'Make informed decisions with expert financial planning and analysis.', keyPoints: 'Financial Planning, Risk Assessment, Investment Strategy' }
-        ]
-      },
-      
-      caseStudies: {
-        type: 'group',
-        label: 'Case Studies',
-        itemLabel: 'Case Study',
-        min: 0,
-        max: 6,
-        fields: {
-          company: { type: 'text', label: 'Company Name', default: '' },
-          industry: { type: 'text', label: 'Industry', default: '' },
-          challenge: { type: 'textarea', label: 'Challenge', default: '' },
-          result: { type: 'text', label: 'Result', default: '' }
-        },
-        default: [
-          { company: 'TechVentures Inc', industry: 'Technology', challenge: 'Struggling with rapid growth and organizational scaling', result: '300% revenue growth in 18 months' },
-          { company: 'RetailCo', industry: 'Retail', challenge: 'Needed digital transformation strategy', result: '45% increase in online sales' },
-          { company: 'ManufacturePro', industry: 'Manufacturing', challenge: 'High operational costs and inefficiencies', result: '32% cost reduction achieved' }
-        ]
-      },
-      
-      team: {
-        type: 'group',
-        label: 'Leadership Team',
-        itemLabel: 'Team Member',
-        min: 0,
-        max: 6,
-        fields: {
-          name: { type: 'text', label: 'Name', default: '' },
-          role: { type: 'text', label: 'Role', default: '' },
-          bio: { type: 'textarea', label: 'Bio', default: '' }
-        },
-        default: [
-          { name: 'Jennifer Martinez', role: 'Managing Partner', bio: '20+ years experience in strategic consulting with Fortune 500 companies' },
-          { name: 'David Chen', role: 'Operations Director', bio: 'Expert in process optimization and organizational transformation' },
-          { name: 'Sarah Thompson', role: 'Financial Advisory Lead', bio: 'Former CFO with expertise in financial planning and M&A' }
-        ]
-      },
-      
-      process: {
-        type: 'group',
-        label: 'Our Process',
-        itemLabel: 'Step',
-        min: 0,
-        max: 6,
-        fields: {
-          title: { type: 'text', label: 'Step Title', default: '' },
-          description: { type: 'textarea', label: 'Description', default: '' }
-        },
-        default: [
-          { title: 'Discovery', description: 'Deep dive into your business, challenges, and objectives' },
-          { title: 'Analysis', description: 'Comprehensive assessment of current state and opportunities' },
-          { title: 'Strategy', description: 'Custom roadmap tailored to your specific needs' },
-          { title: 'Execution', description: 'Hands-on implementation support and guidance' },
-          { title: 'Optimization', description: 'Continuous improvement and performance tracking' }
-        ]
-      },
-      
-      contactEmail: { type: 'email', default: 'contact@catalyst.com', label: 'Contact Email' },
-      phone: { type: 'tel', default: '+1 (555) 123-4567', label: 'Phone Number' }
-    },
-    structure: (data) => `
-      <!-- Navigation -->
-      <nav style="position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: var(--color-bg); backdrop-filter: blur(20px); border-bottom: 1px solid var(--color-border); padding: 1.25rem 0;">
-        <div class="container" style="max-width: 1400px;">
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <div style="font-weight: 700; font-size: 1.25rem; color: var(--color-text);">${data.companyName || 'Consulting'}</div>
-            <div style="display: flex; gap: 2.5rem; align-items: center;">
-              <a href="#services" style="color: var(--color-text-secondary); text-decoration: none; font-size: 0.9375rem; font-weight: 500;">Services</a>
-              <a href="#results" style="color: var(--color-text-secondary); text-decoration: none; font-size: 0.9375rem; font-weight: 500;">Results</a>
-              <a href="#team" style="color: var(--color-text-secondary); text-decoration: none; font-size: 0.9375rem; font-weight: 500;">Team</a>
-              <a href="#contact" class="btn" style="padding: 0.75rem 1.5rem; font-size: 0.9375rem;">Get Started</a>
-            </div>
-          </div>
-        </div>
-      </nav>
-
-      <!-- Hero -->
-      <section style="padding: 10rem 0 6rem; background: var(--color-bg);">
-        <div class="container" style="max-width: 1200px;">
-          <div style="max-width: 900px; margin: 0 auto; text-align: center;">
-            ${data.tagline ? `
-            <div style="display: inline-block; padding: 0.5rem 1.25rem; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-full); font-size: 0.875rem; font-weight: 600; margin-bottom: 2rem; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.05em;">
-              ${data.tagline}
-            </div>
-            ` : ''}
-            <h1 style="font-size: clamp(2.5rem, 7vw, 5rem); font-weight: 800; line-height: 1.1; margin-bottom: 2rem; letter-spacing: -0.03em;">
-              ${data.headline || 'Your Headline'}
-            </h1>
-            <p style="font-size: clamp(1.125rem, 2vw, 1.375rem); color: var(--color-text-secondary); margin-bottom: 3rem; line-height: 1.7;">
-              ${data.subheadline || ''}
-            </p>
-            <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
-              <a href="#contact" class="btn" style="padding: 1.25rem 2.5rem; font-size: 1.0625rem;">Schedule Consultation</a>
-              <a href="#services" class="btn btn-outline" style="padding: 1.25rem 2.5rem; font-size: 1.0625rem;">Our Services</a>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Stats -->
-      <section style="padding: 5rem 0; background: var(--color-surface); border-top: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border);">
-        <div class="container" style="max-width: 1200px;">
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 4rem; text-align: center;">
-            <div>
-              <div style="font-size: 3.5rem; font-weight: 800; margin-bottom: 0.5rem; letter-spacing: -0.02em;">${data.yearsExperience || '15+'}</div>
-              <div style="color: var(--color-text-secondary); font-weight: 500;">Years Experience</div>
-            </div>
-            <div>
-              <div style="font-size: 3.5rem; font-weight: 800; margin-bottom: 0.5rem; letter-spacing: -0.02em;">${data.clientsServed || '200+'}</div>
-              <div style="color: var(--color-text-secondary); font-weight: 500;">Clients Served</div>
-            </div>
-            <div>
-              <div style="font-size: 3.5rem; font-weight: 800; margin-bottom: 0.5rem; letter-spacing: -0.02em;">98%</div>
-              <div style="color: var(--color-text-secondary); font-weight: 500;">Client Satisfaction</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Services -->
-      <section id="services" style="padding: 8rem 0;">
-        <div class="container" style="max-width: 1400px;">
-          <div style="text-align: center; margin-bottom: 5rem; max-width: 700px; margin-left: auto; margin-right: auto;">
-            <h2 style="font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 700; margin-bottom: 1rem; letter-spacing: -0.02em;">Our Services</h2>
-            <p style="font-size: 1.125rem; color: var(--color-text-secondary); line-height: 1.7;">Comprehensive solutions tailored to your business needs</p>
-          </div>
-          
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem;">
-            ${data.services && data.services.length > 0 ? data.services.map((service, idx) => `
-              <div class="card" style="padding: 2.5rem;">
-                <div style="width: 56px; height: 56px; background: var(--color-surface); border-radius: var(--radius-lg); display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem; font-size: 1.5rem; font-weight: 700; border: 1px solid var(--color-border);">
-                  ${(idx + 1).toString().padStart(2, '0')}
-                </div>
-                <h3 style="font-size: 1.5rem; font-weight: 600; margin-bottom: 1rem;">${service.title || ''}</h3>
-                <p style="color: var(--color-text-secondary); line-height: 1.8; margin-bottom: 1.5rem; font-size: 1rem;">${service.description || ''}</p>
-                ${service.keyPoints ? `
-                <div style="display: flex; flex-direction: column; gap: 0.5rem; padding-top: 1.5rem; border-top: 1px solid var(--color-border);">
-                  ${service.keyPoints.split(',').map(point => `
-                    <div style="display: flex; gap: 0.75rem; font-size: 0.875rem;">
-                      <span style="color: var(--color-accent, #667eea); font-weight: 700; flex-shrink: 0;">✓</span>
-                      <span style="color: var(--color-text-secondary);">${point.trim()}</span>
-                    </div>
-                  `).join('')}
-                </div>
-                ` : ''}
-              </div>
-            `).join('') : ''}
-          </div>
-        </div>
-      </section>
-
-      <!-- Process -->
-      ${data.process && data.process.length > 0 ? `
-      <section style="padding: 8rem 0; background: var(--color-surface); border-top: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border);">
-        <div class="container" style="max-width: 1200px;">
-          <div style="text-align: center; margin-bottom: 5rem;">
-            <h2 style="font-size: clamp(2rem, 5vw, 3rem); font-weight: 700; margin-bottom: 1rem; letter-spacing: -0.02em;">Our Process</h2>
-            <p style="font-size: 1.125rem; color: var(--color-text-secondary);">A proven methodology for delivering results</p>
-          </div>
-          
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 2rem;">
-            ${data.process.map((step, idx) => `
-              <div style="text-align: center; position: relative;">
-                <div style="width: 72px; height: 72px; background: var(--color-bg); border: 3px solid var(--color-border); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; font-size: 1.75rem; font-weight: 800;">
-                  ${idx + 1}
-                </div>
-                <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem;">${step.title || ''}</h3>
-                <p style="color: var(--color-text-secondary); line-height: 1.7; font-size: 0.9375rem;">${step.description || ''}</p>
-              </div>
-            `).join('')}
-          </div>
-        </div>
-      </section>
-      ` : ''}
-
-      <!-- Case Studies -->
-      ${data.caseStudies && data.caseStudies.length > 0 ? `
-      <section id="results" style="padding: 8rem 0;">
-        <div class="container" style="max-width: 1200px;">
-          <div style="text-align: center; margin-bottom: 5rem;">
-            <h2 style="font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 700; margin-bottom: 1rem; letter-spacing: -0.02em;">Proven Results</h2>
-            <p style="font-size: 1.125rem; color: var(--color-text-secondary);">Real success stories from our clients</p>
-          </div>
-          
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 2rem;">
-            ${data.caseStudies.map(study => `
-              <div class="card" style="padding: 2.5rem;">
-                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1.5rem;">
-                  <div>
-                    <h3 style="font-size: 1.375rem; font-weight: 600; margin-bottom: 0.25rem;">${study.company || ''}</h3>
-                    <div style="font-size: 0.875rem; color: var(--color-text-secondary); font-weight: 500;">${study.industry || ''}</div>
-                  </div>
-                </div>
-                <p style="color: var(--color-text-secondary); line-height: 1.7; margin-bottom: 1.5rem; font-size: 0.9375rem;">${study.challenge || ''}</p>
-                <div style="padding: 1.25rem; background: var(--color-surface); border-left: 3px solid var(--color-accent, #667eea); border-radius: var(--radius-sm);">
-                  <div style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-secondary); margin-bottom: 0.5rem;">RESULT</div>
-                  <div style="font-size: 1.125rem; font-weight: 600; color: var(--color-text);">${study.result || ''}</div>
-                </div>
-              </div>
-            `).join('')}
-          </div>
-        </div>
-      </section>
-      ` : ''}
-
-      <!-- Team -->
-      ${data.team && data.team.length > 0 ? `
-      <section id="team" style="padding: 8rem 0; background: var(--color-surface); border-top: 1px solid var(--color-border);">
-        <div class="container" style="max-width: 1200px;">
-          <div style="text-align: center; margin-bottom: 5rem;">
-            <h2 style="font-size: clamp(2rem, 5vw, 3rem); font-weight: 700; margin-bottom: 1rem; letter-spacing: -0.02em;">Leadership Team</h2>
-            <p style="font-size: 1.125rem; color: var(--color-text-secondary);">Expert consultants dedicated to your success</p>
-          </div>
-          
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2.5rem;">
-            ${data.team.map(member => `
-              <div style="text-align: center;">
-                <div style="width: 120px; height: 120px; background: var(--color-bg); border: 2px solid var(--color-border); border-radius: 50%; margin: 0 auto 1.5rem;"></div>
-                <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">${member.name || ''}</h3>
-                <div style="font-size: 0.9375rem; color: var(--color-text-secondary); margin-bottom: 1rem; font-weight: 500;">${member.role || ''}</div>
-                <p style="color: var(--color-text-secondary); line-height: 1.7; font-size: 0.9375rem;">${member.bio || ''}</p>
-              </div>
-            `).join('')}
-          </div>
-        </div>
-      </section>
-      ` : ''}
-
-      <!-- Contact CTA -->
-      <section id="contact" style="padding: 8rem 0;">
-        <div class="container" style="max-width: 800px; text-align: center;">
-          <h2 style="font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 800; margin-bottom: 1.5rem; letter-spacing: -0.02em;">
-            Ready to Transform Your Business?
-          </h2>
-          <p style="font-size: 1.25rem; color: var(--color-text-secondary); margin-bottom: 3rem; line-height: 1.7;">
-            Let's discuss how we can help you achieve your goals
-          </p>
-          <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-bottom: 3rem;">
-            ${data.contactEmail ? `<a href="mailto:${data.contactEmail}" class="btn" style="padding: 1.25rem 2.5rem; font-size: 1.0625rem;">Email Us</a>` : ''}
-            ${data.phone ? `<a href="tel:${data.phone}" class="btn btn-outline" style="padding: 1.25rem 2.5rem; font-size: 1.0625rem;">Call ${data.phone}</a>` : ''}
-          </div>
-        </div>
-      </section>
-
-      <!-- Footer -->
-      <footer style="padding: 3rem 0; border-top: 1px solid var(--color-border); text-align: center;">
+      <footer style="padding: 3rem 0; background: var(--color-bg); text-align: center; color: var(--color-text-secondary); font-size: 0.875rem; border-top: 3px solid var(--color-border);">
         <div class="container">
-          <p style="color: var(--color-text-secondary); font-size: 0.875rem;">
-            © 2024 ${data.companyName || 'Consulting'}. All rights reserved.
-          </p>
+          <p style="font-weight: 700;">Â© 2024 ${data.conferenceName || 'Conference'}. ${data.contact ? `Contact: ${data.contact}` : ''}</p>
         </div>
       </footer>
 
       <style>
-        @media (max-width: 768px) {
-          nav > div > div:last-child { gap: 1rem; }
-          nav > div > div:last-child > a:not(.btn) { display: none; }
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.5; }
         }
-      </style>
-    `
-  }),
-
-  // ============================================
-  // TEMPLATE 6: RESTAURANT
-  // ============================================
-  'restaurant': new Template('restaurant', {
-    name: 'Restaurant',
-    description: 'Modern restaurant with menu, gallery, and reservations',
-    category: 'Restaurant',
-    fields: {
-      restaurantName: { type: 'text', default: 'Bella Vita', label: 'Restaurant Name', required: true },
-      tagline: { type: 'text', default: 'Authentic Italian Cuisine', label: 'Tagline' },
-      description: { 
-        type: 'textarea',
-        default: 'Experience the warmth of Italy with our handcrafted dishes, made from the finest locally-sourced ingredients and traditional family recipes.',
-        label: 'Description'
-      },
-      
-      address: { type: 'text', default: '123 Main Street, Downtown', label: 'Address' },
-      phone: { type: 'tel', default: '+1 (555) 987-6543', label: 'Phone Number' },
-      email: { type: 'email', default: 'hello@bellavita.com', label: 'Email' },
-      
-      hours: {
-        type: 'group',
-        label: 'Opening Hours',
-        itemLabel: 'Day',
-        min: 1,
-        max: 7,
-        fields: {
-          day: { type: 'text', label: 'Day', default: '' },
-          hours: { type: 'text', label: 'Hours', default: '' }
-        },
-        default: [
-          { day: 'Monday - Thursday', hours: '5:00 PM - 10:00 PM' },
-          { day: 'Friday - Saturday', hours: '5:00 PM - 11:00 PM' },
-          { day: 'Sunday', hours: '12:00 PM - 9:00 PM' }
-        ]
-      },
-      
-      menuCategories: {
-        type: 'group',
-        label: 'Menu Categories',
-        itemLabel: 'Category',
-        min: 1,
-        max: 8,
-        fields: {
-          category: { type: 'text', label: 'Category Name', default: '' },
-          items: {
-            type: 'group',
-            label: 'Menu Items',
-            itemLabel: 'Item',
-            fields: {
-              name: { type: 'text', label: 'Dish Name', default: '' },
-              description: { type: 'textarea', label: 'Description', default: '' },
-              price: { type: 'text', label: 'Price', default: '' }
-            }
-          }
-        },
-        default: [
-          {
-            category: 'Antipasti',
-            items: [
-              { name: 'Bruschetta Classica', description: 'Toasted bread with fresh tomatoes, basil, and olive oil', price: '$12' },
-              { name: 'Carpaccio di Manzo', description: 'Thinly sliced beef with arugula and parmesan', price: '$16' }
-            ]
-          },
-          {
-            category: 'Pasta',
-            items: [
-              { name: 'Spaghetti Carbonara', description: 'Classic Roman pasta with pancetta and pecorino', price: '$22' },
-              { name: 'Pappardelle al Ragù', description: 'Wide ribbon pasta with slow-cooked meat sauce', price: '$24' }
-            ]
-          },
-          {
-            category: 'Secondi',
-            items: [
-              { name: 'Osso Buco', description: 'Braised veal shanks with saffron risotto', price: '$38' },
-              { name: 'Branzino al Forno', description: 'Oven-roasted Mediterranean sea bass', price: '$32' }
-            ]
-          }
-        ]
-      },
-      
-      specialties: {
-        type: 'group',
-        label: 'Chef Specialties',
-        itemLabel: 'Specialty',
-        min: 0,
-        max: 4,
-        fields: {
-          name: { type: 'text', label: 'Dish Name', default: '' },
-          description: { type: 'textarea', label: 'Description', default: '' },
-          price: { type: 'text', label: 'Price', default: '' }
-        },
-        default: [
-          { name: 'Truffle Risotto', description: 'Creamy Arborio rice with black truffle and aged parmesan', price: '$34' },
-          { name: 'Bistecca Fiorentina', description: '32oz T-bone steak grilled to perfection (serves 2)', price: '$68' }
-        ]
-      },
-      
-      testimonials: {
-        type: 'group',
-        label: 'Reviews',
-        itemLabel: 'Review',
-        min: 0,
-        max: 6,
-        fields: {
-          quote: { type: 'textarea', label: 'Quote', default: '' },
-          author: { type: 'text', label: 'Author', default: '' },
-          rating: { type: 'select', label: 'Rating', options: ['5', '4'], default: '5' }
-        },
-        default: [
-          { quote: 'The best Italian food outside of Italy! Every dish is crafted with love and authenticity.', author: 'Maria Romano', rating: '5' },
-          { quote: 'Amazing atmosphere and incredible service. The osso buco melts in your mouth.', author: 'James Miller', rating: '5' },
-          { quote: 'A true gem! The homemade pasta is unbelievable and the wine selection is perfect.', author: 'Sophie Laurent', rating: '5' }
-        ]
-      },
-      
-      features: {
-        type: 'repeatable',
-        label: 'Features',
-        itemLabel: 'Feature',
-        default: ['Private Dining', 'Outdoor Seating', 'Wine Cellar', 'Valet Parking'],
-        max: 8
-      },
-      
-      reservationUrl: { type: 'url', default: '', label: 'Reservation Link (Optional)', optional: true }
-    },
-    structure: (data) => `
-      <!-- Navigation -->
-      <nav style="position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: var(--color-bg); backdrop-filter: blur(20px); border-bottom: 1px solid var(--color-border); padding: 1.25rem 0;">
-        <div class="container" style="max-width: 1400px;">
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <div style="font-weight: 700; font-size: 1.5rem; color: var(--color-text); font-family: var(--font-heading);">${data.restaurantName || 'Restaurant'}</div>
-            <div style="display: flex; gap: 2.5rem; align-items: center;">
-              <a href="#menu" style="color: var(--color-text-secondary); text-decoration: none; font-size: 0.9375rem; font-weight: 500;">Menu</a>
-              <a href="#about" style="color: var(--color-text-secondary); text-decoration: none; font-size: 0.9375rem; font-weight: 500;">About</a>
-              <a href="#reviews" style="color: var(--color-text-secondary); text-decoration: none; font-size: 0.9375rem; font-weight: 500;">Reviews</a>
-              <a href="#contact" class="btn" style="padding: 0.75rem 1.5rem; font-size: 0.9375rem;">Reserve Table</a>
-            </div>
-          </div>
-        </div>
-      </nav>
-
-      <!-- Hero -->
-      <section style="min-height: 100vh; display: flex; align-items: center; padding: 8rem 0; background: var(--color-bg); position: relative;">
-        <div style="position: absolute; inset: 0; opacity: 0.05; background: radial-gradient(circle at 30% 50%, var(--color-accent, #d4af76) 0%, transparent 50%);"></div>
-        <div class="container" style="max-width: 1400px; position: relative;">
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6rem; align-items: center;">
-            <div>
-              ${data.tagline ? `
-              <div style="font-size: 0.875rem; font-weight: 600; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1.5rem;">
-                ${data.tagline}
-              </div>
-              ` : ''}
-              <h1 style="font-size: clamp(3rem, 7vw, 6rem); font-weight: 700; line-height: 1; margin-bottom: 2rem; letter-spacing: -0.02em; font-family: var(--font-heading);">
-                ${data.restaurantName || 'Restaurant Name'}
-              </h1>
-              <p style="font-size: 1.25rem; color: var(--color-text-secondary); line-height: 1.8; margin-bottom: 3rem;">
-                ${data.description || ''}
-              </p>
-              <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                <a href="#menu" class="btn" style="padding: 1.25rem 2.5rem; font-size: 1.0625rem;">View Menu</a>
-                <a href="#contact" class="btn btn-outline" style="padding: 1.25rem 2.5rem; font-size: 1.0625rem;">Reserve Now</a>
-              </div>
-            </div>
-            <div style="aspect-ratio: 4/5; background: linear-gradient(135deg, var(--color-surface) 0%, var(--color-border) 100%); border-radius: var(--radius-xl);"></div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Features -->
-      ${data.features && data.features.length > 0 ? `
-      <section style="padding: 5rem 0; background: var(--color-surface); border-top: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border);">
-        <div class="container" style="max-width: 1200px;">
-          <div style="display: flex; justify-content: center; gap: 4rem; flex-wrap: wrap;">
-            ${data.features.map(feature => `
-              <div style="text-align: center;">
-                <div style="font-size: 1.125rem; font-weight: 600; color: var(--color-text);">${feature}</div>
-              </div>
-            `).join('')}
-          </div>
-        </div>
-      </section>
-      ` : ''}
-
-      <!-- Chef's Specialties -->
-      ${data.specialties && data.specialties.length > 0 ? `
-      <section style="padding: 8rem 0;">
-        <div class="container" style="max-width: 1200px;">
-          <div style="text-align: center; margin-bottom: 5rem;">
-            <h2 style="font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 700; margin-bottom: 1rem; letter-spacing: -0.02em; font-family: var(--font-heading);">Chef's Specialties</h2>
-            <p style="font-size: 1.125rem; color: var(--color-text-secondary);">Signature dishes crafted with passion</p>
-          </div>
-          
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 3rem;">
-            ${data.specialties.map(dish => `
-              <div style="text-align: center;">
-                <div style="aspect-ratio: 1; background: var(--color-surface); border-radius: var(--radius-lg); margin-bottom: 2rem; border: 1px solid var(--color-border);"></div>
-                <h3 style="font-size: 1.5rem; font-weight: 600; margin-bottom: 0.75rem; font-family: var(--font-heading);">${dish.name || ''}</h3>
-                <p style="color: var(--color-text-secondary); line-height: 1.8; margin-bottom: 1rem; font-size: 0.9375rem;">${dish.description || ''}</p>
-                <div style="font-size: 1.25rem; font-weight: 700; color: var(--color-accent, #d4af76);">${dish.price || ''}</div>
-              </div>
-            `).join('')}
-          </div>
-        </div>
-      </section>
-      ` : ''}
-
-      <!-- Menu -->
-      <section id="menu" style="padding: 8rem 0; background: var(--color-surface); border-top: 1px solid var(--color-border);">
-        <div class="container" style="max-width: 1000px;">
-          <div style="text-align: center; margin-bottom: 5rem;">
-            <h2 style="font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 700; margin-bottom: 1rem; letter-spacing: -0.02em; font-family: var(--font-heading);">Our Menu</h2>
-            <p style="font-size: 1.125rem; color: var(--color-text-secondary);">Authentic recipes passed down through generations</p>
-          </div>
-          
-          ${data.menuCategories && data.menuCategories.length > 0 ? data.menuCategories.map(category => `
-            <div style="margin-bottom: 5rem;">
-              <h3 style="font-size: 2rem; font-weight: 700; margin-bottom: 2.5rem; text-align: center; text-transform: uppercase; letter-spacing: 0.05em; font-family: var(--font-heading);">
-                ${category.category || ''}
-              </h3>
-              <div style="display: flex; flex-direction: column; gap: 2rem;">
-                ${category.items && category.items.length > 0 ? category.items.map(item => `
-                  <div style="padding-bottom: 2rem; border-bottom: 1px solid var(--color-border);">
-                    <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.75rem; gap: 1rem;">
-                      <h4 style="font-size: 1.25rem; font-weight: 600; flex: 1;">${item.name || ''}</h4>
-                      <span style="font-size: 1.125rem; font-weight: 700; color: var(--color-accent, #d4af76); white-space: nowrap;">${item.price || ''}</span>
-                    </div>
-                    <p style="color: var(--color-text-secondary); line-height: 1.7; font-size: 0.9375rem;">${item.description || ''}</p>
-                  </div>
-                `).join('') : ''}
-              </div>
-            </div>
-          `).join('') : ''}
-        </div>
-      </section>
-
-      <!-- About & Hours -->
-      <section id="about" style="padding: 8rem 0;">
-        <div class="container" style="max-width: 1200px;">
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6rem; align-items: start;">
-            <div>
-              <h2 style="font-size: clamp(2rem, 5vw, 3rem); font-weight: 700; margin-bottom: 2rem; letter-spacing: -0.02em; font-family: var(--font-heading);">About Us</h2>
-              <p style="font-size: 1.125rem; color: var(--color-text-secondary); line-height: 1.9; margin-bottom: 2rem;">
-                ${data.description || 'Our restaurant brings together the finest ingredients and traditional cooking methods to create an unforgettable dining experience.'}
-              </p>
-              <p style="font-size: 1.125rem; color: var(--color-text-secondary); line-height: 1.9;">
-                Every dish is prepared with care, honoring time-tested recipes while adding our own creative touch. Join us for an evening of exceptional food and warm hospitality.
-              </p>
-            </div>
-            
-            <div>
-              <h3 style="font-size: 1.75rem; font-weight: 700; margin-bottom: 2rem; font-family: var(--font-heading);">Hours & Location</h3>
-              
-              ${data.hours && data.hours.length > 0 ? `
-              <div style="margin-bottom: 3rem;">
-                <h4 style="font-size: 0.875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-secondary); margin-bottom: 1rem;">Opening Hours</h4>
-                <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-                  ${data.hours.map(schedule => `
-                    <div style="display: flex; justify-content: space-between; padding: 1rem; background: var(--color-surface); border-radius: var(--radius-md); border: 1px solid var(--color-border);">
-                      <span style="font-weight: 500;">${schedule.day || ''}</span>
-                      <span style="color: var(--color-text-secondary); font-weight: 500;">${schedule.hours || ''}</span>
-                    </div>
-                  `).join('')}
-                </div>
-              </div>
-              ` : ''}
-              
-              ${data.address || data.phone || data.email ? `
-              <div>
-                <h4 style="font-size: 0.875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-secondary); margin-bottom: 1rem;">Contact</h4>
-                <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-                  ${data.address ? `<div style="font-size: 1rem; color: var(--color-text-secondary);">📍 ${data.address}</div>` : ''}
-                  ${data.phone ? `<div style="font-size: 1rem; color: var(--color-text-secondary);">📞 ${data.phone}</div>` : ''}
-                  ${data.email ? `<div style="font-size: 1rem; color: var(--color-text-secondary);">✉️ ${data.email}</div>` : ''}
-                </div>
-              </div>
-              ` : ''}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Reviews -->
-      ${data.testimonials && data.testimonials.length > 0 ? `
-      <section id="reviews" style="padding: 8rem 0; background: var(--color-surface); border-top: 1px solid var(--color-border);">
-        <div class="container" style="max-width: 1200px;">
-          <div style="text-align: center; margin-bottom: 5rem;">
-            <h2 style="font-size: clamp(2.5rem, 6vw, 3.5rem); font-weight: 700; margin-bottom: 1rem; letter-spacing: -0.02em; font-family: var(--font-heading);">What People Say</h2>
-            <p style="font-size: 1.125rem; color: var(--color-text-secondary);">Reviews from our valued guests</p>
-          </div>
-          
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem;">
-            ${data.testimonials.map(review => `
-              <div class="card" style="padding: 2.5rem;">
-                <div style="display: flex; gap: 0.25rem; margin-bottom: 1.5rem;">
-                  ${Array(parseInt(review.rating || 5)).fill('⭐').join('')}
-                </div>
-                <p style="font-size: 1.0625rem; line-height: 1.8; margin-bottom: 1.5rem; color: var(--color-text); font-style: italic;">
-                  "${review.quote || ''}"
-                </p>
-                <div style="font-weight: 600; color: var(--color-text);">— ${review.author || ''}</div>
-              </div>
-            `).join('')}
-          </div>
-        </div>
-      </section>
-      ` : ''}
-
-      <!-- Reservation CTA -->
-      <section id="contact" style="padding: 8rem 0;">
-        <div class="container" style="max-width: 800px; text-align: center;">
-          <h2 style="font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 700; margin-bottom: 1.5rem; letter-spacing: -0.02em; font-family: var(--font-heading);">
-            Reserve Your Table
-          </h2>
-          <p style="font-size: 1.25rem; color: var(--color-text-secondary); margin-bottom: 3rem; line-height: 1.7;">
-            Experience unforgettable dining. Book your table today.
-          </p>
-          <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
-            ${data.phone ? `<a href="tel:${data.phone}" class="btn" style="padding: 1.25rem 2.5rem; font-size: 1.0625rem;">Call to Reserve</a>` : ''}
-            ${data.reservationUrl ? `<a href="${data.reservationUrl}" target="_blank" class="btn btn-outline" style="padding: 1.25rem 2.5rem; font-size: 1.0625rem;">Book Online</a>` : ''}
-          </div>
-        </div>
-      </section>
-
-      <!-- Footer -->
-      <footer style="padding: 4rem 0; border-top: 1px solid var(--color-border); background: var(--color-surface);">
-        <div class="container" style="max-width: 1200px;">
-          <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 4rem; margin-bottom: 3rem;">
-            <div>
-              <h3 style="font-weight: 700; font-size: 1.5rem; margin-bottom: 1rem; font-family: var(--font-heading);">${data.restaurantName || 'Restaurant'}</h3>
-              <p style="color: var(--color-text-secondary); font-size: 0.9375rem; line-height: 1.7;">
-                ${data.tagline || 'Exceptional dining experience'}
-              </p>
-            </div>
-            <div>
-              <h4 style="font-weight: 600; margin-bottom: 1rem; font-size: 0.875rem;">Hours</h4>
-              <div style="display: flex; flex-direction: column; gap: 0.5rem; color: var(--color-text-secondary); font-size: 0.875rem;">
-                ${data.hours && data.hours.length > 0 ? data.hours.slice(0, 2).map(h => `<div>${h.day}: ${h.hours}</div>`).join('') : ''}
-              </div>
-            </div>
-            <div>
-              <h4 style="font-weight: 600; margin-bottom: 1rem; font-size: 0.875rem;">Contact</h4>
-              <div style="display: flex; flex-direction: column; gap: 0.5rem; color: var(--color-text-secondary); font-size: 0.875rem;">
-                ${data.phone ? `<div>${data.phone}</div>` : ''}
-                ${data.email ? `<div>${data.email}</div>` : ''}
-              </div>
-            </div>
-          </div>
-          <div style="padding-top: 2rem; border-top: 1px solid var(--color-border); text-align: center;">
-            <p style="color: var(--color-text-secondary); font-size: 0.875rem;">
-              © 2024 ${data.restaurantName || 'Restaurant'}. All rights reserved.
-            </p>
-          </div>
-        </div>
-      </footer>
-
-      <style>
-        @media (max-width: 768px) {
-          nav > div > div:last-child > a:not(.btn) { display: none; }
-          section > div > div[style*="grid-template-columns: 1fr 1fr"],
-          section > div > div[style*="grid-template-columns: 2fr 1fr 1fr"] { 
-            grid-template-columns: 1fr !important; 
-            gap: 3rem !important; 
-          }
+        
+        .speaker-card:hover {
+          transform: translateY(-4px);
+          border-color: var(--color-accent);
+          box-shadow: var(--shadow-lg);
         }
-      </style>
-    `
-  }),
-
-  // ============================================
-  // TEMPLATE 7: EVENTS & CONFERENCES
-  // ============================================
-  'events-conference': new Template('events-conference', {
-    name: 'Events & Conferences',
-    description: 'Professional event landing page with schedule and speakers',
-    category: 'Events',
-    fields: {
-      eventName: { type: 'text', default: 'TechSummit 2024', label: 'Event Name', required: true },
-      tagline: { type: 'text', default: 'The Future of Technology', label: 'Tagline' },
-      date: { type: 'text', default: 'June 15-17, 2024', label: 'Event Date' },
-      location: { type: 'text', default: 'San Francisco Convention Center', label: 'Location' },
-      description: { 
-        type: 'textarea',
-        default: 'Join 5,000+ innovators, developers, and tech leaders for three days of inspiring talks, hands-on workshops, and unparalleled networking opportunities.',
-        label: 'Event Description'
-      },
-      
-      highlightStats: {
-        type: 'group',
-        label: 'Event Highlights',
-        itemLabel: 'Stat',
-        min: 0,
-        max: 4,
-        fields: {
-          number: { type: 'text', label: 'Number', default: '' },
-          label: { type: 'text', label: 'Label', default: '' }
-        },
-        default: [
-          { number: '5000+', label: 'Attendees' },
-          { number: '50+', label: 'Speakers' },
-          { number: '3', label: 'Days' },
-          { number: '20+', label: 'Workshops' }
-        ]
-      },
-      
-      speakers: {
-        type: 'group',
-        label: 'Featured Speakers',
-        itemLabel: 'Speaker',
-        min: 0,
-        max: 12,
-        fields: {
-          name: { type: 'text', label: 'Name', default: '' },
-          title: { type: 'text', label: 'Title', default: '' },
-          company: { type: 'text', label: 'Company', default: '' },
-          bio: { type: 'textarea', label: 'Bio', default: '' }
-        },
-        default: [
-          { name: 'Dr. Sarah Johnson', title: 'Chief AI Officer', company: 'TechCorp', bio: 'Pioneer in machine learning with 15+ years of experience' },
-          { name: 'Marcus Chen', title: 'VP of Engineering', company: 'CloudScale', bio: 'Leading expert in cloud architecture and scalability' },
-          { name: 'Elena Rodriguez', title: 'Founder & CEO', company: 'StartupXYZ', bio: 'Serial entrepreneur and innovation advisor' },
-          { name: 'James Wilson', title: 'Head of Design', company: 'Creative Labs', bio: 'Award-winning designer and UX strategist' }
-        ]
-      },
-      
-      schedule: {
-        type: 'group',
-        label: 'Event Schedule',
-        itemLabel: 'Day',
-        min: 0,
-        max: 5,
-        fields: {
-          day: { type: 'text', label: 'Day', default: '' },
-          date: { type: 'text', label: 'Date', default: '' },
-          sessions: {
-            type: 'group',
-            label: 'Sessions',
-            itemLabel: 'Session',
-            fields: {
-              time: { type: 'text', label: 'Time', default: '' },
-              title: { type: 'text', label: 'Session Title', default: '' },
-              speaker: { type: 'text', label: 'Speaker', default: '' },
-              track: { type: 'text', label: 'Track/Category', default: '' }
-            }
-          }
-        },
-        default: [
-          {
-            day: 'Day 1',
-            date: 'June 15',
-            sessions: [
-              { time: '9:00 AM', title: 'Opening Keynote: The Future of AI', speaker: 'Dr. Sarah Johnson', track: 'Keynote' },
-              { time: '10:30 AM', title: 'Building Scalable Systems', speaker: 'Marcus Chen', track: 'Engineering' },
-              { time: '2:00 PM', title: 'Design Thinking Workshop', speaker: 'James Wilson', track: 'Workshop' }
-            ]
-          },
-          {
-            day: 'Day 2',
-            date: 'June 16',
-            sessions: [
-              { time: '9:00 AM', title: 'Startup Success Stories', speaker: 'Elena Rodriguez', track: 'Business' },
-              { time: '11:00 AM', title: 'Cloud Architecture Patterns', speaker: 'Marcus Chen', track: 'Engineering' },
-              { time: '3:00 PM', title: 'Networking Session', speaker: '', track: 'Networking' }
-            ]
-          }
-        ]
-      },
-      
-      tickets: {
-        type: 'group',
-        label: 'Ticket Tiers',
-        itemLabel: 'Ticket',
-        min: 1,
-        max: 4,
-        fields: {
-          name: { type: 'text', label: 'Ticket Name', default: '' },
-          price: { type: 'text', label: 'Price', default: '' },
-          description: { type: 'textarea', label: 'Description', default: '' },
-          features: { type: 'text', label: 'Features (comma-separated)', default: '' },
-          available: { type: 'select', label: 'Availability', options: ['Available', 'Sold Out', 'Coming Soon'], default: 'Available' }
-        },
-        default: [
-          { name: 'General Admission', price: '$299', description: 'Access to all sessions and workshops', features: 'All sessions, Workshop access, Networking events, Conference materials', available: 'Available' },
-          { name: 'VIP Pass', price: '$599', description: 'Premium experience with exclusive perks', features: 'All sessions, VIP seating, Speaker meet & greet, Premium swag, Exclusive dinner', available: 'Available' },
-          { name: 'Student', price: '$99', description: 'Special pricing for students', features: 'All sessions, Workshop access, Conference materials', available: 'Available' }
-        ]
-      },
-      
-      sponsors: {
-        type: 'repeatable',
-        label: 'Sponsors',
-        itemLabel: 'Sponsor Name',
-        default: ['TechCorp', 'CloudScale', 'InnovateLabs', 'DataStream'],
-        max: 12
-      },
-      
-      venue: {
-        type: 'textarea',
-        label: 'Venue Details',
-        default: 'The San Francisco Convention Center is a world-class facility in the heart of downtown, featuring state-of-the-art technology and easy access to hotels and restaurants.'
-      },
-      
-      contactEmail: { type: 'email', default: 'info@techsummit.com', label: 'Contact Email' },
-      registrationUrl: { type: 'url', default: '', label: 'Registration Link (Optional)', optional: true }
-    },
-    structure: (data) => `
-      <!-- Navigation -->
-      <nav style="position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: var(--color-bg); backdrop-filter: blur(20px); border-bottom: 1px solid var(--color-border); padding: 1rem 0;">
-        <div class="container" style="max-width: 1400px;">
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <div style="font-weight: 700; font-size: 1.25rem; color: var(--color-text);">${data.eventName || 'Event'}</div>
-            <div style="display: flex; gap: 2rem; align-items: center;">
-              <a href="#speakers" style="color: var(--color-text-secondary); text-decoration: none; font-size: 0.9375rem; font-weight: 500;">Speakers</a>
-              <a href="#schedule" style="color: var(--color-text-secondary); text-decoration: none; font-size: 0.9375rem; font-weight: 500;">Schedule</a>
-              <a href="#tickets" style="color: var(--color-text-secondary); text-decoration: none; font-size: 0.9375rem; font-weight: 500;">Tickets</a>
-              <a href="#tickets" class="btn" style="padding: 0.75rem 1.5rem; font-size: 0.9375rem;">Register Now</a>
-            </div>
-          </div>
-        </div>
-      </nav>
-
-      <!-- Hero -->
-      <section style="padding: 10rem 0 6rem; background: var(--color-bg); position: relative; overflow: hidden;">
-        <div style="position: absolute; inset: 0; opacity: 0.03; background: linear-gradient(135deg, var(--color-accent, #667eea) 0%, transparent 50%);"></div>
-        <div class="container" style="max-width: 1200px; position: relative;">
-          <div style="text-align: center; max-width: 900px; margin: 0 auto;">
-            ${data.tagline ? `
-            <div style="display: inline-block; padding: 0.5rem 1.25rem; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-full); font-size: 0.875rem; font-weight: 600; margin-bottom: 2rem; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.05em;">
-              ${data.tagline}
-            </div>
-            ` : ''}
-            <h1 style="font-size: clamp(3rem, 8vw, 6rem); font-weight: 800; line-height: 1; margin-bottom: 2rem; letter-spacing: -0.03em;">
-              ${data.eventName || 'Event Name'}
-            </h1>
-            <div style="display: flex; gap: 2rem; justify-content: center; align-items: center; flex-wrap: wrap; margin-bottom: 2rem; font-size: 1.125rem; color: var(--color-text-secondary);">
-              ${data.date ? `<div style="display: flex; align-items: center; gap: 0.5rem;">📅 ${data.date}</div>` : ''}
-              ${data.location ? `<div style="display: flex; align-items: center; gap: 0.5rem;">📍 ${data.location}</div>` : ''}
-            </div>
-            <p style="font-size: 1.25rem; color: var(--color-text-secondary); margin-bottom: 3rem; line-height: 1.7;">
-              ${data.description || ''}
-            </p>
-            <a href="#tickets" class="btn" style="padding: 1.25rem 3rem; font-size: 1.125rem;">Get Your Ticket</a>
-          </div>
-        </div>
-      </section>
-
-      <!-- Stats -->
-      ${data.highlightStats && data.highlightStats.length > 0 ? `
-      <section style="padding: 5rem 0; background: var(--color-surface); border-top: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border);">
-        <div class="container" style="max-width: 1200px;">
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 3rem; text-align: center;">
-            ${data.highlightStats.map(stat => `
-              <div>
-                <div style="font-size: 3.5rem; font-weight: 800; margin-bottom: 0.5rem; letter-spacing: -0.02em; color: var(--color-accent, #667eea);">${stat.number}</div>
-                <div style="color: var(--color-text-secondary); font-weight: 500; font-size: 1.0625rem;">${stat.label}</div>
-              </div>
-            `).join('')}
-          </div>
-        </div>
-      </section>
-      ` : ''}
-
-      <!-- Speakers -->
-      ${data.speakers && data.speakers.length > 0 ? `
-      <section id="speakers" style="padding: 8rem 0;">
-        <div class="container" style="max-width: 1400px;">
-          <div style="text-align: center; margin-bottom: 5rem;">
-            <h2 style="font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 700; margin-bottom: 1rem; letter-spacing: -0.02em;">Featured Speakers</h2>
-            <p style="font-size: 1.125rem; color: var(--color-text-secondary);">Industry leaders and innovators</p>
-          </div>
-          
-          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 2.5rem;">
-            ${data.speakers.map(speaker => `
-              <div class="card" style="padding: 2.5rem; text-align: center;">
-                <div style="width: 120px; height: 120px; background: var(--color-surface); border-radius: 50%; margin: 0 auto 1.5rem; border: 3px solid var(--color-border);"></div>
-                <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">${speaker.name || ''}</h3>
-                <div style="font-size: 0.9375rem; color: var(--color-text-secondary); margin-bottom: 0.25rem; font-weight: 500;">${speaker.title || ''}</div>
-                <div style="font-size: 0.875rem; color: var(--color-accent, #667eea); margin-bottom: 1rem; font-weight: 600;">${speaker.company || ''}</div>
-                <p style="color: var(--color-text-secondary); line-height: 1.7; font-size: 0.875rem;">${speaker.bio || ''}</p>
-              </div>
-            `).join('')}
-          </div>
-        </div>
-      </section>
-      ` : ''}
-
-      <!-- Schedule -->
-      ${data.schedule && data.schedule.length > 0 ? `
-      <section id="schedule" style="padding: 8rem 0; background: var(--color-surface); border-top: 1px solid var(--color-border);">
-        <div class="container" style="max-width: 1200px;">
-          <div style="text-align: center; margin-bottom: 5rem;">
-            <h2 style="font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 700; margin-bottom: 1rem; letter-spacing: -0.02em;">Event Schedule</h2>
-            <p style="font-size: 1.125rem; color: var(--color-text-secondary);">Plan your experience</p>
-          </div>
-          
-          <div style="display: flex; flex-direction: column; gap: 4rem;">
-            ${data.schedule.map(day => `
-              <div>
-                <div style="display: flex; gap: 1rem; align-items: baseline; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 2px solid var(--color-border);">
-                  <h3 style="font-size: 2rem; font-weight: 700;">${day.day || ''}</h3>
-                  <span style="font-size: 1.125rem; color: var(--color-text-secondary); font-weight: 500;">${day.date || ''}</span>
-                </div>
-                
-                ${day.sessions && day.sessions.length > 0 ? `
-                <div style="display: flex; flex-direction: column; gap: 1.5rem;">
-                  ${day.sessions.map(session => `
-                    <div style="display: grid; grid-template-columns: 140px 1fr auto; gap: 2rem; align-items: start; padding: 1.5rem; background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--radius-lg);">
-                      <div style="font-size: 1.125rem; font-weight: 600; color: var(--color-accent, #667eea);">${session.time || ''}</div>
-                      <div>
-                        <h4 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">${session.title || ''}</h4>
-                        ${session.speaker ? `<div style="color: var(--color-text-secondary); font-size: 0.9375rem;">${session.speaker}</div>` : ''}
-                      </div>
-                      ${session.track ? `
-                      <div style="padding: 0.375rem 1rem; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-full); font-size: 0.8125rem; font-weight: 600; color: var(--color-text-secondary); white-space: nowrap;">
-                        ${session.track}
-                      </div>
-                      ` : ''}
-                    </div>
-                  `).join('')}
-                </div>
-                ` : ''}
-              </div>
-            `).join('')}
-          </div>
-        </div>
-      </section>
-      ` : ''}
-
-      <!-- Tickets -->
-      <section id="tickets" style="padding: 8rem 0;">
-        <div class="container" style="max-width: 1200px;">
-          <div style="text-align: center; margin-bottom: 5rem;">
-            <h2 style="font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 700; margin-bottom: 1rem; letter-spacing: -0.02em;">Get Your Ticket</h2>
-            <p style="font-size: 1.125rem; color: var(--color-text-secondary);">Choose the pass that fits your needs</p>
-          </div>
-          
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; max-width: 1100px; margin: 0 auto;">
-            ${data.tickets && data.tickets.length > 0 ? data.tickets.map(ticket => `
-              <div class="card" style="padding: 3rem 2.5rem; text-align: center; ${ticket.available === 'Sold Out' ? 'opacity: 0.6;' : ''}">
-                <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem;">${ticket.name || ''}</h3>
-                <div style="font-size: 3.5rem; font-weight: 800; margin-bottom: 1rem; letter-spacing: -0.02em;">${ticket.price || ''}</div>
-                <p style="color: var(--color-text-secondary); margin-bottom: 2rem; min-height: 3em; line-height: 1.6; font-size: 0.9375rem;">
-                  ${ticket.description || ''}
-                </p>
-                
-                ${ticket.available === 'Available' ? `
-                <a href="${data.registrationUrl || '#'}" class="btn" style="width: 100%; padding: 1rem; margin-bottom: 2rem; font-size: 1rem;">
-                  Register Now
-                </a>
-                ` : ticket.available === 'Sold Out' ? `
-                <div style="width: 100%; padding: 1rem; margin-bottom: 2rem; font-size: 1rem; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); font-weight: 600; color: var(--color-text-secondary);">
-                  Sold Out
-                </div>
-                ` : `
-                <div style="width: 100%; padding: 1rem; margin-bottom: 2rem; font-size: 1rem; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); font-weight: 600; color: var(--color-text-secondary);">
-                  Coming Soon
-                </div>
-                `}
-                
-                ${ticket.features ? `
-                <div style="text-align: left; padding-top: 2rem; border-top: 1px solid var(--color-border);">
-                  ${ticket.features.split(',').map(feature => `
-                    <div style="display: flex; gap: 0.75rem; margin-bottom: 1rem; font-size: 0.9375rem;">
-                      <span style="color: var(--color-accent, #667eea); font-weight: 700; flex-shrink: 0;">✓</span>
-                      <span style="color: var(--color-text-secondary); line-height: 1.6;">${feature.trim()}</span>
-                    </div>
-                  `).join('')}
-                </div>
-                ` : ''}
-              </div>
-            `).join('') : ''}
-          </div>
-        </div>
-      </section>
-
-      <!-- Venue -->
-      ${data.venue || data.location ? `
-      <section style="padding: 8rem 0; background: var(--color-surface); border-top: 1px solid var(--color-border);">
-        <div class="container" style="max-width: 1000px;">
-          <div style="text-align: center; margin-bottom: 3rem;">
-            <h2 style="font-size: clamp(2rem, 5vw, 3rem); font-weight: 700; margin-bottom: 1rem; letter-spacing: -0.02em;">Venue</h2>
-            ${data.location ? `<div style="font-size: 1.25rem; color: var(--color-accent, #667eea); font-weight: 600; margin-bottom: 1.5rem;">${data.location}</div>` : ''}
-          </div>
-          ${data.venue ? `<p style="font-size: 1.125rem; color: var(--color-text-secondary); line-height: 1.8; text-align: center;">${data.venue}</p>` : ''}
-        </div>
-      </section>
-      ` : ''}
-
-      <!-- Sponsors -->
-      ${data.sponsors && data.sponsors.length > 0 ? `
-      <section style="padding: 6rem 0; border-top: 1px solid var(--color-border);">
-        <div class="container" style="max-width: 1200px;">
-          <h3 style="text-align: center; font-size: 1.5rem; font-weight: 700; margin-bottom: 3rem; color: var(--color-text-secondary);">Proudly Sponsored By</h3>
-          <div style="display: flex; justify-content: center; align-items: center; gap: 4rem; flex-wrap: wrap;">
-            ${data.sponsors.map(sponsor => `
-              <div style="font-size: 1.25rem; font-weight: 600; color: var(--color-text-secondary); opacity: 0.6;">
-                ${sponsor}
-              </div>
-            `).join('')}
-          </div>
-        </div>
-      </section>
-      ` : ''}
-
-      <!-- Footer -->
-      <footer style="padding: 4rem 0; border-top: 1px solid var(--color-border); text-align: center; background: var(--color-surface);">
-        <div class="container">
-          <div style="margin-bottom: 2rem;">
-            <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem;">${data.eventName || 'Event'}</h3>
-            ${data.contactEmail ? `<a href="mailto:${data.contactEmail}" style="color: var(--color-text-secondary); text-decoration: none; font-size: 0.9375rem;">${data.contactEmail}</a>` : ''}
-          </div>
-          <p style="color: var(--color-text-secondary); font-size: 0.875rem;">
-            © 2024 ${data.eventName || 'Event'}. All rights reserved.
-          </p>
-        </div>
-      </footer>
-
-      <style>
-        @media (max-width: 768px) {
-          nav > div > div:last-child > a:not(.btn) { display: none; }
-          section div[style*="grid-template-columns: 140px 1fr auto"] {
+        
+        @media (max-width: 968px) {
+          header nav { display: none !important; }
+          section > div > div[style*="grid-template-columns: 1fr 1fr"] {
             grid-template-columns: 1fr !important;
-            gap: 1rem !important;
           }
         }
       </style>
     `
   }),
-
-  // ============================================
-  // TEMPLATE 8: EDUCATION & ONLINE COURSES
-  // ============================================
-  'education-course': new Template('education-course', {
-    name: 'Education & Courses',
-    description: 'Online learning platform with courses and curriculum',
-    category: 'Education',
-    fields: {
-      platformName: { type: 'text', default: 'LearnHub', label: 'Platform Name', required: true },
-      tagline: { type: 'text', default: 'Learn Skills That Matter', label: 'Tagline' },
-      headline: { 
-        type: 'text',
-        default: 'Master In-Demand Skills at Your Own Pace',
-        label: 'Hero Headline',
-        required: true
-      },
-      description: { 
-        type: 'textarea',
-        default: 'Join thousands of students learning from industry experts. Access high-quality courses, earn certificates, and advance your career.',
-        label: 'Platform Description'
-      },
-      
-      stats: {
-        type: 'group',
-        label: 'Platform Stats',
-        itemLabel: 'Stat',
-        min: 0,
-        max: 4,
-        fields: {
-          number: { type: 'text', label: 'Number', default: '' },
-          label: { type: 'text', label: 'Label', default: '' }
-        },
-        default: [
-          { number: '50K+', label: 'Active Students' },
-          { number: '200+', label: 'Expert Instructors' },
-          { number: '500+', label: 'Courses' },
-          { number: '95%', label: 'Completion Rate' }
-        ]
-      },
-      
-      courses: {
-        type: 'group',
-        label: 'Featured Courses',
-        itemLabel: 'Course',
-        min: 1,
-        max: 12,
-        fields: {
-          title: { type: 'text', label: 'Course Title', default: '' },
-          instructor: { type: 'text', label: 'Instructor Name', default: '' },
-          description: { type: 'textarea', label: 'Description', default: '' },
-          duration: { type: 'text', label: 'Duration', default: '' },
-          level: { type: 'select', label: 'Level', options: ['Beginner', 'Intermediate', 'Advanced'], default: 'Beginner' },
-          students: { type: 'text', label: 'Number of Students', default: '' },
-          price: { type: 'text', label: 'Price', default: '' }
-        },
-        default: [
-          { title: 'Complete Web Development Bootcamp', instructor: 'Sarah Chen', description: 'Learn HTML, CSS, JavaScript, React, and Node.js from scratch', duration: '40 hours', level: 'Beginner', students: '12,450', price: '$49' },
-          { title: 'Data Science with Python', instructor: 'Dr. Marcus Lee', description: 'Master data analysis, visualization, and machine learning', duration: '35 hours', level: 'Intermediate', students: '8,320', price: '$59' },
-          { title: 'UX Design Fundamentals', instructor: 'Elena Rodriguez', description: 'Create user-centered designs that delight and convert', duration: '25 hours', level: 'Beginner', students: '9,870', price: '$39' },
-          { title: 'Advanced JavaScript Patterns', instructor: 'James Wilson', description: 'Deep dive into modern JavaScript and design patterns', duration: '30 hours', level: 'Advanced', students: '5,640', price: '$69' }
-        ]
-      },
-      
-      features: {
-        type: 'group',
-        label: 'Learning Features',
-        itemLabel: 'Feature',
-        min: 1,
-        max: 8,
-        fields: {
-          title: { type: 'text', label: 'Feature Title', default: '' },
-          description: { type: 'textarea', label: 'Description', default: '' },
-          icon: { type: 'text', label: 'Icon (emoji)', default: '📚' }
-        },
-        default: [
-          { title: 'Expert-Led Content', description: 'Learn from industry professionals with real-world experience', icon: '👨‍🏫' },
-          { title: 'Lifetime Access', description: 'Access course materials anytime, anywhere, forever', icon: '♾️' },
-          { title: 'Practical Projects', description: 'Build real projects to reinforce your learning', icon: '🛠️' },
-          { title: 'Career Support', description: 'Get guidance on landing your dream job', icon: '🎯' },
-          { title: 'Certificates', description: 'Earn recognized certificates upon completion', icon: '🏆' },
-          { title: 'Community Access', description: 'Connect with fellow learners and get support', icon: '👥' }
-        ]
-      },
-      
-      curriculum: {
-        type: 'group',
-        label: 'Sample Curriculum',
-        itemLabel: 'Module',
-        min: 0,
-        max: 10,
-        fields: {
-          module: { type: 'text', label: 'Module Name', default: '' },
-          lessons: { type: 'text', label: 'Number of Lessons', default: '' },
-          duration: { type: 'text', label: 'Duration', default: '' },
-          topics: { type: 'text', label: 'Key Topics (comma-separated)', default: '' }
-        },
-        default: [
-          { module: 'Introduction to Web Development', lessons: '8', duration: '4 hours', topics: 'HTML basics, CSS fundamentals, First website' },
-          { module: 'JavaScript Essentials', lessons: '12', duration: '8 hours', topics: 'Variables, Functions, DOM manipulation, Events' },
-          { module: 'Modern JavaScript', lessons: '10', duration: '6 hours', topics: 'ES6+, Async programming, APIs' },
-          { module: 'React Fundamentals', lessons: '15', duration: '10 hours', topics: 'Components, State, Props, Hooks' },
-          { module: 'Backend with Node.js', lessons: '12', duration: '8 hours', topics: 'Express, Databases, Authentication, APIs' }
-        ]
-      },
-      
-      testimonials: {
-        type: 'group',
-        label: 'Student Reviews',
-        itemLabel: 'Review',
-        min: 0,
-        max: 6,
-        fields: {
-          quote: { type: 'textarea', label: 'Quote', default: '' },
-          author: { type: 'text', label: 'Student Name', default: '' },
-          role: { type: 'text', label: 'Achievement', default: '' },
-          rating: { type: 'select', label: 'Rating', options: ['5', '4'], default: '5' }
-        },
-        default: [
-          { quote: 'This course changed my career! I went from complete beginner to landing a developer job in 6 months.', author: 'Michael Torres', role: 'Now working at Google', rating: '5' },
-          { quote: 'The instructors are amazing and the content is always up-to-date. Best investment I\'ve made in myself.', author: 'Priya Patel', role: 'Successfully transitioned to UX Design', rating: '5' },
-          { quote: 'Practical, hands-on learning that actually prepares you for real work. The projects were challenging but rewarding.', author: 'David Kim', role: 'Freelancing successfully', rating: '5' }
-        ]
-      },
-      
-      pricingPlans: {
-        type: 'group',
-        label: 'Pricing Plans',
-        itemLabel: 'Plan',
-        min: 1,
-        max: 3,
-        fields: {
-          name: { type: 'text', label: 'Plan Name', default: '' },
-          price: { type: 'text', label: 'Price', default: '' },
-          period: { type: 'text', label: 'Billing Period', default: '/month' },
-          description: { type: 'textarea', label: 'Description', default: '' },
-          features: { type: 'text', label: 'Features (comma-separated)', default: '' }
-        },
-        default: [
-          { name: 'Free', price: '$0', period: '', description: 'Get started with basic courses', features: '10 free courses, Community access, Course certificates' },
-          { name: 'Pro', price: '$29', period: '/month', description: 'Full access to all content', features: 'All 500+ courses, Download resources, Priority support, Career coaching, Exclusive workshops' },
-          { name: 'Team', price: '$99', period: '/month', description: 'Perfect for teams and organizations', features: 'Everything in Pro, Up to 10 team members, Admin dashboard, Progress tracking, Custom reports' }
-        ]
-      },
-      
-      instructors: {
-        type: 'group',
-        label: 'Featured Instructors',
-        itemLabel: 'Instructor',
-        min: 0,
-        max: 8,
-        fields: {
-          name: { type: 'text', label: 'Name', default: '' },
-          title: { type: 'text', label: 'Title/Expertise', default: '' },
-          bio: { type: 'textarea', label: 'Bio', default: '' },
-          students: { type: 'text', label: 'Total Students', default: '' }
-        },
-        default: [
-          { name: 'Sarah Chen', title: 'Full-Stack Developer', bio: '10+ years at Meta, teaching web development', students: '45,000+' },
-          { name: 'Dr. Marcus Lee', title: 'Data Scientist', bio: 'PhD in ML, former Google AI researcher', students: '32,000+' },
-          { name: 'Elena Rodriguez', title: 'UX Design Lead', bio: 'Award-winning designer, ex-Apple', students: '28,000+' }
-        ]
-      },
-      
-      contactEmail: { type: 'email', default: 'support@learnhub.com', label: 'Contact Email' }
-    },
-    structure: (data) => `
-      <!-- Navigation -->
-      <nav style="position: fixed; top: 0; left: 0; right: 0; z-index: 1000; background: var(--color-bg); backdrop-filter: blur(20px); border-bottom: 1px solid var(--color-border); padding: 1rem 0;">
-        <div class="container" style="max-width: 1400px;">
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <div style="font-weight: 700; font-size: 1.25rem; color: var(--color-text);">${data.platformName || 'LearnHub'}</div>
-            <div style="display: flex; gap: 2.5rem; align-items: center;">
-              <a href="#courses" style="color: var(--color-text-secondary); text-decoration: none; font-size: 0.9375rem; font-weight: 500;">Courses</a>
-              <a href="#instructors" style="color: var(--color-text-secondary); text-decoration: none; font-size: 0.9375rem; font-weight: 500;">Instructors</a>
-              <a href="#pricing" style="color: var(--color-text-secondary); text-decoration: none; font-size: 0.9375rem; font-weight: 500;">Pricing</a>
-              <a href="#pricing" class="btn" style="padding: 0.75rem 1.5rem; font-size: 0.9375rem;">Start Learning</a>
-            </div>
+    tutoring: new Template('tutoring', {
+    name: 'Tutoring Services',
+    description: 'Professional tutoring and education services website',
+    category: 'Business',
+    defaultTheme: 'elegant',
+    fields: [
+      { id: 'businessName', label: 'Business Name', type: 'text', placeholder: 'Elite Tutoring Services', required: true },
+      { id: 'tagline', label: 'Tagline', type: 'text', placeholder: 'Empowering Students to Achieve Excellence' },
+      { id: 'about', label: 'About', type: 'textarea', placeholder: 'Tell students and parents about your tutoring approach and philosophy...' },
+      { id: 'subjects', label: 'Subjects Offered', type: 'textarea', placeholder: 'Enter subjects as JSON array: [{"name": "Mathematics", "grades": "K-12", "description": "Algebra, Calculus, Geometry"}, ...]' },
+      { id: 'qualifications', label: 'Qualifications', type: 'textarea', placeholder: 'Your credentials, degrees, certifications...' },
+      { id: 'testimonials', label: 'Testimonials', type: 'textarea', placeholder: 'Enter testimonials as JSON: [{"name": "Parent Name", "student": "Student Name", "text": "...", "rating": 5}, ...]' },
+      { id: 'pricing', label: 'Pricing Info', type: 'textarea', placeholder: 'Starting at $50/hour • Package deals available' },
+      { id: 'contact', label: 'Contact Email', type: 'email', placeholder: 'hello@tutoring.com' },
+      { id: 'phone', label: 'Phone', type: 'tel', placeholder: '(555) 123-4567' },
+      { id: 'bookingLink', label: 'Booking Link', type: 'url', placeholder: 'https://calendly.com/yourlink' },
+    ],
+    structure: (data, theme) => `
+      <!-- Header -->
+      <header style="position: sticky; top: 0; z-index: 1000; background: var(--color-bg); border-bottom: 2px solid var(--color-border); backdrop-filter: blur(10px);">
+        <div class="container" style="display: flex; justify-content: space-between; align-items: center; padding-top: 1.5rem; padding-bottom: 1.5rem;">
+          <div style="font-size: 1.5rem; font-weight: 900; color: var(--color-accent);">
+            📚 ${data.businessName || 'Tutoring Services'}
           </div>
+          <nav style="display: flex; gap: 2rem; align-items: center; font-weight: 600;">
+            <a href="#subjects" style="color: var(--color-text); text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">Subjects</a>
+            <a href="#about" style="color: var(--color-text); text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">About</a>
+            <a href="#testimonials" style="color: var(--color-text); text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">Reviews</a>
+            <a href="#contact" style="color: var(--color-text); text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">Contact</a>
+            <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle theme">
+              <span class="theme-icon">🌙</span>
+            </button>
+          </nav>
         </div>
-      </nav>
+      </header>
 
       <!-- Hero -->
-      <section style="padding: 10rem 0 6rem; background: var(--color-bg); position: relative; overflow: hidden;">
-        <div style="position: absolute; inset: 0; opacity: 0.03; background: radial-gradient(circle at 70% 30%, var(--color-accent, #667eea) 0%, transparent 50%);"></div>
-        <div class="container" style="max-width: 1200px; position: relative;">
-          <div style="max-width: 900px; margin: 0 auto; text-align: center;">
-            ${data.tagline ? `
-            <div style="display: inline-block; padding: 0.5rem 1.25rem; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-full); font-size: 0.875rem; font-weight: 600; margin-bottom: 2rem; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.05em;">
-              ${data.tagline}
-            </div>
-            ` : ''}
-            <h1 style="font-size: clamp(2.5rem, 7vw, 5.5rem); font-weight: 800; line-height: 1.1; margin-bottom: 2rem; letter-spacing: -0.03em;">
-              ${data.headline || 'Your Headline'}
-            </h1>
-            <p style="font-size: clamp(1.125rem, 2vw, 1.375rem); color: var(--color-text-secondary); margin-bottom: 3rem; line-height: 1.7;">
-              ${data.description || ''}
+      <section style="padding: 8rem 0 6rem; background: linear-gradient(135deg, var(--color-surface), var(--color-bg));">
+        <div class="container" style="text-align: center; max-width: 900px;">
+          <div style="font-size: 5rem; margin-bottom: 2rem;">🎓</div>
+          <h1 style="font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 900; margin-bottom: 1.5rem; letter-spacing: -0.02em; line-height: 1.1;">
+            ${data.businessName || 'Professional Tutoring Services'}
+          </h1>
+          <p style="font-size: 1.5rem; color: var(--color-text-secondary); margin-bottom: 3rem; line-height: 1.5;">
+            ${data.tagline || 'Personalized Learning for Academic Excellence'}
+          </p>
+          ${data.bookingLink ? `
+          <a href="${data.bookingLink}" target="_blank" style="display: inline-block; padding: 1.25rem 3rem; background: var(--color-accent); color: var(--color-bg); text-decoration: none; font-weight: 700; font-size: 1.125rem; border-radius: var(--radius-md); transition: all 0.2s; box-shadow: var(--shadow-md);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='var(--shadow-lg)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-md)'">
+            Book a Session
+          </a>
+          ` : ''}
+          ${data.pricing ? `
+          <div style="margin-top: 2rem; font-size: 1.125rem; color: var(--color-text-secondary);">
+            ${data.pricing}
+          </div>
+          ` : ''}
+        </div>
+      </section>
+
+      ${data.subjects && data.subjects.trim() !== '' && data.subjects !== '[]' ? `
+      <!-- Subjects -->
+      <section id="subjects" style="padding: 6rem 0; background: var(--color-bg);">
+        <div class="container">
+          <div style="text-align: center; margin-bottom: 4rem;">
+            <h2 style="font-size: clamp(2rem, 5vw, 3rem); font-weight: 900; margin-bottom: 1rem;">
+              Subjects We Teach
+            </h2>
+            <p style="font-size: 1.125rem; color: var(--color-text-secondary);">
+              Expert instruction across multiple subjects and grade levels
             </p>
-            <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
-              <a href="#courses" class="btn" style="padding: 1.25rem 2.5rem; font-size: 1.0625rem;">Explore Courses</a>
-              <a href="#pricing" class="btn btn-outline" style="padding: 1.25rem 2.5rem; font-size: 1.0625rem;">View Pricing</a>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Stats -->
-      ${data.stats && data.stats.length > 0 ? `
-      <section style="padding: 5rem 0; background: var(--color-surface); border-top: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border);">
-        <div class="container" style="max-width: 1200px;">
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 4rem; text-align: center;">
-            ${data.stats.map(stat => `
-              <div>
-                <div style="font-size: 3.5rem; font-weight: 800; margin-bottom: 0.5rem; letter-spacing: -0.02em; color: var(--color-accent, #667eea);">${stat.number}</div>
-                <div style="color: var(--color-text-secondary); font-weight: 500; font-size: 1.0625rem;">${stat.label}</div>
-              </div>
-            `).join('')}
-          </div>
-        </div>
-      </section>
-      ` : ''}
-
-      <!-- Features -->
-      ${data.features && data.features.length > 0 ? `
-      <section style="padding: 8rem 0;">
-        <div class="container" style="max-width: 1400px;">
-          <div style="text-align: center; margin-bottom: 5rem;">
-            <h2 style="font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 700; margin-bottom: 1rem; letter-spacing: -0.02em;">Why Choose ${data.platformName || 'Us'}</h2>
-            <p style="font-size: 1.125rem; color: var(--color-text-secondary);">Everything you need to succeed</p>
           </div>
           
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2.5rem;">
-            ${data.features.map(feature => `
-              <div class="card" style="padding: 2.5rem; text-align: center;">
-                <div style="font-size: 3rem; margin-bottom: 1.5rem;">${feature.icon || '📚'}</div>
-                <h3 style="font-size: 1.375rem; font-weight: 600; margin-bottom: 1rem;">${feature.title || ''}</h3>
-                <p style="color: var(--color-text-secondary); line-height: 1.8; font-size: 1rem;">${feature.description || ''}</p>
-              </div>
-            `).join('')}
-          </div>
-        </div>
-      </section>
-      ` : ''}
-
-      <!-- Courses -->
-      <section id="courses" style="padding: 8rem 0; background: var(--color-surface); border-top: 1px solid var(--color-border);">
-        <div class="container" style="max-width: 1400px;">
-          <div style="text-align: center; margin-bottom: 5rem;">
-            <h2 style="font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 700; margin-bottom: 1rem; letter-spacing: -0.02em;">Featured Courses</h2>
-            <p style="font-size: 1.125rem; color: var(--color-text-secondary);">Start learning today with our expert-led courses</p>
-          </div>
-          
-          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 2rem;">
-            ${data.courses && data.courses.length > 0 ? data.courses.map(course => `
-              <div class="card" style="padding: 0; overflow: hidden;">
-                <div style="aspect-ratio: 16/9; background: linear-gradient(135deg, var(--color-surface) 0%, var(--color-border) 100%);"></div>
-                <div style="padding: 2rem;">
-                  <div style="display: flex; gap: 0.75rem; margin-bottom: 1rem; flex-wrap: wrap;">
-                    <span style="padding: 0.25rem 0.75rem; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-sm); font-size: 0.75rem; font-weight: 600; color: var(--color-text-secondary);">
-                      ${course.level || 'Beginner'}
-                    </span>
-                    ${course.duration ? `
-                    <span style="padding: 0.25rem 0.75rem; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-sm); font-size: 0.75rem; font-weight: 600; color: var(--color-text-secondary);">
-                      ${course.duration}
-                    </span>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+            ${(() => {
+              try {
+                const subjects = JSON.parse(data.subjects || '[]');
+                return subjects.map(subject => `
+                  <div style="background: var(--color-surface); border: 2px solid var(--color-border); border-radius: var(--radius-lg); padding: 2rem; transition: all 0.2s;" onmouseover="this.style.borderColor='var(--color-accent)'; this.style.transform='translateY(-4px)'" onmouseout="this.style.borderColor='var(--color-border)'; this.style.transform='translateY(0)'">
+                    <h3 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 0.5rem; color: var(--color-accent);">
+                      ${subject.name || 'Subject'}
+                    </h3>
+                    ${subject.grades ? `
+                    <div style="font-size: 0.875rem; color: var(--color-text-secondary); font-weight: 600; margin-bottom: 1rem;">
+                      Grades: ${subject.grades}
+                    </div>
+                    ` : ''}
+                    ${subject.description ? `
+                    <p style="color: var(--color-text-secondary); line-height: 1.6;">
+                      ${subject.description}
+                    </p>
                     ` : ''}
                   </div>
-                  <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; line-height: 1.3;">${course.title || ''}</h3>
-                  <p style="color: var(--color-text-secondary); line-height: 1.7; margin-bottom: 1rem; font-size: 0.9375rem;">${course.description || ''}</p>
-                  <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 1rem; border-top: 1px solid var(--color-border);">
-                    <div>
-                      <div style="font-size: 0.875rem; color: var(--color-text-secondary); margin-bottom: 0.25rem;">by ${course.instructor || ''}</div>
-                      ${course.students ? `<div style="font-size: 0.8125rem; color: var(--color-text-secondary);">${course.students} students</div>` : ''}
-                    </div>
-                    <div style="font-size: 1.5rem; font-weight: 700; color: var(--color-accent, #667eea);">${course.price || ''}</div>
-                  </div>
-                </div>
-              </div>
-            `).join('') : ''}
-          </div>
-        </div>
-      </section>
-
-      <!-- Curriculum Sample -->
-      ${data.curriculum && data.curriculum.length > 0 ? `
-      <section style="padding: 8rem 0;">
-        <div class="container" style="max-width: 1000px;">
-          <div style="text-align: center; margin-bottom: 5rem;">
-            <h2 style="font-size: clamp(2rem, 5vw, 3rem); font-weight: 700; margin-bottom: 1rem; letter-spacing: -0.02em;">Course Curriculum</h2>
-            <p style="font-size: 1.125rem; color: var(--color-text-secondary);">A glimpse into what you'll learn</p>
-          </div>
-          
-          <div style="display: flex; flex-direction: column; gap: 1.5rem;">
-            ${data.curriculum.map((module, idx) => `
-              <div style="padding: 2rem; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg);">
-                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem; gap: 2rem;">
-                  <div style="display: flex; gap: 1.5rem; align-items: start; flex: 1;">
-                    <div style="width: 48px; height: 48px; background: var(--color-bg); border: 2px solid var(--color-border); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.125rem; flex-shrink: 0;">
-                      ${idx + 1}
-                    </div>
-                    <div style="flex: 1;">
-                      <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">${module.module || ''}</h3>
-                      <div style="display: flex; gap: 2rem; color: var(--color-text-secondary); font-size: 0.875rem; margin-bottom: 1rem;">
-                        ${module.lessons ? `<div>${module.lessons} lessons</div>` : ''}
-                        ${module.duration ? `<div>${module.duration}</div>` : ''}
-                      </div>
-                      ${module.topics ? `
-                      <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
-                        ${module.topics.split(',').map(topic => `
-                          <span style="padding: 0.25rem 0.75rem; background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--radius-sm); font-size: 0.8125rem; color: var(--color-text-secondary);">
-                            ${topic.trim()}
-                          </span>
-                        `).join('')}
-                      </div>
-                      ` : ''}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            `).join('')}
+                `).join('');
+              } catch (e) {
+                return '<p style="text-align: center; color: var(--color-text-secondary);">Subjects information will appear here</p>';
+              }
+            })()}
           </div>
         </div>
       </section>
       ` : ''}
 
-      <!-- Instructors -->
-      ${data.instructors && data.instructors.length > 0 ? `
-      <section id="instructors" style="padding: 8rem 0; background: var(--color-surface); border-top: 1px solid var(--color-border);">
-        <div class="container" style="max-width: 1200px;">
-          <div style="text-align: center; margin-bottom: 5rem;">
-            <h2 style="font-size: clamp(2.5rem, 6vw, 3.5rem); font-weight: 700; margin-bottom: 1rem; letter-spacing: -0.02em;">Learn From The Best</h2>
-            <p style="font-size: 1.125rem; color: var(--color-text-secondary);">Industry experts with real-world experience</p>
+      <!-- About -->
+      <section id="about" style="padding: 6rem 0; background: var(--color-surface);">
+        <div class="container" style="max-width: 900px;">
+          <div style="text-align: center; margin-bottom: 4rem;">
+            <h2 style="font-size: clamp(2rem, 5vw, 3rem); font-weight: 900; margin-bottom: 1rem;">
+              About Our Tutoring
+            </h2>
           </div>
           
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2.5rem;">
-            ${data.instructors.map(instructor => `
-              <div class="card" style="padding: 2.5rem; text-align: center;">
-                <div style="width: 120px; height: 120px; background: var(--color-bg); border: 3px solid var(--color-border); border-radius: 50%; margin: 0 auto 1.5rem;"></div>
-                <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">${instructor.name || ''}</h3>
-                <div style="font-size: 0.9375rem; color: var(--color-accent, #667eea); margin-bottom: 1rem; font-weight: 600;">${instructor.title || ''}</div>
-                <p style="color: var(--color-text-secondary); line-height: 1.7; margin-bottom: 1rem; font-size: 0.9375rem;">${instructor.bio || ''}</p>
-                ${instructor.students ? `
-                <div style="padding-top: 1rem; border-top: 1px solid var(--color-border); font-size: 0.875rem; color: var(--color-text-secondary);">
-                  <strong>${instructor.students}</strong> students taught
-                </div>
-                ` : ''}
-              </div>
-            `).join('')}
+          ${data.about ? `
+          <div style="font-size: 1.125rem; line-height: 1.8; color: var(--color-text); margin-bottom: 3rem; white-space: pre-line;">
+            ${data.about}
           </div>
+          ` : ''}
+          
+          ${data.qualifications ? `
+          <div style="background: var(--color-bg); border-left: 4px solid var(--color-accent); border-radius: var(--radius-md); padding: 2rem;">
+            <h3 style="font-size: 1.25rem; font-weight: 800; margin-bottom: 1rem; color: var(--color-accent);">
+              Qualifications & Experience
+            </h3>
+            <div style="color: var(--color-text-secondary); line-height: 1.8; white-space: pre-line;">
+              ${data.qualifications}
+            </div>
+          </div>
+          ` : ''}
         </div>
       </section>
-      ` : ''}
 
+      ${data.testimonials && data.testimonials.trim() !== '' && data.testimonials !== '[]' ? `
       <!-- Testimonials -->
-      ${data.testimonials && data.testimonials.length > 0 ? `
-      <section style="padding: 8rem 0;">
-        <div class="container" style="max-width: 1200px;">
-          <div style="text-align: center; margin-bottom: 5rem;">
-            <h2 style="font-size: clamp(2.5rem, 6vw, 3.5rem); font-weight: 700; margin-bottom: 1rem; letter-spacing: -0.02em;">Student Success Stories</h2>
-            <p style="font-size: 1.125rem; color: var(--color-text-secondary);">Real results from real students</p>
+      <section id="testimonials" style="padding: 6rem 0; background: var(--color-bg);">
+        <div class="container">
+          <div style="text-align: center; margin-bottom: 4rem;">
+            <h2 style="font-size: clamp(2rem, 5vw, 3rem); font-weight: 900; margin-bottom: 1rem;">
+              What Parents & Students Say
+            </h2>
           </div>
           
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 2rem;">
-            ${data.testimonials.map(review => `
-              <div class="card" style="padding: 2.5rem;">
-                <div style="display: flex; gap: 0.25rem; margin-bottom: 1.5rem;">
-                  ${Array(parseInt(review.rating || 5)).fill('⭐').join('')}
-                </div>
-                <p style="font-size: 1.0625rem; line-height: 1.8; margin-bottom: 1.5rem; color: var(--color-text);">
-                  "${review.quote || ''}"
-                </p>
-                <div style="padding-top: 1.5rem; border-top: 1px solid var(--color-border);">
-                  <h4 style="font-weight: 600; margin-bottom: 0.25rem; font-size: 0.9375rem;">${review.author || ''}</h4>
-                  <p style="color: var(--color-text-secondary); font-size: 0.875rem;">${review.role || ''}</p>
-                </div>
-              </div>
-            `).join('')}
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+            ${(() => {
+              try {
+                const testimonials = JSON.parse(data.testimonials || '[]');
+                return testimonials.map(testimonial => `
+                  <div style="background: var(--color-surface); border: 2px solid var(--color-border); border-radius: var(--radius-lg); padding: 2rem;">
+                    ${testimonial.rating ? `
+                    <div style="font-size: 1.25rem; margin-bottom: 1rem; color: var(--color-accent);">
+                      ${'⭐'.repeat(testimonial.rating)}
+                    </div>
+                    ` : ''}
+                    <p style="font-size: 1rem; line-height: 1.6; color: var(--color-text); margin-bottom: 1.5rem; font-style: italic;">
+                      "${testimonial.text || ''}"
+                    </p>
+                    <div style="font-weight: 700; color: var(--color-text);">
+                      ${testimonial.name || 'Parent'}
+                    </div>
+                    ${testimonial.student ? `
+                    <div style="font-size: 0.875rem; color: var(--color-text-secondary);">
+                      Parent of ${testimonial.student}
+                    </div>
+                    ` : ''}
+                  </div>
+                `).join('');
+              } catch (e) {
+                return '';
+              }
+            })()}
           </div>
         </div>
       </section>
       ` : ''}
 
-      <!-- Pricing -->
-      <section id="pricing" style="padding: 8rem 0; background: var(--color-surface); border-top: 1px solid var(--color-border);">
-        <div class="container" style="max-width: 1200px;">
-          <div style="text-align: center; margin-bottom: 5rem;">
-            <h2 style="font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 700; margin-bottom: 1rem; letter-spacing: -0.02em;">Choose Your Plan</h2>
-            <p style="font-size: 1.125rem; color: var(--color-text-secondary);">Start learning today</p>
+      <!-- Contact -->
+      <section id="contact" style="padding: 6rem 0; background: var(--color-surface);">
+        <div class="container" style="max-width: 700px; text-align: center;">
+          <h2 style="font-size: clamp(2rem, 5vw, 3rem); font-weight: 900; margin-bottom: 1rem;">
+            Ready to Get Started?
+          </h2>
+          <p style="font-size: 1.125rem; color: var(--color-text-secondary); margin-bottom: 3rem;">
+            Contact us today to schedule your first tutoring session
+          </p>
+          
+          <div style="display: flex; flex-direction: column; gap: 1.5rem; align-items: center; margin-bottom: 3rem;">
+            ${data.contact ? `
+            <a href="mailto:${data.contact}" style="display: flex; align-items: center; gap: 1rem; font-size: 1.125rem; color: var(--color-text); text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">
+              <span style="font-size: 1.5rem;">✉️</span>
+              ${data.contact}
+            </a>
+            ` : ''}
+            ${data.phone ? `
+            <a href="tel:${data.phone}" style="display: flex; align-items: center; gap: 1rem; font-size: 1.125rem; color: var(--color-text); text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">
+              <span style="font-size: 1.5rem;">📞</span>
+              ${data.phone}
+            </a>
+            ` : ''}
           </div>
           
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; max-width: 1100px; margin: 0 auto;">
-            ${data.pricingPlans && data.pricingPlans.length > 0 ? data.pricingPlans.map(plan => `
-              <div class="card" style="padding: 3rem 2.5rem; text-align: center;">
-                <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem;">${plan.name || ''}</h3>
-                <div style="margin-bottom: 1rem;">
-                  <span style="font-size: 3.5rem; font-weight: 800; letter-spacing: -0.02em;">${plan.price || ''}</span>
-                  ${plan.period ? `<span style="font-size: 1.125rem; color: var(--color-text-secondary);">${plan.period}</span>` : ''}
-                </div>
-                <p style="color: var(--color-text-secondary); margin-bottom: 2rem; min-height: 3em; line-height: 1.6; font-size: 0.9375rem;">
-                  ${plan.description || ''}
-                </p>
-                <a href="#" class="btn" style="width: 100%; padding: 1rem; margin-bottom: 2rem; font-size: 1rem;">
-                  Get Started
-                </a>
-                ${plan.features ? `
-                <div style="text-align: left; padding-top: 2rem; border-top: 1px solid var(--color-border);">
-                  ${plan.features.split(',').map(feature => `
-                    <div style="display: flex; gap: 0.75rem; margin-bottom: 1rem; font-size: 0.9375rem;">
-                      <span style="color: var(--color-accent, #667eea); font-weight: 700; flex-shrink: 0;">✓</span>
-                      <span style="color: var(--color-text-secondary); line-height: 1.6;">${feature.trim()}</span>
-                    </div>
-                  `).join('')}
-                </div>
-                ` : ''}
-              </div>
-            `).join('') : ''}
-          </div>
-        </div>
-      </section>
-
-      <!-- CTA -->
-      <section style="padding: 8rem 0;">
-        <div class="container" style="max-width: 800px; text-align: center;">
-          <h2 style="font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 800; margin-bottom: 1.5rem; letter-spacing: -0.02em;">
-            Ready to Start Learning?
-          </h2>
-          <p style="font-size: 1.25rem; color: var(--color-text-secondary); margin-bottom: 3rem; line-height: 1.7;">
-            Join thousands of students transforming their careers
-          </p>
-          <a href="#pricing" class="btn" style="padding: 1.25rem 3rem; font-size: 1.125rem;">
-            Start Your Journey Today
+          ${data.bookingLink ? `
+          <a href="${data.bookingLink}" target="_blank" style="display: inline-block; padding: 1.25rem 3rem; background: var(--color-accent); color: var(--color-bg); text-decoration: none; font-weight: 700; font-size: 1.125rem; border-radius: var(--radius-md); transition: all 0.2s; box-shadow: var(--shadow-md);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='var(--shadow-lg)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-md)'">
+            Schedule a Free Consultation
           </a>
+          ` : ''}
         </div>
       </section>
 
       <!-- Footer -->
-      <footer style="padding: 4rem 0; border-top: 1px solid var(--color-border); text-align: center; background: var(--color-surface);">
+      <footer style="padding: 2rem 0; background: var(--color-bg); text-align: center; color: var(--color-text-secondary); font-size: 0.875rem; border-top: 2px solid var(--color-border);">
         <div class="container">
-          <div style="margin-bottom: 2rem;">
-            <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem;">${data.platformName || 'LearnHub'}</h3>
-            ${data.contactEmail ? `<a href="mailto:${data.contactEmail}" style="color: var(--color-text-secondary); text-decoration: none; font-size: 0.9375rem;">${data.contactEmail}</a>` : ''}
+          <p>© 2024 ${data.businessName || 'Tutoring Services'}. All rights reserved.</p>
+        </div>
+      </footer>
+
+      <style>
+        @media (max-width: 768px) {
+          header nav { display: none !important; }
+        }
+      </style>
+    `
+  }),
+
+  realestate: new Template('realestate', {
+    name: 'Real Estate Agent',
+    description: 'Professional real estate agent and property listings website',
+    category: 'Business',
+    defaultTheme: 'glassmorphism',
+    fields: [
+      { id: 'agentName', label: 'Agent Name', type: 'text', placeholder: 'Sarah Mitchell', required: true },
+      { id: 'title', label: 'Professional Title', type: 'text', placeholder: 'Luxury Real Estate Specialist' },
+      { id: 'tagline', label: 'Tagline', type: 'text', placeholder: 'Finding Your Dream Home in [City]' },
+      { id: 'bio', label: 'About', type: 'textarea', placeholder: 'Share your experience, market expertise, and what makes you unique...' },
+      { id: 'serviceArea', label: 'Service Area', type: 'text', placeholder: 'Greater Los Angeles Area' },
+      { id: 'featuredListings', label: 'Featured Properties', type: 'textarea', placeholder: 'Enter properties as JSON: [{"address": "123 Oak St", "price": "$1,250,000", "beds": 4, "baths": 3, "sqft": "2,800", "type": "Single Family", "status": "For Sale", "image": "🏡"}, ...]' },
+      { id: 'services', label: 'Services', type: 'textarea', placeholder: 'Enter services as JSON: [{"name": "Buyer Representation", "icon": "🔍", "description": "..."}, ...]' },
+      { id: 'testimonials', label: 'Client Testimonials', type: 'textarea', placeholder: 'Enter testimonials as JSON: [{"name": "John & Mary Smith", "text": "Sarah helped us find our dream home!", "property": "Bought 2BR Condo", "rating": 5}, ...]' },
+      { id: 'stats', label: 'Statistics', type: 'textarea', placeholder: 'Enter stats as JSON: [{"number": "150+", "label": "Homes Sold"}, {"number": "$50M+", "label": "Sales Volume"}, ...]' },
+      { id: 'license', label: 'License Number', type: 'text', placeholder: 'DRE #01234567' },
+      { id: 'brokerage', label: 'Brokerage', type: 'text', placeholder: 'Luxury Realty Group' },
+      { id: 'contact', label: 'Email', type: 'email', placeholder: 'sarah@luxuryrealty.com' },
+      { id: 'phone', label: 'Phone', type: 'tel', placeholder: '(555) 123-4567' },
+      { id: 'calendlyLink', label: 'Consultation Link', type: 'url', placeholder: 'https://calendly.com/yourlink' },
+    ],
+    structure: (data, theme) => `
+      <!-- Header -->
+      <header style="position: sticky; top: 0; z-index: 1000; background: rgba(var(--color-bg-rgb, 255, 255, 255), 0.85); backdrop-filter: blur(20px); border-bottom: 1px solid var(--color-border);">
+        <div class="container" style="display: flex; justify-content: space-between; align-items: center; padding-top: 1.25rem; padding-bottom: 1.25rem;">
+          <div>
+            <div style="font-size: 1.5rem; font-weight: 900; color: var(--color-accent); letter-spacing: -0.02em;">
+              ${data.agentName || 'Real Estate Agent'}
+            </div>
+            ${data.brokerage ? `
+            <div style="font-size: 0.75rem; color: var(--color-text-secondary); font-weight: 600; margin-top: 0.25rem;">
+              ${data.brokerage}
+            </div>
+            ` : ''}
           </div>
-          <p style="color: var(--color-text-secondary); font-size: 0.875rem;">
-            © 2024 ${data.platformName || 'LearnHub'}. Empowering learners worldwide.
+          <nav style="display: flex; gap: 2rem; align-items: center; font-weight: 600; font-size: 0.9375rem;">
+            <a href="#listings" style="color: var(--color-text); text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">Listings</a>
+            <a href="#services" style="color: var(--color-text); text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">Services</a>
+            <a href="#testimonials" style="color: var(--color-text); text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">Testimonials</a>
+            <a href="#contact" style="color: var(--color-text); text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">Contact</a>
+            <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle theme">
+              <span class="theme-icon">🌙</span>
+            </button>
+          </nav>
+        </div>
+      </header>
+
+      <!-- Hero -->
+      <section style="padding: 8rem 0 6rem; background: linear-gradient(135deg, var(--color-surface), var(--color-bg)); position: relative; overflow: hidden;">
+        <div style="position: absolute; inset: 0; opacity: 0.03; background-image: radial-gradient(circle, var(--color-text) 1px, transparent 1px); background-size: 30px 30px;"></div>
+        <div class="container" style="position: relative; z-index: 1;">
+          <div style="max-width: 800px;">
+            ${data.title ? `
+            <div style="display: inline-block; padding: 0.5rem 1rem; background: var(--color-accent); color: var(--color-bg); font-weight: 700; font-size: 0.875rem; border-radius: var(--radius-full); margin-bottom: 1.5rem;">
+              ${data.title}
+            </div>
+            ` : ''}
+            <h1 style="font-size: clamp(3rem, 7vw, 5rem); font-weight: 900; margin-bottom: 1.5rem; letter-spacing: -0.03em; line-height: 1.1;">
+              ${data.agentName || 'Your Real Estate Expert'}
+            </h1>
+            <p style="font-size: 1.5rem; color: var(--color-text-secondary); margin-bottom: 3rem; line-height: 1.4;">
+              ${data.tagline || 'Helping You Find the Perfect Property'}
+            </p>
+            ${data.serviceArea ? `
+            <div style="display: flex; align-items: center; gap: 0.75rem; font-size: 1.125rem; color: var(--color-text-secondary); margin-bottom: 3rem;">
+              <span style="font-size: 1.5rem;">📍</span>
+              <span style="font-weight: 600;">Serving ${data.serviceArea}</span>
+            </div>
+            ` : ''}
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+              ${data.calendlyLink ? `
+              <a href="${data.calendlyLink}" target="_blank" style="display: inline-block; padding: 1.25rem 2.5rem; background: var(--color-accent); color: var(--color-bg); text-decoration: none; font-weight: 700; font-size: 1.0625rem; border-radius: var(--radius-md); transition: all 0.2s; box-shadow: var(--shadow-md);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='var(--shadow-lg)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-md)'">
+                Schedule Consultation
+              </a>
+              ` : ''}
+              ${data.phone ? `
+              <a href="tel:${data.phone}" style="display: inline-block; padding: 1.25rem 2.5rem; background: var(--color-surface); color: var(--color-text); text-decoration: none; font-weight: 700; font-size: 1.0625rem; border-radius: var(--radius-md); border: 2px solid var(--color-border); transition: all 0.2s;" onmouseover="this.style.borderColor='var(--color-accent)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='var(--color-border)'; this.style.transform='translateY(0)'">
+                📞 ${data.phone}
+              </a>
+              ` : ''}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      ${data.stats && data.stats.trim() !== '' && data.stats !== '[]' ? `
+      <!-- Stats -->
+      <section style="padding: 4rem 0; background: var(--color-accent); color: var(--color-bg);">
+        <div class="container">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 3rem; text-align: center;">
+            ${(() => {
+              try {
+                const stats = JSON.parse(data.stats || '[]');
+                return stats.map(stat => `
+                  <div>
+                    <div style="font-size: 3rem; font-weight: 900; margin-bottom: 0.5rem; opacity: 0.95;">
+                      ${stat.number || '0'}
+                    </div>
+                    <div style="font-size: 1rem; opacity: 0.9; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">
+                      ${stat.label || ''}
+                    </div>
+                  </div>
+                `).join('');
+              } catch (e) {
+                return '';
+              }
+            })()}
+          </div>
+        </div>
+      </section>
+      ` : ''}
+
+      ${data.featuredListings && data.featuredListings.trim() !== '' && data.featuredListings !== '[]' ? `
+      <!-- Featured Listings -->
+      <section id="listings" style="padding: 6rem 0; background: var(--color-bg);">
+        <div class="container">
+          <div style="text-align: center; margin-bottom: 4rem;">
+            <h2 style="font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: 900; margin-bottom: 1rem; letter-spacing: -0.02em;">
+              Featured Properties
+            </h2>
+            <p style="font-size: 1.125rem; color: var(--color-text-secondary);">
+              Explore my current listings and recent sales
+            </p>
+          </div>
+          
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 2rem;">
+            ${(() => {
+              try {
+                const listings = JSON.parse(data.featuredListings || '[]');
+                return listings.map(property => `
+                  <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); overflow: hidden; transition: all 0.3s; box-shadow: var(--shadow-sm);" onmouseover="this.style.transform='translateY(-8px)'; this.style.boxShadow='var(--shadow-lg)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-sm)'">
+                    <div style="aspect-ratio: 4/3; background: linear-gradient(135deg, var(--color-accent), var(--color-text)); display: flex; align-items: center; justify-content: center; font-size: 5rem; position: relative;">
+                      ${property.image || '🏠'}
+                      ${property.status ? `
+                      <div style="position: absolute; top: 1rem; right: 1rem; background: ${property.status.toLowerCase().includes('sold') ? '#22c55e' : 'var(--color-accent)'}; color: white; padding: 0.5rem 1rem; font-size: 0.75rem; font-weight: 800; border-radius: var(--radius-sm); text-transform: uppercase; letter-spacing: 0.05em;">
+                        ${property.status}
+                      </div>
+                      ` : ''}
+                    </div>
+                    <div style="padding: 1.5rem;">
+                      ${property.price ? `
+                      <div style="font-size: 1.75rem; font-weight: 900; color: var(--color-accent); margin-bottom: 0.75rem;">
+                        ${property.price}
+                      </div>
+                      ` : ''}
+                      ${property.address ? `
+                      <div style="font-size: 1.125rem; font-weight: 700; margin-bottom: 1rem; color: var(--color-text);">
+                        ${property.address}
+                      </div>
+                      ` : ''}
+                      ${property.type ? `
+                      <div style="font-size: 0.875rem; color: var(--color-text-secondary); font-weight: 600; margin-bottom: 1rem;">
+                        ${property.type}
+                      </div>
+                      ` : ''}
+                      <div style="display: flex; gap: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--color-border); font-size: 0.9375rem; color: var(--color-text-secondary); font-weight: 600;">
+                        ${property.beds ? `<span>🛏️ ${property.beds} beds</span>` : ''}
+                        ${property.baths ? `<span>🚿 ${property.baths} baths</span>` : ''}
+                        ${property.sqft ? `<span>📐 ${property.sqft} sqft</span>` : ''}
+                      </div>
+                    </div>
+                  </div>
+                `).join('');
+              } catch (e) {
+                return '';
+              }
+            })()}
+          </div>
+        </div>
+      </section>
+      ` : ''}
+
+      ${data.services && data.services.trim() !== '' && data.services !== '[]' ? `
+      <!-- Services -->
+      <section id="services" style="padding: 6rem 0; background: var(--color-surface);">
+        <div class="container">
+          <div style="text-align: center; margin-bottom: 4rem;">
+            <h2 style="font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: 900; margin-bottom: 1rem; letter-spacing: -0.02em;">
+              How I Can Help
+            </h2>
+          </div>
+          
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem; max-width: 1000px; margin: 0 auto;">
+            ${(() => {
+              try {
+                const services = JSON.parse(data.services || '[]');
+                return services.map(service => `
+                  <div style="background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 2rem; text-align: center; transition: all 0.2s;" onmouseover="this.style.borderColor='var(--color-accent)'; this.style.transform='translateY(-4px)'" onmouseout="this.style.borderColor='var(--color-border)'; this.style.transform='translateY(0)'">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">${service.icon || '🏡'}</div>
+                    <h3 style="font-size: 1.375rem; font-weight: 800; margin-bottom: 1rem; letter-spacing: -0.01em;">
+                      ${service.name || 'Service'}
+                    </h3>
+                    ${service.description ? `
+                    <p style="color: var(--color-text-secondary); line-height: 1.6;">
+                      ${service.description}
+                    </p>
+                    ` : ''}
+                  </div>
+                `).join('');
+              } catch (e) {
+                return '';
+              }
+            })()}
+          </div>
+        </div>
+      </section>
+      ` : ''}
+
+      <!-- About -->
+      <section style="padding: 6rem 0; background: var(--color-bg);">
+        <div class="container" style="max-width: 900px;">
+          <div style="text-align: center; margin-bottom: 3rem;">
+            <h2 style="font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: 900; letter-spacing: -0.02em;">
+              About Me
+            </h2>
+          </div>
+          
+          ${data.bio ? `
+          <div style="font-size: 1.125rem; line-height: 1.8; color: var(--color-text); margin-bottom: 2rem; white-space: pre-line;">
+            ${data.bio}
+          </div>
+          ` : ''}
+          
+          ${data.license || data.brokerage ? `
+          <div style="display: flex; gap: 2rem; justify-content: center; padding: 1.5rem; background: var(--color-surface); border-radius: var(--radius-md); font-size: 0.9375rem; color: var(--color-text-secondary); font-weight: 600; flex-wrap: wrap;">
+            ${data.license ? `<span>📄 ${data.license}</span>` : ''}
+            ${data.brokerage ? `<span>🏢 ${data.brokerage}</span>` : ''}
+          </div>
+          ` : ''}
+        </div>
+      </section>
+
+      ${data.testimonials && data.testimonials.trim() !== '' && data.testimonials !== '[]' ? `
+      <!-- Testimonials -->
+      <section id="testimonials" style="padding: 6rem 0; background: var(--color-surface);">
+        <div class="container">
+          <div style="text-align: center; margin-bottom: 4rem;">
+            <h2 style="font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: 900; margin-bottom: 1rem; letter-spacing: -0.02em;">
+              Client Success Stories
+            </h2>
+          </div>
+          
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem;">
+            ${(() => {
+              try {
+                const testimonials = JSON.parse(data.testimonials || '[]');
+                return testimonials.map(testimonial => `
+                  <div style="background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 2rem;">
+                    ${testimonial.rating ? `
+                    <div style="font-size: 1.25rem; margin-bottom: 1rem; color: #fbbf24;">
+                      ${'⭐'.repeat(testimonial.rating)}
+                    </div>
+                    ` : ''}
+                    <p style="font-size: 1.0625rem; line-height: 1.7; color: var(--color-text); margin-bottom: 1.5rem; font-style: italic;">
+                      "${testimonial.text || ''}"
+                    </p>
+                    <div style="border-top: 1px solid var(--color-border); padding-top: 1rem;">
+                      <div style="font-weight: 700; color: var(--color-text);">
+                        ${testimonial.name || 'Client'}
+                      </div>
+                      ${testimonial.property ? `
+                      <div style="font-size: 0.875rem; color: var(--color-text-secondary); margin-top: 0.25rem;">
+                        ${testimonial.property}
+                      </div>
+                      ` : ''}
+                    </div>
+                  </div>
+                `).join('');
+              } catch (e) {
+                return '';
+              }
+            })()}
+          </div>
+        </div>
+      </section>
+      ` : ''}
+
+      <!-- Contact -->
+      <section id="contact" style="padding: 6rem 0; background: var(--color-bg);">
+        <div class="container" style="max-width: 700px; text-align: center;">
+          <h2 style="font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: 900; margin-bottom: 1rem; letter-spacing: -0.02em;">
+            Let's Find Your Dream Home
+          </h2>
+          <p style="font-size: 1.125rem; color: var(--color-text-secondary); margin-bottom: 3rem; line-height: 1.6;">
+            Ready to buy or sell? Get in touch for a free consultation
+          </p>
+          
+          <div style="display: flex; flex-direction: column; gap: 1rem; align-items: center; margin-bottom: 2.5rem;">
+            ${data.contact ? `
+            <a href="mailto:${data.contact}" style="display: flex; align-items: center; gap: 1rem; font-size: 1.0625rem; color: var(--color-text); text-decoration: none; font-weight: 600; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">
+              <span style="font-size: 1.5rem;">✉️</span>
+              ${data.contact}
+            </a>
+            ` : ''}
+            ${data.phone ? `
+            <a href="tel:${data.phone}" style="display: flex; align-items: center; gap: 1rem; font-size: 1.0625rem; color: var(--color-text); text-decoration: none; font-weight: 600; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">
+              <span style="font-size: 1.5rem;">📞</span>
+              ${data.phone}
+            </a>
+            ` : ''}
+          </div>
+          
+          ${data.calendlyLink ? `
+          <a href="${data.calendlyLink}" target="_blank" style="display: inline-block; padding: 1.25rem 2.5rem; background: var(--color-accent); color: var(--color-bg); text-decoration: none; font-weight: 700; font-size: 1.0625rem; border-radius: var(--radius-md); transition: all 0.2s; box-shadow: var(--shadow-md);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='var(--shadow-lg)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-md)'">
+            Schedule Free Consultation
+          </a>
+          ` : ''}
+        </div>
+      </section>
+
+      <!-- Footer -->
+      <footer style="padding: 2rem 0; background: var(--color-surface); text-align: center; color: var(--color-text-secondary); font-size: 0.875rem; border-top: 1px solid var(--color-border);">
+        <div class="container">
+          <p>© 2024 ${data.agentName || 'Real Estate Agent'}. ${data.license ? data.license : ''}</p>
+        </div>
+      </footer>
+
+      <style>
+        @media (max-width: 768px) {
+          header nav { display: none !important; }
+        }
+      </style>
+    `
+  }),
+
+  financialadvisor: new Template('financialadvisor', {
+    name: 'Financial Advisor',
+    description: 'Professional financial planning and wealth management website',
+    category: 'Business',
+    defaultTheme: 'elegant',
+    fields: [
+      { id: 'advisorName', label: 'Advisor Name', type: 'text', placeholder: 'Michael Chen, CFP®', required: true },
+      { id: 'firmName', label: 'Firm Name', type: 'text', placeholder: 'Horizon Wealth Management' },
+      { id: 'tagline', label: 'Tagline', type: 'text', placeholder: 'Building Your Financial Future with Confidence' },
+      { id: 'bio', label: 'About', type: 'textarea', placeholder: 'Share your background, philosophy, and approach to financial planning...' },
+      { id: 'specializations', label: 'Specializations', type: 'textarea', placeholder: 'Enter specializations as JSON: [{"name": "Retirement Planning", "icon": "🏖️", "description": "..."}, ...]' },
+      { id: 'services', label: 'Services Offered', type: 'textarea', placeholder: 'Enter services as JSON: [{"name": "Wealth Management", "description": "...", "features": ["Feature 1", "Feature 2"]}, ...]' },
+      { id: 'process', label: 'Planning Process', type: 'textarea', placeholder: 'Enter process steps as JSON: [{"step": "1", "title": "Discovery", "description": "..."}, ...]' },
+      { id: 'credentials', label: 'Credentials & Certifications', type: 'textarea', placeholder: 'CFP®, CFA, MBA, 15+ years experience...' },
+      { id: 'testimonials', label: 'Client Testimonials', type: 'textarea', placeholder: 'Enter testimonials as JSON: [{"name": "Robert & Linda K.", "text": "...", "title": "Retired Executives"}, ...]' },
+      { id: 'disclosure', label: 'Disclosure', type: 'text', placeholder: 'Securities offered through XYZ Financial, Member FINRA/SIPC' },
+      { id: 'contact', label: 'Email', type: 'email', placeholder: 'michael@horizonwealth.com' },
+      { id: 'phone', label: 'Phone', type: 'tel', placeholder: '(555) 123-4567' },
+      { id: 'address', label: 'Office Address', type: 'textarea', placeholder: '123 Financial Plaza, Suite 500\nNew York, NY 10001' },
+      { id: 'calendlyLink', label: 'Consultation Link', type: 'url', placeholder: 'https://calendly.com/yourlink' },
+    ],
+    structure: (data, theme) => `
+      <!-- Header -->
+      <header style="position: sticky; top: 0; z-index: 1000; background: var(--color-bg); border-bottom: 1px solid var(--color-border); box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+        <div class="container" style="display: flex; justify-content: space-between; align-items: center; padding-top: 1.25rem; padding-bottom: 1.25rem;">
+          <div>
+            <div style="font-size: 1.375rem; font-weight: 900; color: var(--color-text); letter-spacing: -0.01em;">
+              ${data.advisorName || 'Financial Advisor'}
+            </div>
+            ${data.firmName ? `
+            <div style="font-size: 0.8125rem; color: var(--color-text-secondary); font-weight: 600; margin-top: 0.25rem;">
+              ${data.firmName}
+            </div>
+            ` : ''}
+          </div>
+          <nav style="display: flex; gap: 2rem; align-items: center; font-weight: 600; font-size: 0.9375rem;">
+            <a href="#services" style="color: var(--color-text); text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">Services</a>
+            <a href="#process" style="color: var(--color-text); text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">Process</a>
+            <a href="#about" style="color: var(--color-text); text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">About</a>
+            <a href="#contact" style="color: var(--color-text); text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">Contact</a>
+            <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle theme">
+              <span class="theme-icon">🌙</span>
+            </button>
+          </nav>
+        </div>
+      </header>
+
+      <!-- Hero -->
+      <section style="padding: 7rem 0 6rem; background: var(--color-bg); border-bottom: 1px solid var(--color-border);">
+        <div class="container">
+          <div style="max-width: 800px; margin: 0 auto; text-align: center;">
+            <div style="display: inline-flex; align-items: center; gap: 0.75rem; padding: 0.625rem 1.25rem; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-full); margin-bottom: 2rem; font-size: 0.9375rem; font-weight: 600; color: var(--color-text-secondary);">
+              <span style="font-size: 1.25rem;">📊</span>
+              Professional Financial Planning
+            </div>
+            <h1 style="font-size: clamp(2.75rem, 6vw, 4.5rem); font-weight: 800; margin-bottom: 1.5rem; letter-spacing: -0.03em; line-height: 1.1; color: var(--color-text);">
+              ${data.tagline || 'Strategic Financial Planning for Your Future'}
+            </h1>
+            <p style="font-size: 1.25rem; color: var(--color-text-secondary); margin-bottom: 3rem; line-height: 1.6; font-weight: 500;">
+              ${data.firmName ? `${data.firmName} • ` : ''}Personalized wealth management strategies tailored to your goals
+            </p>
+            <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+              ${data.calendlyLink ? `
+              <a href="${data.calendlyLink}" target="_blank" style="display: inline-block; padding: 1.125rem 2.5rem; background: var(--color-accent); color: var(--color-bg); text-decoration: none; font-weight: 700; font-size: 1rem; border-radius: var(--radius-md); transition: all 0.2s; box-shadow: var(--shadow-sm);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='var(--shadow-md)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-sm)'">
+                Schedule Consultation
+              </a>
+              ` : ''}
+              ${data.phone ? `
+              <a href="tel:${data.phone}" style="display: inline-block; padding: 1.125rem 2.5rem; background: var(--color-bg); color: var(--color-text); text-decoration: none; font-weight: 700; font-size: 1rem; border-radius: var(--radius-md); border: 2px solid var(--color-border); transition: all 0.2s;" onmouseover="this.style.borderColor='var(--color-text)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='var(--color-border)'; this.style.transform='translateY(0)'">
+                ${data.phone}
+              </a>
+              ` : ''}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      ${data.specializations && data.specializations.trim() !== '' && data.specializations !== '[]' ? `
+      <!-- Specializations -->
+      <section style="padding: 5rem 0; background: var(--color-surface);">
+        <div class="container">
+          <div style="text-align: center; margin-bottom: 4rem;">
+            <h2 style="font-size: clamp(2rem, 5vw, 3rem); font-weight: 800; margin-bottom: 1rem; letter-spacing: -0.02em;">
+              Areas of Expertise
+            </h2>
+            <p style="font-size: 1.0625rem; color: var(--color-text-secondary); max-width: 600px; margin: 0 auto;">
+              Comprehensive financial solutions across multiple areas
+            </p>
+          </div>
+          
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem;">
+            ${(() => {
+              try {
+                const specializations = JSON.parse(data.specializations || '[]');
+                return specializations.map(spec => `
+                  <div style="background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 2rem; transition: all 0.2s;" onmouseover="this.style.borderColor='var(--color-accent)'; this.style.transform='translateY(-4px)'; this.style.boxShadow='var(--shadow-md)'" onmouseout="this.style.borderColor='var(--color-border)'; this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                    <div style="font-size: 2.5rem; margin-bottom: 1rem;">${spec.icon || '💼'}</div>
+                    <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.75rem; letter-spacing: -0.01em;">
+                      ${spec.name || 'Specialization'}
+                    </h3>
+                    ${spec.description ? `
+                    <p style="color: var(--color-text-secondary); line-height: 1.6; font-size: 0.9375rem;">
+                      ${spec.description}
+                    </p>
+                    ` : ''}
+                  </div>
+                `).join('');
+              } catch (e) {
+                return '';
+              }
+            })()}
+          </div>
+        </div>
+      </section>
+      ` : ''}
+
+      ${data.services && data.services.trim() !== '' && data.services !== '[]' ? `
+      <!-- Services -->
+      <section id="services" style="padding: 5rem 0; background: var(--color-bg);">
+        <div class="container">
+          <div style="text-align: center; margin-bottom: 4rem;">
+            <h2 style="font-size: clamp(2rem, 5vw, 3rem); font-weight: 800; margin-bottom: 1rem; letter-spacing: -0.02em;">
+              Comprehensive Services
+            </h2>
+          </div>
+          
+          <div style="max-width: 1000px; margin: 0 auto; display: flex; flex-direction: column; gap: 2rem;">
+            ${(() => {
+              try {
+                const services = JSON.parse(data.services || '[]');
+                return services.map((service, i) => `
+                  <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 2.5rem; transition: all 0.2s;" onmouseover="this.style.borderColor='var(--color-accent)'; this.style.boxShadow='var(--shadow-md)'" onmouseout="this.style.borderColor='var(--color-border)'; this.style.boxShadow='none'">
+                    <div style="display: flex; align-items: start; gap: 1.5rem;">
+                      <div style="flex-shrink: 0; width: 3rem; height: 3rem; background: var(--color-accent); color: var(--color-bg); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.25rem;">
+                        ${i + 1}
+                      </div>
+                      <div style="flex: 1;">
+                        <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; letter-spacing: -0.01em;">
+                          ${service.name || 'Service'}
+                        </h3>
+                        ${service.description ? `
+                        <p style="color: var(--color-text-secondary); line-height: 1.7; margin-bottom: 1.5rem;">
+                          ${service.description}
+                        </p>
+                        ` : ''}
+                        ${service.features && service.features.length > 0 ? `
+                        <ul style="list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.75rem;">
+                          ${service.features.map(feature => `
+                            <li style="display: flex; align-items: center; gap: 0.5rem; color: var(--color-text); font-size: 0.9375rem;">
+                              <span style="color: var(--color-accent); font-weight: 900;">✓</span>
+                              <span>${feature}</span>
+                            </li>
+                          `).join('')}
+                        </ul>
+                        ` : ''}
+                      </div>
+                    </div>
+                  </div>
+                `).join('');
+              } catch (e) {
+                return '';
+              }
+            })()}
+          </div>
+        </div>
+      </section>
+      ` : ''}
+
+      ${data.process && data.process.trim() !== '' && data.process !== '[]' ? `
+      <!-- Process -->
+      <section id="process" style="padding: 5rem 0; background: var(--color-surface);">
+        <div class="container">
+          <div style="text-align: center; margin-bottom: 4rem;">
+            <h2 style="font-size: clamp(2rem, 5vw, 3rem); font-weight: 800; margin-bottom: 1rem; letter-spacing: -0.02em;">
+              My Planning Process
+            </h2>
+            <p style="font-size: 1.0625rem; color: var(--color-text-secondary); max-width: 650px; margin: 0 auto;">
+              A systematic approach to building your financial future
+            </p>
+          </div>
+          
+          <div style="max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 2rem;">
+            ${(() => {
+              try {
+                const process = JSON.parse(data.process || '[]');
+                return process.map((step, i) => `
+                  <div style="display: flex; gap: 2rem; align-items: start;">
+                    <div style="flex-shrink: 0; width: 4rem; height: 4rem; background: var(--color-accent); color: var(--color-bg); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.5rem; position: relative;">
+                      ${step.step || i + 1}
+                      ${i < process.length - 1 ? `
+                      <div style="position: absolute; top: 100%; left: 50%; transform: translateX(-50%); width: 2px; height: 2rem; background: var(--color-border);"></div>
+                      ` : ''}
+                    </div>
+                    <div style="flex: 1; padding-top: 0.5rem;">
+                      <h3 style="font-size: 1.375rem; font-weight: 700; margin-bottom: 0.75rem; letter-spacing: -0.01em;">
+                        ${step.title || 'Step'}
+                      </h3>
+                      ${step.description ? `
+                      <p style="color: var(--color-text-secondary); line-height: 1.7;">
+                        ${step.description}
+                      </p>
+                      ` : ''}
+                    </div>
+                  </div>
+                `).join('');
+              } catch (e) {
+                return '';
+              }
+            })()}
+          </div>
+        </div>
+      </section>
+      ` : ''}
+
+      <!-- About -->
+      <section id="about" style="padding: 5rem 0; background: var(--color-bg);">
+        <div class="container" style="max-width: 900px;">
+          <div style="text-align: center; margin-bottom: 3rem;">
+            <h2 style="font-size: clamp(2rem, 5vw, 3rem); font-weight: 800; letter-spacing: -0.02em;">
+              About ${data.advisorName ? data.advisorName.split(',')[0] : 'Me'}
+            </h2>
+          </div>
+          
+          ${data.bio ? `
+          <div style="font-size: 1.0625rem; line-height: 1.8; color: var(--color-text); margin-bottom: 2.5rem; white-space: pre-line;">
+            ${data.bio}
+          </div>
+          ` : ''}
+          
+          ${data.credentials ? `
+          <div style="background: var(--color-surface); border-left: 4px solid var(--color-accent); border-radius: var(--radius-md); padding: 2rem; margin-top: 2.5rem;">
+            <h3 style="font-size: 1.125rem; font-weight: 700; margin-bottom: 1rem; color: var(--color-accent); text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.875rem;">
+              Credentials & Experience
+            </h3>
+            <div style="color: var(--color-text); line-height: 1.8; white-space: pre-line;">
+              ${data.credentials}
+            </div>
+          </div>
+          ` : ''}
+        </div>
+      </section>
+
+      ${data.testimonials && data.testimonials.trim() !== '' && data.testimonials !== '[]' ? `
+      <!-- Testimonials -->
+      <section style="padding: 5rem 0; background: var(--color-surface);">
+        <div class="container">
+          <div style="text-align: center; margin-bottom: 4rem;">
+            <h2 style="font-size: clamp(2rem, 5vw, 3rem); font-weight: 800; margin-bottom: 1rem; letter-spacing: -0.02em;">
+              Client Testimonials
+            </h2>
+          </div>
+          
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem; max-width: 1100px; margin: 0 auto;">
+            ${(() => {
+              try {
+                const testimonials = JSON.parse(data.testimonials || '[]');
+                return testimonials.map(testimonial => `
+                  <div style="background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 2rem;">
+                    <div style="font-size: 2rem; color: var(--color-accent); margin-bottom: 1rem; line-height: 1;">"</div>
+                    <p style="font-size: 1rem; line-height: 1.7; color: var(--color-text); margin-bottom: 1.5rem; font-style: italic;">
+                      ${testimonial.text || ''}
+                    </p>
+                    <div style="border-top: 1px solid var(--color-border); padding-top: 1rem;">
+                      <div style="font-weight: 700; color: var(--color-text); margin-bottom: 0.25rem;">
+                        ${testimonial.name || 'Client'}
+                      </div>
+                      ${testimonial.title ? `
+                      <div style="font-size: 0.875rem; color: var(--color-text-secondary);">
+                        ${testimonial.title}
+                      </div>
+                      ` : ''}
+                    </div>
+                  </div>
+                `).join('');
+              } catch (e) {
+                return '';
+              }
+            })()}
+          </div>
+        </div>
+      </section>
+      ` : ''}
+
+      <!-- Contact -->
+      <section id="contact" style="padding: 5rem 0; background: var(--color-bg);">
+        <div class="container" style="max-width: 700px;">
+          <div style="text-align: center; margin-bottom: 3rem;">
+            <h2 style="font-size: clamp(2rem, 5vw, 3rem); font-weight: 800; margin-bottom: 1rem; letter-spacing: -0.02em;">
+              Start Your Financial Journey
+            </h2>
+            <p style="font-size: 1.0625rem; color: var(--color-text-secondary); line-height: 1.6;">
+              Schedule a complimentary consultation to discuss your financial goals
+            </p>
+          </div>
+          
+          <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 2.5rem; margin-bottom: 2rem;">
+            <div style="display: grid; gap: 1.5rem;">
+              ${data.phone ? `
+              <a href="tel:${data.phone}" style="display: flex; align-items: center; gap: 1rem; color: var(--color-text); text-decoration: none; font-weight: 600; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">
+                <span style="font-size: 1.5rem;">📞</span>
+                <span>${data.phone}</span>
+              </a>
+              ` : ''}
+              ${data.contact ? `
+              <a href="mailto:${data.contact}" style="display: flex; align-items: center; gap: 1rem; color: var(--color-text); text-decoration: none; font-weight: 600; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">
+                <span style="font-size: 1.5rem;">✉️</span>
+                <span>${data.contact}</span>
+              </a>
+              ` : ''}
+              ${data.address ? `
+              <div style="display: flex; align-items: start; gap: 1rem; color: var(--color-text-secondary);">
+                <span style="font-size: 1.5rem;">📍</span>
+                <span style="line-height: 1.6; white-space: pre-line;">${data.address}</span>
+              </div>
+              ` : ''}
+            </div>
+          </div>
+          
+          ${data.calendlyLink ? `
+          <div style="text-align: center;">
+            <a href="${data.calendlyLink}" target="_blank" style="display: inline-block; padding: 1.125rem 2.5rem; background: var(--color-accent); color: var(--color-bg); text-decoration: none; font-weight: 700; font-size: 1rem; border-radius: var(--radius-md); transition: all 0.2s; box-shadow: var(--shadow-sm);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='var(--shadow-md)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-sm)'">
+              Schedule Free Consultation
+            </a>
+          </div>
+          ` : ''}
+        </div>
+      </section>
+
+      <!-- Footer -->
+      <footer style="padding: 2.5rem 0; background: var(--color-surface); text-align: center; color: var(--color-text-secondary); font-size: 0.8125rem; border-top: 1px solid var(--color-border);">
+        <div class="container" style="max-width: 900px;">
+          <p style="margin-bottom: 0.75rem; font-weight: 600;">© 2024 ${data.advisorName || 'Financial Advisor'}${data.firmName ? ` • ${data.firmName}` : ''}</p>
+          ${data.disclosure ? `
+          <p style="line-height: 1.6; opacity: 0.8;">${data.disclosure}</p>
+          ` : ''}
+          <p style="margin-top: 1rem; opacity: 0.7; font-size: 0.75rem;">
+            Investment advisory services offered through a registered investment advisor. Past performance does not guarantee future results.
           </p>
         </div>
       </footer>
 
       <style>
         @media (max-width: 768px) {
-          nav > div > div:last-child > a:not(.btn) { display: none; }
+          header nav { display: none !important; }
         }
       </style>
     `
-  })
+  }),
+
+  fitness: new Template('fitness', {
+    name: 'Fitness Trainer',
+    description: 'Personal training and fitness coaching website',
+    category: 'Business',
+    defaultTheme: 'brutalist',
+    fields: [
+      { id: 'trainerName', label: 'Trainer Name', type: 'text', placeholder: 'Alex Johnson', required: true },
+      { id: 'tagline', label: 'Tagline', type: 'text', placeholder: 'Transform Your Body, Transform Your Life' },
+      { id: 'bio', label: 'Bio', type: 'textarea', placeholder: 'Share your fitness journey, certifications, and training philosophy...' },
+      { id: 'specialties', label: 'Specialties', type: 'textarea', placeholder: 'Enter specialties as JSON array: [{"name": "Strength Training", "icon": "💪", "description": "Build muscle and power"}, ...]' },
+      { id: 'programs', label: 'Training Programs', type: 'textarea', placeholder: 'Enter programs as JSON: [{"name": "1-on-1 Training", "duration": "60 min", "price": "$80/session", "description": "..."}, ...]' },
+      { id: 'transformations', label: 'Client Transformations', type: 'textarea', placeholder: 'Enter success stories as JSON: [{"name": "John D.", "result": "Lost 30 lbs", "time": "3 months", "testimonial": "..."}, ...]' },
+      { id: 'certifications', label: 'Certifications', type: 'textarea', placeholder: 'NASM CPT, ACE, CrossFit Level 1, etc.' },
+      { id: 'contact', label: 'Contact Email', type: 'email', placeholder: 'trainer@fitness.com' },
+      { id: 'phone', label: 'Phone', type: 'tel', placeholder: '(555) 123-4567' },
+      { id: 'instagram', label: 'Instagram', type: 'url', placeholder: 'https://instagram.com/yourhandle' },
+      { id: 'bookingLink', label: 'Booking Link', type: 'url', placeholder: 'https://calendly.com/yourlink' },
+    ],
+    structure: (data, theme) => `
+      <!-- Header -->
+      <header style="position: sticky; top: 0; z-index: 1000; background: var(--color-bg); border-bottom: 3px solid var(--color-accent); backdrop-filter: blur(10px);">
+        <div class="container" style="display: flex; justify-content: space-between; align-items: center; padding-top: 1.5rem; padding-bottom: 1.5rem;">
+          <div style="font-size: 1.5rem; font-weight: 900; color: var(--color-accent); text-transform: uppercase; letter-spacing: 0.05em;">
+            💪 ${data.trainerName || 'Fitness Coach'}
+          </div>
+          <nav style="display: flex; gap: 2rem; align-items: center; font-weight: 700; text-transform: uppercase; font-size: 0.875rem;">
+            <a href="#programs" style="color: var(--color-text); text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">Programs</a>
+            <a href="#about" style="color: var(--color-text); text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">About</a>
+            <a href="#results" style="color: var(--color-text); text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">Results</a>
+            <a href="#contact" style="color: var(--color-text); text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">Contact</a>
+            <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle theme">
+              <span class="theme-icon">🌙</span>
+            </button>
+          </nav>
+        </div>
+      </header>
+
+      <!-- Hero -->
+      <section style="padding: 10rem 0 8rem; background: linear-gradient(135deg, var(--color-accent), var(--color-text)); color: var(--color-bg); position: relative; overflow: hidden;">
+        <div style="position: absolute; inset: 0; opacity: 0.1; background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, currentColor 10px, currentColor 11px);"></div>
+        <div class="container" style="text-align: center; position: relative; z-index: 1;">
+          <div style="font-size: 6rem; margin-bottom: 2rem; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));">🏋️</div>
+          <h1 style="font-size: clamp(3rem, 8vw, 5.5rem); font-weight: 900; margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: -0.02em; line-height: 1;">
+            ${data.trainerName || 'Elite Personal Training'}
+          </h1>
+          <p style="font-size: 1.75rem; margin-bottom: 3rem; font-weight: 700; opacity: 0.95; text-transform: uppercase; letter-spacing: 0.05em;">
+            ${data.tagline || 'Transform Your Body. Transform Your Life.'}
+          </p>
+          ${data.bookingLink ? `
+          <a href="${data.bookingLink}" target="_blank" style="display: inline-block; padding: 1.5rem 3.5rem; background: var(--color-bg); color: var(--color-accent); text-decoration: none; font-weight: 900; font-size: 1.25rem; border-radius: var(--radius-sm); transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.05em; box-shadow: 0 8px 24px rgba(0,0,0,0.3);" onmouseover="this.style.transform='translateY(-4px) scale(1.02)'; this.style.boxShadow='0 12px 32px rgba(0,0,0,0.4)'" onmouseout="this.style.transform='translateY(0) scale(1)'; this.style.boxShadow='0 8px 24px rgba(0,0,0,0.3)'">
+            Start Your Transformation
+          </a>
+          ` : ''}
+        </div>
+      </section>
+
+      ${data.specialties && data.specialties.trim() !== '' && data.specialties !== '[]' ? `
+      <!-- Specialties -->
+      <section style="padding: 6rem 0; background: var(--color-bg);">
+        <div class="container">
+          <div style="text-align: center; margin-bottom: 4rem;">
+            <h2 style="font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: 900; margin-bottom: 1rem; text-transform: uppercase;">
+              My Specialties
+            </h2>
+          </div>
+          
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem;">
+            ${(() => {
+              try {
+                const specialties = JSON.parse(data.specialties || '[]');
+                return specialties.map(specialty => `
+                  <div style="background: var(--color-surface); border: 3px solid var(--color-border); padding: 2.5rem; text-align: center; transition: all 0.2s;" onmouseover="this.style.borderColor='var(--color-accent)'; this.style.transform='translateY(-6px)'" onmouseout="this.style.borderColor='var(--color-border)'; this.style.transform='translateY(0)'">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">${specialty.icon || '⚡'}</div>
+                    <h3 style="font-size: 1.375rem; font-weight: 900; margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">
+                      ${specialty.name || 'Specialty'}
+                    </h3>
+                    ${specialty.description ? `
+                    <p style="color: var(--color-text-secondary); line-height: 1.6;">
+                      ${specialty.description}
+                    </p>
+                    ` : ''}
+                  </div>
+                `).join('');
+              } catch (e) {
+                return '';
+              }
+            })()}
+          </div>
+        </div>
+      </section>
+      ` : ''}
+
+      ${data.programs && data.programs.trim() !== '' && data.programs !== '[]' ? `
+      <!-- Programs -->
+      <section id="programs" style="padding: 6rem 0; background: var(--color-surface);">
+        <div class="container">
+          <div style="text-align: center; margin-bottom: 4rem;">
+            <h2 style="font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: 900; margin-bottom: 1rem; text-transform: uppercase;">
+              Training Programs
+            </h2>
+            <p style="font-size: 1.125rem; color: var(--color-text-secondary); font-weight: 600;">
+              Customized programs designed for your goals
+            </p>
+          </div>
+          
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem; max-width: 1100px; margin: 0 auto;">
+            ${(() => {
+              try {
+                const programs = JSON.parse(data.programs || '[]');
+                return programs.map((program, i) => `
+                  <div style="background: var(--color-bg); border: 3px solid ${i === 1 ? 'var(--color-accent)' : 'var(--color-border)'}; padding: 2.5rem; position: relative; transition: all 0.2s;" onmouseover="this.style.borderColor='var(--color-accent)'; this.style.transform='translateY(-4px)'" onmouseout="this.style.borderColor='${i === 1 ? 'var(--color-accent)' : 'var(--color-border)'}'; this.style.transform='translateY(0)'">
+                    ${i === 1 ? '<div style="position: absolute; top: -15px; left: 50%; transform: translateX(-50%); background: var(--color-accent); color: var(--color-bg); padding: 0.5rem 1.5rem; font-weight: 900; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em;">Most Popular</div>' : ''}
+                    <h3 style="font-size: 1.75rem; font-weight: 900; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em;">
+                      ${program.name || 'Program'}
+                    </h3>
+                    ${program.duration ? `
+                    <div style="font-size: 0.875rem; color: var(--color-text-secondary); font-weight: 700; margin-bottom: 1rem; text-transform: uppercase;">
+                      ${program.duration}
+                    </div>
+                    ` : ''}
+                    ${program.price ? `
+                    <div style="font-size: 2.5rem; font-weight: 900; color: var(--color-accent); margin-bottom: 1.5rem;">
+                      ${program.price}
+                    </div>
+                    ` : ''}
+                    ${program.description ? `
+                    <p style="color: var(--color-text-secondary); line-height: 1.6; margin-bottom: 2rem;">
+                      ${program.description}
+                    </p>
+                    ` : ''}
+                    ${program.features ? `
+                    <ul style="list-style: none; padding: 0; margin-bottom: 2rem;">
+                      ${program.features.split('\n').map(feature => `
+                        <li style="padding: 0.5rem 0; color: var(--color-text); display: flex; align-items: start; gap: 0.75rem;">
+                          <span style="color: var(--color-accent); font-weight: 900; font-size: 1.125rem;">✓</span>
+                          <span>${feature.trim()}</span>
+                        </li>
+                      `).join('')}
+                    </ul>
+                    ` : ''}
+                  </div>
+                `).join('');
+              } catch (e) {
+                return '';
+              }
+            })()}
+          </div>
+        </div>
+      </section>
+      ` : ''}
+
+      <!-- About -->
+      <section id="about" style="padding: 6rem 0; background: var(--color-bg);">
+        <div class="container" style="max-width: 900px;">
+          <div style="text-align: center; margin-bottom: 4rem;">
+            <h2 style="font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: 900; text-transform: uppercase;">
+              About Me
+            </h2>
+          </div>
+          
+          ${data.bio ? `
+          <div style="font-size: 1.125rem; line-height: 1.8; color: var(--color-text); margin-bottom: 3rem; white-space: pre-line;">
+            ${data.bio}
+          </div>
+          ` : ''}
+          
+          ${data.certifications ? `
+          <div style="background: var(--color-surface); border-left: 5px solid var(--color-accent); padding: 2rem; margin-top: 3rem;">
+            <h3 style="font-size: 1.25rem; font-weight: 900; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.05em;">
+              Certifications & Credentials
+            </h3>
+            <div style="color: var(--color-text-secondary); line-height: 1.8; white-space: pre-line; font-weight: 600;">
+              ${data.certifications}
+            </div>
+          </div>
+          ` : ''}
+        </div>
+      </section>
+
+      ${data.transformations && data.transformations.trim() !== '' && data.transformations !== '[]' ? `
+      <!-- Transformations -->
+      <section id="results" style="padding: 6rem 0; background: var(--color-surface);">
+        <div class="container">
+          <div style="text-align: center; margin-bottom: 4rem;">
+            <h2 style="font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: 900; text-transform: uppercase;">
+              Real Results
+            </h2>
+            <p style="font-size: 1.125rem; color: var(--color-text-secondary); font-weight: 600;">
+              Success stories from clients who transformed their lives
+            </p>
+          </div>
+          
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+            ${(() => {
+              try {
+                const transformations = JSON.parse(data.transformations || '[]');
+                return transformations.map(story => `
+                  <div style="background: var(--color-bg); border: 3px solid var(--color-border); padding: 2rem; transition: all 0.2s;" onmouseover="this.style.borderColor='var(--color-accent)'; this.style.transform='translateY(-4px)'" onmouseout="this.style.borderColor='var(--color-border)'; this.style.transform='translateY(0)'">
+                    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
+                      <div style="width: 60px; height: 60px; background: var(--color-accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 900; color: var(--color-bg);">
+                        ${(story.name || 'C').charAt(0)}
+                      </div>
+                      <div>
+                        <div style="font-weight: 900; font-size: 1.125rem;">${story.name || 'Client'}</div>
+                        ${story.result ? `
+                        <div style="font-size: 0.875rem; color: var(--color-accent); font-weight: 700; text-transform: uppercase;">
+                          ${story.result}
+                        </div>
+                        ` : ''}
+                      </div>
+                    </div>
+                    ${story.time ? `
+                    <div style="font-size: 0.875rem; color: var(--color-text-secondary); font-weight: 700; margin-bottom: 1rem; text-transform: uppercase;">
+                      In ${story.time}
+                    </div>
+                    ` : ''}
+                    ${story.testimonial ? `
+                    <p style="font-style: italic; color: var(--color-text-secondary); line-height: 1.6;">
+                      "${story.testimonial}"
+                    </p>
+                    ` : ''}
+                  </div>
+                `).join('');
+              } catch (e) {
+                return '';
+              }
+            })()}
+          </div>
+        </div>
+      </section>
+      ` : ''}
+
+      <!-- Contact -->
+      <section id="contact" style="padding: 8rem 0; background: var(--color-accent); color: var(--color-bg);">
+        <div class="container" style="max-width: 700px; text-align: center;">
+          <h2 style="font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 900; margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: -0.02em;">
+            Ready to Start?
+          </h2>
+          <p style="font-size: 1.375rem; margin-bottom: 3rem; opacity: 0.95; font-weight: 600;">
+            Let's build your dream physique together
+          </p>
+          
+          <div style="display: flex; flex-direction: column; gap: 1.5rem; align-items: center; margin-bottom: 3rem;">
+            ${data.contact ? `
+            <a href="mailto:${data.contact}" style="display: flex; align-items: center; gap: 1rem; font-size: 1.125rem; color: var(--color-bg); text-decoration: none; font-weight: 700; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+              <span style="font-size: 1.5rem;">✉️</span>
+              ${data.contact}
+            </a>
+            ` : ''}
+            ${data.phone ? `
+            <a href="tel:${data.phone}" style="display: flex; align-items: center; gap: 1rem; font-size: 1.125rem; color: var(--color-bg); text-decoration: none; font-weight: 700; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+              <span style="font-size: 1.5rem;">📞</span>
+              ${data.phone}
+            </a>
+            ` : ''}
+            ${data.instagram ? `
+            <a href="${data.instagram}" target="_blank" style="display: flex; align-items: center; gap: 1rem; font-size: 1.125rem; color: var(--color-bg); text-decoration: none; font-weight: 700; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+              <span style="font-size: 1.5rem;">📸</span>
+              Follow on Instagram
+            </a>
+            ` : ''}
+          </div>
+          
+          ${data.bookingLink ? `
+          <a href="${data.bookingLink}" target="_blank" style="display: inline-block; padding: 1.5rem 3.5rem; background: var(--color-bg); color: var(--color-accent); text-decoration: none; font-weight: 900; font-size: 1.25rem; border-radius: var(--radius-sm); transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.05em; box-shadow: 0 8px 24px rgba(0,0,0,0.3);" onmouseover="this.style.transform='translateY(-4px) scale(1.02)'" onmouseout="this.style.transform='translateY(0) scale(1)'">
+            Book Free Consultation
+          </a>
+          ` : ''}
+        </div>
+      </section>
+
+      <!-- Footer -->
+      <footer style="padding: 2rem 0; background: var(--color-bg); text-align: center; color: var(--color-text-secondary); font-size: 0.875rem; border-top: 3px solid var(--color-accent); font-weight: 700;">
+        <div class="container">
+          <p style="text-transform: uppercase; letter-spacing: 0.05em;">© 2024 ${data.trainerName || 'Fitness Training'}. All rights reserved.</p>
+        </div>
+      </footer>
+
+      <style>
+        @media (max-width: 768px) {
+          header nav { display: none !important; }
+        }
+      </style>
+    `
+  }),
 };
 
 // Helper functions
@@ -2709,6 +5139,7 @@ export function getAllTemplates() {
     category: template.category,
     supportedThemes: template.supportedThemes,
     defaultTheme: template.defaultTheme,
+    image: template.image
   }));
 }
 

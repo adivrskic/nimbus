@@ -1,6 +1,6 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Star, Search, X } from 'lucide-react';
+import { ArrowRight, Star, Search, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { getAllTemplates } from '../utils/templateSystem';
 import { getAllThemes } from '../styles/themes';
 import './TemplateGallery.scss';
@@ -38,7 +38,7 @@ const templates = templateData.map(template => ({
   description: template.description,
   category: template.category,
   featured: Math.random() > 0.5,
-  preview: generateUnsplashImage(template.category),
+  preview: template.image,
   supportedThemes: template.supportedThemes,
   defaultTheme: template.defaultTheme
 }));
@@ -64,6 +64,12 @@ function TemplateGallery({ onTemplateSelect }) {
   const [activeFilter, setActiveFilter] = useState('All Templates');
   const [searchQuery, setSearchQuery] = useState('');
   const [visibleCount, setVisibleCount] = useState(12);
+  const [leftArrowOpacity, setLeftArrowOpacity] = useState(0);
+  const [rightArrowOpacity, setRightArrowOpacity] = useState(1);
+  const scrollContainerRef = useRef(null);
+  const isDraggingRef = useRef(false);
+  const startXRef = useRef(0);
+  const scrollLeftRef = useRef(0);
 
   const filteredTemplates = useMemo(() => {
     let filtered = [...templates];
@@ -104,6 +110,88 @@ function TemplateGallery({ onTemplateSelect }) {
     setSearchQuery('');
   };
 
+  // Check scroll position to update arrow opacity
+  // const checkScrollPosition = useCallback(() => {
+  //   const container = scrollContainerRef.current;
+  //   if (!container) return;
+
+  //   const { scrollLeft, scrollWidth, clientWidth } = container;
+  //   const maxScroll = scrollWidth - clientWidth;
+    
+  //   // Calculate opacity based on scroll position
+  //   // Fade in over the first/last 50px of scroll
+  //   const fadeDistance = 50;
+    
+  //   // Left arrow: 0 opacity at start, 1 opacity after fadeDistance
+  //   const leftOpacity = Math.min(scrollLeft / fadeDistance, 1);
+    
+  //   // Right arrow: 1 opacity at start, 0 opacity at end
+  //   const rightOpacity = Math.min((maxScroll - scrollLeft) / fadeDistance, 1);
+    
+  //   setLeftArrowOpacity(leftOpacity);
+  //   setRightArrowOpacity(rightOpacity);
+  // }, []);
+
+  // Scroll handler
+  const scroll = (direction) => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    const scrollAmount = 300;
+    container.scrollBy({
+      left: direction === 'left' ? -scrollAmount : scrollAmount,
+      behavior: 'smooth'
+    });
+  };
+
+  // Drag to scroll handlers
+  const handleMouseDown = (e) => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    isDraggingRef.current = true;
+    startXRef.current = e.pageX - container.offsetLeft;
+    scrollLeftRef.current = container.scrollLeft;
+    container.style.cursor = 'grabbing';
+    container.style.userSelect = 'none';
+  };
+
+  const handleMouseMove = (e) => {
+    if (!isDraggingRef.current) return;
+    e.preventDefault();
+    
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    const x = e.pageX - container.offsetLeft;
+    const walk = (x - startXRef.current) * 2; // Multiply for faster scroll
+    container.scrollLeft = scrollLeftRef.current - walk;
+  };
+
+  const handleMouseUpOrLeave = () => {
+    const container = scrollContainerRef.current;
+    if (container) {
+      isDraggingRef.current = false;
+      container.style.cursor = 'grab';
+      container.style.removeProperty('user-select');
+    }
+  };
+
+  // Setup scroll listener
+  // useEffect(() => {
+  //   const container = scrollContainerRef.current;
+  //   if (!container) return;
+
+  //   checkScrollPosition();
+  //   container.addEventListener('scroll', checkScrollPosition);
+  //   window.addEventListener('resize', checkScrollPosition);
+
+  //   return () => {
+  //     container.removeEventListener('scroll', checkScrollPosition);
+  //     window.removeEventListener('resize', checkScrollPosition);
+  //   };
+  // }, [checkScrollPosition]);
+
   const handleTemplateClick = useCallback((templateId) => {
     if (onTemplateSelect) {
       onTemplateSelect(templateId);
@@ -129,18 +217,19 @@ function TemplateGallery({ onTemplateSelect }) {
             </button>
           )}
         </div>
-        {searchQuery && (
+        {/* {searchQuery && (
           <p className="search-results-text">
             Found {filteredTemplates.length} template{filteredTemplates.length !== 1 ? 's' : ''} 
             {searchQuery && ` for "${searchQuery}"`}
           </p>
-        )}
+        )} */}
       </div>
 
       {/* Filters */}
       <div className="template-filters-wrapper">
-        <div className="template-filters">
-          {categories.map(category => (
+        {/* Sticky filters on the left */}
+        <div className="template-filters-sticky">
+          {categories.slice(0, 2).map(category => (
             <button
               key={category.name}
               className={`filter-tab ${activeFilter === category.name ? 'active' : ''} ${
@@ -154,13 +243,62 @@ function TemplateGallery({ onTemplateSelect }) {
             </button>
           ))}
         </div>
+
+        {/* Scrollable filters container */}
+        <div className="template-filters-scroll-container">
+          <button 
+            className="scroll-arrow scroll-arrow-left"
+            onClick={() => scroll('left')}
+            aria-label="Scroll left"
+            // style={{ 
+            //   opacity: leftArrowOpacity,
+            //   pointerEvents: leftArrowOpacity < 0.1 ? 'none' : 'auto'
+            // }}
+          >
+            <ChevronLeft size={20} />
+          </button>
+          
+          <div 
+            className="template-filters-scrollable"
+            ref={scrollContainerRef}
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUpOrLeave}
+            onMouseLeave={handleMouseUpOrLeave}
+          >
+            {categories.slice(2).map(category => (
+              <button
+                key={category.name}
+                className={`filter-tab ${activeFilter === category.name ? 'active' : ''}`}
+                onClick={() => setActiveFilter(category.name)}
+              >
+                <span>{category.name}</span>
+                <span className="filter-count">{category.count}</span>
+              </button>
+            ))}
+          </div>
+
+          <button 
+            className="scroll-arrow scroll-arrow-right"
+            onClick={() => scroll('right')}
+            aria-label="Scroll right"
+            // style={{ 
+            //   opacity: rightArrowOpacity,
+            //   pointerEvents: rightArrowOpacity < 0.1 ? 'none' : 'auto'
+            // }}
+          >
+            <ChevronRight size={20} />
+          </button>
+        </div>
       </div>
 
       {/* Grid */}
       {visibleTemplates.length > 0 ? (
         <>
           <div className="template-gallery__grid">
-            {visibleTemplates.map(template => (
+            {visibleTemplates.map(template => {
+              console.log('Template image path:', template.preview);// Add this
+              return (
               <div
                 key={template.id}
                 className="template-card"
@@ -176,7 +314,7 @@ function TemplateGallery({ onTemplateSelect }) {
                 <div className="template-card__preview">
                   <img src={template.preview} alt={template.name} />
                   <div className="template-card__overlay">
-                    <button className="btn btn--primary">
+                    <button className="btn btn-primary">
                       Customize
                       <ArrowRight size={18} />
                     </button>
@@ -191,7 +329,7 @@ function TemplateGallery({ onTemplateSelect }) {
                   <p className="template-card__description">{template.description}</p>
                   
                   {/* Theme badges */}
-                  <div className="template-card__themes">
+                  {/* <div className="template-card__themes">
                     {template.supportedThemes && template.supportedThemes.slice(0, 3).map(themeId => {
                       const theme = themes.find(t => t.id === themeId);
                       return (
@@ -203,10 +341,11 @@ function TemplateGallery({ onTemplateSelect }) {
                     {template.supportedThemes && template.supportedThemes.length > 3 && (
                       <span className="theme-badge">+{template.supportedThemes.length - 3}</span>
                     )}
-                  </div>
+                  </div> */}
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
 
           {/* Load More */}
