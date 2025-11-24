@@ -11,6 +11,7 @@ import './styles/global.scss';
 const Home = lazy(() => import('./pages/Home'));
 const Roadmap = lazy(() => import('./pages/Roadmap'));
 const Support = lazy(() => import('./pages/Support'));
+const ResetPassword = lazy(() => import('./pages/ResetPassword'));
 
 // Loading component
 const PageLoader = () => (
@@ -53,6 +54,7 @@ function App() {
                 <Route path="/" element={<Home theme={theme} />} />
                 <Route path="/roadmap" element={<Roadmap />} />
                 <Route path="/support" element={<Support />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
               </Routes>
             </Suspense>
             <Footer />

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Feather, Zap, Sparkles, BookOpen, Palette, Shapes, Monitor, Tablet, Smartphone, Cloud } from 'lucide-react';
+import { Feather, Zap, Sparkles, BookOpen, Palette, Shapes, Monitor, Tablet, Smartphone, Cloud, Sun, Moon } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import './StyleShowcase.scss';
 
@@ -1241,40 +1241,67 @@ footer p{color:${textSecondary};font-size:0.9375rem}
 </body></html>`;
 };
 
-
 function StyleShowcase() {
   const { theme, selectedStyleTheme, setStyleTheme } = useTheme();
   const [activeStyle, setActiveStyle] = useState(selectedStyleTheme);
   const [previewMode, setPreviewMode] = useState(theme);
-  const [viewMode, setViewMode] = useState('desktop'); // desktop, tablet, mobile
+  const [viewMode, setViewMode] = useState("desktop"); // desktop, tablet, mobile
   const iframeRef = useRef(null);
 
-  // Sync with global theme changes
+  // pinned = controls stuck to bottom; default true
+  const [isPinned, setIsPinned] = useState(true);
+
+  // Ensure previewMode follows global theme
   useEffect(() => {
     setPreviewMode(theme);
   }, [theme]);
 
-  // Update global state when style is changed
   const handleStyleChange = (styleId) => {
     setActiveStyle(styleId);
     setStyleTheme(styleId);
   };
 
+  // Write preview HTML into iframe
   useEffect(() => {
     if (!iframeRef.current) return;
-
     const html = generatePreviewHTML(activeStyle, previewMode);
-    const iframe = iframeRef.current;
-    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-    
-    iframeDoc.open();
-    iframeDoc.write(html);
-    iframeDoc.close();
+    const doc = iframeRef.current.contentDocument || iframeRef.current.contentWindow?.document;
+    if (!doc) return;
+    doc.open();
+    doc.write(html);
+    doc.close();
   }, [activeStyle, previewMode]);
 
+  // IntersectionObserver: observe the sentinel just after the preview.
+  // When the sentinel becomes visible, the preview was scrolled past -> unpin controls.
+  useEffect(() => {
+    const sentinel = document.querySelector("#preview-sentinel");
+    if (!sentinel) {
+      // fallback: keep pinned
+      setIsPinned(true);
+      return;
+    }
+
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        // if sentinel is intersecting => we've reached/past the bottom of preview => unpin
+        setIsPinned(!entry.isIntersecting);
+      },
+      {
+        root: null,
+        threshold: 0,
+        // slight offset so panel unpins just a bit before/after the sentinel is fully in view
+        rootMargin: "0px 0px -8% 0px",
+      }
+    );
+
+    obs.observe(sentinel);
+    return () => obs.disconnect();
+  }, []);
+
   return (
-    <section 
-      className="style-showcase" 
+    <section
+      className="style-showcase"
       id="styles"
       style={{
         '--style-bg': styleThemes[activeStyle][theme].bg,
@@ -1294,17 +1321,61 @@ function StyleShowcase() {
         </div>
 
         <div className="style-showcase__content">
-          {/* Style Selector */}
-          <div className="style-selector">
+
+          {/* ----------------------------
+             MOBILE / TABLET: bottom stacked control panel (mobile-only)
+             This panel is pinned/unpinned based on the preview sentinel.
+          ----------------------------- */}
+          <div
+            className={`style-control-panel mobile-only ${isPinned ? "pinned" : "unpinned"}`}
+            aria-hidden={!isPinned && true}
+          >
+            {/* Style selector (icons + small label) */}
+            <div className="panel-section style-select">
+              {styles.map((style) => (
+                <button
+                  key={style.id}
+                  className={`style-item ${activeStyle === style.id ? "active" : ""}`}
+                  onClick={() => handleStyleChange(style.id)}
+                  aria-pressed={activeStyle === style.id}
+                >
+                  <div className="style-icon" aria-hidden>{style.icon}</div>
+                  {/* <span className="style-label">{style.name}</span> */}
+                </button>
+              ))}
+            </div>
+
+            {/* Color mode */}
+            <div className="panel-section mode-select" role="radiogroup" aria-label="Color mode">
+              <button
+                onClick={() => setPreviewMode("light")}
+                className={`mode-btn ${previewMode === "light" ? "active" : ""}`}
+                aria-pressed={previewMode === "light"}
+              >
+                <Sun size={16} />
+              </button>
+              <button
+                onClick={() => setPreviewMode("dark")}
+                className={`mode-btn ${previewMode === "dark" ? "active" : ""}`}
+                aria-pressed={previewMode === "dark"}
+              >
+                <Moon size={16} />
+              </button>
+            </div>
+          </div>
+
+          {/* ----------------------------
+             DESKTOP: side selector (desktop-only)
+             Desktop layout is intentionally unchanged.
+          ----------------------------- */}
+          <div className="style-selector desktop-only">
             {styles.map((style) => (
               <button
                 key={style.id}
-                className={`style-selector__item ${activeStyle === style.id ? 'active' : ''}`}
+                className={`style-selector__item ${activeStyle === style.id ? "active" : ""}`}
                 onClick={() => handleStyleChange(style.id)}
               >
-                <div className="style-selector__icon">
-                  {style.icon}
-                </div>
+                <div className="style-selector__icon">{style.icon}</div>
                 <div className="style-selector__info">
                   <h3>{style.name}</h3>
                   <p>{style.description}</p>
@@ -1313,64 +1384,60 @@ function StyleShowcase() {
             ))}
           </div>
 
-          {/* Preview Area */}
+          {/* ----------------------------
+             PREVIEW: visible on all breakpoints
+             Note: id="live-preview" is always present; sentinel follows it.
+          ----------------------------- */}
           <div className="style-preview">
-            <div className="style-preview__controls">
+            <div className="style-preview__controls desktop-only-controls">
               <div className="style-preview__title-group">
-                <h3>{styles.find(s => s.id === activeStyle)?.name}</h3>
+                <h3>{styles.find((s) => s.id === activeStyle)?.name}</h3>
                 <span className="style-preview__device-label">{viewMode}</span>
               </div>
-              
-              <div className="style-preview__control-group">
-                {/* View Mode Controls */}
+
+              <div className="style-preview__control-group desktop-only-controls">
                 <div className="style-preview__view-modes">
-                  <button 
-                    className={`view-toggle ${viewMode === 'desktop' ? 'active' : ''}`}
-                    onClick={() => setViewMode('desktop')}
+                  <button
+                    className={`view-toggle ${viewMode === "desktop" ? "active" : ""}`}
+                    onClick={() => setViewMode("desktop")}
                     aria-label="Desktop view"
-                    title="Desktop view"
                   >
                     <Monitor size={18} />
                   </button>
-                  <button 
-                    className={`view-toggle ${viewMode === 'tablet' ? 'active' : ''}`}
-                    onClick={() => setViewMode('tablet')}
+                  <button
+                    className={`view-toggle ${viewMode === "tablet" ? "active" : ""}`}
+                    onClick={() => setViewMode("tablet")}
                     aria-label="Tablet view"
-                    title="Tablet view"
                   >
                     <Tablet size={18} />
                   </button>
-                  <button 
-                    className={`view-toggle ${viewMode === 'mobile' ? 'active' : ''}`}
-                    onClick={() => setViewMode('mobile')}
+                  <button
+                    className={`view-toggle ${viewMode === "mobile" ? "active" : ""}`}
+                    onClick={() => setViewMode("mobile")}
                     aria-label="Mobile view"
-                    title="Mobile view"
                   >
                     <Smartphone size={18} />
                   </button>
                 </div>
 
-                {/* Color Mode Controls */}
                 <div className="style-preview__modes">
-                  <button 
-                    className={`mode-toggle ${previewMode === 'light' ? 'active' : ''}`}
-                    onClick={() => setPreviewMode('light')}
-                    aria-label="Light mode"
+                  <button
+                    className={`mode-toggle ${previewMode === "light" ? "active" : ""}`}
+                    onClick={() => setPreviewMode("light")}
                   >
                     Light
                   </button>
-                  <button 
-                    className={`mode-toggle ${previewMode === 'dark' ? 'active' : ''}`}
-                    onClick={() => setPreviewMode('dark')}
-                    aria-label="Dark mode"
+                  <button
+                    className={`mode-toggle ${previewMode === "dark" ? "active" : ""}`}
+                    onClick={() => setPreviewMode("dark")}
                   >
                     Dark
                   </button>
                 </div>
               </div>
             </div>
-            
-            <div className={`style-preview__frame style-preview__frame--${viewMode}`}>
+
+            <div className={`style-preview__frame style-preview__frame--${viewMode}`} id="live-preview">
               <iframe
                 ref={iframeRef}
                 className="style-preview__iframe"
@@ -1378,11 +1445,15 @@ function StyleShowcase() {
                 sandbox="allow-same-origin"
               />
             </div>
+
+            {/* sentinel used by IntersectionObserver (small, invisible) */}
+            <div id="preview-sentinel" style={{ width: "1px", height: "1px", opacity: 0 }} />
           </div>
         </div>
       </div>
     </section>
   );
 }
+
 
 export default StyleShowcase;

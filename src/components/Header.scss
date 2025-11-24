@@ -1,3 +1,4 @@
+// src/components/Header.scss
 @import '../styles/variables.scss';
 
 .header {
@@ -5,17 +6,16 @@
   top: 0;
   z-index: 100;
   background: var(--glass-background);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
   border-bottom: 1px solid var(--color-border);
-  
+  backdrop-filter: blur(10px);
+
   &__content {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    height: 64px;
+    padding: calc(var(--spacing-unit)) 0;
   }
-  
+
   &__logo {
     position: relative;
     display: flex;
@@ -26,10 +26,6 @@
     font-size: 1.25rem;
     color: var(--color-text-primary);
     transition: opacity var(--transition-fast);
-    
-    &:hover {
-      opacity: 0.7;
-    }
 
     &-text {
       margin-left: 20px;
@@ -44,135 +40,187 @@
       z-index: -1;
     }
   }
-  
+
   &__nav {
     display: flex;
     align-items: center;
     gap: calc(var(--spacing-unit) * 3);
-    
+
     @media (max-width: $breakpoint-md) {
       gap: calc(var(--spacing-unit) * 2);
-      
-      &-link {
-        display: none;
-      }
+    }
+
+    @media (max-width: $breakpoint-sm) {
+      gap: calc(var(--spacing-unit) * 1.5);
     }
   }
-  
+
   &__nav-link {
     color: var(--color-text-secondary);
     text-decoration: none;
-    font-weight: 500;
     font-size: 0.9375rem;
+    font-weight: 500;
     transition: color var(--transition-fast);
-    
+
     &:hover {
       color: var(--color-text-primary);
     }
+
+    @media (max-width: $breakpoint-md) {
+      display: none;
+    }
   }
-  
+
   &__theme-toggle {
     display: flex;
     align-items: center;
     justify-content: center;
     width: 40px;
     height: 40px;
+    background: var(--color-surface);
     border: 1px solid var(--color-border);
-    background: transparent;
+    border-radius: var(--radius-md);
     color: var(--color-text-secondary);
-    border-radius: var(--radius-sm);
     cursor: pointer;
     transition: all var(--transition-fast);
-    
+
     &:hover {
-      background: var(--color-surface);
+      background: var(--color-surface-alt);
       color: var(--color-text-primary);
+      border-color: var(--color-border-hover);
+    }
+  }
+
+  &__user-menu {
+    position: relative;
+  }
+
+  &__user-button {
+    display: flex;
+    align-items: center;
+    gap: calc(var(--spacing-unit) * 1.5);
+    padding: calc(var(--spacing-unit) * 1) calc(var(--spacing-unit) * 2);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    color: var(--color-text-primary);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+
+    &:hover {
+      background: var(--color-surface-alt);
+      border-color: var(--color-border-hover);
+    }
+
+    .user-name {
+      max-width: 150px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      border-radius: var(--radius-md);
+
+      @media (max-width: $breakpoint-sm) {
+        display: none;
+      }
+    }
+
+    .chevron {
+      transition: transform var(--transition-fast);
+
+      &.open {
+        transform: rotate(180deg);
+      }
+    }
+  }
+
+  &__user-dropdown {
+    position: absolute;
+    top: calc(100% + calc(var(--spacing-unit) * 1));
+    right: 0;
+    min-width: 280px;
+    background: var(--color-background);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: 
+      0 20px 25px -5px rgba(0, 0, 0, 0.1),
+      0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    overflow: hidden;
+    animation: slideDown 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 1000;
+
+    @media (max-width: $breakpoint-sm) {
+      right: -10px;
+      min-width: 260px;
     }
   }
 }
 
-// Add these styles to your existing Header.scss file
-
-.header__user-menu {
-  position: relative;
-
-  &:hover .header__user-dropdown {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0);
-  }
-}
-
-.header__user-button {
+// User avatar
+.user-avatar {
   display: flex;
   align-items: center;
-  gap: calc(var(--spacing-unit) * 1);
-  padding: calc(var(--spacing-unit) * 1) calc(var(--spacing-unit) * 2);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: var(--color-accent);
+  color: white;
   border-radius: var(--radius-md);
-  color: var(--color-text-primary);
   font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-
-  &:hover {
-    background: var(--color-surface-alt);
-    border-color: var(--color-border-hover);
-  }
-
-  span {
-    max-width: 150px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-
-    @media (max-width: $breakpoint-md) {
-      display: none;
-    }
-  }
+  font-weight: 600;
+  flex-shrink: 0;
 }
 
-.header__user-dropdown {
-  position: absolute;
-  top: calc(100% + calc(var(--spacing-unit) * 1));
-  right: 0;
-  min-width: 220px;
-  background: var(--color-background);
-  border: 1px solid var(--color-border);
+.user-avatar-large {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background: var(--color-accent);
+  color: white;
   border-radius: var(--radius-md);
-  box-shadow: var(--shadow-lg);
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(-8px);
-  transition: all var(--transition-fast);
-  z-index: 100;
+  font-size: 1.125rem;
+  font-weight: 600;
+  flex-shrink: 0;
 }
 
+// Dropdown styles
 .dropdown-header {
-  padding: calc(var(--spacing-unit) * 2);
+  display: flex;
+  align-items: center;
+  gap: calc(var(--spacing-unit) * 2);
+  padding: calc(var(--spacing-unit) * 3);
 
-  .user-name {
-    font-size: 0.9375rem;
-    font-weight: 600;
-    color: var(--color-text-primary);
-    margin-bottom: calc(var(--spacing-unit) * 0.5);
-  }
+  .user-info {
+    flex: 1;
+    min-width: 0;
 
-  .user-email {
-    font-size: 0.8125rem;
-    color: var(--color-text-secondary);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    .user-name {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin-bottom: calc(var(--spacing-unit) * 0.5);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .user-email {
+      font-size: 0.8125rem;
+      color: var(--color-text-secondary);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
   }
 }
 
 .dropdown-divider {
   height: 1px;
   background: var(--color-border);
-  margin: 0 calc(var(--spacing-unit) * 1);
+  margin: 0;
 }
 
 .dropdown-item {
@@ -180,11 +228,11 @@
   align-items: center;
   gap: calc(var(--spacing-unit) * 1.5);
   width: 100%;
-  padding: calc(var(--spacing-unit) * 1.5) calc(var(--spacing-unit) * 2);
-  background: none;
+  padding: calc(var(--spacing-unit) * 2) calc(var(--spacing-unit) * 3);
+  background: transparent;
   border: none;
   color: var(--color-text-primary);
-  font-size: 0.875rem;
+  font-size: 0.9375rem;
   font-weight: 500;
   text-align: left;
   cursor: pointer;
@@ -196,5 +244,73 @@
 
   svg {
     color: var(--color-text-secondary);
+    flex-shrink: 0;
+  }
+
+  &--danger {
+    color: #ef4444;
+
+    svg {
+      color: #ef4444;
+    }
+
+    &:hover {
+      background: rgba(239, 68, 68, 0.1);
+    }
+  }
+}
+
+// Animations
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Button styles
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--spacing-unit) * 1);
+  padding: calc(var(--spacing-unit) * 1.5) calc(var(--spacing-unit) * 3);
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+
+  &:hover:not(:disabled) {
+    border-color: var(--color-border-hover);
+    // transform: translateY(-1px);
+  }
+
+  // &:active:not(:disabled) {
+  //   transform: translateY(0);
+  // }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.btn-primary {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: white;
+
+  &:hover:not(:disabled) {
+    opacity: 0.9;
   }
 }

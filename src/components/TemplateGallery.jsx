@@ -292,6 +292,22 @@ function TemplateGallery({ onTemplateSelect }) {
         </div>
       </div>
 
+      {/* Mobile/Tablet Floating Filter Buttons */}
+      <div className="mobile-filter-fab">
+        {categories.map(cat => (
+          <button
+            key={cat.name}
+            className={`mobile-filter-button ${activeFilter === cat.name ? 'active' : ''}`}
+            onClick={() => setActiveFilter(cat.name)}
+            title={cat.name}
+          >
+            {/* Use first letter or icon */}
+            {cat.name === 'Featured' ? <Star size={16} /> : cat.name[0]}
+          </button>
+        ))}
+      </div>
+
+
       {/* Grid */}
       {visibleTemplates.length > 0 ? (
         <>
@@ -351,7 +367,7 @@ function TemplateGallery({ onTemplateSelect }) {
           {/* Load More */}
           {hasMore && (
             <div className="template-gallery__load-more">
-              <button className="btn btn--secondary" onClick={handleLoadMore}>
+              <button className="btn btn-secondary" onClick={handleLoadMore}>
                 Load More Templates
                 <span className="load-more-count">
                   ({filteredTemplates.length - visibleCount} remaining)

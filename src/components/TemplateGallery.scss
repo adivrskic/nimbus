@@ -460,3 +460,69 @@
     color: var(--color-text-secondary);
   }
 }
+
+/* ---------------------------
+   MOBILE + TABLET FILTER BUTTON FAB
+   Stacked, icon-only, bottom-right
+   DOES NOT affect desktop
+---------------------------- */
+
+.mobile-filter-fab {
+  display: none;
+
+  @media (max-width: $breakpoint-md) {
+    position: fixed;
+    bottom: 16px;
+    right: 16px;
+    z-index: 2500;
+
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    background: rgba(255, 255, 255, 0.9);
+    padding: 12px;
+    border-radius: 18px;
+    box-shadow: 0 6px 28px rgba(0,0,0,0.18);
+    backdrop-filter: blur(8px);
+  }
+}
+
+.mobile-filter-button {
+  @media (max-width: $breakpoint-md) {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: 1px solid var(--color-border);
+    background: var(--color-background);
+    color: var(--color-text-primary);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    font-weight: 600;
+
+    cursor: pointer;
+    transition: all 0.18s ease;
+
+    &:hover {
+      background: var(--color-surface);
+      transform: scale(1.06);
+    }
+
+    &.active {
+      background: var(--color-text-primary);
+      color: var(--color-background);
+      border-color: var(--color-text-primary);
+      transform: scale(1.08);
+    }
+  }
+}
+
+/* Hide the entire existing filter bar ONLY on mobile/tablet */
+@media (max-width: $breakpoint-md) {
+  .template-filters-wrapper {
+    display: none !important;
+  }
+}
