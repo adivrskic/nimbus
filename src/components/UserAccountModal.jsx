@@ -302,7 +302,7 @@ function UserAccountModal({ isOpen, onClose }) {
 
                 <button 
                   type="submit" 
-                  className="btn btn--primary"
+                  className="btn btn-primary"
                   disabled={isLoading}
                 >
                   {isLoading ? (
@@ -384,7 +384,7 @@ function UserAccountModal({ isOpen, onClose }) {
 
                         {site.billing_status === 'active' && !site.cancelled_at && (
                           <button
-                            className="btn btn--danger btn--small"
+                            className="btn btn-danger btn-small"
                             onClick={() => handleCancelSite(site.id, site.site_name)}
                             disabled={isLoading}
                           >
@@ -451,7 +451,7 @@ function UserAccountModal({ isOpen, onClose }) {
                     <h3>Payment Methods</h3>
                     <p>Manage your payment methods and view invoices through Stripe.</p>
                     <button 
-                      className="btn btn--secondary"
+                      className="btn btn-secondary"
                       onClick={() => {
                         // TODO: Create Stripe Customer Portal session
                         alert('Stripe Customer Portal integration coming soon');
@@ -501,7 +501,7 @@ function UserAccountModal({ isOpen, onClose }) {
 
                 <button 
                   type="submit" 
-                  className="btn btn--primary"
+                  className="btn btn-primary"
                   disabled={isLoading || !passwordForm.newPassword || !passwordForm.confirmPassword}
                 >
                   {isLoading ? (

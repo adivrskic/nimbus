@@ -16,7 +16,7 @@
   }
 
   &__content {
-    max-width: 800px;
+    // max-width: 800px;
     margin: 0 auto;
     text-align: center;
     position: relative;
@@ -27,12 +27,15 @@
   &__title {
     margin-bottom: calc(var(--spacing-unit) * 3);
     text-transform: uppercase;
+    font-size: 96px;
 
     &-outline {
       -webkit-text-stroke: 2px var(--color-text-primary);
       -webkit-text-fill-color: transparent;
       color: transparent;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      justify-content: center;
     }
   }
 
@@ -41,13 +44,14 @@
     top: 80%;
     left: 50%;
     transform: translate(-50%, -50%);
-    max-width: 680px;
+    width: 100%;
+    // max-width: 680px;
   }
 
   &__subtitle {
     font-size: 1.25rem;
     color: var(--color-text-secondary);
-    margin-bottom: calc(var(--spacing-unit) * 5);
+    margin-bottom: calc(var(--spacing-unit) * 2);
     line-height: 1.6;
     text-align: center;
 
@@ -186,7 +190,7 @@
 .reveal {
   opacity: 0;
   transform: translateY(30px);
-  filter: blur(18px);
+  filter: blur(64px);
   transition: opacity 0.8s ease-out, transform 0.8s ease-out, filter 0.8s ease-out;
 }
 
@@ -199,7 +203,7 @@
 .reveal-stagger > * {
   opacity: 0;
   transform: translateY(30px);
-  filter: blur(18px);
+  filter: blur(64px);
   transition: opacity 0.8s ease-out, transform 0.8s ease-out, filter 0.8s ease-out;
 }
 
@@ -213,3 +217,39 @@
 .reveal-stagger.visible > *:nth-child(2) { transition-delay: 0.25s; }
 .reveal-stagger.visible > *:nth-child(3) { transition-delay: 0.4s; }
 .reveal-stagger.visible > *:nth-child(4) { transition-delay: 0.55s; }
+
+
+@media screen and (max-width: 680px) {
+  .hero {
+    &__title {
+      font-size: 64px
+    }
+  }
+}
+
+.letter {
+  display: inline-block;
+  animation: floatLetter 4s ease-in-out infinite;
+  animation-delay: calc(var(--i) * 0.33s);
+  will-change: transform;
+}
+
+.outline-letter {
+  color: transparent;
+  // -webkit-text-stroke: 1px #fff; /* Keep the outline effect */
+}
+
+@keyframes floatLetter {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  25% {
+    transform: translateY(-3px);
+  }
+  50% {
+    transform: translateY(0);
+  }
+  75% {
+    transform: translateY(1px);
+  }
+}

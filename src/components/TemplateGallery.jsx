@@ -46,7 +46,7 @@ const templates = templateData.map(template => ({
 
 // Categories with counts
 const categories = [
-  { name: 'All Templates', count: templates.length },
+  { name: 'All', count: templates.length },
   { name: 'Featured', count: templates.filter(t => t.featured).length },
   { name: 'Personal', count: templates.filter(t => t.category === 'Personal').length },
   { name: 'Business', count: templates.filter(t => t.category === 'Business').length },
@@ -61,7 +61,7 @@ const categories = [
 
 function TemplateGallery({ onTemplateSelect }) {
   const navigate = useNavigate();
-  const [activeFilter, setActiveFilter] = useState('All Templates');
+  const [activeFilter, setActiveFilter] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [visibleCount, setVisibleCount] = useState(12);
   const [leftArrowOpacity, setLeftArrowOpacity] = useState(0);
@@ -77,7 +77,7 @@ function TemplateGallery({ onTemplateSelect }) {
     // Apply category filter
     if (activeFilter === 'Featured') {
       filtered = filtered.filter(t => t.featured);
-    } else if (activeFilter !== 'All Templates') {
+    } else if (activeFilter !== 'All') {
       // Handle Portfolio/Creative mapping
       if (activeFilter === 'Portfolio') {
         filtered = filtered.filter(t => t.category === 'Portfolio' || t.category === 'Creative');

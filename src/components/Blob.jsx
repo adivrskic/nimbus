@@ -1,11 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 
-const BlobParticles = ({
+const Blob = ({
   color = "#eb1736",
-  bloomStrength = 12,
-  bloomRadius = 2,
-  bloomThreshold = 2.25,
   wireframe = false,
 }) => {
   const mountRef = useRef(null);
@@ -16,15 +13,17 @@ const BlobParticles = ({
 
   useEffect(() => {
     const mount = mountRef.current;
+    if (!mount) return;
 
-    const getSize = () => ({
-      width: mount.clientWidth,
-      height: mount.clientHeight,
-    });
+    // ----- SCENE & CAMERA -----
+    const scene = new THREE.Scene();
+    const width = mount.clientWidth;
+    const height = mount.clientHeight;
 
-    const { width, height } = getSize();
+    const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+    camera.position.set(0, 0, 14);
+    cameraRef.current = camera;
 
-    // Renderer
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(width, height);
     renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -32,30 +31,20 @@ const BlobParticles = ({
     mount.appendChild(renderer.domElement);
     rendererRef.current = renderer;
 
-    // Scene
-    const scene = new THREE.Scene();
-
-    // Camera
-    const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
-    camera.position.set(0, 0, 14);
-    cameraRef.current = camera;
-
     const clock = new THREE.Clock();
 
-    // Random stretch direction
+    // ----- RANDOM STRETCH -----
     const stretchSeed = new THREE.Vector3(
       Math.random() * 2 - 1,
       Math.random() * 2 - 1,
       Math.random() * 2 - 1
     ).normalize();
 
-    // Shaders
+    // ----- SHADERS -----
     const vertexShader = `
       uniform float u_time;
-      uniform float u_frequency;
       uniform float u_stretchAmp;
       uniform vec3 u_stretchSeed;
-
       varying vec3 vNormal;
 
       void main() {
@@ -88,7 +77,7 @@ const BlobParticles = ({
       varying vec3 vNormal;
 
       void main() {
-        float intensity = dot(vNormal, vec3(0.0, 0.0, 1.0)) * 0.4 + 0.6;
+        float intensity = dot(vNormal, vec3(0.0,0.0,1.0)) * 0.4 + 0.6;
         vec3 brightColor = vec3(u_red, u_green, u_blue);
         vec3 darkColor = brightColor * 0.5;
         vec3 color = mix(darkColor, brightColor, intensity);
@@ -96,21 +85,17 @@ const BlobParticles = ({
       }
     `;
 
+    const col = new THREE.Color(color);
     const uniforms = {
       u_time: { value: 0 },
-      u_frequency: { value: 0 },
-      u_red: { value: 0 },
-      u_green: { value: 0 },
-      u_blue: { value: 0 },
+      u_red: { value: col.r },
+      u_green: { value: col.g },
+      u_blue: { value: col.b },
       u_stretchAmp: { value: 0.2 },
       u_stretchSeed: { value: stretchSeed },
     };
 
-    const col = new THREE.Color(color);
-    uniforms.u_red.value = col.r;
-    uniforms.u_green.value = col.g;
-    uniforms.u_blue.value = col.b;
-
+    // ----- MESH -----
     const geo = new THREE.IcosahedronGeometry(4, 30);
     const mat = new THREE.ShaderMaterial({
       uniforms,
@@ -121,20 +106,59 @@ const BlobParticles = ({
     });
 
     const mesh = new THREE.Mesh(geo, mat);
-
-    // Horizontal cloud-like shape
-    mesh.scale.set(1.6, 1.0, 1.3);
     scene.add(mesh);
 
-    setTimeout(() => setIsLoaded(true), 10);
+    // ----- RESPONSIVE SCALE & ANIMATION -----
+    const getScaleFactor = () => {
+      const width = window.innerWidth;
+      if (width < 480) return 0.6;   // tiny phones
+      if (width < 768) return 0.9;   // tablets
+      if (width < 1200) return 1.2;  // small desktops
+      return 1.6;                     // large desktops
+    };
 
-    // ---- ANIMATION LOOP ----
+    const updateForScreen = () => {
+      const scale = getScaleFactor();
+
+      // Mobile: slower rotation + subtle pulsing
+      if (window.innerWidth < 768) {
+        uniforms.u_stretchAmp.value = 0.1;
+        mesh.userData.rotationXSpeed = 0.0001;
+        mesh.userData.rotationYSpeed = 0.0001;
+        mesh.userData.pulse = true;
+      } else {
+        uniforms.u_stretchAmp.value = 0.2;
+        mesh.userData.rotationXSpeed = 0.00015;
+        mesh.userData.rotationYSpeed = 0.0002;
+        mesh.userData.pulse = false;
+      }
+
+      mesh.scale.set(scale, scale * 0.6, scale * 0.8);
+    };
+
+    updateForScreen();
+
+    window.addEventListener("resize", () => {
+      updateForScreen();
+      const newWidth = mount.clientWidth;
+      const newHeight = mount.clientHeight;
+      renderer.setSize(newWidth, newHeight);
+      camera.aspect = newWidth / newHeight;
+      camera.updateProjectionMatrix();
+    });
+
+    // ----- ANIMATION LOOP -----
     const animate = () => {
       const t = clock.getElapsedTime();
       uniforms.u_time.value = t;
 
-      mesh.rotation.x += 0.00015;
-      mesh.rotation.y += 0.0002;
+      if (mesh.userData.pulse) {
+        const pulse = 0.95 + 0.05 * Math.sin(t * 2);
+        mesh.scale.set(pulse, pulse * 0.6, pulse * 0.8);
+      }
+
+      mesh.rotation.x += mesh.userData.rotationXSpeed;
+      mesh.rotation.y += mesh.userData.rotationYSpeed;
 
       renderer.render(scene, camera);
       animationRef.current = requestAnimationFrame(animate);
@@ -142,28 +166,18 @@ const BlobParticles = ({
 
     animate();
 
-    // ---- RESIZE HANDLER ----
-    const handleResize = () => {
-      if (!mount) return;
+    // ----- SHOW AFTER SHORT DELAY -----
+    setTimeout(() => setIsLoaded(true), 10);
 
-      const newWidth = mount.clientWidth;
-      const newHeight = mount.clientHeight;
-
-      renderer.setSize(newWidth, newHeight);
-      camera.aspect = newWidth / newHeight;
-      camera.updateProjectionMatrix();
-    };
-
-    window.addEventListener("resize", handleResize);
-
+    // ----- CLEANUP -----
     return () => {
-      window.removeEventListener("resize", handleResize);
       cancelAnimationFrame(animationRef.current);
+      window.removeEventListener("resize", updateForScreen);
       mount.removeChild(renderer.domElement);
       geo.dispose();
       mat.dispose();
     };
-  }, []);
+  }, [color, wireframe]);
 
   return (
     <div
@@ -172,9 +186,9 @@ const BlobParticles = ({
         position: "absolute",
         inset: 0,
         width: "100%",
-        height: "67%",   // Adjust as needed to prevent overflow
+        height: "67%",   // adjust as needed
         maxHeight: "100%",
-        overflow: "hidden", // prevents overflow!
+        overflow: "hidden",
         zIndex: 1,
         opacity: isLoaded ? 1 : 0,
         filter: isLoaded ? "blur(26px)" : "blur(64px)",
@@ -186,4 +200,4 @@ const BlobParticles = ({
   );
 };
 
-export default BlobParticles;
+export default Blob;

@@ -3,7 +3,7 @@ import { Layout, Palette, Rocket } from 'lucide-react';
 import TemplateGallery from '../components/TemplateGallery';
 import CustomizeModal from '../components/CustomizeModal';
 import StyleShowcase from '../components/StyleShowcase';
-import BlobParticles from '../components/GalaxyParticles';
+import Blob from '../components/Blob';
 import useReveal from '../hooks/useReveal';
 
 import './Home.scss';
@@ -64,17 +64,36 @@ function Home() {
     <div className="home">
       {/* Hero Section */}
       <section className={`hero reveal ${heroVisible ? 'visible' : ''}`} ref={heroRef}>
-        <BlobParticles isDark={true} count={100} enableMouseInteraction={false} />
+        <Blob isDark={true} count={100} enableMouseInteraction={false} />
         <div className="container">
-          <div className="hero__content">
-            <h1 className="hero__title">
-              Build Your Website in
-              <span className="hero__title-outline"> Minutes</span>
-            </h1>
-          </div>
+        <div className="hero__content">
+          <h1 className="hero__title">
+            {"Build Your Website in ".split("").map((char, i) => (
+              <span
+                key={i}
+                className="letter"
+                style={{ "--i": i }}
+              >
+                {char === " " ? "\u00A0" : char} {/* preserve spaces */}
+              </span>
+            ))}
+            <span className="hero__title-outline">
+              {"Minutes".split("").map((char, i) => (
+                <span
+                  key={i}
+                  className="letter outline-letter"
+                  style={{ "--i": i }}
+                >
+                  {char}
+                </span>
+              ))}
+            </span>
+          </h1>
+        </div>
+
           <div className="hero__subtitle-container">
             <p className="hero__subtitle">
-              Professional templates, zero coding required. Choose, customize, and deploy your perfect website today.
+              No coding required. Customize and deploy your perfect website today.
             </p>
             <div className="hero__cta">
               <a href="#templates" className="btn btn-primary">
