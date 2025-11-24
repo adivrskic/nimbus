@@ -1,30 +1,107 @@
-import { useState } from 'react';
+// src/components/Header.jsx
+import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Moon, Sun, Cloudy, User, LogOut } from 'lucide-react';
+import { Moon, Sun, Cloudy, User, Settings, LogOut, ChevronDown } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 import AuthModal from './AuthModal';
+import ForgotPasswordModal from './ForgotPasswordModal';
+import UserAccountModal from './UserAccountModal';
 import './Header.scss';
 
 function Header({ theme, toggleTheme }) {
   const location = useLocation();
   const isHomePage = location.pathname === '/';
   
+  const { user, profile, isAuthenticated, logout } = useAuth();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [user, setUser] = useState(() => {
-    // Check for saved user in localStorage (for demo purposes)
-    const savedUser = localStorage.getItem('user');
-    return savedUser ? JSON.parse(savedUser) : null;
-  });
+  const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
+  const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  
+  const userMenuRef = useRef(null);
 
-  const handleAuthSuccess = (userData) => {
-    setUser(userData);
-    localStorage.setItem('user', JSON.stringify(userData));
-    console.log('User authenticated:', userData);
+  // Check URL hash for email confirmation redirect
+  useEffect(() => {
+    const hash = window.location.hash;
+    
+    // Handle email confirmation
+    if (hash && hash.includes('type=signup')) {
+      // Remove the hash from URL
+      window.history.replaceState(null, '', window.location.pathname);
+      
+      // Open auth modal if not already authenticated
+      if (!isAuthenticated) {
+        setIsAuthModalOpen(true);
+      }
+    }
+    
+    // Handle password reset
+    if (hash && hash.includes('type=recovery')) {
+      // Open account modal to security tab for password change
+      if (isAuthenticated) {
+        setIsAccountModalOpen(true);
+      }
+    }
+  }, [isAuthenticated]);
+
+  // Close user menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
+        setIsUserMenuOpen(false);
+      }
+    };
+
+    if (isUserMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isUserMenuOpen]);
+
+  const handleLogout = async () => {
+    await logout();
+    setIsUserMenuOpen(false);
   };
 
-  const handleLogout = () => {
-    setUser(null);
-    localStorage.removeItem('user');
-    console.log('User logged out');
+  const handleOpenAccountModal = () => {
+    setIsAccountModalOpen(true);
+    setIsUserMenuOpen(false);
+  };
+
+  const handleAuthSuccess = () => {
+    setIsAuthModalOpen(false);
+  };
+
+  const handleForgotPassword = () => {
+    setIsAuthModalOpen(false);
+    setIsForgotPasswordOpen(true);
+  };
+
+  // Get user display name
+  const getUserDisplayName = () => {
+    if (profile?.full_name) return profile.full_name;
+    if (user?.email) {
+      return user.email.split('@')[0];
+    }
+    return 'User';
+  };
+
+  // Get user initials for avatar
+  const getUserInitials = () => {
+    if (profile?.full_name) {
+      const parts = profile.full_name.trim().split(' ');
+      if (parts.length === 1) {
+        return parts[0].charAt(0).toUpperCase();
+      }
+      return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+    }
+    if (user?.email) {
+      return user.email.charAt(0).toUpperCase();
+    }
+    return 'U';
   };
 
   return (
@@ -54,23 +131,55 @@ function Header({ theme, toggleTheme }) {
                 {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
               </button>
               
-              {user ? (
-                <div className="header__user-menu">
-                  <button className="header__user-button">
-                    <User size={18} />
-                    <span>{user.name || user.email}</span>
-                  </button>
-                  <div className="header__user-dropdown">
-                    <div className="dropdown-header">
-                      <p className="user-name">{user.name || 'User'}</p>
-                      <p className="user-email">{user.email}</p>
+              {isAuthenticated ? (
+                <div className="header__user-menu" ref={userMenuRef}>
+                  <button 
+                    className="header__user-button"
+                    onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                  >
+                    <div className="user-avatar">
+                      {getUserInitials()}
                     </div>
-                    <div className="dropdown-divider"></div>
-                    <button className="dropdown-item" onClick={handleLogout}>
-                      <LogOut size={16} />
-                      Sign Out
-                    </button>
-                  </div>
+                    <span className="user-name">{getUserDisplayName()}</span>
+                    <ChevronDown 
+                      size={16} 
+                      className={`chevron ${isUserMenuOpen ? 'open' : ''}`}
+                    />
+                  </button>
+                  
+                  {isUserMenuOpen && (
+                    <div className="header__user-dropdown">
+                      <div className="dropdown-header">
+                        <div className="user-avatar-large">
+                          {getUserInitials()}
+                        </div>
+                        <div className="user-info">
+                          <p className="user-name">{getUserDisplayName()}</p>
+                          <p className="user-email">{user?.email}</p>
+                        </div>
+                      </div>
+                      
+                      <div className="dropdown-divider"></div>
+                      
+                      <button 
+                        className="dropdown-item"
+                        onClick={handleOpenAccountModal}
+                      >
+                        <Settings size={16} />
+                        Account Settings
+                      </button>
+                      
+                      <div className="dropdown-divider"></div>
+                      
+                      <button 
+                        className="dropdown-item dropdown-item--danger"
+                        onClick={handleLogout}
+                      >
+                        <LogOut size={16} />
+                        Sign Out
+                      </button>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <button 
@@ -85,10 +194,24 @@ function Header({ theme, toggleTheme }) {
         </div>
       </header>
 
+      {/* Auth Modal */}
       <AuthModal
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
         onAuthSuccess={handleAuthSuccess}
+        onForgotPassword={handleForgotPassword}
+      />
+
+      {/* Forgot Password Modal */}
+      <ForgotPasswordModal
+        isOpen={isForgotPasswordOpen}
+        onClose={() => setIsForgotPasswordOpen(false)}
+      />
+
+      {/* User Account Modal */}
+      <UserAccountModal
+        isOpen={isAccountModalOpen}
+        onClose={() => setIsAccountModalOpen(false)}
       />
     </>
   );

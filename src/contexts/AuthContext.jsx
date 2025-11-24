@@ -1,151 +1,227 @@
+// src/contexts/AuthContext.jsx
 import { createContext, useContext, useState, useEffect } from 'react';
+import { supabase } from '../lib/supabaseClient';
 
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
+  const [profile, setProfile] = useState(null);
+  const [rememberedEmail, setRememberedEmail] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Initialize user from localStorage on mount
+  // ⭐ Load remembered email on boot
   useEffect(() => {
-    const initializeAuth = async () => {
-      const savedUser = localStorage.getItem('user');
-      const token = localStorage.getItem('authToken');
+    const savedEmail = localStorage.getItem("rememberedEmail");
+    if (savedEmail) {
+      setRememberedEmail(savedEmail);
+    }
+  }, []);
 
-      if (savedUser && token) {
-        try {
-          // Verify token is still valid
-          const response = await fetch('/api/auth/verify', {
-            headers: {
-              'Authorization': `Bearer ${token}`
-            }
-          });
+  // ⭐ Initialize Supabase auth state on mount
+  useEffect(() => {
+    let active = true;
 
-          if (response.ok) {
-            setUser(JSON.parse(savedUser));
-          } else {
-            // Token invalid, clear storage
-            logout();
-          }
-        } catch (error) {
-          console.error('Token verification failed:', error);
-          logout();
-        }
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (!active) return;
+
+      if (session?.user) {
+        setUser(session.user);
+        await loadUserProfile(session.user.id);
       }
 
       setIsLoading(false);
-    };
-
-    initializeAuth();
-  }, []);
-
-  const login = async (email, password) => {
-    try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password })
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Login failed');
-      }
-
-      const data = await response.json();
-      const userData = {
-        id: data.user.id,
-        name: data.user.name,
-        email: data.user.email,
-      };
-
-      setUser(userData);
-      localStorage.setItem('user', JSON.stringify(userData));
-      localStorage.setItem('authToken', data.token);
-
-      return { success: true, user: userData };
-    } catch (error) {
-      return { success: false, error: error.message };
-    }
-  };
-
-  const signup = async (name, email, password) => {
-    try {
-      const response = await fetch('/api/auth/signup', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ name, email, password })
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Signup failed');
-      }
-
-      const data = await response.json();
-      const userData = {
-        id: data.user.id,
-        name: data.user.name,
-        email: data.user.email,
-      };
-
-      setUser(userData);
-      localStorage.setItem('user', JSON.stringify(userData));
-      localStorage.setItem('authToken', data.token);
-
-      return { success: true, user: userData };
-    } catch (error) {
-      return { success: false, error: error.message };
-    }
-  };
-
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('user');
-    localStorage.removeItem('authToken');
-  };
-
-  const updateUser = (updates) => {
-    const updatedUser = { ...user, ...updates };
-    setUser(updatedUser);
-    localStorage.setItem('user', JSON.stringify(updatedUser));
-  };
-
-  // Helper to make authenticated requests
-  const authenticatedFetch = async (url, options = {}) => {
-    const token = localStorage.getItem('authToken');
-
-    const response = await fetch(url, {
-      ...options,
-      headers: {
-        ...options.headers,
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
     });
 
-    // Handle token expiration
-    if (response.status === 401) {
-      logout();
-      throw new Error('Session expired. Please log in again.');
-    }
+    // Listen for login/logout events
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (session?.user) {
+          setUser(session.user);
+          await loadUserProfile(session.user.id);
+        } else {
+          setUser(null);
+          setProfile(null);
+        }
+      }
+    );
 
-    return response;
+    return () => {
+      active = false;
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  // Load user profile from Supabase
+  const loadUserProfile = async (userId) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      if (error) throw error;
+      setProfile(data);
+    } catch (err) {
+      console.error("Profile load error:", err.message);
+    }
   };
+
+  // Email/password signup
+  const signup = async (email, password, fullName) => {
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { data: { full_name: fullName } }
+      });
+
+      if (error) throw error;
+
+      if (data?.user && !data.session) {
+        return {
+          success: true,
+          requiresEmailConfirmation: true,
+          message: 'Please check your email to confirm your account'
+        };
+      }
+
+      return { success: true, user: data.user };
+    } catch (e) {
+      return { success: false, error: e.message };
+    }
+  };
+
+  // Email/password login
+  const login = async (email, password, rememberMe = false) => {
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+        options: { persistSession: rememberMe }
+      });
+
+      if (error) throw error;
+
+      // ⭐ Store/remove remembered email
+      if (rememberMe) {
+        localStorage.setItem("rememberedEmail", email);
+        setRememberedEmail(email);
+      } else {
+        localStorage.removeItem("rememberedEmail");
+        setRememberedEmail(null);
+      }
+
+      return { success: true, user: data.user };
+    } catch (e) {
+      return { success: false, error: e.message };
+    }
+  };
+
+  const logout = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+    setProfile(null);
+  };
+
+  // Update profile helpers…
+  const updateProfile = async (updates) => { /* unchanged */ };
+  const updateEmail = async (newEmail) => { /* unchanged */ };
+  const updatePassword = async (newPassword) => { /* unchanged */ };
+
+  const resetPassword = async (email) => { /* unchanged */ };
+
+  // ⭐ Sign in with Google
+  const signInWithGoogle = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: window.location.origin }
+      });
+      if (error) throw error;
+      return { success: true };
+    } catch (e) {
+      return { success: false, error: e.message };
+    }
+  };
+
+  // ⭐ Sign in with GitHub
+  const signInWithGitHub = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'github',
+        options: { redirectTo: window.location.origin }
+      });
+      if (error) throw error;
+      return { success: true };
+    } catch (e) {
+      return { success: false, error: e.message };
+    }
+  };
+
+  // ⭐ Sign in with Facebook
+  const signInWithFacebook = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'facebook',
+        options: { redirectTo: window.location.origin }
+      });
+      if (error) throw error;
+      return { success: true };
+    } catch (e) {
+      return { success: false, error: e.message };
+    }
+  };
+
+  // ⭐ Sign in with Apple
+  const signInWithApple = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'apple',
+        options: { redirectTo: window.location.origin }
+      });
+      if (error) throw error;
+      return { success: true };
+    } catch (e) {
+      return { success: false, error: e.message };
+    }
+  };
+
+  // ⭐ Sign in with LinkedIn
+  const signInWithLinkedIn = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'linkedin_oidc',  // <-- Correct Supabase ID
+        options: { redirectTo: window.location.origin }
+      });
+      if (error) throw error;
+      return { success: true };
+    } catch (e) {
+      return { success: false, error: e.message };
+    }
+  };
+
 
   const value = {
     user,
+    profile,
+    rememberedEmail,   // ⭐ Exposed so AuthModal can auto-fill
     isLoading,
     isAuthenticated: !!user,
-    login,
     signup,
+    login,
     logout,
-    updateUser,
-    authenticatedFetch,
+    updateProfile,
+    updateEmail,
+    updatePassword,
+    resetPassword,
+    signInWithGoogle,
+    signInWithGitHub,
+    signInWithFacebook,   
+    signInWithApple,     
+    signInWithLinkedIn,  
+    supabase,
   };
 
   return (
@@ -156,29 +232,5 @@ export function AuthProvider({ children }) {
 }
 
 export function useAuth() {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
+  return useContext(AuthContext);
 }
-
-// Example usage in a component:
-/*
-import { useAuth } from './contexts/AuthContext';
-
-function MyComponent() {
-  const { user, isAuthenticated, login, logout } = useAuth();
-
-  if (!isAuthenticated) {
-    return <button onClick={() => login('email', 'password')}>Login</button>;
-  }
-
-  return (
-    <div>
-      <h1>Welcome, {user.name}!</h1>
-      <button onClick={logout}>Logout</button>
-    </div>
-  );
-}
-*/

@@ -44,7 +44,7 @@
     &:hover {
       background: var(--color-surface-alt);
       color: var(--color-text-primary);
-      transform: rotate(90deg);
+      // transform: rotate(90deg);
     }
   }
 
@@ -343,4 +343,36 @@
 @keyframes spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
+}
+
+.social-auth--row {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.btn-social-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: #f5f5f5;
+  border: 1px solid #e0e0e0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all .15s ease;
+}
+
+.btn-social-icon:hover {
+  background: #fff;
+  border-color: #c9c9c9;
+  transform: translateY(-1px);
+}
+
+.btn-social-icon:disabled {
+  opacity: .6;
+  cursor: not-allowed;
+  transform: none;
 }
