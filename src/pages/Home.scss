@@ -46,6 +46,7 @@
     transform: translate(-50%, -50%);
     width: 100%;
     // max-width: 680px;
+    padding: 0 20px;
   }
 
   &__subtitle {
@@ -244,7 +245,7 @@
     transform: translateY(0);
   }
   25% {
-    transform: translateY(-3px);
+    transform: translateY(-1px);
   }
   50% {
     transform: translateY(0);

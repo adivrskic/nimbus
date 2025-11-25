@@ -8,43 +8,43 @@ const styles = [
     id: 'minimal',
     name: 'Minimal',
     description: 'Clean lines and thoughtful whitespace',
-    icon: <Feather size={20} />,
+    icon: <Feather size={30} strokeWidth={1} />,
   },
   {
     id: 'brutalist',
     name: 'Brutalist',
     description: 'Bold typography and raw aesthetics',
-    icon: <Zap size={20} />,
+    icon: <Zap size={30} strokeWidth={1} />,
   },
   {
     id: 'gradient',
     name: 'Gradient',
     description: 'Smooth colors and soft edges',
-    icon: <Sparkles size={20} />,
+    icon: <Sparkles size={30} strokeWidth={1} />,
   },
   {
     id: 'elegant',
     name: 'Elegant',
     description: 'Sophisticated and timeless',
-    icon: <BookOpen size={20} />,
+    icon: <BookOpen size={30} strokeWidth={1} />,
   },
   {
     id: 'retro',
     name: 'Retro Wave',
     description: 'Vibrant 80s inspired design',
-    icon: <Palette size={20} />,
+    icon: <Palette size={30} strokeWidth={1} />,
   },
   {
     id: 'glassmorphism',
     name: 'Glassmorphism',
     description: 'Frosted glass and depth',
-    icon: <Shapes size={20} />,
+    icon: <Shapes size={30} strokeWidth={1} />,
   },
   {
     id: 'neumorphism',
     name: 'Neumorphism',
     description: 'Soft shadows and subtle depth',
-    icon: <Cloud size={20} />,
+    icon: <Cloud size={30} strokeWidth={1} />,
   },
 ];
 
@@ -371,7 +371,7 @@ header{padding:2rem 0;border-bottom:4px solid ${text}}
 .btn-outline:hover{background:${text};color:${bg}}
 
 /* Grid Section */
-.grid-section{padding:6rem 0;background:${text};color:${bg}}
+.grid-section{background:${text};color:${bg}}
 .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0}
 @media(max-width:1024px){.grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:640px){.grid{grid-template-columns:1fr}}
@@ -382,7 +382,7 @@ header{padding:2rem 0;border-bottom:4px solid ${text}}
 .grid-item p{font-family:Arial,sans-serif;font-size:1.125rem;line-height:1.5}
 
 /* Statement Section */
-.statement{padding:8rem 0;text-align:center}
+.statement{padding:8rem 0 0 0;text-align:center}
 .statement h2{font-size:clamp(2.5rem,8vw,6rem);line-height:1.1;text-transform:uppercase;margin-bottom:2rem}
 .underline{border-bottom:6px solid ${accent};display:inline-block}
 
@@ -521,7 +521,7 @@ h1{font-size:clamp(2.5rem,8vw,5.5rem);font-weight:800;line-height:1.1;margin-bot
 @media(max-width:640px){.cta-group{flex-direction:column;max-width:300px;margin:0 auto}}
 
 /* Features */
-.features{padding:8rem 0}
+.features{padding:0;}
 @media(max-width:768px){.features{padding:5rem 0}}
 .section-title{font-size:clamp(2rem,5vw,3.5rem);font-weight:800;text-align:center;margin-bottom:1rem;letter-spacing:-0.02em}
 .section-desc{text-align:center;color:${textSecondary};max-width:600px;margin:0 auto 5rem;font-size:1.125rem}
@@ -541,7 +541,7 @@ h1{font-size:clamp(2.5rem,8vw,5.5rem);font-weight:800;line-height:1.1;margin-bot
 .stat-label{color:${textSecondary};font-size:1rem;font-weight:500}
 
 /* CTA */
-.cta{padding:8rem 0;text-align:center}
+.cta{text-align:center}
 @media(max-width:768px){.cta{padding:5rem 0}}
 .cta-box{background:linear-gradient(135deg,#667eea,#764ba2);border-radius:32px;padding:5rem 2rem;color:white}
 .cta h2{font-size:clamp(2rem,6vw,4rem);font-weight:800;margin-bottom:1rem}
@@ -852,7 +852,7 @@ header{padding:1.5rem 0;backdrop-filter:blur(10px);border-bottom:3px solid ${acc
 .feature-card p{line-height:1.7;font-size:0.9375rem}
 
 /* Stats */
-.stats{padding:6rem 0;text-align:center}
+.stats{padding:0;text-align:center}
 .stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:3rem}
 @media(max-width:768px){.stats-grid{grid-template-columns:1fr;gap:2rem}}
 .stat{border:3px solid ${accent2};padding:2rem;background:${isDark ? 'rgba(0,245,255,0.03)' : 'rgba(0,217,255,0.05)'};transition:all 0.3s}
@@ -974,7 +974,7 @@ header{padding:1.5rem 0;position:sticky;top:0;z-index:100;backdrop-filter:blur(2
 @media(max-width:768px){.nav-links{display:none}}
 
 /* Hero */
-.hero{padding:8rem 0;text-align:center}
+.hero{padding:8rem 0 0 0;text-align:center}
 @media(max-width:768px){.hero{padding:5rem 0}}
 h1{font-size:clamp(2.5rem,8vw,6rem);font-weight:800;line-height:1.1;margin-bottom:1.5rem;letter-spacing:-0.02em;color:${isDark ? '#fff' : '#1e293b'}}
 .hero p{font-size:1.25rem;color:${textSecondary};max-width:700px;margin:0 auto 3rem;line-height:1.8}
@@ -998,7 +998,7 @@ h1{font-size:clamp(2.5rem,8vw,6rem);font-weight:800;line-height:1.1;margin-botto
 .card p{color:${textSecondary};line-height:1.7;font-size:1rem}
 
 /* Feature Section */
-.feature{padding:8rem 0;text-align:center}
+.feature{padding:8rem 0 0 0;text-align:center}
 @media(max-width:768px){.feature{padding:5rem 0}}
 .feature-box{padding:5rem 3rem;border-radius:32px;max-width:900px;margin:0 auto}
 .feature h2{font-size:clamp(2rem,6vw,4rem);font-weight:800;margin-bottom:1.5rem;color:${isDark ? '#fff' : '#1e293b'}}
@@ -1121,7 +1121,7 @@ header{padding:2rem 0}
 @media(max-width:768px){.nav-links{display:none}}
 
 /* Hero */
-.hero{padding:8rem 0;text-align:center}
+.hero{padding:2rem 0 0 0;text-align:center}
 @media(max-width:768px){.hero{padding:5rem 0}}
 .hero-content{padding:4rem 3rem;border-radius:32px;box-shadow:${shadowOut};max-width:900px;margin:0 auto}
 @media(max-width:768px){.hero-content{padding:3rem 2rem}}
@@ -1146,7 +1146,7 @@ h1{font-size:clamp(2.5rem,7vw,5rem);font-weight:800;line-height:1.1;margin-botto
 .feature-card p{color:${textSecondary};line-height:1.7;font-size:1rem}
 
 /* Stats */
-.stats{padding:6rem 0}
+.stats{padding:0}
 @media(max-width:768px){.stats{padding:4rem 0}}
 .stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2.5rem;text-align:center}
 @media(max-width:768px){.stats-grid{grid-template-columns:1fr;gap:2rem}}
@@ -1248,10 +1248,9 @@ function StyleShowcase() {
   const [viewMode, setViewMode] = useState("desktop"); // desktop, tablet, mobile
   const iframeRef = useRef(null);
 
-  // pinned = controls stuck to bottom; default true
   const [isPinned, setIsPinned] = useState(true);
 
-  // Ensure previewMode follows global theme
+  // Keep previewMode in sync with global theme
   useEffect(() => {
     setPreviewMode(theme);
   }, [theme]);
@@ -1272,31 +1271,20 @@ function StyleShowcase() {
     doc.close();
   }, [activeStyle, previewMode]);
 
-  // IntersectionObserver: observe the sentinel just after the preview.
-  // When the sentinel becomes visible, the preview was scrolled past -> unpin controls.
+  // IntersectionObserver to unpin panel when scrolled past preview
   useEffect(() => {
     const sentinel = document.querySelector("#preview-sentinel");
-    if (!sentinel) {
-      // fallback: keep pinned
-      setIsPinned(true);
-      return;
-    }
+    if (!sentinel) return;
 
-    const obs = new IntersectionObserver(
+    const observer = new IntersectionObserver(
       ([entry]) => {
-        // if sentinel is intersecting => we've reached/past the bottom of preview => unpin
         setIsPinned(!entry.isIntersecting);
       },
-      {
-        root: null,
-        threshold: 0,
-        // slight offset so panel unpins just a bit before/after the sentinel is fully in view
-        rootMargin: "0px 0px -8% 0px",
-      }
+      { root: null, threshold: 0, rootMargin: "0px 0px -8% 0px" }
     );
 
-    obs.observe(sentinel);
-    return () => obs.disconnect();
+    observer.observe(sentinel);
+    return () => observer.disconnect();
   }, []);
 
   return (
@@ -1304,12 +1292,12 @@ function StyleShowcase() {
       className="style-showcase"
       id="styles"
       style={{
-        '--style-bg': styleThemes[activeStyle][theme].bg,
-        '--style-surface': styleThemes[activeStyle][theme].surface,
-        '--style-border': styleThemes[activeStyle][theme].border,
-        '--style-text': styleThemes[activeStyle][theme].text,
-        '--style-text-secondary': styleThemes[activeStyle][theme].textSecondary,
-        '--style-accent': styleThemes[activeStyle][theme].accent,
+        "--style-bg": styleThemes[activeStyle][theme].bg,
+        "--style-surface": styleThemes[activeStyle][theme].surface,
+        "--style-border": styleThemes[activeStyle][theme].border,
+        "--style-text": styleThemes[activeStyle][theme].text,
+        "--style-text-secondary": styleThemes[activeStyle][theme].textSecondary,
+        "--style-accent": styleThemes[activeStyle][theme].accent,
       }}
     >
       <div className="container">
@@ -1321,16 +1309,21 @@ function StyleShowcase() {
         </div>
 
         <div className="style-showcase__content">
-
           {/* ----------------------------
-             MOBILE / TABLET: bottom stacked control panel (mobile-only)
-             This panel is pinned/unpinned based on the preview sentinel.
+             MOBILE / TABLET: bottom stacked control panel
           ----------------------------- */}
           <div
             className={`style-control-panel mobile-only ${isPinned ? "pinned" : "unpinned"}`}
-            aria-hidden={!isPinned && true}
+            style={{
+              "--style-bg": styleThemes[activeStyle][theme].bg,
+              "--style-surface": styleThemes[activeStyle][theme].surface,
+              "--style-border": styleThemes[activeStyle][theme].border,
+              "--style-text": styleThemes[activeStyle][theme].text,
+              "--style-text-secondary": styleThemes[activeStyle][theme].textSecondary,
+              "--style-accent": styleThemes[activeStyle][theme].accent,
+            }}
           >
-            {/* Style selector (icons + small label) */}
+            {/* Style selector */}
             <div className="panel-section style-select">
               {styles.map((style) => (
                 <button
@@ -1340,7 +1333,6 @@ function StyleShowcase() {
                   aria-pressed={activeStyle === style.id}
                 >
                   <div className="style-icon" aria-hidden>{style.icon}</div>
-                  {/* <span className="style-label">{style.name}</span> */}
                 </button>
               ))}
             </div>
@@ -1352,21 +1344,20 @@ function StyleShowcase() {
                 className={`mode-btn ${previewMode === "light" ? "active" : ""}`}
                 aria-pressed={previewMode === "light"}
               >
-                <Sun size={16} />
+                <Sun size={30} strokeWidth={1}/>
               </button>
               <button
                 onClick={() => setPreviewMode("dark")}
                 className={`mode-btn ${previewMode === "dark" ? "active" : ""}`}
                 aria-pressed={previewMode === "dark"}
               >
-                <Moon size={16} />
+                <Moon size={30} strokeWidth={1}/>
               </button>
             </div>
           </div>
 
           {/* ----------------------------
-             DESKTOP: side selector (desktop-only)
-             Desktop layout is intentionally unchanged.
+             DESKTOP: side selector
           ----------------------------- */}
           <div className="style-selector desktop-only">
             {styles.map((style) => (
@@ -1386,7 +1377,6 @@ function StyleShowcase() {
 
           {/* ----------------------------
              PREVIEW: visible on all breakpoints
-             Note: id="live-preview" is always present; sentinel follows it.
           ----------------------------- */}
           <div className="style-preview">
             <div className="style-preview__controls desktop-only-controls">
@@ -1446,7 +1436,6 @@ function StyleShowcase() {
               />
             </div>
 
-            {/* sentinel used by IntersectionObserver (small, invisible) */}
             <div id="preview-sentinel" style={{ width: "1px", height: "1px", opacity: 0 }} />
           </div>
         </div>
@@ -1454,6 +1443,5 @@ function StyleShowcase() {
     </section>
   );
 }
-
 
 export default StyleShowcase;
