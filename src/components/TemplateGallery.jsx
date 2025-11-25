@@ -301,11 +301,11 @@ function TemplateGallery({ onTemplateSelect }) {
             onClick={() => setActiveFilter(cat.name)}
             title={cat.name}
           >
-            {/* Use first letter or icon */}
             {cat.name === 'Featured' ? <Star size={16} /> : cat.name[0]}
           </button>
         ))}
       </div>
+
 
 
       {/* Grid */}
