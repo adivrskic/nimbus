@@ -51,12 +51,12 @@ function getTemplateFields(template) {
   // };
   
   // Add optional accent color override
-  customizable.accentOverride = {
-    type: 'color',
-    default: '',
-    label: 'Custom Accent (Optional)',
-    optional: true
-  };
+  // customizable.accentOverride = {
+  //   type: 'color',
+  //   default: '',
+  //   label: 'Custom Accent (Optional)',
+  //   optional: true
+  // };
   
   return customizable;
 }
