@@ -573,3 +573,10 @@
     }
   }
 }
+
+@media screen and (max-width: 768px) {
+  .account-modal {
+    height: 100%;
+    max-height: calc(100% - 24px);
+  }
+}

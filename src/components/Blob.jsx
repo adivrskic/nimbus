@@ -153,7 +153,7 @@ const Blob = ({
       uniforms.u_time.value = t;
 
       if (mesh.userData.pulse) {
-        const pulse = 0.95 + 0.05 * Math.sin(t * 2);
+        const pulse = 0.95 + 0.05 * Math.sin(t * 4);
         mesh.scale.set(pulse, pulse * 0.6, pulse * 0.8);
       }
 

@@ -471,17 +471,17 @@
   display: none;
 
   @media (max-width: $breakpoint-md) {
-    position: fixed;
-    bottom: 16px;
-    right: 16px;
+    position: absolute;
+    top: 72px;
+    right: 0;
     z-index: 2500;
 
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 6px;
 
     background: rgba(255, 255, 255, 0.9);
-    padding: 12px;
+    padding: 8px 6px;
     border-radius: 18px;
     box-shadow: 0 6px 28px rgba(0,0,0,0.18);
     backdrop-filter: blur(8px);
@@ -528,14 +528,15 @@
 }
 
 .mobile-filter-fab {
-  position: fixed;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
+    position: sticky;
+    top: 72px;
+    left: 100%;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 6px;
   z-index: 1000;
+  width: fit-content;
+  height: fit-content;
 
   @media (max-width: 768px) {
     gap: 8px;
@@ -577,17 +578,13 @@
   display: none;
 
   @media (max-width: 768px) {
-    position: fixed;
-    bottom: 16px;
-    right: 16px;
     z-index: 2500;
 
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 6px;
 
-    background: rgba(255, 255, 255, 0.9);
-    padding: 12px;
+    background: var(--color-background);
     border-radius: 18px;
     box-shadow: 0 6px 28px rgba(0,0,0,0.18);
     backdrop-filter: blur(8px);
@@ -624,5 +621,10 @@
 @media (max-width: 768px) {
   .template-search {
     display: none;
+  }
+
+  .template-gallery__grid,
+  .template-gallery__empty {
+    margin-top: -640px;
   }
 }

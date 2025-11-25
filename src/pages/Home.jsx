@@ -68,25 +68,9 @@ function Home() {
         <div className="container">
         <div className="hero__content">
           <h1 className="hero__title">
-            {"Build Your Website in ".split("").map((char, i) => (
-              <span
-                key={i}
-                className="letter"
-                style={{ "--i": i }}
-              >
-                {char === " " ? "\u00A0" : char} {/* preserve spaces */}
-              </span>
-            ))}
+            Build your Website in 
             <span className="hero__title-outline">
-              {"Minutes".split("").map((char, i) => (
-                <span
-                  key={i}
-                  className="letter outline-letter"
-                  style={{ "--i": i }}
-                >
-                  {char}
-                </span>
-              ))}
+              Minutes
             </span>
           </h1>
         </div>

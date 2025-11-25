@@ -257,11 +257,11 @@ function CustomizationPanel({ fields, customization, onChange, onImageUpload }) 
     if (field.type === 'theme-selector') {
       return (
         <div key={key} className="field field--theme-selector">
-          <div className="field__header">
+          {/* <div className="field__header">
             <label className="field__label">
               <span className="field__required">Choose your design style</span>
             </label>
-          </div>
+          </div> */}
           <div className="theme-selector-grid">
             {themes.map(theme => (
               <button

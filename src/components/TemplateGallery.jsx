@@ -1,8 +1,25 @@
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Star, Search, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { getAllTemplates } from '../utils/templateSystem';
 import { getAllThemes } from '../styles/themes';
+import {
+  ArrowRight,
+  Star,
+  Search,
+  X,
+  ChevronLeft,
+  ChevronRight,
+  List,
+  User,
+  Building2,
+  Briefcase,
+  Monitor,
+  UtensilsCrossed,
+  CalendarDays,
+  GraduationCap,
+  HeartPulse,
+  Wrench
+} from 'lucide-react';
 import './TemplateGallery.scss';
 
 // Get templates from the new system
@@ -22,6 +39,21 @@ const UNSPLASH_CATEGORY_MAP = {
   "Health & Wellness": "wellness,health,spa",
   Services: "services,agency,workplace",
 };
+
+const FILTER_ICONS = {
+  All: List,
+  Featured: Star,
+  Personal: User,
+  Business: Building2,
+  Portfolio: Briefcase,
+  "Landing Page": Monitor,
+  Restaurant: UtensilsCrossed,
+  Events: CalendarDays,
+  Education: GraduationCap,
+  "Health & Wellness": HeartPulse,
+  Services: Wrench
+};
+
 
 // Helper to generate a random Unsplash image URL
 const generateUnsplashImage = (category) => {
@@ -294,19 +326,21 @@ function TemplateGallery({ onTemplateSelect }) {
 
       {/* Mobile/Tablet Floating Filter Buttons */}
       <div className="mobile-filter-fab">
-        {categories.map(cat => (
-          <button
-            key={cat.name}
-            className={`mobile-filter-button ${activeFilter === cat.name ? 'active' : ''}`}
-            onClick={() => setActiveFilter(cat.name)}
-            title={cat.name}
-          >
-            {cat.name === 'Featured' ? <Star size={16} /> : cat.name[0]}
-          </button>
-        ))}
+        {categories.map(cat => {
+          const Icon = FILTER_ICONS[cat.name] || List;
+
+          return (
+            <button
+              key={cat.name}
+              className={`mobile-filter-button ${activeFilter === cat.name ? 'active' : ''}`}
+              onClick={() => setActiveFilter(cat.name)}
+              title={cat.name}
+            >
+              <Icon size={18} />
+            </button>
+          );
+        })}
       </div>
-
-
 
       {/* Grid */}
       {visibleTemplates.length > 0 ? (

@@ -8,43 +8,43 @@ const styles = [
     id: 'minimal',
     name: 'Minimal',
     description: 'Clean lines and thoughtful whitespace',
-    icon: <Feather size={30} strokeWidth={1} />,
+    icon: <Feather size={18} />,
   },
   {
     id: 'brutalist',
     name: 'Brutalist',
     description: 'Bold typography and raw aesthetics',
-    icon: <Zap size={30} strokeWidth={1} />,
+    icon: <Zap size={18} />,
   },
   {
     id: 'gradient',
     name: 'Gradient',
     description: 'Smooth colors and soft edges',
-    icon: <Sparkles size={30} strokeWidth={1} />,
+    icon: <Sparkles size={18}  />,
   },
   {
     id: 'elegant',
     name: 'Elegant',
     description: 'Sophisticated and timeless',
-    icon: <BookOpen size={30} strokeWidth={1} />,
+    icon: <BookOpen size={18}  />,
   },
   {
     id: 'retro',
     name: 'Retro Wave',
     description: 'Vibrant 80s inspired design',
-    icon: <Palette size={30} strokeWidth={1} />,
+    icon: <Palette size={18} />,
   },
   {
     id: 'glassmorphism',
     name: 'Glassmorphism',
     description: 'Frosted glass and depth',
-    icon: <Shapes size={30} strokeWidth={1} />,
+    icon: <Shapes size={18}  />,
   },
   {
     id: 'neumorphism',
     name: 'Neumorphism',
     description: 'Soft shadows and subtle depth',
-    icon: <Cloud size={30} strokeWidth={1} />,
+    icon: <Cloud size={18}  />,
   },
 ];
 
@@ -1310,53 +1310,6 @@ function StyleShowcase() {
 
         <div className="style-showcase__content">
           {/* ----------------------------
-             MOBILE / TABLET: bottom stacked control panel
-          ----------------------------- */}
-          <div
-            className={`style-control-panel mobile-only ${isPinned ? "pinned" : "unpinned"}`}
-            style={{
-              "--style-bg": styleThemes[activeStyle][theme].bg,
-              "--style-surface": styleThemes[activeStyle][theme].surface,
-              "--style-border": styleThemes[activeStyle][theme].border,
-              "--style-text": styleThemes[activeStyle][theme].text,
-              "--style-text-secondary": styleThemes[activeStyle][theme].textSecondary,
-              "--style-accent": styleThemes[activeStyle][theme].accent,
-            }}
-          >
-            {/* Style selector */}
-            <div className="panel-section style-select">
-              {styles.map((style) => (
-                <button
-                  key={style.id}
-                  className={`style-item ${activeStyle === style.id ? "active" : ""}`}
-                  onClick={() => handleStyleChange(style.id)}
-                  aria-pressed={activeStyle === style.id}
-                >
-                  <div className="style-icon" aria-hidden>{style.icon}</div>
-                </button>
-              ))}
-            </div>
-
-            {/* Color mode */}
-            <div className="panel-section mode-select" role="radiogroup" aria-label="Color mode">
-              <button
-                onClick={() => setPreviewMode("light")}
-                className={`mode-btn ${previewMode === "light" ? "active" : ""}`}
-                aria-pressed={previewMode === "light"}
-              >
-                <Sun size={30} strokeWidth={1}/>
-              </button>
-              <button
-                onClick={() => setPreviewMode("dark")}
-                className={`mode-btn ${previewMode === "dark" ? "active" : ""}`}
-                aria-pressed={previewMode === "dark"}
-              >
-                <Moon size={30} strokeWidth={1}/>
-              </button>
-            </div>
-          </div>
-
-          {/* ----------------------------
              DESKTOP: side selector
           ----------------------------- */}
           <div className="style-selector desktop-only">
@@ -1379,6 +1332,49 @@ function StyleShowcase() {
              PREVIEW: visible on all breakpoints
           ----------------------------- */}
           <div className="style-preview">
+            <div
+              className={`style-control-panel mobile-only ${isPinned ? "pinned" : "unpinned"}`}
+              style={{
+                "--style-bg": styleThemes[activeStyle][theme].bg,
+                "--style-surface": styleThemes[activeStyle][theme].surface,
+                "--style-border": styleThemes[activeStyle][theme].border,
+                "--style-text": styleThemes[activeStyle][theme].text,
+                "--style-text-secondary": styleThemes[activeStyle][theme].textSecondary,
+                "--style-accent": styleThemes[activeStyle][theme].accent,
+              }}
+            >
+              {/* Style selector */}
+              <div className="panel-section style-select">
+                {styles.map((style) => (
+                  <button
+                    key={style.id}
+                    className={`style-item ${activeStyle === style.id ? "active" : ""}`}
+                    onClick={() => handleStyleChange(style.id)}
+                    aria-pressed={activeStyle === style.id}
+                  >
+                    <div className="style-icon" aria-hidden>{style.icon}</div>
+                  </button>
+                ))}
+              </div>
+
+              {/* Color mode */}
+              <div className="panel-section mode-select" role="radiogroup" aria-label="Color mode">
+                <button
+                  onClick={() => setPreviewMode("light")}
+                  className={`mode-btn ${previewMode === "light" ? "active" : ""}`}
+                  aria-pressed={previewMode === "light"}
+                >
+                  <Sun size={18} />
+                </button>
+                <button
+                  onClick={() => setPreviewMode("dark")}
+                  className={`mode-btn ${previewMode === "dark" ? "active" : ""}`}
+                  aria-pressed={previewMode === "dark"}
+                >
+                  <Moon size={18} />
+                </button>
+              </div>
+            </div>
             <div className="style-preview__controls desktop-only-controls">
               <div className="style-preview__title-group">
                 <h3>{styles.find((s) => s.id === activeStyle)?.name}</h3>
