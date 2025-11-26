@@ -57,13 +57,14 @@
   }
   
   &__content {
-    flex: 1;
+    // flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: calc(var(--spacing-unit) * 4);
     overflow: auto;
     background: var(--color-surface);
+    height: 690px;
     
     @media (max-width: $breakpoint-md) {
       padding: calc(var(--spacing-unit) * 2);
@@ -131,3 +132,8 @@
   }
 }
 
+@media (max-width: 1024px) {
+  .live-preview__toolbar {
+    display: none !important;
+  }
+}

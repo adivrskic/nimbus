@@ -307,7 +307,7 @@
       .style-preview__iframe {
         width: 100%;
         height: 100%;
-        border-radius: 12px;
+        border-radius: 0 0 12px 12px;
         box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
       }
     }
@@ -347,6 +347,108 @@
       }
     }
   }
+
+// ===== Minimal monochrome browser chrome + iframe viewport =====
+.iframe-browser {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  border-radius: inherit;
+  overflow: hidden; // ensure chrome and iframe clip to frame radius
+  background: transparent;
+  position: relative;
+  z-index: 1;
+
+  &__chrome {
+    height: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 12px;
+    background: var(--color-surface); // keeps it monochrome & neutral
+    border-bottom: 1px solid var(--style-border);
+    box-shadow: inset 0 -1px 0 rgba(0,0,0,0.02);
+    z-index: 2;
+  }
+
+  &__window-controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-right: 6px;
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--style-border);
+      opacity: 0.55;
+      display: inline-block;
+    }
+  }
+
+  &__url {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding-left: 6px;
+
+    .url__pill {
+      width: 46%;
+      max-width: 520px;
+      height: 18px;
+      border-radius: 6px;
+      background: var(--color-background);
+      border: 1px solid var(--style-border);
+      opacity: 0.95;
+      box-shadow: none;
+    }
+  }
+
+  &__actions {
+    width: 48px; // reserved space for optional icons
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+  }
+
+  &__viewport {
+    flex: 1 1 auto;
+    height: calc(100% - 44px);
+    background: var(--style-surface);
+    position: relative;
+    z-index: 1;
+
+    .style-preview__iframe {
+      width: 100%;
+      height: 100%;
+      display: block;
+      border: none;
+      background: var(--color-background);
+    }
+  }
+}
+
+/* Make chrome slightly subtler on smaller frames (tablet/mobile) */
+@media (max-width: $breakpoint-md) {
+  .iframe-browser__chrome {
+    height: 40px;
+  }
+
+  .iframe-browser__window-controls .dot {
+    width: 9px;
+    height: 9px;
+  }
+
+  .iframe-browser__url .url__pill {
+    height: 16px;
+  }
+}
+
+
   
   &__iframe {
     border: none;
@@ -483,21 +585,21 @@
     gap: 4px;
     border-radius: 8px;
     border: 1px solid rgba(255,255,255,.3);
-    font-size: 11px;
+    // font-size: 11px;
     background: var(--style-accent);
-    width: 40px;
-    height: 40px;
+width: 48px;
+  height: 48px;
     transition: background 0.18s, border-color 0.18s, color 0.18s;
     
     
     @media (max-width: 768px) {
       // padding: 6px;
-      font-size: 11px;
+      // font-size: 11px;
     }
 
     @media (max-width: 480px) {
       // padding: 4px;
-      font-size: 10px;
+      // font-size: 10px;
     }
     
     .style-icon {
@@ -539,6 +641,8 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    width: 48px;
+  height: 48px;
     
     &.active {
       background: var(--style-accent);
@@ -555,17 +659,17 @@
     background-color: var(--style-accent);
     font-size: 12px;
     opacity: 0.4;
-    width: 40px;
-    height: 40px;
+width: 48px;
+  height: 48px;
     
     @media (max-width: 768px) {
       // padding: 5px 6px;
-      font-size: 11px;
+      // font-size: 11px;
     }
 
     @media (max-width: 480px) {
       // padding: 4px 5px;
-      font-size: 10px;
+      // font-size: 10px;
     }
     
     &.active {

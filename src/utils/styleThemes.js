@@ -1,416 +1,411 @@
 // styleThemes.js
 // Theme System - Defines visual themes that can be applied to any template
 
+// Enhanced theme definitions with proper variables
 export const themes = {
   minimal: {
     id: 'minimal',
     name: 'Minimal',
-    description: 'Clean and simple design',
     fonts: {
-      heading: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif',
-      body: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif',
+      heading: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+      body: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
     },
     colors: {
       light: {
         bg: '#ffffff',
-        surface: '#f5f5f7',
-        text: '#1d1d1f',
-        textSecondary: '#86868b',
-        border: '#e5e5e7',
-        borderHover: '#d1d1d6',
-        accent: '#007aff',
+        surface: '#fafafa',
+        text: '#0a0a0a',
+        textSecondary: '#666666',
+        border: '#e5e5e5',
+        borderHover: '#cccccc',
+        accent: '#2563eb'
       },
       dark: {
-        bg: '#000000',
-        surface: '#1c1c1e',
-        text: '#f5f5f7',
-        textSecondary: '#98989d',
-        border: '#38383a',
-        borderHover: '#48484a',
-        accent: '#0a84ff',
-      },
-    },
-    spacing: {
-      xs: '8px',
-      sm: '16px',
-      md: '24px',
-      lg: '32px',
-      xl: '48px',
-      xxl: '64px',
+        bg: '#0a0a0a',
+        surface: '#141414',
+        text: '#ffffff',
+        textSecondary: '#a0a0a0',
+        border: '#1f1f1f',
+        borderHover: '#333333',
+        accent: '#3b82f6'
+      }
     },
     typography: {
-      hero: 'clamp(48px, 7vw, 72px)',
-      h1: 'clamp(32px, 5vw, 48px)',
-      h2: 'clamp(24px, 3vw, 32px)',
-      h3: 'clamp(20px, 2.5vw, 24px)',
-      body: '16px',
-      small: '14px',
+      hero: 'clamp(2.5rem, 7vw, 5rem)',
+      h1: 'clamp(2rem, 5vw, 3rem)',
+      h2: 'clamp(1.5rem, 4vw, 2.25rem)',
+      h3: '1.25rem',
+      body: '1rem',
+      small: '0.875rem'
+    },
+    spacing: {
+      xs: '0.5rem',
+      sm: '1rem',
+      md: '1.5rem',
+      lg: '2rem',
+      xl: '3rem',
+      xxl: '4rem'
     },
     radius: {
       sm: '4px',
       md: '8px',
       lg: '12px',
-      xl: '16px',
+      xl: '16px'
     },
     shadows: {
-      sm: '0 1px 3px rgba(0, 0, 0, 0.08)',
-      md: '0 4px 12px rgba(0, 0, 0, 0.12)',
-      lg: '0 8px 24px rgba(0, 0, 0, 0.16)',
-    },
+      sm: '0 1px 3px rgba(0, 0, 0, 0.12)',
+      md: '0 4px 6px rgba(0, 0, 0, 0.1)',
+      lg: '0 10px 15px rgba(0, 0, 0, 0.1)'
+    }
   },
 
   brutalist: {
     id: 'brutalist',
     name: 'Brutalist',
-    description: 'Bold and raw aesthetic',
     fonts: {
-      heading: "'Space Grotesk', sans-serif",
-      body: "'Space Mono', monospace",
+      heading: "'Arial Black', 'Arial Bold', sans-serif",
+      body: "Arial, sans-serif"
     },
     colors: {
       light: {
         bg: '#ffffff',
-        surface: '#f0f0f0',
+        surface: '#000000',
         text: '#000000',
-        textSecondary: '#666666',
+        textSecondary: '#000000',
         border: '#000000',
-        borderHover: '#333333',
-        accent: '#ff0000',
+        borderHover: '#000000',
+        accent: '#ff0000'
       },
       dark: {
-        bg: '#0a0a0a',
-        surface: '#1a1a1a',
+        bg: '#000000',
+        surface: '#ffffff',
         text: '#ffffff',
-        textSecondary: '#999999',
+        textSecondary: '#ffffff',
         border: '#ffffff',
-        borderHover: '#cccccc',
-        accent: '#ff3333',
-      },
-    },
-    spacing: {
-      xs: '8px',
-      sm: '16px',
-      md: '24px',
-      lg: '40px',
-      xl: '56px',
-      xxl: '80px',
+        borderHover: '#ffffff',
+        accent: '#00ff00'
+      }
     },
     typography: {
-      hero: 'clamp(56px, 8vw, 96px)',
-      h1: 'clamp(40px, 6vw, 64px)',
-      h2: 'clamp(32px, 4vw, 48px)',
-      h3: 'clamp(24px, 3vw, 32px)',
-      body: '18px',
-      small: '14px',
+      hero: 'clamp(3rem, 10vw, 8rem)',
+      h1: 'clamp(2.5rem, 8vw, 6rem)',
+      h2: 'clamp(2rem, 6vw, 4rem)',
+      h3: '2rem',
+      body: '1.125rem',
+      small: '1rem'
+    },
+    spacing: {
+      xs: '1rem',
+      sm: '1.5rem',
+      md: '2rem',
+      lg: '3rem',
+      xl: '4rem',
+      xxl: '6rem'
     },
     radius: {
-      sm: '0px',
-      md: '0px',
-      lg: '0px',
-      xl: '0px',
+      sm: '0',
+      md: '0',
+      lg: '0',
+      xl: '0'
     },
     shadows: {
-      sm: '4px 4px 0 rgba(0, 0, 0, 0.2)',
-      md: '8px 8px 0 rgba(0, 0, 0, 0.25)',
-      lg: '12px 12px 0 rgba(0, 0, 0, 0.3)',
-    },
+      sm: 'none',
+      md: '8px 8px 0 currentColor',
+      lg: '12px 12px 0 currentColor'
+    }
   },
 
   gradient: {
     id: 'gradient',
     name: 'Gradient',
-    description: 'Vibrant gradient backgrounds',
     fonts: {
-      heading: "'Outfit', sans-serif",
-      body: "'Inter', sans-serif",
+      heading: "'Inter', sans-serif",
+      body: "'Inter', sans-serif"
     },
     colors: {
       light: {
         bg: '#ffffff',
-        surface: '#f8f9fa',
-        text: '#1a1a1a',
-        textSecondary: '#6c757d',
-        border: '#dee2e6',
-        borderHover: '#adb5bd',
-        accent: '#6366f1',
+        surface: '#fafafa',
+        text: '#1a1a2e',
+        textSecondary: '#6b7280',
+        border: 'rgba(0, 0, 0, 0.05)',
+        borderHover: 'rgba(102, 126, 234, 0.3)',
+        accent: '#667eea'
       },
       dark: {
-        bg: '#0f0f1e',
-        surface: '#1a1a2e',
-        text: '#f0f0f0',
-        textSecondary: '#a0a0a0',
-        border: '#2a2a3e',
-        borderHover: '#3a3a4e',
-        accent: '#818cf8',
-      },
-    },
-    spacing: {
-      xs: '8px',
-      sm: '16px',
-      md: '24px',
-      lg: '32px',
-      xl: '48px',
-      xxl: '64px',
+        bg: '#0a0a1f',
+        surface: '#12122f',
+        text: '#ffffff',
+        textSecondary: '#a0a0c0',
+        border: 'rgba(255, 255, 255, 0.05)',
+        borderHover: 'rgba(102, 126, 234, 0.5)',
+        accent: '#764ba2'
+      }
     },
     typography: {
-      hero: 'clamp(48px, 7vw, 72px)',
-      h1: 'clamp(36px, 5vw, 56px)',
-      h2: 'clamp(28px, 4vw, 40px)',
-      h3: 'clamp(22px, 3vw, 28px)',
-      body: '16px',
-      small: '14px',
+      hero: 'clamp(2.5rem, 8vw, 5.5rem)',
+      h1: 'clamp(2rem, 5vw, 3.5rem)',
+      h2: 'clamp(1.5rem, 4vw, 2.5rem)',
+      h3: '1.375rem',
+      body: '1rem',
+      small: '0.875rem'
+    },
+    spacing: {
+      xs: '0.5rem',
+      sm: '1rem',
+      md: '1.5rem',
+      lg: '2.5rem',
+      xl: '3rem',
+      xxl: '5rem'
     },
     radius: {
-      sm: '6px',
-      md: '12px',
-      lg: '16px',
-      xl: '24px',
+      sm: '12px',
+      md: '16px',
+      lg: '24px',
+      xl: '32px'
     },
     shadows: {
-      sm: '0 2px 8px rgba(99, 102, 241, 0.1)',
-      md: '0 4px 16px rgba(99, 102, 241, 0.15)',
-      lg: '0 8px 32px rgba(99, 102, 241, 0.2)',
+      sm: '0 10px 30px rgba(102, 126, 234, 0.3)',
+      md: '0 15px 40px rgba(102, 126, 234, 0.4)',
+      lg: '0 20px 60px rgba(102, 126, 234, 0.2)'
     },
     gradients: {
-      primary: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-      secondary: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-      accent: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-    },
-  },
-
-  elegant: {
-    id: 'elegant',
-    name: 'Elegant',
-    description: 'Sophisticated and refined',
-    fonts: {
-      heading: "'Playfair Display', serif",
-      body: "'Lato', sans-serif",
-    },
-    colors: {
-      light: {
-        bg: '#fafaf9',
-        surface: '#ffffff',
-        text: '#292524',
-        textSecondary: '#78716c',
-        border: '#e7e5e4',
-        borderHover: '#d6d3d1',
-        accent: '#b45309',
-      },
-      dark: {
-        bg: '#1c1917',
-        surface: '#292524',
-        text: '#fafaf9',
-        textSecondary: '#a8a29e',
-        border: '#44403c',
-        borderHover: '#57534e',
-        accent: '#fbbf24',
-      },
-    },
-    spacing: {
-      xs: '8px',
-      sm: '16px',
-      md: '24px',
-      lg: '32px',
-      xl: '48px',
-      xxl: '64px',
-    },
-    typography: {
-      hero: 'clamp(42px, 6vw, 64px)',
-      h1: 'clamp(32px, 5vw, 48px)',
-      h2: 'clamp(24px, 3.5vw, 36px)',
-      h3: 'clamp(20px, 2.5vw, 28px)',
-      body: '17px',
-      small: '15px',
-    },
-    radius: {
-      sm: '2px',
-      md: '4px',
-      lg: '6px',
-      xl: '8px',
-    },
-    shadows: {
-      sm: '0 1px 2px rgba(0, 0, 0, 0.05)',
-      md: '0 2px 8px rgba(0, 0, 0, 0.08)',
-      lg: '0 4px 16px rgba(0, 0, 0, 0.1)',
-    },
+      primary: 'linear-gradient(135deg, #667eea, #764ba2)',
+      secondary: 'linear-gradient(135deg, #667eea, #764ba2, #f093fb)',
+      accent: 'linear-gradient(135deg, #f093fb, #f5576c)'
+    }
   },
 
   retro: {
     id: 'retro',
     name: 'Retro',
-    description: '80s inspired vaporwave',
     fonts: {
-      heading: "'Orbitron', sans-serif",
-      body: "'Rajdhani', sans-serif",
+      heading: "'Space Mono', 'Courier New', monospace",
+      body: "'Space Mono', monospace"
     },
     colors: {
       light: {
-        bg: '#fef3f8',
-        surface: '#ffffff',
-        text: '#2d1b4e',
-        textSecondary: '#7c5295',
-        border: '#e9c5e0',
-        borderHover: '#d19ac4',
-        accent: '#ff6ec7',
+        bg: '#fff5fd',
+        surface: '#ffe6f9',
+        text: '#1a0033',
+        textSecondary: '#1a0033',
+        border: '#e91e8c',
+        borderHover: '#00d9ff',
+        accent: '#e91e8c'
       },
       dark: {
-        bg: '#120458',
-        surface: '#1e0a78',
-        text: '#e0d9f7',
-        textSecondary: '#b19cd9',
-        border: '#4b2e83',
-        borderHover: '#6b4ea3',
-        accent: '#ff6ec7',
-      },
-    },
-    spacing: {
-      xs: '8px',
-      sm: '16px',
-      md: '24px',
-      lg: '32px',
-      xl: '48px',
-      xxl: '64px',
+        bg: '#0d001a',
+        surface: '#1a0028',
+        text: '#ffffff',
+        textSecondary: '#ffffff',
+        border: '#ff2fb5',
+        borderHover: '#00f5ff',
+        accent: '#ff2fb5'
+      }
     },
     typography: {
-      hero: 'clamp(48px, 7vw, 80px)',
-      h1: 'clamp(36px, 5vw, 56px)',
-      h2: 'clamp(28px, 4vw, 40px)',
-      h3: 'clamp(22px, 3vw, 28px)',
-      body: '16px',
-      small: '14px',
+      hero: 'clamp(2.5rem, 10vw, 6rem)',
+      h1: 'clamp(2rem, 6vw, 3.5rem)',
+      h2: 'clamp(1.75rem, 5vw, 2.5rem)',
+      h3: '1.25rem',
+      body: '0.9375rem',
+      small: '0.875rem'
+    },
+    spacing: {
+      xs: '0.75rem',
+      sm: '1rem',
+      md: '1.5rem',
+      lg: '2rem',
+      xl: '4rem',
+      xxl: '6rem'
     },
     radius: {
       sm: '4px',
       md: '8px',
-      lg: '16px',
-      xl: '24px',
+      lg: '12px',
+      xl: '20px'
     },
     shadows: {
-      sm: '0 4px 8px rgba(255, 110, 199, 0.2)',
-      md: '0 8px 16px rgba(255, 110, 199, 0.3)',
-      lg: '0 12px 24px rgba(255, 110, 199, 0.4)',
-      glow: '0 0 20px rgba(255, 110, 199, 0.6)',
+      sm: '0 0 20px rgba(255, 47, 181, 0.3)',
+      md: '0 0 40px rgba(255, 47, 181, 0.4)',
+      lg: '0 10px 40px rgba(255, 47, 181, 0.3)',
+      glow: '0 0 30px currentColor'
     },
     gradients: {
-      vaporwave: 'linear-gradient(135deg, #ff6ec7 0%, #7c5295 50%, #120458 100%)',
-      neon: 'linear-gradient(135deg, #00f2ff 0%, #ff6ec7 100%)',
+      primary: 'linear-gradient(90deg, #ff2fb5, #b537f2)',
+      secondary: 'linear-gradient(90deg, #ff2fb5, #00f5ff)',
+      accent: 'linear-gradient(45deg, #ff2fb5, #00f5ff, #b537f2)'
+    }
+  },
+
+  elegant: {
+    id: 'elegant',
+    name: 'Elegant',
+    fonts: {
+      heading: "'Playfair Display', serif",
+      body: "'Lato', sans-serif"
     },
+    colors: {
+      light: {
+        bg: '#faf9f7',
+        surface: '#ffffff',
+        text: '#2a2a2a',
+        textSecondary: '#6b6b6b',
+        border: '#e8e6e3',
+        borderHover: '#a78b5f',
+        accent: '#a78b5f'
+      },
+      dark: {
+        bg: '#1a1a1a',
+        surface: '#242424',
+        text: '#f5f5f5',
+        textSecondary: '#a0a0a0',
+        border: '#333333',
+        borderHover: '#d4af76',
+        accent: '#d4af76'
+      }
+    },
+    typography: {
+      hero: 'clamp(2.5rem, 7vw, 5rem)',
+      h1: 'clamp(2rem, 5vw, 3rem)',
+      h2: 'clamp(1.5rem, 4vw, 2.25rem)',
+      h3: '1.5rem',
+      body: '1rem',
+      small: '0.9375rem'
+    },
+    spacing: {
+      xs: '0.5rem',
+      sm: '1rem',
+      md: '1.5rem',
+      lg: '2rem',
+      xl: '3rem',
+      xxl: '4rem'
+    },
+    radius: {
+      sm: '2px',
+      md: '4px',
+      lg: '8px',
+      xl: '12px'
+    },
+    shadows: {
+      sm: '0 1px 2px rgba(0, 0, 0, 0.05)',
+      md: '0 2px 4px rgba(0, 0, 0, 0.08)',
+      lg: '0 4px 8px rgba(0, 0, 0, 0.1)'
+    }
   },
 
   glassmorphism: {
     id: 'glassmorphism',
     name: 'Glassmorphism',
-    description: 'Frosted glass and depth',
     fonts: {
-      heading: "'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif",
-      body: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
+      heading: "'Inter', sans-serif",
+      body: "'Inter', sans-serif"
     },
     colors: {
       light: {
-        bg: 'linear-gradient(135deg, #e3f2ff 0%, #ffeef8 100%)',
-        surface: 'rgba(255, 255, 255, 0.7)',
+        bg: '#667eea',
+        surface: 'rgba(255, 255, 255, 0.25)',
         text: '#1e293b',
-        textSecondary: '#64748b',
-        border: 'rgba(255, 255, 255, 0.3)',
-        borderHover: 'rgba(255, 255, 255, 0.5)',
-        accent: '#6366f1',
+        textSecondary: '#475569',
+        border: 'rgba(255, 255, 255, 0.4)',
+        borderHover: 'rgba(255, 255, 255, 0.6)',
+        accent: '#764ba2'
       },
       dark: {
-        bg: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%)',
+        bg: '#0f1729',
         surface: 'rgba(255, 255, 255, 0.05)',
-        text: '#f1f5f9',
-        textSecondary: '#94a3b8',
+        text: '#f8fafc',
+        textSecondary: '#cbd5e1',
         border: 'rgba(255, 255, 255, 0.1)',
         borderHover: 'rgba(255, 255, 255, 0.2)',
-        accent: '#818cf8',
-      },
-    },
-    spacing: {
-      xs: '12px',
-      sm: '20px',
-      md: '40px',
-      lg: '72px',
-      xl: '112px',
-      xxl: '160px',
+        accent: '#667eea'
+      }
     },
     typography: {
-      hero: 'clamp(56px, 8vw, 96px)',
-      h1: 'clamp(44px, 6vw, 72px)',
-      h2: 'clamp(36px, 5vw, 56px)',
-      h3: 'clamp(28px, 4vw, 40px)',
-      body: '18px',
-      small: '15px',
+      hero: 'clamp(2.5rem, 8vw, 6rem)',
+      h1: 'clamp(2rem, 6vw, 4rem)',
+      h2: 'clamp(1.5rem, 4vw, 2.5rem)',
+      h3: '1.5rem',
+      body: '1rem',
+      small: '0.9375rem'
+    },
+    spacing: {
+      xs: '0.5rem',
+      sm: '1rem',
+      md: '1.5rem',
+      lg: '2rem',
+      xl: '3rem',
+      xxl: '5rem'
     },
     radius: {
       sm: '12px',
-      md: '20px',
-      lg: '28px',
-      xl: '40px',
+      md: '16px',
+      lg: '24px',
+      xl: '32px'
     },
     shadows: {
-      sm: '0 4px 6px rgba(0, 0, 0, 0.1)',
-      md: '0 8px 16px rgba(0, 0, 0, 0.12)',
-      lg: '0 16px 32px rgba(0, 0, 0, 0.15)',
-    },
+      sm: '0 8px 32px 0 rgba(31, 38, 135, 0.15)',
+      md: '0 12px 40px 0 rgba(31, 38, 135, 0.2)',
+      lg: '0 20px 60px 0 rgba(31, 38, 135, 0.25)'
+    }
   },
 
   neumorphism: {
     id: 'neumorphism',
     name: 'Neumorphism',
-    description: 'Soft, subtle depth designed with modern minimalism',
     fonts: {
-      heading: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
-      body: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
+      heading: "'Inter', sans-serif",
+      body: "'Inter', sans-serif"
     },
     colors: {
       light: {
-        bg: '#e5e9f0',
-        surface: '#e7ebf2',
-        text: '#2e2e2e',
-        textSecondary: '#676767',
-        border: '#d3d8e0',
-        borderHover: '#c6ccd6',
-        accent: '#6366f1',
+        bg: '#e8ecf2',
+        surface: '#e8ecf2',
+        text: '#2d3142',
+        textSecondary: '#6b7280',
+        border: '#d1d5db',
+        borderHover: '#4c6ef5',
+        accent: '#4c6ef5'
       },
       dark: {
-        bg: '#1d1f25',
-        surface: '#1f2127',
-        text: '#f2f2f2',
-        textSecondary: '#b0b0b0',
-        border: '#2a2d34',
-        borderHover: '#3a3d44',
-        accent: '#818cf8',
-      },
-    },
-    spacing: {
-      xs: '10px',
-      sm: '18px',
-      md: '32px',
-      lg: '64px',
-      xl: '104px',
-      xxl: '144px',
+        bg: '#1e2128',
+        surface: '#1e2128',
+        text: '#f0f0f0',
+        textSecondary: '#a0a0a0',
+        border: '#2a2d35',
+        borderHover: '#6b8afd',
+        accent: '#6b8afd'
+      }
     },
     typography: {
-      hero: 'clamp(52px, 7vw, 80px)',
-      h1: 'clamp(40px, 5.5vw, 64px)',
-      h2: 'clamp(32px, 4.5vw, 48px)',
-      h3: 'clamp(26px, 3.5vw, 35px)',
-      body: '18px',
-      small: '15px',
+      hero: 'clamp(2.5rem, 7vw, 5rem)',
+      h1: 'clamp(2rem, 5vw, 3rem)',
+      h2: 'clamp(1.5rem, 4vw, 2.25rem)',
+      h3: '1.375rem',
+      body: '1rem',
+      small: '0.9375rem'
+    },
+    spacing: {
+      xs: '0.5rem',
+      sm: '1rem',
+      md: '1.5rem',
+      lg: '2rem',
+      xl: '3rem',
+      xxl: '4rem'
     },
     radius: {
       sm: '12px',
-      md: '20px',
-      lg: '28px',
-      xl: '36px',
+      md: '16px',
+      lg: '24px',
+      xl: '32px'
     },
     shadows: {
-      sm: '3px 3px 6px rgba(0, 0, 0, 0.10), -3px -3px 6px rgba(255, 255, 255, 0.65)',
-      md: '6px 6px 12px rgba(0, 0, 0, 0.12), -6px -6px 12px rgba(255, 255, 255, 0.55)',
-      lg: '10px 10px 20px rgba(0, 0, 0, 0.14), -10px -10px 20px rgba(255, 255, 255, 0.50)',
-      inset: 'inset 3px 3px 6px rgba(0, 0, 0, 0.15), inset -3px -3px 6px rgba(255, 255, 255, 0.55)',
-    },
-  },
+      sm: '6px 6px 12px rgba(0, 0, 0, 0.12), -6px -6px 12px rgba(255, 255, 255, 0.9)',
+      md: '8px 8px 16px rgba(0, 0, 0, 0.15), -8px -8px 16px rgba(255, 255, 255, 0.95)',
+      lg: '10px 10px 20px rgba(0, 0, 0, 0.18), -10px -10px 20px rgba(255, 255, 255, 1)',
+      inset: 'inset 4px 4px 8px rgba(0, 0, 0, 0.12), inset -4px -4px 8px rgba(255, 255, 255, 0.9)'
+    }
+  }
 };
 
 // Get theme by ID
@@ -419,12 +414,9 @@ export function getTheme(themeId) {
 }
 
 // Generate CSS variables for a theme
+// Helper function to generate CSS variables from a theme
 export function generateThemeCSS(theme, colorMode = 'light') {
-  const colors = theme.colors[colorMode];
-  if (!colors) {
-    console.error("Theme missing colors:", theme);
-    return "";
-  }
+  const colors = colorMode === 'dark' ? theme.colors.dark : theme.colors.light;
   
   return `
     :root {
@@ -438,41 +430,152 @@ export function generateThemeCSS(theme, colorMode = 'light') {
       --color-accent: ${colors.accent};
       
       /* Typography */
-      --font-heading: ${theme.fonts?.heading};
-      --font-body: ${theme.fonts?.body};
-      --text-hero: ${theme.typography?.hero};
-      --text-h1: ${theme.typography?.h1};
-      --text-h2: ${theme.typography?.h2};
-      --text-h3: ${theme.typography?.h3};
-      --text-body: ${theme.typography?.body};
-      --text-small: ${theme.typography?.small};
+      --font-heading: ${theme.fonts.heading};
+      --font-body: ${theme.fonts.body};
+      --text-hero: ${theme.typography.hero};
+      --text-h1: ${theme.typography.h1};
+      --text-h2: ${theme.typography.h2};
+      --text-h3: ${theme.typography.h3};
+      --text-body: ${theme.typography.body};
+      --text-small: ${theme.typography.small};
       
       /* Spacing */
-      --space-xs: ${theme.spacing?.xs};
-      --space-sm: ${theme.spacing?.sm};
-      --space-md: ${theme.spacing?.md};
-      --space-lg: ${theme.spacing?.lg};
-      --space-xl: ${theme.spacing?.xl};
-      --space-xxl: ${theme.spacing?.xxl};
+      --space-xs: ${theme.spacing.xs};
+      --space-sm: ${theme.spacing.sm};
+      --space-md: ${theme.spacing.md};
+      --space-lg: ${theme.spacing.lg};
+      --space-xl: ${theme.spacing.xl};
+      --space-xxl: ${theme.spacing.xxl};
       
       /* Border Radius */
-      --radius-sm: ${theme.radius?.sm};
-      --radius-md: ${theme.radius?.md};
-      --radius-lg: ${theme.radius?.lg};
-      --radius-xl: ${theme.radius?.xl};
+      --radius-sm: ${theme.radius.sm};
+      --radius-md: ${theme.radius.md};
+      --radius-lg: ${theme.radius.lg};
+      --radius-xl: ${theme.radius.xl};
+      --radius-full: 9999px;
       
       /* Shadows */
-      --shadow-sm: ${theme.shadows?.sm};
-      --shadow-md: ${theme.shadows?.md};
-      --shadow-lg: ${theme.shadows?.lg};
-      ${theme.shadows?.glow ? `--shadow-glow: ${theme.shadows?.glow};` : ''}
-      ${theme.shadows?.inset ? `--shadow-inset: ${theme.shadows?.inset};` : ''}
+      --shadow-sm: ${theme.shadows.sm};
+      --shadow-md: ${theme.shadows.md};
+      --shadow-lg: ${theme.shadows.lg};
+      ${theme.shadows.glow ? `--shadow-glow: ${theme.shadows.glow};` : ''}
+      ${theme.shadows.inset ? `--shadow-inset: ${theme.shadows.inset};` : ''}
       
       /* Gradients */
       ${theme.gradients ? Object.entries(theme.gradients).map(([key, value]) => 
         `--gradient-${key}: ${value};`
       ).join('\n      ') : ''}
     }
+    
+    /* Dark mode */
+    [data-theme="dark"] {
+      --color-bg: ${theme.colors.dark.bg};
+      --color-surface: ${theme.colors.dark.surface};
+      --color-text: ${theme.colors.dark.text};
+      --color-text-secondary: ${theme.colors.dark.textSecondary};
+      --color-border: ${theme.colors.dark.border};
+      --color-border-hover: ${theme.colors.dark.borderHover};
+      --color-accent: ${theme.colors.dark.accent};
+    }
+    
+    /* Base Styles */
+    body {
+      font-family: var(--font-body);
+      background: var(--color-bg);
+      color: var(--color-text);
+      font-size: var(--text-body);
+      line-height: 1.6;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+    
+    h1, h2, h3 {
+      font-family: var(--font-heading);
+      line-height: 1.2;
+      font-weight: 700;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 var(--space-md);
+    }
+    
+    @media (max-width: 768px) {
+      .container { padding: 0 var(--space-sm); }
+    }
+    
+    /* Animation Keyframes */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    @keyframes slideUp {
+      from { 
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to { 
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    @keyframes scale {
+      from { transform: scale(0.95); }
+      to { transform: scale(1); }
+    }
+    
+    ${theme.id === 'retro' ? `
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.8; }
+    }
+    
+    @keyframes neon {
+      from { text-shadow: 0 0 10px rgba(255, 0, 255, 0.8); }
+      to { text-shadow: 0 0 20px rgba(0, 255, 255, 0.8); }
+    }
+    
+    @keyframes glitch1 {
+      0%, 100% { transform: translate(0); }
+      20% { transform: translate(-2px, 2px); }
+      40% { transform: translate(-2px, -2px); }
+      60% { transform: translate(2px, 2px); }
+      80% { transform: translate(2px, -2px); }
+    }
+    
+    @keyframes glitch2 {
+      0%, 100% { transform: translate(0); }
+      20% { transform: translate(2px, -2px); }
+      40% { transform: translate(2px, 2px); }
+      60% { transform: translate(-2px, -2px); }
+      80% { transform: translate(-2px, 2px); }
+    }
+    ` : ''}
+    
+    ${theme.id === 'gradient' ? `
+    @keyframes gradient {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    ` : ''}
+    
+    ${theme.id === 'brutalist' ? `
+    @keyframes glitch {
+      0% { transform: translate(0); }
+      20% { transform: translate(-2px, 2px); }
+      40% { transform: translate(-2px, -2px); }
+      60% { transform: translate(2px, 2px); }
+      80% { transform: translate(2px, -2px); }
+      100% { transform: translate(0); }
+    }
+    ` : ''}
   `;
 }
 

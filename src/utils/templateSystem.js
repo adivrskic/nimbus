@@ -133,10 +133,10 @@ class Template {
       document.documentElement.setAttribute('data-theme', theme);
       localStorage.setItem('theme', theme);
       
-      // Update all theme toggle icons
-      const icons = document.querySelectorAll('.theme-icon');
-      icons.forEach(icon => {
-        icon.textContent = theme === 'dark' ? '☀️' : '🌙';
+      // Update all theme toggle switches
+      const switches = document.querySelectorAll('.theme-toggle-switch');
+      switches.forEach(switchEl => {
+        switchEl.checked = theme === 'dark';
       });
     }
     
@@ -171,6 +171,7 @@ class Template {
     }).join('\n  ');
   }
 
+  // Update the getThemeSpecificCSS method in the Template class
   getThemeSpecificCSS(theme) {
     const base = `
       /* Header Styles */
@@ -241,10 +242,6 @@ class Template {
         opacity: 0.8;
       }
       
-      .theme-toggle-btn:active {
-        transform: translateY(0);
-      }
-      
       .btn {
         display: inline-block;
         padding: var(--space-sm) var(--space-md);
@@ -289,54 +286,242 @@ class Template {
     `;
 
     const themeSpecific = {
-      brutalist: `
+      minimal: `
+        /* Minimal - Clean and simple */
+        body {
+          font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+        h1, h2, h3 {
+          letter-spacing: -0.02em;
+          font-weight: 700;
+        }
         .btn {
-          border: 3px solid var(--color-text);
+          border-radius: 8px;
+        }
+        .card {
+          border-radius: 12px;
+        }
+      `,
+      brutalist: `
+        /* Brutalist - Bold and raw */
+        body {
+          font-family: 'Arial Black', 'Arial Bold', sans-serif;
+        }
+        h1, h2, h3 {
           text-transform: uppercase;
+          letter-spacing: 0.02em;
+          font-weight: 900;
+        }
+        .btn {
+          border: 4px solid var(--color-text);
+          text-transform: uppercase;
+          font-weight: 900;
+          letter-spacing: 0.05em;
+          border-radius: 0;
         }
         .btn:hover {
           transform: translate(-4px, -4px);
-          box-shadow: var(--shadow-md);
+          box-shadow: 8px 8px 0 var(--color-border);
         }
         .card {
-          border: 3px solid var(--color-border);
+          border: 4px solid var(--color-border);
+          border-radius: 0;
         }
         .card:hover {
           transform: translate(-4px, -4px);
           box-shadow: 8px 8px 0 var(--color-border);
         }
+        header {
+          border-bottom: 4px solid var(--color-text);
+        }
       `,
       gradient: `
+        /* Gradient - Smooth transitions */
+        body {
+          font-family: 'Inter', sans-serif;
+          overflow-x: hidden;
+        }
+        h1, h2, h3 {
+          font-weight: 800;
+          letter-spacing: -0.02em;
+        }
+        .gradient-text {
+          background: var(--gradient-primary);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+        }
         .btn {
           background: var(--gradient-primary);
           border: none;
+          border-radius: 999px;
+          box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+        .btn:hover {
+          box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
+        }
+        .btn-outline {
+          background: rgba(255, 255, 255, 0.05);
+          border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+        .card {
+          background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
+          border: 1px solid rgba(255, 255, 255, 0.05);
+          border-radius: 24px;
+        }
+        .card:hover {
+          box-shadow: 0 20px 60px rgba(102, 126, 234, 0.2);
+        }
+        header {
+          backdrop-filter: blur(10px);
         }
       `,
       retro: `
+        /* Retro - 80s vibes */
+        body {
+          font-family: 'Space Mono', 'Courier New', monospace;
+          position: relative;
+        }
+        body::before {
+          content: '';
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background-image: 
+            linear-gradient(rgba(255, 47, 181, 0.03) 2px, transparent 2px),
+            linear-gradient(90deg, rgba(255, 47, 181, 0.03) 2px, transparent 2px);
+          background-size: 50px 50px;
+          pointer-events: none;
+          z-index: 0;
+        }
+        main {
+          position: relative;
+          z-index: 1;
+        }
         h1, h2 {
+          text-transform: uppercase;
+          letter-spacing: 2px;
+          font-weight: 700;
           text-shadow: 3px 3px 0 var(--color-accent);
+        }
+        .btn {
+          text-transform: uppercase;
+          letter-spacing: 1px;
+          border: 2px solid var(--color-accent);
+          border-radius: 999px;
+          box-shadow: 0 0 30px var(--color-accent);
+          font-weight: 700;
+        }
+        .btn:hover {
+          box-shadow: 0 0 50px var(--color-accent);
+        }
+        .card {
+          border: 2px solid var(--color-accent);
+          position: relative;
+          background: rgba(255, 47, 181, 0.05);
+        }
+        .card::before {
+          content: '';
+          position: absolute;
+          top: -2px;
+          left: -2px;
+          right: -2px;
+          bottom: -2px;
+          background: var(--gradient-primary);
+          opacity: 0;
+          transition: opacity 0.3s;
+          z-index: -1;
+        }
+        .card:hover::before {
+          opacity: 0.2;
+        }
+        header {
+          border-bottom: 3px solid var(--color-accent);
         }
       `,
       elegant: `
-        h1, h2 {
-          font-weight: 400;
-          letter-spacing: -0.02em;
+        /* Elegant - Sophisticated serif */
+        body {
+          font-family: 'Lato', sans-serif;
+          font-weight: 300;
+        }
+        h1, h2, h3 {
+          font-family: 'Playfair Display', serif;
+          font-weight: 600;
+          letter-spacing: -0.01em;
+        }
+        .btn {
+          letter-spacing: 0.5px;
+          border: 1px solid var(--color-border);
+        }
+        .btn-primary {
+          background: var(--color-accent);
+          border-color: var(--color-accent);
+        }
+        .card {
+          border: 1px solid var(--color-border);
+        }
+        header {
+          border-bottom: 1px solid var(--color-border);
         }
       `,
       glassmorphism: `
+        /* Glassmorphism - Frosted glass effect */
+        body {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+          background-attachment: fixed;
+        }
+        [data-theme="dark"] body {
+          background: linear-gradient(135deg, #0f1729 0%, #1a0f2e 100%);
+        }
+        .card, .btn, header {
+          background: rgba(255, 255, 255, 0.25);
+          backdrop-filter: blur(20px) saturate(180%);
+          -webkit-backdrop-filter: blur(20px) saturate(180%);
+          border: 1px solid rgba(255, 255, 255, 0.4);
+          box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+        }
+        [data-theme="dark"] .card,
+        [data-theme="dark"] .btn,
+        [data-theme="dark"] header {
+          background: rgba(255, 255, 255, 0.05);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
         .card {
-          background: rgba(255, 255, 255, 0.1);
-          backdrop-filter: blur(10px);
-          -webkit-backdrop-filter: blur(10px);
-          border: 1px solid rgba(255, 255, 255, 0.3);
+          border-radius: 24px;
+        }
+        .btn {
+          border-radius: 16px;
+        }
+        .card:hover {
+          transform: translateY(-8px);
         }
       `,
       neumorphism: `
-        .card {
+        /* Neumorphism - Soft UI with shadows */
+        .card, .btn {
+          background: var(--color-bg);
           box-shadow: var(--shadow-sm);
+          border: none;
         }
-        .card:hover {
+        .card:hover, .btn:hover {
           box-shadow: var(--shadow-inset);
+        }
+        .btn:active {
+          box-shadow: var(--shadow-inset);
+          transform: scale(0.98);
+        }
+        .card {
+          border-radius: 24px;
+        }
+        .btn {
+          border-radius: 16px;
+        }
+        header {
+          border: none;
         }
       `,
     };
@@ -344,10 +529,6 @@ class Template {
     return base + (themeSpecific[theme.id] || '');
   }
 }
-
-// ============================================
-// MVP TEMPLATES
-// ============================================
 
 export const templates = {
   // ============================================
@@ -359,7 +540,7 @@ export const templates = {
     category: 'Landing Page',
     image: '/templates/landing-page.png',
     fields: {
-      companyName: { type: 'text', default: 'ACME', label: 'Company Name', required: true },
+      companyName: { type: 'text', default: 'MINIMAL', label: 'Company Name', required: true },
       headline: { type: 'text', default: 'Less is More', label: 'Headline', required: true },
       subheadline: { 
         type: 'textarea',
@@ -410,52 +591,56 @@ export const templates = {
       testimonialAuthor: { type: 'text', default: 'Sarah Chen', label: 'Testimonial Author' },
       testimonialRole: { type: 'text', default: 'Product Designer', label: 'Author Role' }
     },
-    structure: (data) => `
-      <header style="padding: 1.5rem 0; border-bottom: 1px solid var(--color-border); position: sticky; top: 0; background: var(--color-bg); z-index: 100; backdrop-filter: blur(10px);">
+    structure: (data, theme) => `
+      <!-- Header -->
+      <header style="padding: 1.5rem 0; border-bottom: 1px solid var(--color-border);">
         <div class="container">
           <nav style="display: flex; justify-content: space-between; align-items: center;">
-            <div style="font-weight: 600; font-size: 1.125rem; letter-spacing: -0.02em;">${data.companyName || 'ACME'}</div>
-            <div style="display: flex; align-items: center; gap: 2rem;">
-              <ul style="display: flex; gap: 2rem; list-style: none; align-items: center;">
-                <li><a href="#features" style="color: var(--color-text-secondary); text-decoration: none; font-size: 0.875rem;">Features</a></li>
-                <li><a href="#testimonial" style="color: var(--color-text-secondary); text-decoration: none; font-size: 0.875rem;">Reviews</a></li>
-                <li>
-                  <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle theme">
-                    <span class="theme-icon">Ã°Å¸Å’â„¢</span>
-                  </button>
-                </li>
-              </ul>
-            </div>
+            <div style="font-weight: 600; font-size: 1.125rem; letter-spacing: -0.02em;">${data.companyName || 'MINIMAL'}</div>
+            <ul style="display: flex; gap: 2rem; list-style: none; align-items: center;">
+              <li><a href="#features" style="color: var(--color-text-secondary); text-decoration: none; font-size: 0.875rem; transition: color 0.2s;" onmouseover="this.style.color='var(--color-text)'" onmouseout="this.style.color='var(--color-text-secondary)'">Features</a></li>
+              <li><a href="#testimonial" style="color: var(--color-text-secondary); text-decoration: none; font-size: 0.875rem; transition: color 0.2s;" onmouseover="this.style.color='var(--color-text)'" onmouseout="this.style.color='var(--color-text-secondary)'">Reviews</a></li>
+              <li>
+                <label class="theme-toggle-switch-wrapper" style="cursor: pointer;">
+                  <input type="checkbox" class="theme-toggle-switch" onclick="toggleTheme()" aria-label="Toggle theme">
+                  <span class="theme-toggle-slider"></span>
+                </label>
+              </li>
+            </ul>
           </nav>
         </div>
       </header>
 
       <main>
         <!-- Hero -->
-        <section class="hero" style="padding: 8rem 0 6rem; text-align: center; position: relative;">
+        <section style="padding: 8rem 0 6rem; text-align: center;">
           <div class="container">
             <h1 style="font-size: clamp(2.5rem, 7vw, 5rem); font-weight: 700; line-height: 1.1; letter-spacing: -0.03em; margin-bottom: 1.5rem;">
-              ${data.headline || 'Your Headline'}
+              ${data.headline || 'Less is More'}
             </h1>
             <p style="font-size: 1.125rem; color: var(--color-text-secondary); max-width: 600px; margin: 0 auto 3rem; line-height: 1.8;">
-              ${data.subheadline || ''}
+              ${data.subheadline || 'Clean design, thoughtful whitespace, and perfect typography.'}
             </p>
-            <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
-              ${data.ctaPrimary ? `<a href="#" class="btn">${data.ctaPrimary}</a>` : ''}
-              ${data.ctaSecondary ? `<a href="#" class="btn btn-outline">${data.ctaSecondary}</a>` : ''}
+            <div class="cta-group" style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+              ${data.ctaPrimary ? `<a href="#" class="btn btn-primary" style="padding: 1rem 2rem; border-radius: 8px; text-decoration: none; font-weight: 500; transition: all 0.2s; display: inline-block; background: var(--color-accent); color: white;" onmouseover="this.style.transform='translateY(-2px)'; this.style.opacity='0.9'" onmouseout="this.style.transform='translateY(0)'; this.style.opacity='1'">${data.ctaPrimary}</a>` : ''}
+              ${data.ctaSecondary ? `<a href="#" class="btn btn-secondary" style="padding: 1rem 2rem; border-radius: 8px; text-decoration: none; font-weight: 500; transition: all 0.2s; display: inline-block; border: 1px solid var(--color-border); color: var(--color-text);" onmouseover="this.style.background='var(--color-surface)'" onmouseout="this.style.background='transparent'">${data.ctaSecondary}</a>` : ''}
             </div>
           </div>
         </section>
 
         <!-- Stats -->
         ${data.stats && data.stats.length > 0 ? `
-        <section style="padding: 4rem 0; background: var(--color-surface); border-top: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border);">
+        <section class="stats" style="padding: 4rem 0; background: var(--color-surface); border-top: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border);">
           <div class="container">
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 3rem; text-align: center;">
+            <div class="stats-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 3rem; text-align: center;">
               ${data.stats.map(stat => `
-                <div>
-                  <h3 style="font-size: 2.5rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--color-accent);">${stat.number}</h3>
-                  <p style="color: var(--color-text-secondary); font-size: 0.875rem;">${stat.label}</p>
+                <div class="stat">
+                  <h3 style="font-size: 2.5rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--color-accent);">
+                    ${stat.number}
+                  </h3>
+                  <p style="color: var(--color-text-secondary); font-size: 0.875rem;">
+                    ${stat.label}
+                  </p>
                 </div>
               `).join('')}
             </div>
@@ -464,20 +649,24 @@ export const templates = {
         ` : ''}
 
         <!-- Features -->
-        <section id="features" style="padding: 6rem 0;">
+        <section id="features" class="features" style="padding: 6rem 0;">
           <div class="container">
-            <h2 style="font-size: clamp(2rem, 5vw, 3rem); font-weight: 700; text-align: center; margin-bottom: 1rem; letter-spacing: -0.02em;">
-              ${data.featuresTitle || 'Features'}
+            <h2 class="section-title" style="font-size: clamp(2rem, 5vw, 3rem); font-weight: 700; text-align: center; margin-bottom: 1rem; letter-spacing: -0.02em;">
+              ${data.featuresTitle || 'Built for Simplicity'}
             </h2>
-            <p style="text-align: center; color: var(--color-text-secondary); max-width: 600px; margin: 0 auto 4rem; font-size: 1.125rem;">
-              ${data.featuresSubtitle || ''}
+            <p class="section-desc" style="text-align: center; color: var(--color-text-secondary); max-width: 600px; margin: 0 auto 4rem; font-size: 1.125rem;">
+              ${data.featuresSubtitle || 'Everything you need, nothing you don\'t'}
             </p>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem;">
+            <div class="features-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem;">
               ${data.features && data.features.length > 0 ? data.features.map(feature => `
-                <div class="card">
-                  <div style="width: 48px; height: 48px; background: var(--color-accent); border-radius: var(--radius-md); margin-bottom: 1.5rem; opacity: 0.1;"></div>
-                  <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem;">${feature.title || ''}</h3>
-                  <p style="color: var(--color-text-secondary); line-height: 1.7; font-size: 0.9375rem;">${feature.description || ''}</p>
+                <div class="feature-card" style="padding: 2rem; border-radius: 12px; border: 1px solid var(--color-border); transition: all 0.3s;" onmouseover="this.style.borderColor='var(--color-accent)'; this.style.transform='translateY(-4px)'" onmouseout="this.style.borderColor='var(--color-border)'; this.style.transform='translateY(0)'">
+                  <div class="feature-icon" style="width: 48px; height: 48px; background: var(--color-accent); border-radius: 8px; margin-bottom: 1.5rem; opacity: 0.1;"></div>
+                  <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem;">
+                    ${feature.title || ''}
+                  </h3>
+                  <p style="color: var(--color-text-secondary); line-height: 1.7; font-size: 0.9375rem;">
+                    ${feature.description || ''}
+                  </p>
                 </div>
               `).join('') : ''}
             </div>
@@ -486,16 +675,20 @@ export const templates = {
 
         <!-- Testimonial -->
         ${data.testimonialQuote ? `
-        <section id="testimonial" style="padding: 6rem 0; background: var(--color-surface); text-align: center;">
+        <section id="testimonial" class="testimonial" style="padding: 6rem 0; background: var(--color-surface); text-align: center;">
           <div class="container">
-            <p style="font-size: 1.5rem; line-height: 1.8; max-width: 800px; margin: 0 auto 2rem; font-weight: 500;">
+            <p class="quote" style="font-size: 1.5rem; line-height: 1.8; max-width: 800px; margin: 0 auto 2rem; font-weight: 500; color: var(--color-text);">
               ${data.testimonialQuote}
             </p>
-            <div style="display: flex; align-items: center; justify-content: center; gap: 1rem;">
-              <div style="width: 48px; height: 48px; border-radius: 50%; background: var(--color-accent); opacity: 0.2;"></div>
-              <div style="text-align: left;">
-                <h4 style="font-weight: 600; margin-bottom: 0.25rem;">${data.testimonialAuthor || ''}</h4>
-                <p style="color: var(--color-text-secondary); font-size: 0.875rem;">${data.testimonialRole || ''}</p>
+            <div class="author" style="display: flex; align-items: center; justify-content: center; gap: 1rem;">
+              <div class="avatar" style="width: 48px; height: 48px; border-radius: 50%; background: var(--color-accent); opacity: 0.2;"></div>
+              <div class="author-info">
+                <h4 style="font-weight: 600; margin-bottom: 0.25rem;">
+                  ${data.testimonialAuthor || ''}
+                </h4>
+                <p style="color: var(--color-text-secondary); font-size: 0.875rem;">
+                  ${data.testimonialRole || ''}
+                </p>
               </div>
             </div>
           </div>
@@ -505,9 +698,37 @@ export const templates = {
 
       <footer style="padding: 3rem 0; border-top: 1px solid var(--color-border); text-align: center; color: var(--color-text-secondary); font-size: 0.875rem;">
         <div class="container">
-          <p>Ã‚Â© 2024 ${data.companyName || 'Company'}. All rights reserved.</p>
+          <p>© 2024 ${data.companyName || 'Minimal'}. All rights reserved.</p>
         </div>
       </footer>
+
+      <style>
+        @media (max-width: 768px) {
+          .container { padding: 0 1.5rem !important; }
+          section[style*="padding: 8rem"] { padding: 5rem 0 !important; }
+          section[style*="padding: 6rem"] { padding: 4rem 0 !important; }
+          nav ul { display: none !important; }
+          nav::after { 
+            content: ''; 
+            width: 52px; 
+            height: 28px;
+          }
+          .stats-grid { grid-template-columns: 1fr !important; gap: 2rem !important; }
+          .features-grid { grid-template-columns: 1fr !important; gap: 1.5rem !important; }
+          .quote { font-size: 1.25rem !important; }
+        }
+        @media (max-width: 640px) {
+          .cta-group {
+            flex-direction: column !important;
+            max-width: 300px;
+            margin-left: auto;
+            margin-right: auto;
+          }
+          .cta-group .btn {
+            width: 100%;
+          }
+        }
+      </style>
     `
   }),
 
@@ -644,56 +865,69 @@ export const templates = {
       }
     },
     structure: (data) => `
+      <!-- Header with Theme Toggle -->
+      <header style="padding: 1.5rem 0; position: fixed; top: 0; left: 0; right: 0; background: var(--color-bg); border-bottom: 1px solid var(--color-border); z-index: 1000; backdrop-filter: blur(10px);">
+        <div class="container">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-weight: 600; font-size: 1.125rem; letter-spacing: -0.02em;">${data.name || 'Portfolio'}</div>
+            <label class="theme-toggle-switch-wrapper" style="cursor: pointer;">
+              <input type="checkbox" class="theme-toggle-switch" onclick="toggleTheme()" aria-label="Toggle theme">
+              <span class="theme-toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+      </header>
+
       <!-- Hero Section -->
-      <section style="min-height: 90vh; display: flex; align-items: center; padding: var(--space-xxl) 0; position: relative;">
+      <section class="hero" style="min-height: 100vh; display: flex; align-items: center; padding: 8rem 0 6rem; position: relative;">
         <div class="container" style="max-width: 1000px;">
           <!-- Availability Badge -->
           ${data.availability ? `
-          <div style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-full); margin-bottom: var(--space-lg); font-size: 0.875rem;">
+          <div style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 9999px; margin-bottom: 2rem; font-size: 0.875rem;">
             <span style="width: 8px; height: 8px; background: #10b981; border-radius: 50%; display: inline-block;"></span>
             ${data.availability}
           </div>
           ` : ''}
           
-          <div style="margin-bottom: var(--space-xl);">
-            <h1 style="font-size: clamp(3rem, 8vw, 5.5rem); font-weight: 800; margin-bottom: var(--space-md); letter-spacing: -0.03em; line-height: 1;">
+          <div style="margin-bottom: 3rem;">
+            <h1 style="font-size: clamp(3rem, 8vw, 5.5rem); font-weight: 800; margin-bottom: 1.5rem; letter-spacing: -0.03em; line-height: 1;">
               ${data.name || 'Your Name'}
             </h1>
             ${data.tagline ? `
-            <p style="font-size: clamp(1.5rem, 4vw, 2.25rem); color: var(--color-text-secondary); margin-bottom: var(--space-md); font-weight: 500;">
+            <p style="font-size: clamp(1.5rem, 4vw, 2.25rem); color: var(--color-text-secondary); margin-bottom: 1rem; font-weight: 500;">
               ${data.tagline}
             </p>
             ` : ''}
             ${data.location ? `
-            <p style="font-size: 1rem; color: var(--color-text-secondary); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: 0.5rem;">
-              Ã°Å¸â€œÂ ${data.location}
+            <p style="font-size: 1rem; color: var(--color-text-secondary); margin-bottom: 2rem; display: flex; align-items: center; gap: 0.5rem;">
+              📍 ${data.location}
             </p>
             ` : ''}
             ${data.bio ? `
-            <p style="font-size: 1.25rem; line-height: 1.8; color: var(--color-text-secondary); max-width: 700px; margin-bottom: var(--space-xl);">
+            <p style="font-size: 1.25rem; line-height: 1.8; color: var(--color-text-secondary); max-width: 700px; margin-bottom: 3rem;">
               ${data.bio}
             </p>
             ` : ''}
 
             <!-- CTA Buttons -->
-            <div style="display: flex; gap: var(--space-md); flex-wrap: wrap; margin-bottom: var(--space-xl);">
+            <div class="cta-group" style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 3rem;">
               ${data.contactEmail ? `
-              <a href="mailto:${data.contactEmail}" class="btn" style="font-size: 1rem; padding: 1rem 2rem;">
+              <a href="mailto:${data.contactEmail}" class="btn btn-primary" style="padding: 1rem 2rem; border-radius: 8px; text-decoration: none; font-weight: 500; transition: all 0.2s; display: inline-block; background: var(--color-accent); color: white;" onmouseover="this.style.transform='translateY(-2px)'; this.style.opacity='0.9'" onmouseout="this.style.transform='translateY(0)'; this.style.opacity='1'">
                 Get in Touch
               </a>
               ` : ''}
-              ${data.socialLinks && data.socialLinks.length > 0 ? `
-              <a href="#contact" class="btn btn-outline" style="font-size: 1rem; padding: 1rem 2rem;">
-                View Work
-              </a>
-              ` : ''}
+              ${data.socialLinks && data.socialLinks.length > 0 ? data.socialLinks.slice(0, 1).map(link => `
+                <a href="${link.url}" target="_blank" class="btn btn-secondary" style="padding: 1rem 2rem; border-radius: 8px; text-decoration: none; font-weight: 500; transition: all 0.2s; display: inline-block; border: 1px solid var(--color-border); color: var(--color-text);" onmouseover="this.style.background='var(--color-surface)'" onmouseout="this.style.background='transparent'">
+                  View ${link.platform}
+                </a>
+              `).join('') : ''}
             </div>
 
             <!-- Social Links -->
             ${data.socialLinks && data.socialLinks.length > 0 ? `
-            <div style="display: flex; gap: var(--space-sm); flex-wrap: wrap;">
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
               ${data.socialLinks.map(link => `
-                <a href="${link.url}" target="_blank" class="btn btn-outline" style="font-size: 0.875rem; padding: 0.625rem 1.25rem;">
+                <a href="${link.url}" target="_blank" style="padding: 0.5rem 1rem; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 8px; color: var(--color-text-secondary); text-decoration: none; font-size: 0.875rem; transition: all 0.2s; font-weight: 500;" onmouseover="this.style.borderColor='var(--color-accent)'; this.style.color='var(--color-text)'" onmouseout="this.style.borderColor='var(--color-border)'; this.style.color='var(--color-text-secondary)'">
                   ${link.platform}
                 </a>
               `).join('')}
@@ -701,9 +935,9 @@ export const templates = {
             ` : ''}
           </div>
 
-          <!-- Stats Section -->
+          <!-- Stats -->
           ${data.stats && data.stats.length > 0 ? `
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--space-lg); padding: var(--space-xl) 0; border-top: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border); margin-top: var(--space-xxl);">
+          <div class="stats-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; padding-top: 3rem; border-top: 1px solid var(--color-border);">
             ${data.stats.map(stat => `
               <div style="text-align: center;">
                 <div style="font-size: 2.5rem; font-weight: 800; margin-bottom: 0.5rem; color: var(--color-accent);">${stat.number}</div>
@@ -717,22 +951,22 @@ export const templates = {
 
       <!-- Experience Timeline -->
       ${data.experience && data.experience.length > 0 ? `
-      <section style="padding: var(--space-xxl) 0; background: var(--color-surface);">
+      <section class="experience" style="padding: 6rem 0; background: var(--color-surface);">
         <div class="container" style="max-width: 900px;">
-          <h2 style="font-size: clamp(2rem, 5vw, 3rem); font-weight: 700; margin-bottom: var(--space-xl); letter-spacing: -0.02em;">
+          <h2 style="font-size: clamp(2rem, 5vw, 3rem); font-weight: 700; margin-bottom: 3rem; letter-spacing: -0.02em;">
             Experience
           </h2>
-          <div style="display: flex; flex-direction: column; gap: var(--space-xl); position: relative; padding-left: var(--space-xl);">
+          <div class="timeline" style="display: flex; flex-direction: column; gap: 3rem; position: relative; padding-left: 2rem;">
             <!-- Timeline Line -->
-            <div style="position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: var(--color-border);"></div>
+            <div class="timeline-line" style="position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: var(--color-border);"></div>
             
             ${data.experience.map((job, index) => `
               <div style="position: relative;">
                 <!-- Timeline Dot -->
-                <div style="position: absolute; left: calc(-1 * var(--space-xl) - 6px); top: 0.25rem; width: 14px; height: 14px; background: var(--color-accent); border: 3px solid var(--color-bg); border-radius: 50%; z-index: 1;"></div>
+                <div style="position: absolute; left: -2.375rem; top: 0.25rem; width: 14px; height: 14px; background: var(--color-accent); border: 3px solid var(--color-bg); border-radius: 50%; z-index: 1;"></div>
                 
-                <div class="card" style="padding: var(--space-lg);">
-                  <div style="display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: var(--space-sm); margin-bottom: var(--space-sm);">
+                <div class="card" style="padding: 2rem; border-radius: 12px; border: 1px solid var(--color-border); background: var(--color-bg); transition: all 0.3s;" onmouseover="this.style.borderColor='var(--color-accent)'; this.style.transform='translateY(-4px)'" onmouseout="this.style.borderColor='var(--color-border)'; this.style.transform='translateY(0)'">
+                  <div style="display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: 1rem; margin-bottom: 0.75rem;">
                     <div>
                       <h3 style="font-size: 1.375rem; font-weight: 600; margin-bottom: 0.25rem;">
                         ${job.role || 'Position'}
@@ -741,7 +975,7 @@ export const templates = {
                         ${job.company || 'Company'}
                       </p>
                     </div>
-                    <span style="font-size: 0.875rem; color: var(--color-text-secondary); font-weight: 500;">
+                    <span style="font-size: 0.875rem; color: var(--color-text-secondary); font-weight: 500; white-space: nowrap;">
                       ${job.period || ''}
                     </span>
                   </div>
@@ -760,14 +994,14 @@ export const templates = {
 
       <!-- Skills -->
       ${data.skills && data.skills.length > 0 ? `
-      <section style="padding: var(--space-xxl) 0;">
+      <section class="skills" style="padding: 6rem 0;">
         <div class="container" style="max-width: 900px;">
-          <h2 style="font-size: clamp(2rem, 5vw, 3rem); font-weight: 700; margin-bottom: var(--space-xl); letter-spacing: -0.02em;">
+          <h2 style="font-size: clamp(2rem, 5vw, 3rem); font-weight: 700; margin-bottom: 3rem; letter-spacing: -0.02em;">
             Skills & Expertise
           </h2>
-          <div style="display: flex; flex-wrap: wrap; gap: var(--space-sm);">
+          <div style="display: flex; flex-wrap: wrap; gap: 0.75rem;">
             ${data.skills.map(skill => `
-              <span style="padding: var(--space-sm) var(--space-md); background: var(--color-surface); border: 2px solid var(--color-border); border-radius: var(--radius-md); font-weight: 600; font-size: 0.9375rem; transition: all 0.2s;">
+              <span style="padding: 0.75rem 1.25rem; background: var(--color-surface); border: 2px solid var(--color-border); border-radius: 8px; font-weight: 600; font-size: 0.9375rem; transition: all 0.2s;" onmouseover="this.style.borderColor='var(--color-accent)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='var(--color-border)'; this.style.transform='translateY(0)'">
                 ${skill}
               </span>
             `).join('')}
@@ -778,32 +1012,32 @@ export const templates = {
 
       <!-- Projects -->
       ${data.projects && data.projects.length > 0 ? `
-      <section style="padding: var(--space-xxl) 0; background: var(--color-surface);">
+      <section class="projects" style="padding: 6rem 0; background: var(--color-surface);">
         <div class="container" style="max-width: 1100px;">
-          <h2 style="font-size: clamp(2rem, 5vw, 3rem); font-weight: 700; margin-bottom: var(--space-xl); letter-spacing: -0.02em;">
+          <h2 style="font-size: clamp(2rem, 5vw, 3rem); font-weight: 700; margin-bottom: 3rem; letter-spacing: -0.02em;">
             Featured Work
           </h2>
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: var(--space-xl);">
+          <div class="projects-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
             ${data.projects.map(project => `
-              <div class="card" style="padding: var(--space-xl); display: flex; flex-direction: column; height: 100%;">
-                <h3 style="font-size: 1.625rem; font-weight: 700; margin-bottom: var(--space-md); letter-spacing: -0.01em;">
+              <div class="card" style="padding: 2rem; display: flex; flex-direction: column; height: 100%; border-radius: 12px; border: 1px solid var(--color-border); transition: all 0.3s;" onmouseover="this.style.borderColor='var(--color-accent)'; this.style.transform='translateY(-4px)'" onmouseout="this.style.borderColor='var(--color-border)'; this.style.transform='translateY(0)'">
+                <h3 style="font-size: 1.625rem; font-weight: 700; margin-bottom: 1rem; letter-spacing: -0.01em;">
                   ${project.title || 'Project'}
                 </h3>
-                <p style="color: var(--color-text-secondary); line-height: 1.8; margin-bottom: var(--space-md); font-size: 1rem; flex-grow: 1;">
+                <p style="color: var(--color-text-secondary); line-height: 1.8; margin-bottom: 1.5rem; font-size: 1rem; flex-grow: 1;">
                   ${project.description || ''}
                 </p>
                 ${project.tags ? `
-                <div style="display: flex; flex-wrap: wrap; gap: var(--space-xs); margin-bottom: var(--space-md);">
+                <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.5rem;">
                   ${project.tags.split(',').map(tag => `
-                    <span style="padding: 0.375rem 0.75rem; background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--radius-sm); font-size: 0.75rem; color: var(--color-text-secondary); font-weight: 600;">
+                    <span style="padding: 0.375rem 0.75rem; background: var(--color-bg); border: 1px solid var(--color-border); border-radius: 6px; font-size: 0.75rem; color: var(--color-text-secondary); font-weight: 600;">
                       ${tag.trim()}
                     </span>
                   `).join('')}
                 </div>
                 ` : ''}
                 ${project.link ? `
-                <a href="${project.link}" target="_blank" class="btn btn-outline" style="align-self: flex-start;">
-                  View Project Ã¢â€ â€™
+                <a href="${project.link}" target="_blank" style="align-self: flex-start; padding: 0.75rem 1.5rem; border-radius: 8px; text-decoration: none; font-weight: 500; transition: all 0.2s; border: 1px solid var(--color-border); color: var(--color-text); font-size: 0.875rem;" onmouseover="this.style.background='var(--color-surface)'" onmouseout="this.style.background='transparent'">
+                  View Project →
                 </a>
                 ` : ''}
               </div>
@@ -815,18 +1049,18 @@ export const templates = {
 
       <!-- Testimonials -->
       ${data.testimonials && data.testimonials.length > 0 ? `
-      <section style="padding: var(--space-xxl) 0;">
+      <section class="testimonials" style="padding: 6rem 0;">
         <div class="container" style="max-width: 1100px;">
-          <h2 style="font-size: clamp(2rem, 5vw, 3rem); font-weight: 700; margin-bottom: var(--space-xl); letter-spacing: -0.02em; text-align: center;">
+          <h2 style="font-size: clamp(2rem, 5vw, 3rem); font-weight: 700; margin-bottom: 3rem; letter-spacing: -0.02em; text-align: center;">
             What People Say
           </h2>
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: var(--space-lg);">
+          <div class="testimonials-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
             ${data.testimonials.map(testimonial => `
-              <div class="card" style="padding: var(--space-xl);">
-                <p style="font-size: 1.125rem; line-height: 1.8; margin-bottom: var(--space-lg); font-style: italic; color: var(--color-text);">
+              <div class="card" style="padding: 2rem; border-radius: 12px; border: 1px solid var(--color-border); transition: all 0.3s;" onmouseover="this.style.borderColor='var(--color-accent)'; this.style.transform='translateY(-4px)'" onmouseout="this.style.borderColor='var(--color-border)'; this.style.transform='translateY(0)'">
+                <p style="font-size: 1.125rem; line-height: 1.8; margin-bottom: 2rem; font-style: italic; color: var(--color-text);">
                   "${testimonial.quote || ''}"
                 </p>
-                <div style="display: flex; align-items: center; gap: var(--space-md); padding-top: var(--space-md); border-top: 1px solid var(--color-border);">
+                <div style="display: flex; align-items: center; gap: 1rem; padding-top: 1.5rem; border-top: 1px solid var(--color-border);">
                   <div style="width: 48px; height: 48px; border-radius: 50%; background: var(--color-accent); opacity: 0.2;"></div>
                   <div>
                     <h4 style="font-weight: 600; margin-bottom: 0.25rem; font-size: 0.9375rem;">${testimonial.author || ''}</h4>
@@ -841,16 +1075,16 @@ export const templates = {
       ` : ''}
 
       <!-- Contact CTA -->
-      <section id="contact" style="padding: var(--space-xxl) 0; background: var(--color-surface); text-align: center;">
+      <section id="contact" class="contact" style="padding: 8rem 0 6rem; background: var(--color-surface); text-align: center;">
         <div class="container" style="max-width: 700px;">
-          <h2 style="font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 800; margin-bottom: var(--space-lg); letter-spacing: -0.03em;">
+          <h2 style="font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 800; margin-bottom: 1.5rem; letter-spacing: -0.03em;">
             Let's Work Together
           </h2>
-          <p style="font-size: 1.25rem; color: var(--color-text-secondary); margin-bottom: var(--space-xl); line-height: 1.7;">
+          <p style="font-size: 1.25rem; color: var(--color-text-secondary); margin-bottom: 3rem; line-height: 1.7;">
             Have a project in mind? Let's create something amazing together.
           </p>
           ${data.contactEmail ? `
-          <a href="mailto:${data.contactEmail}" class="btn" style="padding: 1.25rem 3rem; font-size: 1.125rem;">
+          <a href="mailto:${data.contactEmail}" class="btn btn-primary" style="padding: 1.25rem 3rem; font-size: 1.125rem; border-radius: 8px; text-decoration: none; font-weight: 500; transition: all 0.2s; display: inline-block; background: var(--color-accent); color: white;" onmouseover="this.style.transform='translateY(-2px)'; this.style.opacity='0.9'" onmouseout="this.style.transform='translateY(0)'; this.style.opacity='1'">
             Get in Touch
           </a>
           ` : ''}
@@ -858,15 +1092,51 @@ export const templates = {
       </section>
 
       <!-- Footer -->
-      <footer style="padding: var(--space-xl) 0; border-top: 1px solid var(--color-border); text-align: center; color: var(--color-text-secondary); font-size: 0.875rem;">
+      <footer style="padding: 3rem 0; border-top: 1px solid var(--color-border); text-align: center; color: var(--color-text-secondary); font-size: 0.875rem;">
         <div class="container">
-          <p>Ã‚Â© 2024 ${data.name || 'Your Name'}. Designed with care.</p>
+          <p>© 2024 ${data.name || 'Your Name'}. Designed with care.</p>
         </div>
       </footer>
+
+      <style>
+        /* Responsive Design */
+        @media (max-width: 768px) {
+          header { position: relative !important; }
+          .container { padding: 0 1.5rem !important; }
+          .hero { padding: 5rem 0 4rem !important; min-height: auto !important; }
+          .stats-grid { grid-template-columns: 1fr !important; gap: 1.5rem !important; }
+          .timeline { padding-left: 1.5rem !important; }
+          .timeline-line { display: none; }
+          .timeline > div > div:first-child { display: none; }
+          .projects-grid { grid-template-columns: 1fr !important; }
+          .testimonials-grid { grid-template-columns: 1fr !important; }
+          section[style*="padding: 6rem"] { padding: 4rem 0 !important; }
+          section[style*="padding: 8rem"] { padding: 5rem 0 !important; }
+        }
+        
+        @media (max-width: 640px) {
+          .cta-group {
+            flex-direction: column !important;
+            width: 100%;
+          }
+          .cta-group a {
+            width: 100%;
+            text-align: center;
+          }
+        }
+        
+        @media (max-width: 480px) {
+          .stats-grid > div {
+            padding: 1rem;
+            background: var(--color-bg);
+            border-radius: 8px;
+          }
+        }
+      </style>
     `
   }),
 
-  // ============================================
+// ============================================
   // TEMPLATE 3: RESTAURANT
   // ============================================
   'restaurant': new Template('restaurant', {
@@ -959,22 +1229,29 @@ export const templates = {
       reservationUrl: { type: 'url', default: '', label: 'Reservation URL (optional)' }
     },
     structure: (data) => `
+      <!-- Header -->
       <header style="padding: 1.5rem 0; border-bottom: 1px solid var(--color-border); position: sticky; top: 0; background: var(--color-bg); z-index: 100; backdrop-filter: blur(10px);">
         <div class="container">
           <nav style="display: flex; justify-content: space-between; align-items: center;">
             <div style="font-weight: 700; font-size: 1.375rem; letter-spacing: -0.02em;">${data.restaurantName || 'Restaurant'}</div>
-            <ul style="display: flex; gap: 2rem; list-style: none;">
-              <li><a href="#menu" style="color: var(--color-text-secondary); text-decoration: none; font-size: 0.9375rem; font-weight: 500;">Menu</a></li>
-              <li><a href="#about" style="color: var(--color-text-secondary); text-decoration: none; font-size: 0.9375rem; font-weight: 500;">About</a></li>
-              <li><a href="#contact" style="color: var(--color-text-secondary); text-decoration: none; font-size: 0.9375rem; font-weight: 500;">Contact</a></li>
-            </ul>
+            <div style="display: flex; align-items: center; gap: 2rem;">
+              <ul class="nav-links" style="display: flex; gap: 2rem; list-style: none; margin: 0;">
+                <li><a href="#menu" style="color: var(--color-text-secondary); text-decoration: none; font-size: 0.9375rem; font-weight: 500; transition: color 0.2s;" onmouseover="this.style.color='var(--color-text)'" onmouseout="this.style.color='var(--color-text-secondary)'">Menu</a></li>
+                <li><a href="#about" style="color: var(--color-text-secondary); text-decoration: none; font-size: 0.9375rem; font-weight: 500; transition: color 0.2s;" onmouseover="this.style.color='var(--color-text)'" onmouseout="this.style.color='var(--color-text-secondary)'">About</a></li>
+                <li><a href="#contact" style="color: var(--color-text-secondary); text-decoration: none; font-size: 0.9375rem; font-weight: 500; transition: color 0.2s;" onmouseover="this.style.color='var(--color-text)'" onmouseout="this.style.color='var(--color-text-secondary)'">Contact</a></li>
+              </ul>
+              <label class="theme-toggle-switch-wrapper" style="cursor: pointer;">
+                <input type="checkbox" class="theme-toggle-switch" onclick="toggleTheme()" aria-label="Toggle theme">
+                <span class="theme-toggle-slider"></span>
+              </label>
+            </div>
           </nav>
         </div>
       </header>
 
       <main>
         <!-- Hero -->
-        <section style="padding: 8rem 0 6rem; text-align: center; background: var(--color-surface); border-bottom: 1px solid var(--color-border);">
+        <section class="hero" style="padding: 8rem 0 6rem; text-align: center; background: var(--color-surface); border-bottom: 1px solid var(--color-border);">
           <div class="container" style="max-width: 900px;">
             <h1 style="font-size: clamp(3rem, 8vw, 5.5rem); font-weight: 800; line-height: 1; letter-spacing: -0.03em; margin-bottom: 1.5rem;">
               ${data.restaurantName || 'Restaurant'}
@@ -989,18 +1266,18 @@ export const templates = {
               ${data.description}
             </p>
             ` : ''}
-            <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+            <div class="cta-group" style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
               ${data.reservationUrl ? `
-              <a href="${data.reservationUrl}" target="_blank" class="btn" style="padding: 1rem 2.5rem; font-size: 1rem;">Reserve a Table</a>
+              <a href="${data.reservationUrl}" target="_blank" class="btn btn-primary" style="padding: 1rem 2.5rem; font-size: 1rem; border-radius: 8px; text-decoration: none; font-weight: 500; transition: all 0.2s; display: inline-block; background: var(--color-accent); color: white;" onmouseover="this.style.transform='translateY(-2px)'; this.style.opacity='0.9'" onmouseout="this.style.transform='translateY(0)'; this.style.opacity='1'">Reserve a Table</a>
               ` : ''}
-              <a href="#menu" class="btn btn-outline" style="padding: 1rem 2.5rem; font-size: 1rem;">View Menu</a>
+              <a href="#menu" class="btn btn-secondary" style="padding: 1rem 2.5rem; font-size: 1rem; border-radius: 8px; text-decoration: none; font-weight: 500; transition: all 0.2s; display: inline-block; border: 1px solid var(--color-border); color: var(--color-text);" onmouseover="this.style.background='var(--color-surface)'" onmouseout="this.style.background='transparent'">View Menu</a>
             </div>
           </div>
         </section>
 
         <!-- Chef's Specialties -->
         ${data.specialties && data.specialties.length > 0 ? `
-        <section style="padding: 6rem 0; background: var(--color-bg);">
+        <section class="specialties" style="padding: 6rem 0; background: var(--color-bg);">
           <div class="container" style="max-width: 1100px;">
             <h2 style="font-size: clamp(2.5rem, 6vw, 3.5rem); font-weight: 700; text-align: center; margin-bottom: 1rem; letter-spacing: -0.02em;">
               Chef's Specialties
@@ -1008,9 +1285,9 @@ export const templates = {
             <p style="text-align: center; color: var(--color-text-secondary); max-width: 600px; margin: 0 auto 4rem; font-size: 1.125rem;">
               Our signature dishes, crafted with passion
             </p>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem;">
+            <div class="specialties-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem;">
               ${data.specialties.map(dish => `
-                <div class="card" style="padding: var(--space-xl); text-align: center;">
+                <div class="card" style="padding: 2rem; text-align: center; border-radius: 12px; border: 1px solid var(--color-border); transition: all 0.3s;" onmouseover="this.style.borderColor='var(--color-accent)'; this.style.transform='translateY(-4px)'" onmouseout="this.style.borderColor='var(--color-border)'; this.style.transform='translateY(0)'">
                   <div style="width: 80px; height: 80px; background: var(--color-accent); border-radius: 50%; margin: 0 auto 1.5rem; opacity: 0.1;"></div>
                   <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem;">${dish.name || ''}</h3>
                   <p style="color: var(--color-text-secondary); line-height: 1.7; margin-bottom: 1.5rem; font-size: 1rem;">
@@ -1025,19 +1302,19 @@ export const templates = {
         ` : ''}
 
         <!-- Menu -->
-        <section id="menu" style="padding: 6rem 0; background: var(--color-surface);">
+        <section id="menu" class="menu" style="padding: 6rem 0; background: var(--color-surface);">
           <div class="container" style="max-width: 1000px;">
             <h2 style="font-size: clamp(2.5rem, 6vw, 3.5rem); font-weight: 700; text-align: center; margin-bottom: 4rem; letter-spacing: -0.02em;">
               Our Menu
             </h2>
             ${data.menuCategories && data.menuCategories.length > 0 ? data.menuCategories.map(category => `
-              <div style="margin-bottom: 5rem;">
+              <div class="menu-category" style="margin-bottom: 5rem;">
                 <h3 style="font-size: 2rem; font-weight: 700; margin-bottom: 2.5rem; padding-bottom: 1rem; border-bottom: 2px solid var(--color-border); letter-spacing: -0.01em;">
                   ${category.category || 'Category'}
                 </h3>
                 <div style="display: grid; gap: 2rem;">
                   ${category.items && category.items.length > 0 ? category.items.map(item => `
-                    <div style="display: flex; justify-content: space-between; align-items: start; gap: 2rem; padding-bottom: 2rem; border-bottom: 1px solid var(--color-border);">
+                    <div class="menu-item" style="display: flex; justify-content: space-between; align-items: start; gap: 2rem; padding-bottom: 2rem; border-bottom: 1px solid var(--color-border);">
                       <div style="flex: 1;">
                         <h4 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">${item.name || ''}</h4>
                         <p style="color: var(--color-text-secondary); line-height: 1.7; font-size: 0.9375rem;">
@@ -1056,16 +1333,16 @@ export const templates = {
         </section>
 
         <!-- About & Hours -->
-        <section id="about" style="padding: 6rem 0;">
+        <section id="about" class="about" style="padding: 6rem 0;">
           <div class="container" style="max-width: 1000px;">
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 3rem;">
+            <div class="info-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 3rem;">
               <!-- Hours -->
               ${data.hours && data.hours.length > 0 ? `
-              <div class="card" style="padding: var(--space-xl);">
-                <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: var(--space-lg);">Hours</h3>
-                <div style="display: grid; gap: var(--space-sm);">
+              <div class="card" style="padding: 2rem; border-radius: 12px; border: 1px solid var(--color-border);">
+                <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 2rem;">Hours</h3>
+                <div style="display: grid; gap: 0.75rem;">
                   ${data.hours.map(day => `
-                    <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-sm) 0;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0;">
                       <span style="font-weight: 600;">${day.day || ''}</span>
                       <span style="color: var(--color-text-secondary);">${day.hours || ''}</span>
                     </div>
@@ -1075,9 +1352,9 @@ export const templates = {
               ` : ''}
 
               <!-- Contact -->
-              <div class="card" id="contact" style="padding: var(--space-xl);">
-                <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: var(--space-lg);">Visit Us</h3>
-                <div style="display: grid; gap: var(--space-md); font-size: 0.9375rem;">
+              <div class="card" id="contact" style="padding: 2rem; border-radius: 12px; border: 1px solid var(--color-border);">
+                <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 2rem;">Visit Us</h3>
+                <div style="display: grid; gap: 1.5rem; font-size: 0.9375rem;">
                   ${data.address ? `
                   <div>
                     <div style="font-weight: 600; margin-bottom: 0.25rem; color: var(--color-text-secondary); font-size: 0.875rem;">Address</div>
@@ -1087,13 +1364,13 @@ export const templates = {
                   ${data.phone ? `
                   <div>
                     <div style="font-weight: 600; margin-bottom: 0.25rem; color: var(--color-text-secondary); font-size: 0.875rem;">Phone</div>
-                    <a href="tel:${data.phone}" style="color: var(--color-text); text-decoration: none;">${data.phone}</a>
+                    <a href="tel:${data.phone}" style="color: var(--color-text); text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">${data.phone}</a>
                   </div>
                   ` : ''}
                   ${data.email ? `
                   <div>
                     <div style="font-weight: 600; margin-bottom: 0.25rem; color: var(--color-text-secondary); font-size: 0.875rem;">Email</div>
-                    <a href="mailto:${data.email}" style="color: var(--color-text); text-decoration: none;">${data.email}</a>
+                    <a href="mailto:${data.email}" style="color: var(--color-text); text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">${data.email}</a>
                   </div>
                   ` : ''}
                 </div>
@@ -1103,20 +1380,20 @@ export const templates = {
         </section>
 
         <!-- Reservation CTA -->
-        <section style="padding: 6rem 0; background: var(--color-surface); text-align: center; border-top: 1px solid var(--color-border);">
+        <section class="cta" style="padding: 8rem 0 6rem; background: var(--color-surface); text-align: center; border-top: 1px solid var(--color-border);">
           <div class="container" style="max-width: 700px;">
             <h2 style="font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 800; margin-bottom: 1.5rem; letter-spacing: -0.03em;">
               Ready to Dine?
             </h2>
             <p style="font-size: 1.25rem; color: var(--color-text-secondary); margin-bottom: 2.5rem; line-height: 1.7;">
-              Reserve your table today and experience authentic Italian cuisine
+              Reserve your table today and experience authentic cuisine
             </p>
             ${data.reservationUrl ? `
-            <a href="${data.reservationUrl}" target="_blank" class="btn" style="padding: 1.25rem 3rem; font-size: 1.125rem;">
+            <a href="${data.reservationUrl}" target="_blank" class="btn btn-primary" style="padding: 1.25rem 3rem; font-size: 1.125rem; border-radius: 8px; text-decoration: none; font-weight: 500; transition: all 0.2s; display: inline-block; background: var(--color-accent); color: white;" onmouseover="this.style.transform='translateY(-2px)'; this.style.opacity='0.9'" onmouseout="this.style.transform='translateY(0)'; this.style.opacity='1'">
               Make a Reservation
             </a>
             ` : data.phone ? `
-            <a href="tel:${data.phone}" class="btn" style="padding: 1.25rem 3rem; font-size: 1.125rem;">
+            <a href="tel:${data.phone}" class="btn btn-primary" style="padding: 1.25rem 3rem; font-size: 1.125rem; border-radius: 8px; text-decoration: none; font-weight: 500; transition: all 0.2s; display: inline-block; background: var(--color-accent); color: white;" onmouseover="this.style.transform='translateY(-2px)'; this.style.opacity='0.9'" onmouseout="this.style.transform='translateY(0)'; this.style.opacity='1'">
               Call to Reserve
             </a>
             ` : ''}
@@ -1126,18 +1403,55 @@ export const templates = {
 
       <footer style="padding: 3rem 0; border-top: 1px solid var(--color-border); text-align: center; color: var(--color-text-secondary); font-size: 0.875rem;">
         <div class="container">
-          <p>Ã‚Â© 2024 ${data.restaurantName || 'Restaurant'}. All rights reserved.</p>
+          <p>© 2024 ${data.restaurantName || 'Restaurant'}. All rights reserved.</p>
         </div>
       </footer>
+
+      <style>
+        /* Responsive Design */
+        @media (max-width: 768px) {
+          .container { padding: 0 1.5rem !important; }
+          .nav-links { display: none !important; }
+          .hero { padding: 5rem 0 4rem !important; }
+          .specialties { padding: 4rem 0 !important; }
+          .specialties-grid { grid-template-columns: 1fr !important; }
+          .menu { padding: 4rem 0 !important; }
+          .menu-category { margin-bottom: 3rem !important; }
+          .menu-item { flex-direction: column !important; align-items: start !important; gap: 0.5rem !important; }
+          .info-grid { grid-template-columns: 1fr !important; gap: 2rem !important; }
+          .about { padding: 4rem 0 !important; }
+          .cta { padding: 5rem 0 4rem !important; }
+        }
+        
+        @media (max-width: 640px) {
+          .cta-group {
+            flex-direction: column !important;
+            max-width: 300px;
+            margin-left: auto;
+            margin-right: auto;
+          }
+          .cta-group a {
+            width: 100%;
+            text-align: center;
+          }
+        }
+        
+        @media (max-width: 480px) {
+          .menu-item > div:last-child {
+            align-self: start;
+          }
+        }
+      </style>
     `
   }),
 
-  // ============================================
+// ============================================
   // TEMPLATE 4: DIGITAL BUSINESS CARD
   // ============================================
   'digital-card': new Template('digital-card', {
     name: 'Digital Business Card',
     description: 'Modern digital business card with QR code and instant contact sharing',
+    image: '/templates/digital-card.png',
     category: 'Personal',
     fields: {
       name: { type: 'text', default: 'Alex Morgan', label: 'Full Name', required: true },
@@ -1183,18 +1497,29 @@ export const templates = {
       }
     },
     structure: (data) => `
+      <!-- Header with Theme Toggle -->
+      <header style="padding: 1.5rem 0; border-bottom: 1px solid var(--color-border);">
+        <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
+          <div style="font-weight: 600; font-size: 1.125rem;">Digital Card</div>
+          <label class="theme-toggle-switch-wrapper" style="cursor: pointer;">
+            <input type="checkbox" class="theme-toggle-switch" onclick="toggleTheme()" aria-label="Toggle theme">
+            <span class="theme-toggle-slider"></span>
+          </label>
+        </div>
+      </header>
+
       <!-- Card Container -->
-      <div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: var(--space-lg); background: var(--color-bg);">
+      <div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem; background: var(--color-bg);">
         <div style="max-width: 500px; width: 100%;">
           <!-- Main Card -->
-          <div class="card" style="padding: var(--space-xxl); text-align: center; position: relative; overflow: hidden;">
+          <div class="card" style="padding: 3rem; text-align: center; position: relative; overflow: hidden; border-radius: 16px; border: 1px solid var(--color-border);">
             <!-- Decorative Background -->
             <div style="position: absolute; top: 0; left: 0; right: 0; height: 120px; background: var(--color-surface); opacity: 0.5; z-index: 0;"></div>
             
             <!-- Profile Section -->
-            <div style="position: relative; z-index: 1; margin-bottom: var(--space-xl);">
+            <div style="position: relative; z-index: 1; margin-bottom: 2rem;">
               <!-- Avatar Placeholder -->
-              <div style="width: 120px; height: 120px; margin: 0 auto var(--space-lg); background: var(--color-accent); border-radius: 50%; border: 4px solid var(--color-bg); opacity: 0.2;"></div>
+              <div style="width: 120px; height: 120px; margin: 0 auto 2rem; background: var(--color-accent); border-radius: 50%; border: 4px solid var(--color-bg); opacity: 0.2;"></div>
               
               <h1 style="font-size: 2rem; font-weight: 800; margin-bottom: 0.5rem; letter-spacing: -0.02em;">
                 ${data.name || 'Your Name'}
@@ -1207,27 +1532,27 @@ export const templates = {
               ` : ''}
               
               ${data.company ? `
-              <p style="font-size: 1rem; color: var(--color-text-secondary); margin-bottom: var(--space-md);">
+              <p style="font-size: 1rem; color: var(--color-text-secondary); margin-bottom: 1rem;">
                 ${data.company}
               </p>
               ` : ''}
               
               ${data.tagline ? `
-              <p style="font-size: 0.9375rem; color: var(--color-text-secondary); font-style: italic; margin-bottom: var(--space-lg);">
+              <p style="font-size: 0.9375rem; color: var(--color-text-secondary); font-style: italic; margin-bottom: 2rem;">
                 "${data.tagline}"
               </p>
               ` : ''}
               
               ${data.location ? `
               <p style="font-size: 0.875rem; color: var(--color-text-secondary); display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
-                Ã°Å¸â€œÂ ${data.location}
+                📍 ${data.location}
               </p>
               ` : ''}
             </div>
 
             <!-- Bio -->
             ${data.bio ? `
-            <div style="padding: var(--space-lg) 0; border-top: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border); margin-bottom: var(--space-lg);">
+            <div style="padding: 2rem 0; border-top: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border); margin-bottom: 2rem;">
               <p style="font-size: 0.9375rem; line-height: 1.7; color: var(--color-text-secondary);">
                 ${data.bio}
               </p>
@@ -1235,24 +1560,24 @@ export const templates = {
             ` : ''}
 
             <!-- Contact Info -->
-            <div style="display: grid; gap: var(--space-sm); margin-bottom: var(--space-lg); text-align: left;">
+            <div style="display: grid; gap: 0.75rem; margin-bottom: 2rem; text-align: left;">
               ${data.email ? `
-              <a href="mailto:${data.email}" style="display: flex; align-items: center; gap: 0.75rem; padding: var(--space-sm); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); text-decoration: none; color: var(--color-text); transition: all 0.2s;">
-                <span style="font-size: 1.25rem;">Ã¢Å“â€°Ã¯Â¸Â</span>
+              <a href="mailto:${data.email}" style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 8px; text-decoration: none; color: var(--color-text); transition: all 0.2s;" onmouseover="this.style.borderColor='var(--color-accent)'" onmouseout="this.style.borderColor='var(--color-border)'">
+                <span style="font-size: 1.25rem;">✉️</span>
                 <span style="font-size: 0.875rem; font-weight: 500;">${data.email}</span>
               </a>
               ` : ''}
               
               ${data.phone ? `
-              <a href="tel:${data.phone.replace(/\s/g, '')}" style="display: flex; align-items: center; gap: 0.75rem; padding: var(--space-sm); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); text-decoration: none; color: var(--color-text); transition: all 0.2s;">
-                <span style="font-size: 1.25rem;">Ã°Å¸â€œÅ¾</span>
+              <a href="tel:${data.phone.replace(/\s/g, '')}" style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 8px; text-decoration: none; color: var(--color-text); transition: all 0.2s;" onmouseover="this.style.borderColor='var(--color-accent)'" onmouseout="this.style.borderColor='var(--color-border)'">
+                <span style="font-size: 1.25rem;">📞</span>
                 <span style="font-size: 0.875rem; font-weight: 500;">${data.phone}</span>
               </a>
               ` : ''}
               
               ${data.website ? `
-              <a href="${data.website}" target="_blank" style="display: flex; align-items: center; gap: 0.75rem; padding: var(--space-sm); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); text-decoration: none; color: var(--color-text); transition: all 0.2s;">
-                <span style="font-size: 1.25rem;">Ã°Å¸Å’Â</span>
+              <a href="${data.website}" target="_blank" style="display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 8px; text-decoration: none; color: var(--color-text); transition: all 0.2s;" onmouseover="this.style.borderColor='var(--color-accent)'" onmouseout="this.style.borderColor='var(--color-border)'">
+                <span style="font-size: 1.25rem;">🌐</span>
                 <span style="font-size: 0.875rem; font-weight: 500;">${data.website.replace('https://', '').replace('http://', '')}</span>
               </a>
               ` : ''}
@@ -1260,13 +1585,13 @@ export const templates = {
 
             <!-- Skills -->
             ${data.skills && data.skills.length > 0 ? `
-            <div style="margin-bottom: var(--space-lg);">
-              <h3 style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--color-text-secondary); margin-bottom: var(--space-md);">
+            <div style="margin-bottom: 2rem;">
+              <h3 style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--color-text-secondary); margin-bottom: 1rem;">
                 Expertise
               </h3>
               <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center;">
                 ${data.skills.map(skill => `
-                  <span style="padding: 0.375rem 0.875rem; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-full); font-size: 0.8125rem; font-weight: 600;">
+                  <span style="padding: 0.375rem 0.875rem; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 9999px; font-size: 0.8125rem; font-weight: 600;">
                     ${skill}
                   </span>
                 `).join('')}
@@ -1276,13 +1601,13 @@ export const templates = {
 
             <!-- Social Links -->
             ${data.socialLinks && data.socialLinks.length > 0 ? `
-            <div style="margin-top: var(--space-lg); padding-top: var(--space-lg); border-top: 1px solid var(--color-border);">
-              <h3 style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--color-text-secondary); margin-bottom: var(--space-md);">
+            <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid var(--color-border);">
+              <h3 style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--color-text-secondary); margin-bottom: 1rem;">
                 Connect
               </h3>
               <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center;">
                 ${data.socialLinks.map(link => `
-                  <a href="${link.url}" target="_blank" class="btn btn-outline" style="font-size: 0.8125rem; padding: 0.5rem 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                  <a href="${link.url}" target="_blank" style="font-size: 0.8125rem; padding: 0.5rem 1rem; display: flex; align-items: center; gap: 0.5rem; border-radius: 8px; text-decoration: none; border: 1px solid var(--color-border); color: var(--color-text); transition: all 0.2s;" onmouseover="this.style.background='var(--color-surface)'" onmouseout="this.style.background='transparent'">
                     <span>${link.platform}</span>
                     ${link.username ? `<span style="opacity: 0.6; font-size: 0.75rem;">${link.username}</span>` : ''}
                   </a>
@@ -1292,19 +1617,19 @@ export const templates = {
             ` : ''}
 
             <!-- Save Contact Button -->
-            <div style="margin-top: var(--space-xl);">
-              <button onclick="saveContact()" class="btn" style="width: 100%; padding: var(--space-md); font-size: 1rem; cursor: pointer;">
-                Ã°Å¸â€™Â¾ Save Contact
+            <div style="margin-top: 2rem;">
+              <button onclick="saveContact()" style="width: 100%; padding: 1rem; font-size: 1rem; cursor: pointer; background: var(--color-accent); color: white; border: none; border-radius: 8px; font-weight: 500; transition: all 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.opacity='0.9'" onmouseout="this.style.transform='translateY(0)'; this.style.opacity='1'">
+                💾 Save Contact
               </button>
             </div>
           </div>
 
           <!-- QR Code Section -->
-          <div class="card" style="margin-top: var(--space-md); padding: var(--space-lg); text-align: center;">
-            <p style="font-size: 0.875rem; color: var(--color-text-secondary); margin-bottom: var(--space-md);">
+          <div class="card" style="margin-top: 1rem; padding: 2rem; text-align: center; border-radius: 16px; border: 1px solid var(--color-border);">
+            <p style="font-size: 0.875rem; color: var(--color-text-secondary); margin-bottom: 1rem;">
               Scan to save contact
             </p>
-            <div id="qr-code" style="width: 200px; height: 200px; margin: 0 auto; background: var(--color-surface); border: 2px solid var(--color-border); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; color: var(--color-text-secondary);">
+            <div id="qr-code" style="width: 200px; height: 200px; margin: 0 auto; background: var(--color-surface); border: 2px solid var(--color-border); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; color: var(--color-text-secondary);">
               QR Code
             </div>
           </div>
@@ -1313,7 +1638,6 @@ export const templates = {
 
       <script>
         function saveContact() {
-          // Create vCard data
           const vcard = \`BEGIN:VCARD
 VERSION:3.0
 FN:${data.name || ''}
@@ -1325,7 +1649,6 @@ URL:${data.website || ''}
 NOTE:${data.bio || ''}
 END:VCARD\`;
           
-          // Create blob and download
           const blob = new Blob([vcard], { type: 'text/vcard' });
           const url = window.URL.createObjectURL(blob);
           const a = document.createElement('a');
@@ -1337,17 +1660,26 @@ END:VCARD\`;
           window.URL.revokeObjectURL(url);
         }
 
-        // Generate QR code URL (using a public API)
         window.addEventListener('DOMContentLoaded', () => {
           const qrData = encodeURIComponent(window.location.href);
           const qrUrl = \`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=\${qrData}\`;
-          document.getElementById('qr-code').innerHTML = \`<img src="\${qrUrl}" alt="QR Code" style="width: 100%; height: 100%; border-radius: var(--radius-md);">\`;
+          document.getElementById('qr-code').innerHTML = \`<img src="\${qrUrl}" alt="QR Code" style="width: 100%; height: 100%; border-radius: 8px;">\`;
         });
       </script>
+
+      <style>
+        @media (max-width: 768px) {
+          .container { padding: 0 1.5rem !important; }
+          .card { padding: 2rem !important; }
+        }
+        
+        @media (max-width: 480px) {
+          .card { padding: 1.5rem !important; }
+        }
+      </style>
     `
   }),
-
-  // ============================================
+// ============================================
   // TEMPLATE 5: RESUME/CV
   // ============================================
   'resume': new Template('resume', {
@@ -1505,44 +1837,55 @@ END:VCARD\`;
       }
     },
     structure: (data) => `
-      <div style="min-height: 100vh; padding: var(--space-xl) var(--space-md); background: var(--color-bg);">
-        <div style="max-width: 900px; margin: 0 auto; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); box-shadow: var(--shadow-md);">
+      <!-- Header with Theme Toggle -->
+      <header style="padding: 1.5rem 0; border-bottom: 1px solid var(--color-border); margin-bottom: 2rem;">
+        <div class="container" style="max-width: 900px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center;">
+          <div style="font-weight: 600; font-size: 1.125rem;">Resume</div>
+          <label class="theme-toggle-switch-wrapper" style="cursor: pointer;">
+            <input type="checkbox" class="theme-toggle-switch" onclick="toggleTheme()" aria-label="Toggle theme">
+            <span class="theme-toggle-slider"></span>
+          </label>
+        </div>
+      </header>
+
+      <div style="min-height: 100vh; padding: 2rem 1rem; background: var(--color-bg);">
+        <div style="max-width: 900px; margin: 0 auto; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
           
           <!-- Header Section -->
-          <header style="padding: var(--space-xxl) var(--space-xl); background: var(--color-bg); border-bottom: 3px solid var(--color-accent); border-radius: var(--radius-lg) var(--radius-lg) 0 0;">
+          <header style="padding: 3rem 2rem; background: var(--color-bg); border-bottom: 3px solid var(--color-accent); border-radius: 12px 12px 0 0;">
             <h1 style="font-size: 2.5rem; font-weight: 800; margin-bottom: 0.5rem; letter-spacing: -0.02em;">
               ${data.name || 'Your Name'}
             </h1>
             ${data.title ? `
-            <p style="font-size: 1.25rem; color: var(--color-accent); font-weight: 600; margin-bottom: var(--space-lg);">
+            <p style="font-size: 1.25rem; color: var(--color-accent); font-weight: 600; margin-bottom: 2rem;">
               ${data.title}
             </p>
             ` : ''}
             
             <!-- Contact Info -->
-            <div style="display: flex; flex-wrap: wrap; gap: var(--space-md); font-size: 0.9375rem; color: var(--color-text-secondary);">
-              ${data.email ? `<span>Ã¢Å“â€°Ã¯Â¸Â ${data.email}</span>` : ''}
-              ${data.phone ? `<span>Ã°Å¸â€œÅ¾ ${data.phone}</span>` : ''}
-              ${data.location ? `<span>Ã°Å¸â€œÂ ${data.location}</span>` : ''}
+            <div style="display: flex; flex-wrap: wrap; gap: 1rem; font-size: 0.9375rem; color: var(--color-text-secondary);">
+              ${data.email ? `<span>✉️ ${data.email}</span>` : ''}
+              ${data.phone ? `<span>📞 ${data.phone}</span>` : ''}
+              ${data.location ? `<span>📍 ${data.location}</span>` : ''}
             </div>
             
             <!-- Links -->
             ${(data.website || data.linkedin || data.github) ? `
-            <div style="display: flex; flex-wrap: wrap; gap: var(--space-sm); margin-top: var(--space-md);">
-              ${data.website ? `<a href="${data.website}" target="_blank" class="btn btn-outline" style="font-size: 0.875rem; padding: 0.5rem 1rem;">Ã°Å¸Å’Â Website</a>` : ''}
-              ${data.linkedin ? `<a href="${data.linkedin}" target="_blank" class="btn btn-outline" style="font-size: 0.875rem; padding: 0.5rem 1rem;">Ã°Å¸â€™Â¼ LinkedIn</a>` : ''}
-              ${data.github ? `<a href="${data.github}" target="_blank" class="btn btn-outline" style="font-size: 0.875rem; padding: 0.5rem 1rem;">Ã°Å¸â€™Â» GitHub</a>` : ''}
+            <div style="display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1rem;">
+              ${data.website ? `<a href="${data.website}" target="_blank" style="font-size: 0.875rem; padding: 0.5rem 1rem; border-radius: 8px; text-decoration: none; border: 1px solid var(--color-border); color: var(--color-text); transition: all 0.2s;" onmouseover="this.style.background='var(--color-surface)'" onmouseout="this.style.background='transparent'">🌐 Website</a>` : ''}
+              ${data.linkedin ? `<a href="${data.linkedin}" target="_blank" style="font-size: 0.875rem; padding: 0.5rem 1rem; border-radius: 8px; text-decoration: none; border: 1px solid var(--color-border); color: var(--color-text); transition: all 0.2s;" onmouseover="this.style.background='var(--color-surface)'" onmouseout="this.style.background='transparent'">💼 LinkedIn</a>` : ''}
+              ${data.github ? `<a href="${data.github}" target="_blank" style="font-size: 0.875rem; padding: 0.5rem 1rem; border-radius: 8px; text-decoration: none; border: 1px solid var(--color-border); color: var(--color-text); transition: all 0.2s;" onmouseover="this.style.background='var(--color-surface)'" onmouseout="this.style.background='transparent'">💻 GitHub</a>` : ''}
             </div>
             ` : ''}
           </header>
 
           <!-- Main Content -->
-          <div style="padding: var(--space-xl);">
+          <div style="padding: 2rem;">
             
             <!-- Summary -->
             ${data.summary ? `
-            <section style="margin-bottom: var(--space-xxl);">
-              <h2 style="font-size: 1.375rem; font-weight: 700; margin-bottom: var(--space-md); color: var(--color-accent); text-transform: uppercase; letter-spacing: 0.05em; font-size: 1rem;">
+            <section style="margin-bottom: 3rem;">
+              <h2 style="font-size: 1rem; font-weight: 700; margin-bottom: 1rem; color: var(--color-accent); text-transform: uppercase; letter-spacing: 0.05em;">
                 Professional Summary
               </h2>
               <p style="font-size: 1rem; line-height: 1.8; color: var(--color-text-secondary);">
@@ -1553,20 +1896,20 @@ END:VCARD\`;
 
             <!-- Experience -->
             ${data.experience && data.experience.length > 0 ? `
-            <section style="margin-bottom: var(--space-xxl);">
-              <h2 style="font-size: 1.375rem; font-weight: 700; margin-bottom: var(--space-lg); color: var(--color-accent); text-transform: uppercase; letter-spacing: 0.05em; font-size: 1rem;">
+            <section style="margin-bottom: 3rem;">
+              <h2 style="font-size: 1rem; font-weight: 700; margin-bottom: 2rem; color: var(--color-accent); text-transform: uppercase; letter-spacing: 0.05em;">
                 Work Experience
               </h2>
-              <div style="display: flex; flex-direction: column; gap: var(--space-xl);">
+              <div style="display: flex; flex-direction: column; gap: 2rem;">
                 ${data.experience.map(job => `
                   <div>
-                    <div style="display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: var(--space-sm); margin-bottom: var(--space-sm);">
+                    <div style="display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 0.75rem;">
                       <div style="flex: 1;">
                         <h3 style="font-size: 1.125rem; font-weight: 700; margin-bottom: 0.25rem;">
                           ${job.role || ''}
                         </h3>
                         <p style="font-size: 1rem; color: var(--color-text-secondary); font-weight: 600;">
-                          ${job.company || ''} ${job.location ? `Ã¢â‚¬Â¢ ${job.location}` : ''}
+                          ${job.company || ''} ${job.location ? `• ${job.location}` : ''}
                         </p>
                       </div>
                       <span style="font-size: 0.875rem; color: var(--color-text-secondary); font-weight: 600; white-space: nowrap;">
@@ -1590,20 +1933,20 @@ END:VCARD\`;
 
             <!-- Education -->
             ${data.education && data.education.length > 0 ? `
-            <section style="margin-bottom: var(--space-xxl);">
-              <h2 style="font-size: 1.375rem; font-weight: 700; margin-bottom: var(--space-lg); color: var(--color-accent); text-transform: uppercase; letter-spacing: 0.05em; font-size: 1rem;">
+            <section style="margin-bottom: 3rem;">
+              <h2 style="font-size: 1rem; font-weight: 700; margin-bottom: 2rem; color: var(--color-accent); text-transform: uppercase; letter-spacing: 0.05em;">
                 Education
               </h2>
-              <div style="display: flex; flex-direction: column; gap: var(--space-lg);">
+              <div style="display: flex; flex-direction: column; gap: 2rem;">
                 ${data.education.map(edu => `
                   <div>
-                    <div style="display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: var(--space-sm);">
+                    <div style="display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: 0.75rem;">
                       <div style="flex: 1;">
                         <h3 style="font-size: 1.125rem; font-weight: 700; margin-bottom: 0.25rem;">
                           ${edu.degree || ''}
                         </h3>
                         <p style="font-size: 1rem; color: var(--color-text-secondary); font-weight: 600;">
-                          ${edu.school || ''} ${edu.location ? `Ã¢â‚¬Â¢ ${edu.location}` : ''}
+                          ${edu.school || ''} ${edu.location ? `• ${edu.location}` : ''}
                         </p>
                         ${edu.details ? `
                         <p style="font-size: 0.875rem; color: var(--color-text-secondary); margin-top: 0.25rem;">
@@ -1623,19 +1966,19 @@ END:VCARD\`;
 
             <!-- Skills -->
             ${data.skills && data.skills.length > 0 ? `
-            <section style="margin-bottom: var(--space-xxl);">
-              <h2 style="font-size: 1.375rem; font-weight: 700; margin-bottom: var(--space-lg); color: var(--color-accent); text-transform: uppercase; letter-spacing: 0.05em; font-size: 1rem;">
+            <section style="margin-bottom: 3rem;">
+              <h2 style="font-size: 1rem; font-weight: 700; margin-bottom: 2rem; color: var(--color-accent); text-transform: uppercase; letter-spacing: 0.05em;">
                 Skills
               </h2>
-              <div style="display: grid; gap: var(--space-md);">
+              <div style="display: grid; gap: 1rem;">
                 ${data.skills.map(skillGroup => `
                   <div>
-                    <h3 style="font-size: 0.875rem; font-weight: 700; margin-bottom: var(--space-sm); text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-secondary);">
+                    <h3 style="font-size: 0.875rem; font-weight: 700; margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-secondary);">
                       ${skillGroup.category || ''}
                     </h3>
                     <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
                       ${skillGroup.items && skillGroup.items.length > 0 ? skillGroup.items.map(skill => `
-                        <span style="padding: 0.375rem 0.875rem; background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--radius-md); font-size: 0.875rem; font-weight: 600;">
+                        <span style="padding: 0.375rem 0.875rem; background: var(--color-bg); border: 1px solid var(--color-border); border-radius: 8px; font-size: 0.875rem; font-weight: 600;">
                           ${skill}
                         </span>
                       `).join('') : ''}
@@ -1647,22 +1990,22 @@ END:VCARD\`;
             ` : ''}
 
             <!-- Two Column Layout for Certifications and Languages -->
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--space-xl);">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem;">
               
               <!-- Certifications -->
               ${data.certifications && data.certifications.length > 0 ? `
               <section>
-                <h2 style="font-size: 1.375rem; font-weight: 700; margin-bottom: var(--space-lg); color: var(--color-accent); text-transform: uppercase; letter-spacing: 0.05em; font-size: 1rem;">
+                <h2 style="font-size: 1rem; font-weight: 700; margin-bottom: 2rem; color: var(--color-accent); text-transform: uppercase; letter-spacing: 0.05em;">
                   Certifications
                 </h2>
-                <div style="display: flex; flex-direction: column; gap: var(--space-md);">
+                <div style="display: flex; flex-direction: column; gap: 1rem;">
                   ${data.certifications.map(cert => `
                     <div>
                       <h3 style="font-size: 0.9375rem; font-weight: 700; margin-bottom: 0.25rem;">
                         ${cert.name || ''}
                       </h3>
                       <p style="font-size: 0.875rem; color: var(--color-text-secondary);">
-                        ${cert.issuer || ''} ${cert.year ? `Ã¢â‚¬Â¢ ${cert.year}` : ''}
+                        ${cert.issuer || ''} ${cert.year ? `• ${cert.year}` : ''}
                       </p>
                     </div>
                   `).join('')}
@@ -1673,10 +2016,10 @@ END:VCARD\`;
               <!-- Languages -->
               ${data.languages && data.languages.length > 0 ? `
               <section>
-                <h2 style="font-size: 1.375rem; font-weight: 700; margin-bottom: var(--space-lg); color: var(--color-accent); text-transform: uppercase; letter-spacing: 0.05em; font-size: 1rem;">
+                <h2 style="font-size: 1rem; font-weight: 700; margin-bottom: 2rem; color: var(--color-accent); text-transform: uppercase; letter-spacing: 0.05em;">
                   Languages
                 </h2>
-                <div style="display: flex; flex-direction: column; gap: var(--space-md);">
+                <div style="display: flex; flex-direction: column; gap: 1rem;">
                   ${data.languages.map(lang => `
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                       <span style="font-size: 0.9375rem; font-weight: 600;">
@@ -1695,9 +2038,9 @@ END:VCARD\`;
           </div>
 
           <!-- Footer -->
-          <footer style="padding: var(--space-lg) var(--space-xl); background: var(--color-bg); border-top: 1px solid var(--color-border); border-radius: 0 0 var(--radius-lg) var(--radius-lg); text-align: center;">
-            <button onclick="window.print()" class="btn" style="padding: var(--space-sm) var(--space-xl); cursor: pointer;">
-              Ã°Å¸â€“Â¨Ã¯Â¸Â Print / Save as PDF
+          <footer style="padding: 2rem; background: var(--color-bg); border-top: 1px solid var(--color-border); border-radius: 0 0 12px 12px; text-align: center;">
+            <button onclick="window.print()" style="padding: 0.75rem 2rem; cursor: pointer; background: var(--color-accent); color: white; border: none; border-radius: 8px; font-weight: 500; transition: all 0.2s; font-size: 1rem;" onmouseover="this.style.transform='translateY(-2px)'; this.style.opacity='0.9'" onmouseout="this.style.transform='translateY(0)'; this.style.opacity='1'">
+              🖨️ Print / Save as PDF
             </button>
           </footer>
 
@@ -1710,7 +2053,7 @@ END:VCARD\`;
             background: white;
             padding: 0;
           }
-          .theme-toggle {
+          header:first-of-type {
             display: none !important;
           }
           footer button {
@@ -1721,11 +2064,24 @@ END:VCARD\`;
             border: 1px solid #e5e7eb !important;
           }
         }
+        
+        @media (max-width: 768px) {
+          .container { padding: 0 1.5rem !important; }
+          header:nth-of-type(2) { padding: 2rem 1.5rem !important; }
+          div[style*="padding: 2rem"] { padding: 1.5rem !important; }
+        }
+        
+        @media (max-width: 640px) {
+          div[style*="display: flex"][style*="gap: 1rem"] {
+            flex-direction: column;
+            align-items: start !important;
+          }
+        }
       </style>
     `
   }),
 
-  // ============================================
+// ============================================
   // TEMPLATE 6: PHOTOGRAPHY PORTFOLIO (MASONRY)
   // ============================================
   'photo-masonry': new Template('photo-masonry', {
@@ -1788,55 +2144,48 @@ END:VCARD\`;
       }
     },
     structure: (data) => `
-      <!-- Header -->
-      <header style="padding: 1.5rem 0; border-bottom: 1px solid var(--color-border); position: sticky; top: 0; background: var(--color-bg); z-index: 100; backdrop-filter: blur(10px);">
-        <div class="container">
-          <nav style="display: flex; justify-content: space-between; align-items: center;">
-            <div style="font-weight: 700; font-size: 1.25rem; letter-spacing: -0.02em;">${data.photographerName || 'Photographer'}</div>
-            <div style="display: flex; align-items: center; gap: 2rem;">
-              <ul style="display: flex; gap: 2rem; list-style: none; align-items: center;">
-                <li><a href="#gallery" style="color: var(--color-text-secondary); text-decoration: none; font-size: 0.9375rem; font-weight: 500;">Gallery</a></li>
-                <li><a href="#about" style="color: var(--color-text-secondary); text-decoration: none; font-size: 0.9375rem; font-weight: 500;">About</a></li>
-                <li><a href="#contact" style="color: var(--color-text-secondary); text-decoration: none; font-size: 0.9375rem; font-weight: 500;">Contact</a></li>
-                <li>
-                  <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle theme">
-                    <span class="theme-icon">Ã°Å¸Å’â„¢</span>
-                  </button>
-                </li>
-              </ul>
-            </div>
-          </nav>
+      <!-- Floating Header -->
+      <header style="position: fixed; top: 2rem; left: 2rem; right: 2rem; z-index: 1000; display: flex; justify-content: space-between; align-items: center;">
+        <div style="background: var(--color-bg); backdrop-filter: blur(10px); padding: 1rem 1.5rem; border-radius: 50px; border: 1px solid var(--color-border); box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+          <h1 style="font-size: 1.125rem; font-weight: 700; letter-spacing: -0.01em; margin: 0;">${data.photographerName || 'Photographer'}</h1>
         </div>
+        <label class="theme-toggle-switch-wrapper" style="cursor: pointer; background: var(--color-bg); backdrop-filter: blur(10px); padding: 0.75rem; border-radius: 50%; border: 1px solid var(--color-border); box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+          <input type="checkbox" class="theme-toggle-switch" onclick="toggleTheme()" aria-label="Toggle theme">
+          <span class="theme-toggle-slider"></span>
+        </label>
       </header>
 
-      <!-- Hero -->
-      <section style="padding: 6rem 0 4rem; text-align: center; background: var(--color-surface); border-bottom: 1px solid var(--color-border);">
-        <div class="container" style="max-width: 800px;">
-          <h1 style="font-size: clamp(2.5rem, 7vw, 4.5rem); font-weight: 800; margin-bottom: 1rem; letter-spacing: -0.03em;">
+      <!-- Full Screen Hero with Overlay -->
+      <section style="min-height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center; position: relative; background: var(--color-bg); padding: 6rem 2rem 4rem;">
+        <div style="max-width: 700px; z-index: 1;">
+          <h2 style="font-size: clamp(3rem, 8vw, 6rem); font-weight: 900; margin-bottom: 1rem; letter-spacing: -0.04em; line-height: 0.95;">
             ${data.photographerName || 'Photographer'}
-          </h1>
+          </h2>
           ${data.tagline ? `
-          <p style="font-size: clamp(1.125rem, 3vw, 1.5rem); color: var(--color-accent); margin-bottom: 1.5rem; font-weight: 600;">
+          <p style="font-size: clamp(1.25rem, 3vw, 1.75rem); color: var(--color-accent); margin-bottom: 2rem; font-weight: 600;">
             ${data.tagline}
           </p>
           ` : ''}
           ${data.bio ? `
-          <p style="font-size: 1.125rem; color: var(--color-text-secondary); margin-bottom: 2rem; line-height: 1.8;">
+          <p style="font-size: 1.125rem; color: var(--color-text-secondary); margin-bottom: 3rem; line-height: 1.8;">
             ${data.bio}
           </p>
           ` : ''}
+          <a href="#gallery" style="display: inline-block; padding: 1rem 2.5rem; background: var(--color-text); color: var(--color-bg); text-decoration: none; border-radius: 50px; font-weight: 600; transition: all 0.3s;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 20px rgba(0,0,0,0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+            View Gallery ↓
+          </a>
         </div>
       </section>
 
-      <!-- Gallery Filters -->
-      <section id="gallery" style="padding: 3rem 0 1.5rem; background: var(--color-bg);">
+      <!-- Floating Filter Pills -->
+      <section id="gallery" style="padding: 4rem 0 2rem; background: var(--color-bg);">
         <div class="container">
-          <div style="display: flex; justify-content: center; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 2rem;">
+          <div style="display: flex; justify-content: center; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 3rem;">
             ${data.categories && data.categories.length > 0 ? data.categories.map((cat, index) => `
               <button 
                 class="filter-btn ${index === 0 ? 'active' : ''}" 
                 onclick="filterGallery('${cat.toLowerCase()}')"
-                style="padding: 0.625rem 1.5rem; background: ${index === 0 ? 'var(--color-text)' : 'var(--color-surface)'}; color: ${index === 0 ? 'var(--color-bg)' : 'var(--color-text)'}; border: 2px solid var(--color-border); border-radius: var(--radius-full); font-weight: 600; cursor: pointer; transition: all 0.2s; font-size: 0.9375rem;"
+                style="padding: 0.75rem 1.75rem; background: ${index === 0 ? 'var(--color-text)' : 'transparent'}; color: ${index === 0 ? 'var(--color-bg)' : 'var(--color-text)'}; border: 2px solid ${index === 0 ? 'var(--color-text)' : 'var(--color-border)'}; border-radius: 50px; font-weight: 600; cursor: pointer; transition: all 0.2s; font-size: 0.9375rem;"
               >
                 ${cat}
               </button>
@@ -1846,22 +2195,24 @@ END:VCARD\`;
       </section>
 
       <!-- Masonry Gallery -->
-      <section style="padding: 0 0 4rem; background: var(--color-bg);">
+      <section style="padding: 0 0 6rem; background: var(--color-bg);">
         <div class="container">
           <div id="masonry-grid" style="column-count: 3; column-gap: 1.5rem;">
             ${data.photos && data.photos.length > 0 ? data.photos.map((photo, index) => `
-              <div class="gallery-item" data-category="${(photo.category || '').toLowerCase()}" style="break-inside: avoid; margin-bottom: 1.5rem; cursor: pointer;" onclick="openLightbox(${index})">
-                <div style="position: relative; overflow: hidden; border-radius: var(--radius-lg); border: 1px solid var(--color-border); transition: all 0.3s;">
+              <div class="gallery-item" data-category="${(photo.category || '').toLowerCase()}" style="break-inside: avoid; margin-bottom: 1.5rem; cursor: pointer; position: relative; overflow: hidden; border-radius: 16px;" onclick="openLightbox(${index})">
+                <div style="position: relative; overflow: hidden; border-radius: 16px; transition: all 0.3s;">
                   <img 
                     src="${photo.imageUrl || ''}" 
                     alt="${photo.title || 'Photo'}"
-                    style="width: 100%; height: auto; display: block; transition: transform 0.3s;"
-                    onmouseover="this.style.transform='scale(1.05)'"
+                    style="width: 100%; height: auto; display: block; transition: transform 0.5s ease;"
+                    onmouseover="this.style.transform='scale(1.08)'"
                     onmouseout="this.style.transform='scale(1)'"
                   />
-                  <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 1.5rem; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); color: white; opacity: 0; transition: opacity 0.3s;" class="photo-overlay">
-                    <h3 style="font-size: 1.125rem; font-weight: 700; margin-bottom: 0.25rem; color: white;">${photo.title || ''}</h3>
-                    ${photo.description ? `<p style="font-size: 0.875rem; opacity: 0.9; color: white;">${photo.description}</p>` : ''}
+                  <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.4) 50%, transparent 100%); display: flex; align-items: flex-end; padding: 2rem; opacity: 0; transition: opacity 0.3s;" class="photo-overlay">
+                    <div>
+                      <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem; color: white;">${photo.title || ''}</h3>
+                      ${photo.description ? `<p style="font-size: 0.875rem; color: rgba(255,255,255,0.9);">${photo.description}</p>` : ''}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1870,44 +2221,46 @@ END:VCARD\`;
         </div>
       </section>
 
-      <!-- About & Services -->
-      <section id="about" style="padding: 6rem 0; background: var(--color-surface); border-top: 1px solid var(--color-border);">
-        <div class="container" style="max-width: 1000px;">
-          ${data.services && data.services.length > 0 ? `
-          <div>
-            <h2 style="font-size: clamp(2rem, 5vw, 3rem); font-weight: 700; margin-bottom: 3rem; text-align: center; letter-spacing: -0.02em;">
-              Services
-            </h2>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem;">
-              ${data.services.map(service => `
-                <div class="card" style="padding: 2rem; text-align: center;">
-                  <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 1rem;">${service.name || ''}</h3>
-                  <p style="color: var(--color-text-secondary); line-height: 1.7;">${service.description || ''}</p>
-                </div>
-              `).join('')}
-            </div>
+      <!-- Services with Cards -->
+      ${data.services && data.services.length > 0 ? `
+      <section style="padding: 8rem 0; background: var(--color-surface);">
+        <div class="container" style="max-width: 1100px;">
+          <h2 style="font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 900; margin-bottom: 1rem; text-align: center; letter-spacing: -0.03em;">
+            Services
+          </h2>
+          <p style="text-align: center; color: var(--color-text-secondary); max-width: 600px; margin: 0 auto 4rem; font-size: 1.125rem;">
+            Professional photography for every occasion
+          </p>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+            ${data.services.map((service, i) => `
+              <div style="padding: 2.5rem; background: var(--color-bg); border-radius: 20px; border: 1px solid var(--color-border); transition: all 0.3s;" onmouseover="this.style.transform='translateY(-8px)'; this.style.borderColor='var(--color-accent)'" onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='var(--color-border)'">
+                <div style="width: 56px; height: 56px; background: var(--color-accent); border-radius: 16px; display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem; opacity: 0.15; font-size: 1.75rem;">📸</div>
+                <h3 style="font-size: 1.375rem; font-weight: 700; margin-bottom: 1rem;">${service.name || ''}</h3>
+                <p style="color: var(--color-text-secondary); line-height: 1.7; font-size: 1rem;">${service.description || ''}</p>
+              </div>
+            `).join('')}
           </div>
-          ` : ''}
         </div>
       </section>
+      ` : ''}
 
-      <!-- Contact -->
-      <section id="contact" style="padding: 6rem 0; text-align: center;">
+      <!-- Contact CTA -->
+      <section style="padding: 8rem 0 6rem; text-align: center; background: var(--color-bg);">
         <div class="container" style="max-width: 700px;">
-          <h2 style="font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 800; margin-bottom: 1.5rem; letter-spacing: -0.03em;">
-            Let's Work Together
+          <h2 style="font-size: clamp(2.5rem, 7vw, 5rem); font-weight: 900; margin-bottom: 1.5rem; letter-spacing: -0.04em; line-height: 1;">
+            Let's Create Together
           </h2>
-          <p style="font-size: 1.25rem; color: var(--color-text-secondary); margin-bottom: 2.5rem; line-height: 1.7;">
-            Available for commissions and collaborations
+          <p style="font-size: 1.25rem; color: var(--color-text-secondary); margin-bottom: 3rem; line-height: 1.7;">
+            Available for commissions and collaborations worldwide
           </p>
           <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
             ${data.email ? `
-            <a href="mailto:${data.email}" class="btn" style="padding: 1rem 2.5rem; font-size: 1rem;">
+            <a href="mailto:${data.email}" style="padding: 1.25rem 2.5rem; background: var(--color-accent); color: white; text-decoration: none; border-radius: 50px; font-weight: 600; font-size: 1.125rem; transition: all 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 20px rgba(0,0,0,0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
               Get in Touch
             </a>
             ` : ''}
             ${data.instagram ? `
-            <a href="https://instagram.com/${data.instagram.replace('@', '')}" target="_blank" class="btn btn-outline" style="padding: 1rem 2.5rem; font-size: 1rem;">
+            <a href="https://instagram.com/${data.instagram.replace('@', '')}" target="_blank" style="padding: 1.25rem 2.5rem; background: transparent; color: var(--color-text); text-decoration: none; border-radius: 50px; border: 2px solid var(--color-border); font-weight: 600; font-size: 1.125rem; transition: all 0.2s;" onmouseover="this.style.borderColor='var(--color-text)'" onmouseout="this.style.borderColor='var(--color-border)'">
               ${data.instagram}
             </a>
             ` : ''}
@@ -1915,21 +2268,21 @@ END:VCARD\`;
         </div>
       </section>
 
-      <!-- Footer -->
-      <footer style="padding: 3rem 0; border-top: 1px solid var(--color-border); text-align: center; color: var(--color-text-secondary); font-size: 0.875rem;">
+      <!-- Minimal Footer -->
+      <footer style="padding: 2rem 0; text-align: center; color: var(--color-text-secondary); font-size: 0.875rem; border-top: 1px solid var(--color-border);">
         <div class="container">
-          <p>Ã‚Â© 2024 ${data.photographerName || 'Photographer'}. All rights reserved.</p>
+          <p>© 2024 ${data.photographerName || 'Photographer'}</p>
         </div>
       </footer>
 
-      <!-- Lightbox -->
-      <div id="lightbox" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.95); z-index: 10000; align-items: center; justify-content: center; padding: 2rem;" onclick="closeLightbox()">
-        <button onclick="closeLightbox()" style="position: absolute; top: 2rem; right: 2rem; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.3); color: white; width: 48px; height: 48px; border-radius: 50%; font-size: 1.5rem; cursor: pointer; backdrop-filter: blur(10px);">Ãƒâ€”</button>
-        <button onclick="event.stopPropagation(); prevPhoto()" style="position: absolute; left: 2rem; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.3); color: white; width: 48px; height: 48px; border-radius: 50%; font-size: 1.5rem; cursor: pointer; backdrop-filter: blur(10px);">Ã¢â‚¬Â¹</button>
-        <button onclick="event.stopPropagation(); nextPhoto()" style="position: absolute; right: 2rem; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.3); color: white; width: 48px; height: 48px; border-radius: 50%; font-size: 1.5rem; cursor: pointer; backdrop-filter: blur(10px);">Ã¢â‚¬Âº</button>
+      <!-- Fullscreen Lightbox -->
+      <div id="lightbox" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.97); z-index: 10000; align-items: center; justify-content: center; padding: 2rem;" onclick="closeLightbox()">
+        <button onclick="closeLightbox()" style="position: absolute; top: 2rem; right: 2rem; background: rgba(255,255,255,0.1); border: none; color: white; width: 56px; height: 56px; border-radius: 50%; font-size: 1.5rem; cursor: pointer; backdrop-filter: blur(10px); transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">×</button>
+        <button onclick="event.stopPropagation(); prevPhoto()" style="position: absolute; left: 2rem; background: rgba(255,255,255,0.1); border: none; color: white; width: 56px; height: 56px; border-radius: 50%; font-size: 1.5rem; cursor: pointer; backdrop-filter: blur(10px); transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">←</button>
+        <button onclick="event.stopPropagation(); nextPhoto()" style="position: absolute; right: 2rem; background: rgba(255,255,255,0.1); border: none; color: white; width: 56px; height: 56px; border-radius: 50%; font-size: 1.5rem; cursor: pointer; backdrop-filter: blur(10px); transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">→</button>
         <div style="max-width: 90vw; max-height: 90vh; text-align: center;">
-          <img id="lightbox-img" src="" alt="" style="max-width: 100%; max-height: 85vh; object-fit: contain; border-radius: var(--radius-lg);" onclick="event.stopPropagation()">
-          <div id="lightbox-info" style="color: white; margin-top: 1.5rem; padding: 1rem;"></div>
+          <img id="lightbox-img" src="" alt="" style="max-width: 100%; max-height: 85vh; object-fit: contain; border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,0.5);" onclick="event.stopPropagation()">
+          <div id="lightbox-info" style="color: white; margin-top: 2rem; padding: 1rem;"></div>
         </div>
       </div>
 
@@ -1938,8 +2291,8 @@ END:VCARD\`;
         .gallery-item:hover .photo-overlay { opacity: 1; }
         
         .filter-btn:hover {
-          border-color: var(--color-text) !important;
           transform: translateY(-2px);
+          border-color: var(--color-text) !important;
         }
         
         .filter-btn.active {
@@ -1950,10 +2303,17 @@ END:VCARD\`;
         
         @media (max-width: 1024px) {
           #masonry-grid { column-count: 2; }
+          header { top: 1rem; left: 1rem; right: 1rem; }
+        }
+        
+        @media (max-width: 768px) {
+          #masonry-grid { column-count: 1; }
+          header { flex-direction: column; gap: 1rem; align-items: stretch; }
+          header > div { text-align: center; }
         }
         
         @media (max-width: 640px) {
-          #masonry-grid { column-count: 1; }
+          .container { padding: 0 1.5rem !important; }
         }
       </style>
 
@@ -1967,13 +2327,15 @@ END:VCARD\`;
           
           buttons.forEach(btn => {
             btn.classList.remove('active');
-            btn.style.background = 'var(--color-surface)';
+            btn.style.background = 'transparent';
             btn.style.color = 'var(--color-text)';
+            btn.style.borderColor = 'var(--color-border)';
           });
           
           event.target.classList.add('active');
           event.target.style.background = 'var(--color-text)';
           event.target.style.color = 'var(--color-bg)';
+          event.target.style.borderColor = 'var(--color-text)';
           
           items.forEach(item => {
             if (category === 'all' || item.dataset.category === category) {
@@ -2110,7 +2472,7 @@ END:VCARD\`;
                 <li><a href="#contact" style="color: var(--color-text-secondary); text-decoration: none; font-size: 0.9375rem; font-weight: 500;">Contact</a></li>
                 <li>
                   <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle theme">
-                    <span class="theme-icon">Ã°Å¸Å’â„¢</span>
+                    <span class="theme-icon">ÃƒÂ°Ã…Â¸Ã…â€™Ã¢â€žÂ¢</span>
                   </button>
                 </li>
               </ul>
@@ -2254,15 +2616,15 @@ END:VCARD\`;
       <!-- Footer -->
       <footer style="padding: 3rem 0; border-top: 1px solid var(--color-border); text-align: center; color: var(--color-text-secondary); font-size: 0.875rem;">
         <div class="container">
-          <p>Ã‚Â© 2024 ${data.photographerName || 'Photographer'}. All rights reserved.</p>
+          <p>Ãƒâ€šÃ‚Â© 2024 ${data.photographerName || 'Photographer'}. All rights reserved.</p>
         </div>
       </footer>
 
       <!-- Lightbox -->
       <div id="lightbox" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.95); z-index: 10000; align-items: center; justify-content: center; padding: 2rem;" onclick="closeLightbox()">
-        <button onclick="closeLightbox()" style="position: absolute; top: 2rem; right: 2rem; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.3); color: white; width: 48px; height: 48px; border-radius: 50%; font-size: 1.5rem; cursor: pointer; backdrop-filter: blur(10px);">Ãƒâ€”</button>
-        <button onclick="event.stopPropagation(); prevPhoto()" style="position: absolute; left: 2rem; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.3); color: white; width: 48px; height: 48px; border-radius: 50%; font-size: 1.5rem; cursor: pointer; backdrop-filter: blur(10px);">Ã¢â‚¬Â¹</button>
-        <button onclick="event.stopPropagation(); nextPhoto()" style="position: absolute; right: 2rem; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.3); color: white; width: 48px; height: 48px; border-radius: 50%; font-size: 1.5rem; cursor: pointer; backdrop-filter: blur(10px);">Ã¢â‚¬Âº</button>
+        <button onclick="closeLightbox()" style="position: absolute; top: 2rem; right: 2rem; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.3); color: white; width: 48px; height: 48px; border-radius: 50%; font-size: 1.5rem; cursor: pointer; backdrop-filter: blur(10px);">ÃƒÆ’Ã¢â‚¬â€</button>
+        <button onclick="event.stopPropagation(); prevPhoto()" style="position: absolute; left: 2rem; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.3); color: white; width: 48px; height: 48px; border-radius: 50%; font-size: 1.5rem; cursor: pointer; backdrop-filter: blur(10px);">ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¹</button>
+        <button onclick="event.stopPropagation(); nextPhoto()" style="position: absolute; right: 2rem; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.3); color: white; width: 48px; height: 48px; border-radius: 50%; font-size: 1.5rem; cursor: pointer; backdrop-filter: blur(10px);">ÃƒÂ¢Ã¢â€šÂ¬Ã‚Âº</button>
         <div style="max-width: 90vw; max-height: 90vh; text-align: center;">
           <img id="lightbox-img" src="" alt="" style="max-width: 100%; max-height: 85vh; object-fit: contain; border-radius: var(--radius-lg);" onclick="event.stopPropagation()">
           <div id="lightbox-info" style="color: white; margin-top: 1.5rem; padding: 1rem;"></div>
@@ -2386,7 +2748,7 @@ END:VCARD\`;
     structure: (data, theme) => `
       <!-- Compact Header with Contact Info -->
       <div style="background: var(--color-accent); color: var(--color-bg); padding: 0.75rem 0; text-align: center; font-size: 0.875rem; font-weight: 600;">
-        ${data.phone ? `📍 ${data.phone}` : ''} ${data.phone && data.email ? ' 📍 ' : ''} ${data.email ? `📍¸ ${data.email}` : ''}
+        ${data.phone ? `ðŸ“ ${data.phone}` : ''} ${data.phone && data.email ? ' ðŸ“ ' : ''} ${data.email ? `ðŸ“Â¸Â ${data.email}` : ''}
       </div>
       
       <header style="padding: 1rem 0; background: var(--color-bg); position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
@@ -2400,7 +2762,7 @@ END:VCARD\`;
                 <a href="#contact" style="text-decoration: none; color: var(--color-text); font-weight: 600; font-size: 0.9375rem;">Contact</a>
               </nav>
               <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle theme">
-                <span class="theme-icon">ðŸŒ™</span>
+                <span class="theme-icon">Ã°Å¸Å’â„¢</span>
               </button>
             </div>
           </div>
@@ -2433,7 +2795,7 @@ END:VCARD\`;
               </div>
             </div>
             <div style="background: linear-gradient(135deg, var(--color-accent), var(--color-text)); height: 100%; min-height: 500px; display: flex; align-items: center; justify-content: center; color: white; font-size: 5rem; opacity: 0.1;">
-              ðŸª
+              Ã°Å¸ÂÂª
             </div>
           </div>
         </div>
@@ -2445,7 +2807,7 @@ END:VCARD\`;
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; max-width: 1000px; margin: 0 auto;">
             ${data.address || data.city ? `
             <div style="background: var(--color-bg); padding: 2rem; border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); text-align: center; border: 3px solid var(--color-border);">
-              <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">ðŸ“</div>
+              <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">Ã°Å¸â€œÂ</div>
               <div style="font-weight: 700; font-size: 1rem; margin-bottom: 0.5rem;">Visit Us</div>
               <div style="color: var(--color-text-secondary); font-size: 0.9375rem; line-height: 1.5;">
                 ${data.address ? data.address + '<br>' : ''}${data.city || ''}
@@ -2454,7 +2816,7 @@ END:VCARD\`;
             ` : ''}
             ${data.hours ? `
             <div style="background: var(--color-bg); padding: 2rem; border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); text-align: center; border: 3px solid var(--color-border);">
-              <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">ðŸ•</div>
+              <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">Ã°Å¸â€¢Â</div>
               <div style="font-weight: 700; font-size: 1rem; margin-bottom: 0.5rem;">Hours</div>
               <div style="color: var(--color-text-secondary); font-size: 0.9375rem; line-height: 1.5; white-space: pre-line;">
                 ${data.hours.split('\n')[0]}
@@ -2463,7 +2825,7 @@ END:VCARD\`;
             ` : ''}
             ${data.phone ? `
             <div style="background: var(--color-bg); padding: 2rem; border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); text-align: center; border: 3px solid var(--color-border);">
-              <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">ðŸ“ž</div>
+              <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">Ã°Å¸â€œÅ¾</div>
               <div style="font-weight: 700; font-size: 1rem; margin-bottom: 0.5rem;">Call Us</div>
               <a href="tel:${data.phone.replace(/\s/g, '')}" style="color: var(--color-accent); font-size: 1.125rem; text-decoration: none; font-weight: 700;">
                 ${data.phone}
@@ -2518,7 +2880,7 @@ END:VCARD\`;
                   <div style="background: var(--color-bg); padding: 2.5rem; border-radius: var(--radius-lg); box-shadow: var(--shadow-md); border-top: 4px solid var(--color-accent);">
                     ${t.rating ? `
                     <div style="color: #FFB800; font-size: 1.5rem; margin-bottom: 1.25rem;">
-                      ${'â˜…'.repeat(t.rating)}${'â˜†'.repeat(5 - t.rating)}
+                      ${'Ã¢Ëœâ€¦'.repeat(t.rating)}${'Ã¢Ëœâ€ '.repeat(5 - t.rating)}
                     </div>
                     ` : ''}
                     <p style="font-size: 1.0625rem; line-height: 1.7; margin-bottom: 1.5rem; font-style: italic;">
@@ -2556,12 +2918,12 @@ END:VCARD\`;
           <div style="display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap;">
             ${data.phone ? `
             <a href="tel:${data.phone.replace(/\s/g, '')}" style="display: inline-block; padding: 1.25rem 3rem; background: var(--color-bg); color: var(--color-accent); text-decoration: none; font-weight: 700; font-size: 1.125rem; border-radius: var(--radius-md); transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
-              ðŸ“ž Call ${data.phone}
+              Ã°Å¸â€œÅ¾ Call ${data.phone}
             </a>
             ` : ''}
             ${data.email ? `
             <a href="mailto:${data.email}" style="display: inline-block; padding: 1.25rem 3rem; background: transparent; color: var(--color-bg); text-decoration: none; font-weight: 700; font-size: 1.125rem; border: 3px solid var(--color-bg); border-radius: var(--radius-md); transition: all 0.2s;" onmouseover="this.style.background='var(--color-bg)'; this.style.color='var(--color-accent)'" onmouseout="this.style.background='transparent'; this.style.color='var(--color-bg)'">
-              âœ‰ï¸ Email Us
+              Ã¢Å“â€°Ã¯Â¸Â Email Us
             </a>
             ` : ''}
           </div>
@@ -2573,7 +2935,7 @@ END:VCARD\`;
               <a href="${data.facebook}" target="_blank" style="width: 48px; height: 48px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 1.25rem; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">f</a>
               ` : ''}
               ${data.instagram ? `
-              <a href="https://instagram.com/${data.instagram.replace('@', '')}" target="_blank" style="width: 48px; height: 48px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 1.25rem; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.3)'">ðŸ“·</a>
+              <a href="https://instagram.com/${data.instagram.replace('@', '')}" target="_blank" style="width: 48px; height: 48px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 1.25rem; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.3)'">Ã°Å¸â€œÂ·</a>
               ` : ''}
             </div>
           </div>
@@ -2584,7 +2946,7 @@ END:VCARD\`;
       <!-- Footer -->
       <footer style="padding: 2rem 0; background: var(--color-bg); text-align: center; color: var(--color-text-secondary); font-size: 0.875rem; border-top: 1px solid var(--color-border);">
         <div class="container">
-          <p>Â© 2024 ${data.businessName || 'Business'}. Proudly serving our local community.</p>
+          <p>Ã‚Â© 2024 ${data.businessName || 'Business'}. Proudly serving our local community.</p>
         </div>
       </footer>
 
@@ -2633,7 +2995,7 @@ END:VCARD\`;
           ${data.designerName?.split(' ')[0]?.toUpperCase() || 'DESIGNER'}
         </div>
         <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle theme" style="background: transparent; border: 2px solid var(--color-bg); color: var(--color-bg); margin-top: auto;">
-          <span class="theme-icon">ðŸŒ™</span>
+          <span class="theme-icon">Ã°Å¸Å’â„¢</span>
         </button>
       </nav>
 
@@ -2669,7 +3031,7 @@ END:VCARD\`;
                   <div style="font-weight: 900; font-size: 0.875rem; letter-spacing: 0.1em; margin-bottom: 1.5rem;">CONTACT</div>
                   ${data.email ? `
                   <a href="mailto:${data.email}" style="display: block; color: var(--color-bg); text-decoration: none; font-weight: 700; font-size: 1.125rem; margin-bottom: 1rem; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'">
-                    âœ‰ ${data.email}
+                    Ã¢Å“â€° ${data.email}
                   </a>
                   ` : ''}
                   <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1.5rem;">
@@ -2704,7 +3066,7 @@ END:VCARD\`;
                       </div>
                       ` : `
                       <div style="aspect-ratio: ${i % 3 === 0 ? '4/5' : i % 3 === 1 ? '1/1' : '16/9'}; background: var(--color-text); display: flex; align-items: center; justify-content: center; font-size: 4rem; color: var(--color-bg); opacity: 0.3;">
-                        ${['â—†', 'â—', 'â– '][i % 3]}
+                        ${['Ã¢â€”â€ ', 'Ã¢â€”Â', 'Ã¢â€“Â '][i % 3]}
                       </div>
                       `}
                       <div style="padding: 2rem; border: 4px solid var(--color-border); border-top: none;">
@@ -2713,7 +3075,7 @@ END:VCARD\`;
                             ${project.title || 'Project'}
                           </h3>
                           ${project.link ? `
-                          <a href="${project.link}" target="_blank" style="width: 40px; height: 40px; background: var(--color-text); color: var(--color-bg); display: flex; align-items: center; justify-content: center; text-decoration: none; font-weight: 900; font-size: 1.25rem; flex-shrink: 0;">â†’</a>
+                          <a href="${project.link}" target="_blank" style="width: 40px; height: 40px; background: var(--color-text); color: var(--color-bg); display: flex; align-items: center; justify-content: center; text-decoration: none; font-weight: 900; font-size: 1.25rem; flex-shrink: 0;">Ã¢â€ â€™</a>
                           ` : ''}
                         </div>
                         <p style="font-size: 1rem; line-height: 1.6; margin-bottom: 1.5rem; color: var(--color-text-secondary);">
@@ -2787,7 +3149,7 @@ END:VCARD\`;
             </p>
             ${data.email ? `
             <a href="mailto:${data.email}" style="display: inline-block; background: var(--color-bg); color: var(--color-text); padding: 1.5rem 4rem; font-weight: 900; font-size: 1.25rem; text-decoration: none; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
-              GET IN TOUCH â†’
+              GET IN TOUCH Ã¢â€ â€™
             </a>
             ` : ''}
           </div>
@@ -2796,7 +3158,7 @@ END:VCARD\`;
         <!-- Footer -->
         <footer style="background: var(--color-bg); padding: 2rem 0; text-align: center; color: var(--color-text-secondary); font-size: 0.875rem; border-top: 4px solid var(--color-border);">
           <div class="container">
-            <p style="font-weight: 700;">Â© 2024 ${data.designerName || 'Designer'}</p>
+            <p style="font-weight: 700;">Ã‚Â© 2024 ${data.designerName || 'Designer'}</p>
           </div>
         </footer>
       </div>
@@ -2856,7 +3218,7 @@ END:VCARD\`;
               ${data.writerName || 'Writer Name'}
             </div>
             <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle theme">
-              <span class="theme-icon">ðŸŒ™</span>
+              <span class="theme-icon">Ã°Å¸Å’â„¢</span>
             </button>
           </div>
         </div>
@@ -2886,7 +3248,7 @@ END:VCARD\`;
             Featured In
           </div>
           <div style="font-family: serif; font-size: 1rem; font-style: italic; opacity: 0.95;">
-            ${data.publications.split(',').map(pub => pub.trim()).join(' Â· ')}
+            ${data.publications.split(',').map(pub => pub.trim()).join(' Ã‚Â· ')}
           </div>
         </div>
       </section>
@@ -2918,7 +3280,7 @@ END:VCARD\`;
                 </p>
                 ${featured.link ? `
                 <a href="${featured.link}" target="_blank" style="display: inline-block; padding: 1rem 2.5rem; border: 2px solid var(--color-text); color: var(--color-text); text-decoration: none; font-weight: 600; font-size: 0.9375rem; letter-spacing: 0.05em; text-transform: uppercase; transition: all 0.3s;" onmouseover="this.style.background='var(--color-text)'; this.style.color='var(--color-bg)'" onmouseout="this.style.background='transparent'; this.style.color='var(--color-text)'">
-                  Read Full Article â†’
+                  Read Full Article Ã¢â€ â€™
                 </a>
                 ` : ''}
               </article>
@@ -3043,7 +3405,7 @@ END:VCARD\`;
                 <div style="font-family: serif; font-size: 1.25rem; color: var(--color-text); font-style: italic;">
                   ${specialty.trim()}
                 </div>
-              `).join('<div style="color: var(--color-text-secondary);">Â·</div>')}
+              `).join('<div style="color: var(--color-text-secondary);">Ã‚Â·</div>')}
             </div>
           </div>
           ` : ''}
@@ -3094,7 +3456,7 @@ END:VCARD\`;
       <!-- Footer -->
       <footer style="padding: 3rem 0; background: var(--color-bg); text-align: center; color: var(--color-text-secondary); font-size: 0.875rem; border-top: 1px solid var(--color-border);">
         <div class="container">
-          <p style="font-family: serif; font-style: italic;">Â© 2024 ${data.writerName || 'Writer'}. All rights reserved.</p>
+          <p style="font-family: serif; font-style: italic;">Ã‚Â© 2024 ${data.writerName || 'Writer'}. All rights reserved.</p>
         </div>
       </footer>
 
@@ -3135,7 +3497,7 @@ END:VCARD\`;
   //             ${data.writerName || 'Writer Name'}
   //           </div>
   //           <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle theme">
-  //             <span class="theme-icon">ðŸŒ™</span>
+  //             <span class="theme-icon">Ã°Å¸Å’â„¢</span>
   //           </button>
   //         </div>
   //       </div>
@@ -3165,7 +3527,7 @@ END:VCARD\`;
   //           Featured In
   //         </div>
   //         <div style="font-family: serif; font-size: 1rem; font-style: italic; opacity: 0.95;">
-  //           ${data.publications.split(',').map(pub => pub.trim()).join(' Â· ')}
+  //           ${data.publications.split(',').map(pub => pub.trim()).join(' Ã‚Â· ')}
   //         </div>
   //       </div>
   //     </section>
@@ -3197,7 +3559,7 @@ END:VCARD\`;
   //               </p>
   //               ${featured.link ? `
   //               <a href="${featured.link}" target="_blank" style="display: inline-block; padding: 1rem 2.5rem; border: 2px solid var(--color-text); color: var(--color-text); text-decoration: none; font-weight: 600; font-size: 0.9375rem; letter-spacing: 0.05em; text-transform: uppercase; transition: all 0.3s;" onmouseover="this.style.background='var(--color-text)'; this.style.color='var(--color-bg)'" onmouseout="this.style.background='transparent'; this.style.color='var(--color-text)'">
-  //                 Read Full Article â†’
+  //                 Read Full Article Ã¢â€ â€™
   //               </a>
   //               ` : ''}
   //             </article>
@@ -3322,7 +3684,7 @@ END:VCARD\`;
   //               <div style="font-family: serif; font-size: 1.25rem; color: var(--color-text); font-style: italic;">
   //                 ${specialty.trim()}
   //               </div>
-  //             `).join('<div style="color: var(--color-text-secondary);">Â·</div>')}
+  //             `).join('<div style="color: var(--color-text-secondary);">Ã‚Â·</div>')}
   //           </div>
   //         </div>
   //         ` : ''}
@@ -3373,7 +3735,7 @@ END:VCARD\`;
   //     <!-- Footer -->
   //     <footer style="padding: 3rem 0; background: var(--color-bg); text-align: center; color: var(--color-text-secondary); font-size: 0.875rem; border-top: 1px solid var(--color-border);">
   //       <div class="container">
-  //         <p style="font-family: serif; font-style: italic;">Â© 2024 ${data.writerName || 'Writer'}. All rights reserved.</p>
+  //         <p style="font-family: serif; font-style: italic;">Ã‚Â© 2024 ${data.writerName || 'Writer'}. All rights reserved.</p>
   //       </div>
   //     </footer>
 
@@ -3420,7 +3782,7 @@ END:VCARD\`;
       <section style="padding: 8rem 0; background: var(--color-bg); text-align: center; position: relative;">
         <div class="container" style="max-width: 800px;">
           <!-- Decorative flourish -->
-          <div style="font-size: 3rem; color: var(--color-accent); margin-bottom: 2rem; opacity: 0.6;">â¦</div>
+          <div style="font-size: 3rem; color: var(--color-accent); margin-bottom: 2rem; opacity: 0.6;">Ã¢ÂÂ¦</div>
           
           <div style="font-family: serif; font-size: 1rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--color-text-secondary); margin-bottom: 2rem;">
             Together with their families
@@ -3446,7 +3808,7 @@ END:VCARD\`;
           </a>
           ` : ''}
           
-          <div style="font-size: 2rem; color: var(--color-accent); margin-top: 3rem; opacity: 0.6;">â¦</div>
+          <div style="font-size: 2rem; color: var(--color-accent); margin-top: 3rem; opacity: 0.6;">Ã¢ÂÂ¦</div>
         </div>
       </section>
 
@@ -3454,7 +3816,7 @@ END:VCARD\`;
       <section style="padding: 6rem 0; background: var(--color-surface);">
         <div class="container" style="max-width: 1000px;">
           <div style="text-align: center; margin-bottom: 5rem;">
-            <div style="font-size: 2rem; color: var(--color-accent); margin-bottom: 1rem; opacity: 0.6;">âœ¦</div>
+            <div style="font-size: 2rem; color: var(--color-accent); margin-bottom: 1rem; opacity: 0.6;">Ã¢Å“Â¦</div>
             <h2 style="font-family: serif; font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: 400; margin-bottom: 1rem;">
               Celebration Details
             </h2>
@@ -3464,7 +3826,7 @@ END:VCARD\`;
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 4rem;">
             <!-- Ceremony -->
             <div style="text-align: center; padding: 3rem; background: var(--color-bg); border: 1px solid var(--color-border);">
-              <div style="font-size: 2rem; color: var(--color-accent); margin-bottom: 1.5rem;">ðŸ’’</div>
+              <div style="font-size: 2rem; color: var(--color-accent); margin-bottom: 1.5rem;">Ã°Å¸â€™â€™</div>
               <h3 style="font-family: serif; font-size: 1.75rem; font-weight: 400; margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: 0.1em; font-size: 1.125rem; color: var(--color-text-secondary);">
                 Ceremony
               </h3>
@@ -3475,7 +3837,7 @@ END:VCARD\`;
             
             <!-- Reception -->
             <div style="text-align: center; padding: 3rem; background: var(--color-bg); border: 1px solid var(--color-border);">
-              <div style="font-size: 2rem; color: var(--color-accent); margin-bottom: 1.5rem;">ðŸ¥‚</div>
+              <div style="font-size: 2rem; color: var(--color-accent); margin-bottom: 1.5rem;">Ã°Å¸Â¥â€š</div>
               <h3 style="font-family: serif; font-size: 1.75rem; font-weight: 400; margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: 0.1em; font-size: 1.125rem; color: var(--color-text-secondary);">
                 Reception
               </h3>
@@ -3534,7 +3896,7 @@ END:VCARD\`;
       <!-- Our Story -->
       <section style="padding: 6rem 0; background: var(--color-surface);">
         <div class="container" style="max-width: 700px; text-align: center;">
-          <div style="font-size: 2rem; color: var(--color-accent); margin-bottom: 1.5rem; opacity: 0.6;">â™¥</div>
+          <div style="font-size: 2rem; color: var(--color-accent); margin-bottom: 1.5rem; opacity: 0.6;">Ã¢â„¢Â¥</div>
           <h2 style="font-family: serif; font-size: clamp(2rem, 5vw, 3rem); font-weight: 400; margin-bottom: 3rem;">
             Our Story
           </h2>
@@ -3552,7 +3914,7 @@ END:VCARD\`;
             
             ${data.dressCode ? `
             <div style="text-align: center; padding: 2.5rem; border: 1px solid var(--color-border);">
-              <div style="font-size: 1.75rem; margin-bottom: 1rem;">ðŸ‘”</div>
+              <div style="font-size: 1.75rem; margin-bottom: 1rem;">Ã°Å¸â€˜â€</div>
               <h3 style="font-family: serif; font-size: 1.125rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--color-text-secondary); margin-bottom: 1rem;">
                 Dress Code
               </h3>
@@ -3564,7 +3926,7 @@ END:VCARD\`;
             
             ${data.hotelInfo ? `
             <div style="text-align: center; padding: 2.5rem; border: 1px solid var(--color-border);">
-              <div style="font-size: 1.75rem; margin-bottom: 1rem;">ðŸ¨</div>
+              <div style="font-size: 1.75rem; margin-bottom: 1rem;">Ã°Å¸ÂÂ¨</div>
               <h3 style="font-family: serif; font-size: 1.125rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--color-text-secondary); margin-bottom: 1rem;">
                 Accommodations
               </h3>
@@ -3576,7 +3938,7 @@ END:VCARD\`;
             
             ${data.registryLink ? `
             <div style="text-align: center; padding: 2.5rem; border: 1px solid var(--color-border);">
-              <div style="font-size: 1.75rem; margin-bottom: 1rem;">ðŸŽ</div>
+              <div style="font-size: 1.75rem; margin-bottom: 1rem;">Ã°Å¸Å½Â</div>
               <h3 style="font-family: serif; font-size: 1.125rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--color-text-secondary); margin-bottom: 1.5rem;">
                 Registry
               </h3>
@@ -3592,7 +3954,7 @@ END:VCARD\`;
       <!-- Final CTA -->
       <section style="padding: 6rem 0; background: var(--color-surface); text-align: center;">
         <div class="container" style="max-width: 600px;">
-          <div style="font-size: 2.5rem; color: var(--color-accent); margin-bottom: 2rem; opacity: 0.6;">â¦</div>
+          <div style="font-size: 2.5rem; color: var(--color-accent); margin-bottom: 2rem; opacity: 0.6;">Ã¢ÂÂ¦</div>
           <h2 style="font-family: serif; font-size: clamp(2rem, 5vw, 3rem); font-weight: 400; margin-bottom: 2rem; line-height: 1.4;">
             We can't wait to celebrate with you
           </h2>
@@ -3671,7 +4033,7 @@ END:VCARD\`;
               </a>
               ` : ''}
               <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle theme">
-                <span class="theme-icon">ðŸŒ™</span>
+                <span class="theme-icon">Ã°Å¸Å’â„¢</span>
               </button>
             </div>
           </div>
@@ -3686,7 +4048,7 @@ END:VCARD\`;
             <div style="display: inline-flex; align-items: center; gap: 1rem; margin-bottom: 2rem; padding: 0.75rem 1.5rem; background: var(--color-bg); border: 2px solid var(--color-accent); border-radius: var(--radius-full);">
               <div style="width: 8px; height: 8px; background: var(--color-accent); border-radius: 50%; animation: pulse 2s infinite;"></div>
               <span style="font-weight: 700; font-size: 0.9375rem; text-transform: uppercase; letter-spacing: 0.05em;">
-                ${data.date || 'Coming Soon'} â€¢ ${data.location || 'Location TBA'}
+                ${data.date || 'Coming Soon'} Ã¢â‚¬Â¢ ${data.location || 'Location TBA'}
               </span>
             </div>
             
@@ -3705,7 +4067,7 @@ END:VCARD\`;
             <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
               ${data.registerLink ? `
               <a href="${data.registerLink}" target="_blank" style="padding: 1.25rem 3rem; background: var(--color-accent); color: var(--color-bg); text-decoration: none; font-weight: 700; font-size: 1.125rem; border-radius: var(--radius-sm); transition: all 0.2s; box-shadow: var(--shadow-md);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='var(--shadow-lg)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-md)'">
-                Register Now ${data.price ? `â€¢ ${data.price}` : ''}
+                Register Now ${data.price ? `Ã¢â‚¬Â¢ ${data.price}` : ''}
               </a>
               ` : ''}
               ${data.contact ? `
@@ -3879,7 +4241,7 @@ END:VCARD\`;
               </div>
             </div>
             <div style="aspect-ratio: 4/3; background: linear-gradient(135deg, var(--color-accent), var(--color-text)); border-radius: var(--radius-lg); display: flex; align-items: center; justify-content: center; font-size: 5rem; color: var(--color-bg); opacity: 0.8;">
-              ðŸ“
+              Ã°Å¸â€œÂ
             </div>
           </div>
         </div>
@@ -3914,7 +4276,7 @@ END:VCARD\`;
           </p>
           ${data.registerLink ? `
           <a href="${data.registerLink}" target="_blank" style="display: inline-block; padding: 1.5rem 4rem; background: var(--color-bg); color: var(--color-accent); text-decoration: none; font-weight: 900; font-size: 1.25rem; border-radius: var(--radius-sm); transition: all 0.2s; box-shadow: 0 8px 24px rgba(0,0,0,0.2);" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 12px 32px rgba(0,0,0,0.3)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 8px 24px rgba(0,0,0,0.2)'">
-            Register Today ${data.price ? `â€¢ ${data.price}` : ''}
+            Register Today ${data.price ? `Ã¢â‚¬Â¢ ${data.price}` : ''}
           </a>
           ` : ''}
         </div>
@@ -3923,7 +4285,7 @@ END:VCARD\`;
       <!-- Footer -->
       <footer style="padding: 3rem 0; background: var(--color-bg); text-align: center; color: var(--color-text-secondary); font-size: 0.875rem; border-top: 3px solid var(--color-border);">
         <div class="container">
-          <p style="font-weight: 700;">Â© 2024 ${data.conferenceName || 'Conference'}. ${data.contact ? `Contact: ${data.contact}` : ''}</p>
+          <p style="font-weight: 700;">Ã‚Â© 2024 ${data.conferenceName || 'Conference'}. ${data.contact ? `Contact: ${data.contact}` : ''}</p>
         </div>
       </footer>
 
@@ -3960,7 +4322,7 @@ END:VCARD\`;
       { id: 'subjects', label: 'Subjects Offered', type: 'textarea', placeholder: 'Enter subjects as JSON array: [{"name": "Mathematics", "grades": "K-12", "description": "Algebra, Calculus, Geometry"}, ...]' },
       { id: 'qualifications', label: 'Qualifications', type: 'textarea', placeholder: 'Your credentials, degrees, certifications...' },
       { id: 'testimonials', label: 'Testimonials', type: 'textarea', placeholder: 'Enter testimonials as JSON: [{"name": "Parent Name", "student": "Student Name", "text": "...", "rating": 5}, ...]' },
-      { id: 'pricing', label: 'Pricing Info', type: 'textarea', placeholder: 'Starting at $50/hour • Package deals available' },
+      { id: 'pricing', label: 'Pricing Info', type: 'textarea', placeholder: 'Starting at $50/hour â€¢ Package deals available' },
       { id: 'contact', label: 'Contact Email', type: 'email', placeholder: 'hello@tutoring.com' },
       { id: 'phone', label: 'Phone', type: 'tel', placeholder: '(555) 123-4567' },
       { id: 'bookingLink', label: 'Booking Link', type: 'url', placeholder: 'https://calendly.com/yourlink' },
@@ -3970,7 +4332,7 @@ END:VCARD\`;
       <header style="position: sticky; top: 0; z-index: 1000; background: var(--color-bg); border-bottom: 2px solid var(--color-border); backdrop-filter: blur(10px);">
         <div class="container" style="display: flex; justify-content: space-between; align-items: center; padding-top: 1.5rem; padding-bottom: 1.5rem;">
           <div style="font-size: 1.5rem; font-weight: 900; color: var(--color-accent);">
-            📚 ${data.businessName || 'Tutoring Services'}
+            ðŸ“š ${data.businessName || 'Tutoring Services'}
           </div>
           <nav style="display: flex; gap: 2rem; align-items: center; font-weight: 600;">
             <a href="#subjects" style="color: var(--color-text); text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">Subjects</a>
@@ -3978,7 +4340,7 @@ END:VCARD\`;
             <a href="#testimonials" style="color: var(--color-text); text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">Reviews</a>
             <a href="#contact" style="color: var(--color-text); text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">Contact</a>
             <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle theme">
-              <span class="theme-icon">🌙</span>
+              <span class="theme-icon">ðŸŒ™</span>
             </button>
           </nav>
         </div>
@@ -3987,7 +4349,7 @@ END:VCARD\`;
       <!-- Hero -->
       <section style="padding: 8rem 0 6rem; background: linear-gradient(135deg, var(--color-surface), var(--color-bg));">
         <div class="container" style="text-align: center; max-width: 900px;">
-          <div style="font-size: 5rem; margin-bottom: 2rem;">🎓</div>
+          <div style="font-size: 5rem; margin-bottom: 2rem;">ðŸŽ“</div>
           <h1 style="font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 900; margin-bottom: 1.5rem; letter-spacing: -0.02em; line-height: 1.1;">
             ${data.businessName || 'Professional Tutoring Services'}
           </h1>
@@ -4096,7 +4458,7 @@ END:VCARD\`;
                   <div style="background: var(--color-surface); border: 2px solid var(--color-border); border-radius: var(--radius-lg); padding: 2rem;">
                     ${testimonial.rating ? `
                     <div style="font-size: 1.25rem; margin-bottom: 1rem; color: var(--color-accent);">
-                      ${'⭐'.repeat(testimonial.rating)}
+                      ${'â­'.repeat(testimonial.rating)}
                     </div>
                     ` : ''}
                     <p style="font-size: 1rem; line-height: 1.6; color: var(--color-text); margin-bottom: 1.5rem; font-style: italic;">
@@ -4134,13 +4496,13 @@ END:VCARD\`;
           <div style="display: flex; flex-direction: column; gap: 1.5rem; align-items: center; margin-bottom: 3rem;">
             ${data.contact ? `
             <a href="mailto:${data.contact}" style="display: flex; align-items: center; gap: 1rem; font-size: 1.125rem; color: var(--color-text); text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">
-              <span style="font-size: 1.5rem;">✉️</span>
+              <span style="font-size: 1.5rem;">âœ‰ï¸</span>
               ${data.contact}
             </a>
             ` : ''}
             ${data.phone ? `
             <a href="tel:${data.phone}" style="display: flex; align-items: center; gap: 1rem; font-size: 1.125rem; color: var(--color-text); text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">
-              <span style="font-size: 1.5rem;">📞</span>
+              <span style="font-size: 1.5rem;">ðŸ“ž</span>
               ${data.phone}
             </a>
             ` : ''}
@@ -4157,7 +4519,7 @@ END:VCARD\`;
       <!-- Footer -->
       <footer style="padding: 2rem 0; background: var(--color-bg); text-align: center; color: var(--color-text-secondary); font-size: 0.875rem; border-top: 2px solid var(--color-border);">
         <div class="container">
-          <p>© 2024 ${data.businessName || 'Tutoring Services'}. All rights reserved.</p>
+          <p>Â© 2024 ${data.businessName || 'Tutoring Services'}. All rights reserved.</p>
         </div>
       </footer>
 
@@ -4180,8 +4542,8 @@ END:VCARD\`;
       { id: 'tagline', label: 'Tagline', type: 'text', placeholder: 'Finding Your Dream Home in [City]' },
       { id: 'bio', label: 'About', type: 'textarea', placeholder: 'Share your experience, market expertise, and what makes you unique...' },
       { id: 'serviceArea', label: 'Service Area', type: 'text', placeholder: 'Greater Los Angeles Area' },
-      { id: 'featuredListings', label: 'Featured Properties', type: 'textarea', placeholder: 'Enter properties as JSON: [{"address": "123 Oak St", "price": "$1,250,000", "beds": 4, "baths": 3, "sqft": "2,800", "type": "Single Family", "status": "For Sale", "image": "🏡"}, ...]' },
-      { id: 'services', label: 'Services', type: 'textarea', placeholder: 'Enter services as JSON: [{"name": "Buyer Representation", "icon": "🔍", "description": "..."}, ...]' },
+      { id: 'featuredListings', label: 'Featured Properties', type: 'textarea', placeholder: 'Enter properties as JSON: [{"address": "123 Oak St", "price": "$1,250,000", "beds": 4, "baths": 3, "sqft": "2,800", "type": "Single Family", "status": "For Sale", "image": "ðŸ¡"}, ...]' },
+      { id: 'services', label: 'Services', type: 'textarea', placeholder: 'Enter services as JSON: [{"name": "Buyer Representation", "icon": "ðŸ”", "description": "..."}, ...]' },
       { id: 'testimonials', label: 'Client Testimonials', type: 'textarea', placeholder: 'Enter testimonials as JSON: [{"name": "John & Mary Smith", "text": "Sarah helped us find our dream home!", "property": "Bought 2BR Condo", "rating": 5}, ...]' },
       { id: 'stats', label: 'Statistics', type: 'textarea', placeholder: 'Enter stats as JSON: [{"number": "150+", "label": "Homes Sold"}, {"number": "$50M+", "label": "Sales Volume"}, ...]' },
       { id: 'license', label: 'License Number', type: 'text', placeholder: 'DRE #01234567' },
@@ -4210,7 +4572,7 @@ END:VCARD\`;
             <a href="#testimonials" style="color: var(--color-text); text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">Testimonials</a>
             <a href="#contact" style="color: var(--color-text); text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">Contact</a>
             <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle theme">
-              <span class="theme-icon">🌙</span>
+              <span class="theme-icon">ðŸŒ™</span>
             </button>
           </nav>
         </div>
@@ -4234,7 +4596,7 @@ END:VCARD\`;
             </p>
             ${data.serviceArea ? `
             <div style="display: flex; align-items: center; gap: 0.75rem; font-size: 1.125rem; color: var(--color-text-secondary); margin-bottom: 3rem;">
-              <span style="font-size: 1.5rem;">📍</span>
+              <span style="font-size: 1.5rem;">ðŸ“</span>
               <span style="font-weight: 600;">Serving ${data.serviceArea}</span>
             </div>
             ` : ''}
@@ -4246,7 +4608,7 @@ END:VCARD\`;
               ` : ''}
               ${data.phone ? `
               <a href="tel:${data.phone}" style="display: inline-block; padding: 1.25rem 2.5rem; background: var(--color-surface); color: var(--color-text); text-decoration: none; font-weight: 700; font-size: 1.0625rem; border-radius: var(--radius-md); border: 2px solid var(--color-border); transition: all 0.2s;" onmouseover="this.style.borderColor='var(--color-accent)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='var(--color-border)'; this.style.transform='translateY(0)'">
-                📞 ${data.phone}
+                ðŸ“ž ${data.phone}
               </a>
               ` : ''}
             </div>
@@ -4301,7 +4663,7 @@ END:VCARD\`;
                 return listings.map(property => `
                   <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); overflow: hidden; transition: all 0.3s; box-shadow: var(--shadow-sm);" onmouseover="this.style.transform='translateY(-8px)'; this.style.boxShadow='var(--shadow-lg)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-sm)'">
                     <div style="aspect-ratio: 4/3; background: linear-gradient(135deg, var(--color-accent), var(--color-text)); display: flex; align-items: center; justify-content: center; font-size: 5rem; position: relative;">
-                      ${property.image || '🏠'}
+                      ${property.image || 'ðŸ '}
                       ${property.status ? `
                       <div style="position: absolute; top: 1rem; right: 1rem; background: ${property.status.toLowerCase().includes('sold') ? '#22c55e' : 'var(--color-accent)'}; color: white; padding: 0.5rem 1rem; font-size: 0.75rem; font-weight: 800; border-radius: var(--radius-sm); text-transform: uppercase; letter-spacing: 0.05em;">
                         ${property.status}
@@ -4325,9 +4687,9 @@ END:VCARD\`;
                       </div>
                       ` : ''}
                       <div style="display: flex; gap: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--color-border); font-size: 0.9375rem; color: var(--color-text-secondary); font-weight: 600;">
-                        ${property.beds ? `<span>🛏️ ${property.beds} beds</span>` : ''}
-                        ${property.baths ? `<span>🚿 ${property.baths} baths</span>` : ''}
-                        ${property.sqft ? `<span>📐 ${property.sqft} sqft</span>` : ''}
+                        ${property.beds ? `<span>ðŸ›ï¸ ${property.beds} beds</span>` : ''}
+                        ${property.baths ? `<span>ðŸš¿ ${property.baths} baths</span>` : ''}
+                        ${property.sqft ? `<span>ðŸ“ ${property.sqft} sqft</span>` : ''}
                       </div>
                     </div>
                   </div>
@@ -4357,7 +4719,7 @@ END:VCARD\`;
                 const services = JSON.parse(data.services || '[]');
                 return services.map(service => `
                   <div style="background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 2rem; text-align: center; transition: all 0.2s;" onmouseover="this.style.borderColor='var(--color-accent)'; this.style.transform='translateY(-4px)'" onmouseout="this.style.borderColor='var(--color-border)'; this.style.transform='translateY(0)'">
-                    <div style="font-size: 3rem; margin-bottom: 1rem;">${service.icon || '🏡'}</div>
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">${service.icon || 'ðŸ¡'}</div>
                     <h3 style="font-size: 1.375rem; font-weight: 800; margin-bottom: 1rem; letter-spacing: -0.01em;">
                       ${service.name || 'Service'}
                     </h3>
@@ -4394,8 +4756,8 @@ END:VCARD\`;
           
           ${data.license || data.brokerage ? `
           <div style="display: flex; gap: 2rem; justify-content: center; padding: 1.5rem; background: var(--color-surface); border-radius: var(--radius-md); font-size: 0.9375rem; color: var(--color-text-secondary); font-weight: 600; flex-wrap: wrap;">
-            ${data.license ? `<span>📄 ${data.license}</span>` : ''}
-            ${data.brokerage ? `<span>🏢 ${data.brokerage}</span>` : ''}
+            ${data.license ? `<span>ðŸ“„ ${data.license}</span>` : ''}
+            ${data.brokerage ? `<span>ðŸ¢ ${data.brokerage}</span>` : ''}
           </div>
           ` : ''}
         </div>
@@ -4419,7 +4781,7 @@ END:VCARD\`;
                   <div style="background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 2rem;">
                     ${testimonial.rating ? `
                     <div style="font-size: 1.25rem; margin-bottom: 1rem; color: #fbbf24;">
-                      ${'⭐'.repeat(testimonial.rating)}
+                      ${'â­'.repeat(testimonial.rating)}
                     </div>
                     ` : ''}
                     <p style="font-size: 1.0625rem; line-height: 1.7; color: var(--color-text); margin-bottom: 1.5rem; font-style: italic;">
@@ -4459,13 +4821,13 @@ END:VCARD\`;
           <div style="display: flex; flex-direction: column; gap: 1rem; align-items: center; margin-bottom: 2.5rem;">
             ${data.contact ? `
             <a href="mailto:${data.contact}" style="display: flex; align-items: center; gap: 1rem; font-size: 1.0625rem; color: var(--color-text); text-decoration: none; font-weight: 600; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">
-              <span style="font-size: 1.5rem;">✉️</span>
+              <span style="font-size: 1.5rem;">âœ‰ï¸</span>
               ${data.contact}
             </a>
             ` : ''}
             ${data.phone ? `
             <a href="tel:${data.phone}" style="display: flex; align-items: center; gap: 1rem; font-size: 1.0625rem; color: var(--color-text); text-decoration: none; font-weight: 600; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">
-              <span style="font-size: 1.5rem;">📞</span>
+              <span style="font-size: 1.5rem;">ðŸ“ž</span>
               ${data.phone}
             </a>
             ` : ''}
@@ -4482,7 +4844,7 @@ END:VCARD\`;
       <!-- Footer -->
       <footer style="padding: 2rem 0; background: var(--color-surface); text-align: center; color: var(--color-text-secondary); font-size: 0.875rem; border-top: 1px solid var(--color-border);">
         <div class="container">
-          <p>© 2024 ${data.agentName || 'Real Estate Agent'}. ${data.license ? data.license : ''}</p>
+          <p>Â© 2024 ${data.agentName || 'Real Estate Agent'}. ${data.license ? data.license : ''}</p>
         </div>
       </footer>
 
@@ -4500,14 +4862,14 @@ END:VCARD\`;
     category: 'Business',
     defaultTheme: 'elegant',
     fields: [
-      { id: 'advisorName', label: 'Advisor Name', type: 'text', placeholder: 'Michael Chen, CFP®', required: true },
+      { id: 'advisorName', label: 'Advisor Name', type: 'text', placeholder: 'Michael Chen, CFPÂ®', required: true },
       { id: 'firmName', label: 'Firm Name', type: 'text', placeholder: 'Horizon Wealth Management' },
       { id: 'tagline', label: 'Tagline', type: 'text', placeholder: 'Building Your Financial Future with Confidence' },
       { id: 'bio', label: 'About', type: 'textarea', placeholder: 'Share your background, philosophy, and approach to financial planning...' },
-      { id: 'specializations', label: 'Specializations', type: 'textarea', placeholder: 'Enter specializations as JSON: [{"name": "Retirement Planning", "icon": "🏖️", "description": "..."}, ...]' },
+      { id: 'specializations', label: 'Specializations', type: 'textarea', placeholder: 'Enter specializations as JSON: [{"name": "Retirement Planning", "icon": "ðŸ–ï¸", "description": "..."}, ...]' },
       { id: 'services', label: 'Services Offered', type: 'textarea', placeholder: 'Enter services as JSON: [{"name": "Wealth Management", "description": "...", "features": ["Feature 1", "Feature 2"]}, ...]' },
       { id: 'process', label: 'Planning Process', type: 'textarea', placeholder: 'Enter process steps as JSON: [{"step": "1", "title": "Discovery", "description": "..."}, ...]' },
-      { id: 'credentials', label: 'Credentials & Certifications', type: 'textarea', placeholder: 'CFP®, CFA, MBA, 15+ years experience...' },
+      { id: 'credentials', label: 'Credentials & Certifications', type: 'textarea', placeholder: 'CFPÂ®, CFA, MBA, 15+ years experience...' },
       { id: 'testimonials', label: 'Client Testimonials', type: 'textarea', placeholder: 'Enter testimonials as JSON: [{"name": "Robert & Linda K.", "text": "...", "title": "Retired Executives"}, ...]' },
       { id: 'disclosure', label: 'Disclosure', type: 'text', placeholder: 'Securities offered through XYZ Financial, Member FINRA/SIPC' },
       { id: 'contact', label: 'Email', type: 'email', placeholder: 'michael@horizonwealth.com' },
@@ -4535,7 +4897,7 @@ END:VCARD\`;
             <a href="#about" style="color: var(--color-text); text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">About</a>
             <a href="#contact" style="color: var(--color-text); text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">Contact</a>
             <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle theme">
-              <span class="theme-icon">🌙</span>
+              <span class="theme-icon">ðŸŒ™</span>
             </button>
           </nav>
         </div>
@@ -4546,14 +4908,14 @@ END:VCARD\`;
         <div class="container">
           <div style="max-width: 800px; margin: 0 auto; text-align: center;">
             <div style="display: inline-flex; align-items: center; gap: 0.75rem; padding: 0.625rem 1.25rem; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-full); margin-bottom: 2rem; font-size: 0.9375rem; font-weight: 600; color: var(--color-text-secondary);">
-              <span style="font-size: 1.25rem;">📊</span>
+              <span style="font-size: 1.25rem;">ðŸ“Š</span>
               Professional Financial Planning
             </div>
             <h1 style="font-size: clamp(2.75rem, 6vw, 4.5rem); font-weight: 800; margin-bottom: 1.5rem; letter-spacing: -0.03em; line-height: 1.1; color: var(--color-text);">
               ${data.tagline || 'Strategic Financial Planning for Your Future'}
             </h1>
             <p style="font-size: 1.25rem; color: var(--color-text-secondary); margin-bottom: 3rem; line-height: 1.6; font-weight: 500;">
-              ${data.firmName ? `${data.firmName} • ` : ''}Personalized wealth management strategies tailored to your goals
+              ${data.firmName ? `${data.firmName} â€¢ ` : ''}Personalized wealth management strategies tailored to your goals
             </p>
             <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
               ${data.calendlyLink ? `
@@ -4590,7 +4952,7 @@ END:VCARD\`;
                 const specializations = JSON.parse(data.specializations || '[]');
                 return specializations.map(spec => `
                   <div style="background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 2rem; transition: all 0.2s;" onmouseover="this.style.borderColor='var(--color-accent)'; this.style.transform='translateY(-4px)'; this.style.boxShadow='var(--shadow-md)'" onmouseout="this.style.borderColor='var(--color-border)'; this.style.transform='translateY(0)'; this.style.boxShadow='none'">
-                    <div style="font-size: 2.5rem; margin-bottom: 1rem;">${spec.icon || '💼'}</div>
+                    <div style="font-size: 2.5rem; margin-bottom: 1rem;">${spec.icon || 'ðŸ’¼'}</div>
                     <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.75rem; letter-spacing: -0.01em;">
                       ${spec.name || 'Specialization'}
                     </h3>
@@ -4643,7 +5005,7 @@ END:VCARD\`;
                         <ul style="list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.75rem;">
                           ${service.features.map(feature => `
                             <li style="display: flex; align-items: center; gap: 0.5rem; color: var(--color-text); font-size: 0.9375rem;">
-                              <span style="color: var(--color-accent); font-weight: 900;">✓</span>
+                              <span style="color: var(--color-accent); font-weight: 900;">âœ“</span>
                               <span>${feature}</span>
                             </li>
                           `).join('')}
@@ -4793,19 +5155,19 @@ END:VCARD\`;
             <div style="display: grid; gap: 1.5rem;">
               ${data.phone ? `
               <a href="tel:${data.phone}" style="display: flex; align-items: center; gap: 1rem; color: var(--color-text); text-decoration: none; font-weight: 600; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">
-                <span style="font-size: 1.5rem;">📞</span>
+                <span style="font-size: 1.5rem;">ðŸ“ž</span>
                 <span>${data.phone}</span>
               </a>
               ` : ''}
               ${data.contact ? `
               <a href="mailto:${data.contact}" style="display: flex; align-items: center; gap: 1rem; color: var(--color-text); text-decoration: none; font-weight: 600; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">
-                <span style="font-size: 1.5rem;">✉️</span>
+                <span style="font-size: 1.5rem;">âœ‰ï¸</span>
                 <span>${data.contact}</span>
               </a>
               ` : ''}
               ${data.address ? `
               <div style="display: flex; align-items: start; gap: 1rem; color: var(--color-text-secondary);">
-                <span style="font-size: 1.5rem;">📍</span>
+                <span style="font-size: 1.5rem;">ðŸ“</span>
                 <span style="line-height: 1.6; white-space: pre-line;">${data.address}</span>
               </div>
               ` : ''}
@@ -4825,7 +5187,7 @@ END:VCARD\`;
       <!-- Footer -->
       <footer style="padding: 2.5rem 0; background: var(--color-surface); text-align: center; color: var(--color-text-secondary); font-size: 0.8125rem; border-top: 1px solid var(--color-border);">
         <div class="container" style="max-width: 900px;">
-          <p style="margin-bottom: 0.75rem; font-weight: 600;">© 2024 ${data.advisorName || 'Financial Advisor'}${data.firmName ? ` • ${data.firmName}` : ''}</p>
+          <p style="margin-bottom: 0.75rem; font-weight: 600;">Â© 2024 ${data.advisorName || 'Financial Advisor'}${data.firmName ? ` â€¢ ${data.firmName}` : ''}</p>
           ${data.disclosure ? `
           <p style="line-height: 1.6; opacity: 0.8;">${data.disclosure}</p>
           ` : ''}
@@ -4852,7 +5214,7 @@ END:VCARD\`;
       { id: 'trainerName', label: 'Trainer Name', type: 'text', placeholder: 'Alex Johnson', required: true },
       { id: 'tagline', label: 'Tagline', type: 'text', placeholder: 'Transform Your Body, Transform Your Life' },
       { id: 'bio', label: 'Bio', type: 'textarea', placeholder: 'Share your fitness journey, certifications, and training philosophy...' },
-      { id: 'specialties', label: 'Specialties', type: 'textarea', placeholder: 'Enter specialties as JSON array: [{"name": "Strength Training", "icon": "💪", "description": "Build muscle and power"}, ...]' },
+      { id: 'specialties', label: 'Specialties', type: 'textarea', placeholder: 'Enter specialties as JSON array: [{"name": "Strength Training", "icon": "ðŸ’ª", "description": "Build muscle and power"}, ...]' },
       { id: 'programs', label: 'Training Programs', type: 'textarea', placeholder: 'Enter programs as JSON: [{"name": "1-on-1 Training", "duration": "60 min", "price": "$80/session", "description": "..."}, ...]' },
       { id: 'transformations', label: 'Client Transformations', type: 'textarea', placeholder: 'Enter success stories as JSON: [{"name": "John D.", "result": "Lost 30 lbs", "time": "3 months", "testimonial": "..."}, ...]' },
       { id: 'certifications', label: 'Certifications', type: 'textarea', placeholder: 'NASM CPT, ACE, CrossFit Level 1, etc.' },
@@ -4866,7 +5228,7 @@ END:VCARD\`;
       <header style="position: sticky; top: 0; z-index: 1000; background: var(--color-bg); border-bottom: 3px solid var(--color-accent); backdrop-filter: blur(10px);">
         <div class="container" style="display: flex; justify-content: space-between; align-items: center; padding-top: 1.5rem; padding-bottom: 1.5rem;">
           <div style="font-size: 1.5rem; font-weight: 900; color: var(--color-accent); text-transform: uppercase; letter-spacing: 0.05em;">
-            💪 ${data.trainerName || 'Fitness Coach'}
+            ðŸ’ª ${data.trainerName || 'Fitness Coach'}
           </div>
           <nav style="display: flex; gap: 2rem; align-items: center; font-weight: 700; text-transform: uppercase; font-size: 0.875rem;">
             <a href="#programs" style="color: var(--color-text); text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">Programs</a>
@@ -4874,7 +5236,7 @@ END:VCARD\`;
             <a href="#results" style="color: var(--color-text); text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">Results</a>
             <a href="#contact" style="color: var(--color-text); text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">Contact</a>
             <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle theme">
-              <span class="theme-icon">🌙</span>
+              <span class="theme-icon">ðŸŒ™</span>
             </button>
           </nav>
         </div>
@@ -4884,7 +5246,7 @@ END:VCARD\`;
       <section style="padding: 10rem 0 8rem; background: linear-gradient(135deg, var(--color-accent), var(--color-text)); color: var(--color-bg); position: relative; overflow: hidden;">
         <div style="position: absolute; inset: 0; opacity: 0.1; background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, currentColor 10px, currentColor 11px);"></div>
         <div class="container" style="text-align: center; position: relative; z-index: 1;">
-          <div style="font-size: 6rem; margin-bottom: 2rem; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));">🏋️</div>
+          <div style="font-size: 6rem; margin-bottom: 2rem; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));">ðŸ‹ï¸</div>
           <h1 style="font-size: clamp(3rem, 8vw, 5.5rem); font-weight: 900; margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: -0.02em; line-height: 1;">
             ${data.trainerName || 'Elite Personal Training'}
           </h1>
@@ -4915,7 +5277,7 @@ END:VCARD\`;
                 const specialties = JSON.parse(data.specialties || '[]');
                 return specialties.map(specialty => `
                   <div style="background: var(--color-surface); border: 3px solid var(--color-border); padding: 2.5rem; text-align: center; transition: all 0.2s;" onmouseover="this.style.borderColor='var(--color-accent)'; this.style.transform='translateY(-6px)'" onmouseout="this.style.borderColor='var(--color-border)'; this.style.transform='translateY(0)'">
-                    <div style="font-size: 3rem; margin-bottom: 1rem;">${specialty.icon || '⚡'}</div>
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">${specialty.icon || 'âš¡'}</div>
                     <h3 style="font-size: 1.375rem; font-weight: 900; margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">
                       ${specialty.name || 'Specialty'}
                     </h3>
@@ -4977,7 +5339,7 @@ END:VCARD\`;
                     <ul style="list-style: none; padding: 0; margin-bottom: 2rem;">
                       ${program.features.split('\n').map(feature => `
                         <li style="padding: 0.5rem 0; color: var(--color-text); display: flex; align-items: start; gap: 0.75rem;">
-                          <span style="color: var(--color-accent); font-weight: 900; font-size: 1.125rem;">✓</span>
+                          <span style="color: var(--color-accent); font-weight: 900; font-size: 1.125rem;">âœ“</span>
                           <span>${feature.trim()}</span>
                         </li>
                       `).join('')}
@@ -5088,19 +5450,19 @@ END:VCARD\`;
           <div style="display: flex; flex-direction: column; gap: 1.5rem; align-items: center; margin-bottom: 3rem;">
             ${data.contact ? `
             <a href="mailto:${data.contact}" style="display: flex; align-items: center; gap: 1rem; font-size: 1.125rem; color: var(--color-bg); text-decoration: none; font-weight: 700; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
-              <span style="font-size: 1.5rem;">✉️</span>
+              <span style="font-size: 1.5rem;">âœ‰ï¸</span>
               ${data.contact}
             </a>
             ` : ''}
             ${data.phone ? `
             <a href="tel:${data.phone}" style="display: flex; align-items: center; gap: 1rem; font-size: 1.125rem; color: var(--color-bg); text-decoration: none; font-weight: 700; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
-              <span style="font-size: 1.5rem;">📞</span>
+              <span style="font-size: 1.5rem;">ðŸ“ž</span>
               ${data.phone}
             </a>
             ` : ''}
             ${data.instagram ? `
             <a href="${data.instagram}" target="_blank" style="display: flex; align-items: center; gap: 1rem; font-size: 1.125rem; color: var(--color-bg); text-decoration: none; font-weight: 700; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
-              <span style="font-size: 1.5rem;">📸</span>
+              <span style="font-size: 1.5rem;">ðŸ“¸</span>
               Follow on Instagram
             </a>
             ` : ''}
@@ -5117,7 +5479,7 @@ END:VCARD\`;
       <!-- Footer -->
       <footer style="padding: 2rem 0; background: var(--color-bg); text-align: center; color: var(--color-text-secondary); font-size: 0.875rem; border-top: 3px solid var(--color-accent); font-weight: 700;">
         <div class="container">
-          <p style="text-transform: uppercase; letter-spacing: 0.05em;">© 2024 ${data.trainerName || 'Fitness Training'}. All rights reserved.</p>
+          <p style="text-transform: uppercase; letter-spacing: 0.05em;">Â© 2024 ${data.trainerName || 'Fitness Training'}. All rights reserved.</p>
         </div>
       </footer>
 

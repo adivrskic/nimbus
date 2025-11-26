@@ -8,43 +8,43 @@ const styles = [
     id: 'minimal',
     name: 'Minimal',
     description: 'Clean lines and thoughtful whitespace',
-    icon: <Feather size={18} />,
+    icon: <Feather size={20} />,
   },
   {
     id: 'brutalist',
     name: 'Brutalist',
     description: 'Bold typography and raw aesthetics',
-    icon: <Zap size={18} />,
+    icon: <Zap size={20} />,
   },
   {
     id: 'gradient',
     name: 'Gradient',
     description: 'Smooth colors and soft edges',
-    icon: <Sparkles size={18}  />,
+    icon: <Sparkles size={20}  />,
   },
   {
     id: 'elegant',
     name: 'Elegant',
     description: 'Sophisticated and timeless',
-    icon: <BookOpen size={18}  />,
+    icon: <BookOpen size={20}  />,
   },
   {
     id: 'retro',
     name: 'Retro Wave',
     description: 'Vibrant 80s inspired design',
-    icon: <Palette size={18} />,
+    icon: <Palette size={20} />,
   },
   {
     id: 'glassmorphism',
     name: 'Glassmorphism',
     description: 'Frosted glass and depth',
-    icon: <Shapes size={18}  />,
+    icon: <Shapes size={20} />,
   },
   {
     id: 'neumorphism',
     name: 'Neumorphism',
     description: 'Soft shadows and subtle depth',
-    icon: <Cloud size={18}  />,
+    icon: <Cloud size={20} />,
   },
 ];
 
@@ -1364,14 +1364,14 @@ function StyleShowcase() {
                   className={`mode-btn ${previewMode === "light" ? "active" : ""}`}
                   aria-pressed={previewMode === "light"}
                 >
-                  <Sun size={18} />
+                  <Sun size={20} />
                 </button>
                 <button
                   onClick={() => setPreviewMode("dark")}
                   className={`mode-btn ${previewMode === "dark" ? "active" : ""}`}
                   aria-pressed={previewMode === "dark"}
                 >
-                  <Moon size={18} />
+                  <Moon size={20} />
                 </button>
               </div>
             </div>
@@ -1388,21 +1388,21 @@ function StyleShowcase() {
                     onClick={() => setViewMode("desktop")}
                     aria-label="Desktop view"
                   >
-                    <Monitor size={18} />
+                    <Monitor size={20} />
                   </button>
                   <button
                     className={`view-toggle ${viewMode === "tablet" ? "active" : ""}`}
                     onClick={() => setViewMode("tablet")}
                     aria-label="Tablet view"
                   >
-                    <Tablet size={18} />
+                    <Tablet size={20}/>
                   </button>
                   <button
                     className={`view-toggle ${viewMode === "mobile" ? "active" : ""}`}
                     onClick={() => setViewMode("mobile")}
                     aria-label="Mobile view"
                   >
-                    <Smartphone size={18} />
+                    <Smartphone size={20}/>
                   </button>
                 </div>
 
@@ -1424,13 +1424,34 @@ function StyleShowcase() {
             </div>
 
             <div className={`style-preview__frame style-preview__frame--${viewMode}`} id="live-preview">
-              <iframe
-                ref={iframeRef}
-                className="style-preview__iframe"
-                title="Style Preview"
-                sandbox="allow-same-origin"
-              />
+              <div className="iframe-browser">
+                <div className="iframe-browser__chrome" role="toolbar" aria-hidden>
+                  <div className="iframe-browser__window-controls">
+                    <span className="dot"></span>
+                    <span className="dot"></span>
+                    <span className="dot"></span>
+                  </div>
+
+                  <div className="iframe-browser__url" aria-hidden>
+                    <div className="url__pill" />
+                  </div>
+
+                  <div className="iframe-browser__actions" aria-hidden>
+                    {/* optional: small icons or empty to keep minimal */}
+                  </div>
+                </div>
+
+                <div className="iframe-browser__viewport">
+                  <iframe
+                    ref={iframeRef}
+                    className="style-preview__iframe"
+                    title="Style Preview"
+                    sandbox="allow-same-origin"
+                  />
+                </div>
+              </div>
             </div>
+
 
             <div id="preview-sentinel" style={{ width: "1px", height: "1px", opacity: 0 }} />
           </div>
