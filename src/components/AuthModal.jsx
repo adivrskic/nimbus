@@ -29,7 +29,6 @@ function AuthModal({ isOpen, onClose, onAuthSuccess, onForgotPassword }) {
   const [successMessage, setSuccessMessage] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
 
-  // ⭐ Load remembered email
   useEffect(() => {
     if (isOpen) {
       const savedEmail = localStorage.getItem('rememberedEmail');
@@ -122,7 +121,6 @@ function AuthModal({ isOpen, onClose, onAuthSuccess, onForgotPassword }) {
     }
   };
 
-  // ⭐ OAuth Handlers (Google, GitHub, Facebook, Apple, LinkedIn)
   const createOAuthHandler = (oauthFunc, providerName) => async () => {
     setIsLoading(true);
     setErrors({});
@@ -141,9 +139,9 @@ function AuthModal({ isOpen, onClose, onAuthSuccess, onForgotPassword }) {
 
   const handleGoogleSignIn   = createOAuthHandler(signInWithGoogle, 'Google');
   const handleGitHubSignIn   = createOAuthHandler(signInWithGitHub, 'GitHub');
-  const handleFacebookSignIn = createOAuthHandler(signInWithFacebook, 'Facebook');
-  const handleAppleSignIn    = createOAuthHandler(signInWithApple, 'Apple');
-  const handleLinkedInSignIn = createOAuthHandler(signInWithLinkedIn, 'LinkedIn');
+  // const handleFacebookSignIn = createOAuthHandler(signInWithFacebook, 'Facebook');
+  // const handleAppleSignIn    = createOAuthHandler(signInWithApple, 'Apple');
+  // const handleLinkedInSignIn = createOAuthHandler(signInWithLinkedIn, 'LinkedIn');
 
   const handleForgotPassword = () => {
     if (onForgotPassword) onForgotPassword();
@@ -186,7 +184,6 @@ function AuthModal({ isOpen, onClose, onAuthSuccess, onForgotPassword }) {
         </button>
 
         <div className="auth-modal__content">
-          {/* TITLE */}
           <div className="auth-modal__header">
             <h2>{mode === 'login' ? 'Welcome Back' : 'Create Account'}</h2>
             <p>
@@ -196,12 +193,10 @@ function AuthModal({ isOpen, onClose, onAuthSuccess, onForgotPassword }) {
             </p>
           </div>
 
-          {/* SUCCESS MESSAGE */}
           {successMessage && (
             <div className="success-message">{successMessage}</div>
           )}
 
-          {/* FORM */}
           <form className="auth-form" onSubmit={handleSubmit}>
             {mode === 'signup' && (
               <div className="form-field">
@@ -329,8 +324,6 @@ function AuthModal({ isOpen, onClose, onAuthSuccess, onForgotPassword }) {
 
 
           <div className="social-auth--row">
-
-            {/* Google */}
             <button
               className="btn-social-icon"
               onClick={handleGoogleSignIn}
@@ -354,8 +347,6 @@ function AuthModal({ isOpen, onClose, onAuthSuccess, onForgotPassword }) {
                 3.58 9 3.58z"/>
               </svg>
             </button>
-
-            {/* GitHub */}
             <button
               className="btn-social-icon"
               onClick={handleGitHubSignIn}

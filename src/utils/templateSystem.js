@@ -591,15 +591,27 @@ export const templates = {
       testimonialAuthor: { type: 'text', default: 'Sarah Chen', label: 'Testimonial Author' },
       testimonialRole: { type: 'text', default: 'Product Designer', label: 'Author Role' }
     },
-    structure: (data, theme) => `
-      <!-- Header -->
-      <header style="padding: 1.5rem 0; border-bottom: 1px solid var(--color-border);">
+    structure: (data, theme) => {
+      // Detect theme style for dynamic elements
+      const themeId = theme?.id || 'minimal';
+      const isBrutalist = themeId === 'brutalist';
+      const isGradient = themeId === 'gradient';
+      const isElegant = themeId === 'elegant';
+      const isRetro = themeId === 'retro';
+      const isGlassmorphism = themeId === 'glassmorphism';
+      const isNeumorphism = themeId === 'neumorphism';
+      
+      return `
+      <!-- Sticky Header with Theme-Specific Styling -->
+      <header style="padding: ${isBrutalist ? '2rem 0' : isElegant ? '2rem 0' : isNeumorphism ? '2rem 0' : '1.5rem 0'}; border-bottom: ${isBrutalist ? '4px' : isRetro ? '3px' : isNeumorphism ? 'none' : '1px'} solid ${isBrutalist || isRetro ? 'var(--color-accent)' : isNeumorphism || isGlassmorphism ? 'transparent' : 'var(--color-border)'}; position: sticky; top: 0; ${isGlassmorphism ? 'background: rgba(255, 255, 255, 0.1);' : 'background: var(--color-bg);'} z-index: 100; backdrop-filter: blur(${isGlassmorphism ? '20px' : '10px'}); ${isGlassmorphism ? 'box-shadow: 0 8px 32px rgba(31, 38, 135, 0.1);' : ''}">
         <div class="container">
           <nav style="display: flex; justify-content: space-between; align-items: center;">
-            <div style="font-weight: 600; font-size: 1.125rem; letter-spacing: -0.02em;">${data.companyName || 'MINIMAL'}</div>
-            <ul style="display: flex; gap: 2rem; list-style: none; align-items: center;">
-              <li><a href="#features" style="color: var(--color-text-secondary); text-decoration: none; font-size: 0.875rem; transition: color 0.2s;" onmouseover="this.style.color='var(--color-text)'" onmouseout="this.style.color='var(--color-text-secondary)'">Features</a></li>
-              <li><a href="#testimonial" style="color: var(--color-text-secondary); text-decoration: none; font-size: 0.875rem; transition: color 0.2s;" onmouseover="this.style.color='var(--color-text)'" onmouseout="this.style.color='var(--color-text-secondary)'">Reviews</a></li>
+            <div class="logo" style="font-weight: ${isBrutalist ? '900' : isNeumorphism || isElegant ? '700' : '600'}; font-size: ${isBrutalist ? '2rem' : isRetro ? '1.5rem' : isElegant ? '1.5rem' : isNeumorphism ? '1.25rem' : '1.125rem'}; letter-spacing: ${isBrutalist ? '2px' : isRetro ? '0' : isElegant ? '0' : '-0.02em'}; ${isBrutalist || isRetro ? 'text-transform: uppercase;' : ''} ${isGradient ? 'background: linear-gradient(135deg, #667eea, #764ba2, #f093fb); -webkit-background-clip: text; -webkit-text-fill-color: transparent;' : isRetro ? 'background: linear-gradient(90deg, var(--color-accent), #00f5ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent;' : isElegant ? 'font-family: Playfair Display, serif; color: var(--color-accent);' : isNeumorphism || isGlassmorphism ? 'color: var(--color-accent);' : ''}">${data.companyName || 'MINIMAL'}</div>
+            
+            <!-- Desktop Navigation -->
+            <ul class="nav-links" style="display: flex; gap: ${isBrutalist || isElegant ? '3rem' : '2rem'}; list-style: none; align-items: center;">
+              <li><a href="#features" style="color: ${isGlassmorphism ? 'var(--color-text)' : 'var(--color-text-secondary)'}; text-decoration: none; font-size: ${isBrutalist ? '1.125rem' : isRetro ? '0.875rem' : '0.875rem'}; transition: ${isBrutalist ? 'all 0.1s' : 'color 0.2s'}; font-weight: ${isBrutalist ? '700' : isElegant ? '400' : '500'}; ${isBrutalist || isRetro ? 'text-transform: uppercase;' : ''} ${isRetro ? 'letter-spacing: 1px;' : isElegant ? 'letter-spacing: 0.5px;' : ''}" ${isBrutalist ? `onmouseover="this.style.background='var(--color-text)'; this.style.color='var(--color-bg)'; this.style.padding='0.25rem 0.5rem'" onmouseout="this.style.background='transparent'; this.style.color='var(--color-text-secondary)'; this.style.padding='0'"` : isRetro ? `onmouseover="this.style.color='var(--color-accent)'; this.style.textShadow='0 0 10px var(--color-accent)'" onmouseout="this.style.color='var(--color-text-secondary)'; this.style.textShadow='none'"` : isElegant ? `onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text-secondary)'"` : isGlassmorphism ? `onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'"` : `onmouseover="this.style.color='var(--color-text)'" onmouseout="this.style.color='var(--color-text-secondary)'"`}>Features</a></li>
+              <li><a href="#testimonial" style="color: ${isGlassmorphism ? 'var(--color-text)' : 'var(--color-text-secondary)'}; text-decoration: none; font-size: ${isBrutalist ? '1.125rem' : isRetro ? '0.875rem' : '0.875rem'}; transition: ${isBrutalist ? 'all 0.1s' : 'color 0.2s'}; font-weight: ${isBrutalist ? '700' : isElegant ? '400' : '500'}; ${isBrutalist || isRetro ? 'text-transform: uppercase;' : ''} ${isRetro ? 'letter-spacing: 1px;' : isElegant ? 'letter-spacing: 0.5px;' : ''}" ${isBrutalist ? `onmouseover="this.style.background='var(--color-text)'; this.style.color='var(--color-bg)'; this.style.padding='0.25rem 0.5rem'" onmouseout="this.style.background='transparent'; this.style.color='var(--color-text-secondary)'; this.style.padding='0'"` : isRetro ? `onmouseover="this.style.color='var(--color-accent)'; this.style.textShadow='0 0 10px var(--color-accent)'" onmouseout="this.style.color='var(--color-text-secondary)'; this.style.textShadow='none'"` : isElegant ? `onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text-secondary)'"` : isGlassmorphism ? `onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'"` : `onmouseover="this.style.color='var(--color-text)'" onmouseout="this.style.color='var(--color-text-secondary)'"`}>Reviews</a></li>
               <li>
                 <label class="theme-toggle-switch-wrapper" style="cursor: pointer;">
                   <input type="checkbox" class="theme-toggle-switch" onclick="toggleTheme()" aria-label="Toggle theme">
@@ -607,64 +619,161 @@ export const templates = {
                 </label>
               </li>
             </ul>
+            
+            <!-- Mobile Menu Button & Theme Toggle -->
+            <div class="mobile-controls" style="display: none; align-items: center; gap: 1rem;">
+              <button class="theme-toggle-btn mobile-theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+                <span class="theme-icon"></span>
+              </button>
+              <button class="hamburger-btn" onclick="toggleMobileMenu()" aria-label="Menu" style="background: none; border: none; cursor: pointer; padding: 0.5rem; color: var(--color-text);">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                  <line x1="3" y1="12" x2="21" y2="12"></line>
+                  <line x1="3" y1="6" x2="21" y2="6"></line>
+                  <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+              </button>
+            </div>
           </nav>
+          
+          <!-- Mobile Menu Dropdown -->
+          <div class="mobile-menu" style="display: none; padding: 2rem 0 1rem; border-top: 1px solid ${isNeumorphism || isGlassmorphism ? 'transparent' : 'var(--color-border)'}; margin-top: 1rem;">
+            <ul style="list-style: none; display: flex; flex-direction: column; gap: 1.5rem;">
+              <li><a href="#features" onclick="toggleMobileMenu()" style="color: var(--color-text); text-decoration: none; font-size: 1.125rem; font-weight: 500; display: block;">Features</a></li>
+              <li><a href="#testimonial" onclick="toggleMobileMenu()" style="color: var(--color-text); text-decoration: none; font-size: 1.125rem; font-weight: 500; display: block;">Reviews</a></li>
+              <li>
+                <label class="theme-toggle-switch-wrapper" style="cursor: pointer;">
+                  <input type="checkbox" class="theme-toggle-switch" onclick="toggleTheme()" aria-label="Toggle theme">
+                  <span class="theme-toggle-slider"></span>
+                </label>
+              </li>
+              </ul>
+          </div>
         </div>
       </header>
 
       <main>
-        <!-- Hero -->
-        <section style="padding: 8rem 0 6rem; text-align: center;">
+        <!-- Hero Section with Theme-Specific Styling -->
+        <section style="padding: ${isBrutalist ? '6rem 0' : isElegant ? '8rem 0' : '8rem 0 6rem'}; text-align: center; position: relative;">
           <div class="container">
-            <h1 style="font-size: clamp(2.5rem, 7vw, 5rem); font-weight: 700; line-height: 1.1; letter-spacing: -0.03em; margin-bottom: 1.5rem;">
-              ${data.headline || 'Less is More'}
+            ${isGradient ? `<div style="display: inline-block; padding: 0.5rem 1.25rem; background: linear-gradient(135deg, rgba(102,126,234,0.1), rgba(118,75,162,0.1)); border-radius: 999px; margin-bottom: 2rem; font-size: 0.875rem; font-weight: 600;">New Features Available</div>` : ''}
+            ${isElegant ? `<div style="color: var(--color-accent); font-size: 0.875rem; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 1.5rem; font-weight: 400;">Timeless Design</div>` : ''}
+            
+            <h1 style="font-family: ${isElegant ? 'Playfair Display, serif' : 'inherit'}; font-size: clamp(${isBrutalist || isRetro ? '3rem' : '2.5rem'}, ${isBrutalist || isRetro ? '10vw' : '7vw'}, ${isBrutalist || isRetro ? '8rem' : isGlassmorphism ? '6rem' : '5rem'}); font-weight: ${isBrutalist || isNeumorphism || isGlassmorphism ? '800' : isRetro ? '700' : isElegant ? '600' : '700'}; line-height: ${isBrutalist || isRetro ? '0.9' : isElegant ? '1.2' : '1.1'}; letter-spacing: ${isRetro ? '2px' : '-0.03em'}; margin-bottom: ${isElegant ? '2rem' : '1.5rem'}; ${isBrutalist || isRetro ? 'text-transform: uppercase;' : ''}">
+              ${isBrutalist ? data.headline.split(' ').map((word, i) => i === 0 ? `<span style="background: var(--color-accent); color: var(--color-bg); padding: 0 0.5rem; display: inline-block; transform: rotate(-1deg);">${word}</span>` : word).join(' ') : ''}
+              ${isGradient ? data.headline.split(' ').map((word, i) => i === data.headline.split(' ').length - 1 ? `<span style="background: linear-gradient(135deg, #667eea, #764ba2, #f093fb); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">${word}</span>` : word).join(' ') : ''}
+              ${isRetro ? `<span data-text="${data.headline}" style="position: relative; background: linear-gradient(90deg, var(--color-accent), #00f5ff, var(--color-accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">${data.headline}</span>` : ''}
+              ${!isBrutalist && !isGradient && !isRetro ? data.headline || 'Less is More' : ''}
             </h1>
-            <p style="font-size: 1.125rem; color: var(--color-text-secondary); max-width: 600px; margin: 0 auto 3rem; line-height: 1.8;">
+            
+            <p style="font-family: ${isElegant ? 'Lato, sans-serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: ${isBrutalist || isRetro ? '1.5rem' : isElegant || isGlassmorphism ? '1.125rem' : '1.125rem'}; font-weight: ${isElegant ? '300' : 'normal'}; color: var(--color-text-secondary); max-width: ${isElegant ? '680px' : isGlassmorphism ? '700px' : '600px'}; margin: 0 auto 3rem; line-height: ${isBrutalist || isRetro ? '1.6' : isElegant || isGlassmorphism ? '1.9' : '1.8'};">
               ${data.subheadline || 'Clean design, thoughtful whitespace, and perfect typography.'}
             </p>
-            <div class="cta-group" style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
-              ${data.ctaPrimary ? `<a href="#" class="btn btn-primary" style="padding: 1rem 2rem; border-radius: 8px; text-decoration: none; font-weight: 500; transition: all 0.2s; display: inline-block; background: var(--color-accent); color: white;" onmouseover="this.style.transform='translateY(-2px)'; this.style.opacity='0.9'" onmouseout="this.style.transform='translateY(0)'; this.style.opacity='1'">${data.ctaPrimary}</a>` : ''}
-              ${data.ctaSecondary ? `<a href="#" class="btn btn-secondary" style="padding: 1rem 2rem; border-radius: 8px; text-decoration: none; font-weight: 500; transition: all 0.2s; display: inline-block; border: 1px solid var(--color-border); color: var(--color-text);" onmouseover="this.style.background='var(--color-surface)'" onmouseout="this.style.background='transparent'">${data.ctaSecondary}</a>` : ''}
+            
+            <div class="cta-group" style="display: flex; gap: ${isElegant ? '1.5rem' : isRetro ? '1.5rem' : '1rem'}; justify-content: center; flex-wrap: wrap;">
+              ${data.ctaPrimary ? `
+              <a href="#" style="padding: ${isBrutalist ? '1.5rem 3rem' : isGradient || isNeumorphism ? '1.125rem 2.5rem' : isElegant ? '1rem 2.5rem' : isRetro ? '1rem 2.5rem' : '1rem 2rem'}; border-radius: ${isGradient || isRetro ? '999px' : isBrutalist ? '0' : isGlassmorphism || isNeumorphism ? '16px' : isElegant ? '0' : '8px'}; text-decoration: none; font-weight: ${isBrutalist || isRetro ? '700' : isNeumorphism ? '600' : '500'}; transition: all ${isBrutalist || isRetro ? '0.1s' : '0.2s'}; display: inline-block; background: ${isGradient ? 'linear-gradient(135deg, #667eea, #764ba2)' : isGlassmorphism ? 'rgba(255,255,255,0.15)' : isNeumorphism ? 'var(--color-bg)' : isRetro ? 'linear-gradient(90deg, var(--color-accent), #b537f2)' : isElegant ? 'var(--color-accent)' : 'var(--color-accent)'}; color: ${isElegant ? 'white' : isGlassmorphism ? 'var(--color-text)' : isNeumorphism ? 'var(--color-text)' : 'white'}; ${isBrutalist ? 'text-transform: uppercase; border: 4px solid var(--color-text); background: var(--color-text); color: var(--color-bg); font-size: 1.125rem;' : isRetro ? 'text-transform: uppercase; letter-spacing: 1px; font-size: 0.9375rem; box-shadow: 0 0 30px var(--color-accent); border: 2px solid var(--color-accent);' : isElegant ? 'font-size: 0.9375rem; letter-spacing: 0.5px; border: 1px solid var(--color-accent);' : isGlassmorphism ? 'backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 8px 20px rgba(0,0,0,0.3);' : isNeumorphism ? 'box-shadow: 6px 6px 12px rgba(0,0,0,0.12), -6px -6px 12px rgba(255,255,255,0.9);' : ''} ${isGradient ? 'box-shadow: 0 10px 30px rgba(102,126,234,0.3);' : ''}" 
+                onmouseover="this.style.transform='translateY(-2px)'; ${isBrutalist ? `this.style.background='var(--color-bg)'; this.style.color='var(--color-text)'` : isGradient ? `this.style.boxShadow='0 15px 40px rgba(102,126,234,0.4)'` : isRetro ? `this.style.transform='translateY(-3px)'; this.style.boxShadow='0 0 50px var(--color-accent)'` : isElegant ? `this.style.background='transparent'; this.style.color='var(--color-accent)'` : isGlassmorphism ? `this.style.transform='translateY(-3px)'; this.style.boxShadow='0 12px 30px rgba(0,0,0,0.4)'` : isNeumorphism ? `this.style.boxShadow='inset 4px 4px 8px rgba(0,0,0,0.12), inset -4px -4px 8px rgba(255,255,255,0.9)'` : `this.style.opacity='0.9'`}" 
+                onmouseout="this.style.transform='translateY(0)'; ${isBrutalist ? `this.style.background='var(--color-text)'; this.style.color='var(--color-bg)'` : isGradient ? `this.style.boxShadow='0 10px 30px rgba(102,126,234,0.3)'` : isRetro ? `this.style.boxShadow='0 0 30px var(--color-accent)'` : isElegant ? `this.style.background='var(--color-accent)'; this.style.color='white'` : isGlassmorphism ? `this.style.boxShadow='0 8px 20px rgba(0,0,0,0.3)'` : isNeumorphism ? `this.style.boxShadow='6px 6px 12px rgba(0,0,0,0.12), -6px -6px 12px rgba(255,255,255,0.9)'` : `this.style.opacity='1'`}">
+                ${data.ctaPrimary}
+              </a>
+              ` : ''}
+              ${data.ctaSecondary ? `
+              <a href="#" style="padding: ${isBrutalist ? '1.5rem 3rem' : isGradient || isNeumorphism ? '1.125rem 2.5rem' : isElegant ? '1rem 2.5rem' : isRetro ? '1rem 2.5rem' : '1rem 2rem'}; border-radius: ${isGradient || isRetro ? '999px' : isBrutalist ? '0' : isGlassmorphism || isNeumorphism ? '16px' : isElegant ? '0' : '8px'}; text-decoration: none; font-weight: ${isBrutalist || isRetro ? '700' : isNeumorphism ? '600' : '500'}; transition: all 0.2s; display: inline-block; border: ${isBrutalist ? '4px' : isRetro ? '2px' : isElegant ? '1px' : isGlassmorphism ? '1px' : '2px'} solid ${isBrutalist ? 'var(--color-text)' : isRetro ? '#00f5ff' : isElegant ? 'var(--color-border)' : isGlassmorphism ? 'rgba(255,255,255,0.1)' : 'var(--color-border)'}; color: var(--color-text); background: ${isBrutalist ? 'var(--color-bg)' : isGlassmorphism ? 'rgba(255,255,255,0.05)' : isNeumorphism ? 'var(--color-bg)' : 'transparent'}; ${isBrutalist || isRetro ? 'text-transform: uppercase; font-size: 1.125rem;' : isElegant ? 'font-size: 0.9375rem; letter-spacing: 0.5px;' : isRetro ? 'font-size: 0.9375rem; letter-spacing: 1px; box-shadow: 0 0 20px #00f5ff;' : isGlassmorphism ? 'backdrop-filter: blur(10px);' : isNeumorphism ? 'box-shadow: 6px 6px 12px rgba(0,0,0,0.12), -6px -6px 12px rgba(255,255,255,0.9);' : ''}" 
+                onmouseover="${isBrutalist ? `this.style.background='var(--color-text)'; this.style.color='var(--color-bg)'` : isRetro ? `this.style.background='#00f5ff'; this.style.color='#0d001a'; this.style.boxShadow='0 0 40px #00f5ff'` : isElegant ? `this.style.background='var(--color-surface)'; this.style.borderColor='var(--color-accent)'` : isGlassmorphism ? `this.style.background='rgba(255,255,255,0.1)'` : isNeumorphism ? `this.style.boxShadow='inset 4px 4px 8px rgba(0,0,0,0.12), inset -4px -4px 8px rgba(255,255,255,0.9)'` : `this.style.background='var(--color-surface)'`}" 
+                onmouseout="${isBrutalist ? `this.style.background='var(--color-bg)'; this.style.color='var(--color-text)'` : isRetro ? `this.style.background='transparent'; this.style.color='var(--color-text)'; this.style.boxShadow='0 0 20px #00f5ff'` : isElegant ? `this.style.background='transparent'; this.style.borderColor='var(--color-border)'` : isGlassmorphism ? `this.style.background='rgba(255,255,255,0.05)'` : isNeumorphism ? `this.style.boxShadow='6px 6px 12px rgba(0,0,0,0.12), -6px -6px 12px rgba(255,255,255,0.9)'` : `this.style.background='transparent'`}">
+                ${data.ctaSecondary}
+              </a>
+              ` : ''}
             </div>
           </div>
         </section>
 
-        <!-- Stats -->
+        <!-- Stats Section with Theme-Specific Styling -->
         ${data.stats && data.stats.length > 0 ? `
-        <section class="stats" style="padding: 4rem 0; background: var(--color-surface); border-top: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border);">
+        <section class="stats-section" style="padding: ${isBrutalist ? '0' : isNeumorphism ? '0' : '4rem 0'}; background: ${isBrutalist ? 'var(--color-text)' : isGradient ? 'linear-gradient(135deg, rgba(102,126,234,0.1), rgba(240,147,251,0.1))' : isRetro ? 'var(--color-surface)' : isElegant ? 'var(--color-surface)' : isGlassmorphism ? 'rgba(255,255,255,0.02)' : 'var(--color-surface)'}; ${!isBrutalist && !isRetro ? 'border-top: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border);' : isRetro ? 'margin: 4rem 0; border-top: 3px solid var(--color-accent); border-bottom: 3px solid #00f5ff;' : ''} ${isGradient ? 'border-radius: 32px; margin: 0 2rem;' : isGlassmorphism ? 'backdrop-filter: blur(20px);' : ''}">
           <div class="container">
-            <div class="stats-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 3rem; text-align: center;">
-              ${data.stats.map(stat => `
-                <div class="stat">
-                  <h3 style="font-size: 2.5rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--color-accent);">
+            <div class="stats-grid" style="display: grid; grid-template-columns: repeat(${isBrutalist ? '4' : '3'}, 1fr); gap: ${isBrutalist ? '0' : isRetro ? '3rem' : isNeumorphism ? '2.5rem' : '3rem'}; text-align: center;">
+              ${data.stats.map((stat, index) => `
+                <div class="stat" style="${isBrutalist ? `padding: 3rem; border: 3px solid var(--color-bg); min-height: 250px; display: flex; flex-direction: column; justify-content: center; ${index === 1 ? 'background: var(--color-accent); color: var(--color-bg);' : index === 2 ? 'background: #0000ff; color: var(--color-bg);' : 'color: var(--color-bg);'}` : isRetro ? `border: 3px solid #00f5ff; padding: 2rem; background: rgba(0,245,255,0.03); transition: all 0.3s;` : isNeumorphism ? `padding: 3rem 2rem; border-radius: 24px; box-shadow: 6px 6px 12px rgba(0,0,0,0.12), -6px -6px 12px rgba(255,255,255,0.9); transition: all 0.3s;` : isGlassmorphism ? `padding: 2rem; border-radius: 20px; background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1);` : ''}" ${isRetro ? `onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 0 40px #00f5ff'" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none'"` : isNeumorphism ? `onmouseover="this.style.boxShadow='inset 4px 4px 8px rgba(0,0,0,0.12), inset -4px -4px 8px rgba(255,255,255,0.9)'" onmouseout="this.style.boxShadow='6px 6px 12px rgba(0,0,0,0.12), -6px -6px 12px rgba(255,255,255,0.9)'"` : ''}>
+                  <h3 style="font-size: ${isBrutalist ? '2rem' : isGradient ? '3.5rem' : isRetro ? '3rem' : isNeumorphism || isGlassmorphism ? '3rem' : '2.5rem'}; font-weight: ${isBrutalist ? '900' : isRetro || isNeumorphism || isGlassmorphism ? '800' : '700'}; margin-bottom: 0.5rem; ${isBrutalist ? 'text-transform: uppercase;' : isGradient ? 'background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent;' : isRetro ? 'background: linear-gradient(90deg, var(--color-accent), #00f5ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent;' : isNeumorphism || isGlassmorphism ? 'color: var(--color-accent);' : 'color: var(--color-accent);'}">
                     ${stat.number}
                   </h3>
-                  <p style="color: var(--color-text-secondary); font-size: 0.875rem;">
+                  <p style="color: ${isBrutalist ? 'inherit' : 'var(--color-text-secondary)'}; font-size: ${isBrutalist ? '1.125rem' : isRetro ? '0.875rem' : isNeumorphism || isGlassmorphism ? '1rem' : '0.875rem'}; ${isBrutalist ? 'line-height: 1.5;' : isRetro ? 'text-transform: uppercase; letter-spacing: 2px;' : isNeumorphism || isGlassmorphism ? 'font-weight: 500;' : ''}">
                     ${stat.label}
                   </p>
                 </div>
               `).join('')}
+              ${isBrutalist && data.stats.length === 3 ? `
+              <div class="stat" style="padding: 3rem; border: 3px solid var(--color-bg); min-height: 250px; display: flex; flex-direction: column; justify-content: center; color: var(--color-bg);">
+                <h3 style="font-size: 2rem; font-weight: 900; margin-bottom: 1rem; text-transform: uppercase;">READY?</h3>
+                <p style="font-size: 1.125rem; line-height: 1.5;">Join thousands</p>
+              </div>
+              ` : ''}
             </div>
           </div>
         </section>
         ` : ''}
 
-        <!-- Features -->
-        <section id="features" class="features" style="padding: 6rem 0;">
+        <!-- Features Section with Theme-Specific Cards -->
+        <section id="features" class="features" style="padding: ${isRetro || isElegant ? '8rem 0' : '6rem 0'};">
           <div class="container">
-            <h2 class="section-title" style="font-size: clamp(2rem, 5vw, 3rem); font-weight: 700; text-align: center; margin-bottom: 1rem; letter-spacing: -0.02em;">
+            ${isBrutalist ? `
+            <div style="text-align: center; margin-bottom: 6rem;">
+              <h2 style="font-size: clamp(2.5rem, 8vw, 6rem); line-height: 1.1; text-transform: uppercase; margin-bottom: 2rem; font-weight: 900;">
+                ${data.featuresTitle || 'DESIGN IS'}<br>
+                <span style="border-bottom: 6px solid var(--color-accent); display: inline-block;">COMMUNICATION</span>
+              </h2>
+            </div>
+            ` : isElegant ? `
+            <div style="text-align: center; margin-bottom: 6rem;">
+              <h2 style="font-family: Playfair Display, serif; font-size: clamp(2rem, 5vw, 3rem); font-weight: 600; margin-bottom: 1rem; letter-spacing: -0.01em;">
+                ${data.featuresTitle || 'Our Philosophy'}
+              </h2>
+              <p style="color: var(--color-text-secondary); font-size: 1.125rem; font-weight: 300; max-width: 600px; margin: 0 auto;">
+                ${data.featuresSubtitle || 'Crafted with care, designed for longevity'}
+              </p>
+            </div>
+            ` : isRetro ? `
+            <h2 style="font-size: clamp(2rem, 6vw, 3.5rem); text-align: center; margin-bottom: 4rem; text-transform: uppercase; letter-spacing: 3px; font-weight: 700; background: linear-gradient(90deg, var(--color-accent), #00f5ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+              ${data.featuresTitle || 'Power Features'}
+            </h2>
+            ` : isNeumorphism ? `
+            <h2 style="font-size: clamp(2rem, 5vw, 3rem); text-align: center; margin-bottom: 4rem; font-weight: 800;">
+              ${data.featuresTitle || 'Soft & Subtle'}
+            </h2>
+            ` : `
+            <h2 class="section-title" style="font-size: clamp(2rem, 5vw, 3rem); font-weight: ${isGradient || isGlassmorphism ? '800' : '700'}; text-align: center; margin-bottom: 1rem; letter-spacing: -0.02em;">
               ${data.featuresTitle || 'Built for Simplicity'}
             </h2>
             <p class="section-desc" style="text-align: center; color: var(--color-text-secondary); max-width: 600px; margin: 0 auto 4rem; font-size: 1.125rem;">
               ${data.featuresSubtitle || 'Everything you need, nothing you don\'t'}
             </p>
-            <div class="features-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem;">
-              ${data.features && data.features.length > 0 ? data.features.map(feature => `
-                <div class="feature-card" style="padding: 2rem; border-radius: 12px; border: 1px solid var(--color-border); transition: all 0.3s;" onmouseover="this.style.borderColor='var(--color-accent)'; this.style.transform='translateY(-4px)'" onmouseout="this.style.borderColor='var(--color-border)'; this.style.transform='translateY(0)'">
+            `}
+            
+            <div class="features-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(${isBrutalist || isElegant ? '320px' : '280px'}, 1fr)); gap: ${isElegant ? '4rem 3rem' : isNeumorphism ? '2.5rem' : '2rem'};">
+              ${data.features && data.features.length > 0 ? data.features.map((feature, index) => `
+                <div class="feature-card" style="${isElegant ? 'text-align: center;' : ''} padding: ${isBrutalist || isElegant ? '3rem' : isGradient ? '2.5rem' : isRetro ? '2rem' : isNeumorphism ? '2.5rem' : '2rem'}; border-radius: ${isGradient ? '24px' : isBrutalist || isElegant ? '0' : isRetro ? '0' : isNeumorphism ? '24px' : isGlassmorphism ? '24px' : '12px'}; border: ${isBrutalist ? '4px' : isRetro ? '2px' : isElegant ? '0' : '1px'} solid ${isBrutalist ? 'var(--color-text)' : isRetro ? 'var(--color-accent)' : isElegant ? 'transparent' : 'var(--color-border)'}; transition: all ${isBrutalist || isRetro ? '0.2s' : '0.3s'}; background: ${isGradient ? 'linear-gradient(135deg, rgba(102,126,234,0.03), rgba(118,75,162,0.03))' : isRetro ? 'rgba(255,47,181,0.05)' : isGlassmorphism ? 'rgba(255,255,255,0.05)' : isNeumorphism ? 'var(--color-bg)' : 'var(--color-bg)'}; ${isGlassmorphism ? 'backdrop-filter: blur(20px); box-shadow: 0 8px 32px rgba(0,0,0,0.1);' : isNeumorphism ? 'box-shadow: 6px 6px 12px rgba(0,0,0,0.12), -6px -6px 12px rgba(255,255,255,0.9);' : ''} ${isRetro ? 'position: relative;' : ''}" 
+                  onmouseover="${isBrutalist ? `this.style.transform='translate(-4px, -4px)'; this.style.boxShadow='8px 8px 0 var(--color-text)'` : isGradient ? `this.style.transform='translateY(-8px)'; this.style.boxShadow='0 20px 60px rgba(102,126,234,0.15)'` : isRetro ? `this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 40px rgba(255,47,181,0.3)'` : isGlassmorphism ? `this.style.transform='translateY(-8px)'` : isNeumorphism ? `this.style.boxShadow='inset 4px 4px 8px rgba(0,0,0,0.12), inset -4px -4px 8px rgba(255,255,255,0.9)'` : `this.style.borderColor='var(--color-accent)'; this.style.transform='translateY(-4px)'`}" 
+                  onmouseout="${isBrutalist ? `this.style.transform='translate(0, 0)'; this.style.boxShadow='none'` : isGradient ? `this.style.transform='translateY(0)'; this.style.boxShadow='none'` : isRetro ? `this.style.transform='translateY(0)'; this.style.boxShadow='none'` : isGlassmorphism ? `this.style.transform='translateY(0)'` : isNeumorphism ? `this.style.boxShadow='6px 6px 12px rgba(0,0,0,0.12), -6px -6px 12px rgba(255,255,255,0.9)'` : `this.style.borderColor='var(--color-border)'; this.style.transform='translateY(0)'`}">
+                  ${isGradient ? `
+                  <div style="width: 56px; height: 56px; border-radius: 16px; background: linear-gradient(135deg, #667eea, #764ba2); margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem; font-weight: 700;">
+                    ${index + 1}
+                  </div>
+                  ` : isElegant ? `
+                  <div style="color: var(--color-accent); font-family: Playfair Display, serif; font-size: 3rem; margin-bottom: 1.5rem; font-weight: 400;">0${index + 1}</div>
+                  ` : isRetro ? `
+                  <div style="font-size: 2.5rem; margin-bottom: 1rem;">${['⚡', '🎮', '🌈'][index % 3]}</div>
+                  ` : isNeumorphism ? `
+                  <div style="width: 64px; height: 64px; border-radius: 16px; background: var(--color-bg); box-shadow: 6px 6px 12px rgba(0,0,0,0.12), -6px -6px 12px rgba(255,255,255,0.9); margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: center; font-size: 1.75rem;">💎</div>
+                  ` : isGlassmorphism ? `
+                  <div style="width: 64px; height: 64px; border-radius: 16px; background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: center; font-size: 1.75rem; border: 1px solid rgba(255,255,255,0.15);">✨</div>
+                  ` : isBrutalist ? '' : `
                   <div class="feature-icon" style="width: 48px; height: 48px; background: var(--color-accent); border-radius: 8px; margin-bottom: 1.5rem; opacity: 0.1;"></div>
-                  <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem;">
+                  `}
+                  <h3 style="font-family: ${isElegant ? 'Playfair Display, serif' : 'inherit'}; font-size: ${isBrutalist || isElegant ? '1.75rem' : isGradient ? '1.375rem' : isRetro ? '1.25rem' : isNeumorphism || isGlassmorphism ? '1.5rem' : '1.25rem'}; font-weight: ${isBrutalist ? '900' : isElegant ? '600' : isRetro ? '700' : isNeumorphism || isGlassmorphism ? '700' : '700'}; margin-bottom: ${isBrutalist || isElegant ? '1.5rem' : isRetro ? '1rem' : isNeumorphism || isGlassmorphism ? '1rem' : '0.75rem'}; ${isBrutalist || isRetro ? 'text-transform: uppercase;' : ''} ${isRetro ? 'letter-spacing: 2px; color: var(--color-accent);' : isNeumorphism || isGlassmorphism ? 'color: var(--color-accent);' : ''}">
                     ${feature.title || ''}
                   </h3>
-                  <p style="color: var(--color-text-secondary); line-height: 1.7; font-size: 0.9375rem;">
+                  <p style="font-family: ${isElegant ? 'Lato, sans-serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-weight: ${isElegant ? '300' : 'normal'}; color: var(--color-text-secondary); line-height: ${isElegant ? '1.9' : '1.7'}; font-size: ${isBrutalist || isRetro ? '1.125rem' : isElegant || isNeumorphism || isGlassmorphism ? '1rem' : '0.9375rem'};">
                     ${feature.description || ''}
                   </p>
                 </div>
@@ -673,50 +782,101 @@ export const templates = {
           </div>
         </section>
 
-        <!-- Testimonial -->
+        <!-- Testimonial/CTA Section with Theme-Specific Styling -->
         ${data.testimonialQuote ? `
-        <section id="testimonial" class="testimonial" style="padding: 6rem 0; background: var(--color-surface); text-align: center;">
-          <div class="container">
-            <p class="quote" style="font-size: 1.5rem; line-height: 1.8; max-width: 800px; margin: 0 auto 2rem; font-weight: 500; color: var(--color-text);">
+        <section id="testimonial" class="testimonial" style="padding: ${isBrutalist || isRetro || isElegant ? '8rem 0' : '6rem 0'}; background: ${isBrutalist ? 'var(--color-accent)' : isGradient ? 'linear-gradient(135deg, #667eea, #764ba2)' : isRetro ? 'linear-gradient(135deg, var(--color-accent), #b537f2)' : isElegant ? 'var(--color-surface)' : isGlassmorphism ? 'transparent' : 'var(--color-surface)'}; text-align: center; ${isBrutalist || isGradient || isRetro ? 'color: white;' : ''} ${isElegant ? 'border-top: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border);' : isRetro ? 'border-radius: 20px; margin: 0 2rem; box-shadow: 0 20px 60px rgba(255,47,181,0.4);' : ''}">
+          <div class="container" style="${isGlassmorphism || isNeumorphism ? `padding: 5rem 3rem; border-radius: 32px; max-width: 900px; ${isGlassmorphism ? 'background: rgba(255,255,255,0.05); backdrop-filter: blur(20px); box-shadow: 0 8px 32px rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.1);' : 'box-shadow: 6px 6px 12px rgba(0,0,0,0.12), -6px -6px 12px rgba(255,255,255,0.9);'}` : ''}">
+            ${isBrutalist ? `
+            <h2 style="font-size: clamp(2.5rem, 7vw, 5rem); text-transform: uppercase; margin-bottom: 2rem; font-weight: 900; color: var(--color-bg);">
+              READY TO GO BOLD?
+            </h2>
+            <p style="font-size: 1.5rem; margin-bottom: 3rem; color: var(--color-bg);">
+              ${data.testimonialQuote.replace(/"/g, '')}
+            </p>
+            <a href="#" style="display: inline-block; padding: 1.5rem 3rem; background: var(--color-bg); color: var(--color-accent); text-decoration: none; text-transform: uppercase; font-size: 1.125rem; border: 4px solid var(--color-bg); transition: all 0.1s; font-weight: 900;" onmouseover="this.style.background='transparent'; this.style.color='var(--color-bg)'" onmouseout="this.style.background='var(--color-bg)'; this.style.color='var(--color-accent)'">
+              GET STARTED
+            </a>
+            ` : isElegant ? `
+            <p style="font-family: Playfair Display, serif; font-size: clamp(1.5rem, 3vw, 2.25rem); line-height: 1.6; max-width: 800px; margin: 0 auto 2rem; font-style: italic; color: var(--color-text);">
+              ${data.testimonialQuote}
+            </p>
+            <p style="margin-top: 2rem; text-align: center; color: var(--color-text-secondary); font-size: 1rem; letter-spacing: 1px;">
+              — ${data.testimonialAuthor || ''}<span style="display: inline-block; margin: 0 0.5rem;">|</span>${data.testimonialRole || ''}
+            </p>
+            ` : isRetro ? `
+            <h2 style="font-size: clamp(2rem, 6vw, 4rem); margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 3px; font-weight: 700;">
+              ${data.testimonialQuote.split('"').join('').substring(0, 30)}...
+            </h2>
+            <p style="font-size: 1.25rem; margin-bottom: 2.5rem;">
+              Step into the future of design
+            </p>
+            <a href="#" style="display: inline-block; padding: 1rem 2.5rem; background: white; color: var(--color-accent); text-decoration: none; font-weight: 700; font-size: 1rem; border-radius: 999px; transition: all 0.3s; text-transform: uppercase; letter-spacing: 1px; border: 2px solid white;" onmouseover="this.style.background='transparent'; this.style.color='white'; this.style.borderColor='white'" onmouseout="this.style.background='white'; this.style.color='var(--color-accent)'">
+              Get Started Now
+            </a>
+            ` : `
+            <p class="quote" style="font-size: ${isGradient ? '1.25rem' : isGlassmorphism || isNeumorphism ? '1.125rem' : '1.5rem'}; line-height: 1.8; max-width: 800px; margin: 0 auto 2rem; font-weight: 500; color: ${isGradient || isRetro ? 'white' : isGlassmorphism ? 'var(--color-text)' : 'var(--color-text)'}; ${isGradient ? 'opacity: 0.9;' : ''}">
               ${data.testimonialQuote}
             </p>
             <div class="author" style="display: flex; align-items: center; justify-content: center; gap: 1rem;">
-              <div class="avatar" style="width: 48px; height: 48px; border-radius: 50%; background: var(--color-accent); opacity: 0.2;"></div>
-              <div class="author-info">
-                <h4 style="font-weight: 600; margin-bottom: 0.25rem;">
+              <div class="avatar" style="width: 48px; height: 48px; border-radius: 50%; background: ${isGradient || isRetro ? 'white' : 'var(--color-accent)'}; opacity: 0.2;"></div>
+              <div class="author-info" style="text-align: left;">
+                <h4 style="font-weight: 600; margin-bottom: 0.25rem; color: ${isGradient || isRetro ? 'white' : 'var(--color-text)'};">
                   ${data.testimonialAuthor || ''}
                 </h4>
-                <p style="color: var(--color-text-secondary); font-size: 0.875rem;">
+                <p style="color: ${isGradient || isRetro ? 'rgba(255,255,255,0.8)' : 'var(--color-text-secondary)'}; font-size: 0.875rem;">
                   ${data.testimonialRole || ''}
                 </p>
               </div>
             </div>
+            ${isGradient ? `
+            <a href="#" style="display: inline-block; padding: 1.125rem 2.5rem; background: white; color: #667eea; text-decoration: none; font-weight: 600; font-size: 1rem; border-radius: 999px; transition: all 0.3s; margin-top: 2rem;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+              Start Free Trial
+            </a>
+            ` : ''}
+            ${isGlassmorphism || isNeumorphism ? `
+            <a href="#" style="display: inline-block; padding: 1.125rem 2.5rem; background: ${isGlassmorphism ? 'rgba(255,255,255,0.15)' : 'var(--color-bg)'}; color: var(--color-text); text-decoration: none; font-weight: 600; font-size: 1rem; border-radius: 16px; transition: all 0.3s; margin-top: 2rem; ${isGlassmorphism ? 'backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 8px 20px rgba(0,0,0,0.3);' : 'box-shadow: 6px 6px 12px rgba(0,0,0,0.12), -6px -6px 12px rgba(255,255,255,0.9);'}" 
+              onmouseover="${isGlassmorphism ? `this.style.transform='translateY(-3px)'; this.style.boxShadow='0 12px 30px rgba(0,0,0,0.4)'` : `this.style.boxShadow='inset 4px 4px 8px rgba(0,0,0,0.12), inset -4px -4px 8px rgba(255,255,255,0.9)'`}" 
+              onmouseout="${isGlassmorphism ? `this.style.transform='translateY(0)'; this.style.boxShadow='0 8px 20px rgba(0,0,0,0.3)'` : `this.style.boxShadow='6px 6px 12px rgba(0,0,0,0.12), -6px -6px 12px rgba(255,255,255,0.9)'`}">
+              Start Your Journey
+            </a>
+            ` : ''}
+            `}
           </div>
         </section>
         ` : ''}
       </main>
 
-      <footer style="padding: 3rem 0; border-top: 1px solid var(--color-border); text-align: center; color: var(--color-text-secondary); font-size: 0.875rem;">
+      <!-- Footer -->
+      <footer style="padding: ${isBrutalist ? '4rem 0' : isRetro ? '3rem 0' : '3rem 0'}; ${isBrutalist ? 'border-top: 4px solid var(--color-text);' : isRetro ? 'margin-top: 3rem; border-top: 3px solid var(--color-accent);' : isElegant ? 'border-top: 1px solid var(--color-border);' : 'border-top: 1px solid var(--color-border);'} text-align: center; color: var(--color-text-secondary); font-size: ${isRetro ? '0.875rem' : '0.875rem'}; ${isGlassmorphism ? 'backdrop-filter: blur(20px); background: rgba(255,255,255,0.02);' : ''} ${isElegant ? 'padding: 4rem 0;' : ''}">
         <div class="container">
-          <p>© 2024 ${data.companyName || 'Minimal'}. All rights reserved.</p>
+          ${isElegant ? `
+          <ul style="display: flex; gap: 2rem; justify-content: center; margin-bottom: 2rem; list-style: none;">
+            <li><a href="#" style="color: var(--color-text-secondary); text-decoration: none; transition: color 0.3s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text-secondary)'">Privacy</a></li>
+            <li><a href="#" style="color: var(--color-text-secondary); text-decoration: none; transition: color 0.3s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text-secondary)'">Terms</a></li>
+            <li><a href="#" style="color: var(--color-text-secondary); text-decoration: none; transition: color 0.3s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text-secondary)'">Contact</a></li>
+          </ul>
+          <p style="letter-spacing: 0.5px;">© 2024 ${data.companyName || 'Minimal'}. All rights reserved.</p>
+          ` : `
+          <p style="${isBrutalist ? 'font-size: 1.25rem; text-transform: uppercase; font-weight: 700;' : isRetro ? 'text-transform: uppercase; letter-spacing: 2px;' : ''}">
+            © 2024 ${data.companyName || 'Minimal'}. All rights reserved.
+          </p>
+          `}
         </div>
       </footer>
 
       <style>
+        /* Mobile Hamburger Menu Styles */
         @media (max-width: 768px) {
           .container { padding: 0 1.5rem !important; }
           section[style*="padding: 8rem"] { padding: 5rem 0 !important; }
           section[style*="padding: 6rem"] { padding: 4rem 0 !important; }
-          nav ul { display: none !important; }
-          nav::after { 
-            content: ''; 
-            width: 52px; 
-            height: 28px;
-          }
-          .stats-grid { grid-template-columns: 1fr !important; gap: 2rem !important; }
-          .features-grid { grid-template-columns: 1fr !important; gap: 1.5rem !important; }
+          .nav-links { display: none !important; }
+          .mobile-controls { display: flex !important; }
+          .stats-grid { grid-template-columns: 1fr !important; gap: ${isBrutalist ? '0 !important' : '2rem !important'}; }
+          .features-grid { grid-template-columns: 1fr !important; gap: ${isElegant ? '3rem !important' : '1.5rem !important'}; }
           .quote { font-size: 1.25rem !important; }
         }
+        
         @media (max-width: 640px) {
           .cta-group {
             flex-direction: column !important;
@@ -724,13 +884,65 @@ export const templates = {
             margin-left: auto;
             margin-right: auto;
           }
-          .cta-group .btn {
+          .cta-group a {
             width: 100%;
+            text-align: center;
           }
         }
+        
+        /* Gradient animation */
+        ${isGradient || isRetro ? `
+        @keyframes gradient {
+          0%, 100% { background-position: 0 50%; }
+          50% { background-position: 100% 50%; }
+        }
+        ` : ''}
+        
+        ${isRetro ? `
+        /* Retro grid background */
+        body::before {
+          content: '';
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background-image: 
+            linear-gradient(rgba(255,47,181,0.03) 2px, transparent 2px),
+            linear-gradient(90deg, rgba(255,47,181,0.03) 2px, transparent 2px);
+          background-size: 50px 50px;
+          pointer-events: none;
+          z-index: 0;
+        }
+        main { position: relative; z-index: 1; }
+        ` : ''}
       </style>
-    `
+      
+      <script>
+        function toggleMobileMenu() {
+          const mobileMenu = document.querySelector('.mobile-menu');
+          if (mobileMenu.style.display === 'none' || mobileMenu.style.display === '') {
+            mobileMenu.style.display = 'block';
+          } else {
+            mobileMenu.style.display = 'none';
+          }
+        }
+        
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', function(event) {
+          const mobileMenu = document.querySelector('.mobile-menu');
+          const hamburger = document.querySelector('.hamburger-btn');
+          const nav = document.querySelector('nav');
+          
+          if (!nav.contains(event.target) && mobileMenu.style.display === 'block') {
+            mobileMenu.style.display = 'none';
+          }
+        });
+      </script>
+    `;
+    }
   }),
+
 
   // ============================================
   // TEMPLATE 2: ENHANCED PERSONAL PROFILE
@@ -1685,6 +1897,7 @@ END:VCARD\`;
   'resume': new Template('resume', {
     name: 'Resume/CV',
     description: 'Professional resume with work experience, education, and skills',
+    image: '/templates/resume.png',
     category: 'Personal',
     fields: {
       name: { type: 'text', default: 'Sarah Johnson', label: 'Full Name', required: true },
@@ -2088,6 +2301,8 @@ END:VCARD\`;
     name: 'Photography Portfolio (Masonry)',
     description: 'Dynamic masonry grid photography portfolio',
     category: 'Portfolio',
+    image: '/templates/photography-masonry.png',
+
     fields: {
       photographerName: { type: 'text', default: 'Emma Wilson', label: 'Photographer Name', required: true },
       tagline: { type: 'text', default: 'Fine Art & Portrait Photography', label: 'Tagline' },
@@ -2391,9 +2606,10 @@ END:VCARD\`;
   // ============================================
   // TEMPLATE 7: PHOTOGRAPHY PORTFOLIO (GRID)
   // ============================================
-  'photo-grid': new Template('photo-grid', {
+'photo-grid': new Template('photo-grid', {
     name: 'Photography Portfolio (Grid)',
     description: 'Clean uniform grid photography portfolio',
+    image: '/templates/photography-grid.png',
     category: 'Portfolio',
     fields: {
       photographerName: { type: 'text', default: 'Alex Chen', label: 'Photographer Name', required: true },
@@ -2460,84 +2676,106 @@ END:VCARD\`;
       }
     },
     structure: (data) => `
-      <!-- Header -->
+      <!-- Sticky Header with Theme Toggle - Minimal Style -->
       <header style="padding: 1.5rem 0; border-bottom: 1px solid var(--color-border); position: sticky; top: 0; background: var(--color-bg); z-index: 100; backdrop-filter: blur(10px);">
         <div class="container">
           <nav style="display: flex; justify-content: space-between; align-items: center;">
-            <div style="font-weight: 700; font-size: 1.25rem; letter-spacing: -0.02em;">${data.photographerName || 'Photographer'}</div>
-            <div style="display: flex; align-items: center; gap: 2rem;">
-              <ul style="display: flex; gap: 2rem; list-style: none; align-items: center;">
-                <li><a href="#gallery" style="color: var(--color-text-secondary); text-decoration: none; font-size: 0.9375rem; font-weight: 500;">Work</a></li>
-                <li><a href="#about" style="color: var(--color-text-secondary); text-decoration: none; font-size: 0.9375rem; font-weight: 500;">About</a></li>
-                <li><a href="#contact" style="color: var(--color-text-secondary); text-decoration: none; font-size: 0.9375rem; font-weight: 500;">Contact</a></li>
-                <li>
-                  <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle theme">
-                    <span class="theme-icon">ÃƒÂ°Ã…Â¸Ã…â€™Ã¢â€žÂ¢</span>
-                  </button>
-                </li>
-              </ul>
-            </div>
+            <div style="font-weight: 600; font-size: 1.125rem; letter-spacing: -0.02em;">${data.photographerName || 'PHOTOGRAPHER'}</div>
+            <ul class="nav-links" style="display: flex; gap: 2rem; list-style: none; align-items: center;">
+              <li><a href="#gallery" style="color: var(--color-text-secondary); text-decoration: none; font-size: 0.875rem; transition: color 0.2s;" onmouseover="this.style.color='var(--color-text)'" onmouseout="this.style.color='var(--color-text-secondary)'">Work</a></li>
+              <li><a href="#about" style="color: var(--color-text-secondary); text-decoration: none; font-size: 0.875rem; transition: color 0.2s;" onmouseover="this.style.color='var(--color-text)'" onmouseout="this.style.color='var(--color-text-secondary)'">About</a></li>
+              <li><a href="#contact" style="color: var(--color-text-secondary); text-decoration: none; font-size: 0.875rem; transition: color 0.2s;" onmouseover="this.style.color='var(--color-text)'" onmouseout="this.style.color='var(--color-text-secondary)'">Contact</a></li>
+              <li>
+                <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle theme" style="background: transparent; border: none; padding: 0.5rem; cursor: pointer; color: var(--color-text); font-size: 1.125rem;">
+                  <span class="theme-icon">☀️</span>
+                </button>
+              </li>
+            </ul>
           </nav>
         </div>
       </header>
 
-      <!-- Hero -->
-      <section style="padding: 8rem 0 5rem; text-align: center; background: var(--color-surface); border-bottom: 1px solid var(--color-border);">
-        <div class="container" style="max-width: 900px;">
-          <h1 style="font-size: clamp(3rem, 8vw, 5.5rem); font-weight: 800; margin-bottom: 1rem; letter-spacing: -0.03em; line-height: 1;">
-            ${data.photographerName || 'Photographer'}
+      <!-- Hero Section - Minimal Style -->
+      <section style="padding: 8rem 0 6rem; text-align: center;">
+        <div class="container">
+          <h1 style="font-size: clamp(2.5rem, 7vw, 5rem); font-weight: 700; line-height: 1.1; letter-spacing: -0.03em; margin-bottom: 1.5rem;">
+            ${data.photographerName || 'Less is More'}
           </h1>
-          ${data.tagline ? `
-          <p style="font-size: clamp(1.25rem, 3vw, 1.75rem); color: var(--color-accent); margin-bottom: 2rem; font-weight: 600;">
-            ${data.tagline}
-          </p>
-          ` : ''}
           ${data.bio ? `
-          <p style="font-size: 1.125rem; color: var(--color-text-secondary); max-width: 700px; margin: 0 auto 2.5rem; line-height: 1.8;">
+          <p style="font-size: 1.125rem; color: var(--color-text-secondary); max-width: 600px; margin: 0 auto 3rem; line-height: 1.8;">
             ${data.bio}
           </p>
           ` : ''}
-          ${data.email ? `
-          <a href="mailto:${data.email}" class="btn" style="padding: 1rem 2.5rem; font-size: 1rem;">
-            Work With Me
-          </a>
-          ` : ''}
+          <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+            ${data.email ? `
+            <a href="mailto:${data.email}" style="padding: 1rem 2rem; border-radius: 8px; text-decoration: none; font-weight: 500; transition: all 0.2s; display: inline-block; background: var(--color-accent); color: white;" onmouseover="this.style.transform='translateY(-2px)'; this.style.opacity='0.9'" onmouseout="this.style.transform='translateY(0)'; this.style.opacity='1'">
+              Get Started
+            </a>
+            ` : ''}
+            ${data.phone ? `
+            <a href="tel:${data.phone.replace(/\s/g, '')}" style="padding: 1rem 2rem; border-radius: 8px; text-decoration: none; font-weight: 500; transition: all 0.2s; display: inline-block; border: 1px solid var(--color-border); color: var(--color-text);" onmouseover="this.style.background='var(--color-surface)'" onmouseout="this.style.background='transparent'">
+              Learn More
+            </a>
+            ` : ''}
+          </div>
         </div>
       </section>
 
-      <!-- Gallery Filters -->
-      <section id="gallery" style="padding: 3rem 0 2rem; background: var(--color-bg);">
+      <!-- Stats Section - Minimal Style -->
+      <section style="padding: 4rem 0; background: var(--color-surface); border-top: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border);">
         <div class="container">
-          <div style="display: flex; justify-content: center; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 3rem;">
+          <div class="stats-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 3rem; text-align: center;">
+            <div>
+              <h3 style="font-size: 2.5rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--color-accent);">99.9%</h3>
+              <p style="color: var(--color-text-secondary); font-size: 0.875rem;">Client Satisfaction</p>
+            </div>
+            <div>
+              <h3 style="font-size: 2.5rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--color-accent);">50K+</h3>
+              <p style="color: var(--color-text-secondary); font-size: 0.875rem;">Photos Delivered</p>
+            </div>
+            <div>
+              <h3 style="font-size: 2.5rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--color-accent);">4.9</h3>
+              <p style="color: var(--color-text-secondary); font-size: 0.875rem;">Average Rating</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Gallery Section - Minimal Style with Categories -->
+      <section id="gallery" style="padding: 6rem 0;">
+        <div class="container">
+          <h2 style="font-size: clamp(2rem, 5vw, 3rem); font-weight: 700; text-align: center; margin-bottom: 1rem; letter-spacing: -0.02em;">
+            Portfolio
+          </h2>
+          <p style="text-align: center; color: var(--color-text-secondary); max-width: 600px; margin: 0 auto 4rem; font-size: 1.125rem;">
+            Everything you need, nothing you don't
+          </p>
+          
+          <!-- Category Filters -->
+          <div style="display: flex; justify-content: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 3rem;">
             ${data.categories && data.categories.length > 0 ? data.categories.map((cat, index) => `
               <button 
                 class="filter-btn ${index === 0 ? 'active' : ''}" 
                 onclick="filterGallery('${cat.toLowerCase()}')"
-                style="padding: 0.625rem 1.5rem; background: ${index === 0 ? 'var(--color-text)' : 'var(--color-surface)'}; color: ${index === 0 ? 'var(--color-bg)' : 'var(--color-text)'}; border: 2px solid var(--color-border); border-radius: var(--radius-full); font-weight: 600; cursor: pointer; transition: all 0.2s; font-size: 0.9375rem;"
+                style="padding: 0.75rem 1.5rem; background: ${index === 0 ? 'var(--color-accent)' : 'transparent'}; color: ${index === 0 ? 'white' : 'var(--color-text)'}; border: 1px solid var(--color-border); border-radius: 8px; font-weight: 500; cursor: pointer; transition: all 0.2s; font-size: 0.875rem;"
               >
                 ${cat}
               </button>
             `).join('') : ''}
           </div>
-        </div>
-      </section>
-
-      <!-- Uniform Grid Gallery -->
-      <section style="padding: 0 0 5rem; background: var(--color-bg);">
-        <div class="container">
-          <div id="grid-gallery" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem;">
+          
+          <!-- Photo Grid -->
+          <div id="grid-gallery" class="features-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem;">
             ${data.photos && data.photos.length > 0 ? data.photos.map((photo, index) => `
-              <div class="gallery-item" data-category="${(photo.category || '').toLowerCase()}" style="cursor: pointer; aspect-ratio: 1; overflow: hidden; border-radius: var(--radius-lg); border: 1px solid var(--color-border); position: relative;" onclick="openLightbox(${index})">
+              <div class="gallery-item feature-card" data-category="${(photo.category || '').toLowerCase()}" style="cursor: pointer; padding: 0; overflow: hidden; border-radius: 12px; border: 1px solid var(--color-border); position: relative; transition: all 0.3s; aspect-ratio: 1;" onclick="openLightbox(${index})">
                 <img 
                   src="${photo.imageUrl || ''}" 
                   alt="${photo.title || 'Photo'}"
                   style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s;"
-                  onmouseover="this.style.transform='scale(1.05)'"
-                  onmouseout="this.style.transform='scale(1)'"
                 />
-                <div style="position: absolute; inset: 0; padding: 1.5rem; background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); color: white; opacity: 0; transition: opacity 0.3s; display: flex; flex-direction: column; justify-content: flex-end;" class="photo-overlay">
-                  <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem; color: white;">${photo.title || ''}</h3>
-                  ${photo.description ? `<p style="font-size: 0.875rem; opacity: 0.9; color: white;">${photo.description}</p>` : ''}
+                <div style="position: absolute; inset: 0; padding: 2rem; background: linear-gradient(to top, rgba(0,0,0,0.9), transparent 60%); color: white; opacity: 0; transition: opacity 0.3s; display: flex; flex-direction: column; justify-content: flex-end;" class="photo-overlay">
+                  <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; color: white;">${photo.title || ''}</h3>
+                  ${photo.description ? `<p style="color: white; line-height: 1.7; font-size: 0.9375rem; opacity: 0.9;">${photo.description}</p>` : ''}
                 </div>
               </div>
             `).join('') : ''}
@@ -2545,19 +2783,19 @@ END:VCARD\`;
         </div>
       </section>
 
-      <!-- About Section -->
-      <section id="about" style="padding: 6rem 0; background: var(--color-surface); border-top: 1px solid var(--color-border);">
+      <!-- About Section - Minimal Style -->
+      <section id="about" style="padding: 6rem 0; background: var(--color-surface);">
         <div class="container" style="max-width: 1100px;">
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 4rem;">
             
             ${data.clients && data.clients.length > 0 ? `
             <div>
-              <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem; letter-spacing: -0.01em;">
+              <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem; letter-spacing: -0.02em;">
                 Notable Clients
               </h2>
               <div style="display: flex; flex-wrap: wrap; gap: 1rem;">
                 ${data.clients.map(client => `
-                  <span style="padding: 0.75rem 1.25rem; background: var(--color-bg); border: 2px solid var(--color-border); border-radius: var(--radius-md); font-weight: 600; font-size: 0.9375rem;">
+                  <span style="padding: 0.75rem 1.25rem; background: var(--color-bg); border: 1px solid var(--color-border); border-radius: 8px; font-weight: 500; font-size: 0.9375rem; transition: all 0.3s;" onmouseover="this.style.borderColor='var(--color-accent)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='var(--color-border)'; this.style.transform='translateY(0)'">
                     ${client}
                   </span>
                 `).join('')}
@@ -2567,14 +2805,15 @@ END:VCARD\`;
             
             ${data.awards && data.awards.length > 0 ? `
             <div>
-              <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem; letter-spacing: -0.01em;">
+              <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem; letter-spacing: -0.02em;">
                 Awards & Recognition
               </h2>
               <div style="display: flex; flex-direction: column; gap: 1rem;">
                 ${data.awards.map(award => `
-                  <div style="padding: 1rem; background: var(--color-bg); border-left: 3px solid var(--color-accent); border-radius: var(--radius-md);">
-                    <h3 style="font-size: 1rem; font-weight: 700; margin-bottom: 0.25rem;">${award.title || ''}</h3>
-                    <p style="font-size: 0.875rem; color: var(--color-text-secondary); font-weight: 600;">${award.year || ''}</p>
+                  <div style="padding: 2rem; background: var(--color-bg); border-radius: 12px; border: 1px solid var(--color-border); transition: all 0.3s;" onmouseover="this.style.borderColor='var(--color-accent)'; this.style.transform='translateY(-4px)'" onmouseout="this.style.borderColor='var(--color-border)'; this.style.transform='translateY(0)'">
+                    <div style="width: 48px; height: 48px; background: var(--color-accent); border-radius: 8px; margin-bottom: 1.5rem; opacity: 0.1;"></div>
+                    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem;">${award.title || ''}</h3>
+                    <p style="color: var(--color-text-secondary); line-height: 1.7; font-size: 0.9375rem;">${award.year || ''}</p>
                   </div>
                 `).join('')}
               </div>
@@ -2584,28 +2823,44 @@ END:VCARD\`;
         </div>
       </section>
 
-      <!-- Contact -->
+      <!-- Testimonial Section - Minimal Style -->
+      <section style="padding: 6rem 0; text-align: center;">
+        <div class="container">
+          <p style="font-size: 1.5rem; line-height: 1.8; max-width: 800px; margin: 0 auto 2rem; font-weight: 500; color: var(--color-text);">
+            "The most elegant solution I've found. Nothing unnecessary, everything essential."
+          </p>
+          <div style="display: flex; align-items: center; justify-content: center; gap: 1rem;">
+            <div style="width: 48px; height: 48px; border-radius: 50%; background: var(--color-accent); opacity: 0.2;"></div>
+            <div style="text-align: left;">
+              <h4 style="font-weight: 600; margin-bottom: 0.25rem;">Sarah Chen</h4>
+              <p style="color: var(--color-text-secondary); font-size: 0.875rem;">Brand Director</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Contact Section - Minimal Style -->
       <section id="contact" style="padding: 6rem 0; text-align: center;">
         <div class="container" style="max-width: 700px;">
-          <h2 style="font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 800; margin-bottom: 1.5rem; letter-spacing: -0.03em;">
+          <h2 style="font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 700; margin-bottom: 1.5rem; letter-spacing: -0.03em;">
             Let's Create Together
           </h2>
           <p style="font-size: 1.25rem; color: var(--color-text-secondary); margin-bottom: 2.5rem; line-height: 1.7;">
-            Available for commissions, editorial work, and collaborations worldwide
+            Available for commissions and collaborations
           </p>
           <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
             ${data.email ? `
-            <a href="mailto:${data.email}" class="btn" style="padding: 1rem 2.5rem; font-size: 1rem;">
-              Email Me
+            <a href="mailto:${data.email}" style="padding: 1rem 2rem; border-radius: 8px; text-decoration: none; font-weight: 500; transition: all 0.2s; display: inline-block; background: var(--color-accent); color: white;" onmouseover="this.style.transform='translateY(-2px)'; this.style.opacity='0.9'" onmouseout="this.style.transform='translateY(0)'; this.style.opacity='1'">
+              Get in Touch
             </a>
             ` : ''}
             ${data.phone ? `
-            <a href="tel:${data.phone.replace(/\s/g, '')}" class="btn btn-outline" style="padding: 1rem 2.5rem; font-size: 1rem;">
+            <a href="tel:${data.phone.replace(/\s/g, '')}" style="padding: 1rem 2rem; border-radius: 8px; text-decoration: none; font-weight: 500; transition: all 0.2s; display: inline-block; border: 1px solid var(--color-border); color: var(--color-text);" onmouseover="this.style.background='var(--color-surface)'" onmouseout="this.style.background='transparent'">
               ${data.phone}
             </a>
             ` : ''}
             ${data.instagram ? `
-            <a href="https://instagram.com/${data.instagram.replace('@', '')}" target="_blank" class="btn btn-outline" style="padding: 1rem 2.5rem; font-size: 1rem;">
+            <a href="https://instagram.com/${data.instagram.replace('@', '')}" target="_blank" style="padding: 1rem 2rem; border-radius: 8px; text-decoration: none; font-weight: 500; transition: all 0.2s; display: inline-block; border: 1px solid var(--color-border); color: var(--color-text);" onmouseover="this.style.background='var(--color-surface)'" onmouseout="this.style.background='transparent'">
               ${data.instagram}
             </a>
             ` : ''}
@@ -2613,45 +2868,54 @@ END:VCARD\`;
         </div>
       </section>
 
-      <!-- Footer -->
+      <!-- Footer - Minimal Style -->
       <footer style="padding: 3rem 0; border-top: 1px solid var(--color-border); text-align: center; color: var(--color-text-secondary); font-size: 0.875rem;">
         <div class="container">
-          <p>Ãƒâ€šÃ‚Â© 2024 ${data.photographerName || 'Photographer'}. All rights reserved.</p>
+          <p>© 2024 ${data.photographerName || 'Photographer'}. All rights reserved.</p>
         </div>
       </footer>
 
-      <!-- Lightbox -->
+      <!-- Lightbox Modal -->
       <div id="lightbox" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.95); z-index: 10000; align-items: center; justify-content: center; padding: 2rem;" onclick="closeLightbox()">
-        <button onclick="closeLightbox()" style="position: absolute; top: 2rem; right: 2rem; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.3); color: white; width: 48px; height: 48px; border-radius: 50%; font-size: 1.5rem; cursor: pointer; backdrop-filter: blur(10px);">ÃƒÆ’Ã¢â‚¬â€</button>
-        <button onclick="event.stopPropagation(); prevPhoto()" style="position: absolute; left: 2rem; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.3); color: white; width: 48px; height: 48px; border-radius: 50%; font-size: 1.5rem; cursor: pointer; backdrop-filter: blur(10px);">ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¹</button>
-        <button onclick="event.stopPropagation(); nextPhoto()" style="position: absolute; right: 2rem; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.3); color: white; width: 48px; height: 48px; border-radius: 50%; font-size: 1.5rem; cursor: pointer; backdrop-filter: blur(10px);">ÃƒÂ¢Ã¢â€šÂ¬Ã‚Âº</button>
+        <button onclick="closeLightbox()" style="position: absolute; top: 2rem; right: 2rem; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.3); color: white; width: 48px; height: 48px; border-radius: 50%; font-size: 1.5rem; cursor: pointer; backdrop-filter: blur(10px); transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">×</button>
+        <button onclick="event.stopPropagation(); prevPhoto()" style="position: absolute; left: 2rem; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.3); color: white; width: 48px; height: 48px; border-radius: 50%; font-size: 1.5rem; cursor: pointer; backdrop-filter: blur(10px); transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">‹</button>
+        <button onclick="event.stopPropagation(); nextPhoto()" style="position: absolute; right: 2rem; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.3); color: white; width: 48px; height: 48px; border-radius: 50%; font-size: 1.5rem; cursor: pointer; backdrop-filter: blur(10px); transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">›</button>
         <div style="max-width: 90vw; max-height: 90vh; text-align: center;">
-          <img id="lightbox-img" src="" alt="" style="max-width: 100%; max-height: 85vh; object-fit: contain; border-radius: var(--radius-lg);" onclick="event.stopPropagation()">
+          <img id="lightbox-img" src="" alt="" style="max-width: 100%; max-height: 85vh; object-fit: contain; border-radius: 8px;" onclick="event.stopPropagation()">
           <div id="lightbox-info" style="color: white; margin-top: 1.5rem; padding: 1rem;"></div>
         </div>
       </div>
 
       <style>
+        /* Hover Effects */
         .photo-overlay { pointer-events: none; }
         .gallery-item:hover .photo-overlay { opacity: 1; }
+        .gallery-item:hover { border-color: var(--color-accent) !important; transform: translateY(-4px); }
         
+        /* Filter Button States */
         .filter-btn:hover {
-          border-color: var(--color-text) !important;
+          border-color: var(--color-accent) !important;
           transform: translateY(-2px);
         }
         
         .filter-btn.active {
-          background: var(--color-text) !important;
-          color: var(--color-bg) !important;
-          border-color: var(--color-text) !important;
+          background: var(--color-accent) !important;
+          color: white !important;
+          border-color: var(--color-accent) !important;
         }
         
+        /* Responsive Design */
         @media (max-width: 768px) {
-          #grid-gallery { grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); }
+          .nav-links { display: none !important; }
+          .stats-grid { grid-template-columns: 1fr !important; gap: 2rem !important; }
+          .features-grid { grid-template-columns: 1fr !important; gap: 1.5rem !important; }
+          section { padding: 5rem 0 4rem !important; }
         }
         
-        @media (max-width: 480px) {
-          #grid-gallery { grid-template-columns: 1fr; }
+        @media (max-width: 640px) {
+          .cta-group { flex-direction: column; max-width: 300px; margin: 0 auto; }
+          .cta-group a { width: 100%; }
+          section { padding: 4rem 0 3rem !important; }
         }
       </style>
 
@@ -2665,13 +2929,15 @@ END:VCARD\`;
           
           buttons.forEach(btn => {
             btn.classList.remove('active');
-            btn.style.background = 'var(--color-surface)';
+            btn.style.background = 'transparent';
             btn.style.color = 'var(--color-text)';
+            btn.style.borderColor = 'var(--color-border)';
           });
           
           event.target.classList.add('active');
-          event.target.style.background = 'var(--color-text)';
-          event.target.style.color = 'var(--color-bg)';
+          event.target.style.background = 'var(--color-accent)';
+          event.target.style.color = 'white';
+          event.target.style.borderColor = 'var(--color-accent)';
           
           items.forEach(item => {
             if (category === 'all' || item.dataset.category === category) {
@@ -2698,7 +2964,7 @@ END:VCARD\`;
           const photo = photos[index];
           document.getElementById('lightbox-img').src = photo.imageUrl;
           document.getElementById('lightbox-info').innerHTML = \`
-            <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem;">\${photo.title || ''}</h3>
+            <h3 style="font-size: 1.5rem; font-weight: 600; margin-bottom: 0.5rem;">\${photo.title || ''}</h3>
             \${photo.description ? \`<p style="font-size: 1rem; opacity: 0.8;">\${photo.description}</p>\` : ''}
           \`;
         }
@@ -2723,8 +2989,7 @@ END:VCARD\`;
       </script>
     `
   }),
-
-  'local-business': new Template('local-business', {
+'local-business': new Template('local-business', {
     name: 'Local Small Business',
     description: 'Perfect for local shops, services, and small businesses',
     category: 'business',
@@ -2746,88 +3011,94 @@ END:VCARD\`;
       { name: 'testimonials', label: 'Customer Testimonials (JSON format)', type: 'textarea', placeholder: '[{"name": "John Doe", "text": "Great service!", "rating": 5}]', required: false }
     ],
     structure: (data, theme) => `
-      <!-- Compact Header with Contact Info -->
-      <div style="background: var(--color-accent); color: var(--color-bg); padding: 0.75rem 0; text-align: center; font-size: 0.875rem; font-weight: 600;">
-        ${data.phone ? `ðŸ“ ${data.phone}` : ''} ${data.phone && data.email ? ' ðŸ“ ' : ''} ${data.email ? `ðŸ“Â¸Â ${data.email}` : ''}
+      <!-- Top Bar with Quick Contact -->
+      <div style="background: var(--color-accent); color: white; padding: 0.75rem 0; text-align: center; font-size: 0.875rem; font-weight: 600;">
+        <div class="container" style="display: flex; justify-content: center; align-items: center; gap: 2rem; flex-wrap: wrap;">
+          ${data.phone ? `<span style="display: flex; align-items: center; gap: 0.5rem;">📞 ${data.phone}</span>` : ''}
+          ${data.email ? `<span style="display: flex; align-items: center; gap: 0.5rem;">📧 ${data.email}</span>` : ''}
+        </div>
       </div>
       
-      <header style="padding: 1rem 0; background: var(--color-bg); position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+      <!-- Sticky Header -->
+      <header style="padding: 1.25rem 0; background: var(--color-bg); position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 12px rgba(0,0,0,0.08); backdrop-filter: blur(10px);">
         <div class="container">
-          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-            <div style="font-size: 1.75rem; font-weight: 900; color: var(--color-accent);">${data.businessName || 'Business Name'}</div>
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem;">
+            <div style="font-size: 1.5rem; font-weight: 900; color: var(--color-accent); letter-spacing: -0.01em;">
+              ${data.businessName || 'Business Name'}
+            </div>
             <div style="display: flex; gap: 2rem; align-items: center;">
-              <nav style="display: flex; gap: 2rem;">
-                <a href="#services" style="text-decoration: none; color: var(--color-text); font-weight: 600; font-size: 0.9375rem;">Services</a>
-                <a href="#reviews" style="text-decoration: none; color: var(--color-text); font-weight: 600; font-size: 0.9375rem;">Reviews</a>
-                <a href="#contact" style="text-decoration: none; color: var(--color-text); font-weight: 600; font-size: 0.9375rem;">Contact</a>
+              <nav class="nav-links" style="display: flex; gap: 2rem;">
+                <a href="#services" style="text-decoration: none; color: var(--color-text-secondary); font-weight: 600; font-size: 0.9375rem; transition: color 0.2s;" onmouseover="this.style.color='var(--color-text)'" onmouseout="this.style.color='var(--color-text-secondary)'">Services</a>
+                <a href="#reviews" style="text-decoration: none; color: var(--color-text-secondary); font-weight: 600; font-size: 0.9375rem; transition: color 0.2s;" onmouseover="this.style.color='var(--color-text)'" onmouseout="this.style.color='var(--color-text-secondary)'">Reviews</a>
+                <a href="#contact" style="text-decoration: none; color: var(--color-text-secondary); font-weight: 600; font-size: 0.9375rem; transition: color 0.2s;" onmouseover="this.style.color='var(--color-text)'" onmouseout="this.style.color='var(--color-text-secondary)'">Contact</a>
               </nav>
-              <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle theme">
-                <span class="theme-icon">Ã°Å¸Å’â„¢</span>
+              <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle theme" style="background: transparent; border: none; padding: 0.5rem; cursor: pointer; color: var(--color-text); font-size: 1.125rem;">
+                <span class="theme-icon">☀️</span>
               </button>
             </div>
           </div>
         </div>
       </header>
 
-      <!-- Hero Banner with Split Layout -->
-      <section style="background: var(--color-surface); padding: 0;">
+      <!-- Hero Section with Modern Split Layout -->
+      <section class="hero-section" style="background: var(--color-surface); padding: 0; overflow: hidden;">
         <div class="container" style="max-width: 1400px;">
-          <div style="display: grid; grid-template-columns: 1.2fr 1fr; min-height: 500px; align-items: center; gap: 4rem;">
-            <div style="padding: 4rem 0;">
-              <div style="display: inline-block; background: var(--color-accent); color: var(--color-bg); padding: 0.5rem 1.25rem; border-radius: var(--radius-full); font-weight: 700; font-size: 0.875rem; margin-bottom: 1.5rem;">
+          <div class="hero-grid" style="display: grid; grid-template-columns: 1.2fr 1fr; min-height: 500px; align-items: center; gap: 4rem;">
+            <div style="padding: 5rem 0;">
+              <div style="display: inline-block; background: var(--color-accent); color: white; padding: 0.625rem 1.5rem; border-radius: 50px; font-weight: 700; font-size: 0.875rem; margin-bottom: 1.5rem; letter-spacing: 0.05em;">
                 LOCAL & TRUSTED
               </div>
-              <h1 style="font-size: clamp(2.5rem, 5vw, 4rem); font-weight: 900; margin-bottom: 1.5rem; line-height: 1.1;">
+              <h1 style="font-size: clamp(2.5rem, 5vw, 4rem); font-weight: 900; margin-bottom: 1.5rem; line-height: 1.1; letter-spacing: -0.02em;">
                 ${data.tagline || 'Your Trusted Local Partner'}
               </h1>
-              <p style="font-size: 1.25rem; color: var(--color-text-secondary); margin-bottom: 2.5rem; line-height: 1.7;">
+              <p style="font-size: 1.125rem; color: var(--color-text-secondary); margin-bottom: 2.5rem; line-height: 1.7; max-width: 600px;">
                 ${data.description || 'Serving our community with quality service and dedication'}
               </p>
-              <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                <a href="#contact" class="btn" style="padding: 1.125rem 2.5rem; font-size: 1.125rem; background: var(--color-accent); border-color: var(--color-accent); color: var(--color-bg);">
+              <div class="cta-buttons" style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                <a href="#contact" style="padding: 1.125rem 2.5rem; font-size: 1rem; background: var(--color-accent); color: white; border-radius: 8px; text-decoration: none; font-weight: 600; transition: all 0.2s; display: inline-block;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 20px rgba(0,0,0,0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
                   ${data.ctaText || 'Get Started'}
                 </a>
                 ${data.phone ? `
-                <a href="tel:${data.phone.replace(/\s/g, '')}" class="btn btn-outline" style="padding: 1.125rem 2.5rem; font-size: 1.125rem;">
+                <a href="tel:${data.phone.replace(/\s/g, '')}" style="padding: 1.125rem 2.5rem; font-size: 1rem; background: transparent; color: var(--color-text); border: 2px solid var(--color-border); border-radius: 8px; text-decoration: none; font-weight: 600; transition: all 0.2s; display: inline-block;" onmouseover="this.style.background='var(--color-bg)'; this.style.borderColor='var(--color-accent)'; this.style.color='var(--color-accent)'" onmouseout="this.style.background='transparent'; this.style.borderColor='var(--color-border)'; this.style.color='var(--color-text)'">
                   Call Now
                 </a>
                 ` : ''}
               </div>
             </div>
-            <div style="background: linear-gradient(135deg, var(--color-accent), var(--color-text)); height: 100%; min-height: 500px; display: flex; align-items: center; justify-content: center; color: white; font-size: 5rem; opacity: 0.1;">
-              Ã°Å¸ÂÂª
+            <div class="hero-image" style="background: linear-gradient(135deg, var(--color-accent), var(--color-text)); height: 100%; min-height: 500px; display: flex; align-items: center; justify-content: center; color: white; font-size: 4rem; opacity: 0.1; border-radius: 0 0 0 80px;">
+              🏪
             </div>
           </div>
         </div>
       </section>
 
-      <!-- Quick Info Cards -->
-      <section style="padding: 3rem 0; margin-top: -2rem; position: relative; z-index: 10;">
+      <!-- Quick Info Cards with Modern Design -->
+      <section style="padding: 3rem 0; margin-top: -3rem; position: relative; z-index: 10;">
         <div class="container">
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; max-width: 1000px; margin: 0 auto;">
+          <div class="info-cards" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; max-width: 1000px; margin: 0 auto;">
             ${data.address || data.city ? `
-            <div style="background: var(--color-bg); padding: 2rem; border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); text-align: center; border: 3px solid var(--color-border);">
-              <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">Ã°Å¸â€œÂ</div>
-              <div style="font-weight: 700; font-size: 1rem; margin-bottom: 0.5rem;">Visit Us</div>
-              <div style="color: var(--color-text-secondary); font-size: 0.9375rem; line-height: 1.5;">
+            <div style="background: var(--color-bg); padding: 2rem; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); text-align: center; border: 1px solid var(--color-border); transition: all 0.3s;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 30px rgba(0,0,0,0.12)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 20px rgba(0,0,0,0.08)'">
+              <div style="font-size: 2.5rem; margin-bottom: 1rem;">📍</div>
+              <div style="font-weight: 700; font-size: 1.125rem; margin-bottom: 0.5rem; color: var(--color-text);">Visit Us</div>
+              <div style="color: var(--color-text-secondary); font-size: 0.9375rem; line-height: 1.6;">
                 ${data.address ? data.address + '<br>' : ''}${data.city || ''}
               </div>
             </div>
             ` : ''}
             ${data.hours ? `
-            <div style="background: var(--color-bg); padding: 2rem; border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); text-align: center; border: 3px solid var(--color-border);">
-              <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">Ã°Å¸â€¢Â</div>
-              <div style="font-weight: 700; font-size: 1rem; margin-bottom: 0.5rem;">Hours</div>
-              <div style="color: var(--color-text-secondary); font-size: 0.9375rem; line-height: 1.5; white-space: pre-line;">
-                ${data.hours.split('\n')[0]}
+            <div style="background: var(--color-bg); padding: 2rem; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); text-align: center; border: 1px solid var(--color-border); transition: all 0.3s;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 30px rgba(0,0,0,0.12)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 20px rgba(0,0,0,0.08)'">
+              <div style="font-size: 2.5rem; margin-bottom: 1rem;">🕒</div>
+              <div style="font-weight: 700; font-size: 1.125rem; margin-bottom: 0.5rem; color: var(--color-text);">Hours</div>
+              <div style="color: var(--color-text-secondary); font-size: 0.9375rem; line-height: 1.6; white-space: pre-line;">
+                ${data.hours.split('\n').slice(0, 2).join('\n')}
               </div>
             </div>
             ` : ''}
             ${data.phone ? `
-            <div style="background: var(--color-bg); padding: 2rem; border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); text-align: center; border: 3px solid var(--color-border);">
-              <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">Ã°Å¸â€œÅ¾</div>
-              <div style="font-weight: 700; font-size: 1rem; margin-bottom: 0.5rem;">Call Us</div>
-              <a href="tel:${data.phone.replace(/\s/g, '')}" style="color: var(--color-accent); font-size: 1.125rem; text-decoration: none; font-weight: 700;">
+            <div style="background: var(--color-bg); padding: 2rem; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); text-align: center; border: 1px solid var(--color-border); transition: all 0.3s;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 30px rgba(0,0,0,0.12)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 20px rgba(0,0,0,0.08)'">
+              <div style="font-size: 2.5rem; margin-bottom: 1rem;">📞</div>
+              <div style="font-weight: 700; font-size: 1.125rem; margin-bottom: 0.5rem; color: var(--color-text);">Call Us</div>
+              <a href="tel:${data.phone.replace(/\s/g, '')}" style="color: var(--color-accent); font-size: 1.125rem; text-decoration: none; font-weight: 700; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
                 ${data.phone}
               </a>
             </div>
@@ -2836,23 +3107,26 @@ END:VCARD\`;
         </div>
       </section>
 
-      <!-- Services Grid -->
+      <!-- Services Section with Modern Grid -->
       <section id="services" style="padding: 6rem 0;">
         <div class="container">
-          <div style="text-align: center; margin-bottom: 4rem;">
-            <h2 style="font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: 900; margin-bottom: 1rem;">
+          <div style="text-align: center; margin-bottom: 4rem; max-width: 700px; margin-left: auto; margin-right: auto;">
+            <h2 style="font-size: clamp(2rem, 5vw, 3rem); font-weight: 900; margin-bottom: 1rem; letter-spacing: -0.02em;">
               Our Services
             </h2>
-            <div style="width: 80px; height: 4px; background: var(--color-accent); margin: 0 auto;"></div>
+            <div style="width: 60px; height: 4px; background: var(--color-accent); margin: 0 auto 1rem; border-radius: 2px;"></div>
+            <p style="color: var(--color-text-secondary); font-size: 1.125rem; line-height: 1.6;">
+              Quality services tailored to your needs
+            </p>
           </div>
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+          <div class="services-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
             ${(data.services || '').split('\n').filter(s => s.trim()).map((service, i) => `
-              <div class="service-box" style="background: var(--color-surface); padding: 2rem; border-radius: var(--radius-md); border-left: 4px solid var(--color-accent); transition: all 0.3s;">
-                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.75rem;">
-                  <div style="width: 40px; height: 40px; background: var(--color-accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--color-bg); font-weight: 900; font-size: 1.125rem; flex-shrink: 0;">
+              <div class="service-card" style="background: var(--color-surface); padding: 2rem; border-radius: 12px; border-left: 4px solid var(--color-accent); transition: all 0.3s; cursor: pointer;" onmouseover="this.style.transform='translateX(8px)'; this.style.boxShadow='0 4px 20px rgba(0,0,0,0.1)'" onmouseout="this.style.transform='translateX(0)'; this.style.boxShadow='none'">
+                <div style="display: flex; align-items: start; gap: 1rem;">
+                  <div style="width: 48px; height: 48px; background: var(--color-accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 900; font-size: 1.125rem; flex-shrink: 0;">
                     ${i + 1}
                   </div>
-                  <h3 style="font-size: 1.25rem; font-weight: 700; line-height: 1.3;">
+                  <h3 style="font-size: 1.125rem; font-weight: 700; line-height: 1.4; color: var(--color-text); margin-top: 0.5rem;">
                     ${service.trim()}
                   </h3>
                 </div>
@@ -2863,35 +3137,38 @@ END:VCARD\`;
       </section>
 
       ${data.testimonials && data.testimonials.trim() !== '' ? `
-      <!-- Customer Reviews -->
+      <!-- Customer Reviews with Modern Cards -->
       <section id="reviews" style="padding: 6rem 0; background: var(--color-surface);">
         <div class="container">
-          <div style="text-align: center; margin-bottom: 4rem;">
-            <h2 style="font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: 900; margin-bottom: 1rem;">
+          <div style="text-align: center; margin-bottom: 4rem; max-width: 700px; margin-left: auto; margin-right: auto;">
+            <h2 style="font-size: clamp(2rem, 5vw, 3rem); font-weight: 900; margin-bottom: 1rem; letter-spacing: -0.02em;">
               Customer Reviews
             </h2>
-            <div style="width: 80px; height: 4px; background: var(--color-accent); margin: 0 auto;"></div>
+            <div style="width: 60px; height: 4px; background: var(--color-accent); margin: 0 auto 1rem; border-radius: 2px;"></div>
+            <p style="color: var(--color-text-secondary); font-size: 1.125rem; line-height: 1.6;">
+              What our customers say about us
+            </p>
           </div>
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; max-width: 1200px; margin: 0 auto;">
+          <div class="reviews-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; max-width: 1200px; margin: 0 auto;">
             ${(() => {
               try {
                 const testimonials = JSON.parse(data.testimonials);
                 return testimonials.map(t => `
-                  <div style="background: var(--color-bg); padding: 2.5rem; border-radius: var(--radius-lg); box-shadow: var(--shadow-md); border-top: 4px solid var(--color-accent);">
+                  <div style="background: var(--color-bg); padding: 2.5rem; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); border-top: 4px solid var(--color-accent); transition: all 0.3s;" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 30px rgba(0,0,0,0.12)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 20px rgba(0,0,0,0.08)'">
                     ${t.rating ? `
-                    <div style="color: #FFB800; font-size: 1.5rem; margin-bottom: 1.25rem;">
-                      ${'Ã¢Ëœâ€¦'.repeat(t.rating)}${'Ã¢Ëœâ€ '.repeat(5 - t.rating)}
+                    <div style="color: #FFB800; font-size: 1.25rem; margin-bottom: 1.25rem; letter-spacing: 0.25rem;">
+                      ${'★'.repeat(t.rating)}${'☆'.repeat(5 - t.rating)}
                     </div>
                     ` : ''}
-                    <p style="font-size: 1.0625rem; line-height: 1.7; margin-bottom: 1.5rem; font-style: italic;">
+                    <p style="font-size: 1rem; line-height: 1.7; margin-bottom: 1.5rem; font-style: italic; color: var(--color-text);">
                       "${t.text}"
                     </p>
-                    <div style="display: flex; align-items: center; gap: 0.75rem;">
-                      <div style="width: 48px; height: 48px; background: var(--color-accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--color-bg); font-weight: 900; font-size: 1.25rem;">
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                      <div style="width: 48px; height: 48px; background: var(--color-accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 900; font-size: 1.25rem; flex-shrink: 0;">
                         ${t.name.charAt(0).toUpperCase()}
                       </div>
                       <div>
-                        <div style="font-weight: 700; font-size: 1rem;">${t.name}</div>
+                        <div style="font-weight: 700; font-size: 1rem; color: var(--color-text);">${t.name}</div>
                         <div style="font-size: 0.875rem; color: var(--color-text-secondary);">Verified Customer</div>
                       </div>
                     </div>
@@ -2906,36 +3183,41 @@ END:VCARD\`;
       </section>
       ` : ''}
 
-      <!-- Contact CTA Section -->
-      <section id="contact" style="padding: 6rem 0; background: var(--color-accent); color: var(--color-bg); text-align: center;">
-        <div class="container" style="max-width: 800px;">
-          <h2 style="font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 900; margin-bottom: 1.5rem; color: var(--color-bg);">
+      <!-- Contact CTA Section with Modern Design -->
+      <section id="contact" style="padding: 6rem 0; background: var(--color-accent); color: white; text-align: center; position: relative; overflow: hidden;">
+        <div style="position: absolute; inset: 0; background: radial-gradient(circle at 30% 50%, rgba(255,255,255,0.1), transparent); pointer-events: none;"></div>
+        <div class="container" style="max-width: 800px; position: relative;">
+          <h2 style="font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 900; margin-bottom: 1.5rem; color: white; letter-spacing: -0.02em;">
             Ready to Get Started?
           </h2>
-          <p style="font-size: 1.375rem; margin-bottom: 3rem; opacity: 0.95; line-height: 1.6;">
+          <p style="font-size: 1.25rem; margin-bottom: 3rem; opacity: 0.95; line-height: 1.6; max-width: 600px; margin-left: auto; margin-right: auto;">
             Contact us today and experience the difference of working with a local business that cares
           </p>
-          <div style="display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap;">
+          <div style="display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap; margin-bottom: 3rem;">
             ${data.phone ? `
-            <a href="tel:${data.phone.replace(/\s/g, '')}" style="display: inline-block; padding: 1.25rem 3rem; background: var(--color-bg); color: var(--color-accent); text-decoration: none; font-weight: 700; font-size: 1.125rem; border-radius: var(--radius-md); transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
-              Ã°Å¸â€œÅ¾ Call ${data.phone}
+            <a href="tel:${data.phone.replace(/\s/g, '')}" style="display: inline-flex; align-items: center; gap: 0.75rem; padding: 1.25rem 2.5rem; background: white; color: var(--color-accent); text-decoration: none; font-weight: 700; font-size: 1.125rem; border-radius: 8px; transition: all 0.2s; box-shadow: 0 4px 15px rgba(0,0,0,0.1);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 25px rgba(0,0,0,0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(0,0,0,0.1)'">
+              <span style="font-size: 1.5rem;">📞</span> Call ${data.phone}
             </a>
             ` : ''}
             ${data.email ? `
-            <a href="mailto:${data.email}" style="display: inline-block; padding: 1.25rem 3rem; background: transparent; color: var(--color-bg); text-decoration: none; font-weight: 700; font-size: 1.125rem; border: 3px solid var(--color-bg); border-radius: var(--radius-md); transition: all 0.2s;" onmouseover="this.style.background='var(--color-bg)'; this.style.color='var(--color-accent)'" onmouseout="this.style.background='transparent'; this.style.color='var(--color-bg)'">
-              Ã¢Å“â€°Ã¯Â¸Â Email Us
+            <a href="mailto:${data.email}" style="display: inline-flex; align-items: center; gap: 0.75rem; padding: 1.25rem 2.5rem; background: transparent; color: white; text-decoration: none; font-weight: 700; font-size: 1.125rem; border: 3px solid white; border-radius: 8px; transition: all 0.2s;" onmouseover="this.style.background='white'; this.style.color='var(--color-accent)'" onmouseout="this.style.background='transparent'; this.style.color='white'">
+              <span style="font-size: 1.5rem;">📧</span> Email Us
             </a>
             ` : ''}
           </div>
           ${data.facebook || data.instagram ? `
-          <div style="margin-top: 3rem; padding-top: 3rem; border-top: 2px solid rgba(255,255,255,0.2);">
-            <div style="font-weight: 700; margin-bottom: 1rem; font-size: 1.125rem;">Follow Us</div>
+          <div style="padding-top: 3rem; border-top: 2px solid rgba(255,255,255,0.2);">
+            <div style="font-weight: 700; margin-bottom: 1.5rem; font-size: 1.125rem;">Follow Us</div>
             <div style="display: flex; gap: 1rem; justify-content: center;">
               ${data.facebook ? `
-              <a href="${data.facebook}" target="_blank" style="width: 48px; height: 48px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 1.25rem; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">f</a>
+              <a href="${data.facebook}" target="_blank" style="width: 56px; height: 56px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 1.5rem; transition: all 0.2s; backdrop-filter: blur(10px);" onmouseover="this.style.background='rgba(255,255,255,0.3)'; this.style.transform='scale(1.1)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'; this.style.transform='scale(1)'">
+                <span style="color: white;">f</span>
+              </a>
               ` : ''}
               ${data.instagram ? `
-              <a href="https://instagram.com/${data.instagram.replace('@', '')}" target="_blank" style="width: 48px; height: 48px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 1.25rem; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.3)'">Ã°Å¸â€œÂ·</a>
+              <a href="https://instagram.com/${data.instagram.replace('@', '')}" target="_blank" style="width: 56px; height: 56px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 1.5rem; transition: all 0.2s; backdrop-filter: blur(10px);" onmouseover="this.style.background='rgba(255,255,255,0.3)'; this.style.transform='scale(1.1)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'; this.style.transform='scale(1)'">
+                <span style="color: white;">📷</span>
+              </a>
               ` : ''}
             </div>
           </div>
@@ -2944,25 +3226,75 @@ END:VCARD\`;
       </section>
 
       <!-- Footer -->
-      <footer style="padding: 2rem 0; background: var(--color-bg); text-align: center; color: var(--color-text-secondary); font-size: 0.875rem; border-top: 1px solid var(--color-border);">
+      <footer style="padding: 3rem 0; background: var(--color-bg); text-align: center; color: var(--color-text-secondary); font-size: 0.875rem; border-top: 1px solid var(--color-border);">
         <div class="container">
-          <p>Ã‚Â© 2024 ${data.businessName || 'Business'}. Proudly serving our local community.</p>
+          <p>© 2024 ${data.businessName || 'Business'}. Proudly serving our local community.</p>
         </div>
       </footer>
 
       <style>
-        .service-box:hover {
+        /* Smooth hover transitions */
+        .service-card:hover {
           transform: translateX(8px);
-          box-shadow: var(--shadow-md);
         }
         
+        /* Responsive Grid Adjustments */
         @media (max-width: 968px) {
-          header > div > div:first-child > div:nth-child(2) > nav { display: none; }
-          section > div > div[style*="grid-template-columns: 1.2fr 1fr"] {
+          .nav-links {
+            display: none !important;
+          }
+          
+          .hero-grid {
+            grid-template-columns: 1fr !important;
+            gap: 0 !important;
+          }
+          
+          .hero-image {
+            display: none !important;
+          }
+          
+          .hero-section {
+            padding: 4rem 0 !important;
+          }
+          
+          .info-cards {
+            grid-template-columns: 1fr !important;
+            gap: 1rem !important;
+          }
+          
+          .services-grid {
             grid-template-columns: 1fr !important;
           }
-          section > div > div[style*="grid-template-columns: 1.2fr 1fr"] > div:last-child {
-            display: none;
+          
+          .reviews-grid {
+            grid-template-columns: 1fr !important;
+          }
+          
+          .cta-buttons {
+            flex-direction: column;
+          }
+          
+          .cta-buttons a {
+            width: 100%;
+            text-align: center;
+          }
+        }
+        
+        @media (max-width: 640px) {
+          section {
+            padding: 4rem 0 !important;
+          }
+          
+          .container {
+            padding: 0 1.25rem !important;
+          }
+          
+          h1 {
+            font-size: 2rem !important;
+          }
+          
+          h2 {
+            font-size: 1.75rem !important;
           }
         }
       </style>
