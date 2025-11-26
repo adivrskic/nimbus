@@ -66,6 +66,8 @@ function CustomizeModal({ templateId, isOpen, onClose }) {
   const themes = getAllThemes();
   const { theme: globalTheme, selectedStyleTheme, setStyleTheme } = useTheme();
   console.log(globalTheme, selectedStyleTheme)
+  const [mobileView, setMobileView] = useState('editor'); // 'editor' | 'preview'
+
   
   // Build template config from template system
   const templateConfig = template ? {
@@ -221,35 +223,80 @@ function CustomizeModal({ templateId, isOpen, onClose }) {
             </div>
           </div>
           <div className="customize-modal__actions">
+
             <button className="btn btn-secondary" onClick={handlePreviewNewTab}>
               <Eye size={20} />
-              Preview
+              <span className="btn-text">Preview</span>
             </button>
+
             <button className="btn btn-secondary" onClick={handleDownload}>
               <Download size={20} />
-              Download
+              <span className="btn-text">Download</span>
             </button>
+
             <button className="btn btn-primary" onClick={handleDeploy}>
               <ExternalLink size={20} />
-              Deploy
+              <span className="btn-text">Deploy</span>
             </button>
+
           </div>
         </div>
 
-        <div className="customize-modal__content">
-          <CustomizationPanel
-            fields={templateConfig.customizable}
-            customization={customization}
-            onChange={handleCustomizationChange}
-            onImageUpload={handleImageUpload}
-            themes={themes}
-          />
-          <LivePreview
-            templateId={templateId}
-            customization={customization}
-            images={uploadedImages}
-          />
+        { /* Mobile Editor/Preview Switch */ }
+        <div className="customize-modal__mobile-tabs">
+          <button
+            className={mobileView === 'editor' ? 'active' : ''}
+            onClick={() => setMobileView('editor')}
+          >
+            Editor
+          </button>
+          <button
+            className={mobileView === 'preview' ? 'active' : ''}
+            onClick={() => setMobileView('preview')}
+          >
+            Preview
+          </button>
         </div>
+
+
+        { /* Mobile Toggle Bar */ }
+        {/* <div className="customize-modal__mobile-toggle">
+          <button
+            className={mobileView === 'editor' ? 'active' : ''}
+            onClick={() => setMobileView('editor')}
+          >
+            Editor
+          </button>
+          <button
+            className={mobileView === 'preview' ? 'active' : ''}
+            onClick={() => setMobileView('preview')}
+          >
+            Preview
+          </button>
+        </div> */}
+
+
+        <div className={`customize-modal__content mobile-${mobileView}`}>
+          <div className="customize-modal__panel">
+            <CustomizationPanel
+              fields={templateConfig.customizable}
+              customization={customization}
+              onChange={handleCustomizationChange}
+              onImageUpload={handleImageUpload}
+              themes={themes}
+            />
+          </div>
+
+          <div className="customize-modal__preview">
+            <LivePreview
+              templateId={templateId}
+              customization={customization}
+              images={uploadedImages}
+            />
+          </div>
+        </div>
+
+
       </div>
 
       <PaymentModal

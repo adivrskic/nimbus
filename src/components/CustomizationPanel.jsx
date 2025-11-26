@@ -166,7 +166,7 @@ function CustomizationPanel({ fields, customization, onChange, onImageUpload }) 
       const scrollTop = contentRef.current.scrollTop;
       const scrollHeight = contentRef.current.scrollHeight;
       const clientHeight = contentRef.current.clientHeight;
-      const offset = 100; // Offset for sticky header
+      const offset = 150; // Offset for sticky header
 
       // Check if we're at the bottom of the scroll container
       const isAtBottom = scrollTop + clientHeight >= scrollHeight - 10; // 10px threshold
@@ -201,7 +201,7 @@ function CustomizationPanel({ fields, customization, onChange, onImageUpload }) 
   const scrollToSection = (sectionKey) => {
     const sectionElement = sectionRefs.current[sectionKey];
     if (sectionElement && contentRef.current) {
-      const offset = 60; // Account for sticky tabs
+      const offset = 150; // Account for sticky tabs
       const elementPosition = sectionElement.offsetTop;
       contentRef.current.scrollTo({
         top: elementPosition - offset,

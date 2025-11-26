@@ -118,7 +118,7 @@ function LivePreview({ templateId, customization, images }) {
           </button>
         </div>
         
-        <div className="live-preview__controls">
+        {/* <div className="live-preview__controls">
           <button
             className={`live-preview__control ${getDisplayMode() === 'light' ? 'active' : ''}`}
             onClick={() => handleColorModeChange('light')}
@@ -133,7 +133,7 @@ function LivePreview({ templateId, customization, images }) {
           >
             <Moon size={20} />
           </button>
-        </div>
+        </div> */}
 
         <div>
           <span className="live-preview__label">Preview: </span>
