@@ -41,6 +41,10 @@
     height: calc(100vh - 140px); // header + toggle bar
   }
 
+  .customize-modal__panel {
+    overflow-y: scroll;
+  }
+
   .customize-modal__panel,
   .customize-modal__preview {
     height: 100%;

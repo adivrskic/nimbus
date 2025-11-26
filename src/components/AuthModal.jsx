@@ -378,7 +378,7 @@ function AuthModal({ isOpen, onClose, onAuthSuccess, onForgotPassword }) {
             </button>
 
             {/* Facebook */}
-            <button
+            {/* <button
               className="btn-social-icon"
               onClick={handleFacebookSignIn}
               disabled={isLoading}
@@ -395,10 +395,10 @@ function AuthModal({ isOpen, onClose, onAuthSuccess, onForgotPassword }) {
                 23.406 24 22.676V1.325C24 .593 23.407 
                 0 22.675 0z"/>
               </svg>
-            </button>
+            </button> */}
 
             {/* Apple */}
-            <button
+            {/* <button
               className="btn-social-icon"
               onClick={handleAppleSignIn}
               disabled={isLoading}
@@ -416,10 +416,10 @@ function AuthModal({ isOpen, onClose, onAuthSuccess, onForgotPassword }) {
                 0 2.4-1.07 4.54-1.07 1.67 0 3.45.91 
                 4.66 2.48-4.1 2.25-3.43 8.11.63 10.28z"/>
               </svg>
-            </button>
+            </button> */}
 
             {/* LinkedIn */}
-            <button
+            {/* <button
               className="btn-social-icon"
               onClick={handleLinkedInSignIn}
               disabled={isLoading}
@@ -437,7 +437,7 @@ function AuthModal({ isOpen, onClose, onAuthSuccess, onForgotPassword }) {
                 1.66-1.83 3.42-1.83 3.66 0 4.34 2.41 4.34 
                 5.54v6.18z"/>
               </svg>
-            </button>
+            </button> */}
 
           </div>
 
