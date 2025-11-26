@@ -314,11 +314,12 @@ export const styleThemes = {
       light: {
         bg: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',  // ✅ Soft cyan to pink
         surface: 'rgba(255, 255, 255, 0.3)',                       // ✅ More opaque glass
-        text: '#1e293b',                                            // ✅ Dark slate
-        textSecondary: '#64748b',                                   // ✅ Medium slate
+        text: '#f8fafc',                                            // ✅ Dark slate
+        textSecondary: '#d7d7d7',                                   // ✅ Medium slate
         border: 'rgba(255, 255, 255, 0.5)',                        // ✅ More visible borders
         borderHover: 'rgba(255, 255, 255, 0.8)',                   // ✅ Brighter on hover
-        accent: '#0ea5e9'                                           // ✅ Sky blue
+        accent: '#f8fafc',
+        switch:  '#f8fafc'                                     // ✅ Sky blue
       },
       dark: {
         bg: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%)',  // ✅ Dark blue gradient
@@ -327,7 +328,8 @@ export const styleThemes = {
         textSecondary: '#cbd5e1',                                   // ✅ Keep existing
         border: 'rgba(255, 255, 255, 0.1)',                        // ✅ Keep existing
         borderHover: 'rgba(255, 255, 255, 0.2)',                   // ✅ Keep existing
-        accent: '#38bdf8'                                           // ✅ Lighter sky blue
+        accent: '#38bdf8', 
+        switch: '#f8fafc'                                       // ✅ Lighter sky blue
       }
     },
     typography: {

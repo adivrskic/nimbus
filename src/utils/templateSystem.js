@@ -42,6 +42,7 @@ class Template {
       --color-border: ${lightColors.border};
       --color-border-hover: ${lightColors.borderHover};
       --color-accent: ${lightColors.accent};
+      --color-switch: ${lightColors.switch};
       
       /* Typography */
       --font-heading: ${theme.fonts?.heading};
@@ -90,6 +91,7 @@ class Template {
       --color-border: ${darkColors.border};
       --color-border-hover: ${darkColors.borderHover};
       --color-accent: ${darkColors.accent};
+      --color-switch: ${darkColors.switch};
     }
     
     body {
@@ -224,7 +226,7 @@ class Template {
         width: 18px;
         left: 2px;
         bottom: 2px;
-        background-color: var(--color-bg);
+        background-color: var(--color-switch);
         transition: 0.3s;
         border-radius: 50%;
       }
@@ -721,7 +723,7 @@ export const templates = {
             <div style="text-align: center; margin-bottom: 6rem;">
               <h2 style="font-size: clamp(2.5rem, 8vw, 6rem); line-height: 1.1; text-transform: uppercase; margin-bottom: 2rem; font-weight: 900;">
                 ${data.featuresTitle || 'DESIGN IS'}<br>
-                <span style="border-bottom: 6px solid var(--color-accent); display: inline-block;">COMMUNICATION</span>
+                <span style="border-bottom: 6px solid var(--color-accent); display: inline-block;">COMMUNITY</span>
               </h2>
             </div>
             ` : isElegant ? `
@@ -759,17 +761,9 @@ export const templates = {
                   <div style="width: 56px; height: 56px; border-radius: 16px; background: linear-gradient(135deg, #667eea, #764ba2); margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem; font-weight: 700;">
                     ${index + 1}
                   </div>
-                  ` : isElegant ? `
-                  <div style="color: var(--color-accent); font-family: Playfair Display, serif; font-size: 3rem; margin-bottom: 1.5rem; font-weight: 400;">0${index + 1}</div>
-                  ` : isRetro ? `
-                  <div style="font-size: 2.5rem; margin-bottom: 1rem;">${['⚡', '🎮', '🌈'][index % 3]}</div>
-                  ` : isNeumorphism ? `
-                  <div style="width: 64px; height: 64px; border-radius: 16px; background: var(--color-bg); box-shadow: 6px 6px 12px rgba(0,0,0,0.12), -6px -6px 12px rgba(255,255,255,0.9); margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: center; font-size: 1.75rem;">💎</div>
-                  ` : isGlassmorphism ? `
-                  <div style="width: 64px; height: 64px; border-radius: 16px; background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: center; font-size: 1.75rem; border: 1px solid rgba(255,255,255,0.15);">✨</div>
-                  ` : isBrutalist ? '' : `
-                  <div class="feature-icon" style="width: 48px; height: 48px; background: var(--color-accent); border-radius: 8px; margin-bottom: 1.5rem; opacity: 0.1;"></div>
-                  `}
+                  ` : 
+                    `<div class="feature-icon" style="flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem; font-weight: 700; text-align:center; width: 48px; height: 48px; background: var(--color-accent); border-radius: 8px; margin-bottom: 1.5rem; opacity: 0.1;">${index + 1}</div>`
+                  }
                   <h3 style="font-family: ${isElegant ? 'Playfair Display, serif' : 'inherit'}; font-size: ${isBrutalist || isElegant ? '1.75rem' : isGradient ? '1.375rem' : isRetro ? '1.25rem' : isNeumorphism || isGlassmorphism ? '1.5rem' : '1.25rem'}; font-weight: ${isBrutalist ? '900' : isElegant ? '600' : isRetro ? '700' : isNeumorphism || isGlassmorphism ? '700' : '700'}; margin-bottom: ${isBrutalist || isElegant ? '1.5rem' : isRetro ? '1rem' : isNeumorphism || isGlassmorphism ? '1rem' : '0.75rem'}; ${isBrutalist || isRetro ? 'text-transform: uppercase;' : ''} ${isRetro ? 'letter-spacing: 2px; color: var(--color-accent);' : isNeumorphism || isGlassmorphism ? 'color: var(--color-accent);' : ''}">
                     ${feature.title || ''}
                   </h3>
@@ -849,18 +843,9 @@ export const templates = {
       <!-- Footer -->
       <footer style="padding: ${isBrutalist ? '4rem 0' : isRetro ? '3rem 0' : '3rem 0'}; ${isBrutalist ? 'border-top: 4px solid var(--color-text);' : isRetro ? 'margin-top: 3rem; border-top: 3px solid var(--color-accent);' : isElegant ? 'border-top: 1px solid var(--color-border);' : 'border-top: 1px solid var(--color-border);'} text-align: center; color: var(--color-text-secondary); font-size: ${isRetro ? '0.875rem' : '0.875rem'}; ${isGlassmorphism ? 'backdrop-filter: blur(20px); background: rgba(255,255,255,0.02);' : ''} ${isElegant ? 'padding: 4rem 0;' : ''}">
         <div class="container">
-          ${isElegant ? `
-          <ul style="display: flex; gap: 2rem; justify-content: center; margin-bottom: 2rem; list-style: none;">
-            <li><a href="#" style="color: var(--color-text-secondary); text-decoration: none; transition: color 0.3s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text-secondary)'">Privacy</a></li>
-            <li><a href="#" style="color: var(--color-text-secondary); text-decoration: none; transition: color 0.3s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text-secondary)'">Terms</a></li>
-            <li><a href="#" style="color: var(--color-text-secondary); text-decoration: none; transition: color 0.3s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text-secondary)'">Contact</a></li>
-          </ul>
-          <p style="letter-spacing: 0.5px;">© 2024 ${data.companyName || 'Minimal'}. All rights reserved.</p>
-          ` : `
           <p style="${isBrutalist ? 'font-size: 1.25rem; text-transform: uppercase; font-weight: 700;' : isRetro ? 'text-transform: uppercase; letter-spacing: 2px;' : ''}">
             © 2024 ${data.companyName || 'Minimal'}. All rights reserved.
           </p>
-          `}
         </div>
       </footer>
 
