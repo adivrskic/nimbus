@@ -19,7 +19,8 @@ export const themes = {
         textSecondary: '#666666',
         border: '#e5e5e5',
         borderHover: '#cccccc',
-        accent: '#2563eb'
+        accent: '#2563eb',
+        switch: '#fafafa'
       },
       dark: {
         bg: '#0a0a0a',
@@ -28,7 +29,8 @@ export const themes = {
         textSecondary: '#a0a0a0',
         border: '#1f1f1f',
         borderHover: '#333333',
-        accent: '#3b82f6'
+        accent: '#3b82f6',
+        switch: '#141414',
       }
     },
     typography: {
@@ -76,7 +78,8 @@ export const themes = {
         textSecondary: '#000000',
         border: '#000000',
         borderHover: '#000000',
-        accent: '#ff0000'
+        accent: '#ff0000',
+        switch: '#fff'
       },
       dark: {
         bg: '#000000',
@@ -85,7 +88,8 @@ export const themes = {
         textSecondary: '#ffffff',
         border: '#ffffff',
         borderHover: '#ffffff',
-        accent: '#00ff00'
+        accent: '#00ff00',
+        switch: '#ffffff'
       }
     },
     typography: {
@@ -133,7 +137,8 @@ export const themes = {
         textSecondary: '#6b7280',
         border: 'rgba(0, 0, 0, 0.05)',
         borderHover: 'rgba(102, 126, 234, 0.3)',
-        accent: '#667eea'
+        accent: '#667eea',
+        switch: '#fafafa',
       },
       dark: {
         bg: '#0a0a1f',
@@ -142,7 +147,8 @@ export const themes = {
         textSecondary: '#a0a0c0',
         border: 'rgba(255, 255, 255, 0.05)',
         borderHover: 'rgba(102, 126, 234, 0.5)',
-        accent: '#764ba2'
+        accent: '#764ba2',
+        switch: '#12122f',
       }
     },
     typography: {
@@ -195,7 +201,8 @@ export const themes = {
         textSecondary: '#6b6b6b',
         border: '#e8e6e3',
         borderHover: '#a78b5f',
-        accent: '#a78b5f'
+        accent: '#a78b5f',
+        switch: '#ffffff',
       },
       dark: {
         bg: '#1a1a1a',
@@ -204,7 +211,8 @@ export const themes = {
         textSecondary: '#a0a0a0',
         border: '#333333',
         borderHover: '#d4af76',
-        accent: '#d4af76'
+        accent: '#d4af76',
+        switch: '#242424'
       }
     },
     typography: {
@@ -253,7 +261,8 @@ export const themes = {
         textSecondary: '#5a1070',
         border: '#e91e8c',
         borderHover: '#00d9ff',
-        accent: '#e91e8c'
+        accent: '#e91e8c',
+        switch: '#ffe6f9',
       },
       dark: {
         bg: '#0d001a',
@@ -262,7 +271,8 @@ export const themes = {
         textSecondary: '#e0b3ff',
         border: '#ff2fb5',
         borderHover: '#00f5ff',
-        accent: '#ff2fb5'
+        accent: '#ff2fb5',
+        switch: '#1a0028'
       }
     },
     typography: {
@@ -317,7 +327,8 @@ export const themes = {
         textSecondary: '#d7d7d7',                                   // ✅ Medium slate
         border: 'rgba(255, 255, 255, 0.5)',                        // ✅ More visible borders
         borderHover: 'rgba(255, 255, 255, 0.8)',                   // ✅ Brighter on hover
-        accent: '#f8fafc'                                           // ✅ Sky blue
+        accent: '#f8fafc',
+        switch:  '#f8fafc'                                     // ✅ Sky blue
       },
       dark: {
         bg: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%)',  // ✅ Dark blue gradient
@@ -326,7 +337,8 @@ export const themes = {
         textSecondary: '#cbd5e1',                                   // ✅ Keep existing
         border: 'rgba(255, 255, 255, 0.1)',                        // ✅ Keep existing
         borderHover: 'rgba(255, 255, 255, 0.2)',                   // ✅ Keep existing
-        accent: '#38bdf8'                                           // ✅ Lighter sky blue
+        accent: '#38bdf8', 
+        switch: '#1e1b4b'                                       // ✅ Lighter sky blue
       }
     },
     typography: {
@@ -375,7 +387,8 @@ export const themes = {
         textSecondary: '#6b7280',         // ✅ Keep existing
         border: 'transparent',             // ✅ Keep existing
         borderHover: 'transparent',        // ✅ Keep existing
-        accent: '#4c6ef5'                  // ✅ Keep existing
+        accent: '#4c6ef5',
+        switch: '#6b7280', 
       },
       dark: {
         bg: '#31353d',                     // ✅ Warmer gray (was #2a2d35)
@@ -384,7 +397,8 @@ export const themes = {
         textSecondary: '#a8adb8',          // ✅ Warmer gray (was #9ca3af)
         border: 'transparent',              // ✅ Keep existing
         borderHover: 'transparent',         // ✅ Keep existing
-        accent: '#7c8aff'                   // ✅ Brighter blue (was #7c8afd)
+        accent: '#7c8aff',
+        switch: '#31353d'
       }
     },
     typography: {
