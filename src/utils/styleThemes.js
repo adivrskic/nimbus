@@ -6,6 +6,7 @@ export const themes = {
   minimal: {
     id: 'minimal',
     name: 'Minimal',
+    description: 'Clean and professional with plenty of whitespace',
     fonts: {
       heading: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
       body: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
@@ -62,6 +63,7 @@ export const themes = {
   brutalist: {
     id: 'brutalist',
     name: 'Brutalist',
+    description: 'Bold typography and strong contrasts',
     fonts: {
       heading: "'Arial Black', 'Arial Bold', sans-serif",
       body: "Arial, sans-serif"
@@ -118,6 +120,7 @@ export const themes = {
   gradient: {
     id: 'gradient',
     name: 'Gradient',
+    description: 'Soft gradients and friendly rounded corners',
     fonts: {
       heading: "'Inter', sans-serif",
       body: "'Inter', sans-serif"
@@ -176,71 +179,10 @@ export const themes = {
     }
   },
 
-  retro: {
-    id: 'retro',
-    name: 'Retro',
-    fonts: {
-      heading: "'Space Mono', 'Courier New', monospace",
-      body: "'Space Mono', monospace"
-    },
-    colors: {
-      light: {
-        bg: '#fff5fd',
-        surface: '#ffe6f9',
-        text: '#1a0033',
-        textSecondary: '#1a0033',
-        border: '#e91e8c',
-        borderHover: '#00d9ff',
-        accent: '#e91e8c'
-      },
-      dark: {
-        bg: '#0d001a',
-        surface: '#1a0028',
-        text: '#ffffff',
-        textSecondary: '#ffffff',
-        border: '#ff2fb5',
-        borderHover: '#00f5ff',
-        accent: '#ff2fb5'
-      }
-    },
-    typography: {
-      hero: 'clamp(2.5rem, 10vw, 6rem)',
-      h1: 'clamp(2rem, 6vw, 3.5rem)',
-      h2: 'clamp(1.75rem, 5vw, 2.5rem)',
-      h3: '1.25rem',
-      body: '0.9375rem',
-      small: '0.875rem'
-    },
-    spacing: {
-      xs: '0.75rem',
-      sm: '1rem',
-      md: '1.5rem',
-      lg: '2rem',
-      xl: '4rem',
-      xxl: '6rem'
-    },
-    radius: {
-      sm: '4px',
-      md: '8px',
-      lg: '12px',
-      xl: '20px'
-    },
-    shadows: {
-      sm: '0 0 20px rgba(255, 47, 181, 0.3)',
-      md: '0 0 40px rgba(255, 47, 181, 0.4)',
-      lg: '0 10px 40px rgba(255, 47, 181, 0.3)',
-      glow: '0 0 30px currentColor'
-    },
-    gradients: {
-      primary: 'linear-gradient(90deg, #ff2fb5, #b537f2)',
-      secondary: 'linear-gradient(90deg, #ff2fb5, #00f5ff)',
-      accent: 'linear-gradient(45deg, #ff2fb5, #00f5ff, #b537f2)'
-    }
-  },
-
   elegant: {
     id: 'elegant',
     name: 'Elegant',
+    description: 'Timeless typography with sophisticated spacing',
     fonts: {
       heading: "'Playfair Display', serif",
       body: "'Lato', sans-serif"
@@ -294,31 +236,97 @@ export const themes = {
     }
   },
 
+  // RETRO THEME - Updated with better spacing and borders
+  retro: {
+    id: 'retro',
+    name: 'Retro Wave',
+    description: 'Vibrant colors with nostalgic vibes',
+    fonts: {
+      heading: "'Space Mono', 'Courier New', monospace",
+      body: "'Space Mono', monospace"
+    },
+    colors: {
+      light: {
+        bg: '#fff5fd',
+        surface: '#ffe6f9',
+        text: '#2a0040',
+        textSecondary: '#5a1070',
+        border: '#e91e8c',
+        borderHover: '#00d9ff',
+        accent: '#e91e8c'
+      },
+      dark: {
+        bg: '#0d001a',
+        surface: '#1a0028',
+        text: '#ffffff',
+        textSecondary: '#e0b3ff',
+        border: '#ff2fb5',
+        borderHover: '#00f5ff',
+        accent: '#ff2fb5'
+      }
+    },
+    typography: {
+      hero: 'clamp(2.5rem, 10vw, 6rem)',
+      h1: 'clamp(2rem, 6vw, 3.5rem)',
+      h2: 'clamp(1.75rem, 5vw, 2.5rem)',
+      h3: '1.25rem',
+      body: '1rem',
+      small: '0.875rem'
+    },
+    spacing: {
+      xs: '0.75rem',
+      sm: '1rem',
+      md: '2rem',
+      lg: '3rem',
+      xl: '4rem',
+      xxl: '8rem'
+    },
+    radius: {
+      sm: '0',
+      md: '0',
+      lg: '0',
+      xl: '20px'
+    },
+    shadows: {
+      sm: '0 0 20px rgba(255, 47, 181, 0.3)',
+      md: '0 0 40px rgba(255, 47, 181, 0.4)',
+      lg: '0 10px 40px rgba(255, 47, 181, 0.3)',
+      glow: '0 0 30px currentColor'
+    },
+    gradients: {
+      primary: 'linear-gradient(90deg, #ff2fb5, #b537f2)',
+      secondary: 'linear-gradient(90deg, #ff2fb5, #00f5ff)',
+      accent: 'linear-gradient(45deg, #ff2fb5, #00f5ff, #b537f2)'
+    }
+  },
+
+  // GLASSMORPHISM THEME - Updated with lighter background and proper glass effect
   glassmorphism: {
     id: 'glassmorphism',
     name: 'Glassmorphism',
+    description: 'Frosted glass and depth',
     fonts: {
       heading: "'Inter', sans-serif",
       body: "'Inter', sans-serif"
     },
     colors: {
       light: {
-        bg: '#667eea',
-        surface: 'rgba(255, 255, 255, 0.25)',
-        text: '#1e293b',
-        textSecondary: '#475569',
-        border: 'rgba(255, 255, 255, 0.4)',
-        borderHover: 'rgba(255, 255, 255, 0.6)',
-        accent: '#764ba2'
+        bg: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',  // ✅ Soft cyan to pink
+        surface: 'rgba(255, 255, 255, 0.3)',                       // ✅ More opaque glass
+        text: '#f8fafc',                                            // ✅ Dark slate
+        textSecondary: '#d7d7d7',                                   // ✅ Medium slate
+        border: 'rgba(255, 255, 255, 0.5)',                        // ✅ More visible borders
+        borderHover: 'rgba(255, 255, 255, 0.8)',                   // ✅ Brighter on hover
+        accent: '#f8fafc'                                           // ✅ Sky blue
       },
       dark: {
-        bg: '#0f1729',
-        surface: 'rgba(255, 255, 255, 0.05)',
-        text: '#f8fafc',
-        textSecondary: '#cbd5e1',
-        border: 'rgba(255, 255, 255, 0.1)',
-        borderHover: 'rgba(255, 255, 255, 0.2)',
-        accent: '#667eea'
+        bg: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%)',  // ✅ Dark blue gradient
+        surface: 'rgba(255, 255, 255, 0.05)',                      // ✅ Keep existing
+        text: '#f8fafc',                                            // ✅ Keep existing
+        textSecondary: '#cbd5e1',                                   // ✅ Keep existing
+        border: 'rgba(255, 255, 255, 0.1)',                        // ✅ Keep existing
+        borderHover: 'rgba(255, 255, 255, 0.2)',                   // ✅ Keep existing
+        accent: '#38bdf8'                                           // ✅ Lighter sky blue
       }
     },
     typography: {
@@ -335,7 +343,7 @@ export const themes = {
       md: '1.5rem',
       lg: '2rem',
       xl: '3rem',
-      xxl: '5rem'
+      xxl: '6rem'
     },
     radius: {
       sm: '12px',
@@ -350,31 +358,33 @@ export const themes = {
     }
   },
 
+  // NEUMORPHISM THEME - Updated with softer dark mode colors and no borders
   neumorphism: {
     id: 'neumorphism',
     name: 'Neumorphism',
+    description: 'Soft, subtle depth designed with modern minimalism.',
     fonts: {
       heading: "'Inter', sans-serif",
       body: "'Inter', sans-serif"
     },
     colors: {
       light: {
-        bg: '#e8ecf2',
-        surface: '#e8ecf2',
-        text: '#2d3142',
-        textSecondary: '#6b7280',
-        border: '#d1d5db',
-        borderHover: '#4c6ef5',
-        accent: '#4c6ef5'
+        bg: '#e8ecf2',                    // ✅ Keep existing (good)
+        surface: '#e8ecf2',               // ✅ Keep existing
+        text: '#2d3142',                  // ✅ Keep existing
+        textSecondary: '#6b7280',         // ✅ Keep existing
+        border: 'transparent',             // ✅ Keep existing
+        borderHover: 'transparent',        // ✅ Keep existing
+        accent: '#4c6ef5'                  // ✅ Keep existing
       },
       dark: {
-        bg: '#1e2128',
-        surface: '#1e2128',
-        text: '#f0f0f0',
-        textSecondary: '#a0a0a0',
-        border: '#2a2d35',
-        borderHover: '#6b8afd',
-        accent: '#6b8afd'
+        bg: '#31353d',                     // ✅ Warmer gray (was #2a2d35)
+        surface: '#31353d',                // ✅ Same as bg
+        text: '#f0f3f7',                   // ✅ Softer white (was #e8eaed)
+        textSecondary: '#a8adb8',          // ✅ Warmer gray (was #9ca3af)
+        border: 'transparent',              // ✅ Keep existing
+        borderHover: 'transparent',         // ✅ Keep existing
+        accent: '#7c8aff'                   // ✅ Brighter blue (was #7c8afd)
       }
     },
     typography: {
@@ -389,7 +399,7 @@ export const themes = {
       xs: '0.5rem',
       sm: '1rem',
       md: '1.5rem',
-      lg: '2rem',
+      lg: '2.5rem',
       xl: '3rem',
       xxl: '4rem'
     },
@@ -400,10 +410,17 @@ export const themes = {
       xl: '32px'
     },
     shadows: {
+      // Light mode shadows
       sm: '6px 6px 12px rgba(0, 0, 0, 0.12), -6px -6px 12px rgba(255, 255, 255, 0.9)',
       md: '8px 8px 16px rgba(0, 0, 0, 0.15), -8px -8px 16px rgba(255, 255, 255, 0.95)',
       lg: '10px 10px 20px rgba(0, 0, 0, 0.18), -10px -10px 20px rgba(255, 255, 255, 1)',
-      inset: 'inset 4px 4px 8px rgba(0, 0, 0, 0.12), inset -4px -4px 8px rgba(255, 255, 255, 0.9)'
+      inset: 'inset 4px 4px 8px rgba(0, 0, 0, 0.12), inset -4px -4px 8px rgba(255, 255, 255, 0.9)',
+      
+      // Dark mode shadows - IMPROVED ✅
+      smDark: '6px 6px 12px #262930, -6px -6px 12px #3c414a',
+      mdDark: '8px 8px 16px #262930, -8px -8px 16px #3c414a',
+      lgDark: '10px 10px 20px #262930, -10px -10px 20px #3c414a',
+      insetDark: 'inset 4px 4px 8px #262930, inset -4px -4px 8px #3c414a'
     }
   }
 };

@@ -10,7 +10,7 @@ export function AuthProvider({ children }) {
   const [rememberedEmail, setRememberedEmail] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // ⭐ Load remembered email on boot
+  // â­ Load remembered email on boot
   useEffect(() => {
     const savedEmail = localStorage.getItem("rememberedEmail");
     if (savedEmail) {
@@ -18,7 +18,7 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
-  // ⭐ Initialize Supabase auth state on mount
+  // â­ Initialize Supabase auth state on mount
   useEffect(() => {
     let active = true;
 
@@ -104,7 +104,7 @@ export function AuthProvider({ children }) {
 
       if (error) throw error;
 
-      // ⭐ Store/remove remembered email
+      // â­ Store/remove remembered email
       if (rememberMe) {
         localStorage.setItem("rememberedEmail", email);
         setRememberedEmail(email);
@@ -125,14 +125,96 @@ export function AuthProvider({ children }) {
     setProfile(null);
   };
 
-  // Update profile helpers…
-  const updateProfile = async (updates) => { /* unchanged */ };
-  const updateEmail = async (newEmail) => { /* unchanged */ };
-  const updatePassword = async (newPassword) => { /* unchanged */ };
+  // Update profile
+  const updateProfile = async (updates) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .update(updates)
+        .eq('id', user.id)
+        .select()
+        .single();
 
-  const resetPassword = async (email) => { /* unchanged */ };
+      if (error) throw error;
+      
+      setProfile(data);
+      return { success: true };
+    } catch (e) {
+      return { success: false, error: e.message };
+    }
+  };
 
-  // ⭐ Sign in with Google
+  // Update email
+  const updateEmail = async (newEmail) => {
+    try {
+      const { error } = await supabase.auth.updateUser({
+        email: newEmail
+      });
+
+      if (error) throw error;
+      return { success: true };
+    } catch (e) {
+      return { success: false, error: e.message };
+    }
+  };
+
+  // Update password
+  const updatePassword = async (newPassword) => {
+    try {
+      console.log('AuthContext: updatePassword called');
+      console.log('AuthContext: User exists:', !!user);
+      console.log('AuthContext: User ID:', user?.id);
+      
+      // Check if we have a valid session
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      console.log('AuthContext: Current session:', session ? 'Valid' : 'Invalid', sessionError);
+      
+      if (!session) {
+        throw new Error('No active session. Please log in again.');
+      }
+      
+      // Add timeout to prevent hanging
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Request timed out after 10 seconds')), 10000)
+      );
+      
+      const updatePromise = supabase.auth.updateUser({
+        password: newPassword
+      });
+      
+      console.log('AuthContext: Calling updateUser...');
+      const { data, error } = await Promise.race([updatePromise, timeoutPromise]);
+
+      console.log('AuthContext: updateUser response:', { data, error });
+
+      if (error) {
+        console.error('AuthContext: updateUser error:', error);
+        throw error;
+      }
+      
+      console.log('AuthContext: Password updated successfully');
+      return { success: true };
+    } catch (e) {
+      console.error('AuthContext: updatePassword exception:', e);
+      return { success: false, error: e.message };
+    }
+  };
+
+  // Reset password
+  const resetPassword = async (email) => {
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`
+      });
+
+      if (error) throw error;
+      return { success: true };
+    } catch (e) {
+      return { success: false, error: e.message };
+    }
+  };
+
+  // â­ Sign in with Google
   const signInWithGoogle = async () => {
     try {
       const { error } = await supabase.auth.signInWithOAuth({
@@ -146,7 +228,7 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // ⭐ Sign in with GitHub
+  // â­ Sign in with GitHub
   const signInWithGitHub = async () => {
     try {
       const { error } = await supabase.auth.signInWithOAuth({
@@ -160,7 +242,7 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // ⭐ Sign in with Facebook
+  // â­ Sign in with Facebook
   const signInWithFacebook = async () => {
     try {
       const { error } = await supabase.auth.signInWithOAuth({
@@ -174,7 +256,7 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // ⭐ Sign in with Apple
+  // â­ Sign in with Apple
   const signInWithApple = async () => {
     try {
       const { error } = await supabase.auth.signInWithOAuth({
@@ -188,7 +270,7 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // ⭐ Sign in with LinkedIn
+  // â­ Sign in with LinkedIn
   const signInWithLinkedIn = async () => {
     try {
       const { error } = await supabase.auth.signInWithOAuth({
@@ -206,7 +288,7 @@ export function AuthProvider({ children }) {
   const value = {
     user,
     profile,
-    rememberedEmail,   // ⭐ Exposed so AuthModal can auto-fill
+    rememberedEmail,   // â­ Exposed so AuthModal can auto-fill
     isLoading,
     isAuthenticated: !!user,
     signup,

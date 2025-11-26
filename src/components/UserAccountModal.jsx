@@ -3,19 +3,29 @@ import { useState, useEffect } from 'react';
 import { 
   X, User, Mail, Lock, CreditCard, Globe, 
   Loader, CheckCircle, AlertCircle, ExternalLink,
-  Trash2, Eye
+  Trash2, Eye, FileText, Edit
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { renderTemplate } from '../utils/templateSystem';
+import ConfirmModal from './ConfirmModal';
+import NotificationModal from './NotificationModal';
+import PaymentModal from './PaymentModal';
 import './UserAccountModal.scss';
 
 function UserAccountModal({ isOpen, onClose }) {
   const { user, profile, updateProfile, updateEmail, updatePassword, supabase } = useAuth();
-  const [activeTab, setActiveTab] = useState('profile'); // 'profile', 'sites', 'billing', 'security'
+  const [activeTab, setActiveTab] = useState('profile'); // 'profile', 'sites', 'drafts', 'billing', 'security'
   const [isLoading, setIsLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [sites, setSites] = useState([]);
+  const [drafts, setDrafts] = useState([]);
   const [billingSummary, setBillingSummary] = useState(null);
+  
+  // Modal states
+  const [confirmModal, setConfirmModal] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
+  const [notification, setNotification] = useState({ isOpen: false, message: '', type: 'success' });
+  const [deployModal, setDeployModal] = useState({ isOpen: false, draft: null });
 
   // Profile form state
   const [profileForm, setProfileForm] = useState({
@@ -50,6 +60,9 @@ function UserAccountModal({ isOpen, onClose }) {
     // Load sites
     await loadSites();
     
+    // Load drafts
+    await loadDrafts();
+    
     // Load billing summary
     await loadBillingSummary();
   };
@@ -66,6 +79,21 @@ function UserAccountModal({ isOpen, onClose }) {
       setSites(data || []);
     } catch (error) {
       console.error('Error loading sites:', error);
+    }
+  };
+
+  const loadDrafts = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('template_drafts')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setDrafts(data || []);
+    } catch (error) {
+      console.error('Error loading drafts:', error);
     }
   };
 
@@ -94,13 +122,24 @@ function UserAccountModal({ isOpen, onClose }) {
       const result = await updateProfile(profileForm);
       
       if (result.success) {
-        setSuccessMessage('Profile updated successfully');
-        setTimeout(() => setSuccessMessage(''), 3000);
+        setNotification({
+          isOpen: true,
+          message: 'Profile updated successfully',
+          type: 'success'
+        });
       } else {
-        setErrorMessage(result.error);
+        setNotification({
+          isOpen: true,
+          message: result.error || 'Failed to update profile',
+          type: 'error'
+        });
       }
     } catch (error) {
-      setErrorMessage(error.message);
+      setNotification({
+        isOpen: true,
+        message: error.message || 'Failed to update profile',
+        type: 'error'
+      });
     } finally {
       setIsLoading(false);
     }
@@ -108,64 +147,173 @@ function UserAccountModal({ isOpen, onClose }) {
 
   const handlePasswordUpdate = async (e) => {
     e.preventDefault();
+    console.log('Password update started');
     setIsLoading(true);
     setSuccessMessage('');
     setErrorMessage('');
 
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-      setErrorMessage('Passwords do not match');
+      console.log('Passwords do not match');
+      setNotification({
+        isOpen: true,
+        message: 'Passwords do not match',
+        type: 'error'
+      });
       setIsLoading(false);
       return;
     }
 
     if (passwordForm.newPassword.length < 8) {
-      setErrorMessage('Password must be at least 8 characters');
+      console.log('Password too short');
+      setNotification({
+        isOpen: true,
+        message: 'Password must be at least 8 characters',
+        type: 'error'
+      });
       setIsLoading(false);
       return;
     }
 
     try {
+      console.log('Calling updatePassword...');
       const result = await updatePassword(passwordForm.newPassword);
+      console.log('updatePassword result:', result);
       
-      if (result.success) {
-        setSuccessMessage('Password updated successfully');
+      if (result && result.success) {
+        console.log('Password updated successfully');
+        setNotification({
+          isOpen: true,
+          message: 'Password updated successfully',
+          type: 'success'
+        });
         setPasswordForm({ newPassword: '', confirmPassword: '' });
-        setTimeout(() => setSuccessMessage(''), 3000);
       } else {
-        setErrorMessage(result.error);
+        console.log('Password update failed:', result?.error);
+        setNotification({
+          isOpen: true,
+          message: result?.error || 'Failed to update password',
+          type: 'error'
+        });
       }
     } catch (error) {
-      setErrorMessage(error.message);
+      console.error('Password update exception:', error);
+      setNotification({
+        isOpen: true,
+        message: error.message || 'Failed to update password',
+        type: 'error'
+      });
     } finally {
+      console.log('Password update complete');
       setIsLoading(false);
     }
   };
 
   const handleCancelSite = async (siteId, siteName) => {
-    if (!confirm(`Are you sure you want to cancel "${siteName}"? It will remain active until the end of your billing period.`)) {
-      return;
-    }
+    setConfirmModal({
+      isOpen: true,
+      title: 'Cancel Site?',
+      message: `Are you sure you want to cancel "${siteName}"? It will remain active until the end of your billing period.`,
+      onConfirm: async () => {
+        setIsLoading(true);
+        try {
+          const { error } = await supabase
+            .from('sites')
+            .update({ 
+              cancelled_at: new Date().toISOString(),
+              billing_status: 'cancelled'
+            })
+            .eq('id', siteId);
 
-    setIsLoading(true);
-    try {
-      const { error } = await supabase
-        .from('sites')
-        .update({ 
-          cancelled_at: new Date().toISOString(),
-          billing_status: 'cancelled'
-        })
-        .eq('id', siteId);
+          if (error) throw error;
 
-      if (error) throw error;
+          setNotification({
+            isOpen: true,
+            message: 'Site cancelled successfully',
+            type: 'success'
+          });
+          await loadSites();
+          await loadBillingSummary();
+        } catch (error) {
+          setNotification({
+            isOpen: true,
+            message: error.message || 'Failed to cancel site',
+            type: 'error'
+          });
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    });
+  };
 
-      setSuccessMessage('Site cancelled successfully');
-      await loadSites();
-      await loadBillingSummary();
-      setTimeout(() => setSuccessMessage(''), 3000);
-    } catch (error) {
-      setErrorMessage(error.message);
-    } finally {
-      setIsLoading(false);
+  const handleDeleteDraft = async (draftId, draftName) => {
+    setConfirmModal({
+      isOpen: true,
+      title: 'Delete Draft?',
+      message: `Are you sure you want to delete "${draftName}"? This action cannot be undone.`,
+      onConfirm: async () => {
+        setIsLoading(true);
+        try {
+          console.log('Deleting draft:', draftId, 'for user:', user.id);
+          
+          const { error } = await supabase
+            .from('template_drafts')
+            .delete()
+            .eq('id', draftId)
+            .eq('user_id', user.id);
+
+          console.log('Delete result:', { error });
+
+          if (error) {
+            console.error('Delete error details:', error);
+            throw error;
+          }
+
+          console.log('Draft deleted successfully');
+          setNotification({
+            isOpen: true,
+            message: 'Draft deleted successfully',
+            type: 'success'
+          });
+          await loadDrafts();
+        } catch (error) {
+          console.error('Delete error:', error);
+          setNotification({
+            isOpen: true,
+            message: error.message || 'Failed to delete draft',
+            type: 'error'
+          });
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    });
+  };
+
+  const handleDeployDraft = (draft) => {
+    setDeployModal({
+      isOpen: true,
+      draft: draft
+    });
+  };
+
+  const handlePreviewDraft = (draft) => {
+    const effectiveColorMode = draft.color_mode?.toLowerCase() === 'auto'
+      ? (document.documentElement.getAttribute('data-theme') || 'light')
+      : (draft.color_mode?.toLowerCase() || 'light');
+
+    const html = renderTemplate(
+      draft.template_id,
+      draft.customization,
+      draft.theme || 'minimal',
+      effectiveColorMode
+    );
+
+    const previewWindow = window.open('', '_blank');
+    if (previewWindow) {
+      previewWindow.document.open();
+      previewWindow.document.write(html);
+      previewWindow.document.close();
     }
   };
 
@@ -222,6 +370,13 @@ function UserAccountModal({ isOpen, onClose }) {
             >
               <Globe size={18} />
               My Sites
+            </button>
+            <button
+              className={`account-tab ${activeTab === 'drafts' ? 'active' : ''}`}
+              onClick={() => setActiveTab('drafts')}
+            >
+              <FileText size={18} />
+              Drafts
             </button>
             <button
               className={`account-tab ${activeTab === 'billing' ? 'active' : ''}`}
@@ -405,6 +560,86 @@ function UserAccountModal({ isOpen, onClose }) {
               </div>
             )}
 
+            {/* Drafts Tab */}
+            {activeTab === 'drafts' && (
+              <div className="drafts-list">
+                <div className="drafts-header">
+                  <h3>Saved Template Drafts</h3>
+                  <span className="drafts-count">{drafts.length} drafts</span>
+                </div>
+
+                {drafts.length === 0 ? (
+                  <div className="empty-state">
+                    <FileText size={48} />
+                    <h4>No drafts yet</h4>
+                    <p>Save template configurations from the customize modal to access them later</p>
+                  </div>
+                ) : (
+                  <div className="drafts-grid">
+                    {drafts.map(draft => (
+                      <div key={draft.id} className="draft-card">
+                        <div className="draft-card__header">
+                          <div>
+                            <h4>{draft.draft_name}</h4>
+                            <span className="draft-template">{draft.template_id}</span>
+                          </div>
+                        </div>
+
+                        <div className="draft-card__info">
+                          <div className="info-row">
+                            <span className="info-label">Theme:</span>
+                            <span className="info-value">{draft.theme}</span>
+                          </div>
+                          <div className="info-row">
+                            <span className="info-label">Created:</span>
+                            <span className="info-value">
+                              {formatDate(draft.created_at)}
+                            </span>
+                          </div>
+                          <div className="info-row">
+                            <span className="info-label">Updated:</span>
+                            <span className="info-value">
+                              {formatDate(draft.updated_at)}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="draft-card__actions">
+                          <button
+                            className="btn btn-secondary btn-small"
+                            onClick={() => handlePreviewDraft(draft)}
+                            disabled={isLoading}
+                            title="Preview draft"
+                          >
+                            <Eye size={16} />
+                            <span className="btn-text">Preview</span>
+                          </button>
+                          <button
+                            className="btn btn-secondary btn-small"
+                            onClick={() => handleDeployDraft(draft)}
+                            disabled={isLoading}
+                            title="Deploy draft"
+                          >
+                            <ExternalLink size={16} />
+                            <span className="btn-text">Deploy</span>
+                          </button>
+                          <button
+                            className="btn btn-danger btn-small"
+                            onClick={() => handleDeleteDraft(draft.id, draft.draft_name)}
+                            disabled={isLoading}
+                            title="Delete draft"
+                          >
+                            <Trash2 size={16} />
+                            <span className="btn-text">Delete</span>
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Billing Tab */}
             {activeTab === 'billing' && (
               <div className="billing-section">
@@ -478,7 +713,7 @@ function UserAccountModal({ isOpen, onClose }) {
                       type="password"
                       value={passwordForm.newPassword}
                       onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
-                      placeholder="••••••••"
+                      placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
                       autoComplete="new-password"
                     />
                     <span className="form-hint">
@@ -493,7 +728,7 @@ function UserAccountModal({ isOpen, onClose }) {
                       type="password"
                       value={passwordForm.confirmPassword}
                       onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
-                      placeholder="••••••••"
+                      placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
                       autoComplete="new-password"
                     />
                   </div>
@@ -518,6 +753,32 @@ function UserAccountModal({ isOpen, onClose }) {
           </div>
         </div>
       </div>
+
+      {/* Modals */}
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        onClose={() => setConfirmModal({ ...confirmModal, isOpen: false })}
+        onConfirm={confirmModal.onConfirm}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        type="danger"
+      />
+
+      <NotificationModal
+        isOpen={notification.isOpen}
+        onClose={() => setNotification({ ...notification, isOpen: false })}
+        message={notification.message}
+        type={notification.type}
+      />
+
+      {deployModal.isOpen && deployModal.draft && (
+        <PaymentModal
+          isOpen={deployModal.isOpen}
+          onClose={() => setDeployModal({ isOpen: false, draft: null })}
+          templateId={deployModal.draft.template_id}
+          customization={deployModal.draft.customization}
+        />
+      )}
     </>
   );
 }

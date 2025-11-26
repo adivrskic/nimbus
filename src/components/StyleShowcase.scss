@@ -304,7 +304,7 @@
     
     // Desktop View
     &--desktop {
-      .style-preview__iframe {
+      .iframe-browser {
         width: 100%;
         height: 100%;
         border-radius: 0 0 12px 12px;
@@ -314,8 +314,8 @@
     
     // Tablet View (768px)
     &--tablet {
-      .style-preview__iframe {
-        width: 768px;
+      .iframe-browser {
+        width: 768px!important;
         max-width: 100%;
         height: 100%;
         border-radius: var(--radius-lg);
@@ -329,8 +329,8 @@
     
     // Mobile View (375px)
     &--mobile {
-      .style-preview__iframe {
-        width: 375px;
+      .iframe-browser {
+        width: 375px!important;
         max-width: 100%;
         height: 100%;
         border-radius: 24px;

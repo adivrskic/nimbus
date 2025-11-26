@@ -1,0 +1,96 @@
+@import '../styles/variables.scss';
+
+.confirm-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 90%;
+  max-width: 440px;
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: calc(var(--spacing-unit) * 4);
+  box-shadow: 
+    0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  z-index: 1002;
+  text-align: center;
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+
+  @media (max-width: $breakpoint-sm) {
+    width: 95%;
+    padding: calc(var(--spacing-unit) * 3);
+  }
+
+  &__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    margin: 0 auto calc(var(--spacing-unit) * 2);
+    border-radius: 50%;
+    background: var(--color-surface);
+    color: var(--color-text-primary);
+
+    .confirm-modal:has(.btn-danger) & {
+      background: rgba(239, 68, 68, 0.1);
+      color: #ef4444;
+    }
+  }
+
+  &__title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin-bottom: calc(var(--spacing-unit) * 1.5);
+  }
+
+  &__message {
+    font-size: 0.9375rem;
+    color: var(--color-text-secondary);
+    line-height: 1.6;
+    margin-bottom: calc(var(--spacing-unit) * 3);
+  }
+
+  &__actions {
+    display: flex;
+    gap: calc(var(--spacing-unit) * 2);
+    
+    button {
+      flex: 1;
+    }
+  }
+}
+
+.btn-danger {
+  background: transparent;
+  color: #ef4444;
+  border: 1px solid #ef4444;
+  
+  &:hover:not(:disabled) {
+    background: #ef4444;
+    color: white;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -45%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}

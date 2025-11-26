@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
-import { X, Download, ExternalLink, Eye } from 'lucide-react';
+import { X, Download, ExternalLink, Eye, Save } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
+import { useAuth } from '../contexts/AuthContext';
 import CustomizationPanel from './CustomizationPanel';
 import LivePreview from './LivePreview';
 import { generateZip } from '../utils/generateZip';
 import { renderTemplate, getTemplate } from '../utils/templateSystem';
 import { getAllThemes } from '../styles/themes';
 import PaymentModal from './PaymentModal';
+import NotificationModal from './NotificationModal';
 import './CustomizeModal.scss';
 
 const defaultTheme = 'minimal';
@@ -65,8 +67,12 @@ function CustomizeModal({ templateId, isOpen, onClose }) {
   const template = getTemplate(templateId);
   const themes = getAllThemes();
   const { theme: globalTheme, selectedStyleTheme, setStyleTheme } = useTheme();
+  const { user, isAuthenticated, supabase } = useAuth();
   console.log(globalTheme, selectedStyleTheme)
   const [mobileView, setMobileView] = useState('editor'); // 'editor' | 'preview'
+  const [isSavingDraft, setIsSavingDraft] = useState(false);
+  const [draftSaved, setDraftSaved] = useState(false);
+  const [notification, setNotification] = useState({ isOpen: false, message: '', type: 'success' });
 
   
   // Build template config from template system
@@ -198,7 +204,63 @@ function CustomizeModal({ templateId, isOpen, onClose }) {
       URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Failed to generate download:', error);
-      alert('Failed to generate download. Please try again.');
+      setNotification({
+        isOpen: true,
+        message: 'Failed to generate download. Please try again.',
+        type: 'error'
+      });
+    }
+  };
+
+  const handleSaveDraft = async () => {
+    if (!isAuthenticated) {
+      setNotification({
+        isOpen: true,
+        message: 'Please sign in to save drafts',
+        type: 'error'
+      });
+      return;
+    }
+
+    // Prompt for draft name
+    const draftName = prompt('Enter a name for this draft:', template.name);
+    if (!draftName) return;
+
+    setIsSavingDraft(true);
+    setDraftSaved(false);
+
+    try {
+      const { data, error } = await supabase
+        .from('template_drafts')
+        .insert({
+          user_id: user.id,
+          template_id: templateId,
+          draft_name: draftName,
+          customization: customization,
+          theme: customization.theme || 'minimal',
+          color_mode: customization.colorMode || 'auto'
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setDraftSaved(true);
+      setTimeout(() => setDraftSaved(false), 3000);
+      setNotification({
+        isOpen: true,
+        message: 'Draft saved successfully!',
+        type: 'success'
+      });
+    } catch (error) {
+      console.error('Failed to save draft:', error);
+      setNotification({
+        isOpen: true,
+        message: error.message || 'Failed to save draft. Please try again.',
+        type: 'error'
+      });
+    } finally {
+      setIsSavingDraft(false);
     }
   };
 
@@ -223,6 +285,18 @@ function CustomizeModal({ templateId, isOpen, onClose }) {
             </div>
           </div>
           <div className="customize-modal__actions">
+
+            <button 
+              className={`btn btn-secondary ${draftSaved ? 'btn-success' : ''}`}
+              onClick={handleSaveDraft}
+              disabled={!isAuthenticated || isSavingDraft}
+              title={!isAuthenticated ? 'Sign in to save drafts' : 'Save as draft'}
+            >
+              <Save size={20} />
+              <span className="btn-text">
+                {isSavingDraft ? 'Saving...' : draftSaved ? 'Saved!' : 'Save Draft'}
+              </span>
+            </button>
 
             <button className="btn btn-secondary" onClick={handlePreviewNewTab}>
               <Eye size={20} />
@@ -304,6 +378,13 @@ function CustomizeModal({ templateId, isOpen, onClose }) {
         onClose={() => setIsPaymentModalOpen(false)}
         templateId={templateId}
         customization={customization}
+      />
+
+      <NotificationModal
+        isOpen={notification.isOpen}
+        onClose={() => setNotification({ ...notification, isOpen: false })}
+        message={notification.message}
+        type={notification.type}
       />
     </>
   );
