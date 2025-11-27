@@ -4082,76 +4082,143 @@ END:VCARD\`;
     `
     }
   }),
+'designer-portfolio': new Template('designer-portfolio', {
+  name: 'Designer Portfolio',
+  description: 'Showcase your design work with style',
+  category: 'portfolio',
+  defaultTheme: 'brutalist',
+  fields: {
+    designerName: { type: 'text', default: 'Alex Jordan', label: 'Your Name', required: true },
+    title: { type: 'text', default: 'UI/UX Designer', label: 'Professional Title', required: true },
+    bio: { 
+      type: 'textarea',
+      default: 'Creating exceptional digital experiences through thoughtful design. I believe in the power of simplicity and intentional design decisions.',
+      label: 'Bio',
+      required: true 
+    },
+    email: { type: 'email', default: 'hello@designer.com', label: 'Email', required: true },
+    phone: { type: 'text', default: '', label: 'Phone Number', required: false },
+    portfolio: { type: 'url', default: '', label: 'Portfolio Website', required: false },
+    linkedin: { type: 'url', default: '', label: 'LinkedIn URL', required: false },
+    behance: { type: 'url', default: '', label: 'Behance URL', required: false },
+    dribbble: { type: 'url', default: '', label: 'Dribbble URL', required: false },
+    projects: {
+      type: 'group',
+      label: 'Projects',
+      itemLabel: 'Project',
+      min: 1,
+      max: 12,
+      fields: {
+        title: { type: 'text', label: 'Project Title', default: '' },
+        description: { type: 'textarea', label: 'Description', default: '' },
+        imageUrl: { type: 'url', label: 'Image URL', default: '' },
+        link: { type: 'url', label: 'Project Link', default: '' },
+        tags: { type: 'text', label: 'Tags (comma separated)', default: '' }
+      },
+      default: [
+        { 
+          title: 'Brand Identity System', 
+          description: 'Complete visual identity for a modern tech startup, including logo design, color palette, and brand guidelines.',
+          imageUrl: '',
+          link: '',
+          tags: 'Branding, Identity, Logo Design'
+        },
+        { 
+          title: 'E-Commerce Platform', 
+          description: 'User-centered design for a seamless shopping experience with focus on conversion optimization.',
+          imageUrl: '',
+          link: '',
+          tags: 'UI Design, UX Research, Web Design'
+        },
+        { 
+          title: 'Mobile App Interface', 
+          description: 'Intuitive mobile app design with modern interactions and delightful micro-animations.',
+          imageUrl: '',
+          link: '',
+          tags: 'Mobile Design, Prototyping, iOS'
+        }
+      ]
+    },
+    skills: { 
+      type: 'text',
+      default: 'Figma, Sketch, Adobe Creative Suite, Prototyping, User Research, Wireframing',
+      label: 'Skills (comma separated)',
+      required: true 
+    },
+    experience: { type: 'text', default: '8+ Years', label: 'Years of Experience', required: false },
+    availability: { 
+      type: 'text',
+      default: 'Available for freelance projects',
+      label: 'Current Availability',
+      required: false 
+    }
+  },
+  structure: (data, theme) => {
+    const isBrutalist = theme.id === 'brutalist';
+    const isMinimal = theme.id === 'minimal';
+    const isGradient = theme.id === 'gradient';
+    const isElegant = theme.id === 'elegant';
+    const isRetro = theme.id === 'retro';
+    const isGlassmorphism = theme.id === 'glassmorphism';
+    const isNeumorphism = theme.id === 'neumorphism';
 
-  'designer-portfolio': new Template('designer-portfolio', {
-    name: 'Designer Portfolio',
-    description: 'Showcase your design work with style',
-    category: 'portfolio',
-    defaultTheme: 'brutalist',
-    fields: [
-      { name: 'designerName', label: 'Your Name', type: 'text', required: true },
-      { name: 'title', label: 'Professional Title', type: 'text', placeholder: 'UI/UX Designer, Graphic Designer, etc.', required: true },
-      { name: 'bio', label: 'Bio', type: 'textarea', required: true },
-      { name: 'email', label: 'Email', type: 'email', required: true },
-      { name: 'portfolio', label: 'Portfolio Website', type: 'url', required: false },
-      { name: 'linkedin', label: 'LinkedIn URL', type: 'url', required: false },
-      { name: 'behance', label: 'Behance URL', type: 'url', required: false },
-      { name: 'dribbble', label: 'Dribbble URL', type: 'url', required: false },
-      { name: 'projects', label: 'Projects (JSON format)', type: 'textarea', placeholder: '[{"title": "Project Name", "description": "Brief description", "imageUrl": "https://...", "tags": ["UI", "Branding"], "link": "https://..."}]', required: true },
-      { name: 'skills', label: 'Skills (comma separated)', type: 'text', placeholder: 'Figma, Photoshop, Illustrator, Sketch', required: true },
-      { name: 'experience', label: 'Years of Experience', type: 'text', required: false },
-      { name: 'availability', label: 'Current Availability', type: 'text', placeholder: 'Available for freelance, Open to opportunities, etc.', required: false }
-    ],
-    structure: (data, theme) => `
+    return `
       <!-- Fixed Side Navigation -->
-      <nav style="position: fixed; left: 0; top: 0; bottom: 0; width: 80px; background: var(--color-text); color: var(--color-bg); z-index: 1000; display: flex; flex-direction: column; align-items: center; padding: 2rem 0;">
-        <div style="writing-mode: vertical-rl; font-weight: 900; font-size: 1.125rem; letter-spacing: 0.1em; margin-bottom: auto; transform: rotate(180deg);">
+      <nav style="position: fixed; left: 0; top: 0; bottom: 0; width: 80px; background: ${isBrutalist ? 'var(--color-text)' : isGlassmorphism ? 'rgba(255, 255, 255, 0.1)' : isNeumorphism ? 'var(--color-bg)' : isGradient ? 'linear-gradient(180deg, #667eea 0%, #764ba2 100%)' : isRetro ? 'var(--color-text)' : 'var(--color-text)'}; ${isGlassmorphism ? 'backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-right: 1px solid rgba(255, 255, 255, 0.2);' : isBrutalist ? 'border-right: 4px solid var(--color-text);' : ''} color: ${isNeumorphism ? 'var(--color-text)' : 'var(--color-bg)'}; z-index: 1000; display: flex; flex-direction: column; align-items: center; padding: 2rem 0; ${isNeumorphism ? 'box-shadow: 6px 0 12px rgba(163, 177, 198, 0.6), -6px 0 12px rgba(255, 255, 255, 0.9);' : ''}">
+        <div style="writing-mode: vertical-rl; font-weight: ${isBrutalist || isRetro ? '900' : isMinimal || isElegant ? '300' : '700'}; font-size: 1.125rem; letter-spacing: ${isBrutalist || isRetro ? '0.1em' : '0.05em'}; margin-bottom: auto; transform: rotate(180deg); ${isRetro ? 'text-shadow: 0 0 10px currentColor;' : ''}">
           ${data.designerName?.split(' ')[0]?.toUpperCase() || 'DESIGNER'}
         </div>
-        <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle theme" style="background: transparent; border: 2px solid var(--color-bg); color: var(--color-bg); margin-top: auto;">
-          <span class="theme-icon">Ã°Å¸Å’â„¢</span>
-        </button>
+        <label class="theme-toggle-switch-wrapper" style="cursor: pointer; margin-top: auto; ${isNeumorphism ? 'padding: 0.5rem; border-radius: 12px; display: inline-block; box-shadow: 6px 6px 12px rgba(163, 177, 198, 0.6), -6px -6px 12px rgba(255, 255, 255, 0.9);' : ''}">
+          <input type="checkbox" class="theme-toggle-switch" onclick="toggleTheme()" aria-label="Toggle theme">
+          <span class="theme-toggle-slider"></span>
+        </label>
       </nav>
 
       <!-- Main Content with Left Margin -->
       <div style="margin-left: 80px;">
         
-        <!-- Hero Section with Large Type -->
-        <section style="min-height: 100vh; display: flex; align-items: center; padding: 4rem 0; background: var(--color-bg);">
-          <div class="container" style="max-width: 1400px;">
-            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 4rem; align-items: start;">
+        <!-- Hero Section -->
+        <section style="min-height: 100vh; display: flex; align-items: center; padding: 4rem 0; background: ${isGradient ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' : isGlassmorphism ? 'linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%)' : isRetro ? 'var(--color-text)' : 'var(--color-bg)'};">
+          <div class="container" style="max-width: 1400px; margin: 0 auto; padding: 0 2rem;">
+            <div class="hero-grid" style="display: grid; grid-template-columns: 2fr 1fr; gap: 4rem; align-items: start;">
               <div>
                 <div style="overflow: hidden; margin-bottom: 2rem;">
-                  <div style="display: inline-block; background: var(--color-text); color: var(--color-bg); padding: 0.75rem 2rem; font-weight: 900; font-size: 0.875rem; letter-spacing: 0.15em; transform: skew(-5deg);">
-                    <span style="display: inline-block; transform: skew(5deg);">${data.title?.toUpperCase() || 'DESIGNER'}</span>
+                  <div style="display: inline-block; background: ${isBrutalist ? 'var(--color-text)' : isGlassmorphism ? 'rgba(255, 255, 255, 0.2)' : isNeumorphism ? 'var(--color-bg)' : isGradient ? 'rgba(255, 255, 255, 0.2)' : isRetro ? 'linear-gradient(90deg, var(--color-accent), #b537f2)' : isElegant ? 'transparent' : 'var(--color-text)'}; color: ${isNeumorphism ? 'var(--color-text)' : isElegant ? 'var(--color-accent)' : isGradient ? 'white' : 'var(--color-bg)'}; padding: 0.75rem 2rem; font-weight: ${isBrutalist || isRetro ? '900' : isElegant ? '400' : '700'}; font-size: 0.875rem; letter-spacing: ${isElegant ? '2px' : '0.15em'}; text-transform: uppercase; ${isBrutalist ? 'transform: skew(-5deg); border: 3px solid var(--color-text);' : isGlassmorphism ? 'backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 50px;' : isNeumorphism ? 'box-shadow: 6px 6px 12px rgba(163, 177, 198, 0.6), -6px -6px 12px rgba(255, 255, 255, 0.9); border-radius: 50px;' : isRetro ? 'border: 2px solid var(--color-accent); box-shadow: 0 0 20px var(--color-accent); border-radius: 0;' : isElegant ? 'border-bottom: 2px solid var(--color-accent);' : 'border-radius: 4px;'}">
+                    <span style="display: inline-block; ${isBrutalist ? 'transform: skew(5deg);' : ''}">${data.title?.toUpperCase() || 'DESIGNER'}</span>
                   </div>
                 </div>
-                <h1 style="font-size: clamp(4rem, 12vw, 8rem); font-weight: 900; line-height: 0.9; margin-bottom: 2rem; letter-spacing: -0.05em;">
-                  ${data.designerName?.toUpperCase() || 'YOUR NAME'}
+                <h1 ${isRetro ? `class="glitch" data-text="${data.designerName?.toUpperCase() || 'YOUR NAME'}"` : ''} style="font-family: ${isElegant ? 'Playfair Display, serif' : 'inherit'}; font-size: clamp(4rem, 12vw, 8rem); font-weight: ${isBrutalist || isRetro ? '900' : isMinimal || isElegant ? '300' : '800'}; line-height: 0.9; margin-bottom: 2rem; letter-spacing: ${isMinimal || isElegant ? '0' : '-0.05em'}; color: ${isGradient || isRetro ? 'var(--color-bg)' : 'var(--color-text)'}; ${isNeumorphism ? 'text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.8), -2px -2px 4px rgba(163, 177, 198, 0.5);' : isRetro ? 'position: relative; text-transform: uppercase; letter-spacing: 2px;' : ''}">
+                  ${isRetro ? `<span class="gradient-text" style="background: linear-gradient(90deg, var(--color-accent), #00f5ff, var(--color-accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: glow 2s ease-in-out infinite alternate;">${data.designerName?.toUpperCase() || 'YOUR NAME'}</span>` : data.designerName?.toUpperCase() || 'YOUR NAME'}
                 </h1>
-                <div style="width: 200px; height: 8px; background: var(--color-accent); margin-bottom: 3rem;"></div>
-                <p style="font-size: 1.5rem; line-height: 1.6; max-width: 600px; font-weight: 500;">
+                <div style="width: 200px; height: ${isBrutalist || isRetro ? '8px' : '4px'}; background: ${isBrutalist ? 'var(--color-text)' : isGlassmorphism ? 'linear-gradient(90deg, rgba(102, 126, 234, 0.8), rgba(118, 75, 162, 0.8))' : isNeumorphism ? 'linear-gradient(90deg, #cbd5e0, #a0aec0)' : isGradient || isRetro ? 'var(--color-bg)' : 'var(--color-accent)'}; margin-bottom: 3rem; ${isBrutalist ? 'border: 2px solid var(--color-text);' : isRetro ? 'box-shadow: 0 0 20px currentColor;' : ''}"></div>
+                <p style="font-family: ${isElegant ? 'Lato, sans-serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: 1.5rem; line-height: 1.6; max-width: 600px; font-weight: ${isMinimal || isElegant ? '300' : '500'}; color: ${isGradient || isRetro ? 'rgba(255, 255, 255, 0.95)' : 'var(--color-text-secondary)'};">
                   ${data.bio || 'Creating exceptional digital experiences through thoughtful design'}
                 </p>
               </div>
-              <div style="position: sticky; top: 2rem;">
+              <div class="contact-sidebar" style="position: sticky; top: 2rem;">
                 ${data.availability ? `
-                <div style="background: var(--color-accent); color: var(--color-bg); padding: 2rem; margin-bottom: 2rem; transform: rotate(2deg);">
-                  <div style="font-weight: 900; font-size: 0.875rem; letter-spacing: 0.1em; margin-bottom: 0.5rem;">STATUS</div>
-                  <div style="font-size: 1.25rem; font-weight: 700;">${data.availability}</div>
+                <div style="background: ${isBrutalist ? '#ffeb3b' : isGlassmorphism ? 'rgba(255, 255, 255, 0.1)' : isNeumorphism ? 'var(--color-bg)' : isGradient ? 'rgba(255, 255, 255, 0.2)' : isRetro ? 'linear-gradient(90deg, var(--color-accent), #b537f2)' : 'var(--color-accent)'}; color: ${isNeumorphism ? 'var(--color-text)' : isBrutalist ? 'var(--color-text)' : 'var(--color-bg)'}; padding: 2rem; margin-bottom: 2rem; ${isBrutalist ? 'transform: rotate(2deg); border: 4px solid var(--color-text); box-shadow: 8px 8px 0 var(--color-text);' : isGlassmorphism ? 'backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 20px;' : isNeumorphism ? 'box-shadow: 10px 10px 20px rgba(163, 177, 198, 0.6), -10px -10px 20px rgba(255, 255, 255, 0.9); border-radius: 20px;' : isRetro ? 'border: 2px solid var(--color-accent); box-shadow: 0 0 30px var(--color-accent);' : isElegant ? 'border: 1px solid var(--color-accent); border-radius: 0;' : 'border-radius: 12px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);'} ${isGradient ? 'backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);' : ''}">
+                  <div style="font-weight: ${isBrutalist || isRetro ? '900' : '700'}; font-size: 0.875rem; letter-spacing: 0.1em; margin-bottom: 0.5rem; opacity: ${isGradient || isGlassmorphism ? '0.9' : '1'};">STATUS</div>
+                  <div style="font-size: 1.25rem; font-weight: ${isMinimal || isElegant ? '400' : '700'};">${data.availability}</div>
                 </div>
                 ` : ''}
-                <div style="background: var(--color-text); color: var(--color-bg); padding: 2rem;">
-                  <div style="font-weight: 900; font-size: 0.875rem; letter-spacing: 0.1em; margin-bottom: 1.5rem;">CONTACT</div>
+                <div style="background: ${isBrutalist || isRetro ? 'var(--color-text)' : isGlassmorphism ? 'rgba(0, 0, 0, 0.2)' : isNeumorphism ? 'var(--color-bg)' : isGradient ? 'rgba(0, 0, 0, 0.3)' : isElegant ? 'transparent' : 'var(--color-text)'}; color: ${isNeumorphism ? 'var(--color-text)' : isElegant ? 'var(--color-text)' : 'var(--color-bg)'}; padding: 2rem; ${isBrutalist ? 'border: 4px solid var(--color-text); box-shadow: 8px 8px 0 var(--color-text);' : isGlassmorphism ? 'backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px;' : isNeumorphism ? 'box-shadow: 10px 10px 20px rgba(163, 177, 198, 0.6), -10px -10px 20px rgba(255, 255, 255, 0.9); border-radius: 20px;' : isRetro ? 'border: 2px solid var(--color-accent); box-shadow: 0 0 30px var(--color-accent);' : isElegant ? 'border: 1px solid var(--color-border);' : 'border-radius: 12px;'} ${isGradient ? 'backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);' : ''}">
+                  <div style="font-weight: ${isBrutalist || isRetro ? '900' : '700'}; font-size: 0.875rem; letter-spacing: 0.1em; margin-bottom: 1.5rem; opacity: 0.9;">CONTACT</div>
                   ${data.email ? `
-                  <a href="mailto:${data.email}" style="display: block; color: var(--color-bg); text-decoration: none; font-weight: 700; font-size: 1.125rem; margin-bottom: 1rem; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'">
-                    Ã¢Å“â€° ${data.email}
+                  <a href="mailto:${data.email}" style="display: block; color: ${isNeumorphism || isElegant ? 'var(--color-accent)' : 'var(--color-bg)'}; text-decoration: none; font-weight: ${isMinimal || isElegant ? '400' : '700'}; font-size: 1.125rem; margin-bottom: 1rem; transition: all 0.3s; ${isRetro ? 'text-shadow: 0 0 10px currentColor;' : ''}" onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'">
+                    ${data.email}
+                  </a>
+                  ` : ''}
+                  ${data.phone ? `
+                  <a href="tel:${data.phone}" style="display: block; color: ${isNeumorphism || isElegant ? 'var(--color-accent)' : 'var(--color-bg)'}; text-decoration: none; font-weight: ${isMinimal || isElegant ? '400' : '700'}; font-size: 1.125rem; margin-bottom: 1rem; transition: all 0.3s; ${isRetro ? 'text-shadow: 0 0 10px currentColor;' : ''}" onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'">
+                    ${data.phone}
                   </a>
                   ` : ''}
                   <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1.5rem;">
-                    ${data.linkedin ? `<a href="${data.linkedin}" target="_blank" style="color: var(--color-bg); text-decoration: underline; font-size: 0.875rem; font-weight: 600;">LinkedIn</a>` : ''}
-                    ${data.behance ? `<a href="${data.behance}" target="_blank" style="color: var(--color-bg); text-decoration: underline; font-size: 0.875rem; font-weight: 600;">Behance</a>` : ''}
-                    ${data.dribbble ? `<a href="${data.dribbble}" target="_blank" style="color: var(--color-bg); text-decoration: underline; font-size: 0.875rem; font-weight: 600;">Dribbble</a>` : ''}
+                    ${data.linkedin ? `<a href="${data.linkedin}" target="_blank" style="color: ${isNeumorphism || isElegant ? 'var(--color-accent)' : 'var(--color-bg)'}; text-decoration: ${isMinimal || isElegant ? 'none' : 'underline'}; font-size: 0.875rem; font-weight: 600; transition: all 0.3s;" onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'">LinkedIn</a>` : ''}
+                    ${data.behance ? `<a href="${data.behance}" target="_blank" style="color: ${isNeumorphism || isElegant ? 'var(--color-accent)' : 'var(--color-bg)'}; text-decoration: ${isMinimal || isElegant ? 'none' : 'underline'}; font-size: 0.875rem; font-weight: 600; transition: all 0.3s;" onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'">Behance</a>` : ''}
+                    ${data.dribbble ? `<a href="${data.dribbble}" target="_blank" style="color: ${isNeumorphism || isElegant ? 'var(--color-accent)' : 'var(--color-bg)'}; text-decoration: ${isMinimal || isElegant ? 'none' : 'underline'}; font-size: 0.875rem; font-weight: 600; transition: all 0.3s;" onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'">Dribbble</a>` : ''}
+                    ${data.portfolio ? `<a href="${data.portfolio}" target="_blank" style="color: ${isNeumorphism || isElegant ? 'var(--color-accent)' : 'var(--color-bg)'}; text-decoration: ${isMinimal || isElegant ? 'none' : 'underline'}; font-size: 0.875rem; font-weight: 600; transition: all 0.3s;" onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'">Portfolio</a>` : ''}
                   </div>
                 </div>
               </div>
@@ -4160,119 +4227,118 @@ END:VCARD\`;
         </section>
 
         <!-- Projects Masonry Grid -->
-        <section style="background: var(--color-surface); padding: 6rem 0;">
-          <div class="container" style="max-width: 1400px;">
+        ${data.projects && data.projects.length > 0 ? `
+        <section style="background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.05)' : isNeumorphism ? 'var(--color-surface)' : isGradient ? 'linear-gradient(180deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%)' : isRetro ? 'var(--color-bg)' : 'var(--color-surface)'}; padding: 6rem 0;">
+          <div class="container" style="max-width: 1400px; margin: 0 auto; padding: 0 2rem;">
             <div style="margin-bottom: 4rem;">
-              <div style="display: inline-block; background: var(--color-text); color: var(--color-bg); padding: 1rem 3rem; font-weight: 900; font-size: 3rem; letter-spacing: -0.03em;">
+              <div style="display: inline-block; background: ${isBrutalist || isRetro ? 'var(--color-text)' : isGlassmorphism ? 'rgba(255, 255, 255, 0.1)' : isNeumorphism ? 'var(--color-bg)' : isGradient ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' : isElegant ? 'transparent' : 'var(--color-text)'}; color: ${isNeumorphism ? 'var(--color-text)' : isElegant ? 'var(--color-text)' : 'var(--color-bg)'}; padding: 1rem 3rem; font-weight: ${isBrutalist || isRetro ? '900' : isMinimal || isElegant ? '300' : '800'}; font-size: 3rem; letter-spacing: ${isMinimal || isElegant ? '0' : '-0.03em'}; ${isBrutalist ? 'border: 4px solid var(--color-text); box-shadow: 8px 8px 0 var(--color-text);' : isGlassmorphism ? 'backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 12px;' : isNeumorphism ? 'box-shadow: 8px 8px 16px rgba(163, 177, 198, 0.6), -8px -8px 16px rgba(255, 255, 255, 0.9); border-radius: 12px;' : isRetro ? 'border: 2px solid var(--color-accent); box-shadow: 0 0 30px var(--color-accent); text-shadow: 0 0 20px currentColor;' : isElegant ? 'border-bottom: 3px solid var(--color-text);' : 'border-radius: 8px;'}">
                 SELECTED WORK
               </div>
             </div>
             
             <div class="masonry-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 2rem;">
-              ${(() => {
-                try {
-                  const projects = JSON.parse(data.projects || '[]');
-                  return projects.map((project, i) => `
-                    <div class="project-item" style="break-inside: avoid; position: relative; overflow: hidden; background: var(--color-bg);">
-                      ${project.imageUrl ? `
-                      <div style="position: relative; overflow: hidden; aspect-ratio: ${i % 3 === 0 ? '4/5' : i % 3 === 1 ? '1/1' : '16/9'};">
-                        <img src="${project.imageUrl}" alt="${project.title}" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease;">
-                      </div>
-                      ` : `
-                      <div style="aspect-ratio: ${i % 3 === 0 ? '4/5' : i % 3 === 1 ? '1/1' : '16/9'}; background: var(--color-text); display: flex; align-items: center; justify-content: center; font-size: 4rem; color: var(--color-bg); opacity: 0.3;">
-                        ${['Ã¢â€”â€ ', 'Ã¢â€”Â', 'Ã¢â€“Â '][i % 3]}
-                      </div>
-                      `}
-                      <div style="padding: 2rem; border: 4px solid var(--color-border); border-top: none;">
-                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
-                          <h3 style="font-size: 1.75rem; font-weight: 900; letter-spacing: -0.02em; line-height: 1.2;">
-                            ${project.title || 'Project'}
-                          </h3>
-                          ${project.link ? `
-                          <a href="${project.link}" target="_blank" style="width: 40px; height: 40px; background: var(--color-text); color: var(--color-bg); display: flex; align-items: center; justify-content: center; text-decoration: none; font-weight: 900; font-size: 1.25rem; flex-shrink: 0;">Ã¢â€ â€™</a>
-                          ` : ''}
-                        </div>
-                        <p style="font-size: 1rem; line-height: 1.6; margin-bottom: 1.5rem; color: var(--color-text-secondary);">
-                          ${project.description || ''}
-                        </p>
-                        ${project.tags && project.tags.length > 0 ? `
-                        <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
-                          ${project.tags.map(tag => `
-                            <span style="background: var(--color-text); color: var(--color-bg); padding: 0.375rem 1rem; font-size: 0.75rem; font-weight: 900; letter-spacing: 0.05em; text-transform: uppercase;">
-                              ${tag}
-                            </span>
-                          `).join('')}
-                        </div>
-                        ` : ''}
-                      </div>
+              ${data.projects.map((project, i) => `
+                <div class="project-item" style="break-inside: avoid; position: relative; overflow: hidden; background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.1)' : 'var(--color-bg)'}; ${isBrutalist ? 'border: 4px solid var(--color-text); box-shadow: 8px 8px 0 var(--color-text);' : isGlassmorphism ? 'backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 20px;' : isNeumorphism ? 'box-shadow: 10px 10px 20px rgba(163, 177, 198, 0.6), -10px -10px 20px rgba(255, 255, 255, 0.9); border-radius: 20px;' : isRetro ? 'border: 2px solid var(--color-accent); box-shadow: 0 0 20px var(--color-accent);' : isElegant ? 'border: 1px solid var(--color-border);' : 'border-radius: 12px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);'} transition: all 0.3s;">
+                  ${project.imageUrl ? `
+                  <div style="position: relative; overflow: hidden; aspect-ratio: ${i % 3 === 0 ? '4/5' : i % 3 === 1 ? '1/1' : '16/9'}; ${isBrutalist || isRetro ? '' : isGlassmorphism || isNeumorphism ? 'border-radius: 20px 20px 0 0;' : isElegant ? '' : 'border-radius: 12px 12px 0 0;'}">
+                    <img src="${project.imageUrl}" alt="${project.title}" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease;">
+                  </div>
+                  ` : `
+                  <div style="aspect-ratio: ${i % 3 === 0 ? '4/5' : i % 3 === 1 ? '1/1' : '16/9'}; background: ${isBrutalist || isRetro ? 'var(--color-text)' : isGradient ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' : 'var(--color-text)'}; display: flex; align-items: center; justify-content: center; font-size: 4rem; color: ${isNeumorphism ? '#cbd5e0' : 'var(--color-bg)'}; opacity: 0.3; ${isBrutalist || isRetro ? '' : isGlassmorphism || isNeumorphism ? 'border-radius: 20px 20px 0 0;' : 'border-radius: 12px 12px 0 0;'}">
+                    ${['▭', '▬', '▰'][i % 3]}
+                  </div>
+                  `}
+                  <div style="padding: 2rem; ${isBrutalist ? 'border: 4px solid var(--color-text); border-top: none;' : ''}">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                      <h3 style="font-family: ${isElegant ? 'Playfair Display, serif' : 'inherit'}; font-size: 1.75rem; font-weight: ${isBrutalist || isRetro ? '900' : isMinimal || isElegant ? '400' : '800'}; letter-spacing: ${isMinimal || isElegant ? '0' : '-0.02em'}; line-height: 1.2; color: var(--color-text);">
+                        ${project.title || 'Project'}
+                      </h3>
+                      ${project.link ? `
+                      <a href="${project.link}" target="_blank" style="width: 40px; height: 40px; background: ${isBrutalist || isRetro ? 'var(--color-text)' : isGlassmorphism ? 'rgba(255, 255, 255, 0.2)' : isNeumorphism ? 'var(--color-bg)' : isGradient ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' : 'var(--color-text)'}; color: ${isNeumorphism ? 'var(--color-text)' : 'var(--color-bg)'}; display: flex; align-items: center; justify-content: center; text-decoration: none; font-weight: ${isBrutalist || isRetro ? '900' : '700'}; font-size: 1.25rem; flex-shrink: 0; ${isBrutalist ? 'border: 3px solid var(--color-text);' : isGlassmorphism ? 'backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 50%;' : isNeumorphism ? 'box-shadow: 5px 5px 10px rgba(163, 177, 198, 0.6), -5px -5px 10px rgba(255, 255, 255, 0.9); border-radius: 50%;' : isRetro ? 'border: 2px solid var(--color-accent); box-shadow: 0 0 20px var(--color-accent);' : 'border-radius: 8px;'} transition: all 0.3s;">→</a>
+                      ` : ''}
                     </div>
-                  `).join('');
-                } catch (e) {
-                  return '<p style="text-align: center; color: var(--color-text-secondary); grid-column: 1/-1;">No projects to display</p>';
-                }
-              })()}
+                    <p style="font-size: 1rem; line-height: 1.6; margin-bottom: 1.5rem; color: var(--color-text-secondary);">
+                      ${project.description || ''}
+                    </p>
+                    ${project.tags ? `
+                    <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                      ${project.tags.split(',').map(tag => `
+                        <span style="background: ${isBrutalist || isRetro ? 'var(--color-text)' : isGlassmorphism ? 'rgba(255, 255, 255, 0.1)' : isNeumorphism ? 'var(--color-bg)' : isGradient ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' : 'var(--color-text)'}; color: ${isNeumorphism ? 'var(--color-text)' : 'var(--color-bg)'}; padding: 0.375rem 1rem; font-size: 0.75rem; font-weight: ${isBrutalist || isRetro ? '900' : '700'}; letter-spacing: 0.05em; text-transform: uppercase; ${isBrutalist ? 'border: 2px solid var(--color-text);' : isGlassmorphism ? 'backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 20px;' : isNeumorphism ? 'box-shadow: 3px 3px 6px rgba(163, 177, 198, 0.6), -3px -3px 6px rgba(255, 255, 255, 0.9); border-radius: 20px;' : isRetro ? 'border: 1px solid var(--color-accent); box-shadow: 0 0 10px var(--color-accent);' : 'border-radius: 4px;'}">
+                          ${tag.trim()}
+                        </span>
+                      `).join('')}
+                    </div>
+                    ` : ''}
+                  </div>
+                </div>
+              `).join('')}
             </div>
           </div>
         </section>
+        ` : ''}
 
         <!-- Skills & Experience -->
-        <section style="background: var(--color-bg); padding: 6rem 0;">
-          <div class="container" style="max-width: 1400px;">
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6rem;">
+        ${data.skills || data.experience ? `
+        <section style="background: ${isGradient ? 'linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%)' : isGlassmorphism ? 'rgba(0, 0, 0, 0.02)' : isRetro ? 'var(--color-text)' : 'var(--color-bg)'}; padding: 6rem 0;">
+          <div class="container" style="max-width: 1400px; margin: 0 auto; padding: 0 2rem;">
+            <div class="skills-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 6rem;">
+              ${data.skills ? `
               <div>
-                <h2 style="font-size: 3.5rem; font-weight: 900; margin-bottom: 3rem; letter-spacing: -0.03em; line-height: 1;">
+                <h2 style="font-family: ${isElegant ? 'Playfair Display, serif' : 'inherit'}; font-size: 3.5rem; font-weight: ${isBrutalist || isRetro ? '900' : isMinimal || isElegant ? '300' : '800'}; margin-bottom: 3rem; letter-spacing: ${isMinimal || isElegant ? '0' : '-0.03em'}; line-height: 1; color: ${isRetro ? 'var(--color-bg)' : 'var(--color-text)'}; ${isRetro ? 'text-shadow: 0 0 30px currentColor;' : ''}">
                   CAPABILITIES
                 </h2>
                 <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
-                  ${(data.skills || '').split(',').map(skill => `
-                    <div style="background: var(--color-surface); padding: 1.5rem; border-left: 4px solid var(--color-accent);">
-                      <div style="font-weight: 900; font-size: 1.125rem;">
+                  ${data.skills.split(',').map(skill => `
+                    <div style="background: ${isBrutalist ? 'var(--color-bg)' : isGlassmorphism ? 'rgba(255, 255, 255, 0.1)' : isRetro ? 'var(--color-bg)' : 'var(--color-surface)'}; padding: 1.5rem; ${isBrutalist ? 'border: 3px solid var(--color-text); border-left: 8px solid var(--color-text);' : isGlassmorphism ? 'backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); border-left: 4px solid rgba(102, 126, 234, 0.8); border-radius: 12px;' : isNeumorphism ? 'box-shadow: 5px 5px 10px rgba(163, 177, 198, 0.6), -5px -5px 10px rgba(255, 255, 255, 0.9); border-left: 4px solid var(--color-accent); border-radius: 12px;' : isRetro ? 'border: 2px solid var(--color-accent); border-left: 4px solid var(--color-accent); box-shadow: 0 0 20px var(--color-accent);' : isElegant ? 'border-left: 2px solid var(--color-accent);' : 'border-left: 4px solid var(--color-accent); border-radius: 8px;'} transition: all 0.3s;">
+                      <div style="font-weight: ${isBrutalist || isRetro ? '900' : isMinimal || isElegant ? '400' : '700'}; font-size: 1.125rem; color: var(--color-text);">
                         ${skill.trim()}
                       </div>
                     </div>
                   `).join('')}
                 </div>
               </div>
+              ` : ''}
               
               <div>
-                <h2 style="font-size: 3.5rem; font-weight: 900; margin-bottom: 3rem; letter-spacing: -0.03em; line-height: 1;">
+                <h2 style="font-family: ${isElegant ? 'Playfair Display, serif' : 'inherit'}; font-size: 3.5rem; font-weight: ${isBrutalist || isRetro ? '900' : isMinimal || isElegant ? '300' : '800'}; margin-bottom: 3rem; letter-spacing: ${isMinimal || isElegant ? '0' : '-0.03em'}; line-height: 1; color: ${isRetro ? 'var(--color-bg)' : 'var(--color-text)'}; ${isRetro ? 'text-shadow: 0 0 30px currentColor;' : ''}">
                   ABOUT
                 </h2>
-                <p style="font-size: 1.25rem; line-height: 1.8; margin-bottom: 2rem; font-weight: 500;">
+                <p style="font-family: ${isElegant ? 'Lato, sans-serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: 1.25rem; line-height: 1.8; margin-bottom: 2rem; font-weight: ${isMinimal || isElegant ? '300' : '500'}; color: var(--color-text-secondary);">
                   ${data.bio || 'Passionate designer focused on creating impactful experiences.'}
                 </p>
                 ${data.experience ? `
-                <div style="background: var(--color-accent); color: var(--color-bg); padding: 2rem; margin-top: 3rem;">
-                  <div style="font-size: 0.875rem; font-weight: 900; letter-spacing: 0.1em; margin-bottom: 0.5rem;">EXPERIENCE</div>
-                  <div style="font-size: 2.5rem; font-weight: 900; letter-spacing: -0.02em;">${data.experience}</div>
+                <div style="background: ${isBrutalist ? '#ffeb3b' : isGlassmorphism ? 'rgba(102, 126, 234, 0.2)' : isNeumorphism ? 'var(--color-bg)' : isGradient ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' : isRetro ? 'linear-gradient(90deg, var(--color-accent), #b537f2)' : 'var(--color-accent)'}; color: ${isNeumorphism ? 'var(--color-text)' : isBrutalist ? 'var(--color-text)' : 'var(--color-bg)'}; padding: 2rem; margin-top: 3rem; ${isBrutalist ? 'border: 4px solid var(--color-text); box-shadow: 8px 8px 0 var(--color-text);' : isGlassmorphism ? 'backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 20px;' : isNeumorphism ? 'box-shadow: 10px 10px 20px rgba(163, 177, 198, 0.6), -10px -10px 20px rgba(255, 255, 255, 0.9); border-radius: 20px;' : isRetro ? 'border: 2px solid var(--color-accent); box-shadow: 0 0 30px var(--color-accent);' : isElegant ? 'border: 1px solid var(--color-accent);' : 'border-radius: 12px;'}">
+                  <div style="font-size: 0.875rem; font-weight: ${isBrutalist || isRetro ? '900' : '700'}; letter-spacing: 0.1em; margin-bottom: 0.5rem; opacity: ${isBrutalist ? '1' : '0.9'};">EXPERIENCE</div>
+                  <div style="font-size: 2.5rem; font-weight: ${isBrutalist || isRetro ? '900' : isMinimal || isElegant ? '300' : '800'}; letter-spacing: ${isMinimal || isElegant ? '0' : '-0.02em'};">${data.experience}</div>
                 </div>
                 ` : ''}
               </div>
             </div>
           </div>
         </section>
+        ` : ''}
 
         <!-- Footer CTA -->
-        <section style="background: var(--color-text); color: var(--color-bg); padding: 8rem 0; text-align: center;">
-          <div class="container" style="max-width: 1000px;">
-            <h2 style="font-size: clamp(3rem, 8vw, 6rem); font-weight: 900; line-height: 1; margin-bottom: 2rem; letter-spacing: -0.04em;">
+        <section style="background: ${isBrutalist || isRetro ? 'var(--color-text)' : isGlassmorphism ? 'rgba(0, 0, 0, 0.8)' : isNeumorphism ? 'var(--color-surface)' : isGradient ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' : 'var(--color-text)'}; ${isGlassmorphism ? 'backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);' : ''} color: ${isNeumorphism ? 'var(--color-text)' : 'var(--color-bg)'}; padding: 8rem 0; text-align: center;">
+          <div class="container" style="max-width: 1000px; margin: 0 auto; padding: 0 2rem;">
+            <h2 style="font-family: ${isElegant ? 'Playfair Display, serif' : 'inherit'}; font-size: clamp(3rem, 8vw, 6rem); font-weight: ${isBrutalist || isRetro ? '900' : isMinimal || isElegant ? '300' : '800'}; line-height: 1; margin-bottom: 2rem; letter-spacing: ${isMinimal || isElegant ? '0' : '-0.04em'}; ${isRetro ? 'text-shadow: 0 0 40px currentColor;' : ''}">
               LET'S CREATE<br>TOGETHER
             </h2>
-            <p style="font-size: 1.5rem; margin-bottom: 3rem; opacity: 0.9; font-weight: 500;">
+            <p style="font-family: ${isElegant ? 'Lato, sans-serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: 1.5rem; margin-bottom: 3rem; opacity: 0.9; font-weight: ${isMinimal || isElegant ? '300' : '500'};">
               Available for new projects and collaborations
             </p>
             ${data.email ? `
-            <a href="mailto:${data.email}" style="display: inline-block; background: var(--color-bg); color: var(--color-text); padding: 1.5rem 4rem; font-weight: 900; font-size: 1.25rem; text-decoration: none; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
-              GET IN TOUCH Ã¢â€ â€™
+            <a href="mailto:${data.email}" style="display: inline-block; background: ${isBrutalist ? '#ffeb3b' : isGlassmorphism ? 'rgba(255, 255, 255, 0.2)' : isNeumorphism ? 'var(--color-bg)' : isGradient ? 'var(--color-bg)' : isRetro ? 'linear-gradient(90deg, var(--color-accent), #b537f2)' : 'var(--color-bg)'}; color: ${isBrutalist ? 'var(--color-text)' : isNeumorphism ? 'var(--color-text)' : isGradient ? '#667eea' : isRetro ? 'var(--color-bg)' : 'var(--color-text)'}; padding: 1.5rem 4rem; font-weight: ${isBrutalist || isRetro ? '900' : '700'}; font-size: 1.25rem; text-decoration: none; ${isBrutalist ? 'border: 4px solid var(--color-text); box-shadow: 8px 8px 0 var(--color-text);' : isGlassmorphism ? 'backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 50px;' : isNeumorphism ? 'box-shadow: 10px 10px 20px rgba(163, 177, 198, 0.6), -10px -10px 20px rgba(255, 255, 255, 0.9); border-radius: 50px;' : isRetro ? 'border: 2px solid var(--color-accent); box-shadow: 0 0 30px var(--color-accent); text-transform: uppercase; letter-spacing: 1px;' : isElegant ? 'border: 1px solid var(--color-text); border-radius: 0;' : 'border-radius: 50px;'} transition: all 0.3s;" onmouseover="this.style.transform='translateY(-2px)'; ${isRetro ? 'this.style.boxShadow=\'0 0 50px var(--color-accent)\'' : ''}" onmouseout="this.style.transform='translateY(0)'; ${isRetro ? 'this.style.boxShadow=\'0 0 30px var(--color-accent)\'' : ''}">
+              GET IN TOUCH →
             </a>
             ` : ''}
           </div>
         </section>
 
         <!-- Footer -->
-        <footer style="background: var(--color-bg); padding: 2rem 0; text-align: center; color: var(--color-text-secondary); font-size: 0.875rem; border-top: 4px solid var(--color-border);">
+        <footer style="background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.05)' : isRetro ? 'var(--color-bg)' : 'var(--color-bg)'}; padding: 2rem 0; text-align: center; color: var(--color-text-secondary); font-size: 0.875rem; ${isBrutalist ? 'border-top: 4px solid var(--color-text);' : isRetro ? 'border-top: 2px solid var(--color-accent);' : 'border-top: 1px solid var(--color-border);'}">
           <div class="container">
-            <p style="font-weight: 700;">Ã‚Â© 2024 ${data.designerName || 'Designer'}</p>
+            <p style="font-weight: ${isMinimal || isElegant ? '300' : '700'};">© 2024 ${data.designerName || 'Designer'}</p>
           </div>
         </footer>
       </div>
@@ -4282,73 +4348,226 @@ END:VCARD\`;
           transform: scale(1.05);
         }
         
+        ${isBrutalist ? `
+          .project-item:hover {
+            transform: translate(-4px, -4px);
+            box-shadow: 12px 12px 0 var(--color-text) !important;
+          }
+        ` : isGlassmorphism ? `
+          .project-item:hover {
+            transform: translateY(-4px);
+            background: rgba(255, 255, 255, 0.15) !important;
+          }
+        ` : isNeumorphism ? `
+          .project-item:hover {
+            box-shadow: inset 4px 4px 8px rgba(163, 177, 198, 0.6), inset -4px -4px 8px rgba(255, 255, 255, 0.9) !important;
+          }
+        ` : isRetro ? `
+          .project-item:hover {
+            box-shadow: 0 0 40px var(--color-accent) !important;
+          }
+        ` : `
+          .project-item:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15) !important;
+          }
+        `}
+        
+        ${isRetro ? `
+        /* Retro glitch effect */
+        .glitch::before,
+        .glitch::after {
+          content: attr(data-text);
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+        }
+        
+        .glitch::before {
+          animation: glitch1 2s infinite;
+          color: var(--color-accent);
+          z-index: -1;
+        }
+        
+        .glitch::after {
+          animation: glitch2 3s infinite;
+          color: #00f5ff;
+          z-index: -2;
+        }
+        
+        @keyframes glitch1 {
+          0%, 100% { transform: translate(0); }
+          20% { transform: translate(-2px, 2px); }
+          40% { transform: translate(-2px, -2px); }
+          60% { transform: translate(2px, 2px); }
+          80% { transform: translate(2px, -2px); }
+        }
+        
+        @keyframes glitch2 {
+          0%, 100% { transform: translate(0); }
+          20% { transform: translate(2px, -2px); }
+          40% { transform: translate(2px, 2px); }
+          60% { transform: translate(-2px, -2px); }
+          80% { transform: translate(-2px, 2px); }
+        }
+        
+        @keyframes glow {
+          from { filter: drop-shadow(0 0 10px var(--color-accent)); }
+          to { filter: drop-shadow(0 0 30px #00f5ff); }
+        }
+        ` : ''}
+        
         @media (max-width: 1024px) {
           nav { width: 60px; padding: 1.5rem 0; }
           nav > div:first-child { font-size: 0.875rem; }
           div[style*="margin-left: 80px"] { margin-left: 60px !important; }
           .masonry-grid { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)) !important; }
-          section > div > div[style*="grid-template-columns: 2fr 1fr"] {
-            grid-template-columns: 1fr !important;
-          }
-          section > div > div[style*="grid-template-columns: 1fr 1fr"] {
-            grid-template-columns: 1fr !important;
-          }
+          .hero-grid { grid-template-columns: 1fr !important; }
+          .skills-grid { grid-template-columns: 1fr !important; }
+          .contact-sidebar { position: static !important; }
         }
         
         @media (max-width: 768px) {
           nav { display: none; }
-          div[style*="margin-left: 80px"] { margin-left: 0 !important; }
+          div[style*="margin-left: 80px"], div[style*="margin-left: 60px"] { margin-left: 0 !important; }
+          .masonry-grid { grid-template-columns: 1fr !important; gap: 1.5rem !important; }
+          section > div, .container { padding: 0 1.5rem !important; }
+          section[style*="padding: 8rem"] { padding: 5rem 0 !important; }
+          section[style*="padding: 6rem"] { padding: 4rem 0 !important; }
+          h1 { font-size: clamp(2.5rem, 10vw, 4rem) !important; }
+          h2 { font-size: clamp(2rem, 8vw, 3rem) !important; }
+          div[style*="grid-template-columns: repeat(2, 1fr)"] { grid-template-columns: 1fr !important; }
+        }
+        
+        @media (max-width: 480px) {
           .masonry-grid { grid-template-columns: 1fr !important; }
+          section > div, .container { padding: 0 1rem !important; }
         }
       </style>
-    `
-  }),
+    `;
+  }
+}),
+'writer-portfolio': new Template('writer-portfolio', {
+  name: 'Writer Portfolio',
+  description: 'Perfect for authors, journalists, and content creators',
+  category: 'portfolio',
+  defaultTheme: 'elegant',
+  fields: {
+    writerName: { type: 'text', default: 'Jordan Blake', label: 'Your Name', required: true },
+    tagline: { type: 'text', default: 'Freelance Writer & Storyteller', label: 'Tagline', required: true },
+    bio: { 
+      type: 'textarea',
+      default: 'Crafting stories and sharing insights through the written word. I explore the intersection of technology, culture, and human experience.',
+      label: 'Bio',
+      required: true 
+    },
+    email: { type: 'email', default: 'hello@writer.com', label: 'Email', required: true },
+    website: { type: 'url', default: '', label: 'Personal Website', required: false },
+    twitter: { type: 'text', default: '', label: 'Twitter/X Handle', placeholder: '@username', required: false },
+    medium: { type: 'url', default: '', label: 'Medium URL', required: false },
+    linkedin: { type: 'url', default: '', label: 'LinkedIn URL', required: false },
+    articles: {
+      type: 'group',
+      label: 'Published Work',
+      itemLabel: 'Article',
+      min: 1,
+      max: 12,
+      fields: {
+        title: { type: 'text', label: 'Article Title', default: '' },
+        publication: { type: 'text', label: 'Publication Name', default: '' },
+        date: { type: 'text', label: 'Date', default: '' },
+        excerpt: { type: 'textarea', label: 'Brief Excerpt', default: '' },
+        link: { type: 'url', label: 'Article Link', default: '' }
+      },
+      default: [
+        { 
+          title: 'The Future of Digital Storytelling',
+          publication: 'The Atlantic',
+          date: '2024',
+          excerpt: 'As technology evolves, so do the ways we tell and consume stories. This exploration examines how digital platforms are reshaping narrative structures.',
+          link: ''
+        },
+        { 
+          title: 'Finding Voice in the Digital Age',
+          publication: 'Medium',
+          date: '2024',
+          excerpt: 'In an era of constant connectivity, authentic voice has become both more important and more elusive.',
+          link: ''
+        },
+        { 
+          title: 'The Art of the Long Read',
+          publication: 'Longform',
+          date: '2023',
+          excerpt: 'Why deep, immersive journalism still matters in our fast-paced media landscape.',
+          link: ''
+        }
+      ]
+    },
+    specialties: { 
+      type: 'text',
+      default: 'Technology, Culture, Longreads, Essays',
+      label: 'Writing Specialties (comma separated)',
+      required: true 
+    },
+    publications: { 
+      type: 'text',
+      default: 'The Atlantic, Wired, Medium, The New Yorker',
+      label: 'Notable Publications (comma separated)',
+      required: false 
+    },
+    books: {
+      type: 'group',
+      label: 'Books',
+      itemLabel: 'Book',
+      min: 0,
+      max: 6,
+      fields: {
+        title: { type: 'text', label: 'Book Title', default: '' },
+        year: { type: 'text', label: 'Year', default: '' },
+        description: { type: 'textarea', label: 'Description', default: '' },
+        link: { type: 'url', label: 'Book Link', default: '' }
+      },
+      default: []
+    }
+  },
+  structure: (data, theme) => {
+    const isBrutalist = theme.id === 'brutalist';
+    const isMinimal = theme.id === 'minimal';
+    const isGradient = theme.id === 'gradient';
+    const isElegant = theme.id === 'elegant';
+    const isRetro = theme.id === 'retro';
+    const isGlassmorphism = theme.id === 'glassmorphism';
+    const isNeumorphism = theme.id === 'neumorphism';
 
-  'writer-portfolio': new Template('writer-portfolio', {
-    name: 'Writer Portfolio',
-    description: 'Perfect for authors, journalists, and content creators',
-    category: 'portfolio',
-    defaultTheme: 'elegant',
-    fields: [
-      { name: 'writerName', label: 'Your Name', type: 'text', required: true },
-      { name: 'tagline', label: 'Tagline', type: 'text', placeholder: 'Freelance Writer, Author, Journalist, etc.', required: true },
-      { name: 'bio', label: 'Bio', type: 'textarea', required: true },
-      { name: 'email', label: 'Email', type: 'email', required: true },
-      { name: 'website', label: 'Personal Website', type: 'url', required: false },
-      { name: 'twitter', label: 'Twitter/X Handle', type: 'text', placeholder: '@username', required: false },
-      { name: 'medium', label: 'Medium URL', type: 'url', required: false },
-      { name: 'linkedin', label: 'LinkedIn URL', type: 'url', required: false },
-      { name: 'articles', label: 'Published Work (JSON format)', type: 'textarea', placeholder: '[{"title": "Article Title", "publication": "Publication Name", "date": "2024", "excerpt": "Brief excerpt...", "link": "https://..."}]', required: true },
-      { name: 'specialties', label: 'Writing Specialties (comma separated)', type: 'text', placeholder: 'Technology, Culture, Business, Travel', required: true },
-      { name: 'publications', label: 'Notable Publications (comma separated)', type: 'text', placeholder: 'The New York Times, Wired, Medium', required: false },
-      { name: 'books', label: 'Books (JSON format)', type: 'textarea', placeholder: '[{"title": "Book Title", "year": "2024", "description": "Brief description", "link": "https://..."}]', required: false }
-    ],
-    structure: (data, theme) => `
+    return `
       <!-- Minimal Header -->
-      <header style="padding: 2rem 0; background: var(--color-bg); border-bottom: 1px solid var(--color-border);">
-        <div class="container" style="max-width: 1200px;">
+      <header style="padding: 2rem 0; background: var(--color-bg); ${isBrutalist ? 'border-bottom: 4px solid var(--color-text);' : isRetro ? 'border-bottom: 3px solid var(--color-accent);' : 'border-bottom: 1px solid var(--color-border);'}">
+        <div class="container" style="max-width: 1200px; margin: 0 auto; padding: 0 2rem;">
           <div style="display: flex; justify-content: space-between; align-items: center;">
-            <div style="font-family: serif; font-size: 1.75rem; font-weight: 400; font-style: italic;">
+            <div style="font-family: ${isElegant ? 'Playfair Display, serif' : isRetro ? 'Space Mono, monospace' : 'serif'}; font-size: ${isBrutalist ? '2rem' : '1.75rem'}; font-weight: ${isBrutalist ? '900' : '400'}; ${isElegant ? 'font-style: italic;' : ''} ${isBrutalist ? 'text-transform: uppercase;' : ''}">
               ${data.writerName || 'Writer Name'}
             </div>
-            <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle theme">
-              <span class="theme-icon">Ã°Å¸Å’â„¢</span>
-            </button>
+            <label class="theme-toggle-switch-wrapper" style="cursor: pointer; ${isNeumorphism ? 'padding: 0.5rem; border-radius: 12px; display: inline-block; box-shadow: 6px 6px 12px rgba(163, 177, 198, 0.6), -6px -6px 12px rgba(255, 255, 255, 0.9);' : ''}">
+              <input type="checkbox" class="theme-toggle-switch" onclick="toggleTheme()" aria-label="Toggle theme">
+              <span class="theme-toggle-slider"></span>
+            </label>
           </div>
         </div>
       </header>
 
       <!-- Hero Masthead -->
-      <section style="padding: 8rem 0 6rem; background: var(--color-bg); text-align: center;">
-        <div class="container" style="max-width: 900px;">
-          <div style="font-size: 1rem; text-transform: uppercase; letter-spacing: 0.2em; margin-bottom: 2rem; color: var(--color-text-secondary); font-weight: 600;">
+      <section style="padding: ${isBrutalist ? '6rem 0 4rem' : '8rem 0 6rem'}; background: ${isGradient ? 'linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%)' : 'var(--color-bg)'}; text-align: center;">
+        <div class="container" style="max-width: 900px; margin: 0 auto; padding: 0 2rem;">
+          <div style="font-size: ${isBrutalist ? '0.875rem' : '1rem'}; text-transform: uppercase; letter-spacing: ${isBrutalist ? '0.15em' : '0.2em'}; margin-bottom: 2rem; color: ${isBrutalist || isRetro ? 'var(--color-accent)' : 'var(--color-text-secondary)'}; font-weight: ${isBrutalist ? '900' : '600'};">
             ${data.tagline || 'Writer & Storyteller'}
           </div>
-          <h1 style="font-family: serif; font-size: clamp(4rem, 10vw, 7rem); font-weight: 400; margin-bottom: 3rem; line-height: 1.1;">
+          <h1 style="font-family: ${isElegant ? 'Playfair Display, serif' : isBrutalist ? 'inherit' : isRetro ? 'Space Mono, monospace' : 'serif'}; font-size: clamp(${isBrutalist ? '3rem' : '4rem'}, 10vw, ${isBrutalist ? '6rem' : '7rem'}); font-weight: ${isBrutalist ? '900' : isRetro ? '700' : '400'}; margin-bottom: 3rem; line-height: 1.1; ${isBrutalist ? 'text-transform: uppercase; letter-spacing: -0.02em;' : isRetro ? 'text-transform: uppercase;' : ''}">
             ${data.writerName || 'Your Name'}
           </h1>
-          <div style="max-width: 2px; height: 60px; background: var(--color-accent); margin: 0 auto 3rem;"></div>
-          <p style="font-size: 1.375rem; line-height: 1.8; color: var(--color-text-secondary); max-width: 700px; margin: 0 auto; font-weight: 400;">
+          <div style="max-width: ${isBrutalist ? '80px' : '2px'}; height: ${isBrutalist ? '8px' : '60px'}; background: var(--color-accent); margin: 0 auto 3rem; ${isBrutalist ? 'border: 2px solid var(--color-text);' : ''}"></div>
+          <p style="font-family: ${isElegant ? 'Lato, sans-serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: ${isBrutalist ? '1.25rem' : '1.375rem'}; line-height: 1.8; color: var(--color-text-secondary); max-width: 700px; margin: 0 auto; font-weight: ${isElegant ? '300' : '400'};">
             ${data.bio || 'Crafting stories and sharing insights through the written word'}
           </p>
         </div>
@@ -4356,145 +4575,123 @@ END:VCARD\`;
 
       ${data.publications ? `
       <!-- Publications Ribbon -->
-      <section style="background: var(--color-text); color: var(--color-bg); padding: 1.5rem 0; text-align: center; border-top: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border);">
-        <div class="container">
-          <div style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 0.75rem; opacity: 0.7; font-weight: 600;">
+      <section style="background: ${isBrutalist ? 'var(--color-accent)' : isGradient ? 'linear-gradient(135deg, #667eea, #764ba2)' : isRetro ? 'var(--color-accent)' : 'var(--color-text)'}; color: ${isBrutalist ? 'var(--color-text)' : 'var(--color-bg)'}; padding: ${isBrutalist ? '2rem 0' : '1.5rem 0'}; text-align: center; ${isBrutalist ? 'border-top: 4px solid var(--color-text); border-bottom: 4px solid var(--color-text);' : isRetro ? 'border-top: 2px solid var(--color-accent); border-bottom: 2px solid var(--color-accent);' : 'border-top: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border);'}">
+        <div class="container" style="margin: 0 auto; padding: 0 2rem;">
+          <div style="font-size: ${isBrutalist ? '0.875rem' : '0.75rem'}; text-transform: uppercase; letter-spacing: ${isBrutalist ? '0.2em' : '0.15em'}; margin-bottom: ${isBrutalist ? '1rem' : '0.75rem'}; opacity: ${isBrutalist ? '1' : '0.7'}; font-weight: ${isBrutalist ? '900' : '600'};">
             Featured In
           </div>
-          <div style="font-family: serif; font-size: 1rem; font-style: italic; opacity: 0.95;">
-            ${data.publications.split(',').map(pub => pub.trim()).join(' Ã‚Â· ')}
+          <div style="font-family: ${isElegant ? 'Playfair Display, serif' : isBrutalist ? 'inherit' : isRetro ? 'Space Mono, monospace' : 'serif'}; font-size: ${isBrutalist ? '1.125rem' : '1rem'}; ${isElegant ? 'font-style: italic;' : ''} opacity: 0.95; font-weight: ${isBrutalist ? '700' : 'normal'};">
+            ${data.publications.split(',').map(pub => pub.trim()).join(' · ')}
           </div>
         </div>
       </section>
       ` : ''}
 
       <!-- Featured Article (First Article Large) -->
-      ${(() => {
-        try {
-          const articles = JSON.parse(data.articles || '[]');
-          const featured = articles[0];
-          if (!featured) return '';
+      ${data.articles && data.articles.length > 0 ? `
+      <section style="padding: 6rem 0; background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.02)' : isNeumorphism ? 'var(--color-surface)' : 'var(--color-surface)'};">
+        <div class="container" style="max-width: 1000px; margin: 0 auto; padding: 0 2rem;">
+          <div style="font-size: ${isBrutalist ? '0.875rem' : '0.75rem'}; text-transform: uppercase; letter-spacing: ${isBrutalist ? '0.2em' : '0.15em'}; color: var(--color-accent); margin-bottom: ${isBrutalist ? '2rem' : '1rem'}; font-weight: ${isBrutalist ? '900' : '700'};">
+            Featured Story
+          </div>
+          <article>
+            <h2 style="font-family: ${isElegant ? 'Playfair Display, serif' : isBrutalist ? 'inherit' : isRetro ? 'Space Mono, monospace' : 'serif'}; font-size: clamp(${isBrutalist ? '2rem' : '2.5rem'}, 6vw, ${isBrutalist ? '3.5rem' : '4.5rem'}); font-weight: ${isBrutalist ? '900' : isRetro ? '700' : '400'}; line-height: 1.2; margin-bottom: 2rem; ${isBrutalist ? 'text-transform: uppercase; letter-spacing: -0.02em;' : isRetro ? 'text-transform: uppercase;' : ''}">
+              ${data.articles[0].link ? `<a href="${data.articles[0].link}" target="_blank" style="color: var(--color-text); text-decoration: none; transition: color 0.3s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">${data.articles[0].title}</a>` : data.articles[0].title}
+            </h2>
+            <div style="display: flex; gap: 2rem; align-items: center; margin-bottom: 2.5rem; font-size: ${isBrutalist ? '1rem' : '0.9375rem'}; color: var(--color-text-secondary);">
+              <span style="font-weight: ${isBrutalist ? '900' : '600'}; color: var(--color-accent); ${isBrutalist ? 'text-transform: uppercase;' : ''}">${data.articles[0].publication || 'Publication'}</span>
+              ${data.articles[0].date ? `<span>${data.articles[0].date}</span>` : ''}
+            </div>
+            <p style="font-family: ${isElegant ? 'Lato, sans-serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: ${isBrutalist ? '1.25rem' : '1.375rem'}; line-height: 1.9; color: var(--color-text); margin-bottom: 2.5rem; font-weight: ${isElegant ? '300' : '400'};">
+              ${data.articles[0].excerpt || ''}
+            </p>
+            ${data.articles[0].link ? `
+            <a href="${data.articles[0].link}" target="_blank" style="display: inline-block; padding: ${isBrutalist ? '1.25rem 3rem' : '1rem 2.5rem'}; border: ${isBrutalist ? '4px' : '2px'} solid var(--color-text); color: var(--color-text); text-decoration: none; font-weight: ${isBrutalist ? '900' : '600'}; font-size: ${isBrutalist ? '1rem' : '0.9375rem'}; letter-spacing: 0.05em; text-transform: uppercase; transition: all 0.3s; ${isBrutalist ? 'box-shadow: 4px 4px 0 var(--color-text);' : isNeumorphism ? 'box-shadow: 6px 6px 12px rgba(163, 177, 198, 0.6), -6px -6px 12px rgba(255, 255, 255, 0.9); border-radius: 8px;' : isGlassmorphism ? 'backdrop-filter: blur(10px); border-radius: 8px;' : ''}" onmouseover="${isBrutalist ? `this.style.transform='translate(-4px, -4px)'; this.style.boxShadow='8px 8px 0 var(--color-text)'` : `this.style.background='var(--color-text)'; this.style.color='var(--color-bg)'`}" onmouseout="${isBrutalist ? `this.style.transform='translate(0, 0)'; this.style.boxShadow='4px 4px 0 var(--color-text)'` : `this.style.background='transparent'; this.style.color='var(--color-text)'`}">
+              Read Full Article →
+            </a>
+            ` : ''}
+          </article>
+        </div>
+      </section>
+      ` : ''}
+
+      <!-- Recent Articles Grid -->
+      ${data.articles && data.articles.length > 1 ? `
+      <section style="padding: 6rem 0; background: var(--color-bg);">
+        <div class="container" style="max-width: 1200px; margin: 0 auto; padding: 0 2rem;">
+          <div style="text-align: center; margin-bottom: 5rem;">
+            <h2 style="font-family: ${isElegant ? 'Playfair Display, serif' : isBrutalist ? 'inherit' : isRetro ? 'Space Mono, monospace' : 'serif'}; font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: ${isBrutalist ? '900' : isRetro ? '700' : '400'}; margin-bottom: 1.5rem; ${isBrutalist ? 'text-transform: uppercase;' : isRetro ? 'text-transform: uppercase;' : ''}">
+              Recent Work
+            </h2>
+            <div style="width: ${isBrutalist ? '80px' : '60px'}; height: ${isBrutalist ? '6px' : '2px'}; background: var(--color-accent); margin: 0 auto; ${isBrutalist ? 'border: 2px solid var(--color-text);' : ''}"></div>
+          </div>
           
-          return `
-          <section style="padding: 6rem 0; background: var(--color-surface);">
-            <div class="container" style="max-width: 1000px;">
-              <div style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.15em; color: var(--color-accent); margin-bottom: 1rem; font-weight: 700;">
-                Featured Story
-              </div>
-              <article>
-                <h2 style="font-family: serif; font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 400; line-height: 1.2; margin-bottom: 2rem;">
-                  ${featured.link ? `<a href="${featured.link}" target="_blank" style="color: var(--color-text); text-decoration: none; transition: color 0.3s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">${featured.title}</a>` : featured.title}
-                </h2>
-                <div style="display: flex; gap: 2rem; align-items: center; margin-bottom: 2.5rem; font-size: 0.9375rem; color: var(--color-text-secondary);">
-                  <span style="font-weight: 600; color: var(--color-accent);">${featured.publication || 'Publication'}</span>
-                  ${featured.date ? `<span>${featured.date}</span>` : ''}
+          <div class="articles-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 4rem;">
+            ${data.articles.slice(1).map(article => `
+              <article style="padding-bottom: 3rem; border-bottom: ${isBrutalist ? '3px' : '1px'} solid var(--color-border);">
+                <div style="font-size: ${isBrutalist ? '0.875rem' : '0.75rem'}; text-transform: uppercase; letter-spacing: 0.1em; color: var(--color-accent); margin-bottom: 1rem; font-weight: ${isBrutalist ? '900' : '700'};">
+                  ${article.publication || 'Publication'}
                 </div>
-                <p style="font-size: 1.375rem; line-height: 1.9; color: var(--color-text); margin-bottom: 2.5rem; font-weight: 400;">
-                  ${featured.excerpt || ''}
+                <h3 style="font-family: ${isElegant ? 'Playfair Display, serif' : isBrutalist ? 'inherit' : isRetro ? 'Space Mono, monospace' : 'serif'}; font-size: ${isBrutalist ? '1.5rem' : '1.875rem'}; font-weight: ${isBrutalist ? '900' : isRetro ? '700' : '400'}; line-height: 1.3; margin-bottom: 1rem; ${isBrutalist ? 'text-transform: uppercase;' : ''}">
+                  ${article.link ? `<a href="${article.link}" target="_blank" style="color: var(--color-text); text-decoration: none; transition: color 0.3s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">${article.title}</a>` : article.title}
+                </h3>
+                ${article.date ? `
+                <div style="font-size: 0.875rem; color: var(--color-text-secondary); margin-bottom: 1rem;">
+                  ${article.date}
+                </div>
+                ` : ''}
+                <p style="font-family: ${isElegant ? 'Lato, sans-serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: ${isBrutalist ? '1rem' : '1.0625rem'}; line-height: 1.75; color: var(--color-text-secondary); margin-bottom: 1.5rem; font-weight: ${isElegant ? '300' : 'normal'};">
+                  ${article.excerpt || ''}
                 </p>
-                ${featured.link ? `
-                <a href="${featured.link}" target="_blank" style="display: inline-block; padding: 1rem 2.5rem; border: 2px solid var(--color-text); color: var(--color-text); text-decoration: none; font-weight: 600; font-size: 0.9375rem; letter-spacing: 0.05em; text-transform: uppercase; transition: all 0.3s;" onmouseover="this.style.background='var(--color-text)'; this.style.color='var(--color-bg)'" onmouseout="this.style.background='transparent'; this.style.color='var(--color-text)'">
-                  Read Full Article Ã¢â€ â€™
+                ${article.link ? `
+                <a href="${article.link}" target="_blank" style="font-size: ${isBrutalist ? '0.875rem' : '0.875rem'}; font-weight: ${isBrutalist ? '900' : '600'}; color: var(--color-text); text-decoration: none; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 2px solid var(--color-text); padding-bottom: 2px; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'; this.style.borderColor='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'; this.style.borderColor='var(--color-text)'">
+                  Read More
                 </a>
                 ` : ''}
               </article>
-            </div>
-          </section>
-          `;
-        } catch (e) {
-          return '';
-        }
-      })()}
-
-      <!-- Recent Articles Grid -->
-      <section style="padding: 6rem 0; background: var(--color-bg);">
-        <div class="container" style="max-width: 1200px;">
-          <div style="text-align: center; margin-bottom: 5rem;">
-            <h2 style="font-family: serif; font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: 400; margin-bottom: 1.5rem;">
-              Recent Work
-            </h2>
-            <div style="width: 60px; height: 2px; background: var(--color-accent); margin: 0 auto;"></div>
-          </div>
-          
-          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 4rem;">
-            ${(() => {
-              try {
-                const articles = JSON.parse(data.articles || '[]');
-                return articles.slice(1).map(article => `
-                  <article style="padding-bottom: 3rem; border-bottom: 1px solid var(--color-border);">
-                    <div style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--color-accent); margin-bottom: 1rem; font-weight: 700;">
-                      ${article.publication || 'Publication'}
-                    </div>
-                    <h3 style="font-family: serif; font-size: 1.875rem; font-weight: 400; line-height: 1.3; margin-bottom: 1rem;">
-                      ${article.link ? `<a href="${article.link}" target="_blank" style="color: var(--color-text); text-decoration: none; transition: color 0.3s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">${article.title}</a>` : article.title}
-                    </h3>
-                    ${article.date ? `
-                    <div style="font-size: 0.875rem; color: var(--color-text-secondary); margin-bottom: 1rem;">
-                      ${article.date}
-                    </div>
-                    ` : ''}
-                    <p style="font-size: 1.0625rem; line-height: 1.75; color: var(--color-text-secondary); margin-bottom: 1.5rem;">
-                      ${article.excerpt || ''}
-                    </p>
-                    ${article.link ? `
-                    <a href="${article.link}" target="_blank" style="font-size: 0.875rem; font-weight: 600; color: var(--color-text); text-decoration: none; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 2px solid var(--color-text); padding-bottom: 2px; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'; this.style.borderColor='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'; this.style.borderColor='var(--color-text)'">
-                      Read More
-                    </a>
-                    ` : ''}
-                  </article>
-                `).join('');
-              } catch (e) {
-                return '<p style="text-align: center; color: var(--color-text-secondary); grid-column: 1/-1;">No articles to display</p>';
-              }
-            })()}
+            `).join('')}
           </div>
         </div>
       </section>
+      ` : ''}
 
-      ${data.books && data.books.trim() !== '[]' && data.books.trim() !== '' ? `
+      ${data.books && data.books.length > 0 ? `
       <!-- Books Section -->
-      <section style="padding: 6rem 0; background: var(--color-surface);">
-        <div class="container" style="max-width: 1200px;">
+      <section style="padding: 6rem 0; background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.02)' : isNeumorphism ? 'var(--color-surface)' : 'var(--color-surface)'};">
+        <div class="container" style="max-width: 1200px; margin: 0 auto; padding: 0 2rem;">
           <div style="text-align: center; margin-bottom: 5rem;">
-            <h2 style="font-family: serif; font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: 400; margin-bottom: 1.5rem;">
+            <h2 style="font-family: ${isElegant ? 'Playfair Display, serif' : isBrutalist ? 'inherit' : isRetro ? 'Space Mono, monospace' : 'serif'}; font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: ${isBrutalist ? '900' : isRetro ? '700' : '400'}; margin-bottom: 1.5rem; ${isBrutalist ? 'text-transform: uppercase;' : isRetro ? 'text-transform: uppercase;' : ''}">
               Books
             </h2>
-            <div style="width: 60px; height: 2px; background: var(--color-accent); margin: 0 auto;"></div>
+            <div style="width: ${isBrutalist ? '80px' : '60px'}; height: ${isBrutalist ? '6px' : '2px'}; background: var(--color-accent); margin: 0 auto; ${isBrutalist ? 'border: 2px solid var(--color-text);' : ''}"></div>
           </div>
           
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 4rem;">
-            ${(() => {
-              try {
-                const books = JSON.parse(data.books || '[]');
-                return books.map(book => `
-                  <div style="text-align: center;">
-                    <div style="width: 200px; height: 300px; background: linear-gradient(135deg, var(--color-text), var(--color-accent)); margin: 0 auto 2rem; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-lg); position: relative;">
-                      <div style="font-family: serif; font-size: 1.5rem; color: var(--color-bg); font-weight: 400; padding: 2rem; text-align: center; line-height: 1.3;">
-                        ${book.title}
-                      </div>
-                    </div>
-                    <h3 style="font-family: serif; font-size: 1.875rem; font-weight: 400; margin-bottom: 0.5rem;">
-                      ${book.title}
-                    </h3>
-                    ${book.year ? `
-                    <div style="font-size: 0.875rem; color: var(--color-text-secondary); margin-bottom: 1.5rem;">
-                      ${book.year}
-                    </div>
-                    ` : ''}
-                    <p style="font-size: 1rem; line-height: 1.7; color: var(--color-text-secondary); margin-bottom: 2rem;">
-                      ${book.description || ''}
-                    </p>
-                    ${book.link ? `
-                    <a href="${book.link}" target="_blank" style="display: inline-block; padding: 0.875rem 2rem; border: 2px solid var(--color-text); color: var(--color-text); text-decoration: none; font-weight: 600; font-size: 0.875rem; letter-spacing: 0.05em; text-transform: uppercase; transition: all 0.3s;" onmouseover="this.style.background='var(--color-text)'; this.style.color='var(--color-bg)'" onmouseout="this.style.background='transparent'; this.style.color='var(--color-text)'">
-                      Learn More
-                    </a>
-                    ` : ''}
+          <div class="books-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 4rem;">
+            ${data.books.map(book => `
+              <div style="text-align: center;">
+                <div style="width: 200px; height: 300px; background: ${isGradient ? 'linear-gradient(135deg, #667eea, #764ba2)' : isBrutalist ? 'var(--color-accent)' : isRetro ? 'linear-gradient(135deg, var(--color-accent), #b537f2)' : 'linear-gradient(135deg, var(--color-text), var(--color-accent))'}; margin: 0 auto 2rem; display: flex; align-items: center; justify-content: center; ${isBrutalist ? 'border: 4px solid var(--color-text); box-shadow: 8px 8px 0 var(--color-text);' : isNeumorphism ? 'box-shadow: 10px 10px 20px rgba(163, 177, 198, 0.6), -10px -10px 20px rgba(255, 255, 255, 0.9); border-radius: 8px;' : 'box-shadow: var(--shadow-lg);'} position: relative;">
+                  <div style="font-family: ${isElegant ? 'Playfair Display, serif' : isBrutalist ? 'inherit' : 'serif'}; font-size: ${isBrutalist ? '1.25rem' : '1.5rem'}; color: ${isBrutalist ? 'var(--color-text)' : 'var(--color-bg)'}; font-weight: ${isBrutalist ? '900' : '400'}; padding: 2rem; text-align: center; line-height: 1.3; ${isBrutalist ? 'text-transform: uppercase;' : ''}">
+                    ${book.title}
                   </div>
-                `).join('');
-              } catch (e) {
-                return '';
-              }
-            })()}
+                </div>
+                <h3 style="font-family: ${isElegant ? 'Playfair Display, serif' : isBrutalist ? 'inherit' : isRetro ? 'Space Mono, monospace' : 'serif'}; font-size: ${isBrutalist ? '1.5rem' : '1.875rem'}; font-weight: ${isBrutalist ? '900' : isRetro ? '700' : '400'}; margin-bottom: 0.5rem; ${isBrutalist ? 'text-transform: uppercase;' : ''}">
+                  ${book.title}
+                </h3>
+                ${book.year ? `
+                <div style="font-size: 0.875rem; color: var(--color-text-secondary); margin-bottom: 1.5rem;">
+                  ${book.year}
+                </div>
+                ` : ''}
+                <p style="font-family: ${isElegant ? 'Lato, sans-serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: 1rem; line-height: 1.7; color: var(--color-text-secondary); margin-bottom: 2rem; font-weight: ${isElegant ? '300' : 'normal'};">
+                  ${book.description || ''}
+                </p>
+                ${book.link ? `
+                <a href="${book.link}" target="_blank" style="display: inline-block; padding: ${isBrutalist ? '1rem 2.5rem' : '0.875rem 2rem'}; border: ${isBrutalist ? '4px' : '2px'} solid var(--color-text); color: var(--color-text); text-decoration: none; font-weight: ${isBrutalist ? '900' : '600'}; font-size: 0.875rem; letter-spacing: 0.05em; text-transform: uppercase; transition: all 0.3s; ${isBrutalist ? 'box-shadow: 4px 4px 0 var(--color-text);' : isNeumorphism ? 'box-shadow: 6px 6px 12px rgba(163, 177, 198, 0.6), -6px -6px 12px rgba(255, 255, 255, 0.9); border-radius: 8px;' : ''}" onmouseover="${isBrutalist ? `this.style.transform='translate(-4px, -4px)'; this.style.boxShadow='8px 8px 0 var(--color-text)'` : `this.style.background='var(--color-text)'; this.style.color='var(--color-bg)'`}" onmouseout="${isBrutalist ? `this.style.transform='translate(0, 0)'; this.style.boxShadow='4px 4px 0 var(--color-text)'` : `this.style.background='transparent'; this.style.color='var(--color-text)'`}">
+                  Learn More
+                </a>
+                ` : ''}
+              </div>
+            `).join('')}
           </div>
         </div>
       </section>
@@ -4502,24 +4699,24 @@ END:VCARD\`;
 
       <!-- About Section with Pull Quote Style -->
       <section style="padding: 8rem 0; background: var(--color-bg);">
-        <div class="container" style="max-width: 800px;">
-          <div style="border-left: 4px solid var(--color-accent); padding-left: 3rem; margin-bottom: 4rem;">
-            <p style="font-family: serif; font-size: 2rem; line-height: 1.5; font-style: italic; color: var(--color-text);">
+        <div class="container" style="max-width: 800px; margin: 0 auto; padding: 0 2rem;">
+          <div style="border-left: ${isBrutalist ? '8px' : '4px'} solid var(--color-accent); padding-left: ${isBrutalist ? '2rem' : '3rem'}; margin-bottom: 4rem;">
+            <p style="font-family: ${isElegant ? 'Playfair Display, serif' : isBrutalist ? 'inherit' : isRetro ? 'Space Mono, monospace' : 'serif'}; font-size: ${isBrutalist ? '1.75rem' : '2rem'}; line-height: 1.5; ${isElegant ? 'font-style: italic;' : ''} color: var(--color-text); font-weight: ${isBrutalist ? '700' : 'normal'};">
               "${data.bio || 'Passionate about telling stories and sharing ideas through writing.'}"
             </p>
           </div>
           
           ${data.specialties ? `
           <div style="margin-top: 4rem;">
-            <h3 style="font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 2rem; color: var(--color-text-secondary); font-weight: 700; text-align: center;">
+            <h3 style="font-size: ${isBrutalist ? '1rem' : '0.875rem'}; text-transform: uppercase; letter-spacing: ${isBrutalist ? '0.2em' : '0.15em'}; margin-bottom: 2rem; color: var(--color-text-secondary); font-weight: ${isBrutalist ? '900' : '700'}; text-align: center;">
               Areas of Expertise
             </h3>
             <div style="display: flex; flex-wrap: wrap; gap: 1.5rem; justify-content: center;">
               ${data.specialties.split(',').map(specialty => `
-                <div style="font-family: serif; font-size: 1.25rem; color: var(--color-text); font-style: italic;">
+                <div style="font-family: ${isElegant ? 'Playfair Display, serif' : isBrutalist ? 'inherit' : isRetro ? 'Space Mono, monospace' : 'serif'}; font-size: ${isBrutalist ? '1rem' : '1.25rem'}; color: var(--color-text); ${isElegant ? 'font-style: italic;' : ''} font-weight: ${isBrutalist ? '700' : 'normal'};">
                   ${specialty.trim()}
                 </div>
-              `).join('<div style="color: var(--color-text-secondary);">Ã‚Â·</div>')}
+              `).join('<div style="color: var(--color-text-secondary);">·</div>')}
             </div>
           </div>
           ` : ''}
@@ -4527,39 +4724,39 @@ END:VCARD\`;
       </section>
 
       <!-- Contact Section -->
-      <section style="padding: 6rem 0; background: var(--color-surface); text-align: center; border-top: 1px solid var(--color-border);">
-        <div class="container" style="max-width: 700px;">
-          <h2 style="font-family: serif; font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 400; margin-bottom: 2rem;">
+      <section style="padding: 6rem 0; background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.02)' : isNeumorphism ? 'var(--color-surface)' : 'var(--color-surface)'}; text-align: center; ${isBrutalist ? 'border-top: 4px solid var(--color-border);' : 'border-top: 1px solid var(--color-border);'}">
+        <div class="container" style="max-width: 700px; margin: 0 auto; padding: 0 2rem;">
+          <h2 style="font-family: ${isElegant ? 'Playfair Display, serif' : isBrutalist ? 'inherit' : isRetro ? 'Space Mono, monospace' : 'serif'}; font-size: clamp(2.5rem, 6vw, 4rem); font-weight: ${isBrutalist ? '900' : isRetro ? '700' : '400'}; margin-bottom: 2rem; ${isBrutalist ? 'text-transform: uppercase;' : isRetro ? 'text-transform: uppercase;' : ''}">
             Get in Touch
           </h2>
-          <div style="width: 60px; height: 2px; background: var(--color-accent); margin: 0 auto 3rem;"></div>
-          <p style="font-size: 1.125rem; color: var(--color-text-secondary); margin-bottom: 3rem; line-height: 1.7;">
+          <div style="width: ${isBrutalist ? '80px' : '60px'}; height: ${isBrutalist ? '6px' : '2px'}; background: var(--color-accent); margin: 0 auto 3rem; ${isBrutalist ? 'border: 2px solid var(--color-text);' : ''}"></div>
+          <p style="font-family: ${isElegant ? 'Lato, sans-serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: 1.125rem; color: var(--color-text-secondary); margin-bottom: 3rem; line-height: 1.7; font-weight: ${isElegant ? '300' : 'normal'};">
             Available for commissions, collaborations, and editorial projects
           </p>
           ${data.email ? `
-          <a href="mailto:${data.email}" style="display: inline-block; padding: 1.25rem 3rem; background: var(--color-text); color: var(--color-bg); text-decoration: none; font-weight: 600; font-size: 1rem; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 3rem; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+          <a href="mailto:${data.email}" style="display: inline-block; padding: ${isBrutalist ? '1.5rem 3.5rem' : '1.25rem 3rem'}; background: ${isBrutalist ? 'var(--color-accent)' : isGradient ? 'linear-gradient(135deg, #667eea, #764ba2)' : isRetro ? 'linear-gradient(90deg, var(--color-accent), #b537f2)' : 'var(--color-text)'}; color: ${isBrutalist ? 'var(--color-text)' : 'var(--color-bg)'}; text-decoration: none; font-weight: ${isBrutalist ? '900' : '600'}; font-size: 1rem; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 3rem; transition: ${isBrutalist ? 'all 0.2s' : 'transform 0.2s'}; ${isBrutalist ? 'border: 4px solid var(--color-text); box-shadow: 6px 6px 0 var(--color-text);' : isNeumorphism ? 'box-shadow: 10px 10px 20px rgba(163, 177, 198, 0.6), -10px -10px 20px rgba(255, 255, 255, 0.9); border-radius: 8px;' : ''}" onmouseover="${isBrutalist ? `this.style.transform='translate(-4px, -4px)'; this.style.boxShadow='10px 10px 0 var(--color-text)'` : `this.style.transform='translateY(-2px)'`}" onmouseout="${isBrutalist ? `this.style.transform='translate(0, 0)'; this.style.boxShadow='6px 6px 0 var(--color-text)'` : `this.style.transform='translateY(0)'`}">
             ${data.email}
           </a>
           ` : ''}
           
           <div style="display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap; margin-top: 3rem; padding-top: 3rem; border-top: 1px solid var(--color-border);">
             ${data.twitter ? `
-            <a href="https://twitter.com/${data.twitter.replace('@', '')}" target="_blank" style="color: var(--color-text); text-decoration: none; font-weight: 600; font-size: 0.9375rem; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">
+            <a href="https://twitter.com/${data.twitter.replace('@', '')}" target="_blank" style="color: var(--color-text); text-decoration: none; font-weight: ${isBrutalist ? '900' : '600'}; font-size: 0.9375rem; transition: color 0.2s; ${isBrutalist ? 'text-transform: uppercase;' : ''}" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">
               Twitter
             </a>
             ` : ''}
             ${data.medium ? `
-            <a href="${data.medium}" target="_blank" style="color: var(--color-text); text-decoration: none; font-weight: 600; font-size: 0.9375rem; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">
+            <a href="${data.medium}" target="_blank" style="color: var(--color-text); text-decoration: none; font-weight: ${isBrutalist ? '900' : '600'}; font-size: 0.9375rem; transition: color 0.2s; ${isBrutalist ? 'text-transform: uppercase;' : ''}" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">
               Medium
             </a>
             ` : ''}
             ${data.linkedin ? `
-            <a href="${data.linkedin}" target="_blank" style="color: var(--color-text); text-decoration: none; font-weight: 600; font-size: 0.9375rem; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">
+            <a href="${data.linkedin}" target="_blank" style="color: var(--color-text); text-decoration: none; font-weight: ${isBrutalist ? '900' : '600'}; font-size: 0.9375rem; transition: color 0.2s; ${isBrutalist ? 'text-transform: uppercase;' : ''}" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">
               LinkedIn
             </a>
             ` : ''}
             ${data.website ? `
-            <a href="${data.website}" target="_blank" style="color: var(--color-text); text-decoration: none; font-weight: 600; font-size: 0.9375rem; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">
+            <a href="${data.website}" target="_blank" style="color: var(--color-text); text-decoration: none; font-weight: ${isBrutalist ? '900' : '600'}; font-size: 0.9375rem; transition: color 0.2s; ${isBrutalist ? 'text-transform: uppercase;' : ''}" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">
               Website
             </a>
             ` : ''}
@@ -4568,394 +4765,184 @@ END:VCARD\`;
       </section>
 
       <!-- Footer -->
-      <footer style="padding: 3rem 0; background: var(--color-bg); text-align: center; color: var(--color-text-secondary); font-size: 0.875rem; border-top: 1px solid var(--color-border);">
+      <footer style="padding: 3rem 0; background: var(--color-bg); text-align: center; color: var(--color-text-secondary); font-size: 0.875rem; ${isBrutalist ? 'border-top: 4px solid var(--color-border);' : 'border-top: 1px solid var(--color-border);'}">
         <div class="container">
-          <p style="font-family: serif; font-style: italic;">Ã‚Â© 2024 ${data.writerName || 'Writer'}. All rights reserved.</p>
+          <p style="font-family: ${isElegant ? 'Playfair Display, serif' : isBrutalist ? 'inherit' : 'serif'}; ${isElegant ? 'font-style: italic;' : ''} font-weight: ${isBrutalist ? '700' : 'normal'};">© 2024 ${data.writerName || 'Writer'}. All rights reserved.</p>
         </div>
       </footer>
 
       <style>
         @media (max-width: 768px) {
-          section > div > div[style*="grid-template-columns: repeat(2, 1fr)"] {
+          .articles-grid {
             grid-template-columns: 1fr !important;
+            gap: 3rem !important;
+          }
+          .books-grid {
+            grid-template-columns: 1fr !important;
+          }
+          section[style*="padding: 8rem"] {
+            padding: 5rem 0 !important;
+          }
+          section[style*="padding: 6rem"] {
+            padding: 4rem 0 !important;
+          }
+        }
+        
+        @media (max-width: 480px) {
+          .container {
+            padding: 0 1rem !important;
           }
         }
       </style>
     `
-  }),
-  // 'writer-portfolio': new Template('writer-portfolio', {
-  //   name: 'Writer Portfolio',
-  //   description: 'Perfect for authors, journalists, and content creators',
-  //   category: 'portfolio',
-  //   defaultTheme: 'elegant',
-  //   fields: [
-  //     { name: 'writerName', label: 'Your Name', type: 'text', required: true },
-  //     { name: 'tagline', label: 'Tagline', type: 'text', placeholder: 'Freelance Writer, Author, Journalist, etc.', required: true },
-  //     { name: 'bio', label: 'Bio', type: 'textarea', required: true },
-  //     { name: 'email', label: 'Email', type: 'email', required: true },
-  //     { name: 'website', label: 'Personal Website', type: 'url', required: false },
-  //     { name: 'twitter', label: 'Twitter/X Handle', type: 'text', placeholder: '@username', required: false },
-  //     { name: 'medium', label: 'Medium URL', type: 'url', required: false },
-  //     { name: 'linkedin', label: 'LinkedIn URL', type: 'url', required: false },
-  //     { name: 'articles', label: 'Published Work (JSON format)', type: 'textarea', placeholder: '[{"title": "Article Title", "publication": "Publication Name", "date": "2024", "excerpt": "Brief excerpt...", "link": "https://..."}]', required: true },
-  //     { name: 'specialties', label: 'Writing Specialties (comma separated)', type: 'text', placeholder: 'Technology, Culture, Business, Travel', required: true },
-  //     { name: 'publications', label: 'Notable Publications (comma separated)', type: 'text', placeholder: 'The New York Times, Wired, Medium', required: false },
-  //     { name: 'books', label: 'Books (JSON format)', type: 'textarea', placeholder: '[{"title": "Book Title", "year": "2024", "description": "Brief description", "link": "https://..."}]', required: false }
-  //   ],
-  //   structure: (data, theme) => `
-  //     <!-- Minimal Header -->
-  //     <header style="padding: 2rem 0; background: var(--color-bg); border-bottom: 1px solid var(--color-border);">
-  //       <div class="container" style="max-width: 1200px;">
-  //         <div style="display: flex; justify-content: space-between; align-items: center;">
-  //           <div style="font-family: serif; font-size: 1.75rem; font-weight: 400; font-style: italic;">
-  //             ${data.writerName || 'Writer Name'}
-  //           </div>
-  //           <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle theme">
-  //             <span class="theme-icon">Ã°Å¸Å’â„¢</span>
-  //           </button>
-  //         </div>
-  //       </div>
-  //     </header>
+  }
+}),
+'wedding': new Template('wedding', {
+  name: 'Wedding',
+  description: 'Elegant wedding invitation and details',
+  category: 'event',
+  defaultTheme: 'elegant',
+  fields: {
+    coupleName: { type: 'text', default: 'Sarah & Michael', label: 'Couple Names', required: true },
+    weddingDate: { type: 'text', default: 'June 15, 2025', label: 'Wedding Date', required: true },
+    ceremony: { 
+      type: 'textarea',
+      default: '4:00 PM\nGarden Terrace\n123 Elm Street, Beverly Hills',
+      label: 'Ceremony Details',
+      required: true 
+    },
+    reception: { 
+      type: 'textarea',
+      default: '6:00 PM\nGrand Ballroom\nThe Plaza Hotel',
+      label: 'Reception Details',
+      required: true 
+    },
+    story: { 
+      type: 'textarea',
+      default: '',
+      label: 'Your Story',
+      required: false 
+    },
+    rsvpLink: { type: 'url', default: '', label: 'RSVP Link', required: false },
+    registryLink: { type: 'url', default: '', label: 'Registry Link', required: false },
+    hotelInfo: { 
+      type: 'textarea',
+      default: '',
+      label: 'Hotel Information',
+      required: false 
+    },
+    dressCode: { type: 'text', default: 'Formal Attire', label: 'Dress Code', required: false },
+    schedule: {
+      type: 'group',
+      label: 'Schedule',
+      itemLabel: 'Event',
+      min: 0,
+      max: 10,
+      fields: {
+        time: { type: 'text', label: 'Time', default: '' },
+        event: { type: 'text', label: 'Event Name', default: '' },
+        location: { type: 'text', label: 'Location', default: '' }
+      },
+      default: [
+        { time: '4:00 PM', event: 'Ceremony', location: 'Garden Terrace' },
+        { time: '5:00 PM', event: 'Cocktail Hour', location: 'Courtyard' },
+        { time: '6:00 PM', event: 'Reception', location: 'Grand Ballroom' },
+        { time: '7:00 PM', event: 'Dinner', location: 'Grand Ballroom' },
+        { time: '9:00 PM', event: 'Dancing', location: 'Grand Ballroom' }
+      ]
+    }
+  },
+  structure: (data, theme) => {
+    const isBrutalist = theme.id === 'brutalist';
+    const isMinimal = theme.id === 'minimal';
+    const isGradient = theme.id === 'gradient';
+    const isElegant = theme.id === 'elegant';
+    const isRetro = theme.id === 'retro';
+    const isGlassmorphism = theme.id === 'glassmorphism';
+    const isNeumorphism = theme.id === 'neumorphism';
 
-  //     <!-- Hero Masthead -->
-  //     <section style="padding: 8rem 0 6rem; background: var(--color-bg); text-align: center;">
-  //       <div class="container" style="max-width: 900px;">
-  //         <div style="font-size: 1rem; text-transform: uppercase; letter-spacing: 0.2em; margin-bottom: 2rem; color: var(--color-text-secondary); font-weight: 600;">
-  //           ${data.tagline || 'Writer & Storyteller'}
-  //         </div>
-  //         <h1 style="font-family: serif; font-size: clamp(4rem, 10vw, 7rem); font-weight: 400; margin-bottom: 3rem; line-height: 1.1;">
-  //           ${data.writerName || 'Your Name'}
-  //         </h1>
-  //         <div style="max-width: 2px; height: 60px; background: var(--color-accent); margin: 0 auto 3rem;"></div>
-  //         <p style="font-size: 1.375rem; line-height: 1.8; color: var(--color-text-secondary); max-width: 700px; margin: 0 auto; font-weight: 400;">
-  //           ${data.bio || 'Crafting stories and sharing insights through the written word'}
-  //         </p>
-  //       </div>
-  //     </section>
-
-  //     ${data.publications ? `
-  //     <!-- Publications Ribbon -->
-  //     <section style="background: var(--color-text); color: var(--color-bg); padding: 1.5rem 0; text-align: center; border-top: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border);">
-  //       <div class="container">
-  //         <div style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 0.75rem; opacity: 0.7; font-weight: 600;">
-  //           Featured In
-  //         </div>
-  //         <div style="font-family: serif; font-size: 1rem; font-style: italic; opacity: 0.95;">
-  //           ${data.publications.split(',').map(pub => pub.trim()).join(' Ã‚Â· ')}
-  //         </div>
-  //       </div>
-  //     </section>
-  //     ` : ''}
-
-  //     <!-- Featured Article (First Article Large) -->
-  //     ${(() => {
-  //       try {
-  //         const articles = JSON.parse(data.articles || '[]');
-  //         const featured = articles[0];
-  //         if (!featured) return '';
-          
-  //         return `
-  //         <section style="padding: 6rem 0; background: var(--color-surface);">
-  //           <div class="container" style="max-width: 1000px;">
-  //             <div style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.15em; color: var(--color-accent); margin-bottom: 1rem; font-weight: 700;">
-  //               Featured Story
-  //             </div>
-  //             <article>
-  //               <h2 style="font-family: serif; font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 400; line-height: 1.2; margin-bottom: 2rem;">
-  //                 ${featured.link ? `<a href="${featured.link}" target="_blank" style="color: var(--color-text); text-decoration: none; transition: color 0.3s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">${featured.title}</a>` : featured.title}
-  //               </h2>
-  //               <div style="display: flex; gap: 2rem; align-items: center; margin-bottom: 2.5rem; font-size: 0.9375rem; color: var(--color-text-secondary);">
-  //                 <span style="font-weight: 600; color: var(--color-accent);">${featured.publication || 'Publication'}</span>
-  //                 ${featured.date ? `<span>${featured.date}</span>` : ''}
-  //               </div>
-  //               <p style="font-size: 1.375rem; line-height: 1.9; color: var(--color-text); margin-bottom: 2.5rem; font-weight: 400;">
-  //                 ${featured.excerpt || ''}
-  //               </p>
-  //               ${featured.link ? `
-  //               <a href="${featured.link}" target="_blank" style="display: inline-block; padding: 1rem 2.5rem; border: 2px solid var(--color-text); color: var(--color-text); text-decoration: none; font-weight: 600; font-size: 0.9375rem; letter-spacing: 0.05em; text-transform: uppercase; transition: all 0.3s;" onmouseover="this.style.background='var(--color-text)'; this.style.color='var(--color-bg)'" onmouseout="this.style.background='transparent'; this.style.color='var(--color-text)'">
-  //                 Read Full Article Ã¢â€ â€™
-  //               </a>
-  //               ` : ''}
-  //             </article>
-  //           </div>
-  //         </section>
-  //         `;
-  //       } catch (e) {
-  //         return '';
-  //       }
-  //     })()}
-
-  //     <!-- Recent Articles Grid -->
-  //     <section style="padding: 6rem 0; background: var(--color-bg);">
-  //       <div class="container" style="max-width: 1200px;">
-  //         <div style="text-align: center; margin-bottom: 5rem;">
-  //           <h2 style="font-family: serif; font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: 400; margin-bottom: 1.5rem;">
-  //             Recent Work
-  //           </h2>
-  //           <div style="width: 60px; height: 2px; background: var(--color-accent); margin: 0 auto;"></div>
-  //         </div>
-          
-  //         <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 4rem;">
-  //           ${(() => {
-  //             try {
-  //               const articles = JSON.parse(data.articles || '[]');
-  //               return articles.slice(1).map(article => `
-  //                 <article style="padding-bottom: 3rem; border-bottom: 1px solid var(--color-border);">
-  //                   <div style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--color-accent); margin-bottom: 1rem; font-weight: 700;">
-  //                     ${article.publication || 'Publication'}
-  //                   </div>
-  //                   <h3 style="font-family: serif; font-size: 1.875rem; font-weight: 400; line-height: 1.3; margin-bottom: 1rem;">
-  //                     ${article.link ? `<a href="${article.link}" target="_blank" style="color: var(--color-text); text-decoration: none; transition: color 0.3s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">${article.title}</a>` : article.title}
-  //                   </h3>
-  //                   ${article.date ? `
-  //                   <div style="font-size: 0.875rem; color: var(--color-text-secondary); margin-bottom: 1rem;">
-  //                     ${article.date}
-  //                   </div>
-  //                   ` : ''}
-  //                   <p style="font-size: 1.0625rem; line-height: 1.75; color: var(--color-text-secondary); margin-bottom: 1.5rem;">
-  //                     ${article.excerpt || ''}
-  //                   </p>
-  //                   ${article.link ? `
-  //                   <a href="${article.link}" target="_blank" style="font-size: 0.875rem; font-weight: 600; color: var(--color-text); text-decoration: none; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 2px solid var(--color-text); padding-bottom: 2px; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'; this.style.borderColor='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'; this.style.borderColor='var(--color-text)'">
-  //                     Read More
-  //                   </a>
-  //                   ` : ''}
-  //                 </article>
-  //               `).join('');
-  //             } catch (e) {
-  //               return '<p style="text-align: center; color: var(--color-text-secondary); grid-column: 1/-1;">No articles to display</p>';
-  //             }
-  //           })()}
-  //         </div>
-  //       </div>
-  //     </section>
-
-  //     ${data.books && data.books.trim() !== '[]' && data.books.trim() !== '' ? `
-  //     <!-- Books Section -->
-  //     <section style="padding: 6rem 0; background: var(--color-surface);">
-  //       <div class="container" style="max-width: 1200px;">
-  //         <div style="text-align: center; margin-bottom: 5rem;">
-  //           <h2 style="font-family: serif; font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: 400; margin-bottom: 1.5rem;">
-  //             Books
-  //           </h2>
-  //           <div style="width: 60px; height: 2px; background: var(--color-accent); margin: 0 auto;"></div>
-  //         </div>
-          
-  //         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 4rem;">
-  //           ${(() => {
-  //             try {
-  //               const books = JSON.parse(data.books || '[]');
-  //               return books.map(book => `
-  //                 <div style="text-align: center;">
-  //                   <div style="width: 200px; height: 300px; background: linear-gradient(135deg, var(--color-text), var(--color-accent)); margin: 0 auto 2rem; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-lg); position: relative;">
-  //                     <div style="font-family: serif; font-size: 1.5rem; color: var(--color-bg); font-weight: 400; padding: 2rem; text-align: center; line-height: 1.3;">
-  //                       ${book.title}
-  //                     </div>
-  //                   </div>
-  //                   <h3 style="font-family: serif; font-size: 1.875rem; font-weight: 400; margin-bottom: 0.5rem;">
-  //                     ${book.title}
-  //                   </h3>
-  //                   ${book.year ? `
-  //                   <div style="font-size: 0.875rem; color: var(--color-text-secondary); margin-bottom: 1.5rem;">
-  //                     ${book.year}
-  //                   </div>
-  //                   ` : ''}
-  //                   <p style="font-size: 1rem; line-height: 1.7; color: var(--color-text-secondary); margin-bottom: 2rem;">
-  //                     ${book.description || ''}
-  //                   </p>
-  //                   ${book.link ? `
-  //                   <a href="${book.link}" target="_blank" style="display: inline-block; padding: 0.875rem 2rem; border: 2px solid var(--color-text); color: var(--color-text); text-decoration: none; font-weight: 600; font-size: 0.875rem; letter-spacing: 0.05em; text-transform: uppercase; transition: all 0.3s;" onmouseover="this.style.background='var(--color-text)'; this.style.color='var(--color-bg)'" onmouseout="this.style.background='transparent'; this.style.color='var(--color-text)'">
-  //                     Learn More
-  //                   </a>
-  //                   ` : ''}
-  //                 </div>
-  //               `).join('');
-  //             } catch (e) {
-  //               return '';
-  //             }
-  //           })()}
-  //         </div>
-  //       </div>
-  //     </section>
-  //     ` : ''}
-
-  //     <!-- About Section with Pull Quote Style -->
-  //     <section style="padding: 8rem 0; background: var(--color-bg);">
-  //       <div class="container" style="max-width: 800px;">
-  //         <div style="border-left: 4px solid var(--color-accent); padding-left: 3rem; margin-bottom: 4rem;">
-  //           <p style="font-family: serif; font-size: 2rem; line-height: 1.5; font-style: italic; color: var(--color-text);">
-  //             "${data.bio || 'Passionate about telling stories and sharing ideas through writing.'}"
-  //           </p>
-  //         </div>
-          
-  //         ${data.specialties ? `
-  //         <div style="margin-top: 4rem;">
-  //           <h3 style="font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 2rem; color: var(--color-text-secondary); font-weight: 700; text-align: center;">
-  //             Areas of Expertise
-  //           </h3>
-  //           <div style="display: flex; flex-wrap: wrap; gap: 1.5rem; justify-content: center;">
-  //             ${data.specialties.split(',').map(specialty => `
-  //               <div style="font-family: serif; font-size: 1.25rem; color: var(--color-text); font-style: italic;">
-  //                 ${specialty.trim()}
-  //               </div>
-  //             `).join('<div style="color: var(--color-text-secondary);">Ã‚Â·</div>')}
-  //           </div>
-  //         </div>
-  //         ` : ''}
-  //       </div>
-  //     </section>
-
-  //     <!-- Contact Section -->
-  //     <section style="padding: 6rem 0; background: var(--color-surface); text-align: center; border-top: 1px solid var(--color-border);">
-  //       <div class="container" style="max-width: 700px;">
-  //         <h2 style="font-family: serif; font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 400; margin-bottom: 2rem;">
-  //           Get in Touch
-  //         </h2>
-  //         <div style="width: 60px; height: 2px; background: var(--color-accent); margin: 0 auto 3rem;"></div>
-  //         <p style="font-size: 1.125rem; color: var(--color-text-secondary); margin-bottom: 3rem; line-height: 1.7;">
-  //           Available for commissions, collaborations, and editorial projects
-  //         </p>
-  //         ${data.email ? `
-  //         <a href="mailto:${data.email}" style="display: inline-block; padding: 1.25rem 3rem; background: var(--color-text); color: var(--color-bg); text-decoration: none; font-weight: 600; font-size: 1rem; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 3rem; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
-  //           ${data.email}
-  //         </a>
-  //         ` : ''}
-          
-  //         <div style="display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap; margin-top: 3rem; padding-top: 3rem; border-top: 1px solid var(--color-border);">
-  //           ${data.twitter ? `
-  //           <a href="https://twitter.com/${data.twitter.replace('@', '')}" target="_blank" style="color: var(--color-text); text-decoration: none; font-weight: 600; font-size: 0.9375rem; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">
-  //             Twitter
-  //           </a>
-  //           ` : ''}
-  //           ${data.medium ? `
-  //           <a href="${data.medium}" target="_blank" style="color: var(--color-text); text-decoration: none; font-weight: 600; font-size: 0.9375rem; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">
-  //             Medium
-  //           </a>
-  //           ` : ''}
-  //           ${data.linkedin ? `
-  //           <a href="${data.linkedin}" target="_blank" style="color: var(--color-text); text-decoration: none; font-weight: 600; font-size: 0.9375rem; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">
-  //             LinkedIn
-  //           </a>
-  //           ` : ''}
-  //           ${data.website ? `
-  //           <a href="${data.website}" target="_blank" style="color: var(--color-text); text-decoration: none; font-weight: 600; font-size: 0.9375rem; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">
-  //             Website
-  //           </a>
-  //           ` : ''}
-  //         </div>
-  //       </div>
-  //     </section>
-
-  //     <!-- Footer -->
-  //     <footer style="padding: 3rem 0; background: var(--color-bg); text-align: center; color: var(--color-text-secondary); font-size: 0.875rem; border-top: 1px solid var(--color-border);">
-  //       <div class="container">
-  //         <p style="font-family: serif; font-style: italic;">Ã‚Â© 2024 ${data.writerName || 'Writer'}. All rights reserved.</p>
-  //       </div>
-  //     </footer>
-
-  //     <style>
-  //       @media (max-width: 768px) {
-  //         section > div > div[style*="grid-template-columns: repeat(2, 1fr)"] {
-  //           grid-template-columns: 1fr !important;
-  //         }
-  //       }
-  //     </style>
-  //   `
-  // }),
-
-  'wedding': new Template('wedding', {
-    name: 'Wedding',
-    description: 'Elegant wedding invitation and details',
-    category: 'event',
-    defaultTheme: 'elegant',
-    fields: [
-      { name: 'coupleName', label: 'Couple Names', type: 'text', placeholder: 'Sarah & Michael', required: true },
-      { name: 'weddingDate', label: 'Wedding Date', type: 'text', placeholder: 'June 15, 2025', required: true },
-      { name: 'ceremony', label: 'Ceremony Details', type: 'textarea', placeholder: 'Time and location', required: true },
-      { name: 'reception', label: 'Reception Details', type: 'textarea', placeholder: 'Time and location', required: true },
-      { name: 'story', label: 'Your Story', type: 'textarea', required: false },
-      { name: 'rsvpLink', label: 'RSVP Link', type: 'url', required: false },
-      { name: 'registryLink', label: 'Registry Link', type: 'url', required: false },
-      { name: 'hotelInfo', label: 'Hotel Information', type: 'textarea', required: false },
-      { name: 'dressCode', label: 'Dress Code', type: 'text', placeholder: 'Formal Attire', required: false },
-      { name: 'schedule', label: 'Schedule (JSON format)', type: 'textarea', placeholder: '[{"time": "4:00 PM", "event": "Ceremony", "location": "Garden Terrace"}]', required: false }
-    ],
-    structure: (data, theme) => `
+    return `
       <!-- Decorative Header -->
-      <div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, var(--color-border), transparent);"></div>
+      ${!isBrutalist ? `<div style="position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, var(--color-border), transparent);"></div>` : ''}
       
-      <header style="padding: 2rem 0; background: var(--color-bg); text-align: center;">
+      <header style="padding: 2rem 0; background: var(--color-bg); text-align: center; ${isBrutalist ? 'border-bottom: 4px solid var(--color-text);' : ''}">
         <div class="container">
-          <div style="font-family: serif; font-size: 1rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--color-text-secondary);">
-            Wedding Celebration
+          <div style="display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto; padding: 0 2rem;">
+            <div style="font-family: ${isElegant ? 'Playfair Display, serif' : isBrutalist ? 'inherit' : isRetro ? 'Space Mono, monospace' : 'serif'}; font-size: ${isBrutalist ? '1.25rem' : '1rem'}; letter-spacing: ${isBrutalist ? '0.15em' : '0.3em'}; text-transform: uppercase; color: ${isBrutalist ? 'var(--color-accent)' : 'var(--color-text-secondary)'}; font-weight: ${isBrutalist ? '900' : 'normal'};">
+              Wedding Celebration
+            </div>
+            <label class="theme-toggle-switch-wrapper" style="cursor: pointer; ${isNeumorphism ? 'padding: 0.5rem; border-radius: 12px; display: inline-block; box-shadow: 6px 6px 12px rgba(163, 177, 198, 0.6), -6px -6px 12px rgba(255, 255, 255, 0.9);' : ''}">
+              <input type="checkbox" class="theme-toggle-switch" onclick="toggleTheme()" aria-label="Toggle theme">
+              <span class="theme-toggle-slider"></span>
+            </label>
           </div>
         </div>
       </header>
 
       <!-- Hero Invitation -->
-      <section style="padding: 8rem 0; background: var(--color-bg); text-align: center; position: relative;">
-        <div class="container" style="max-width: 800px;">
+      <section style="padding: ${isBrutalist ? '6rem 0' : '8rem 0'}; background: ${isGradient ? 'linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%)' : 'var(--color-bg)'}; text-align: center; position: relative;">
+        <div class="container" style="max-width: 800px; margin: 0 auto; padding: 0 2rem;">
           <!-- Decorative flourish -->
-          <div style="font-size: 3rem; color: var(--color-accent); margin-bottom: 2rem; opacity: 0.6;">Ã¢ÂÂ¦</div>
+          ${!isBrutalist && !isRetro ? `<div style="font-size: 3rem; color: var(--color-accent); margin-bottom: 2rem; opacity: 0.6;">❦</div>` : ''}
           
-          <div style="font-family: serif; font-size: 1rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--color-text-secondary); margin-bottom: 2rem;">
+          <div style="font-family: ${isElegant ? 'Lato, sans-serif' : isBrutalist ? 'inherit' : isRetro ? 'Space Mono, monospace' : 'serif'}; font-size: ${isBrutalist ? '0.875rem' : '1rem'}; letter-spacing: ${isBrutalist ? '0.15em' : '0.2em'}; text-transform: uppercase; color: var(--color-text-secondary); margin-bottom: 2rem; font-weight: ${isBrutalist ? '900' : 'normal'};">
             Together with their families
           </div>
           
-          <h1 style="font-family: serif; font-size: clamp(3.5rem, 9vw, 6rem); font-weight: 400; margin-bottom: 2rem; line-height: 1.2; font-style: italic;">
+          <h1 style="font-family: ${isElegant ? 'Playfair Display, serif' : isBrutalist ? 'inherit' : isRetro ? 'Space Mono, monospace' : 'serif'}; font-size: clamp(${isBrutalist ? '2.5rem' : '3.5rem'}, 9vw, ${isBrutalist ? '5rem' : '6rem'}); font-weight: ${isBrutalist ? '900' : isRetro ? '700' : '400'}; margin-bottom: 2rem; line-height: 1.2; ${isElegant ? 'font-style: italic;' : ''} ${isBrutalist ? 'text-transform: uppercase; letter-spacing: -0.02em;' : isRetro ? 'text-transform: uppercase;' : ''}">
             ${data.coupleName || 'Sarah & Michael'}
           </h1>
           
-          <div style="width: 80px; height: 1px; background: var(--color-accent); margin: 3rem auto;"></div>
+          <div style="width: ${isBrutalist ? '120px' : '80px'}; height: ${isBrutalist ? '6px' : '1px'}; background: var(--color-accent); margin: 3rem auto; ${isBrutalist ? 'border: 2px solid var(--color-text);' : ''}"></div>
           
-          <div style="font-family: serif; font-size: 1rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--color-text-secondary); margin-bottom: 1rem;">
+          <div style="font-family: ${isElegant ? 'Lato, sans-serif' : isBrutalist ? 'inherit' : isRetro ? 'Space Mono, monospace' : 'serif'}; font-size: ${isBrutalist ? '0.875rem' : '1rem'}; letter-spacing: ${isBrutalist ? '0.1em' : '0.15em'}; text-transform: uppercase; color: var(--color-text-secondary); margin-bottom: 1rem; font-weight: ${isBrutalist ? '900' : 'normal'};">
             Request the honor of your presence
           </div>
           
-          <div style="font-family: serif; font-size: 2.5rem; font-weight: 400; color: var(--color-accent); margin-bottom: 3rem;">
+          <div style="font-family: ${isElegant ? 'Playfair Display, serif' : isBrutalist ? 'inherit' : isRetro ? 'Space Mono, monospace' : 'serif'}; font-size: ${isBrutalist ? '2rem' : '2.5rem'}; font-weight: ${isBrutalist ? '900' : '400'}; color: var(--color-accent); margin-bottom: 3rem; ${isBrutalist ? 'text-transform: uppercase;' : ''}">
             ${data.weddingDate || 'June 15, 2025'}
           </div>
           
           ${data.rsvpLink ? `
-          <a href="${data.rsvpLink}" target="_blank" style="display: inline-block; padding: 1.25rem 3.5rem; border: 2px solid var(--color-accent); color: var(--color-accent); text-decoration: none; font-family: serif; font-size: 1rem; letter-spacing: 0.15em; text-transform: uppercase; transition: all 0.3s; margin-top: 1rem;" onmouseover="this.style.background='var(--color-accent)'; this.style.color='var(--color-bg)'" onmouseout="this.style.background='transparent'; this.style.color='var(--color-accent)'">
+          <a href="${data.rsvpLink}" target="_blank" style="display: inline-block; padding: ${isBrutalist ? '1.5rem 4rem' : '1.25rem 3.5rem'}; border: ${isBrutalist ? '4px' : '2px'} solid var(--color-accent); color: var(--color-accent); text-decoration: none; font-family: ${isElegant ? 'Lato, sans-serif' : isBrutalist ? 'inherit' : isRetro ? 'Space Mono, monospace' : 'serif'}; font-size: ${isBrutalist ? '1.125rem' : '1rem'}; letter-spacing: ${isBrutalist ? '0.1em' : '0.15em'}; text-transform: uppercase; transition: all 0.3s; margin-top: 1rem; font-weight: ${isBrutalist ? '900' : 'normal'}; ${isBrutalist ? 'box-shadow: 6px 6px 0 var(--color-accent);' : isNeumorphism ? 'box-shadow: 6px 6px 12px rgba(163, 177, 198, 0.6), -6px -6px 12px rgba(255, 255, 255, 0.9); border-radius: 8px;' : isGlassmorphism ? 'backdrop-filter: blur(10px); border-radius: 8px;' : ''}" onmouseover="${isBrutalist ? `this.style.transform='translate(-4px, -4px)'; this.style.boxShadow='10px 10px 0 var(--color-accent)'` : `this.style.background='var(--color-accent)'; this.style.color='var(--color-bg)'`}" onmouseout="${isBrutalist ? `this.style.transform='translate(0, 0)'; this.style.boxShadow='6px 6px 0 var(--color-accent)'` : `this.style.background='transparent'; this.style.color='var(--color-accent)'`}">
             RSVP
           </a>
           ` : ''}
           
-          <div style="font-size: 2rem; color: var(--color-accent); margin-top: 3rem; opacity: 0.6;">Ã¢ÂÂ¦</div>
+          ${!isBrutalist && !isRetro ? `<div style="font-size: 2rem; color: var(--color-accent); margin-top: 3rem; opacity: 0.6;">❦</div>` : ''}
         </div>
       </section>
 
       <!-- Event Details -->
-      <section style="padding: 6rem 0; background: var(--color-surface);">
-        <div class="container" style="max-width: 1000px;">
+      <section style="padding: 6rem 0; background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.02)' : isNeumorphism ? 'var(--color-surface)' : 'var(--color-surface)'};">
+        <div class="container" style="max-width: 1000px; margin: 0 auto; padding: 0 2rem;">
           <div style="text-align: center; margin-bottom: 5rem;">
-            <div style="font-size: 2rem; color: var(--color-accent); margin-bottom: 1rem; opacity: 0.6;">Ã¢Å“Â¦</div>
-            <h2 style="font-family: serif; font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: 400; margin-bottom: 1rem;">
+            ${!isBrutalist && !isRetro ? `<div style="font-size: 2rem; color: var(--color-accent); margin-bottom: 1rem; opacity: 0.6;">✦</div>` : ''}
+            <h2 style="font-family: ${isElegant ? 'Playfair Display, serif' : isBrutalist ? 'inherit' : isRetro ? 'Space Mono, monospace' : 'serif'}; font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: ${isBrutalist ? '900' : isRetro ? '700' : '400'}; margin-bottom: 1rem; ${isBrutalist ? 'text-transform: uppercase;' : isRetro ? 'text-transform: uppercase;' : ''}">
               Celebration Details
             </h2>
-            <div style="width: 60px; height: 1px; background: var(--color-accent); margin: 0 auto;"></div>
+            <div style="width: ${isBrutalist ? '80px' : '60px'}; height: ${isBrutalist ? '6px' : '1px'}; background: var(--color-accent); margin: 0 auto; ${isBrutalist ? 'border: 2px solid var(--color-text);' : ''}"></div>
           </div>
           
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 4rem;">
+          <div class="event-details-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 4rem;">
             <!-- Ceremony -->
-            <div style="text-align: center; padding: 3rem; background: var(--color-bg); border: 1px solid var(--color-border);">
-              <div style="font-size: 2rem; color: var(--color-accent); margin-bottom: 1.5rem;">Ã°Å¸â€™â€™</div>
-              <h3 style="font-family: serif; font-size: 1.75rem; font-weight: 400; margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: 0.1em; font-size: 1.125rem; color: var(--color-text-secondary);">
+            <div style="text-align: center; padding: 3rem; background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.05)' : 'var(--color-bg)'}; ${isBrutalist ? 'border: 4px solid var(--color-text); box-shadow: 8px 8px 0 var(--color-text);' : isNeumorphism ? 'box-shadow: 10px 10px 20px rgba(163, 177, 198, 0.6), -10px -10px 20px rgba(255, 255, 255, 0.9); border-radius: 20px;' : isGlassmorphism ? 'backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px;' : 'border: 1px solid var(--color-border);'}">
+              ${!isBrutalist ? `<div style="font-size: 2rem; color: var(--color-accent); margin-bottom: 1.5rem;">💍</div>` : ''}
+              <h3 style="font-family: ${isElegant ? 'Playfair Display, serif' : isBrutalist ? 'inherit' : isRetro ? 'Space Mono, monospace' : 'serif'}; font-size: ${isBrutalist ? '1.25rem' : '1.125rem'}; text-transform: uppercase; letter-spacing: 0.1em; color: ${isBrutalist ? 'var(--color-accent)' : 'var(--color-text-secondary)'}; margin-bottom: 1.5rem; font-weight: ${isBrutalist ? '900' : 'normal'};">
                 Ceremony
               </h3>
-              <div style="font-family: serif; font-size: 1.125rem; line-height: 1.8; color: var(--color-text); white-space: pre-line;">
+              <div style="font-family: ${isElegant ? 'Lato, sans-serif' : isBrutalist ? 'inherit' : isRetro ? 'Space Mono, monospace' : 'serif'}; font-size: 1.125rem; line-height: 1.8; color: var(--color-text); white-space: pre-line; font-weight: ${isBrutalist ? '600' : 'normal'};">
                 ${data.ceremony || '4:00 PM\nGarden Terrace'}
               </div>
             </div>
             
             <!-- Reception -->
-            <div style="text-align: center; padding: 3rem; background: var(--color-bg); border: 1px solid var(--color-border);">
-              <div style="font-size: 2rem; color: var(--color-accent); margin-bottom: 1.5rem;">Ã°Å¸Â¥â€š</div>
-              <h3 style="font-family: serif; font-size: 1.75rem; font-weight: 400; margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: 0.1em; font-size: 1.125rem; color: var(--color-text-secondary);">
+            <div style="text-align: center; padding: 3rem; background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.05)' : 'var(--color-bg)'}; ${isBrutalist ? 'border: 4px solid var(--color-text); box-shadow: 8px 8px 0 var(--color-text);' : isNeumorphism ? 'box-shadow: 10px 10px 20px rgba(163, 177, 198, 0.6), -10px -10px 20px rgba(255, 255, 255, 0.9); border-radius: 20px;' : isGlassmorphism ? 'backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px;' : 'border: 1px solid var(--color-border);'}">
+              ${!isBrutalist ? `<div style="font-size: 2rem; color: var(--color-accent); margin-bottom: 1.5rem;">🥂</div>` : ''}
+              <h3 style="font-family: ${isElegant ? 'Playfair Display, serif' : isBrutalist ? 'inherit' : isRetro ? 'Space Mono, monospace' : 'serif'}; font-size: ${isBrutalist ? '1.25rem' : '1.125rem'}; text-transform: uppercase; letter-spacing: 0.1em; color: ${isBrutalist ? 'var(--color-accent)' : 'var(--color-text-secondary)'}; margin-bottom: 1.5rem; font-weight: ${isBrutalist ? '900' : 'normal'};">
                 Reception
               </h3>
-              <div style="font-family: serif; font-size: 1.125rem; line-height: 1.8; color: var(--color-text); white-space: pre-line;">
+              <div style="font-family: ${isElegant ? 'Lato, sans-serif' : isBrutalist ? 'inherit' : isRetro ? 'Space Mono, monospace' : 'serif'}; font-size: 1.125rem; line-height: 1.8; color: var(--color-text); white-space: pre-line; font-weight: ${isBrutalist ? '600' : 'normal'};">
                 ${data.reception || '6:00 PM\nGrand Ballroom'}
               </div>
             </div>
@@ -4963,44 +4950,37 @@ END:VCARD\`;
         </div>
       </section>
 
-      ${data.schedule && data.schedule.trim() !== '' && data.schedule !== '[]' ? `
+      ${data.schedule && data.schedule.length > 0 ? `
       <!-- Schedule -->
       <section style="padding: 6rem 0; background: var(--color-bg);">
-        <div class="container" style="max-width: 800px;">
+        <div class="container" style="max-width: 800px; margin: 0 auto; padding: 0 2rem;">
           <div style="text-align: center; margin-bottom: 4rem;">
-            <h2 style="font-family: serif; font-size: clamp(2rem, 5vw, 3rem); font-weight: 400; margin-bottom: 1rem;">
+            <h2 style="font-family: ${isElegant ? 'Playfair Display, serif' : isBrutalist ? 'inherit' : isRetro ? 'Space Mono, monospace' : 'serif'}; font-size: clamp(2rem, 5vw, 3rem); font-weight: ${isBrutalist ? '900' : isRetro ? '700' : '400'}; margin-bottom: 1rem; ${isBrutalist ? 'text-transform: uppercase;' : isRetro ? 'text-transform: uppercase;' : ''}">
               Schedule of Events
             </h2>
-            <div style="width: 60px; height: 1px; background: var(--color-accent); margin: 0 auto;"></div>
+            <div style="width: ${isBrutalist ? '80px' : '60px'}; height: ${isBrutalist ? '6px' : '1px'}; background: var(--color-accent); margin: 0 auto; ${isBrutalist ? 'border: 2px solid var(--color-text);' : ''}"></div>
           </div>
           
-          <div style="position: relative;">
-            <div style="position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; background: var(--color-border);"></div>
+          <div class="schedule-timeline" style="position: relative;">
+            ${!isBrutalist ? `<div style="position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; background: var(--color-border);"></div>` : ''}
             
-            ${(() => {
-              try {
-                const schedule = JSON.parse(data.schedule || '[]');
-                return schedule.map((item, i) => `
-                  <div style="position: relative; padding: 2rem 0; display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
-                    <div style="text-align: ${i % 2 === 0 ? 'right' : 'left'}; ${i % 2 === 0 ? 'order: 1;' : 'order: 2;'}">
-                      <div style="font-family: serif; font-size: 1.5rem; font-weight: 600; color: var(--color-accent); margin-bottom: 0.5rem;">
-                        ${item.time || ''}
-                      </div>
-                      <div style="font-family: serif; font-size: 1.25rem; font-weight: 400; margin-bottom: 0.5rem;">
-                        ${item.event || ''}
-                      </div>
-                      <div style="font-size: 0.9375rem; color: var(--color-text-secondary); font-style: italic;">
-                        ${item.location || ''}
-                      </div>
-                    </div>
-                    <div style="${i % 2 === 0 ? 'order: 2;' : 'order: 1;'}"></div>
-                    <div style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 12px; height: 12px; background: var(--color-accent); border: 3px solid var(--color-bg); border-radius: 50%;"></div>
+            ${data.schedule.map((item, i) => `
+              <div style="position: relative; padding: 2rem 0; display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                <div style="text-align: ${i % 2 === 0 ? 'right' : 'left'}; ${i % 2 === 0 ? 'order: 1;' : 'order: 2;'}">
+                  <div style="font-family: ${isElegant ? 'Playfair Display, serif' : isBrutalist ? 'inherit' : isRetro ? 'Space Mono, monospace' : 'serif'}; font-size: ${isBrutalist ? '1.25rem' : '1.5rem'}; font-weight: ${isBrutalist ? '900' : '600'}; color: var(--color-accent); margin-bottom: 0.5rem;">
+                    ${item.time || ''}
                   </div>
-                `).join('');
-              } catch (e) {
-                return '';
-              }
-            })()}
+                  <div style="font-family: ${isElegant ? 'Playfair Display, serif' : isBrutalist ? 'inherit' : isRetro ? 'Space Mono, monospace' : 'serif'}; font-size: ${isBrutalist ? '1.125rem' : '1.25rem'}; font-weight: ${isBrutalist ? '700' : '400'}; margin-bottom: 0.5rem; ${isBrutalist ? 'text-transform: uppercase;' : ''}">
+                    ${item.event || ''}
+                  </div>
+                  <div style="font-family: ${isElegant ? 'Lato, sans-serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: 0.9375rem; color: var(--color-text-secondary); ${isElegant ? 'font-style: italic;' : ''}">
+                    ${item.location || ''}
+                  </div>
+                </div>
+                <div style="${i % 2 === 0 ? 'order: 2;' : 'order: 1;'}"></div>
+                ${!isBrutalist ? `<div style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 12px; height: 12px; background: var(--color-accent); border: 3px solid var(--color-bg); border-radius: 50%;"></div>` : ''}
+              </div>
+            `).join('')}
           </div>
         </div>
       </section>
@@ -5008,13 +4988,13 @@ END:VCARD\`;
 
       ${data.story ? `
       <!-- Our Story -->
-      <section style="padding: 6rem 0; background: var(--color-surface);">
-        <div class="container" style="max-width: 700px; text-align: center;">
-          <div style="font-size: 2rem; color: var(--color-accent); margin-bottom: 1.5rem; opacity: 0.6;">Ã¢â„¢Â¥</div>
-          <h2 style="font-family: serif; font-size: clamp(2rem, 5vw, 3rem); font-weight: 400; margin-bottom: 3rem;">
+      <section style="padding: 6rem 0; background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.02)' : isNeumorphism ? 'var(--color-surface)' : 'var(--color-surface)'};">
+        <div class="container" style="max-width: 700px; text-align: center; margin: 0 auto; padding: 0 2rem;">
+          ${!isBrutalist && !isRetro ? `<div style="font-size: 2rem; color: var(--color-accent); margin-bottom: 1.5rem; opacity: 0.6;">♥</div>` : ''}
+          <h2 style="font-family: ${isElegant ? 'Playfair Display, serif' : isBrutalist ? 'inherit' : isRetro ? 'Space Mono, monospace' : 'serif'}; font-size: clamp(2rem, 5vw, 3rem); font-weight: ${isBrutalist ? '900' : isRetro ? '700' : '400'}; margin-bottom: 3rem; ${isBrutalist ? 'text-transform: uppercase;' : isRetro ? 'text-transform: uppercase;' : ''}">
             Our Story
           </h2>
-          <div style="font-family: serif; font-size: 1.1875rem; line-height: 1.9; color: var(--color-text); font-style: italic; white-space: pre-line;">
+          <div style="font-family: ${isElegant ? 'Lato, sans-serif' : isBrutalist ? 'inherit' : isRetro ? 'Space Mono, monospace' : 'serif'}; font-size: ${isBrutalist ? '1.125rem' : '1.1875rem'}; line-height: 1.9; color: var(--color-text); ${isElegant ? 'font-style: italic;' : ''} white-space: pre-line; font-weight: ${isElegant ? '300' : 'normal'};">
             ${data.story}
           </div>
         </div>
@@ -5022,41 +5002,42 @@ END:VCARD\`;
       ` : ''}
 
       <!-- Additional Information -->
+      ${data.dressCode || data.hotelInfo || data.registryLink ? `
       <section style="padding: 6rem 0; background: var(--color-bg);">
-        <div class="container" style="max-width: 1000px;">
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 3rem;">
+        <div class="container" style="max-width: 1000px; margin: 0 auto; padding: 0 2rem;">
+          <div class="info-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 3rem;">
             
             ${data.dressCode ? `
-            <div style="text-align: center; padding: 2.5rem; border: 1px solid var(--color-border);">
-              <div style="font-size: 1.75rem; margin-bottom: 1rem;">Ã°Å¸â€˜â€</div>
-              <h3 style="font-family: serif; font-size: 1.125rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--color-text-secondary); margin-bottom: 1rem;">
+            <div style="text-align: center; padding: 2.5rem; ${isBrutalist ? 'border: 3px solid var(--color-text); box-shadow: 6px 6px 0 var(--color-text);' : isNeumorphism ? 'box-shadow: 8px 8px 16px rgba(163, 177, 198, 0.6), -8px -8px 16px rgba(255, 255, 255, 0.9); border-radius: 16px;' : isGlassmorphism ? 'backdrop-filter: blur(10px); background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px;' : 'border: 1px solid var(--color-border);'}">
+              ${!isBrutalist ? `<div style="font-size: 1.75rem; margin-bottom: 1rem;">👔</div>` : ''}
+              <h3 style="font-family: ${isElegant ? 'Playfair Display, serif' : isBrutalist ? 'inherit' : isRetro ? 'Space Mono, monospace' : 'serif'}; font-size: ${isBrutalist ? '1rem' : '1.125rem'}; text-transform: uppercase; letter-spacing: 0.1em; color: ${isBrutalist ? 'var(--color-accent)' : 'var(--color-text-secondary)'}; margin-bottom: 1rem; font-weight: ${isBrutalist ? '900' : 'normal'};">
                 Dress Code
               </h3>
-              <div style="font-family: serif; font-size: 1.125rem; color: var(--color-text);">
+              <div style="font-family: ${isElegant ? 'Lato, sans-serif' : isBrutalist ? 'inherit' : isRetro ? 'Space Mono, monospace' : 'serif'}; font-size: 1.125rem; color: var(--color-text); font-weight: ${isBrutalist ? '700' : 'normal'};">
                 ${data.dressCode}
               </div>
             </div>
             ` : ''}
             
             ${data.hotelInfo ? `
-            <div style="text-align: center; padding: 2.5rem; border: 1px solid var(--color-border);">
-              <div style="font-size: 1.75rem; margin-bottom: 1rem;">Ã°Å¸ÂÂ¨</div>
-              <h3 style="font-family: serif; font-size: 1.125rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--color-text-secondary); margin-bottom: 1rem;">
+            <div style="text-align: center; padding: 2.5rem; ${isBrutalist ? 'border: 3px solid var(--color-text); box-shadow: 6px 6px 0 var(--color-text);' : isNeumorphism ? 'box-shadow: 8px 8px 16px rgba(163, 177, 198, 0.6), -8px -8px 16px rgba(255, 255, 255, 0.9); border-radius: 16px;' : isGlassmorphism ? 'backdrop-filter: blur(10px); background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px;' : 'border: 1px solid var(--color-border);'}">
+              ${!isBrutalist ? `<div style="font-size: 1.75rem; margin-bottom: 1rem;">🏨</div>` : ''}
+              <h3 style="font-family: ${isElegant ? 'Playfair Display, serif' : isBrutalist ? 'inherit' : isRetro ? 'Space Mono, monospace' : 'serif'}; font-size: ${isBrutalist ? '1rem' : '1.125rem'}; text-transform: uppercase; letter-spacing: 0.1em; color: ${isBrutalist ? 'var(--color-accent)' : 'var(--color-text-secondary)'}; margin-bottom: 1rem; font-weight: ${isBrutalist ? '900' : 'normal'};">
                 Accommodations
               </h3>
-              <div style="font-size: 1rem; line-height: 1.7; color: var(--color-text); white-space: pre-line;">
+              <div style="font-family: ${isElegant ? 'Lato, sans-serif' : isBrutalist ? 'inherit' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: 1rem; line-height: 1.7; color: var(--color-text); white-space: pre-line; font-weight: ${isElegant ? '300' : 'normal'};">
                 ${data.hotelInfo}
               </div>
             </div>
             ` : ''}
             
             ${data.registryLink ? `
-            <div style="text-align: center; padding: 2.5rem; border: 1px solid var(--color-border);">
-              <div style="font-size: 1.75rem; margin-bottom: 1rem;">Ã°Å¸Å½Â</div>
-              <h3 style="font-family: serif; font-size: 1.125rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--color-text-secondary); margin-bottom: 1.5rem;">
+            <div style="text-align: center; padding: 2.5rem; ${isBrutalist ? 'border: 3px solid var(--color-text); box-shadow: 6px 6px 0 var(--color-text);' : isNeumorphism ? 'box-shadow: 8px 8px 16px rgba(163, 177, 198, 0.6), -8px -8px 16px rgba(255, 255, 255, 0.9); border-radius: 16px;' : isGlassmorphism ? 'backdrop-filter: blur(10px); background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px;' : 'border: 1px solid var(--color-border);'}">
+              ${!isBrutalist ? `<div style="font-size: 1.75rem; margin-bottom: 1rem;">🎁</div>` : ''}
+              <h3 style="font-family: ${isElegant ? 'Playfair Display, serif' : isBrutalist ? 'inherit' : isRetro ? 'Space Mono, monospace' : 'serif'}; font-size: ${isBrutalist ? '1rem' : '1.125rem'}; text-transform: uppercase; letter-spacing: 0.1em; color: ${isBrutalist ? 'var(--color-accent)' : 'var(--color-text-secondary)'}; margin-bottom: 1.5rem; font-weight: ${isBrutalist ? '900' : 'normal'};">
                 Registry
               </h3>
-              <a href="${data.registryLink}" target="_blank" style="display: inline-block; padding: 0.875rem 2rem; border: 2px solid var(--color-accent); color: var(--color-accent); text-decoration: none; font-family: serif; font-size: 0.9375rem; letter-spacing: 0.1em; text-transform: uppercase; transition: all 0.3s;" onmouseover="this.style.background='var(--color-accent)'; this.style.color='var(--color-bg)'" onmouseout="this.style.background='transparent'; this.style.color='var(--color-accent)'">
+              <a href="${data.registryLink}" target="_blank" style="display: inline-block; padding: ${isBrutalist ? '1rem 2.5rem' : '0.875rem 2rem'}; border: ${isBrutalist ? '3px' : '2px'} solid var(--color-accent); color: var(--color-accent); text-decoration: none; font-family: ${isElegant ? 'Lato, sans-serif' : isBrutalist ? 'inherit' : isRetro ? 'Space Mono, monospace' : 'serif'}; font-size: ${isBrutalist ? '1rem' : '0.9375rem'}; letter-spacing: 0.1em; text-transform: uppercase; transition: all 0.3s; font-weight: ${isBrutalist ? '900' : 'normal'}; ${isBrutalist ? 'box-shadow: 4px 4px 0 var(--color-accent);' : isNeumorphism ? 'box-shadow: 6px 6px 12px rgba(163, 177, 198, 0.6), -6px -6px 12px rgba(255, 255, 255, 0.9); border-radius: 8px;' : ''}" onmouseover="${isBrutalist ? `this.style.transform='translate(-4px, -4px)'; this.style.boxShadow='8px 8px 0 var(--color-accent)'` : `this.style.background='var(--color-accent)'; this.style.color='var(--color-bg)'`}" onmouseout="${isBrutalist ? `this.style.transform='translate(0, 0)'; this.style.boxShadow='4px 4px 0 var(--color-accent)'` : `this.style.background='transparent'; this.style.color='var(--color-accent)'`}">
                 View Registry
               </a>
             </div>
@@ -5064,16 +5045,17 @@ END:VCARD\`;
           </div>
         </div>
       </section>
+      ` : ''}
 
       <!-- Final CTA -->
-      <section style="padding: 6rem 0; background: var(--color-surface); text-align: center;">
-        <div class="container" style="max-width: 600px;">
-          <div style="font-size: 2.5rem; color: var(--color-accent); margin-bottom: 2rem; opacity: 0.6;">Ã¢ÂÂ¦</div>
-          <h2 style="font-family: serif; font-size: clamp(2rem, 5vw, 3rem); font-weight: 400; margin-bottom: 2rem; line-height: 1.4;">
+      <section style="padding: 6rem 0; background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.02)' : isNeumorphism ? 'var(--color-surface)' : 'var(--color-surface)'}; text-align: center;">
+        <div class="container" style="max-width: 600px; margin: 0 auto; padding: 0 2rem;">
+          ${!isBrutalist && !isRetro ? `<div style="font-size: 2.5rem; color: var(--color-accent); margin-bottom: 2rem; opacity: 0.6;">❦</div>` : ''}
+          <h2 style="font-family: ${isElegant ? 'Playfair Display, serif' : isBrutalist ? 'inherit' : isRetro ? 'Space Mono, monospace' : 'serif'}; font-size: clamp(2rem, 5vw, 3rem); font-weight: ${isBrutalist ? '900' : isRetro ? '700' : '400'}; margin-bottom: 2rem; line-height: 1.4; ${isBrutalist ? 'text-transform: uppercase;' : isRetro ? 'text-transform: uppercase;' : ''}">
             We can't wait to celebrate with you
           </h2>
           ${data.rsvpLink ? `
-          <a href="${data.rsvpLink}" target="_blank" style="display: inline-block; padding: 1.25rem 3.5rem; background: var(--color-accent); color: var(--color-bg); text-decoration: none; font-family: serif; font-size: 1rem; letter-spacing: 0.15em; text-transform: uppercase; transition: all 0.3s; margin-top: 2rem;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 16px rgba(0,0,0,0.15)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+          <a href="${data.rsvpLink}" target="_blank" style="display: inline-block; padding: ${isBrutalist ? '1.5rem 4rem' : '1.25rem 3.5rem'}; background: ${isBrutalist ? 'var(--color-accent)' : isGradient ? 'linear-gradient(135deg, #667eea, #764ba2)' : isRetro ? 'linear-gradient(90deg, var(--color-accent), #b537f2)' : 'var(--color-accent)'}; color: ${isBrutalist ? 'var(--color-text)' : 'var(--color-bg)'}; text-decoration: none; font-family: ${isElegant ? 'Lato, sans-serif' : isBrutalist ? 'inherit' : isRetro ? 'Space Mono, monospace' : 'serif'}; font-size: ${isBrutalist ? '1.125rem' : '1rem'}; letter-spacing: 0.15em; text-transform: uppercase; transition: all 0.3s; margin-top: 2rem; font-weight: ${isBrutalist ? '900' : 'normal'}; ${isBrutalist ? 'border: 4px solid var(--color-text); box-shadow: 6px 6px 0 var(--color-text);' : isNeumorphism ? 'box-shadow: 10px 10px 20px rgba(163, 177, 198, 0.6), -10px -10px 20px rgba(255, 255, 255, 0.9); border-radius: 8px;' : ''}" onmouseover="${isBrutalist ? `this.style.transform='translate(-4px, -4px)'; this.style.boxShadow='10px 10px 0 var(--color-text)'` : `this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 16px rgba(0,0,0,0.15)'`}" onmouseout="${isBrutalist ? `this.style.transform='translate(0, 0)'; this.style.boxShadow='6px 6px 0 var(--color-text)'` : `this.style.transform='translateY(0)'; this.style.boxShadow='none'`}">
             RSVP Now
           </a>
           ` : ''}
@@ -5081,27 +5063,52 @@ END:VCARD\`;
       </section>
 
       <!-- Footer -->
-      <footer style="padding: 3rem 0; background: var(--color-bg); text-align: center; color: var(--color-text-secondary); font-size: 0.875rem; border-top: 1px solid var(--color-border);">
+      <footer style="padding: 3rem 0; background: var(--color-bg); text-align: center; color: var(--color-text-secondary); font-size: 0.875rem; ${isBrutalist ? 'border-top: 4px solid var(--color-border);' : 'border-top: 1px solid var(--color-border);'}">
         <div class="container">
-          <p style="font-family: serif; font-style: italic;">#${data.coupleName?.replace(/\s/g, '') || 'Wedding2025'}</p>
+          <p style="font-family: ${isElegant ? 'Playfair Display, serif' : isBrutalist ? 'inherit' : isRetro ? 'Space Mono, monospace' : 'serif'}; ${isElegant ? 'font-style: italic;' : ''} font-weight: ${isBrutalist ? '700' : 'normal'};">#${data.coupleName?.replace(/\s/g, '').replace(/&/g, '') || 'Wedding2025'}</p>
         </div>
       </footer>
 
       <style>
         @media (max-width: 768px) {
-          section > div > div[style*="grid-template-columns: 1fr 1fr"] > div {
+          .schedule-timeline > div > div {
             order: 1 !important;
             text-align: center !important;
             grid-column: 1 / -1;
           }
-          section > div > div[style*="position: absolute; left: 50%"] {
+          .schedule-timeline > div > div[style*="position: absolute"] {
             display: none;
+          }
+          .schedule-timeline {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+          }
+          .event-details-grid {
+            grid-template-columns: 1fr !important;
+            gap: 2rem !important;
+          }
+          .info-grid {
+            grid-template-columns: 1fr !important;
+            gap: 2rem !important;
+          }
+          section[style*="padding: 8rem"] {
+            padding: 5rem 0 !important;
+          }
+          section[style*="padding: 6rem"] {
+            padding: 4rem 0 !important;
+          }
+        }
+        
+        @media (max-width: 480px) {
+          .container {
+            padding: 0 1rem !important;
           }
         }
       </style>
     `
-  }),
-
+  }
+}),
   'conference': new Template('conference', {
     name: 'Conference',
     description: 'Professional conference or event website',
@@ -6633,3 +6640,8 @@ export function renderTemplate(templateId, customization, themeId, colorMode = '
   
   return template.render(customization, theme, colorMode);
 }
+
+// CONTACT FORM
+// LANDING PAGE SLIDE SHOW GALLERY
+// EVENT SIGNUP
+// COMING SOON
