@@ -147,13 +147,12 @@ function UserAccountModal({ isOpen, onClose }) {
 
   const handlePasswordUpdate = async (e) => {
     e.preventDefault();
-    console.log('Password update started');
     setIsLoading(true);
     setSuccessMessage('');
     setErrorMessage('');
 
+    // Validation
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-      console.log('Passwords do not match');
       setNotification({
         isOpen: true,
         message: 'Passwords do not match',
@@ -164,7 +163,6 @@ function UserAccountModal({ isOpen, onClose }) {
     }
 
     if (passwordForm.newPassword.length < 8) {
-      console.log('Password too short');
       setNotification({
         isOpen: true,
         message: 'Password must be at least 8 characters',
@@ -175,12 +173,9 @@ function UserAccountModal({ isOpen, onClose }) {
     }
 
     try {
-      console.log('Calling updatePassword...');
       const result = await updatePassword(passwordForm.newPassword);
-      console.log('updatePassword result:', result);
       
-      if (result && result.success) {
-        console.log('Password updated successfully');
+      if (result.success) {
         setNotification({
           isOpen: true,
           message: 'Password updated successfully',
@@ -188,22 +183,19 @@ function UserAccountModal({ isOpen, onClose }) {
         });
         setPasswordForm({ newPassword: '', confirmPassword: '' });
       } else {
-        console.log('Password update failed:', result?.error);
         setNotification({
           isOpen: true,
-          message: result?.error || 'Failed to update password',
+          message: result.error || 'Failed to update password',
           type: 'error'
         });
       }
     } catch (error) {
-      console.error('Password update exception:', error);
       setNotification({
         isOpen: true,
         message: error.message || 'Failed to update password',
         type: 'error'
       });
     } finally {
-      console.log('Password update complete');
       setIsLoading(false);
     }
   };
@@ -713,7 +705,7 @@ function UserAccountModal({ isOpen, onClose }) {
                       type="password"
                       value={passwordForm.newPassword}
                       onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
-                      placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
+                      placeholder="••••••••"
                       autoComplete="new-password"
                     />
                     <span className="form-hint">
@@ -728,7 +720,7 @@ function UserAccountModal({ isOpen, onClose }) {
                       type="password"
                       value={passwordForm.confirmPassword}
                       onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
-                      placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
+                      placeholder="••••••••"
                       autoComplete="new-password"
                     />
                   </div>

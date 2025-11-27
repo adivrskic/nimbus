@@ -27,6 +27,7 @@
     display: grid;
     grid-template-columns: 360px 1fr;
     gap: calc(var(--spacing-unit) * 5);
+    margin-top: -660px;
     
     @media (max-width: $breakpoint-lg) {
       grid-template-columns: 1fr;
@@ -511,6 +512,10 @@
 
 .desktop-only {
   display: flex;
+  width: 360px;
+  position: sticky;
+  top: 72px;
+  left: 0;
 }
 
 @media (max-width: $breakpoint-lg) {

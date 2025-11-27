@@ -1308,25 +1308,24 @@ function StyleShowcase() {
           </p>
         </div>
 
+        <div className="style-selector desktop-only">
+          {styles.map((style) => (
+            <button
+              key={style.id}
+              className={`style-selector__item ${activeStyle === style.id ? "active" : ""}`}
+              onClick={() => handleStyleChange(style.id)}
+            >
+              <div className="style-selector__icon">{style.icon}</div>
+              <div className="style-selector__info">
+                <h3>{style.name}</h3>
+                <p>{style.description}</p>
+              </div>
+            </button>
+          ))}
+        </div>
+
         <div className="style-showcase__content">
-          {/* ----------------------------
-             DESKTOP: side selector
-          ----------------------------- */}
-          <div className="style-selector desktop-only">
-            {styles.map((style) => (
-              <button
-                key={style.id}
-                className={`style-selector__item ${activeStyle === style.id ? "active" : ""}`}
-                onClick={() => handleStyleChange(style.id)}
-              >
-                <div className="style-selector__icon">{style.icon}</div>
-                <div className="style-selector__info">
-                  <h3>{style.name}</h3>
-                  <p>{style.description}</p>
-                </div>
-              </button>
-            ))}
-          </div>
+          <div></div>
 
           {/* ----------------------------
              PREVIEW: visible on all breakpoints
