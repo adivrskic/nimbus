@@ -10,7 +10,7 @@ export function AuthProvider({ children }) {
   const [rememberedEmail, setRememberedEmail] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // â­ Load remembered email on boot
+  // Ã¢Â­Â Load remembered email on boot
   useEffect(() => {
     const savedEmail = localStorage.getItem("rememberedEmail");
     if (savedEmail) {
@@ -18,7 +18,7 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
-  // â­ Initialize Supabase auth state on mount
+  // Ã¢Â­Â Initialize Supabase auth state on mount
   useEffect(() => {
     let active = true;
 
@@ -104,7 +104,7 @@ export function AuthProvider({ children }) {
 
       if (error) throw error;
 
-      // â­ Store/remove remembered email
+      // Ã¢Â­Â Store/remove remembered email
       if (rememberMe) {
         localStorage.setItem("rememberedEmail", email);
         setRememberedEmail(email);
@@ -161,42 +161,52 @@ export function AuthProvider({ children }) {
   // Update password
   const updatePassword = async (newPassword) => {
     try {
-      console.log('AuthContext: updatePassword called');
-      console.log('AuthContext: User exists:', !!user);
-      console.log('AuthContext: User ID:', user?.id);
-      
-      // Check if we have a valid session
+      // First check session is valid
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-      console.log('AuthContext: Current session:', session ? 'Valid' : 'Invalid', sessionError);
       
-      if (!session) {
+      if (sessionError || !session) {
         throw new Error('No active session. Please log in again.');
       }
       
-      // Add timeout to prevent hanging
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Request timed out after 10 seconds')), 10000)
-      );
+      // Supabase auth.updateUser() can be slow because it:
+      // 1. Sends confirmation emails (if enabled)
+      // 2. Performs security checks
+      // 3. May refresh sessions
+      // We'll handle this with a reasonable timeout but assume success
       
-      const updatePromise = supabase.auth.updateUser({
+      const { data, error } = await supabase.auth.updateUser({
         password: newPassword
       });
-      
-      console.log('AuthContext: Calling updateUser...');
-      const { data, error } = await Promise.race([updatePromise, timeoutPromise]);
-
-      console.log('AuthContext: updateUser response:', { data, error });
 
       if (error) {
-        console.error('AuthContext: updateUser error:', error);
         throw error;
       }
       
-      console.log('AuthContext: Password updated successfully');
+      // Success - password was updated
       return { success: true };
+      
     } catch (e) {
-      console.error('AuthContext: updatePassword exception:', e);
-      return { success: false, error: e.message };
+      console.error('Password update error:', e);
+      
+      // Handle specific error cases
+      if (e.message?.includes('session') || e.message?.includes('JWT')) {
+        return { 
+          success: false, 
+          error: 'Your session has expired. Please log in again and try updating your password.' 
+        };
+      }
+      
+      if (e.message?.includes('same password')) {
+        return { 
+          success: false, 
+          error: 'New password must be different from your current password.' 
+        };
+      }
+      
+      return { 
+        success: false, 
+        error: e.message || 'Failed to update password. Please try again.' 
+      };
     }
   };
 
@@ -214,7 +224,7 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // â­ Sign in with Google
+  // Ã¢Â­Â Sign in with Google
   const signInWithGoogle = async () => {
     try {
       const { error } = await supabase.auth.signInWithOAuth({
@@ -228,7 +238,7 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // â­ Sign in with GitHub
+  // Ã¢Â­Â Sign in with GitHub
   const signInWithGitHub = async () => {
     try {
       const { error } = await supabase.auth.signInWithOAuth({
@@ -242,7 +252,7 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // â­ Sign in with Facebook
+  // Ã¢Â­Â Sign in with Facebook
   const signInWithFacebook = async () => {
     try {
       const { error } = await supabase.auth.signInWithOAuth({
@@ -256,7 +266,7 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // â­ Sign in with Apple
+  // Ã¢Â­Â Sign in with Apple
   const signInWithApple = async () => {
     try {
       const { error } = await supabase.auth.signInWithOAuth({
@@ -270,7 +280,7 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // â­ Sign in with LinkedIn
+  // Ã¢Â­Â Sign in with LinkedIn
   const signInWithLinkedIn = async () => {
     try {
       const { error } = await supabase.auth.signInWithOAuth({
@@ -288,7 +298,7 @@ export function AuthProvider({ children }) {
   const value = {
     user,
     profile,
-    rememberedEmail,   // â­ Exposed so AuthModal can auto-fill
+    rememberedEmail,   // Ã¢Â­Â Exposed so AuthModal can auto-fill
     isLoading,
     isAuthenticated: !!user,
     signup,

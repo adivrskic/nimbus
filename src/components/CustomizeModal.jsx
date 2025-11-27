@@ -84,24 +84,7 @@ function CustomizeModal({ templateId, isOpen, onClose }) {
   } : null;
   
   const [customization, setCustomization] = useState(() => {
-    const saved = localStorage.getItem(`template_${templateId}`);
-    if (saved) {
-      const data = JSON.parse(saved);
-      // Migration for old data
-      if (data.customization) {
-        if (!data.customization.theme) {
-          data.customization.theme = selectedStyleTheme;
-        }
-        if (data.customization.darkMode) {
-          data.customization.colorMode = data.customization.darkMode;
-          delete data.customization.darkMode;
-        }
-        return data.customization;
-      }
-      return data;
-    }
-    
-    // Initialize with defaults from template and ThemeContext
+    // First, get defaults from template
     const defaults = {};
     if (templateConfig && templateConfig.customizable) {
       Object.entries(templateConfig.customizable).forEach(([key, config]) => {
@@ -116,6 +99,28 @@ function CustomizeModal({ templateId, isOpen, onClose }) {
         }
       });
     }
+    
+    // Then, try to load saved data
+    const saved = localStorage.getItem(`template_${templateId}`);
+    if (saved) {
+      const data = JSON.parse(saved);
+      // Migration for old data
+      let savedCustomization = data.customization || data;
+      
+      if (savedCustomization.darkMode) {
+        savedCustomization.colorMode = savedCustomization.darkMode;
+        delete savedCustomization.darkMode;
+      }
+      if (!savedCustomization.theme) {
+        savedCustomization.theme = selectedStyleTheme;
+      }
+      
+      // IMPORTANT: Merge saved data with defaults to ensure new fields appear
+      // Defaults come first, then override with saved values
+      return { ...defaults, ...savedCustomization };
+    }
+    
+    // No saved data, return defaults
     return defaults;
   });
 
