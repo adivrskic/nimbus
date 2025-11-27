@@ -58,15 +58,16 @@ const styleThemes = {
       text: '#1e40af',
       textSecondary: '#3b82f6',
       accent: '#2563eb',
+      gradient: 'linear-gradient(135deg, rgba(59,130,246,0.25) 0%, rgba(96,165,250,0.35) 30%, rgba(147,197,253,0.45) 60%, rgba(191,219,254,0.32) 100%)',
     },
-    dark: {
+      dark: {
       bg: 'rgba(59, 130, 246, 0.12)',
       surface: 'rgba(59, 130, 246, 0.15)',
       border: 'rgba(59, 130, 246, 0.25)',
       text: '#93c5fd',
       textSecondary: '#60a5fa',
       accent: '#3b82f6',
-    }
+      gradient: 'linear-gradient(135deg, rgba(30,58,138,0.75) 0%, rgba(37,99,235,0.55) 40%, rgba(59,130,246,0.65) 70%, rgba(96,165,250,0.45) 100%)'    }
   },
   brutalist: {
     light: {
@@ -76,6 +77,7 @@ const styleThemes = {
       text: '#991b1b',
       textSecondary: '#dc2626',
       accent: '#ef4444',
+      gradient: 'linear-gradient(135deg, rgba(239, 68, 68, 0.18) 0%, rgba(248, 113, 113, 0.28) 35%, rgba(252, 165, 165, 0.35) 65%, rgba(254, 202, 202, 0.22) 100%)',
     },
     dark: {
       bg: 'rgba(239, 68, 68, 0.12)',
@@ -84,6 +86,7 @@ const styleThemes = {
       text: '#fca5a5',
       textSecondary: '#f87171',
       accent: '#ef4444',
+      gradient: 'linear-gradient(135deg, rgba(127, 29, 29, 0.65) 0%, rgba(220, 38, 38, 0.45) 35%, rgba(239, 68, 68, 0.55) 65%, rgba(248, 113, 113, 0.35) 100%)',
     }
   },
   gradient: {
@@ -94,6 +97,7 @@ const styleThemes = {
       text: '#6b21a8',
       textSecondary: '#9333ea',
       accent: '#a855f7',
+      gradient: 'linear-gradient(135deg, rgba(147, 51, 234, 0.2) 0%, rgba(168, 85, 247, 0.3) 25%, rgba(192, 132, 252, 0.38) 50%, rgba(216, 180, 254, 0.32) 75%, rgba(233, 213, 255, 0.2) 100%)',
     },
     dark: {
       bg: 'rgba(147, 51, 234, 0.12)',
@@ -102,6 +106,7 @@ const styleThemes = {
       text: '#d8b4fe',
       textSecondary: '#c084fc',
       accent: '#a855f7',
+      gradient: 'linear-gradient(135deg, rgba(88, 28, 135, 0.65) 0%, rgba(107, 33, 168, 0.5) 25%, rgba(147, 51, 234, 0.6) 50%, rgba(168, 85, 247, 0.5) 75%, rgba(192, 132, 252, 0.4) 100%)',
     }
   },
   elegant: {
@@ -112,6 +117,7 @@ const styleThemes = {
       text: '#78350f',
       textSecondary: '#a16207',
       accent: '#ca8a04',
+      gradient: 'linear-gradient(135deg, rgba(202, 138, 4, 0.18) 0%, rgba(234, 179, 8, 0.28) 35%, rgba(250, 204, 21, 0.35) 65%, rgba(254, 240, 138, 0.22) 100%)',
     },
     dark: {
       bg: 'rgba(168, 139, 95, 0.12)',
@@ -120,6 +126,7 @@ const styleThemes = {
       text: '#fde68a',
       textSecondary: '#fbbf24',
       accent: '#f59e0b',
+      gradient: 'linear-gradient(135deg, rgba(120, 53, 15, 0.65) 0%, rgba(161, 98, 7, 0.5) 35%, rgba(202, 138, 4, 0.55) 65%, rgba(245, 158, 11, 0.4) 100%)',
     }
   },
   retro: {
@@ -130,6 +137,7 @@ const styleThemes = {
       text: '#9f1239',
       textSecondary: '#e11d48',
       accent: '#ec4899',
+      gradient: 'linear-gradient(135deg, rgba(236, 72, 153, 0.25) 0%, rgba(244, 114, 182, 0.32) 20%, rgba(249, 168, 212, 0.38) 40%, rgba(192, 132, 252, 0.35) 60%, rgba(147, 197, 253, 0.3) 80%, rgba(125, 211, 252, 0.2) 100%)',
     },
     dark: {
       bg: 'rgba(236, 72, 153, 0.12)',
@@ -138,6 +146,7 @@ const styleThemes = {
       text: '#fbcfe8',
       textSecondary: '#f9a8d4',
       accent: '#ec4899',
+      gradient: 'linear-gradient(135deg, rgba(159, 18, 57, 0.65) 0%, rgba(219, 39, 119, 0.55) 20%, rgba(236, 72, 153, 0.6) 40%, rgba(147, 51, 234, 0.5) 60%, rgba(79, 70, 229, 0.45) 80%, rgba(59, 130, 246, 0.4) 100%)',
     }
   },
   glassmorphism: {
@@ -148,6 +157,7 @@ const styleThemes = {
       text: '#3730a3',
       textSecondary: '#4f46e5',
       accent: '#6366f1',
+      gradient: 'linear-gradient(135deg, rgba(99, 102, 241, 0.18) 0%, rgba(129, 140, 248, 0.28) 30%, rgba(165, 180, 252, 0.35) 60%, rgba(199, 210, 254, 0.25) 90%, rgba(224, 231, 255, 0.15) 100%)',
     },
     dark: {
       bg: 'rgba(99, 102, 241, 0.12)',
@@ -156,6 +166,7 @@ const styleThemes = {
       text: '#c7d2fe',
       textSecondary: '#a5b4fc',
       accent: '#6366f1',
+      gradient: 'linear-gradient(135deg, rgba(55, 48, 163, 0.65) 0%, rgba(67, 56, 202, 0.55) 30%, rgba(99, 102, 241, 0.6) 60%, rgba(129, 140, 248, 0.45) 90%, rgba(165, 180, 252, 0.3) 100%)',
     }
   },
   neumorphism: {
@@ -166,6 +177,7 @@ const styleThemes = {
       text: '#075985',
       textSecondary: '#0284c7',
       accent: '#0ea5e9',
+      gradient: 'linear-gradient(135deg, rgba(14, 165, 233, 0.15) 0%, rgba(34, 211, 238, 0.25) 30%, rgba(56, 189, 248, 0.32) 60%, rgba(125, 211, 252, 0.22) 100%)',
     },
     dark: {
       bg: 'rgba(14, 165, 233, 0.12)',
@@ -174,10 +186,10 @@ const styleThemes = {
       text: '#7dd3fc',
       textSecondary: '#38bdf8',
       accent: '#0ea5e9',
+      gradient: 'linear-gradient(135deg, rgba(7, 89, 133, 0.65) 0%, rgba(8, 145, 178, 0.5) 30%, rgba(14, 165, 233, 0.55) 60%, rgba(56, 189, 248, 0.4) 100%)',
     }
   },
 };
-
 // Get the current theme colors
 const getStyleTheme = (styleId, mode) => {
   return styleThemes[styleId][mode];
@@ -1298,8 +1310,12 @@ function StyleShowcase() {
         "--style-text": styleThemes[activeStyle][theme].text,
         "--style-text-secondary": styleThemes[activeStyle][theme].textSecondary,
         "--style-accent": styleThemes[activeStyle][theme].accent,
+        "--style-gradient": styleThemes[activeStyle][theme].gradient,
       }}
     >
+      {/* Bottom overlay gradient */}
+      <div className="style-showcase__bottom-overlay" />
+      
       <div className="container">
         <div className="style-showcase__header">
           <h2 className="style-showcase__title">Choose Your Style</h2>
