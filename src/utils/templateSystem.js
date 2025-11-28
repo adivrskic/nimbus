@@ -540,7 +540,7 @@ export const templates = {
     name: 'Landing Page',
     description: 'Complete landing page with hero, features, and CTA',
     category: 'Landing Page',
-    image: '/templates/landing-page.png',
+    image: 'landing-page',
     fields: {
       companyName: { type: 'text', default: 'MINIMAL', label: 'Company Name', required: true },
       headline: { type: 'text', default: 'Less is More', label: 'Headline', required: true },
@@ -1019,7 +1019,7 @@ export const templates = {
 'personal-profile': new Template('personal-profile', {
     name: 'Personal Profile',
     description: 'Enhanced personal page with timeline, stats, and testimonials',
-    image: '/templates/personal-profile.png',
+    image: 'personal-profile',
     category: 'Personal',
     fields: {
       name: { type: 'text', default: 'Jordan Rivers', label: 'Your Name', required: true },
@@ -1219,7 +1219,7 @@ export const templates = {
             
             ${data.location ? `
             <p style="font-family: ${isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: ${isBrutalist || isRetro ? '1.125rem' : '1rem'}; color: var(--color-text-secondary); margin-bottom: 2rem; display: flex; align-items: center; gap: 0.5rem; ${isBrutalist || isRetro ? 'text-transform: uppercase; letter-spacing: 1px;' : ''}">
-              📍 ${data.location}
+              {data.location}
             </p>
             ` : ''}
             
@@ -1586,7 +1586,7 @@ export const templates = {
 'restaurant': new Template('restaurant', {
     name: 'Restaurant',
     description: 'Beautiful restaurant website with menu and reservation',
-    image: '/templates/restaurant.png',
+    image: 'restaurant',
     category: 'Restaurant',
     fields: {
       restaurantName: { type: 'text', default: 'Bella Cucina', label: 'Restaurant Name', required: true },
@@ -2032,7 +2032,7 @@ export const templates = {
 'digital-card': new Template('digital-card', {
     name: 'Digital Business Card',
     description: 'Modern digital business card with QR code and instant contact sharing',
-    image: '/templates/digital-card.png',
+    image: 'digital-business-card',
     category: 'Personal',
     fields: {
       name: { type: 'text', default: 'Alex Morgan', label: 'Full Name', required: true },
@@ -2412,7 +2412,7 @@ END:VCARD\`;
 'resume': new Template('resume', {
     name: 'Resume/CV',
     description: 'Professional resume with work experience, education, and skills',
-    image: '/templates/resume.png',
+    image: 'resume',
     category: 'Personal',
     fields: {
       name: { type: 'text', default: 'Sarah Johnson', label: 'Full Name', required: true },
@@ -2899,7 +2899,7 @@ END:VCARD\`;
     name: 'Photography Portfolio (Masonry)',
     description: 'Dynamic masonry grid photography portfolio',
     category: 'Portfolio',
-    image: '/templates/photography-masonry.png',
+    image: 'photography-masonry',
 
     fields: {
       photographerName: { type: 'text', default: 'Emma Wilson', label: 'Photographer Name', required: true },
@@ -3281,7 +3281,7 @@ END:VCARD\`;
 'photo-grid': new Template('photo-grid', {
     name: 'Photography Portfolio (Grid)',
     description: 'Clean uniform grid photography portfolio',
-    image: '/templates/photography-grid.png',
+    image: 'photography-grid',
     category: 'Portfolio',
     fields: {
       photographerName: { type: 'text', default: 'Alex Chen', label: 'Photographer Name', required: true },
@@ -3717,6 +3717,7 @@ END:VCARD\`;
     name: 'Local Small Business',
     description: 'Perfect for local shops, services, and small businesses',
     category: 'business',
+    image: 'local-business',
     defaultTheme: 'minimal',
     fields: [
       { name: 'businessName', label: 'Business Name', type: 'text', required: true },
@@ -4086,6 +4087,7 @@ END:VCARD\`;
   name: 'Designer Portfolio',
   description: 'Showcase your design work with style',
   category: 'portfolio',
+  image: 'designer-portfolio',
   defaultTheme: 'brutalist',
   fields: {
     designerName: { type: 'text', default: 'Alex Jordan', label: 'Your Name', required: true },
@@ -4453,6 +4455,7 @@ END:VCARD\`;
   name: 'Writer Portfolio',
   description: 'Perfect for authors, journalists, and content creators',
   category: 'portfolio',
+  image: 'writer-portfolio',
   defaultTheme: 'elegant',
   fields: {
     writerName: { type: 'text', default: 'Jordan Blake', label: 'Your Name', required: true },
@@ -4801,6 +4804,7 @@ END:VCARD\`;
   name: 'Wedding',
   description: 'Elegant wedding invitation and details',
   category: 'event',
+  image: 'wedding',
   defaultTheme: 'elegant',
   fields: {
     coupleName: { type: 'text', default: 'Sarah & Michael', label: 'Couple Names', required: true },
@@ -5109,90 +5113,183 @@ END:VCARD\`;
     `
   }
 }),
-  'conference': new Template('conference', {
-    name: 'Conference',
-    description: 'Professional conference or event website',
-    category: 'event',
-    defaultTheme: 'minimal',
-    fields: [
-      { name: 'conferenceName', label: 'Conference Name', type: 'text', required: true },
-      { name: 'tagline', label: 'Tagline', type: 'text', required: true },
-      { name: 'date', label: 'Date', type: 'text', placeholder: 'March 15-17, 2025', required: true },
-      { name: 'location', label: 'Location', type: 'text', placeholder: 'San Francisco, CA', required: true },
-      { name: 'description', label: 'Event Description', type: 'textarea', required: true },
-      { name: 'registerLink', label: 'Registration Link', type: 'url', required: true },
-      { name: 'speakers', label: 'Speakers (JSON format)', type: 'textarea', placeholder: '[{"name": "Jane Doe", "title": "CEO, Company", "bio": "Brief bio", "imageUrl": "https://..."}]', required: false },
-      { name: 'schedule', label: 'Schedule (JSON format)', type: 'textarea', placeholder: '[{"day": "Day 1", "date": "March 15", "sessions": [{"time": "9:00 AM", "title": "Keynote", "speaker": "John Smith"}]}]', required: false },
-      { name: 'sponsors', label: 'Sponsors (comma separated)', type: 'text', placeholder: 'Company A, Company B, Company C', required: false },
-      { name: 'venue', label: 'Venue Name', type: 'text', required: false },
-      { name: 'venueAddress', label: 'Venue Address', type: 'textarea', required: false },
-      { name: 'price', label: 'Ticket Price', type: 'text', placeholder: '$299', required: false },
-      { name: 'contact', label: 'Contact Email', type: 'email', required: false }
-    ],
-    structure: (data, theme) => `
+'conference': new Template('conference', {
+  name: 'Conference',
+  description: 'Professional conference or event website',
+  category: 'event',
+  defaultTheme: 'minimal',
+  image: 'conference',
+  fields: {
+    conferenceName: { type: 'text', default: 'INNOVATE 2025', label: 'Conference Name', required: true },
+    tagline: { type: 'text', default: 'The Future of Innovation', label: 'Tagline', required: true },
+    date: { type: 'text', default: 'March 15-17, 2025', label: 'Date', required: true },
+    location: { type: 'text', default: 'San Francisco, CA', label: 'Location', required: true },
+    description: { 
+      type: 'textarea',
+      default: 'Join industry leaders and innovators for three days of inspiring talks, networking, and hands-on workshops.',
+      label: 'Event Description',
+      required: true 
+    },
+    registerLink: { type: 'url', default: '', label: 'Registration Link', required: true },
+    speakers: {
+      type: 'group',
+      label: 'Speakers',
+      itemLabel: 'Speaker',
+      min: 0,
+      max: 20,
+      fields: {
+        name: { type: 'text', label: 'Name', default: '' },
+        title: { type: 'text', label: 'Title', default: '' },
+        bio: { type: 'textarea', label: 'Bio', default: '' },
+        imageUrl: { type: 'url', label: 'Image URL', default: '' }
+      },
+      default: [
+        { 
+          name: 'Sarah Chen',
+          title: 'CEO, TechCorp',
+          bio: 'Leading innovation in AI and machine learning for over a decade.',
+          imageUrl: ''
+        },
+        { 
+          name: 'Marcus Johnson',
+          title: 'CTO, StartupLab',
+          bio: 'Building the future of cloud infrastructure and distributed systems.',
+          imageUrl: ''
+        },
+        { 
+          name: 'Emily Rodriguez',
+          title: 'Head of Design, Creative Inc',
+          bio: 'Pioneering user-centered design approaches for modern applications.',
+          imageUrl: ''
+        }
+      ]
+    },
+    schedule: {
+      type: 'group',
+      label: 'Schedule',
+      itemLabel: 'Day',
+      min: 0,
+      max: 10,
+      fields: {
+        day: { type: 'text', label: 'Day Name', default: '' },
+        date: { type: 'text', label: 'Date', default: '' },
+        sessions: {
+          type: 'group',
+          label: 'Sessions',
+          itemLabel: 'Session',
+          min: 0,
+          max: 20,
+          fields: {
+            time: { type: 'text', label: 'Time', default: '' },
+            title: { type: 'text', label: 'Session Title', default: '' },
+            speaker: { type: 'text', label: 'Speaker', default: '' },
+            description: { type: 'textarea', label: 'Description', default: '' }
+          },
+          default: []
+        }
+      },
+      default: [
+        {
+          day: 'Day 1',
+          date: 'March 15',
+          sessions: [
+            { time: '9:00 AM', title: 'Opening Keynote', speaker: 'Sarah Chen', description: 'The future of artificial intelligence and its impact on business' },
+            { time: '11:00 AM', title: 'Workshop: Cloud Architecture', speaker: 'Marcus Johnson', description: 'Hands-on session building scalable cloud solutions' },
+            { time: '2:00 PM', title: 'Panel Discussion', speaker: 'Industry Leaders', description: 'Navigating the changing technology landscape' }
+          ]
+        }
+      ]
+    },
+    sponsors: { 
+      type: 'text',
+      default: 'Google, Microsoft, Amazon, Meta',
+      label: 'Sponsors (comma separated)',
+      required: false 
+    },
+    venue: { type: 'text', default: 'Moscone Center', label: 'Venue Name', required: false },
+    venueAddress: { 
+      type: 'textarea',
+      default: '747 Howard Street\nSan Francisco, CA 94103',
+      label: 'Venue Address',
+      required: false 
+    },
+    price: { type: 'text', default: '$299', label: 'Ticket Price', required: false },
+    contact: { type: 'email', default: '', label: 'Contact Email', required: false }
+  },
+  structure: (data, theme) => {
+    const isBrutalist = theme.id === 'brutalist';
+    const isMinimal = theme.id === 'minimal';
+    const isGradient = theme.id === 'gradient';
+    const isElegant = theme.id === 'elegant';
+    const isRetro = theme.id === 'retro';
+    const isGlassmorphism = theme.id === 'glassmorphism';
+    const isNeumorphism = theme.id === 'neumorphism';
+
+    return `
       <!-- Header with CTA -->
-      <header style="background: var(--color-bg); border-bottom: 3px solid var(--color-accent); position: sticky; top: 0; z-index: 100; box-shadow: var(--shadow-sm);">
-        <div class="container">
+      <header style="background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.1)' : 'var(--color-bg)'}; ${isBrutalist ? 'border-bottom: 4px solid var(--color-accent);' : isRetro ? 'border-bottom: 3px solid var(--color-accent);' : 'border-bottom: 3px solid var(--color-accent);'} position: sticky; top: 0; z-index: 100; ${isGlassmorphism ? 'backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);' : 'box-shadow: var(--shadow-sm);'}">
+        <div class="container" style="margin: 0 auto; padding: 0 2rem;">
           <div style="display: flex; justify-content: space-between; align-items: center; padding: 1.5rem 0;">
             <div style="display: flex; align-items: center; gap: 1rem;">
-              <div style="font-size: 1.75rem; font-weight: 900; letter-spacing: -0.02em;">
+              <div style="font-family: ${isElegant ? 'Playfair Display, serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: ${isBrutalist ? '2rem' : '1.75rem'}; font-weight: ${isBrutalist ? '900' : isRetro ? '700' : '900'}; letter-spacing: ${isBrutalist ? '-0.03em' : '-0.02em'}; ${isBrutalist || isRetro ? 'text-transform: uppercase;' : ''}">
                 ${data.conferenceName || 'CONFERENCE 2025'}
               </div>
-              <div style="padding: 0.375rem 0.875rem; background: var(--color-accent); color: var(--color-bg); font-weight: 700; font-size: 0.75rem; letter-spacing: 0.05em; border-radius: var(--radius-sm);">
-                ${data.date || '2025'}
+              <div style="padding: ${isBrutalist ? '0.5rem 1rem' : '0.375rem 0.875rem'}; background: var(--color-accent); color: ${isBrutalist ? 'var(--color-text)' : 'var(--color-bg)'}; font-weight: ${isBrutalist ? '900' : '700'}; font-size: ${isBrutalist ? '0.875rem' : '0.75rem'}; letter-spacing: 0.05em; ${isBrutalist ? 'border: 3px solid var(--color-text);' : isNeumorphism ? 'box-shadow: 4px 4px 8px rgba(163, 177, 198, 0.6), -4px -4px 8px rgba(255, 255, 255, 0.9); border-radius: var(--radius-sm);' : 'border-radius: var(--radius-sm);'}">
+                ${data.date?.split(',')[0] || '2025'}
               </div>
             </div>
             <div style="display: flex; gap: 2rem; align-items: center;">
-              <nav style="display: flex; gap: 2rem;">
-                <a href="#speakers" style="text-decoration: none; color: var(--color-text); font-weight: 600; font-size: 0.9375rem;">Speakers</a>
-                <a href="#schedule" style="text-decoration: none; color: var(--color-text); font-weight: 600; font-size: 0.9375rem;">Schedule</a>
-                <a href="#venue" style="text-decoration: none; color: var(--color-text); font-weight: 600; font-size: 0.9375rem;">Venue</a>
+              <nav class="desktop-nav" style="display: flex; gap: 2rem;">
+                <a href="#speakers" style="text-decoration: none; color: var(--color-text); font-weight: ${isBrutalist ? '900' : '600'}; font-size: 0.9375rem; ${isBrutalist ? 'text-transform: uppercase;' : ''} transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">Speakers</a>
+                <a href="#schedule" style="text-decoration: none; color: var(--color-text); font-weight: ${isBrutalist ? '900' : '600'}; font-size: 0.9375rem; ${isBrutalist ? 'text-transform: uppercase;' : ''} transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">Schedule</a>
+                <a href="#venue" style="text-decoration: none; color: var(--color-text); font-weight: ${isBrutalist ? '900' : '600'}; font-size: 0.9375rem; ${isBrutalist ? 'text-transform: uppercase;' : ''} transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">Venue</a>
               </nav>
               ${data.registerLink ? `
-              <a href="${data.registerLink}" target="_blank" style="padding: 0.875rem 2rem; background: var(--color-accent); color: var(--color-bg); text-decoration: none; font-weight: 700; font-size: 0.9375rem; border-radius: var(--radius-sm); transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+              <a href="${data.registerLink}" target="_blank" style="padding: ${isBrutalist ? '1rem 2.5rem' : '0.875rem 2rem'}; background: var(--color-accent); color: ${isBrutalist ? 'var(--color-text)' : 'var(--color-bg)'}; text-decoration: none; font-weight: ${isBrutalist ? '900' : '700'}; font-size: 0.9375rem; ${isBrutalist ? 'border: 3px solid var(--color-text); box-shadow: 4px 4px 0 var(--color-text);' : isNeumorphism ? 'box-shadow: 6px 6px 12px rgba(163, 177, 198, 0.6), -6px -6px 12px rgba(255, 255, 255, 0.9); border-radius: var(--radius-sm);' : 'border-radius: var(--radius-sm);'} transition: ${isBrutalist ? 'all 0.2s' : 'transform 0.2s'}; ${isBrutalist ? 'text-transform: uppercase;' : ''}" onmouseover="${isBrutalist ? `this.style.transform='translate(-2px, -2px)'; this.style.boxShadow='6px 6px 0 var(--color-text)'` : `this.style.transform='translateY(-2px)'`}" onmouseout="${isBrutalist ? `this.style.transform='translate(0, 0)'; this.style.boxShadow='4px 4px 0 var(--color-text)'` : `this.style.transform='translateY(0)'`}">
                 Register Now
               </a>
               ` : ''}
-              <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle theme">
-                <span class="theme-icon">Ã°Å¸Å’â„¢</span>
-              </button>
+              <label class="theme-toggle-switch-wrapper" style="cursor: pointer; ${isNeumorphism ? 'padding: 0.5rem; border-radius: 12px; display: inline-block; box-shadow: 6px 6px 12px rgba(163, 177, 198, 0.6), -6px -6px 12px rgba(255, 255, 255, 0.9);' : ''}">
+                <input type="checkbox" class="theme-toggle-switch" onclick="toggleTheme()" aria-label="Toggle theme">
+                <span class="theme-toggle-slider"></span>
+              </label>
             </div>
           </div>
         </div>
       </header>
 
       <!-- Hero -->
-      <section style="padding: 8rem 0 6rem; background: linear-gradient(135deg, var(--color-surface), var(--color-bg)); position: relative; overflow: hidden;">
-        <div style="position: absolute; top: 0; right: 0; width: 50%; height: 100%; background: var(--color-accent); opacity: 0.03; transform: skewX(-10deg) translateX(30%);"></div>
-        <div class="container" style="max-width: 1200px; position: relative;">
+      <section style="padding: ${isBrutalist ? '6rem 0 4rem' : '8rem 0 6rem'}; background: ${isGradient ? 'linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05))' : isGlassmorphism ? 'rgba(255, 255, 255, 0.02)' : 'linear-gradient(135deg, var(--color-surface), var(--color-bg))'}; position: relative; overflow: hidden;">
+        ${!isBrutalist && !isRetro ? `<div style="position: absolute; top: 0; right: 0; width: 50%; height: 100%; background: var(--color-accent); opacity: 0.03; transform: skewX(-10deg) translateX(30%);"></div>` : ''}
+        <div class="container" style="max-width: 1200px; position: relative; margin: 0 auto; padding: 0 2rem;">
           <div style="max-width: 800px;">
-            <div style="display: inline-flex; align-items: center; gap: 1rem; margin-bottom: 2rem; padding: 0.75rem 1.5rem; background: var(--color-bg); border: 2px solid var(--color-accent); border-radius: var(--radius-full);">
+            <div style="display: inline-flex; align-items: center; gap: 1rem; margin-bottom: 2rem; padding: ${isBrutalist ? '1rem 2rem' : '0.75rem 1.5rem'}; background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.1)' : 'var(--color-bg)'}; border: ${isBrutalist ? '3px' : '2px'} solid var(--color-accent); ${isBrutalist ? '' : isNeumorphism ? 'box-shadow: 6px 6px 12px rgba(163, 177, 198, 0.6), -6px -6px 12px rgba(255, 255, 255, 0.9); border-radius: var(--radius-full);' : isGlassmorphism ? 'backdrop-filter: blur(10px); border-radius: var(--radius-full);' : 'border-radius: var(--radius-full);'}">
               <div style="width: 8px; height: 8px; background: var(--color-accent); border-radius: 50%; animation: pulse 2s infinite;"></div>
-              <span style="font-weight: 700; font-size: 0.9375rem; text-transform: uppercase; letter-spacing: 0.05em;">
-                ${data.date || 'Coming Soon'} Ã¢â‚¬Â¢ ${data.location || 'Location TBA'}
+              <span style="font-weight: ${isBrutalist ? '900' : '700'}; font-size: 0.9375rem; text-transform: uppercase; letter-spacing: 0.05em;">
+                ${data.date || 'Coming Soon'} • ${data.location || 'Location TBA'}
               </span>
             </div>
             
-            <h1 style="font-size: clamp(3rem, 8vw, 5.5rem); font-weight: 900; margin-bottom: 2rem; letter-spacing: -0.04em; line-height: 1.05;">
+            <h1 style="font-family: ${isElegant ? 'Playfair Display, serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: clamp(${isBrutalist ? '2.5rem' : '3rem'}, 8vw, ${isBrutalist ? '4.5rem' : '5.5rem'}); font-weight: ${isBrutalist ? '900' : isRetro ? '700' : '900'}; margin-bottom: 2rem; letter-spacing: ${isBrutalist ? '-0.05em' : '-0.04em'}; line-height: 1.05; ${isBrutalist || isRetro ? 'text-transform: uppercase;' : ''}">
               ${data.conferenceName || 'Conference 2025'}
             </h1>
             
-            <p style="font-size: 1.75rem; color: var(--color-text-secondary); margin-bottom: 3rem; line-height: 1.5; font-weight: 600;">
+            <p style="font-family: ${isElegant ? 'Lato, sans-serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: ${isBrutalist ? '1.5rem' : '1.75rem'}; color: var(--color-text-secondary); margin-bottom: 3rem; line-height: 1.5; font-weight: ${isBrutalist ? '700' : '600'};">
               ${data.tagline || 'The Future of Innovation'}
             </p>
             
-            <p style="font-size: 1.125rem; color: var(--color-text-secondary); margin-bottom: 3rem; line-height: 1.7; max-width: 650px;">
+            <p style="font-family: ${isElegant ? 'Lato, sans-serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: ${isBrutalist ? '1.125rem' : '1.125rem'}; color: var(--color-text-secondary); margin-bottom: 3rem; line-height: 1.7; max-width: 650px; font-weight: ${isElegant ? '300' : 'normal'};">
               ${data.description || 'Join industry leaders and innovators for three days of inspiring talks, networking, and hands-on workshops.'}
             </p>
             
             <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
               ${data.registerLink ? `
-              <a href="${data.registerLink}" target="_blank" style="padding: 1.25rem 3rem; background: var(--color-accent); color: var(--color-bg); text-decoration: none; font-weight: 700; font-size: 1.125rem; border-radius: var(--radius-sm); transition: all 0.2s; box-shadow: var(--shadow-md);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='var(--shadow-lg)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-md)'">
-                Register Now ${data.price ? `Ã¢â‚¬Â¢ ${data.price}` : ''}
+              <a href="${data.registerLink}" target="_blank" style="padding: ${isBrutalist ? '1.5rem 3.5rem' : '1.25rem 3rem'}; background: var(--color-accent); color: ${isBrutalist ? 'var(--color-text)' : 'var(--color-bg)'}; text-decoration: none; font-weight: ${isBrutalist ? '900' : '700'}; font-size: 1.125rem; ${isBrutalist ? 'border: 4px solid var(--color-text); box-shadow: 6px 6px 0 var(--color-text);' : isNeumorphism ? 'box-shadow: 10px 10px 20px rgba(163, 177, 198, 0.6), -10px -10px 20px rgba(255, 255, 255, 0.9); border-radius: var(--radius-sm);' : 'border-radius: var(--radius-sm); box-shadow: var(--shadow-md);'} transition: all 0.2s; ${isBrutalist ? 'text-transform: uppercase;' : ''}" onmouseover="${isBrutalist ? `this.style.transform='translate(-4px, -4px)'; this.style.boxShadow='10px 10px 0 var(--color-text)'` : `this.style.transform='translateY(-2px)'; this.style.boxShadow='var(--shadow-lg)'`}" onmouseout="${isBrutalist ? `this.style.transform='translate(0, 0)'; this.style.boxShadow='6px 6px 0 var(--color-text)'` : `this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-md)'`}">
+                Register Now ${data.price ? `• ${data.price}` : ''}
               </a>
               ` : ''}
               ${data.contact ? `
-              <a href="mailto:${data.contact}" style="padding: 1.25rem 3rem; background: var(--color-bg); color: var(--color-text); border: 2px solid var(--color-border); text-decoration: none; font-weight: 700; font-size: 1.125rem; border-radius: var(--radius-sm); transition: all 0.2s;" onmouseover="this.style.borderColor='var(--color-text)'" onmouseout="this.style.borderColor='var(--color-border)'">
+              <a href="mailto:${data.contact}" style="padding: ${isBrutalist ? '1.5rem 3.5rem' : '1.25rem 3rem'}; background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.05)' : 'var(--color-bg)'}; color: var(--color-text); border: ${isBrutalist ? '4px' : '2px'} solid var(--color-border); text-decoration: none; font-weight: ${isBrutalist ? '900' : '700'}; font-size: 1.125rem; ${isBrutalist ? '' : isNeumorphism ? 'box-shadow: 6px 6px 12px rgba(163, 177, 198, 0.6), -6px -6px 12px rgba(255, 255, 255, 0.9); border-radius: var(--radius-sm);' : isGlassmorphism ? 'backdrop-filter: blur(10px); border-radius: var(--radius-sm);' : 'border-radius: var(--radius-sm);'} transition: all 0.2s; ${isBrutalist ? 'text-transform: uppercase;' : ''}" onmouseover="this.style.borderColor='var(--color-text)'" onmouseout="this.style.borderColor='var(--color-border)'">
                 Contact Us
               </a>
               ` : ''}
@@ -5202,158 +5299,144 @@ END:VCARD\`;
       </section>
 
       <!-- Stats Bar -->
-      <section style="background: var(--color-text); color: var(--color-bg); padding: 3rem 0;">
-        <div class="container">
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 3rem; text-align: center;">
+      <section style="background: ${isBrutalist ? 'var(--color-accent)' : isGradient ? 'linear-gradient(135deg, #667eea, #764ba2)' : isRetro ? 'var(--color-accent)' : 'var(--color-text)'}; color: ${isBrutalist ? 'var(--color-text)' : 'var(--color-bg)'}; padding: 3rem 0;">
+        <div class="container" style="margin: 0 auto; padding: 0 2rem;">
+          <div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 3rem; text-align: center;">
             <div>
-              <div style="font-size: 3.5rem; font-weight: 900; margin-bottom: 0.5rem;">3</div>
-              <div style="font-size: 1rem; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.9;">Days</div>
+              <div style="font-size: ${isBrutalist ? '4rem' : '3.5rem'}; font-weight: 900; margin-bottom: 0.5rem;">3</div>
+              <div style="font-size: 1rem; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.9; font-weight: ${isBrutalist ? '900' : 'normal'};">Days</div>
             </div>
             <div>
-              <div style="font-size: 3.5rem; font-weight: 900; margin-bottom: 0.5rem;">50+</div>
-              <div style="font-size: 1rem; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.9;">Speakers</div>
+              <div style="font-size: ${isBrutalist ? '4rem' : '3.5rem'}; font-weight: 900; margin-bottom: 0.5rem;">50+</div>
+              <div style="font-size: 1rem; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.9; font-weight: ${isBrutalist ? '900' : 'normal'};">Speakers</div>
             </div>
             <div>
-              <div style="font-size: 3.5rem; font-weight: 900; margin-bottom: 0.5rem;">100+</div>
-              <div style="font-size: 1rem; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.9;">Sessions</div>
+              <div style="font-size: ${isBrutalist ? '4rem' : '3.5rem'}; font-weight: 900; margin-bottom: 0.5rem;">100+</div>
+              <div style="font-size: 1rem; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.9; font-weight: ${isBrutalist ? '900' : 'normal'};">Sessions</div>
             </div>
             <div>
-              <div style="font-size: 3.5rem; font-weight: 900; margin-bottom: 0.5rem;">2000+</div>
-              <div style="font-size: 1rem; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.9;">Attendees</div>
+              <div style="font-size: ${isBrutalist ? '4rem' : '3.5rem'}; font-weight: 900; margin-bottom: 0.5rem;">2000+</div>
+              <div style="font-size: 1rem; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.9; font-weight: ${isBrutalist ? '900' : 'normal'};">Attendees</div>
             </div>
           </div>
         </div>
       </section>
 
-      ${data.speakers && data.speakers.trim() !== '' && data.speakers !== '[]' ? `
+      ${data.speakers && data.speakers.length > 0 ? `
       <!-- Speakers -->
       <section id="speakers" style="padding: 6rem 0; background: var(--color-bg);">
-        <div class="container">
+        <div class="container" style="margin: 0 auto; padding: 0 2rem;">
           <div style="text-align: center; margin-bottom: 5rem;">
-            <div style="display: inline-block; padding: 0.5rem 1.25rem; background: var(--color-accent); color: var(--color-bg); font-weight: 700; font-size: 0.875rem; letter-spacing: 0.1em; text-transform: uppercase; border-radius: var(--radius-full); margin-bottom: 1.5rem;">
+            <div style="display: inline-block; padding: ${isBrutalist ? '0.75rem 1.5rem' : '0.5rem 1.25rem'}; background: var(--color-accent); color: ${isBrutalist ? 'var(--color-text)' : 'var(--color-bg)'}; font-weight: ${isBrutalist ? '900' : '700'}; font-size: 0.875rem; letter-spacing: 0.1em; text-transform: uppercase; ${isBrutalist ? 'border: 3px solid var(--color-text);' : isNeumorphism ? 'box-shadow: 6px 6px 12px rgba(163, 177, 198, 0.6), -6px -6px 12px rgba(255, 255, 255, 0.9); border-radius: var(--radius-full);' : 'border-radius: var(--radius-full);'} margin-bottom: 1.5rem;">
               Featured Speakers
             </div>
-            <h2 style="font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 900; margin-bottom: 1rem; letter-spacing: -0.03em;">
+            <h2 style="font-family: ${isElegant ? 'Playfair Display, serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: clamp(2.5rem, 6vw, 4rem); font-weight: ${isBrutalist ? '900' : isRetro ? '700' : '900'}; margin-bottom: 1rem; letter-spacing: ${isBrutalist ? '-0.04em' : '-0.03em'}; ${isBrutalist || isRetro ? 'text-transform: uppercase;' : ''}">
               Learn from the Best
             </h2>
-            <p style="font-size: 1.25rem; color: var(--color-text-secondary); max-width: 600px; margin: 0 auto;">
+            <p style="font-family: ${isElegant ? 'Lato, sans-serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: 1.25rem; color: var(--color-text-secondary); max-width: 600px; margin: 0 auto; font-weight: ${isElegant ? '300' : 'normal'};">
               Industry leaders and innovators sharing their insights
             </p>
           </div>
           
-          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 2rem;">
-            ${(() => {
-              try {
-                const speakers = JSON.parse(data.speakers || '[]');
-                return speakers.map(speaker => `
-                  <div style="background: var(--color-surface); border: 2px solid var(--color-border); border-radius: var(--radius-lg); overflow: hidden; transition: all 0.3s;" class="speaker-card">
-                    ${speaker.imageUrl ? `
-                    <div style="aspect-ratio: 1/1; overflow: hidden; background: var(--color-border);">
-                      <img src="${speaker.imageUrl}" alt="${speaker.name}" style="width: 100%; height: 100%; object-fit: cover;">
-                    </div>
-                    ` : `
-                    <div style="aspect-ratio: 1/1; background: linear-gradient(135deg, var(--color-accent), var(--color-text)); display: flex; align-items: center; justify-content: center; font-size: 4rem; color: var(--color-bg); opacity: 0.8;">
-                      ${speaker.name?.charAt(0) || '?'}
-                    </div>
-                    `}
-                    <div style="padding: 2rem;">
-                      <h3 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 0.5rem; letter-spacing: -0.01em;">
-                        ${speaker.name || 'Speaker Name'}
-                      </h3>
-                      <div style="font-size: 0.9375rem; color: var(--color-accent); font-weight: 700; margin-bottom: 1rem;">
-                        ${speaker.title || 'Title'}
-                      </div>
-                      <p style="font-size: 0.9375rem; line-height: 1.6; color: var(--color-text-secondary);">
-                        ${speaker.bio || ''}
-                      </p>
-                    </div>
+          <div class="speakers-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 2rem;">
+            ${data.speakers.map(speaker => `
+              <div class="speaker-card" style="background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.05)' : isNeumorphism ? 'var(--color-bg)' : 'var(--color-surface)'}; border: ${isBrutalist ? '4px' : '2px'} solid var(--color-border); ${isBrutalist ? '' : isNeumorphism ? 'box-shadow: 10px 10px 20px rgba(163, 177, 198, 0.6), -10px -10px 20px rgba(255, 255, 255, 0.9); border-radius: var(--radius-lg);' : isGlassmorphism ? 'backdrop-filter: blur(10px); border-radius: var(--radius-lg);' : 'border-radius: var(--radius-lg);'} overflow: hidden; transition: all 0.3s;">
+                ${speaker.imageUrl ? `
+                <div style="aspect-ratio: 1/1; overflow: hidden; background: var(--color-border);">
+                  <img src="${speaker.imageUrl}" alt="${speaker.name}" style="width: 100%; height: 100%; object-fit: cover;">
+                </div>
+                ` : `
+                <div style="aspect-ratio: 1/1; background: ${isGradient ? 'linear-gradient(135deg, #667eea, #764ba2)' : isBrutalist ? 'var(--color-accent)' : isRetro ? 'linear-gradient(135deg, var(--color-accent), #b537f2)' : 'linear-gradient(135deg, var(--color-accent), var(--color-text))'}; display: flex; align-items: center; justify-content: center; font-size: 4rem; color: ${isBrutalist ? 'var(--color-text)' : 'var(--color-bg)'}; opacity: 0.8; font-weight: 900;">
+                  ${speaker.name?.charAt(0) || '?'}
+                </div>
+                `}
+                <div style="padding: 2rem;">
+                  <h3 style="font-family: ${isElegant ? 'Playfair Display, serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: 1.5rem; font-weight: ${isBrutalist ? '900' : '800'}; margin-bottom: 0.5rem; letter-spacing: -0.01em; ${isBrutalist ? 'text-transform: uppercase;' : ''}">
+                    ${speaker.name || 'Speaker Name'}
+                  </h3>
+                  <div style="font-size: 0.9375rem; color: var(--color-accent); font-weight: ${isBrutalist ? '900' : '700'}; margin-bottom: 1rem;">
+                    ${speaker.title || 'Title'}
                   </div>
-                `).join('');
-              } catch (e) {
-                return '';
-              }
-            })()}
+                  <p style="font-family: ${isElegant ? 'Lato, sans-serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: 0.9375rem; line-height: 1.6; color: var(--color-text-secondary); font-weight: ${isElegant ? '300' : 'normal'};">
+                    ${speaker.bio || ''}
+                  </p>
+                </div>
+              </div>
+            `).join('')}
           </div>
         </div>
       </section>
       ` : ''}
 
-      ${data.schedule && data.schedule.trim() !== '' && data.schedule !== '[]' ? `
+      ${data.schedule && data.schedule.length > 0 ? `
       <!-- Schedule -->
-      <section id="schedule" style="padding: 6rem 0; background: var(--color-surface);">
-        <div class="container" style="max-width: 1200px;">
+      <section id="schedule" style="padding: 6rem 0; background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.02)' : isNeumorphism ? 'var(--color-surface)' : 'var(--color-surface)'};">
+        <div class="container" style="max-width: 1200px; margin: 0 auto; padding: 0 2rem;">
           <div style="text-align: center; margin-bottom: 5rem;">
-            <div style="display: inline-block; padding: 0.5rem 1.25rem; background: var(--color-accent); color: var(--color-bg); font-weight: 700; font-size: 0.875rem; letter-spacing: 0.1em; text-transform: uppercase; border-radius: var(--radius-full); margin-bottom: 1.5rem;">
+            <div style="display: inline-block; padding: ${isBrutalist ? '0.75rem 1.5rem' : '0.5rem 1.25rem'}; background: var(--color-accent); color: ${isBrutalist ? 'var(--color-text)' : 'var(--color-bg)'}; font-weight: ${isBrutalist ? '900' : '700'}; font-size: 0.875rem; letter-spacing: 0.1em; text-transform: uppercase; ${isBrutalist ? 'border: 3px solid var(--color-text);' : isNeumorphism ? 'box-shadow: 6px 6px 12px rgba(163, 177, 198, 0.6), -6px -6px 12px rgba(255, 255, 255, 0.9); border-radius: var(--radius-full);' : 'border-radius: var(--radius-full);'} margin-bottom: 1.5rem;">
               Event Schedule
             </div>
-            <h2 style="font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 900; margin-bottom: 1rem; letter-spacing: -0.03em;">
+            <h2 style="font-family: ${isElegant ? 'Playfair Display, serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: clamp(2.5rem, 6vw, 4rem); font-weight: ${isBrutalist ? '900' : isRetro ? '700' : '900'}; margin-bottom: 1rem; letter-spacing: ${isBrutalist ? '-0.04em' : '-0.03em'}; ${isBrutalist || isRetro ? 'text-transform: uppercase;' : ''}">
               Three Days of Innovation
             </h2>
           </div>
           
-          ${(() => {
-            try {
-              const schedule = JSON.parse(data.schedule || '[]');
-              return schedule.map((day, i) => `
-                <div style="margin-bottom: 4rem;">
-                  <div style="background: var(--color-accent); color: var(--color-bg); padding: 1.5rem 2rem; border-radius: var(--radius-md); margin-bottom: 2rem;">
-                    <div style="font-size: 1.75rem; font-weight: 900; margin-bottom: 0.25rem;">
-                      ${day.day || `Day ${i + 1}`}
-                    </div>
-                    <div style="font-size: 1.125rem; opacity: 0.95; font-weight: 600;">
-                      ${day.date || ''}
-                    </div>
-                  </div>
-                  
-                  <div style="display: grid; gap: 1rem;">
-                    ${(day.sessions || []).map(session => `
-                      <div style="background: var(--color-bg); border: 2px solid var(--color-border); border-radius: var(--radius-md); padding: 2rem; display: flex; gap: 2rem; align-items: start; transition: border-color 0.2s;" onmouseover="this.style.borderColor='var(--color-accent)'" onmouseout="this.style.borderColor='var(--color-border)'">
-                        <div style="min-width: 120px;">
-                          <div style="font-size: 1.5rem; font-weight: 900; color: var(--color-accent);">
-                            ${session.time || ''}
-                          </div>
-                        </div>
-                        <div style="flex: 1;">
-                          <h3 style="font-size: 1.375rem; font-weight: 800; margin-bottom: 0.5rem; letter-spacing: -0.01em;">
-                            ${session.title || ''}
-                          </h3>
-                          ${session.speaker ? `
-                          <div style="font-size: 1rem; color: var(--color-text-secondary); font-weight: 600;">
-                            ${session.speaker}
-                          </div>
-                          ` : ''}
-                          ${session.description ? `
-                          <p style="font-size: 0.9375rem; line-height: 1.6; color: var(--color-text-secondary); margin-top: 1rem;">
-                            ${session.description}
-                          </p>
-                          ` : ''}
-                        </div>
-                      </div>
-                    `).join('')}
-                  </div>
+          ${data.schedule.map((day, i) => `
+            <div style="margin-bottom: 4rem;">
+              <div style="background: var(--color-accent); color: ${isBrutalist ? 'var(--color-text)' : 'var(--color-bg)'}; padding: ${isBrutalist ? '2rem 2.5rem' : '1.5rem 2rem'}; ${isBrutalist ? 'border: 4px solid var(--color-text); box-shadow: 6px 6px 0 var(--color-text);' : isNeumorphism ? 'box-shadow: 10px 10px 20px rgba(163, 177, 198, 0.6), -10px -10px 20px rgba(255, 255, 255, 0.9); border-radius: var(--radius-md);' : 'border-radius: var(--radius-md);'} margin-bottom: 2rem;">
+                <div style="font-size: ${isBrutalist ? '2rem' : '1.75rem'}; font-weight: 900; margin-bottom: 0.25rem; ${isBrutalist ? 'text-transform: uppercase;' : ''}">
+                  ${day.day || `Day ${i + 1}`}
                 </div>
-              `).join('');
-            } catch (e) {
-              return '';
-            }
-          })()}
+                <div style="font-size: 1.125rem; opacity: 0.95; font-weight: ${isBrutalist ? '900' : '600'};">
+                  ${day.date || ''}
+                </div>
+              </div>
+              
+              <div style="display: grid; gap: 1rem;">
+                ${(day.sessions || []).map(session => `
+                  <div style="background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.05)' : 'var(--color-bg)'}; border: ${isBrutalist ? '3px' : '2px'} solid var(--color-border); ${isBrutalist ? '' : isNeumorphism ? 'box-shadow: 8px 8px 16px rgba(163, 177, 198, 0.6), -8px -8px 16px rgba(255, 255, 255, 0.9); border-radius: var(--radius-md);' : isGlassmorphism ? 'backdrop-filter: blur(10px); border-radius: var(--radius-md);' : 'border-radius: var(--radius-md);'} padding: 2rem; display: flex; gap: 2rem; align-items: start; transition: border-color 0.2s;" onmouseover="this.style.borderColor='var(--color-accent)'" onmouseout="this.style.borderColor='var(--color-border)'">
+                    <div style="min-width: 120px;">
+                      <div style="font-size: 1.5rem; font-weight: 900; color: var(--color-accent);">
+                        ${session.time || ''}
+                      </div>
+                    </div>
+                    <div style="flex: 1;">
+                      <h3 style="font-family: ${isElegant ? 'Playfair Display, serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: 1.375rem; font-weight: ${isBrutalist ? '900' : '800'}; margin-bottom: 0.5rem; letter-spacing: -0.01em; ${isBrutalist ? 'text-transform: uppercase;' : ''}">
+                        ${session.title || ''}
+                      </h3>
+                      ${session.speaker ? `
+                      <div style="font-family: ${isElegant ? 'Lato, sans-serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: 1rem; color: var(--color-text-secondary); font-weight: ${isBrutalist ? '700' : '600'};">
+                        ${session.speaker}
+                      </div>
+                      ` : ''}
+                      ${session.description ? `
+                      <p style="font-family: ${isElegant ? 'Lato, sans-serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: 0.9375rem; line-height: 1.6; color: var(--color-text-secondary); margin-top: 1rem; font-weight: ${isElegant ? '300' : 'normal'};">
+                        ${session.description}
+                      </p>
+                      ` : ''}
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          `).join('')}
         </div>
       </section>
       ` : ''}
 
       <!-- Venue -->
       <section id="venue" style="padding: 6rem 0; background: var(--color-bg);">
-        <div class="container" style="max-width: 1200px;">
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center;">
+        <div class="container" style="max-width: 1200px; margin: 0 auto; padding: 0 2rem;">
+          <div class="venue-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center;">
             <div>
-              <div style="display: inline-block; padding: 0.5rem 1.25rem; background: var(--color-accent); color: var(--color-bg); font-weight: 700; font-size: 0.875rem; letter-spacing: 0.1em; text-transform: uppercase; border-radius: var(--radius-full); margin-bottom: 2rem;">
+              <div style="display: inline-block; padding: ${isBrutalist ? '0.75rem 1.5rem' : '0.5rem 1.25rem'}; background: var(--color-accent); color: ${isBrutalist ? 'var(--color-text)' : 'var(--color-bg)'}; font-weight: ${isBrutalist ? '900' : '700'}; font-size: 0.875rem; letter-spacing: 0.1em; text-transform: uppercase; ${isBrutalist ? 'border: 3px solid var(--color-text);' : isNeumorphism ? 'box-shadow: 6px 6px 12px rgba(163, 177, 198, 0.6), -6px -6px 12px rgba(255, 255, 255, 0.9); border-radius: var(--radius-full);' : 'border-radius: var(--radius-full);'} margin-bottom: 2rem;">
                 Venue
               </div>
-              <h2 style="font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: 900; margin-bottom: 2rem; letter-spacing: -0.03em;">
+              <h2 style="font-family: ${isElegant ? 'Playfair Display, serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: ${isBrutalist ? '900' : isRetro ? '700' : '900'}; margin-bottom: 2rem; letter-spacing: ${isBrutalist ? '-0.04em' : '-0.03em'}; ${isBrutalist || isRetro ? 'text-transform: uppercase;' : ''}">
                 ${data.venue || data.location || 'Conference Center'}
               </h2>
               ${data.venueAddress ? `
-              <div style="font-size: 1.125rem; line-height: 1.8; color: var(--color-text-secondary); margin-bottom: 2rem; white-space: pre-line;">
+              <div style="font-family: ${isElegant ? 'Lato, sans-serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: 1.125rem; line-height: 1.8; color: var(--color-text-secondary); margin-bottom: 2rem; white-space: pre-line; font-weight: ${isElegant ? '300' : 'normal'};">
                 ${data.venueAddress}
               </div>
               ` : ''}
@@ -5361,8 +5444,8 @@ END:VCARD\`;
                 ${data.location || ''}
               </div>
             </div>
-            <div style="aspect-ratio: 4/3; background: linear-gradient(135deg, var(--color-accent), var(--color-text)); border-radius: var(--radius-lg); display: flex; align-items: center; justify-content: center; font-size: 5rem; color: var(--color-bg); opacity: 0.8;">
-              Ã°Å¸â€œÂ
+            <div style="aspect-ratio: 4/3; background: ${isGradient ? 'linear-gradient(135deg, #667eea, #764ba2)' : isBrutalist ? 'var(--color-accent)' : isRetro ? 'linear-gradient(135deg, var(--color-accent), #b537f2)' : 'linear-gradient(135deg, var(--color-accent), var(--color-text))'}; ${isBrutalist ? 'border: 4px solid var(--color-text);' : isNeumorphism ? 'box-shadow: 10px 10px 20px rgba(163, 177, 198, 0.6), -10px -10px 20px rgba(255, 255, 255, 0.9); border-radius: var(--radius-lg);' : 'border-radius: var(--radius-lg);'} display: flex; align-items: center; justify-content: center; font-size: 5rem; color: ${isBrutalist ? 'var(--color-text)' : 'var(--color-bg)'}; opacity: 0.8;">
+              📍
             </div>
           </div>
         </div>
@@ -5370,14 +5453,14 @@ END:VCARD\`;
 
       ${data.sponsors ? `
       <!-- Sponsors -->
-      <section style="padding: 6rem 0; background: var(--color-surface); text-align: center;">
-        <div class="container">
-          <h2 style="font-size: 1.5rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 3rem; color: var(--color-text-secondary);">
+      <section style="padding: 6rem 0; background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.02)' : isNeumorphism ? 'var(--color-surface)' : 'var(--color-surface)'}; text-align: center;">
+        <div class="container" style="margin: 0 auto; padding: 0 2rem;">
+          <h2 style="font-size: ${isBrutalist ? '1.75rem' : '1.5rem'}; font-weight: ${isBrutalist ? '900' : '800'}; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 3rem; color: var(--color-text-secondary);">
             Our Sponsors
           </h2>
           <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 3rem; align-items: center;">
             ${data.sponsors.split(',').map(sponsor => `
-              <div style="font-size: 1.75rem; font-weight: 900; color: var(--color-text); opacity: 0.6; transition: opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'">
+              <div style="font-size: ${isBrutalist ? '2rem' : '1.75rem'}; font-weight: 900; color: var(--color-text); opacity: 0.6; transition: opacity 0.2s; ${isBrutalist ? 'text-transform: uppercase;' : ''}" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'">
                 ${sponsor.trim()}
               </div>
             `).join('')}
@@ -5387,26 +5470,26 @@ END:VCARD\`;
       ` : ''}
 
       <!-- Final CTA -->
-      <section style="padding: 8rem 0; background: var(--color-accent); color: var(--color-bg); text-align: center;">
-        <div class="container" style="max-width: 800px;">
-          <h2 style="font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 900; margin-bottom: 2rem; letter-spacing: -0.03em; line-height: 1.1;">
+      <section style="padding: 8rem 0; background: ${isBrutalist ? 'var(--color-accent)' : isGradient ? 'linear-gradient(135deg, #667eea, #764ba2)' : isRetro ? 'linear-gradient(90deg, var(--color-accent), #b537f2)' : 'var(--color-accent)'}; color: ${isBrutalist ? 'var(--color-text)' : 'var(--color-bg)'}; text-align: center;">
+        <div class="container" style="max-width: 800px; margin: 0 auto; padding: 0 2rem;">
+          <h2 style="font-family: ${isElegant ? 'Playfair Display, serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: ${isBrutalist ? '900' : isRetro ? '700' : '900'}; margin-bottom: 2rem; letter-spacing: ${isBrutalist ? '-0.05em' : '-0.03em'}; line-height: 1.1; ${isBrutalist || isRetro ? 'text-transform: uppercase;' : ''}">
             Don't Miss Out
           </h2>
-          <p style="font-size: 1.375rem; margin-bottom: 3rem; opacity: 0.95; line-height: 1.6;">
+          <p style="font-family: ${isElegant ? 'Lato, sans-serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: 1.375rem; margin-bottom: 3rem; opacity: 0.95; line-height: 1.6; font-weight: ${isElegant ? '300' : 'normal'};">
             Join us for ${data.conferenceName || 'the conference'} and connect with industry leaders
           </p>
           ${data.registerLink ? `
-          <a href="${data.registerLink}" target="_blank" style="display: inline-block; padding: 1.5rem 4rem; background: var(--color-bg); color: var(--color-accent); text-decoration: none; font-weight: 900; font-size: 1.25rem; border-radius: var(--radius-sm); transition: all 0.2s; box-shadow: 0 8px 24px rgba(0,0,0,0.2);" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 12px 32px rgba(0,0,0,0.3)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 8px 24px rgba(0,0,0,0.2)'">
-            Register Today ${data.price ? `Ã¢â‚¬Â¢ ${data.price}` : ''}
+          <a href="${data.registerLink}" target="_blank" style="display: inline-block; padding: ${isBrutalist ? '2rem 4.5rem' : '1.5rem 4rem'}; background: ${isBrutalist ? 'var(--color-text)' : 'var(--color-bg)'}; color: ${isBrutalist ? 'var(--color-bg)' : 'var(--color-accent)'}; text-decoration: none; font-weight: ${isBrutalist ? '900' : '900'}; font-size: 1.25rem; ${isBrutalist ? 'border: 4px solid var(--color-text); box-shadow: 8px 8px 0 var(--color-text);' : isNeumorphism ? 'box-shadow: 10px 10px 20px rgba(163, 177, 198, 0.6), -10px -10px 20px rgba(255, 255, 255, 0.9); border-radius: var(--radius-sm);' : 'border-radius: var(--radius-sm); box-shadow: 0 8px 24px rgba(0,0,0,0.2);'} transition: all 0.2s; ${isBrutalist ? 'text-transform: uppercase;' : ''}" onmouseover="${isBrutalist ? `this.style.transform='translate(-6px, -6px)'; this.style.boxShadow='14px 14px 0 var(--color-text)'` : `this.style.transform='translateY(-4px)'; this.style.boxShadow='0 12px 32px rgba(0,0,0,0.3)'`}" onmouseout="${isBrutalist ? `this.style.transform='translate(0, 0)'; this.style.boxShadow='8px 8px 0 var(--color-text)'` : `this.style.transform='translateY(0)'; this.style.boxShadow='0 8px 24px rgba(0,0,0,0.2)'`}">
+            Register Today ${data.price ? `• ${data.price}` : ''}
           </a>
           ` : ''}
         </div>
       </section>
 
       <!-- Footer -->
-      <footer style="padding: 3rem 0; background: var(--color-bg); text-align: center; color: var(--color-text-secondary); font-size: 0.875rem; border-top: 3px solid var(--color-border);">
+      <footer style="padding: 3rem 0; background: var(--color-bg); text-align: center; color: var(--color-text-secondary); font-size: 0.875rem; ${isBrutalist ? 'border-top: 4px solid var(--color-border);' : 'border-top: 3px solid var(--color-border);'}">
         <div class="container">
-          <p style="font-weight: 700;">Ã‚Â© 2024 ${data.conferenceName || 'Conference'}. ${data.contact ? `Contact: ${data.contact}` : ''}</p>
+          <p style="font-weight: ${isBrutalist ? '900' : '700'};">© 2024 ${data.conferenceName || 'Conference'}. ${data.contact ? `Contact: ${data.contact}` : ''}</p>
         </div>
       </footer>
 
@@ -5417,143 +5500,238 @@ END:VCARD\`;
         }
         
         .speaker-card:hover {
-          transform: translateY(-4px);
+          transform: ${isBrutalist ? 'translate(-4px, -4px)' : 'translateY(-4px)'};
           border-color: var(--color-accent);
-          box-shadow: var(--shadow-lg);
+          ${isBrutalist ? 'box-shadow: 8px 8px 0 var(--color-text);' : 'box-shadow: var(--shadow-lg);'}
         }
         
         @media (max-width: 968px) {
-          header nav { display: none !important; }
-          section > div > div[style*="grid-template-columns: 1fr 1fr"] {
+          .desktop-nav { display: none !important; }
+          .venue-grid {
             grid-template-columns: 1fr !important;
+          }
+          .speakers-grid {
+            grid-template-columns: 1fr !important;
+          }
+          .stats-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+          }
+          section[style*="padding: 8rem"] {
+            padding: 5rem 0 !important;
+          }
+          section[style*="padding: 6rem"] {
+            padding: 4rem 0 !important;
+          }
+        }
+        
+        @media (max-width: 480px) {
+          .container {
+            padding: 0 1rem !important;
+          }
+          .stats-grid {
+            grid-template-columns: 1fr !important;
+            gap: 2rem !important;
           }
         }
       </style>
     `
-  }),
-    tutoring: new Template('tutoring', {
-    name: 'Tutoring Services',
-    description: 'Professional tutoring and education services website',
-    category: 'Business',
-    defaultTheme: 'elegant',
-    fields: [
-      { id: 'businessName', label: 'Business Name', type: 'text', placeholder: 'Elite Tutoring Services', required: true },
-      { id: 'tagline', label: 'Tagline', type: 'text', placeholder: 'Empowering Students to Achieve Excellence' },
-      { id: 'about', label: 'About', type: 'textarea', placeholder: 'Tell students and parents about your tutoring approach and philosophy...' },
-      { id: 'subjects', label: 'Subjects Offered', type: 'textarea', placeholder: 'Enter subjects as JSON array: [{"name": "Mathematics", "grades": "K-12", "description": "Algebra, Calculus, Geometry"}, ...]' },
-      { id: 'qualifications', label: 'Qualifications', type: 'textarea', placeholder: 'Your credentials, degrees, certifications...' },
-      { id: 'testimonials', label: 'Testimonials', type: 'textarea', placeholder: 'Enter testimonials as JSON: [{"name": "Parent Name", "student": "Student Name", "text": "...", "rating": 5}, ...]' },
-      { id: 'pricing', label: 'Pricing Info', type: 'textarea', placeholder: 'Starting at $50/hour â€¢ Package deals available' },
-      { id: 'contact', label: 'Contact Email', type: 'email', placeholder: 'hello@tutoring.com' },
-      { id: 'phone', label: 'Phone', type: 'tel', placeholder: '(555) 123-4567' },
-      { id: 'bookingLink', label: 'Booking Link', type: 'url', placeholder: 'https://calendly.com/yourlink' },
-    ],
-    structure: (data, theme) => `
+  }
+}),
+'tutoring': new Template('tutoring', {
+  name: 'Tutoring Services',
+  description: 'Professional tutoring and education services website',
+  category: 'Business',
+  defaultTheme: 'elegant',
+  image: 'tutoring',
+  fields: {
+    businessName: { type: 'text', default: 'Elite Tutoring', label: 'Business Name', required: true },
+    tagline: { type: 'text', default: 'Empowering Students to Achieve Excellence', label: 'Tagline', required: true },
+    about: { 
+      type: 'textarea',
+      default: 'We provide personalized, one-on-one tutoring services designed to help students build confidence, master challenging concepts, and achieve their academic goals. Our approach combines proven teaching methods with individualized attention to ensure every student succeeds.',
+      label: 'About',
+      required: true 
+    },
+    subjects: {
+      type: 'group',
+      label: 'Subjects Offered',
+      itemLabel: 'Subject',
+      min: 1,
+      max: 15,
+      fields: {
+        name: { type: 'text', label: 'Subject Name', default: '' },
+        grades: { type: 'text', label: 'Grade Levels', default: '' },
+        description: { type: 'textarea', label: 'Description', default: '' }
+      },
+      default: [
+        { 
+          name: 'Mathematics',
+          grades: 'K-12, College',
+          description: 'Algebra, Geometry, Calculus, Statistics, and more'
+        },
+        { 
+          name: 'English & Writing',
+          grades: 'K-12',
+          description: 'Reading comprehension, essay writing, grammar, literature analysis'
+        },
+        { 
+          name: 'Science',
+          grades: '6-12, College',
+          description: 'Biology, Chemistry, Physics, Environmental Science'
+        }
+      ]
+    },
+    qualifications: { 
+      type: 'textarea',
+      default: 'Master\'s Degree in Education\nCertified Teacher with 10+ years experience\nSpecialized training in learning strategies\nExperience with students of all learning styles',
+      label: 'Qualifications',
+      required: false 
+    },
+    testimonials: {
+      type: 'group',
+      label: 'Testimonials',
+      itemLabel: 'Testimonial',
+      min: 0,
+      max: 10,
+      fields: {
+        name: { type: 'text', label: 'Name', default: '' },
+        student: { type: 'text', label: 'Student Name', default: '' },
+        text: { type: 'textarea', label: 'Testimonial Text', default: '' },
+        rating: { type: 'text', label: 'Rating (1-5)', default: '5' }
+      },
+      default: [
+        { 
+          name: 'Jennifer M.',
+          student: 'Sarah (10th grade)',
+          text: 'Our daughter\'s math grade improved from a C to an A in just one semester. The personalized attention made all the difference.',
+          rating: '5'
+        },
+        { 
+          name: 'Michael R.',
+          student: 'David (8th grade)',
+          text: 'Excellent tutor who really knows how to explain complex concepts in ways that make sense. Highly recommend!',
+          rating: '5'
+        }
+      ]
+    },
+    pricing: { 
+      type: 'text',
+      default: 'Starting at $60/hour • Package deals available',
+      label: 'Pricing Info',
+      required: false 
+    },
+    contact: { type: 'email', default: 'hello@elitetutoring.com', label: 'Contact Email', required: true },
+    phone: { type: 'tel', default: '', label: 'Phone Number', required: false },
+    bookingLink: { type: 'url', default: '', label: 'Booking/Scheduling Link', required: false }
+  },
+  structure: (data, theme) => {
+    const isBrutalist = theme.id === 'brutalist';
+    const isMinimal = theme.id === 'minimal';
+    const isGradient = theme.id === 'gradient';
+    const isElegant = theme.id === 'elegant';
+    const isRetro = theme.id === 'retro';
+    const isGlassmorphism = theme.id === 'glassmorphism';
+    const isNeumorphism = theme.id === 'neumorphism';
+
+    return `
       <!-- Header -->
-      <header style="position: sticky; top: 0; z-index: 1000; background: var(--color-bg); border-bottom: 2px solid var(--color-border); backdrop-filter: blur(10px);">
-        <div class="container" style="display: flex; justify-content: space-between; align-items: center; padding-top: 1.5rem; padding-bottom: 1.5rem;">
-          <div style="font-size: 1.5rem; font-weight: 900; color: var(--color-accent);">
-            ðŸ“š ${data.businessName || 'Tutoring Services'}
+      <header style="position: sticky; top: 0; z-index: 1000; background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.1)' : 'var(--color-bg)'}; ${isBrutalist ? 'border-bottom: 4px solid var(--color-border);' : 'border-bottom: 2px solid var(--color-border);'} ${isGlassmorphism ? 'backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);' : ''}">
+        <div class="container" style="display: flex; justify-content: space-between; align-items: center; padding: 1.5rem 2rem;">
+          <div style="font-family: ${isElegant ? 'Playfair Display, serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: ${isBrutalist ? '1.75rem' : '1.5rem'}; font-weight: ${isBrutalist ? '900' : '900'}; color: var(--color-accent); ${isBrutalist || isRetro ? 'text-transform: uppercase;' : ''}">
+            ${data.businessName || 'Tutoring Services'}
           </div>
-          <nav style="display: flex; gap: 2rem; align-items: center; font-weight: 600;">
-            <a href="#subjects" style="color: var(--color-text); text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">Subjects</a>
-            <a href="#about" style="color: var(--color-text); text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">About</a>
-            <a href="#testimonials" style="color: var(--color-text); text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">Reviews</a>
-            <a href="#contact" style="color: var(--color-text); text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">Contact</a>
-            <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle theme">
-              <span class="theme-icon">ðŸŒ™</span>
-            </button>
+          <nav class="desktop-nav" style="display: flex; gap: 2rem; align-items: center; font-weight: ${isBrutalist ? '900' : '600'};">
+            <a href="#subjects" style="color: var(--color-text); text-decoration: none; transition: color 0.2s; ${isBrutalist ? 'text-transform: uppercase;' : ''}" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">Subjects</a>
+            <a href="#about" style="color: var(--color-text); text-decoration: none; transition: color 0.2s; ${isBrutalist ? 'text-transform: uppercase;' : ''}" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">About</a>
+            <a href="#testimonials" style="color: var(--color-text); text-decoration: none; transition: color 0.2s; ${isBrutalist ? 'text-transform: uppercase;' : ''}" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">Reviews</a>
+            <a href="#contact" style="color: var(--color-text); text-decoration: none; transition: color 0.2s; ${isBrutalist ? 'text-transform: uppercase;' : ''}" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">Contact</a>
+            <label class="theme-toggle-switch-wrapper" style="cursor: pointer; ${isNeumorphism ? 'padding: 0.5rem; border-radius: 12px; display: inline-block; box-shadow: 6px 6px 12px rgba(163, 177, 198, 0.6), -6px -6px 12px rgba(255, 255, 255, 0.9);' : ''}">
+              <input type="checkbox" class="theme-toggle-switch" onclick="toggleTheme()" aria-label="Toggle theme">
+              <span class="theme-toggle-slider"></span>
+            </label>
           </nav>
         </div>
       </header>
 
       <!-- Hero -->
-      <section style="padding: 8rem 0 6rem; background: linear-gradient(135deg, var(--color-surface), var(--color-bg));">
-        <div class="container" style="text-align: center; max-width: 900px;">
-          <div style="font-size: 5rem; margin-bottom: 2rem;">ðŸŽ“</div>
-          <h1 style="font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 900; margin-bottom: 1.5rem; letter-spacing: -0.02em; line-height: 1.1;">
+      <section style="padding: ${isBrutalist ? '6rem 0 4rem' : '8rem 0 6rem'}; background: ${isGradient ? 'linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05))' : isGlassmorphism ? 'rgba(255, 255, 255, 0.02)' : 'linear-gradient(135deg, var(--color-surface), var(--color-bg))'}};">
+        <div class="container" style="text-align: center; max-width: 900px; margin: 0 auto; padding: 0 2rem;">
+          <h1 style="font-family: ${isElegant ? 'Playfair Display, serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: clamp(${isBrutalist ? '2rem' : '2.5rem'}, 6vw, ${isBrutalist ? '3.5rem' : '4.5rem'}); font-weight: ${isBrutalist ? '900' : isRetro ? '700' : '900'}; margin-bottom: 1.5rem; letter-spacing: ${isBrutalist ? '-0.04em' : '-0.02em'}; line-height: 1.1; ${isBrutalist || isRetro ? 'text-transform: uppercase;' : ''}">
             ${data.businessName || 'Professional Tutoring Services'}
           </h1>
-          <p style="font-size: 1.5rem; color: var(--color-text-secondary); margin-bottom: 3rem; line-height: 1.5;">
+          <p style="font-family: ${isElegant ? 'Lato, sans-serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: ${isBrutalist ? '1.25rem' : '1.5rem'}; color: var(--color-text-secondary); margin-bottom: 3rem; line-height: 1.5; font-weight: ${isElegant ? '300' : 'normal'};">
             ${data.tagline || 'Personalized Learning for Academic Excellence'}
           </p>
           ${data.bookingLink ? `
-          <a href="${data.bookingLink}" target="_blank" style="display: inline-block; padding: 1.25rem 3rem; background: var(--color-accent); color: var(--color-bg); text-decoration: none; font-weight: 700; font-size: 1.125rem; border-radius: var(--radius-md); transition: all 0.2s; box-shadow: var(--shadow-md);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='var(--shadow-lg)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-md)'">
+          <a href="${data.bookingLink}" target="_blank" style="display: inline-block; padding: ${isBrutalist ? '1.5rem 3.5rem' : '1.25rem 3rem'}; background: var(--color-accent); color: ${isBrutalist ? 'var(--color-text)' : 'var(--color-bg)'}; text-decoration: none; font-weight: ${isBrutalist ? '900' : '700'}; font-size: 1.125rem; ${isBrutalist ? 'border: 4px solid var(--color-text); box-shadow: 6px 6px 0 var(--color-text);' : isNeumorphism ? 'box-shadow: 10px 10px 20px rgba(163, 177, 198, 0.6), -10px -10px 20px rgba(255, 255, 255, 0.9); border-radius: var(--radius-md);' : 'border-radius: var(--radius-md); box-shadow: var(--shadow-md);'} transition: all 0.2s; ${isBrutalist ? 'text-transform: uppercase;' : ''}" onmouseover="${isBrutalist ? `this.style.transform='translate(-4px, -4px)'; this.style.boxShadow='10px 10px 0 var(--color-text)'` : `this.style.transform='translateY(-2px)'; this.style.boxShadow='var(--shadow-lg)'`}" onmouseout="${isBrutalist ? `this.style.transform='translate(0, 0)'; this.style.boxShadow='6px 6px 0 var(--color-text)'` : `this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-md)'`}">
             Book a Session
           </a>
           ` : ''}
           ${data.pricing ? `
-          <div style="margin-top: 2rem; font-size: 1.125rem; color: var(--color-text-secondary);">
+          <div style="margin-top: 2rem; font-size: 1.125rem; color: var(--color-text-secondary); font-weight: ${isBrutalist ? '700' : '600'};">
             ${data.pricing}
           </div>
           ` : ''}
         </div>
       </section>
 
-      ${data.subjects && data.subjects.trim() !== '' && data.subjects !== '[]' ? `
+      ${data.subjects && data.subjects.length > 0 ? `
       <!-- Subjects -->
       <section id="subjects" style="padding: 6rem 0; background: var(--color-bg);">
-        <div class="container">
+        <div class="container" style="margin: 0 auto; padding: 0 2rem;">
           <div style="text-align: center; margin-bottom: 4rem;">
-            <h2 style="font-size: clamp(2rem, 5vw, 3rem); font-weight: 900; margin-bottom: 1rem;">
+            <h2 style="font-family: ${isElegant ? 'Playfair Display, serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: clamp(2rem, 5vw, 3rem); font-weight: ${isBrutalist ? '900' : isRetro ? '700' : '900'}; margin-bottom: 1rem; ${isBrutalist || isRetro ? 'text-transform: uppercase;' : ''}">
               Subjects We Teach
             </h2>
-            <p style="font-size: 1.125rem; color: var(--color-text-secondary);">
+            <p style="font-family: ${isElegant ? 'Lato, sans-serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: 1.125rem; color: var(--color-text-secondary); font-weight: ${isElegant ? '300' : 'normal'};">
               Expert instruction across multiple subjects and grade levels
             </p>
           </div>
           
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
-            ${(() => {
-              try {
-                const subjects = JSON.parse(data.subjects || '[]');
-                return subjects.map(subject => `
-                  <div style="background: var(--color-surface); border: 2px solid var(--color-border); border-radius: var(--radius-lg); padding: 2rem; transition: all 0.2s;" onmouseover="this.style.borderColor='var(--color-accent)'; this.style.transform='translateY(-4px)'" onmouseout="this.style.borderColor='var(--color-border)'; this.style.transform='translateY(0)'">
-                    <h3 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 0.5rem; color: var(--color-accent);">
-                      ${subject.name || 'Subject'}
-                    </h3>
-                    ${subject.grades ? `
-                    <div style="font-size: 0.875rem; color: var(--color-text-secondary); font-weight: 600; margin-bottom: 1rem;">
-                      Grades: ${subject.grades}
-                    </div>
-                    ` : ''}
-                    ${subject.description ? `
-                    <p style="color: var(--color-text-secondary); line-height: 1.6;">
-                      ${subject.description}
-                    </p>
-                    ` : ''}
-                  </div>
-                `).join('');
-              } catch (e) {
-                return '<p style="text-align: center; color: var(--color-text-secondary);">Subjects information will appear here</p>';
-              }
-            })()}
+          <div class="subjects-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+            ${data.subjects.map(subject => `
+              <div style="background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.05)' : isNeumorphism ? 'var(--color-bg)' : 'var(--color-surface)'}; border: ${isBrutalist ? '4px' : '2px'} solid var(--color-border); ${isBrutalist ? '' : isNeumorphism ? 'box-shadow: 10px 10px 20px rgba(163, 177, 198, 0.6), -10px -10px 20px rgba(255, 255, 255, 0.9); border-radius: var(--radius-lg);' : isGlassmorphism ? 'backdrop-filter: blur(10px); border-radius: var(--radius-lg);' : 'border-radius: var(--radius-lg);'} padding: 2rem; transition: all 0.2s;" onmouseover="${isBrutalist ? `this.style.transform='translate(-4px, -4px)'; this.style.boxShadow='8px 8px 0 var(--color-text)'` : isNeumorphism ? `this.style.boxShadow='inset 4px 4px 8px rgba(163, 177, 198, 0.6), inset -4px -4px 8px rgba(255, 255, 255, 0.9)'` : `this.style.borderColor='var(--color-accent)'; this.style.transform='translateY(-4px)'`}" onmouseout="${isBrutalist ? `this.style.transform='translate(0, 0)'; this.style.boxShadow='none'` : isNeumorphism ? `this.style.boxShadow='10px 10px 20px rgba(163, 177, 198, 0.6), -10px -10px 20px rgba(255, 255, 255, 0.9)'` : `this.style.borderColor='var(--color-border)'; this.style.transform='translateY(0)'`}">
+                <h3 style="font-family: ${isElegant ? 'Playfair Display, serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: 1.5rem; font-weight: ${isBrutalist ? '900' : '800'}; margin-bottom: 0.5rem; color: var(--color-accent); ${isBrutalist ? 'text-transform: uppercase;' : ''}">
+                  ${subject.name || 'Subject'}
+                </h3>
+                ${subject.grades ? `
+                <div style="font-size: 0.875rem; color: var(--color-text-secondary); font-weight: ${isBrutalist ? '900' : '600'}; margin-bottom: 1rem; ${isBrutalist ? 'text-transform: uppercase;' : ''}">
+                  Grades: ${subject.grades}
+                </div>
+                ` : ''}
+                ${subject.description ? `
+                <p style="font-family: ${isElegant ? 'Lato, sans-serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; color: var(--color-text-secondary); line-height: 1.6; font-weight: ${isElegant ? '300' : 'normal'};">
+                  ${subject.description}
+                </p>
+                ` : ''}
+              </div>
+            `).join('')}
           </div>
         </div>
       </section>
       ` : ''}
 
       <!-- About -->
-      <section id="about" style="padding: 6rem 0; background: var(--color-surface);">
-        <div class="container" style="max-width: 900px;">
+      <section id="about" style="padding: 6rem 0; background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.02)' : isNeumorphism ? 'var(--color-surface)' : 'var(--color-surface)'};">
+        <div class="container" style="max-width: 900px; margin: 0 auto; padding: 0 2rem;">
           <div style="text-align: center; margin-bottom: 4rem;">
-            <h2 style="font-size: clamp(2rem, 5vw, 3rem); font-weight: 900; margin-bottom: 1rem;">
+            <h2 style="font-family: ${isElegant ? 'Playfair Display, serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: clamp(2rem, 5vw, 3rem); font-weight: ${isBrutalist ? '900' : isRetro ? '700' : '900'}; margin-bottom: 1rem; ${isBrutalist || isRetro ? 'text-transform: uppercase;' : ''}">
               About Our Tutoring
             </h2>
           </div>
           
           ${data.about ? `
-          <div style="font-size: 1.125rem; line-height: 1.8; color: var(--color-text); margin-bottom: 3rem; white-space: pre-line;">
+          <div style="font-family: ${isElegant ? 'Lato, sans-serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: 1.125rem; line-height: 1.8; color: var(--color-text); margin-bottom: 3rem; white-space: pre-line; font-weight: ${isElegant ? '300' : 'normal'};">
             ${data.about}
           </div>
           ` : ''}
           
           ${data.qualifications ? `
-          <div style="background: var(--color-bg); border-left: 4px solid var(--color-accent); border-radius: var(--radius-md); padding: 2rem;">
-            <h3 style="font-size: 1.25rem; font-weight: 800; margin-bottom: 1rem; color: var(--color-accent);">
+          <div style="background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.05)' : isNeumorphism ? 'var(--color-bg)' : 'var(--color-bg)'}; border-left: ${isBrutalist ? '8px' : '4px'} solid var(--color-accent); ${isBrutalist ? 'border: 4px solid var(--color-text); border-left: 8px solid var(--color-accent);' : isNeumorphism ? 'box-shadow: 6px 6px 12px rgba(163, 177, 198, 0.6), -6px -6px 12px rgba(255, 255, 255, 0.9); border-radius: var(--radius-md);' : isGlassmorphism ? 'backdrop-filter: blur(10px); border-radius: var(--radius-md);' : 'border-radius: var(--radius-md);'} padding: 2rem;">
+            <h3 style="font-family: ${isElegant ? 'Playfair Display, serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: 1.25rem; font-weight: ${isBrutalist ? '900' : '800'}; margin-bottom: 1rem; color: var(--color-accent); ${isBrutalist ? 'text-transform: uppercase;' : ''}">
               Qualifications & Experience
             </h3>
-            <div style="color: var(--color-text-secondary); line-height: 1.8; white-space: pre-line;">
+            <div style="font-family: ${isElegant ? 'Lato, sans-serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; color: var(--color-text-secondary); line-height: 1.8; white-space: pre-line; font-weight: ${isElegant ? '300' : 'normal'};">
               ${data.qualifications}
             </div>
           </div>
@@ -5561,76 +5739,69 @@ END:VCARD\`;
         </div>
       </section>
 
-      ${data.testimonials && data.testimonials.trim() !== '' && data.testimonials !== '[]' ? `
+      ${data.testimonials && data.testimonials.length > 0 ? `
       <!-- Testimonials -->
       <section id="testimonials" style="padding: 6rem 0; background: var(--color-bg);">
-        <div class="container">
+        <div class="container" style="margin: 0 auto; padding: 0 2rem;">
           <div style="text-align: center; margin-bottom: 4rem;">
-            <h2 style="font-size: clamp(2rem, 5vw, 3rem); font-weight: 900; margin-bottom: 1rem;">
+            <h2 style="font-family: ${isElegant ? 'Playfair Display, serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: clamp(2rem, 5vw, 3rem); font-weight: ${isBrutalist ? '900' : isRetro ? '700' : '900'}; margin-bottom: 1rem; ${isBrutalist || isRetro ? 'text-transform: uppercase;' : ''}">
               What Parents & Students Say
             </h2>
           </div>
           
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
-            ${(() => {
-              try {
-                const testimonials = JSON.parse(data.testimonials || '[]');
-                return testimonials.map(testimonial => `
-                  <div style="background: var(--color-surface); border: 2px solid var(--color-border); border-radius: var(--radius-lg); padding: 2rem;">
-                    ${testimonial.rating ? `
-                    <div style="font-size: 1.25rem; margin-bottom: 1rem; color: var(--color-accent);">
-                      ${'â­'.repeat(testimonial.rating)}
-                    </div>
-                    ` : ''}
-                    <p style="font-size: 1rem; line-height: 1.6; color: var(--color-text); margin-bottom: 1.5rem; font-style: italic;">
-                      "${testimonial.text || ''}"
-                    </p>
-                    <div style="font-weight: 700; color: var(--color-text);">
-                      ${testimonial.name || 'Parent'}
-                    </div>
-                    ${testimonial.student ? `
-                    <div style="font-size: 0.875rem; color: var(--color-text-secondary);">
-                      Parent of ${testimonial.student}
-                    </div>
-                    ` : ''}
-                  </div>
-                `).join('');
-              } catch (e) {
-                return '';
-              }
-            })()}
+          <div class="testimonials-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+            ${data.testimonials.map(testimonial => `
+              <div style="background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.05)' : isNeumorphism ? 'var(--color-bg)' : 'var(--color-surface)'}; border: ${isBrutalist ? '4px' : '2px'} solid var(--color-border); ${isBrutalist ? '' : isNeumorphism ? 'box-shadow: 10px 10px 20px rgba(163, 177, 198, 0.6), -10px -10px 20px rgba(255, 255, 255, 0.9); border-radius: var(--radius-lg);' : isGlassmorphism ? 'backdrop-filter: blur(10px); border-radius: var(--radius-lg);' : 'border-radius: var(--radius-lg);'} padding: 2rem;">
+                ${testimonial.rating ? `
+                <div style="font-size: 1.25rem; margin-bottom: 1rem; color: var(--color-accent);">
+                  ${'★'.repeat(parseInt(testimonial.rating) || 5)}
+                </div>
+                ` : ''}
+                <p style="font-family: ${isElegant ? 'Lato, sans-serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: 1rem; line-height: 1.6; color: var(--color-text); margin-bottom: 1.5rem; ${isElegant ? 'font-style: italic;' : ''} font-weight: ${isElegant ? '300' : 'normal'};">
+                  "${testimonial.text || ''}"
+                </p>
+                <div style="font-weight: ${isBrutalist ? '900' : '700'}; color: var(--color-text);">
+                  ${testimonial.name || 'Parent'}
+                </div>
+                ${testimonial.student ? `
+                <div style="font-size: 0.875rem; color: var(--color-text-secondary);">
+                  Parent of ${testimonial.student}
+                </div>
+                ` : ''}
+              </div>
+            `).join('')}
           </div>
         </div>
       </section>
       ` : ''}
 
       <!-- Contact -->
-      <section id="contact" style="padding: 6rem 0; background: var(--color-surface);">
-        <div class="container" style="max-width: 700px; text-align: center;">
-          <h2 style="font-size: clamp(2rem, 5vw, 3rem); font-weight: 900; margin-bottom: 1rem;">
+      <section id="contact" style="padding: 6rem 0; background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.02)' : isNeumorphism ? 'var(--color-surface)' : 'var(--color-surface)'};">
+        <div class="container" style="max-width: 700px; text-align: center; margin: 0 auto; padding: 0 2rem;">
+          <h2 style="font-family: ${isElegant ? 'Playfair Display, serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: clamp(2rem, 5vw, 3rem); font-weight: ${isBrutalist ? '900' : isRetro ? '700' : '900'}; margin-bottom: 1rem; ${isBrutalist || isRetro ? 'text-transform: uppercase;' : ''}">
             Ready to Get Started?
           </h2>
-          <p style="font-size: 1.125rem; color: var(--color-text-secondary); margin-bottom: 3rem;">
+          <p style="font-family: ${isElegant ? 'Lato, sans-serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: 1.125rem; color: var(--color-text-secondary); margin-bottom: 3rem; font-weight: ${isElegant ? '300' : 'normal'};">
             Contact us today to schedule your first tutoring session
           </p>
           
           <div style="display: flex; flex-direction: column; gap: 1.5rem; align-items: center; margin-bottom: 3rem;">
             ${data.contact ? `
-            <a href="mailto:${data.contact}" style="display: flex; align-items: center; gap: 1rem; font-size: 1.125rem; color: var(--color-text); text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">
-              <span style="font-size: 1.5rem;">âœ‰ï¸</span>
+            <a href="mailto:${data.contact}" style="display: flex; align-items: center; gap: 1rem; font-size: 1.125rem; color: var(--color-text); text-decoration: none; transition: color 0.2s; font-weight: ${isBrutalist ? '900' : '600'};" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">
+              <span style="font-size: 1.5rem;">✉</span>
               ${data.contact}
             </a>
             ` : ''}
             ${data.phone ? `
-            <a href="tel:${data.phone}" style="display: flex; align-items: center; gap: 1rem; font-size: 1.125rem; color: var(--color-text); text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">
-              <span style="font-size: 1.5rem;">ðŸ“ž</span>
+            <a href="tel:${data.phone}" style="display: flex; align-items: center; gap: 1rem; font-size: 1.125rem; color: var(--color-text); text-decoration: none; transition: color 0.2s; font-weight: ${isBrutalist ? '900' : '600'};" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">
+              <span style="font-size: 1.5rem;">☎</span>
               ${data.phone}
             </a>
             ` : ''}
           </div>
           
           ${data.bookingLink ? `
-          <a href="${data.bookingLink}" target="_blank" style="display: inline-block; padding: 1.25rem 3rem; background: var(--color-accent); color: var(--color-bg); text-decoration: none; font-weight: 700; font-size: 1.125rem; border-radius: var(--radius-md); transition: all 0.2s; box-shadow: var(--shadow-md);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='var(--shadow-lg)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-md)'">
+          <a href="${data.bookingLink}" target="_blank" style="display: inline-block; padding: ${isBrutalist ? '1.5rem 3.5rem' : '1.25rem 3rem'}; background: var(--color-accent); color: ${isBrutalist ? 'var(--color-text)' : 'var(--color-bg)'}; text-decoration: none; font-weight: ${isBrutalist ? '900' : '700'}; font-size: 1.125rem; ${isBrutalist ? 'border: 4px solid var(--color-text); box-shadow: 6px 6px 0 var(--color-text);' : isNeumorphism ? 'box-shadow: 10px 10px 20px rgba(163, 177, 198, 0.6), -10px -10px 20px rgba(255, 255, 255, 0.9); border-radius: var(--radius-md);' : 'border-radius: var(--radius-md); box-shadow: var(--shadow-md);'} transition: all 0.2s; ${isBrutalist ? 'text-transform: uppercase;' : ''}" onmouseover="${isBrutalist ? `this.style.transform='translate(-4px, -4px)'; this.style.boxShadow='10px 10px 0 var(--color-text)'` : `this.style.transform='translateY(-2px)'; this.style.boxShadow='var(--shadow-lg)'`}" onmouseout="${isBrutalist ? `this.style.transform='translate(0, 0)'; this.style.boxShadow='6px 6px 0 var(--color-text)'` : `this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-md)'`}">
             Schedule a Free Consultation
           </a>
           ` : ''}
@@ -5638,98 +5809,236 @@ END:VCARD\`;
       </section>
 
       <!-- Footer -->
-      <footer style="padding: 2rem 0; background: var(--color-bg); text-align: center; color: var(--color-text-secondary); font-size: 0.875rem; border-top: 2px solid var(--color-border);">
+      <footer style="padding: 2rem 0; background: var(--color-bg); text-align: center; color: var(--color-text-secondary); font-size: 0.875rem; ${isBrutalist ? 'border-top: 4px solid var(--color-border);' : 'border-top: 2px solid var(--color-border);'}">
         <div class="container">
-          <p>Â© 2024 ${data.businessName || 'Tutoring Services'}. All rights reserved.</p>
+          <p style="font-weight: ${isBrutalist ? '900' : 'normal'};">© 2024 ${data.businessName || 'Tutoring Services'}. All rights reserved.</p>
         </div>
       </footer>
 
       <style>
         @media (max-width: 768px) {
-          header nav { display: none !important; }
+          .desktop-nav { display: none !important; }
+          .subjects-grid {
+            grid-template-columns: 1fr !important;
+          }
+          .testimonials-grid {
+            grid-template-columns: 1fr !important;
+          }
+          section[style*="padding: 8rem"] {
+            padding: 5rem 0 !important;
+          }
+          section[style*="padding: 6rem"] {
+            padding: 4rem 0 !important;
+          }
+        }
+        
+        @media (max-width: 480px) {
+          .container {
+            padding: 0 1rem !important;
+          }
         }
       </style>
     `
-  }),
+  }
+}),
+'realestate': new Template('realestate', {
+  name: 'Real Estate Agent',
+  description: 'Professional real estate agent and property listings website',
+  category: 'Business',
+  defaultTheme: 'glassmorphism',
+  image: 'real-estate',
+  fields: {
+    agentName: { type: 'text', default: 'Sarah Mitchell', label: 'Agent Name', required: true },
+    title: { type: 'text', default: 'Luxury Real Estate Specialist', label: 'Professional Title', required: false },
+    tagline: { type: 'text', default: 'Finding Your Dream Home in Los Angeles', label: 'Tagline', required: true },
+    bio: { 
+      type: 'textarea',
+      default: 'With over 15 years of experience in luxury real estate, I specialize in helping clients find their perfect property. My deep knowledge of the local market, combined with personalized service, ensures a smooth and successful transaction every time.',
+      label: 'About',
+      required: true 
+    },
+    serviceArea: { type: 'text', default: 'Greater Los Angeles Area', label: 'Service Area', required: false },
+    featuredListings: {
+      type: 'group',
+      label: 'Featured Properties',
+      itemLabel: 'Property',
+      min: 0,
+      max: 20,
+      fields: {
+        address: { type: 'text', label: 'Address', default: '' },
+        price: { type: 'text', label: 'Price', default: '' },
+        beds: { type: 'text', label: 'Bedrooms', default: '' },
+        baths: { type: 'text', label: 'Bathrooms', default: '' },
+        sqft: { type: 'text', label: 'Square Feet', default: '' },
+        type: { type: 'text', label: 'Property Type', default: '' },
+        status: { type: 'text', label: 'Status', default: 'For Sale' },
+        imageUrl: { type: 'url', label: 'Image URL', default: '' }
+      },
+      default: [
+        { 
+          address: '123 Ocean Avenue',
+          price: '$1,250,000',
+          beds: '4',
+          baths: '3',
+          sqft: '2,800',
+          type: 'Single Family Home',
+          status: 'For Sale',
+          imageUrl: ''
+        },
+        { 
+          address: '456 Sunset Boulevard',
+          price: '$895,000',
+          beds: '3',
+          baths: '2',
+          sqft: '2,100',
+          type: 'Condo',
+          status: 'For Sale',
+          imageUrl: ''
+        }
+      ]
+    },
+    services: {
+      type: 'group',
+      label: 'Services',
+      itemLabel: 'Service',
+      min: 0,
+      max: 10,
+      fields: {
+        name: { type: 'text', label: 'Service Name', default: '' },
+        description: { type: 'textarea', label: 'Description', default: '' }
+      },
+      default: [
+        { 
+          name: 'Buyer Representation',
+          description: 'Expert guidance through every step of the home buying process'
+        },
+        { 
+          name: 'Seller Representation',
+          description: 'Strategic marketing and negotiation to get top dollar for your home'
+        },
+        { 
+          name: 'Market Analysis',
+          description: 'Comprehensive market insights and property valuations'
+        }
+      ]
+    },
+    testimonials: {
+      type: 'group',
+      label: 'Client Testimonials',
+      itemLabel: 'Testimonial',
+      min: 0,
+      max: 15,
+      fields: {
+        name: { type: 'text', label: 'Client Name', default: '' },
+        text: { type: 'textarea', label: 'Testimonial', default: '' },
+        property: { type: 'text', label: 'Property Details', default: '' },
+        rating: { type: 'text', label: 'Rating (1-5)', default: '5' }
+      },
+      default: [
+        { 
+          name: 'John & Mary Smith',
+          text: 'Sarah helped us find our dream home! Her expertise and dedication made the entire process smooth and stress-free.',
+          property: 'Bought 4BR Single Family Home',
+          rating: '5'
+        },
+        { 
+          name: 'Michael Chen',
+          text: 'Professional, knowledgeable, and always responsive. Sarah sold our condo in just 10 days!',
+          property: 'Sold 2BR Condo',
+          rating: '5'
+        }
+      ]
+    },
+    stats: {
+      type: 'group',
+      label: 'Statistics',
+      itemLabel: 'Stat',
+      min: 0,
+      max: 6,
+      fields: {
+        number: { type: 'text', label: 'Number', default: '' },
+        label: { type: 'text', label: 'Label', default: '' }
+      },
+      default: [
+        { number: '150+', label: 'Homes Sold' },
+        { number: '$50M+', label: 'Sales Volume' },
+        { number: '15', label: 'Years Experience' },
+        { number: '98%', label: 'Client Satisfaction' }
+      ]
+    },
+    license: { type: 'text', default: 'DRE #01234567', label: 'License Number', required: false },
+    brokerage: { type: 'text', default: 'Luxury Realty Group', label: 'Brokerage', required: false },
+    contact: { type: 'email', default: 'sarah@luxuryrealty.com', label: 'Email', required: true },
+    phone: { type: 'tel', default: '(555) 123-4567', label: 'Phone', required: false },
+    calendlyLink: { type: 'url', default: '', label: 'Consultation/Booking Link', required: false }
+  },
+  structure: (data, theme) => {
+    const isBrutalist = theme.id === 'brutalist';
+    const isMinimal = theme.id === 'minimal';
+    const isGradient = theme.id === 'gradient';
+    const isElegant = theme.id === 'elegant';
+    const isRetro = theme.id === 'retro';
+    const isGlassmorphism = theme.id === 'glassmorphism';
+    const isNeumorphism = theme.id === 'neumorphism';
 
-  realestate: new Template('realestate', {
-    name: 'Real Estate Agent',
-    description: 'Professional real estate agent and property listings website',
-    category: 'Business',
-    defaultTheme: 'glassmorphism',
-    fields: [
-      { id: 'agentName', label: 'Agent Name', type: 'text', placeholder: 'Sarah Mitchell', required: true },
-      { id: 'title', label: 'Professional Title', type: 'text', placeholder: 'Luxury Real Estate Specialist' },
-      { id: 'tagline', label: 'Tagline', type: 'text', placeholder: 'Finding Your Dream Home in [City]' },
-      { id: 'bio', label: 'About', type: 'textarea', placeholder: 'Share your experience, market expertise, and what makes you unique...' },
-      { id: 'serviceArea', label: 'Service Area', type: 'text', placeholder: 'Greater Los Angeles Area' },
-      { id: 'featuredListings', label: 'Featured Properties', type: 'textarea', placeholder: 'Enter properties as JSON: [{"address": "123 Oak St", "price": "$1,250,000", "beds": 4, "baths": 3, "sqft": "2,800", "type": "Single Family", "status": "For Sale", "image": "ðŸ¡"}, ...]' },
-      { id: 'services', label: 'Services', type: 'textarea', placeholder: 'Enter services as JSON: [{"name": "Buyer Representation", "icon": "ðŸ”", "description": "..."}, ...]' },
-      { id: 'testimonials', label: 'Client Testimonials', type: 'textarea', placeholder: 'Enter testimonials as JSON: [{"name": "John & Mary Smith", "text": "Sarah helped us find our dream home!", "property": "Bought 2BR Condo", "rating": 5}, ...]' },
-      { id: 'stats', label: 'Statistics', type: 'textarea', placeholder: 'Enter stats as JSON: [{"number": "150+", "label": "Homes Sold"}, {"number": "$50M+", "label": "Sales Volume"}, ...]' },
-      { id: 'license', label: 'License Number', type: 'text', placeholder: 'DRE #01234567' },
-      { id: 'brokerage', label: 'Brokerage', type: 'text', placeholder: 'Luxury Realty Group' },
-      { id: 'contact', label: 'Email', type: 'email', placeholder: 'sarah@luxuryrealty.com' },
-      { id: 'phone', label: 'Phone', type: 'tel', placeholder: '(555) 123-4567' },
-      { id: 'calendlyLink', label: 'Consultation Link', type: 'url', placeholder: 'https://calendly.com/yourlink' },
-    ],
-    structure: (data, theme) => `
+    return `
       <!-- Header -->
-      <header style="position: sticky; top: 0; z-index: 1000; background: rgba(var(--color-bg-rgb, 255, 255, 255), 0.85); backdrop-filter: blur(20px); border-bottom: 1px solid var(--color-border);">
-        <div class="container" style="display: flex; justify-content: space-between; align-items: center; padding-top: 1.25rem; padding-bottom: 1.25rem;">
+      <header style="position: sticky; top: 0; z-index: 1000; background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.1)' : isNeumorphism ? 'var(--color-bg)' : 'rgba(var(--color-bg-rgb, 255, 255, 255), 0.85)'}; ${isGlassmorphism || (!isBrutalist && !isNeumorphism) ? 'backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);' : ''} ${isBrutalist ? 'border-bottom: 4px solid var(--color-border);' : 'border-bottom: 1px solid var(--color-border);'} ${isNeumorphism ? 'box-shadow: 0 4px 6px rgba(163, 177, 198, 0.3), 0 -1px 3px rgba(255, 255, 255, 0.5);' : ''}">
+        <div class="container" style="display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 2rem;">
           <div>
-            <div style="font-size: 1.5rem; font-weight: 900; color: var(--color-accent); letter-spacing: -0.02em;">
+            <div style="font-family: ${isElegant ? 'Playfair Display, serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: ${isBrutalist ? '1.75rem' : '1.5rem'}; font-weight: ${isBrutalist ? '900' : '900'}; color: var(--color-accent); letter-spacing: -0.02em; ${isBrutalist || isRetro ? 'text-transform: uppercase;' : ''}">
               ${data.agentName || 'Real Estate Agent'}
             </div>
             ${data.brokerage ? `
-            <div style="font-size: 0.75rem; color: var(--color-text-secondary); font-weight: 600; margin-top: 0.25rem;">
+            <div style="font-size: 0.75rem; color: var(--color-text-secondary); font-weight: ${isBrutalist ? '900' : '600'}; margin-top: 0.25rem; ${isBrutalist ? 'text-transform: uppercase;' : ''}">
               ${data.brokerage}
             </div>
             ` : ''}
           </div>
-          <nav style="display: flex; gap: 2rem; align-items: center; font-weight: 600; font-size: 0.9375rem;">
-            <a href="#listings" style="color: var(--color-text); text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">Listings</a>
-            <a href="#services" style="color: var(--color-text); text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">Services</a>
-            <a href="#testimonials" style="color: var(--color-text); text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">Testimonials</a>
-            <a href="#contact" style="color: var(--color-text); text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">Contact</a>
-            <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle theme">
-              <span class="theme-icon">ðŸŒ™</span>
-            </button>
+          <nav class="desktop-nav" style="display: flex; gap: 2rem; align-items: center; font-weight: ${isBrutalist ? '900' : '600'}; font-size: 0.9375rem;">
+            <a href="#listings" style="color: var(--color-text); text-decoration: none; transition: color 0.2s; ${isBrutalist ? 'text-transform: uppercase;' : ''}" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">Listings</a>
+            <a href="#services" style="color: var(--color-text); text-decoration: none; transition: color 0.2s; ${isBrutalist ? 'text-transform: uppercase;' : ''}" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">Services</a>
+            <a href="#testimonials" style="color: var(--color-text); text-decoration: none; transition: color 0.2s; ${isBrutalist ? 'text-transform: uppercase;' : ''}" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">Testimonials</a>
+            <a href="#contact" style="color: var(--color-text); text-decoration: none; transition: color 0.2s; ${isBrutalist ? 'text-transform: uppercase;' : ''}" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">Contact</a>
+            <label class="theme-toggle-switch-wrapper" style="cursor: pointer; ${isNeumorphism ? 'padding: 0.5rem; border-radius: 12px; display: inline-block; box-shadow: 6px 6px 12px rgba(163, 177, 198, 0.6), -6px -6px 12px rgba(255, 255, 255, 0.9);' : ''}">
+              <input type="checkbox" class="theme-toggle-switch" onclick="toggleTheme()" aria-label="Toggle theme">
+              <span class="theme-toggle-slider"></span>
+            </label>
           </nav>
         </div>
       </header>
 
       <!-- Hero -->
-      <section style="padding: 8rem 0 6rem; background: linear-gradient(135deg, var(--color-surface), var(--color-bg)); position: relative; overflow: hidden;">
-        <div style="position: absolute; inset: 0; opacity: 0.03; background-image: radial-gradient(circle, var(--color-text) 1px, transparent 1px); background-size: 30px 30px;"></div>
-        <div class="container" style="position: relative; z-index: 1;">
+      <section style="padding: ${isBrutalist ? '6rem 0 4rem' : '8rem 0 6rem'}; background: ${isGradient ? 'linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05))' : 'linear-gradient(135deg, var(--color-surface), var(--color-bg))'}; position: relative; overflow: hidden;">
+        ${!isBrutalist && !isRetro ? `<div style="position: absolute; inset: 0; opacity: 0.03; background-image: radial-gradient(circle, var(--color-text) 1px, transparent 1px); background-size: 30px 30px;"></div>` : ''}
+        <div class="container" style="position: relative; z-index: 1; margin: 0 auto; padding: 0 2rem;">
           <div style="max-width: 800px;">
             ${data.title ? `
-            <div style="display: inline-block; padding: 0.5rem 1rem; background: var(--color-accent); color: var(--color-bg); font-weight: 700; font-size: 0.875rem; border-radius: var(--radius-full); margin-bottom: 1.5rem;">
+            <div style="display: inline-block; padding: ${isBrutalist ? '0.75rem 1.25rem' : '0.5rem 1rem'}; background: var(--color-accent); color: ${isBrutalist ? 'var(--color-text)' : 'var(--color-bg)'}; font-weight: ${isBrutalist ? '900' : '700'}; font-size: ${isBrutalist ? '1rem' : '0.875rem'}; ${isBrutalist ? 'border: 3px solid var(--color-text);' : isNeumorphism ? 'box-shadow: 6px 6px 12px rgba(163, 177, 198, 0.6), -6px -6px 12px rgba(255, 255, 255, 0.9); border-radius: var(--radius-full);' : 'border-radius: var(--radius-full);'} margin-bottom: 1.5rem; ${isBrutalist ? 'text-transform: uppercase;' : ''}">
               ${data.title}
             </div>
             ` : ''}
-            <h1 style="font-size: clamp(3rem, 7vw, 5rem); font-weight: 900; margin-bottom: 1.5rem; letter-spacing: -0.03em; line-height: 1.1;">
+            <h1 style="font-family: ${isElegant ? 'Playfair Display, serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: clamp(${isBrutalist ? '2.5rem' : '3rem'}, 7vw, ${isBrutalist ? '4rem' : '5rem'}); font-weight: ${isBrutalist ? '900' : isRetro ? '700' : '900'}; margin-bottom: 1.5rem; letter-spacing: ${isBrutalist ? '-0.04em' : '-0.03em'}; line-height: 1.1; ${isBrutalist || isRetro ? 'text-transform: uppercase;' : ''}">
               ${data.agentName || 'Your Real Estate Expert'}
             </h1>
-            <p style="font-size: 1.5rem; color: var(--color-text-secondary); margin-bottom: 3rem; line-height: 1.4;">
+            <p style="font-family: ${isElegant ? 'Lato, sans-serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: ${isBrutalist ? '1.25rem' : '1.5rem'}; color: var(--color-text-secondary); margin-bottom: 3rem; line-height: 1.4; font-weight: ${isElegant ? '300' : 'normal'};">
               ${data.tagline || 'Helping You Find the Perfect Property'}
             </p>
             ${data.serviceArea ? `
-            <div style="display: flex; align-items: center; gap: 0.75rem; font-size: 1.125rem; color: var(--color-text-secondary); margin-bottom: 3rem;">
-              <span style="font-size: 1.5rem;">ðŸ“</span>
-              <span style="font-weight: 600;">Serving ${data.serviceArea}</span>
+            <div style="display: flex; align-items: center; gap: 0.75rem; font-size: 1.125rem; color: var(--color-text-secondary); margin-bottom: 3rem; font-weight: ${isBrutalist ? '900' : '600'};">
+              <span style="font-size: 1.5rem;">📍</span>
+              <span>Serving ${data.serviceArea}</span>
             </div>
             ` : ''}
             <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
               ${data.calendlyLink ? `
-              <a href="${data.calendlyLink}" target="_blank" style="display: inline-block; padding: 1.25rem 2.5rem; background: var(--color-accent); color: var(--color-bg); text-decoration: none; font-weight: 700; font-size: 1.0625rem; border-radius: var(--radius-md); transition: all 0.2s; box-shadow: var(--shadow-md);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='var(--shadow-lg)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-md)'">
+              <a href="${data.calendlyLink}" target="_blank" style="display: inline-block; padding: ${isBrutalist ? '1.5rem 3rem' : '1.25rem 2.5rem'}; background: var(--color-accent); color: ${isBrutalist ? 'var(--color-text)' : 'var(--color-bg)'}; text-decoration: none; font-weight: ${isBrutalist ? '900' : '700'}; font-size: 1.0625rem; ${isBrutalist ? 'border: 4px solid var(--color-text); box-shadow: 6px 6px 0 var(--color-text);' : isNeumorphism ? 'box-shadow: 10px 10px 20px rgba(163, 177, 198, 0.6), -10px -10px 20px rgba(255, 255, 255, 0.9); border-radius: var(--radius-md);' : 'border-radius: var(--radius-md); box-shadow: var(--shadow-md);'} transition: all 0.2s; ${isBrutalist ? 'text-transform: uppercase;' : ''}" onmouseover="${isBrutalist ? `this.style.transform='translate(-4px, -4px)'; this.style.boxShadow='10px 10px 0 var(--color-text)'` : `this.style.transform='translateY(-2px)'; this.style.boxShadow='var(--shadow-lg)'`}" onmouseout="${isBrutalist ? `this.style.transform='translate(0, 0)'; this.style.boxShadow='6px 6px 0 var(--color-text)'` : `this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-md)'`}">
                 Schedule Consultation
               </a>
               ` : ''}
               ${data.phone ? `
-              <a href="tel:${data.phone}" style="display: inline-block; padding: 1.25rem 2.5rem; background: var(--color-surface); color: var(--color-text); text-decoration: none; font-weight: 700; font-size: 1.0625rem; border-radius: var(--radius-md); border: 2px solid var(--color-border); transition: all 0.2s;" onmouseover="this.style.borderColor='var(--color-accent)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='var(--color-border)'; this.style.transform='translateY(0)'">
-                ðŸ“ž ${data.phone}
+              <a href="tel:${data.phone}" style="display: inline-block; padding: ${isBrutalist ? '1.5rem 3rem' : '1.25rem 2.5rem'}; background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.05)' : isNeumorphism ? 'var(--color-bg)' : 'var(--color-surface)'}; color: var(--color-text); text-decoration: none; font-weight: ${isBrutalist ? '900' : '700'}; font-size: 1.0625rem; ${isBrutalist ? 'border: 4px solid var(--color-border);' : isNeumorphism ? 'box-shadow: 6px 6px 12px rgba(163, 177, 198, 0.6), -6px -6px 12px rgba(255, 255, 255, 0.9); border-radius: var(--radius-md);' : isGlassmorphism ? 'backdrop-filter: blur(10px); border: 2px solid var(--color-border); border-radius: var(--radius-md);' : 'border-radius: var(--radius-md); border: 2px solid var(--color-border);'} transition: all 0.2s; ${isBrutalist ? 'text-transform: uppercase;' : ''}" onmouseover="${isBrutalist ? `this.style.transform='translate(-2px, -2px)'; this.style.boxShadow='4px 4px 0 var(--color-border)'` : `this.style.borderColor='var(--color-accent)'; this.style.transform='translateY(-2px)'`}" onmouseout="${isBrutalist ? `this.style.transform='translate(0, 0)'; this.style.boxShadow='none'` : `this.style.borderColor='var(--color-border)'; this.style.transform='translateY(0)'`}">
+                📞 ${data.phone}
               </a>
               ` : ''}
             </div>
@@ -5737,124 +6046,108 @@ END:VCARD\`;
         </div>
       </section>
 
-      ${data.stats && data.stats.trim() !== '' && data.stats !== '[]' ? `
+      ${data.stats && data.stats.length > 0 ? `
       <!-- Stats -->
-      <section style="padding: 4rem 0; background: var(--color-accent); color: var(--color-bg);">
-        <div class="container">
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 3rem; text-align: center;">
-            ${(() => {
-              try {
-                const stats = JSON.parse(data.stats || '[]');
-                return stats.map(stat => `
-                  <div>
-                    <div style="font-size: 3rem; font-weight: 900; margin-bottom: 0.5rem; opacity: 0.95;">
-                      ${stat.number || '0'}
-                    </div>
-                    <div style="font-size: 1rem; opacity: 0.9; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">
-                      ${stat.label || ''}
-                    </div>
-                  </div>
-                `).join('');
-              } catch (e) {
-                return '';
-              }
-            })()}
+      <section style="padding: 4rem 0; background: ${isBrutalist ? 'var(--color-accent)' : isGradient ? 'linear-gradient(135deg, #667eea, #764ba2)' : isRetro ? 'linear-gradient(90deg, var(--color-accent), #b537f2)' : 'var(--color-accent)'}; color: ${isBrutalist ? 'var(--color-text)' : 'var(--color-bg)'};">
+        <div class="container" style="margin: 0 auto; padding: 0 2rem;">
+          <div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 3rem; text-align: center;">
+            ${data.stats.map(stat => `
+              <div>
+                <div style="font-size: ${isBrutalist ? '3.5rem' : '3rem'}; font-weight: 900; margin-bottom: 0.5rem; opacity: 0.95;">
+                  ${stat.number || '0'}
+                </div>
+                <div style="font-size: 1rem; opacity: 0.9; font-weight: ${isBrutalist ? '900' : '600'}; text-transform: uppercase; letter-spacing: 0.05em;">
+                  ${stat.label || ''}
+                </div>
+              </div>
+            `).join('')}
           </div>
         </div>
       </section>
       ` : ''}
 
-      ${data.featuredListings && data.featuredListings.trim() !== '' && data.featuredListings !== '[]' ? `
+      ${data.featuredListings && data.featuredListings.length > 0 ? `
       <!-- Featured Listings -->
       <section id="listings" style="padding: 6rem 0; background: var(--color-bg);">
-        <div class="container">
+        <div class="container" style="margin: 0 auto; padding: 0 2rem;">
           <div style="text-align: center; margin-bottom: 4rem;">
-            <h2 style="font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: 900; margin-bottom: 1rem; letter-spacing: -0.02em;">
+            <h2 style="font-family: ${isElegant ? 'Playfair Display, serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: ${isBrutalist ? '900' : isRetro ? '700' : '900'}; margin-bottom: 1rem; letter-spacing: ${isBrutalist ? '-0.04em' : '-0.02em'}; ${isBrutalist || isRetro ? 'text-transform: uppercase;' : ''}">
               Featured Properties
             </h2>
-            <p style="font-size: 1.125rem; color: var(--color-text-secondary);">
+            <p style="font-family: ${isElegant ? 'Lato, sans-serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: 1.125rem; color: var(--color-text-secondary); font-weight: ${isElegant ? '300' : 'normal'};">
               Explore my current listings and recent sales
             </p>
           </div>
           
-          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 2rem;">
-            ${(() => {
-              try {
-                const listings = JSON.parse(data.featuredListings || '[]');
-                return listings.map(property => `
-                  <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); overflow: hidden; transition: all 0.3s; box-shadow: var(--shadow-sm);" onmouseover="this.style.transform='translateY(-8px)'; this.style.boxShadow='var(--shadow-lg)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-sm)'">
-                    <div style="aspect-ratio: 4/3; background: linear-gradient(135deg, var(--color-accent), var(--color-text)); display: flex; align-items: center; justify-content: center; font-size: 5rem; position: relative;">
-                      ${property.image || 'ðŸ '}
-                      ${property.status ? `
-                      <div style="position: absolute; top: 1rem; right: 1rem; background: ${property.status.toLowerCase().includes('sold') ? '#22c55e' : 'var(--color-accent)'}; color: white; padding: 0.5rem 1rem; font-size: 0.75rem; font-weight: 800; border-radius: var(--radius-sm); text-transform: uppercase; letter-spacing: 0.05em;">
-                        ${property.status}
-                      </div>
-                      ` : ''}
-                    </div>
-                    <div style="padding: 1.5rem;">
-                      ${property.price ? `
-                      <div style="font-size: 1.75rem; font-weight: 900; color: var(--color-accent); margin-bottom: 0.75rem;">
-                        ${property.price}
-                      </div>
-                      ` : ''}
-                      ${property.address ? `
-                      <div style="font-size: 1.125rem; font-weight: 700; margin-bottom: 1rem; color: var(--color-text);">
-                        ${property.address}
-                      </div>
-                      ` : ''}
-                      ${property.type ? `
-                      <div style="font-size: 0.875rem; color: var(--color-text-secondary); font-weight: 600; margin-bottom: 1rem;">
-                        ${property.type}
-                      </div>
-                      ` : ''}
-                      <div style="display: flex; gap: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--color-border); font-size: 0.9375rem; color: var(--color-text-secondary); font-weight: 600;">
-                        ${property.beds ? `<span>ðŸ›ï¸ ${property.beds} beds</span>` : ''}
-                        ${property.baths ? `<span>ðŸš¿ ${property.baths} baths</span>` : ''}
-                        ${property.sqft ? `<span>ðŸ“ ${property.sqft} sqft</span>` : ''}
-                      </div>
-                    </div>
+          <div class="listings-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 2rem;">
+            ${data.featuredListings.map(property => `
+              <div style="background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.05)' : isNeumorphism ? 'var(--color-bg)' : 'var(--color-surface)'}; border: ${isBrutalist ? '4px' : '1px'} solid var(--color-border); ${isBrutalist ? '' : isNeumorphism ? 'box-shadow: 10px 10px 20px rgba(163, 177, 198, 0.6), -10px -10px 20px rgba(255, 255, 255, 0.9); border-radius: var(--radius-lg);' : isGlassmorphism ? 'backdrop-filter: blur(10px); border-radius: var(--radius-lg);' : 'border-radius: var(--radius-lg); box-shadow: var(--shadow-sm);'} overflow: hidden; transition: all 0.3s;" onmouseover="${isBrutalist ? `this.style.transform='translate(-6px, -6px)'; this.style.boxShadow='12px 12px 0 var(--color-text)'` : isNeumorphism ? `this.style.boxShadow='inset 4px 4px 8px rgba(163, 177, 198, 0.6), inset -4px -4px 8px rgba(255, 255, 255, 0.9)'` : `this.style.transform='translateY(-8px)'; this.style.boxShadow='var(--shadow-lg)'`}" onmouseout="${isBrutalist ? `this.style.transform='translate(0, 0)'; this.style.boxShadow='none'` : isNeumorphism ? `this.style.boxShadow='10px 10px 20px rgba(163, 177, 198, 0.6), -10px -10px 20px rgba(255, 255, 255, 0.9)'` : `this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-sm)'`}">
+                ${property.imageUrl ? `
+                <div style="aspect-ratio: 4/3; overflow: hidden;">
+                  <img src="${property.imageUrl}" alt="${property.address}" style="width: 100%; height: 100%; object-fit: cover;">
+                </div>
+                ` : `
+                <div style="aspect-ratio: 4/3; background: ${isGradient ? 'linear-gradient(135deg, #667eea, #764ba2)' : isBrutalist ? 'var(--color-accent)' : isRetro ? 'linear-gradient(135deg, var(--color-accent), #b537f2)' : 'linear-gradient(135deg, var(--color-accent), var(--color-text))'}; display: flex; align-items: center; justify-content: center; font-size: 5rem; position: relative; color: ${isBrutalist ? 'var(--color-text)' : 'white'};">
+                  🏡
+                  ${property.status ? `
+                  <div style="position: absolute; top: 1rem; right: 1rem; background: ${property.status.toLowerCase().includes('sold') ? '#22c55e' : 'var(--color-accent)'}; color: white; padding: ${isBrutalist ? '0.75rem 1.25rem' : '0.5rem 1rem'}; font-size: ${isBrutalist ? '0.875rem' : '0.75rem'}; font-weight: ${isBrutalist ? '900' : '800'}; ${isBrutalist ? 'border: 2px solid white;' : 'border-radius: var(--radius-sm);'} text-transform: uppercase; letter-spacing: 0.05em;">
+                    ${property.status}
                   </div>
-                `).join('');
-              } catch (e) {
-                return '';
-              }
-            })()}
+                  ` : ''}
+                </div>
+                `}
+                <div style="padding: 1.5rem;">
+                  ${property.price ? `
+                  <div style="font-size: ${isBrutalist ? '2rem' : '1.75rem'}; font-weight: 900; color: var(--color-accent); margin-bottom: 0.75rem;">
+                    ${property.price}
+                  </div>
+                  ` : ''}
+                  ${property.address ? `
+                  <div style="font-family: ${isElegant ? 'Playfair Display, serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: 1.125rem; font-weight: ${isBrutalist ? '900' : '700'}; margin-bottom: 1rem; color: var(--color-text); ${isBrutalist ? 'text-transform: uppercase;' : ''}">
+                    ${property.address}
+                  </div>
+                  ` : ''}
+                  ${property.type ? `
+                  <div style="font-size: 0.875rem; color: var(--color-text-secondary); font-weight: ${isBrutalist ? '900' : '600'}; margin-bottom: 1rem; ${isBrutalist ? 'text-transform: uppercase;' : ''}">
+                    ${property.type}
+                  </div>
+                  ` : ''}
+                  <div style="display: flex; gap: 1.5rem; padding-top: 1rem; border-top: ${isBrutalist ? '2px' : '1px'} solid var(--color-border); font-size: 0.9375rem; color: var(--color-text-secondary); font-weight: ${isBrutalist ? '900' : '600'}; flex-wrap: wrap;">
+                    ${property.beds ? `<span>🛏 ${property.beds} beds</span>` : ''}
+                    ${property.baths ? `<span>🚿 ${property.baths} baths</span>` : ''}
+                    ${property.sqft ? `<span>📐 ${property.sqft} sqft</span>` : ''}
+                  </div>
+                </div>
+              </div>
+            `).join('')}
           </div>
         </div>
       </section>
       ` : ''}
 
-      ${data.services && data.services.trim() !== '' && data.services !== '[]' ? `
+      ${data.services && data.services.length > 0 ? `
       <!-- Services -->
-      <section id="services" style="padding: 6rem 0; background: var(--color-surface);">
-        <div class="container">
+      <section id="services" style="padding: 6rem 0; background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.02)' : isNeumorphism ? 'var(--color-surface)' : 'var(--color-surface)'};">
+        <div class="container" style="margin: 0 auto; padding: 0 2rem;">
           <div style="text-align: center; margin-bottom: 4rem;">
-            <h2 style="font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: 900; margin-bottom: 1rem; letter-spacing: -0.02em;">
+            <h2 style="font-family: ${isElegant ? 'Playfair Display, serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: ${isBrutalist ? '900' : isRetro ? '700' : '900'}; margin-bottom: 1rem; letter-spacing: ${isBrutalist ? '-0.04em' : '-0.02em'}; ${isBrutalist || isRetro ? 'text-transform: uppercase;' : ''}">
               How I Can Help
             </h2>
           </div>
           
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem; max-width: 1000px; margin: 0 auto;">
-            ${(() => {
-              try {
-                const services = JSON.parse(data.services || '[]');
-                return services.map(service => `
-                  <div style="background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 2rem; text-align: center; transition: all 0.2s;" onmouseover="this.style.borderColor='var(--color-accent)'; this.style.transform='translateY(-4px)'" onmouseout="this.style.borderColor='var(--color-border)'; this.style.transform='translateY(0)'">
-                    <div style="font-size: 3rem; margin-bottom: 1rem;">${service.icon || 'ðŸ¡'}</div>
-                    <h3 style="font-size: 1.375rem; font-weight: 800; margin-bottom: 1rem; letter-spacing: -0.01em;">
-                      ${service.name || 'Service'}
-                    </h3>
-                    ${service.description ? `
-                    <p style="color: var(--color-text-secondary); line-height: 1.6;">
-                      ${service.description}
-                    </p>
-                    ` : ''}
-                  </div>
-                `).join('');
-              } catch (e) {
-                return '';
-              }
-            })()}
+          <div class="services-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem; max-width: 1000px; margin: 0 auto;">
+            ${data.services.map(service => `
+              <div style="background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.05)' : isNeumorphism ? 'var(--color-bg)' : 'var(--color-bg)'}; border: ${isBrutalist ? '4px' : '1px'} solid var(--color-border); ${isBrutalist ? '' : isNeumorphism ? 'box-shadow: 10px 10px 20px rgba(163, 177, 198, 0.6), -10px -10px 20px rgba(255, 255, 255, 0.9); border-radius: var(--radius-lg);' : isGlassmorphism ? 'backdrop-filter: blur(10px); border-radius: var(--radius-lg);' : 'border-radius: var(--radius-lg);'} padding: 2rem; text-align: center; transition: all 0.2s;" onmouseover="${isBrutalist ? `this.style.transform='translate(-4px, -4px)'; this.style.boxShadow='8px 8px 0 var(--color-text)'` : isNeumorphism ? `this.style.boxShadow='inset 4px 4px 8px rgba(163, 177, 198, 0.6), inset -4px -4px 8px rgba(255, 255, 255, 0.9)'` : `this.style.borderColor='var(--color-accent)'; this.style.transform='translateY(-4px)'`}" onmouseout="${isBrutalist ? `this.style.transform='translate(0, 0)'; this.style.boxShadow='none'` : isNeumorphism ? `this.style.boxShadow='10px 10px 20px rgba(163, 177, 198, 0.6), -10px -10px 20px rgba(255, 255, 255, 0.9)'` : `this.style.borderColor='var(--color-border)'; this.style.transform='translateY(0)'`}">
+                <h3 style="font-family: ${isElegant ? 'Playfair Display, serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: 1.375rem; font-weight: ${isBrutalist ? '900' : '800'}; margin-bottom: 1rem; letter-spacing: -0.01em; ${isBrutalist ? 'text-transform: uppercase;' : ''}">
+                  ${service.name || 'Service'}
+                </h3>
+                ${service.description ? `
+                <p style="font-family: ${isElegant ? 'Lato, sans-serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; color: var(--color-text-secondary); line-height: 1.6; font-weight: ${isElegant ? '300' : 'normal'};">
+                  ${service.description}
+                </p>
+                ` : ''}
+              </div>
+            `).join('')}
           </div>
         </div>
       </section>
@@ -5862,68 +6155,61 @@ END:VCARD\`;
 
       <!-- About -->
       <section style="padding: 6rem 0; background: var(--color-bg);">
-        <div class="container" style="max-width: 900px;">
+        <div class="container" style="max-width: 900px; margin: 0 auto; padding: 0 2rem;">
           <div style="text-align: center; margin-bottom: 3rem;">
-            <h2 style="font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: 900; letter-spacing: -0.02em;">
+            <h2 style="font-family: ${isElegant ? 'Playfair Display, serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: ${isBrutalist ? '900' : isRetro ? '700' : '900'}; letter-spacing: ${isBrutalist ? '-0.04em' : '-0.02em'}; ${isBrutalist || isRetro ? 'text-transform: uppercase;' : ''}">
               About Me
             </h2>
           </div>
           
           ${data.bio ? `
-          <div style="font-size: 1.125rem; line-height: 1.8; color: var(--color-text); margin-bottom: 2rem; white-space: pre-line;">
+          <div style="font-family: ${isElegant ? 'Lato, sans-serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: 1.125rem; line-height: 1.8; color: var(--color-text); margin-bottom: 2rem; white-space: pre-line; font-weight: ${isElegant ? '300' : 'normal'};">
             ${data.bio}
           </div>
           ` : ''}
           
           ${data.license || data.brokerage ? `
-          <div style="display: flex; gap: 2rem; justify-content: center; padding: 1.5rem; background: var(--color-surface); border-radius: var(--radius-md); font-size: 0.9375rem; color: var(--color-text-secondary); font-weight: 600; flex-wrap: wrap;">
-            ${data.license ? `<span>ðŸ“„ ${data.license}</span>` : ''}
-            ${data.brokerage ? `<span>ðŸ¢ ${data.brokerage}</span>` : ''}
+          <div style="display: flex; gap: 2rem; justify-content: center; padding: 1.5rem; background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.05)' : isNeumorphism ? 'var(--color-bg)' : 'var(--color-surface)'}; ${isBrutalist ? 'border: 3px solid var(--color-border);' : isNeumorphism ? 'box-shadow: 6px 6px 12px rgba(163, 177, 198, 0.6), -6px -6px 12px rgba(255, 255, 255, 0.9); border-radius: var(--radius-md);' : isGlassmorphism ? 'backdrop-filter: blur(10px); border-radius: var(--radius-md);' : 'border-radius: var(--radius-md);'} font-size: 0.9375rem; color: var(--color-text-secondary); font-weight: ${isBrutalist ? '900' : '600'}; flex-wrap: wrap;">
+            ${data.license ? `<span>📄 ${data.license}</span>` : ''}
+            ${data.brokerage ? `<span>🏢 ${data.brokerage}</span>` : ''}
           </div>
           ` : ''}
         </div>
       </section>
 
-      ${data.testimonials && data.testimonials.trim() !== '' && data.testimonials !== '[]' ? `
+      ${data.testimonials && data.testimonials.length > 0 ? `
       <!-- Testimonials -->
-      <section id="testimonials" style="padding: 6rem 0; background: var(--color-surface);">
-        <div class="container">
+      <section id="testimonials" style="padding: 6rem 0; background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.02)' : isNeumorphism ? 'var(--color-surface)' : 'var(--color-surface)'};">
+        <div class="container" style="margin: 0 auto; padding: 0 2rem;">
           <div style="text-align: center; margin-bottom: 4rem;">
-            <h2 style="font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: 900; margin-bottom: 1rem; letter-spacing: -0.02em;">
+            <h2 style="font-family: ${isElegant ? 'Playfair Display, serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: ${isBrutalist ? '900' : isRetro ? '700' : '900'}; margin-bottom: 1rem; letter-spacing: ${isBrutalist ? '-0.04em' : '-0.02em'}; ${isBrutalist || isRetro ? 'text-transform: uppercase;' : ''}">
               Client Success Stories
             </h2>
           </div>
           
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem;">
-            ${(() => {
-              try {
-                const testimonials = JSON.parse(data.testimonials || '[]');
-                return testimonials.map(testimonial => `
-                  <div style="background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 2rem;">
-                    ${testimonial.rating ? `
-                    <div style="font-size: 1.25rem; margin-bottom: 1rem; color: #fbbf24;">
-                      ${'â­'.repeat(testimonial.rating)}
-                    </div>
-                    ` : ''}
-                    <p style="font-size: 1.0625rem; line-height: 1.7; color: var(--color-text); margin-bottom: 1.5rem; font-style: italic;">
-                      "${testimonial.text || ''}"
-                    </p>
-                    <div style="border-top: 1px solid var(--color-border); padding-top: 1rem;">
-                      <div style="font-weight: 700; color: var(--color-text);">
-                        ${testimonial.name || 'Client'}
-                      </div>
-                      ${testimonial.property ? `
-                      <div style="font-size: 0.875rem; color: var(--color-text-secondary); margin-top: 0.25rem;">
-                        ${testimonial.property}
-                      </div>
-                      ` : ''}
-                    </div>
+          <div class="testimonials-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem;">
+            ${data.testimonials.map(testimonial => `
+              <div style="background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.05)' : isNeumorphism ? 'var(--color-bg)' : 'var(--color-bg)'}; border: ${isBrutalist ? '4px' : '1px'} solid var(--color-border); ${isBrutalist ? '' : isNeumorphism ? 'box-shadow: 10px 10px 20px rgba(163, 177, 198, 0.6), -10px -10px 20px rgba(255, 255, 255, 0.9); border-radius: var(--radius-lg);' : isGlassmorphism ? 'backdrop-filter: blur(10px); border-radius: var(--radius-lg);' : 'border-radius: var(--radius-lg);'} padding: 2rem;">
+                ${testimonial.rating ? `
+                <div style="font-size: 1.25rem; margin-bottom: 1rem; color: #fbbf24;">
+                  ${'★'.repeat(parseInt(testimonial.rating) || 5)}
+                </div>
+                ` : ''}
+                <p style="font-family: ${isElegant ? 'Lato, sans-serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: 1.0625rem; line-height: 1.7; color: var(--color-text); margin-bottom: 1.5rem; ${isElegant ? 'font-style: italic;' : ''} font-weight: ${isElegant ? '300' : 'normal'};">
+                  "${testimonial.text || ''}"
+                </p>
+                <div style="border-top: ${isBrutalist ? '2px' : '1px'} solid var(--color-border); padding-top: 1rem;">
+                  <div style="font-weight: ${isBrutalist ? '900' : '700'}; color: var(--color-text);">
+                    ${testimonial.name || 'Client'}
                   </div>
-                `).join('');
-              } catch (e) {
-                return '';
-              }
-            })()}
+                  ${testimonial.property ? `
+                  <div style="font-size: 0.875rem; color: var(--color-text-secondary); margin-top: 0.25rem;">
+                    ${testimonial.property}
+                  </div>
+                  ` : ''}
+                </div>
+              </div>
+            `).join('')}
           </div>
         </div>
       </section>
@@ -5931,31 +6217,31 @@ END:VCARD\`;
 
       <!-- Contact -->
       <section id="contact" style="padding: 6rem 0; background: var(--color-bg);">
-        <div class="container" style="max-width: 700px; text-align: center;">
-          <h2 style="font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: 900; margin-bottom: 1rem; letter-spacing: -0.02em;">
+        <div class="container" style="max-width: 700px; text-align: center; margin: 0 auto; padding: 0 2rem;">
+          <h2 style="font-family: ${isElegant ? 'Playfair Display, serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: ${isBrutalist ? '900' : isRetro ? '700' : '900'}; margin-bottom: 1rem; letter-spacing: ${isBrutalist ? '-0.04em' : '-0.02em'}; ${isBrutalist || isRetro ? 'text-transform: uppercase;' : ''}">
             Let's Find Your Dream Home
           </h2>
-          <p style="font-size: 1.125rem; color: var(--color-text-secondary); margin-bottom: 3rem; line-height: 1.6;">
+          <p style="font-family: ${isElegant ? 'Lato, sans-serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: 1.125rem; color: var(--color-text-secondary); margin-bottom: 3rem; line-height: 1.6; font-weight: ${isElegant ? '300' : 'normal'};">
             Ready to buy or sell? Get in touch for a free consultation
           </p>
           
           <div style="display: flex; flex-direction: column; gap: 1rem; align-items: center; margin-bottom: 2.5rem;">
             ${data.contact ? `
-            <a href="mailto:${data.contact}" style="display: flex; align-items: center; gap: 1rem; font-size: 1.0625rem; color: var(--color-text); text-decoration: none; font-weight: 600; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">
-              <span style="font-size: 1.5rem;">âœ‰ï¸</span>
+            <a href="mailto:${data.contact}" style="display: flex; align-items: center; gap: 1rem; font-size: 1.0625rem; color: var(--color-text); text-decoration: none; font-weight: ${isBrutalist ? '900' : '600'}; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">
+              <span style="font-size: 1.5rem;">✉</span>
               ${data.contact}
             </a>
             ` : ''}
             ${data.phone ? `
-            <a href="tel:${data.phone}" style="display: flex; align-items: center; gap: 1rem; font-size: 1.0625rem; color: var(--color-text); text-decoration: none; font-weight: 600; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">
-              <span style="font-size: 1.5rem;">ðŸ“ž</span>
+            <a href="tel:${data.phone}" style="display: flex; align-items: center; gap: 1rem; font-size: 1.0625rem; color: var(--color-text); text-decoration: none; font-weight: ${isBrutalist ? '900' : '600'}; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">
+              <span style="font-size: 1.5rem;">☎</span>
               ${data.phone}
             </a>
             ` : ''}
           </div>
           
           ${data.calendlyLink ? `
-          <a href="${data.calendlyLink}" target="_blank" style="display: inline-block; padding: 1.25rem 2.5rem; background: var(--color-accent); color: var(--color-bg); text-decoration: none; font-weight: 700; font-size: 1.0625rem; border-radius: var(--radius-md); transition: all 0.2s; box-shadow: var(--shadow-md);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='var(--shadow-lg)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-md)'">
+          <a href="${data.calendlyLink}" target="_blank" style="display: inline-block; padding: ${isBrutalist ? '1.5rem 3rem' : '1.25rem 2.5rem'}; background: var(--color-accent); color: ${isBrutalist ? 'var(--color-text)' : 'var(--color-bg)'}; text-decoration: none; font-weight: ${isBrutalist ? '900' : '700'}; font-size: 1.0625rem; ${isBrutalist ? 'border: 4px solid var(--color-text); box-shadow: 6px 6px 0 var(--color-text);' : isNeumorphism ? 'box-shadow: 10px 10px 20px rgba(163, 177, 198, 0.6), -10px -10px 20px rgba(255, 255, 255, 0.9); border-radius: var(--radius-md);' : 'border-radius: var(--radius-md); box-shadow: var(--shadow-md);'} transition: all 0.2s; ${isBrutalist ? 'text-transform: uppercase;' : ''}" onmouseover="${isBrutalist ? `this.style.transform='translate(-4px, -4px)'; this.style.boxShadow='10px 10px 0 var(--color-text)'` : `this.style.transform='translateY(-2px)'; this.style.boxShadow='var(--shadow-lg)'`}" onmouseout="${isBrutalist ? `this.style.transform='translate(0, 0)'; this.style.boxShadow='6px 6px 0 var(--color-text)'` : `this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-md)'`}">
             Schedule Free Consultation
           </a>
           ` : ''}
@@ -5963,89 +6249,243 @@ END:VCARD\`;
       </section>
 
       <!-- Footer -->
-      <footer style="padding: 2rem 0; background: var(--color-surface); text-align: center; color: var(--color-text-secondary); font-size: 0.875rem; border-top: 1px solid var(--color-border);">
+      <footer style="padding: 2rem 0; background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.02)' : isNeumorphism ? 'var(--color-surface)' : 'var(--color-surface)'}; text-align: center; color: var(--color-text-secondary); font-size: 0.875rem; ${isBrutalist ? 'border-top: 4px solid var(--color-border);' : 'border-top: 1px solid var(--color-border);'}">
         <div class="container">
-          <p>Â© 2024 ${data.agentName || 'Real Estate Agent'}. ${data.license ? data.license : ''}</p>
+          <p style="font-weight: ${isBrutalist ? '900' : 'normal'};">© 2024 ${data.agentName || 'Real Estate Agent'}. ${data.license ? data.license : ''}</p>
         </div>
       </footer>
 
       <style>
         @media (max-width: 768px) {
-          header nav { display: none !important; }
+          .desktop-nav { display: none !important; }
+          .listings-grid {
+            grid-template-columns: 1fr !important;
+          }
+          .services-grid {
+            grid-template-columns: 1fr !important;
+          }
+          .testimonials-grid {
+            grid-template-columns: 1fr !important;
+          }
+          .stats-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+          }
+          section[style*="padding: 8rem"] {
+            padding: 5rem 0 !important;
+          }
+          section[style*="padding: 6rem"] {
+            padding: 4rem 0 !important;
+          }
+        }
+        
+        @media (max-width: 480px) {
+          .container {
+            padding: 0 1rem !important;
+          }
+          .stats-grid {
+            grid-template-columns: 1fr !important;
+            gap: 2rem !important;
+          }
+          .listings-grid {
+            grid-template-columns: 1fr !important;
+          }
         }
       </style>
     `
-  }),
+  }
+}),
 
-  financialadvisor: new Template('financialadvisor', {
-    name: 'Financial Advisor',
-    description: 'Professional financial planning and wealth management website',
-    category: 'Business',
-    defaultTheme: 'elegant',
-    fields: [
-      { id: 'advisorName', label: 'Advisor Name', type: 'text', placeholder: 'Michael Chen, CFPÂ®', required: true },
-      { id: 'firmName', label: 'Firm Name', type: 'text', placeholder: 'Horizon Wealth Management' },
-      { id: 'tagline', label: 'Tagline', type: 'text', placeholder: 'Building Your Financial Future with Confidence' },
-      { id: 'bio', label: 'About', type: 'textarea', placeholder: 'Share your background, philosophy, and approach to financial planning...' },
-      { id: 'specializations', label: 'Specializations', type: 'textarea', placeholder: 'Enter specializations as JSON: [{"name": "Retirement Planning", "icon": "ðŸ–ï¸", "description": "..."}, ...]' },
-      { id: 'services', label: 'Services Offered', type: 'textarea', placeholder: 'Enter services as JSON: [{"name": "Wealth Management", "description": "...", "features": ["Feature 1", "Feature 2"]}, ...]' },
-      { id: 'process', label: 'Planning Process', type: 'textarea', placeholder: 'Enter process steps as JSON: [{"step": "1", "title": "Discovery", "description": "..."}, ...]' },
-      { id: 'credentials', label: 'Credentials & Certifications', type: 'textarea', placeholder: 'CFPÂ®, CFA, MBA, 15+ years experience...' },
-      { id: 'testimonials', label: 'Client Testimonials', type: 'textarea', placeholder: 'Enter testimonials as JSON: [{"name": "Robert & Linda K.", "text": "...", "title": "Retired Executives"}, ...]' },
-      { id: 'disclosure', label: 'Disclosure', type: 'text', placeholder: 'Securities offered through XYZ Financial, Member FINRA/SIPC' },
-      { id: 'contact', label: 'Email', type: 'email', placeholder: 'michael@horizonwealth.com' },
-      { id: 'phone', label: 'Phone', type: 'tel', placeholder: '(555) 123-4567' },
-      { id: 'address', label: 'Office Address', type: 'textarea', placeholder: '123 Financial Plaza, Suite 500\nNew York, NY 10001' },
-      { id: 'calendlyLink', label: 'Consultation Link', type: 'url', placeholder: 'https://calendly.com/yourlink' },
-    ],
-    structure: (data, theme) => `
+'financialadvisor': new Template('financialadvisor', {
+  name: 'Financial Advisor',
+  description: 'Professional financial planning and wealth management website',
+  category: 'Business',
+  defaultTheme: 'elegant',
+  image: 'financial-advisor',
+  fields: {
+    advisorName: { type: 'text', default: 'Michael Chen, CFP®', label: 'Advisor Name', required: true },
+    firmName: { type: 'text', default: 'Horizon Wealth Management', label: 'Firm Name', required: false },
+    tagline: { type: 'text', default: 'Building Your Financial Future with Confidence', label: 'Tagline', required: true },
+    bio: { 
+      type: 'textarea',
+      default: 'With over 20 years of experience in financial planning, I help individuals and families achieve their financial goals through personalized strategies and dedicated service. My approach combines comprehensive analysis with ongoing support to ensure your financial plan evolves with your life.',
+      label: 'About',
+      required: true 
+    },
+    specializations: {
+      type: 'group',
+      label: 'Specializations',
+      itemLabel: 'Specialization',
+      min: 0,
+      max: 8,
+      fields: {
+        name: { type: 'text', label: 'Name', default: '' },
+        description: { type: 'textarea', label: 'Description', default: '' }
+      },
+      default: [
+        { 
+          name: 'Retirement Planning',
+          description: 'Strategic planning to ensure a comfortable and secure retirement'
+        },
+        { 
+          name: 'Investment Management',
+          description: 'Portfolio construction and management aligned with your goals'
+        },
+        { 
+          name: 'Tax Planning',
+          description: 'Tax-efficient strategies to maximize your wealth'
+        },
+        { 
+          name: 'Estate Planning',
+          description: 'Comprehensive planning for wealth transfer and legacy'
+        }
+      ]
+    },
+    services: {
+      type: 'group',
+      label: 'Services Offered',
+      itemLabel: 'Service',
+      min: 0,
+      max: 10,
+      fields: {
+        name: { type: 'text', label: 'Service Name', default: '' },
+        description: { type: 'textarea', label: 'Description', default: '' },
+        features: { type: 'text', label: 'Features (comma separated)', default: '' }
+      },
+      default: [
+        { 
+          name: 'Comprehensive Financial Planning',
+          description: 'Complete analysis of your financial situation with actionable recommendations',
+          features: 'Cash flow analysis, Goal setting, Risk assessment, Action plan development'
+        },
+        { 
+          name: 'Wealth Management',
+          description: 'Ongoing portfolio management and financial guidance',
+          features: 'Investment selection, Rebalancing, Performance monitoring, Quarterly reviews'
+        }
+      ]
+    },
+    process: {
+      type: 'group',
+      label: 'Planning Process',
+      itemLabel: 'Step',
+      min: 0,
+      max: 8,
+      fields: {
+        step: { type: 'text', label: 'Step Number', default: '' },
+        title: { type: 'text', label: 'Title', default: '' },
+        description: { type: 'textarea', label: 'Description', default: '' }
+      },
+      default: [
+        { step: '1', title: 'Discovery', description: 'We begin by understanding your goals, concerns, and current financial situation' },
+        { step: '2', title: 'Analysis', description: 'Comprehensive review of your finances, investments, and risk profile' },
+        { step: '3', title: 'Strategy', description: 'Development of a personalized financial plan tailored to your objectives' },
+        { step: '4', title: 'Implementation', description: 'Execution of your financial plan with ongoing support and guidance' },
+        { step: '5', title: 'Monitoring', description: 'Regular reviews and adjustments to keep you on track toward your goals' }
+      ]
+    },
+    credentials: { 
+      type: 'textarea',
+      default: 'CFP® (Certified Financial Planner)\nCFA® (Chartered Financial Analyst)\nMBA, Finance - Wharton School of Business\n20+ years of experience in wealth management',
+      label: 'Credentials & Certifications',
+      required: false 
+    },
+    testimonials: {
+      type: 'group',
+      label: 'Client Testimonials',
+      itemLabel: 'Testimonial',
+      min: 0,
+      max: 10,
+      fields: {
+        name: { type: 'text', label: 'Client Name', default: '' },
+        text: { type: 'textarea', label: 'Testimonial', default: '' },
+        title: { type: 'text', label: 'Title/Description', default: '' }
+      },
+      default: [
+        { 
+          name: 'Robert & Linda K.',
+          text: 'Michael helped us navigate a complex retirement transition with confidence. His guidance was invaluable.',
+          title: 'Retired Executives'
+        },
+        { 
+          name: 'Jennifer M.',
+          text: 'Professional, knowledgeable, and always accessible. Our financial plan has given us peace of mind.',
+          title: 'Business Owner'
+        }
+      ]
+    },
+    disclosure: { 
+      type: 'text',
+      default: 'Securities offered through XYZ Financial, Member FINRA/SIPC',
+      label: 'Disclosure',
+      required: false 
+    },
+    contact: { type: 'email', default: 'michael@horizonwealth.com', label: 'Email', required: true },
+    phone: { type: 'tel', default: '(555) 123-4567', label: 'Phone', required: false },
+    address: { 
+      type: 'textarea',
+      default: '123 Financial Plaza, Suite 500\nNew York, NY 10001',
+      label: 'Office Address',
+      required: false 
+    },
+    calendlyLink: { type: 'url', default: '', label: 'Consultation/Booking Link', required: false }
+  },
+  structure: (data, theme) => {
+    const isBrutalist = theme.id === 'brutalist';
+    const isMinimal = theme.id === 'minimal';
+    const isGradient = theme.id === 'gradient';
+    const isElegant = theme.id === 'elegant';
+    const isRetro = theme.id === 'retro';
+    const isGlassmorphism = theme.id === 'glassmorphism';
+    const isNeumorphism = theme.id === 'neumorphism';
+
+    return `
       <!-- Header -->
-      <header style="position: sticky; top: 0; z-index: 1000; background: var(--color-bg); border-bottom: 1px solid var(--color-border); box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-        <div class="container" style="display: flex; justify-content: space-between; align-items: center; padding-top: 1.25rem; padding-bottom: 1.25rem;">
+      <header style="position: sticky; top: 0; z-index: 1000; background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.1)' : isNeumorphism ? 'var(--color-bg)' : 'var(--color-bg)'}; ${isBrutalist ? 'border-bottom: 4px solid var(--color-border);' : 'border-bottom: 1px solid var(--color-border);'} ${isGlassmorphism ? 'backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);' : ''} ${isNeumorphism ? 'box-shadow: 0 4px 6px rgba(163, 177, 198, 0.3), 0 -1px 3px rgba(255, 255, 255, 0.5);' : 'box-shadow: 0 1px 3px rgba(0,0,0,0.05);'}">
+        <div class="container" style="display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 2rem;">
           <div>
-            <div style="font-size: 1.375rem; font-weight: 900; color: var(--color-text); letter-spacing: -0.01em;">
+            <div style="font-family: ${isElegant ? 'Playfair Display, serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: ${isBrutalist ? '1.5rem' : '1.375rem'}; font-weight: ${isBrutalist ? '900' : '900'}; color: var(--color-text); letter-spacing: -0.01em; ${isBrutalist || isRetro ? 'text-transform: uppercase;' : ''}">
               ${data.advisorName || 'Financial Advisor'}
             </div>
             ${data.firmName ? `
-            <div style="font-size: 0.8125rem; color: var(--color-text-secondary); font-weight: 600; margin-top: 0.25rem;">
+            <div style="font-size: 0.8125rem; color: var(--color-text-secondary); font-weight: ${isBrutalist ? '900' : '600'}; margin-top: 0.25rem; ${isBrutalist ? 'text-transform: uppercase;' : ''}">
               ${data.firmName}
             </div>
             ` : ''}
           </div>
-          <nav style="display: flex; gap: 2rem; align-items: center; font-weight: 600; font-size: 0.9375rem;">
-            <a href="#services" style="color: var(--color-text); text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">Services</a>
-            <a href="#process" style="color: var(--color-text); text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">Process</a>
-            <a href="#about" style="color: var(--color-text); text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">About</a>
-            <a href="#contact" style="color: var(--color-text); text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">Contact</a>
-            <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle theme">
-              <span class="theme-icon">ðŸŒ™</span>
-            </button>
+          <nav class="desktop-nav" style="display: flex; gap: 2rem; align-items: center; font-weight: ${isBrutalist ? '900' : '600'}; font-size: 0.9375rem;">
+            <a href="#services" style="color: var(--color-text); text-decoration: none; transition: color 0.2s; ${isBrutalist ? 'text-transform: uppercase;' : ''}" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">Services</a>
+            <a href="#process" style="color: var(--color-text); text-decoration: none; transition: color 0.2s; ${isBrutalist ? 'text-transform: uppercase;' : ''}" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">Process</a>
+            <a href="#about" style="color: var(--color-text); text-decoration: none; transition: color 0.2s; ${isBrutalist ? 'text-transform: uppercase;' : ''}" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">About</a>
+            <a href="#contact" style="color: var(--color-text); text-decoration: none; transition: color 0.2s; ${isBrutalist ? 'text-transform: uppercase;' : ''}" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">Contact</a>
+            <label class="theme-toggle-switch-wrapper" style="cursor: pointer; ${isNeumorphism ? 'padding: 0.5rem; border-radius: 12px; display: inline-block; box-shadow: 6px 6px 12px rgba(163, 177, 198, 0.6), -6px -6px 12px rgba(255, 255, 255, 0.9);' : ''}">
+              <input type="checkbox" class="theme-toggle-switch" onclick="toggleTheme()" aria-label="Toggle theme">
+              <span class="theme-toggle-slider"></span>
+            </label>
           </nav>
         </div>
       </header>
 
       <!-- Hero -->
-      <section style="padding: 7rem 0 6rem; background: var(--color-bg); border-bottom: 1px solid var(--color-border);">
-        <div class="container">
+      <section style="padding: ${isBrutalist ? '5rem 0 4rem' : '7rem 0 6rem'}; background: var(--color-bg); ${isBrutalist ? 'border-bottom: 4px solid var(--color-border);' : 'border-bottom: 1px solid var(--color-border);'}">
+        <div class="container" style="margin: 0 auto; padding: 0 2rem;">
           <div style="max-width: 800px; margin: 0 auto; text-align: center;">
-            <div style="display: inline-flex; align-items: center; gap: 0.75rem; padding: 0.625rem 1.25rem; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-full); margin-bottom: 2rem; font-size: 0.9375rem; font-weight: 600; color: var(--color-text-secondary);">
-              <span style="font-size: 1.25rem;">ðŸ“Š</span>
+            <div style="display: inline-flex; align-items: center; gap: 0.75rem; padding: ${isBrutalist ? '0.875rem 1.5rem' : '0.625rem 1.25rem'}; background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.05)' : isNeumorphism ? 'var(--color-bg)' : 'var(--color-surface)'}; border: ${isBrutalist ? '3px' : '1px'} solid var(--color-border); ${isBrutalist ? '' : isNeumorphism ? 'box-shadow: 6px 6px 12px rgba(163, 177, 198, 0.6), -6px -6px 12px rgba(255, 255, 255, 0.9); border-radius: var(--radius-full);' : isGlassmorphism ? 'backdrop-filter: blur(10px); border-radius: var(--radius-full);' : 'border-radius: var(--radius-full);'} margin-bottom: 2rem; font-size: 0.9375rem; font-weight: ${isBrutalist ? '900' : '600'}; color: var(--color-text-secondary); ${isBrutalist ? 'text-transform: uppercase;' : ''}">
               Professional Financial Planning
             </div>
-            <h1 style="font-size: clamp(2.75rem, 6vw, 4.5rem); font-weight: 800; margin-bottom: 1.5rem; letter-spacing: -0.03em; line-height: 1.1; color: var(--color-text);">
+            <h1 style="font-family: ${isElegant ? 'Playfair Display, serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: clamp(${isBrutalist ? '2.25rem' : '2.75rem'}, 6vw, ${isBrutalist ? '3.5rem' : '4.5rem'}); font-weight: ${isBrutalist ? '900' : isRetro ? '700' : '800'}; margin-bottom: 1.5rem; letter-spacing: ${isBrutalist ? '-0.04em' : '-0.03em'}; line-height: 1.1; color: var(--color-text); ${isBrutalist || isRetro ? 'text-transform: uppercase;' : ''}">
               ${data.tagline || 'Strategic Financial Planning for Your Future'}
             </h1>
-            <p style="font-size: 1.25rem; color: var(--color-text-secondary); margin-bottom: 3rem; line-height: 1.6; font-weight: 500;">
-              ${data.firmName ? `${data.firmName} â€¢ ` : ''}Personalized wealth management strategies tailored to your goals
+            <p style="font-family: ${isElegant ? 'Lato, sans-serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: ${isBrutalist ? '1.125rem' : '1.25rem'}; color: var(--color-text-secondary); margin-bottom: 3rem; line-height: 1.6; font-weight: ${isElegant ? '300' : '500'};">
+              ${data.firmName ? `${data.firmName} • ` : ''}Personalized wealth management strategies tailored to your goals
             </p>
             <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
               ${data.calendlyLink ? `
-              <a href="${data.calendlyLink}" target="_blank" style="display: inline-block; padding: 1.125rem 2.5rem; background: var(--color-accent); color: var(--color-bg); text-decoration: none; font-weight: 700; font-size: 1rem; border-radius: var(--radius-md); transition: all 0.2s; box-shadow: var(--shadow-sm);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='var(--shadow-md)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-sm)'">
+              <a href="${data.calendlyLink}" target="_blank" style="display: inline-block; padding: ${isBrutalist ? '1.375rem 3rem' : '1.125rem 2.5rem'}; background: var(--color-accent); color: ${isBrutalist ? 'var(--color-text)' : 'var(--color-bg)'}; text-decoration: none; font-weight: ${isBrutalist ? '900' : '700'}; font-size: 1rem; ${isBrutalist ? 'border: 4px solid var(--color-text); box-shadow: 6px 6px 0 var(--color-text);' : isNeumorphism ? 'box-shadow: 10px 10px 20px rgba(163, 177, 198, 0.6), -10px -10px 20px rgba(255, 255, 255, 0.9); border-radius: var(--radius-md);' : 'border-radius: var(--radius-md); box-shadow: var(--shadow-sm);'} transition: all 0.2s; ${isBrutalist ? 'text-transform: uppercase;' : ''}" onmouseover="${isBrutalist ? `this.style.transform='translate(-4px, -4px)'; this.style.boxShadow='10px 10px 0 var(--color-text)'` : `this.style.transform='translateY(-2px)'; this.style.boxShadow='var(--shadow-md)'`}" onmouseout="${isBrutalist ? `this.style.transform='translate(0, 0)'; this.style.boxShadow='6px 6px 0 var(--color-text)'` : `this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-sm)'`}">
                 Schedule Consultation
               </a>
               ` : ''}
               ${data.phone ? `
-              <a href="tel:${data.phone}" style="display: inline-block; padding: 1.125rem 2.5rem; background: var(--color-bg); color: var(--color-text); text-decoration: none; font-weight: 700; font-size: 1rem; border-radius: var(--radius-md); border: 2px solid var(--color-border); transition: all 0.2s;" onmouseover="this.style.borderColor='var(--color-text)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='var(--color-border)'; this.style.transform='translateY(0)'">
+              <a href="tel:${data.phone}" style="display: inline-block; padding: ${isBrutalist ? '1.375rem 3rem' : '1.125rem 2.5rem'}; background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.05)' : isNeumorphism ? 'var(--color-bg)' : 'var(--color-bg)'}; color: var(--color-text); text-decoration: none; font-weight: ${isBrutalist ? '900' : '700'}; font-size: 1rem; ${isBrutalist ? 'border: 4px solid var(--color-border);' : isNeumorphism ? 'box-shadow: 6px 6px 12px rgba(163, 177, 198, 0.6), -6px -6px 12px rgba(255, 255, 255, 0.9); border-radius: var(--radius-md);' : isGlassmorphism ? 'backdrop-filter: blur(10px); border: 2px solid var(--color-border); border-radius: var(--radius-md);' : 'border-radius: var(--radius-md); border: 2px solid var(--color-border);'} transition: all 0.2s; ${isBrutalist ? 'text-transform: uppercase;' : ''}" onmouseover="${isBrutalist ? `this.style.transform='translate(-2px, -2px)'; this.style.boxShadow='4px 4px 0 var(--color-border)'` : `this.style.borderColor='var(--color-text)'; this.style.transform='translateY(-2px)'`}" onmouseout="${isBrutalist ? `this.style.transform='translate(0, 0)'; this.style.boxShadow='none'` : `this.style.borderColor='var(--color-border)'; this.style.transform='translateY(0)'`}">
                 ${data.phone}
               </a>
               ` : ''}
@@ -6054,138 +6494,116 @@ END:VCARD\`;
         </div>
       </section>
 
-      ${data.specializations && data.specializations.trim() !== '' && data.specializations !== '[]' ? `
+      ${data.specializations && data.specializations.length > 0 ? `
       <!-- Specializations -->
-      <section style="padding: 5rem 0; background: var(--color-surface);">
-        <div class="container">
+      <section style="padding: 5rem 0; background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.02)' : isNeumorphism ? 'var(--color-surface)' : 'var(--color-surface)'};">
+        <div class="container" style="margin: 0 auto; padding: 0 2rem;">
           <div style="text-align: center; margin-bottom: 4rem;">
-            <h2 style="font-size: clamp(2rem, 5vw, 3rem); font-weight: 800; margin-bottom: 1rem; letter-spacing: -0.02em;">
+            <h2 style="font-family: ${isElegant ? 'Playfair Display, serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: clamp(2rem, 5vw, 3rem); font-weight: ${isBrutalist ? '900' : isRetro ? '700' : '800'}; margin-bottom: 1rem; letter-spacing: ${isBrutalist ? '-0.04em' : '-0.02em'}; ${isBrutalist || isRetro ? 'text-transform: uppercase;' : ''}">
               Areas of Expertise
             </h2>
-            <p style="font-size: 1.0625rem; color: var(--color-text-secondary); max-width: 600px; margin: 0 auto;">
+            <p style="font-family: ${isElegant ? 'Lato, sans-serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: 1.0625rem; color: var(--color-text-secondary); max-width: 600px; margin: 0 auto; font-weight: ${isElegant ? '300' : 'normal'};">
               Comprehensive financial solutions across multiple areas
             </p>
           </div>
           
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem;">
-            ${(() => {
-              try {
-                const specializations = JSON.parse(data.specializations || '[]');
-                return specializations.map(spec => `
-                  <div style="background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 2rem; transition: all 0.2s;" onmouseover="this.style.borderColor='var(--color-accent)'; this.style.transform='translateY(-4px)'; this.style.boxShadow='var(--shadow-md)'" onmouseout="this.style.borderColor='var(--color-border)'; this.style.transform='translateY(0)'; this.style.boxShadow='none'">
-                    <div style="font-size: 2.5rem; margin-bottom: 1rem;">${spec.icon || 'ðŸ’¼'}</div>
-                    <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.75rem; letter-spacing: -0.01em;">
-                      ${spec.name || 'Specialization'}
-                    </h3>
-                    ${spec.description ? `
-                    <p style="color: var(--color-text-secondary); line-height: 1.6; font-size: 0.9375rem;">
-                      ${spec.description}
-                    </p>
-                    ` : ''}
-                  </div>
-                `).join('');
-              } catch (e) {
-                return '';
-              }
-            })()}
+          <div class="specializations-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem;">
+            ${data.specializations.map(spec => `
+              <div style="background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.05)' : isNeumorphism ? 'var(--color-bg)' : 'var(--color-bg)'}; border: ${isBrutalist ? '4px' : '1px'} solid var(--color-border); ${isBrutalist ? '' : isNeumorphism ? 'box-shadow: 10px 10px 20px rgba(163, 177, 198, 0.6), -10px -10px 20px rgba(255, 255, 255, 0.9); border-radius: var(--radius-lg);' : isGlassmorphism ? 'backdrop-filter: blur(10px); border-radius: var(--radius-lg);' : 'border-radius: var(--radius-lg);'} padding: 2rem; transition: all 0.2s;" onmouseover="${isBrutalist ? `this.style.transform='translate(-4px, -4px)'; this.style.boxShadow='8px 8px 0 var(--color-text)'` : isNeumorphism ? `this.style.boxShadow='inset 4px 4px 8px rgba(163, 177, 198, 0.6), inset -4px -4px 8px rgba(255, 255, 255, 0.9)'` : `this.style.borderColor='var(--color-accent)'; this.style.transform='translateY(-4px)'; this.style.boxShadow='var(--shadow-md)'`}" onmouseout="${isBrutalist ? `this.style.transform='translate(0, 0)'; this.style.boxShadow='none'` : isNeumorphism ? `this.style.boxShadow='10px 10px 20px rgba(163, 177, 198, 0.6), -10px -10px 20px rgba(255, 255, 255, 0.9)'` : `this.style.borderColor='var(--color-border)'; this.style.transform='translateY(0)'; this.style.boxShadow='none'`}">
+                <h3 style="font-family: ${isElegant ? 'Playfair Display, serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: 1.25rem; font-weight: ${isBrutalist ? '900' : '700'}; margin-bottom: 0.75rem; letter-spacing: -0.01em; ${isBrutalist ? 'text-transform: uppercase;' : ''}">
+                  ${spec.name || 'Specialization'}
+                </h3>
+                ${spec.description ? `
+                <p style="font-family: ${isElegant ? 'Lato, sans-serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; color: var(--color-text-secondary); line-height: 1.6; font-size: 0.9375rem; font-weight: ${isElegant ? '300' : 'normal'};">
+                  ${spec.description}
+                </p>
+                ` : ''}
+              </div>
+            `).join('')}
           </div>
         </div>
       </section>
       ` : ''}
 
-      ${data.services && data.services.trim() !== '' && data.services !== '[]' ? `
+      ${data.services && data.services.length > 0 ? `
       <!-- Services -->
       <section id="services" style="padding: 5rem 0; background: var(--color-bg);">
-        <div class="container">
+        <div class="container" style="margin: 0 auto; padding: 0 2rem;">
           <div style="text-align: center; margin-bottom: 4rem;">
-            <h2 style="font-size: clamp(2rem, 5vw, 3rem); font-weight: 800; margin-bottom: 1rem; letter-spacing: -0.02em;">
+            <h2 style="font-family: ${isElegant ? 'Playfair Display, serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: clamp(2rem, 5vw, 3rem); font-weight: ${isBrutalist ? '900' : isRetro ? '700' : '800'}; margin-bottom: 1rem; letter-spacing: ${isBrutalist ? '-0.04em' : '-0.02em'}; ${isBrutalist || isRetro ? 'text-transform: uppercase;' : ''}">
               Comprehensive Services
             </h2>
           </div>
           
           <div style="max-width: 1000px; margin: 0 auto; display: flex; flex-direction: column; gap: 2rem;">
-            ${(() => {
-              try {
-                const services = JSON.parse(data.services || '[]');
-                return services.map((service, i) => `
-                  <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 2.5rem; transition: all 0.2s;" onmouseover="this.style.borderColor='var(--color-accent)'; this.style.boxShadow='var(--shadow-md)'" onmouseout="this.style.borderColor='var(--color-border)'; this.style.boxShadow='none'">
-                    <div style="display: flex; align-items: start; gap: 1.5rem;">
-                      <div style="flex-shrink: 0; width: 3rem; height: 3rem; background: var(--color-accent); color: var(--color-bg); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.25rem;">
-                        ${i + 1}
-                      </div>
-                      <div style="flex: 1;">
-                        <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; letter-spacing: -0.01em;">
-                          ${service.name || 'Service'}
-                        </h3>
-                        ${service.description ? `
-                        <p style="color: var(--color-text-secondary); line-height: 1.7; margin-bottom: 1.5rem;">
-                          ${service.description}
-                        </p>
-                        ` : ''}
-                        ${service.features && service.features.length > 0 ? `
-                        <ul style="list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.75rem;">
-                          ${service.features.map(feature => `
-                            <li style="display: flex; align-items: center; gap: 0.5rem; color: var(--color-text); font-size: 0.9375rem;">
-                              <span style="color: var(--color-accent); font-weight: 900;">âœ“</span>
-                              <span>${feature}</span>
-                            </li>
-                          `).join('')}
-                        </ul>
-                        ` : ''}
-                      </div>
-                    </div>
+            ${data.services.map((service, i) => `
+              <div style="background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.05)' : isNeumorphism ? 'var(--color-bg)' : 'var(--color-surface)'}; border: ${isBrutalist ? '4px' : '1px'} solid var(--color-border); ${isBrutalist ? '' : isNeumorphism ? 'box-shadow: 10px 10px 20px rgba(163, 177, 198, 0.6), -10px -10px 20px rgba(255, 255, 255, 0.9); border-radius: var(--radius-lg);' : isGlassmorphism ? 'backdrop-filter: blur(10px); border-radius: var(--radius-lg);' : 'border-radius: var(--radius-lg);'} padding: 2.5rem; transition: all 0.2s;" onmouseover="${isBrutalist ? `this.style.transform='translate(-4px, -4px)'; this.style.boxShadow='8px 8px 0 var(--color-text)'` : isNeumorphism ? `this.style.boxShadow='inset 4px 4px 8px rgba(163, 177, 198, 0.6), inset -4px -4px 8px rgba(255, 255, 255, 0.9)'` : `this.style.borderColor='var(--color-accent)'; this.style.boxShadow='var(--shadow-md)'`}" onmouseout="${isBrutalist ? `this.style.transform='translate(0, 0)'; this.style.boxShadow='none'` : isNeumorphism ? `this.style.boxShadow='10px 10px 20px rgba(163, 177, 198, 0.6), -10px -10px 20px rgba(255, 255, 255, 0.9)'` : `this.style.borderColor='var(--color-border)'; this.style.boxShadow='none'`}">
+                <div class="service-content" style="display: flex; align-items: start; gap: 1.5rem;">
+                  <div style="flex-shrink: 0; width: 3rem; height: 3rem; background: var(--color-accent); color: ${isBrutalist ? 'var(--color-text)' : 'var(--color-bg)'}; ${isBrutalist ? 'border: 3px solid var(--color-text);' : isNeumorphism ? 'box-shadow: 6px 6px 12px rgba(163, 177, 198, 0.6), -6px -6px 12px rgba(255, 255, 255, 0.9); border-radius: var(--radius-md);' : 'border-radius: var(--radius-md);'} display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.25rem;">
+                    ${i + 1}
                   </div>
-                `).join('');
-              } catch (e) {
-                return '';
-              }
-            })()}
+                  <div style="flex: 1;">
+                    <h3 style="font-family: ${isElegant ? 'Playfair Display, serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: 1.5rem; font-weight: ${isBrutalist ? '900' : '700'}; margin-bottom: 1rem; letter-spacing: -0.01em; ${isBrutalist ? 'text-transform: uppercase;' : ''}">
+                      ${service.name || 'Service'}
+                    </h3>
+                    ${service.description ? `
+                    <p style="font-family: ${isElegant ? 'Lato, sans-serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; color: var(--color-text-secondary); line-height: 1.7; margin-bottom: 1.5rem; font-weight: ${isElegant ? '300' : 'normal'};">
+                      ${service.description}
+                    </p>
+                    ` : ''}
+                    ${service.features ? `
+                    <ul style="list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.75rem;">
+                      ${service.features.split(',').map(feature => `
+                        <li style="display: flex; align-items: center; gap: 0.5rem; color: var(--color-text); font-size: 0.9375rem;">
+                          <span style="color: var(--color-accent); font-weight: 900;">✓</span>
+                          <span>${feature.trim()}</span>
+                        </li>
+                      `).join('')}
+                    </ul>
+                    ` : ''}
+                  </div>
+                </div>
+              </div>
+            `).join('')}
           </div>
         </div>
       </section>
       ` : ''}
 
-      ${data.process && data.process.trim() !== '' && data.process !== '[]' ? `
+      ${data.process && data.process.length > 0 ? `
       <!-- Process -->
-      <section id="process" style="padding: 5rem 0; background: var(--color-surface);">
-        <div class="container">
+      <section id="process" style="padding: 5rem 0; background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.02)' : isNeumorphism ? 'var(--color-surface)' : 'var(--color-surface)'};">
+        <div class="container" style="margin: 0 auto; padding: 0 2rem;">
           <div style="text-align: center; margin-bottom: 4rem;">
-            <h2 style="font-size: clamp(2rem, 5vw, 3rem); font-weight: 800; margin-bottom: 1rem; letter-spacing: -0.02em;">
+            <h2 style="font-family: ${isElegant ? 'Playfair Display, serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: clamp(2rem, 5vw, 3rem); font-weight: ${isBrutalist ? '900' : isRetro ? '700' : '800'}; margin-bottom: 1rem; letter-spacing: ${isBrutalist ? '-0.04em' : '-0.02em'}; ${isBrutalist || isRetro ? 'text-transform: uppercase;' : ''}">
               My Planning Process
             </h2>
-            <p style="font-size: 1.0625rem; color: var(--color-text-secondary); max-width: 650px; margin: 0 auto;">
+            <p style="font-family: ${isElegant ? 'Lato, sans-serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: 1.0625rem; color: var(--color-text-secondary); max-width: 650px; margin: 0 auto; font-weight: ${isElegant ? '300' : 'normal'};">
               A systematic approach to building your financial future
             </p>
           </div>
           
-          <div style="max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 2rem;">
-            ${(() => {
-              try {
-                const process = JSON.parse(data.process || '[]');
-                return process.map((step, i) => `
-                  <div style="display: flex; gap: 2rem; align-items: start;">
-                    <div style="flex-shrink: 0; width: 4rem; height: 4rem; background: var(--color-accent); color: var(--color-bg); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.5rem; position: relative;">
-                      ${step.step || i + 1}
-                      ${i < process.length - 1 ? `
-                      <div style="position: absolute; top: 100%; left: 50%; transform: translateX(-50%); width: 2px; height: 2rem; background: var(--color-border);"></div>
-                      ` : ''}
-                    </div>
-                    <div style="flex: 1; padding-top: 0.5rem;">
-                      <h3 style="font-size: 1.375rem; font-weight: 700; margin-bottom: 0.75rem; letter-spacing: -0.01em;">
-                        ${step.title || 'Step'}
-                      </h3>
-                      ${step.description ? `
-                      <p style="color: var(--color-text-secondary); line-height: 1.7;">
-                        ${step.description}
-                      </p>
-                      ` : ''}
-                    </div>
-                  </div>
-                `).join('');
-              } catch (e) {
-                return '';
-              }
-            })()}
+          <div class="process-steps" style="max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 2rem;">
+            ${data.process.map((step, i) => `
+              <div style="display: flex; gap: 2rem; align-items: start;">
+                <div style="flex-shrink: 0; width: 4rem; height: 4rem; background: var(--color-accent); color: ${isBrutalist ? 'var(--color-text)' : 'var(--color-bg)'}; ${isBrutalist ? 'border: 4px solid var(--color-text);' : isNeumorphism ? 'box-shadow: 8px 8px 16px rgba(163, 177, 198, 0.6), -8px -8px 16px rgba(255, 255, 255, 0.9); border-radius: 50%;' : 'border-radius: 50%;'} display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.5rem; position: relative;">
+                  ${step.step || i + 1}
+                  ${i < data.process.length - 1 ? `
+                  <div style="position: absolute; top: 100%; left: 50%; transform: translateX(-50%); width: ${isBrutalist ? '4px' : '2px'}; height: 2rem; background: var(--color-border);"></div>
+                  ` : ''}
+                </div>
+                <div style="flex: 1; padding-top: 0.5rem;">
+                  <h3 style="font-family: ${isElegant ? 'Playfair Display, serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: 1.375rem; font-weight: ${isBrutalist ? '900' : '700'}; margin-bottom: 0.75rem; letter-spacing: -0.01em; ${isBrutalist ? 'text-transform: uppercase;' : ''}">
+                    ${step.title || 'Step'}
+                  </h3>
+                  ${step.description ? `
+                  <p style="font-family: ${isElegant ? 'Lato, sans-serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; color: var(--color-text-secondary); line-height: 1.7; font-weight: ${isElegant ? '300' : 'normal'};">
+                    ${step.description}
+                  </p>
+                  ` : ''}
+                </div>
+              </div>
+            `).join('')}
           </div>
         </div>
       </section>
@@ -6193,25 +6611,25 @@ END:VCARD\`;
 
       <!-- About -->
       <section id="about" style="padding: 5rem 0; background: var(--color-bg);">
-        <div class="container" style="max-width: 900px;">
+        <div class="container" style="max-width: 900px; margin: 0 auto; padding: 0 2rem;">
           <div style="text-align: center; margin-bottom: 3rem;">
-            <h2 style="font-size: clamp(2rem, 5vw, 3rem); font-weight: 800; letter-spacing: -0.02em;">
+            <h2 style="font-family: ${isElegant ? 'Playfair Display, serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: clamp(2rem, 5vw, 3rem); font-weight: ${isBrutalist ? '900' : isRetro ? '700' : '800'}; letter-spacing: ${isBrutalist ? '-0.04em' : '-0.02em'}; ${isBrutalist || isRetro ? 'text-transform: uppercase;' : ''}">
               About ${data.advisorName ? data.advisorName.split(',')[0] : 'Me'}
             </h2>
           </div>
           
           ${data.bio ? `
-          <div style="font-size: 1.0625rem; line-height: 1.8; color: var(--color-text); margin-bottom: 2.5rem; white-space: pre-line;">
+          <div style="font-family: ${isElegant ? 'Lato, sans-serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: 1.0625rem; line-height: 1.8; color: var(--color-text); margin-bottom: 2.5rem; white-space: pre-line; font-weight: ${isElegant ? '300' : 'normal'};">
             ${data.bio}
           </div>
           ` : ''}
           
           ${data.credentials ? `
-          <div style="background: var(--color-surface); border-left: 4px solid var(--color-accent); border-radius: var(--radius-md); padding: 2rem; margin-top: 2.5rem;">
-            <h3 style="font-size: 1.125rem; font-weight: 700; margin-bottom: 1rem; color: var(--color-accent); text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.875rem;">
+          <div style="background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.05)' : isNeumorphism ? 'var(--color-bg)' : 'var(--color-surface)'}; border-left: ${isBrutalist ? '8px' : '4px'} solid var(--color-accent); ${isBrutalist ? 'border: 4px solid var(--color-text); border-left: 8px solid var(--color-accent);' : isNeumorphism ? 'box-shadow: 6px 6px 12px rgba(163, 177, 198, 0.6), -6px -6px 12px rgba(255, 255, 255, 0.9); border-radius: var(--radius-md);' : isGlassmorphism ? 'backdrop-filter: blur(10px); border-radius: var(--radius-md);' : 'border-radius: var(--radius-md);'} padding: 2rem; margin-top: 2.5rem;">
+            <h3 style="font-size: ${isBrutalist ? '1rem' : '0.875rem'}; font-weight: ${isBrutalist ? '900' : '700'}; margin-bottom: 1rem; color: var(--color-accent); text-transform: uppercase; letter-spacing: 0.05em;">
               Credentials & Experience
             </h3>
-            <div style="color: var(--color-text); line-height: 1.8; white-space: pre-line;">
+            <div style="font-family: ${isElegant ? 'Lato, sans-serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; color: var(--color-text); line-height: 1.8; white-space: pre-line; font-weight: ${isElegant ? '300' : 'normal'};">
               ${data.credentials}
             </div>
           </div>
@@ -6219,42 +6637,35 @@ END:VCARD\`;
         </div>
       </section>
 
-      ${data.testimonials && data.testimonials.trim() !== '' && data.testimonials !== '[]' ? `
+      ${data.testimonials && data.testimonials.length > 0 ? `
       <!-- Testimonials -->
-      <section style="padding: 5rem 0; background: var(--color-surface);">
-        <div class="container">
+      <section style="padding: 5rem 0; background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.02)' : isNeumorphism ? 'var(--color-surface)' : 'var(--color-surface)'};">
+        <div class="container" style="margin: 0 auto; padding: 0 2rem;">
           <div style="text-align: center; margin-bottom: 4rem;">
-            <h2 style="font-size: clamp(2rem, 5vw, 3rem); font-weight: 800; margin-bottom: 1rem; letter-spacing: -0.02em;">
+            <h2 style="font-family: ${isElegant ? 'Playfair Display, serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: clamp(2rem, 5vw, 3rem); font-weight: ${isBrutalist ? '900' : isRetro ? '700' : '800'}; margin-bottom: 1rem; letter-spacing: ${isBrutalist ? '-0.04em' : '-0.02em'}; ${isBrutalist || isRetro ? 'text-transform: uppercase;' : ''}">
               Client Testimonials
             </h2>
           </div>
           
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem; max-width: 1100px; margin: 0 auto;">
-            ${(() => {
-              try {
-                const testimonials = JSON.parse(data.testimonials || '[]');
-                return testimonials.map(testimonial => `
-                  <div style="background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 2rem;">
-                    <div style="font-size: 2rem; color: var(--color-accent); margin-bottom: 1rem; line-height: 1;">"</div>
-                    <p style="font-size: 1rem; line-height: 1.7; color: var(--color-text); margin-bottom: 1.5rem; font-style: italic;">
-                      ${testimonial.text || ''}
-                    </p>
-                    <div style="border-top: 1px solid var(--color-border); padding-top: 1rem;">
-                      <div style="font-weight: 700; color: var(--color-text); margin-bottom: 0.25rem;">
-                        ${testimonial.name || 'Client'}
-                      </div>
-                      ${testimonial.title ? `
-                      <div style="font-size: 0.875rem; color: var(--color-text-secondary);">
-                        ${testimonial.title}
-                      </div>
-                      ` : ''}
-                    </div>
+          <div class="testimonials-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem; max-width: 1100px; margin: 0 auto;">
+            ${data.testimonials.map(testimonial => `
+              <div style="background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.05)' : isNeumorphism ? 'var(--color-bg)' : 'var(--color-bg)'}; border: ${isBrutalist ? '4px' : '1px'} solid var(--color-border); ${isBrutalist ? '' : isNeumorphism ? 'box-shadow: 10px 10px 20px rgba(163, 177, 198, 0.6), -10px -10px 20px rgba(255, 255, 255, 0.9); border-radius: var(--radius-lg);' : isGlassmorphism ? 'backdrop-filter: blur(10px); border-radius: var(--radius-lg);' : 'border-radius: var(--radius-lg);'} padding: 2rem;">
+                <div style="font-size: 2rem; color: var(--color-accent); margin-bottom: 1rem; line-height: 1;">"</div>
+                <p style="font-family: ${isElegant ? 'Lato, sans-serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: 1rem; line-height: 1.7; color: var(--color-text); margin-bottom: 1.5rem; ${isElegant ? 'font-style: italic;' : ''} font-weight: ${isElegant ? '300' : 'normal'};">
+                  ${testimonial.text || ''}
+                </p>
+                <div style="border-top: ${isBrutalist ? '2px' : '1px'} solid var(--color-border); padding-top: 1rem;">
+                  <div style="font-weight: ${isBrutalist ? '900' : '700'}; color: var(--color-text); margin-bottom: 0.25rem;">
+                    ${testimonial.name || 'Client'}
                   </div>
-                `).join('');
-              } catch (e) {
-                return '';
-              }
-            })()}
+                  ${testimonial.title ? `
+                  <div style="font-size: 0.875rem; color: var(--color-text-secondary);">
+                    ${testimonial.title}
+                  </div>
+                  ` : ''}
+                </div>
+              </div>
+            `).join('')}
           </div>
         </div>
       </section>
@@ -6262,33 +6673,33 @@ END:VCARD\`;
 
       <!-- Contact -->
       <section id="contact" style="padding: 5rem 0; background: var(--color-bg);">
-        <div class="container" style="max-width: 700px;">
+        <div class="container" style="max-width: 700px; margin: 0 auto; padding: 0 2rem;">
           <div style="text-align: center; margin-bottom: 3rem;">
-            <h2 style="font-size: clamp(2rem, 5vw, 3rem); font-weight: 800; margin-bottom: 1rem; letter-spacing: -0.02em;">
+            <h2 style="font-family: ${isElegant ? 'Playfair Display, serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: clamp(2rem, 5vw, 3rem); font-weight: ${isBrutalist ? '900' : isRetro ? '700' : '800'}; margin-bottom: 1rem; letter-spacing: ${isBrutalist ? '-0.04em' : '-0.02em'}; ${isBrutalist || isRetro ? 'text-transform: uppercase;' : ''}">
               Start Your Financial Journey
             </h2>
-            <p style="font-size: 1.0625rem; color: var(--color-text-secondary); line-height: 1.6;">
+            <p style="font-family: ${isElegant ? 'Lato, sans-serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: 1.0625rem; color: var(--color-text-secondary); line-height: 1.6; font-weight: ${isElegant ? '300' : 'normal'};">
               Schedule a complimentary consultation to discuss your financial goals
             </p>
           </div>
           
-          <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 2.5rem; margin-bottom: 2rem;">
+          <div style="background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.05)' : isNeumorphism ? 'var(--color-bg)' : 'var(--color-surface)'}; border: ${isBrutalist ? '4px' : '1px'} solid var(--color-border); ${isBrutalist ? '' : isNeumorphism ? 'box-shadow: 10px 10px 20px rgba(163, 177, 198, 0.6), -10px -10px 20px rgba(255, 255, 255, 0.9); border-radius: var(--radius-lg);' : isGlassmorphism ? 'backdrop-filter: blur(10px); border-radius: var(--radius-lg);' : 'border-radius: var(--radius-lg);'} padding: 2.5rem; margin-bottom: 2rem;">
             <div style="display: grid; gap: 1.5rem;">
               ${data.phone ? `
-              <a href="tel:${data.phone}" style="display: flex; align-items: center; gap: 1rem; color: var(--color-text); text-decoration: none; font-weight: 600; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">
-                <span style="font-size: 1.5rem;">ðŸ“ž</span>
+              <a href="tel:${data.phone}" style="display: flex; align-items: center; gap: 1rem; color: var(--color-text); text-decoration: none; font-weight: ${isBrutalist ? '900' : '600'}; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">
+                <span style="font-size: 1.5rem;">☎</span>
                 <span>${data.phone}</span>
               </a>
               ` : ''}
               ${data.contact ? `
-              <a href="mailto:${data.contact}" style="display: flex; align-items: center; gap: 1rem; color: var(--color-text); text-decoration: none; font-weight: 600; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">
-                <span style="font-size: 1.5rem;">âœ‰ï¸</span>
+              <a href="mailto:${data.contact}" style="display: flex; align-items: center; gap: 1rem; color: var(--color-text); text-decoration: none; font-weight: ${isBrutalist ? '900' : '600'}; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">
+                <span style="font-size: 1.5rem;">✉</span>
                 <span>${data.contact}</span>
               </a>
               ` : ''}
               ${data.address ? `
               <div style="display: flex; align-items: start; gap: 1rem; color: var(--color-text-secondary);">
-                <span style="font-size: 1.5rem;">ðŸ“</span>
+                <span style="font-size: 1.5rem;">📍</span>
                 <span style="line-height: 1.6; white-space: pre-line;">${data.address}</span>
               </div>
               ` : ''}
@@ -6297,7 +6708,7 @@ END:VCARD\`;
           
           ${data.calendlyLink ? `
           <div style="text-align: center;">
-            <a href="${data.calendlyLink}" target="_blank" style="display: inline-block; padding: 1.125rem 2.5rem; background: var(--color-accent); color: var(--color-bg); text-decoration: none; font-weight: 700; font-size: 1rem; border-radius: var(--radius-md); transition: all 0.2s; box-shadow: var(--shadow-sm);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='var(--shadow-md)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-sm)'">
+            <a href="${data.calendlyLink}" target="_blank" style="display: inline-block; padding: ${isBrutalist ? '1.375rem 3rem' : '1.125rem 2.5rem'}; background: var(--color-accent); color: ${isBrutalist ? 'var(--color-text)' : 'var(--color-bg)'}; text-decoration: none; font-weight: ${isBrutalist ? '900' : '700'}; font-size: 1rem; ${isBrutalist ? 'border: 4px solid var(--color-text); box-shadow: 6px 6px 0 var(--color-text);' : isNeumorphism ? 'box-shadow: 10px 10px 20px rgba(163, 177, 198, 0.6), -10px -10px 20px rgba(255, 255, 255, 0.9); border-radius: var(--radius-md);' : 'border-radius: var(--radius-md); box-shadow: var(--shadow-sm);'} transition: all 0.2s; ${isBrutalist ? 'text-transform: uppercase;' : ''}" onmouseover="${isBrutalist ? `this.style.transform='translate(-4px, -4px)'; this.style.boxShadow='10px 10px 0 var(--color-text)'` : `this.style.transform='translateY(-2px)'; this.style.boxShadow='var(--shadow-md)'`}" onmouseout="${isBrutalist ? `this.style.transform='translate(0, 0)'; this.style.boxShadow='6px 6px 0 var(--color-text)'` : `this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-sm)'`}">
               Schedule Free Consultation
             </a>
           </div>
@@ -6306,9 +6717,9 @@ END:VCARD\`;
       </section>
 
       <!-- Footer -->
-      <footer style="padding: 2.5rem 0; background: var(--color-surface); text-align: center; color: var(--color-text-secondary); font-size: 0.8125rem; border-top: 1px solid var(--color-border);">
-        <div class="container" style="max-width: 900px;">
-          <p style="margin-bottom: 0.75rem; font-weight: 600;">Â© 2024 ${data.advisorName || 'Financial Advisor'}${data.firmName ? ` â€¢ ${data.firmName}` : ''}</p>
+      <footer style="padding: 2.5rem 0; background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.02)' : isNeumorphism ? 'var(--color-surface)' : 'var(--color-surface)'}; text-align: center; color: var(--color-text-secondary); font-size: 0.8125rem; ${isBrutalist ? 'border-top: 4px solid var(--color-border);' : 'border-top: 1px solid var(--color-border);'}">
+        <div class="container" style="max-width: 900px; margin: 0 auto; padding: 0 2rem;">
+          <p style="margin-bottom: 0.75rem; font-weight: ${isBrutalist ? '900' : '600'};">© 2024 ${data.advisorName || 'Financial Advisor'}${data.firmName ? ` • ${data.firmName}` : ''}</p>
           ${data.disclosure ? `
           <p style="line-height: 1.6; opacity: 0.8;">${data.disclosure}</p>
           ` : ''}
@@ -6320,158 +6731,278 @@ END:VCARD\`;
 
       <style>
         @media (max-width: 768px) {
-          header nav { display: none !important; }
+          .desktop-nav { display: none !important; }
+          .specializations-grid {
+            grid-template-columns: 1fr !important;
+          }
+          .testimonials-grid {
+            grid-template-columns: 1fr !important;
+          }
+          .process-steps > div {
+            flex-direction: column;
+            gap: 1rem !important;
+          }
+          .service-content {
+            flex-direction: column !important;
+          }
+          section[style*="padding: 7rem"] {
+            padding: 5rem 0 !important;
+          }
+          section[style*="padding: 5rem"] {
+            padding: 4rem 0 !important;
+          }
+        }
+        
+        @media (max-width: 480px) {
+          .container {
+            padding: 0 1rem !important;
+          }
         }
       </style>
     `
-  }),
+  }
+}),
+'fitness': new Template('fitness', {
+  name: 'Fitness Trainer',
+  description: 'Personal training and fitness coaching website',
+  category: 'Business',
+  defaultTheme: 'brutalist',
+  image: 'fitness',
+  fields: {
+    trainerName: { type: 'text', default: 'Alex Johnson', label: 'Trainer Name', required: true },
+    tagline: { type: 'text', default: 'Transform Your Body, Transform Your Life', label: 'Tagline', required: true },
+    bio: { 
+      type: 'textarea',
+      default: 'As a certified personal trainer with over 10 years of experience, I\'ve helped hundreds of clients achieve their fitness goals. My training philosophy focuses on sustainable habits, proper form, and progressive overload to build strength and confidence that lasts.',
+      label: 'Bio',
+      required: true 
+    },
+    specialties: {
+      type: 'group',
+      label: 'Specialties',
+      itemLabel: 'Specialty',
+      min: 0,
+      max: 8,
+      fields: {
+        name: { type: 'text', label: 'Name', default: '' },
+        description: { type: 'textarea', label: 'Description', default: '' }
+      },
+      default: [
+        { 
+          name: 'Strength Training',
+          description: 'Build muscle and power with progressive resistance training'
+        },
+        { 
+          name: 'Weight Loss',
+          description: 'Sustainable fat loss through nutrition and exercise'
+        },
+        { 
+          name: 'Athletic Performance',
+          description: 'Enhance speed, agility, and sport-specific skills'
+        },
+        { 
+          name: 'Injury Prevention',
+          description: 'Mobility work and corrective exercises for longevity'
+        }
+      ]
+    },
+    programs: {
+      type: 'group',
+      label: 'Training Programs',
+      itemLabel: 'Program',
+      min: 0,
+      max: 10,
+      fields: {
+        name: { type: 'text', label: 'Program Name', default: '' },
+        duration: { type: 'text', label: 'Duration', default: '' },
+        price: { type: 'text', label: 'Price', default: '' },
+        description: { type: 'textarea', label: 'Description', default: '' },
+        features: { type: 'text', label: 'Features (comma separated)', default: '' }
+      },
+      default: [
+        { 
+          name: '1-on-1 Training',
+          duration: '60 min',
+          price: '$80/session',
+          description: 'Personalized training sessions designed specifically for your goals',
+          features: 'Custom workout plan, Form coaching, Progress tracking, Nutrition guidance'
+        },
+        { 
+          name: 'Small Group Training',
+          duration: '45 min',
+          price: '$40/session',
+          description: 'Train with 2-4 people in a motivating group environment',
+          features: 'Group accountability, Cost-effective, Social atmosphere, Expert coaching'
+        },
+        { 
+          name: 'Online Coaching',
+          duration: 'Monthly',
+          price: '$200/month',
+          description: 'Remote training with personalized programming and weekly check-ins',
+          features: 'Custom programs, Video form checks, Weekly calls, App access'
+        }
+      ]
+    },
+    transformations: {
+      type: 'group',
+      label: 'Client Transformations',
+      itemLabel: 'Transformation',
+      min: 0,
+      max: 15,
+      fields: {
+        name: { type: 'text', label: 'Client Name', default: '' },
+        result: { type: 'text', label: 'Result', default: '' },
+        time: { type: 'text', label: 'Timeframe', default: '' },
+        testimonial: { type: 'textarea', label: 'Testimonial', default: '' }
+      },
+      default: [
+        { 
+          name: 'John D.',
+          result: 'Lost 30 lbs',
+          time: '3 months',
+          testimonial: 'Alex helped me completely transform my relationship with fitness. The results speak for themselves!'
+        },
+        { 
+          name: 'Sarah M.',
+          result: 'Gained 15 lbs muscle',
+          time: '6 months',
+          testimonial: 'I never thought I could get this strong. Alex pushed me beyond what I thought was possible.'
+        }
+      ]
+    },
+    certifications: { 
+      type: 'textarea',
+      default: 'NASM Certified Personal Trainer (CPT)\nACE Fitness Nutrition Specialist\nCrossFit Level 1 Trainer\nFirst Aid & CPR Certified',
+      label: 'Certifications',
+      required: false 
+    },
+    contact: { type: 'email', default: 'alex@fitness.com', label: 'Contact Email', required: true },
+    phone: { type: 'tel', default: '(555) 123-4567', label: 'Phone Number', required: false },
+    instagram: { type: 'url', default: '', label: 'Instagram URL', required: false },
+    bookingLink: { type: 'url', default: '', label: 'Booking/Scheduling Link', required: false }
+  },
+  structure: (data, theme) => {
+    const isBrutalist = theme.id === 'brutalist';
+    const isMinimal = theme.id === 'minimal';
+    const isGradient = theme.id === 'gradient';
+    const isElegant = theme.id === 'elegant';
+    const isRetro = theme.id === 'retro';
+    const isGlassmorphism = theme.id === 'glassmorphism';
+    const isNeumorphism = theme.id === 'neumorphism';
 
-  fitness: new Template('fitness', {
-    name: 'Fitness Trainer',
-    description: 'Personal training and fitness coaching website',
-    category: 'Business',
-    defaultTheme: 'brutalist',
-    fields: [
-      { id: 'trainerName', label: 'Trainer Name', type: 'text', placeholder: 'Alex Johnson', required: true },
-      { id: 'tagline', label: 'Tagline', type: 'text', placeholder: 'Transform Your Body, Transform Your Life' },
-      { id: 'bio', label: 'Bio', type: 'textarea', placeholder: 'Share your fitness journey, certifications, and training philosophy...' },
-      { id: 'specialties', label: 'Specialties', type: 'textarea', placeholder: 'Enter specialties as JSON array: [{"name": "Strength Training", "icon": "ðŸ’ª", "description": "Build muscle and power"}, ...]' },
-      { id: 'programs', label: 'Training Programs', type: 'textarea', placeholder: 'Enter programs as JSON: [{"name": "1-on-1 Training", "duration": "60 min", "price": "$80/session", "description": "..."}, ...]' },
-      { id: 'transformations', label: 'Client Transformations', type: 'textarea', placeholder: 'Enter success stories as JSON: [{"name": "John D.", "result": "Lost 30 lbs", "time": "3 months", "testimonial": "..."}, ...]' },
-      { id: 'certifications', label: 'Certifications', type: 'textarea', placeholder: 'NASM CPT, ACE, CrossFit Level 1, etc.' },
-      { id: 'contact', label: 'Contact Email', type: 'email', placeholder: 'trainer@fitness.com' },
-      { id: 'phone', label: 'Phone', type: 'tel', placeholder: '(555) 123-4567' },
-      { id: 'instagram', label: 'Instagram', type: 'url', placeholder: 'https://instagram.com/yourhandle' },
-      { id: 'bookingLink', label: 'Booking Link', type: 'url', placeholder: 'https://calendly.com/yourlink' },
-    ],
-    structure: (data, theme) => `
+    return `
       <!-- Header -->
-      <header style="position: sticky; top: 0; z-index: 1000; background: var(--color-bg); border-bottom: 3px solid var(--color-accent); backdrop-filter: blur(10px);">
-        <div class="container" style="display: flex; justify-content: space-between; align-items: center; padding-top: 1.5rem; padding-bottom: 1.5rem;">
-          <div style="font-size: 1.5rem; font-weight: 900; color: var(--color-accent); text-transform: uppercase; letter-spacing: 0.05em;">
-            ðŸ’ª ${data.trainerName || 'Fitness Coach'}
+      <header style="position: sticky; top: 0; z-index: 1000; background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.1)' : isNeumorphism ? 'var(--color-bg)' : 'var(--color-bg)'}; ${isBrutalist ? 'border-bottom: 4px solid var(--color-accent);' : isRetro ? 'border-bottom: 3px solid var(--color-accent);' : 'border-bottom: 3px solid var(--color-accent);'} ${isGlassmorphism ? 'backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);' : 'backdrop-filter: blur(10px);'} ${isNeumorphism ? 'box-shadow: 0 4px 6px rgba(163, 177, 198, 0.3), 0 -1px 3px rgba(255, 255, 255, 0.5);' : ''}">
+        <div class="container" style="display: flex; justify-content: space-between; align-items: center; padding: 1.5rem 2rem;">
+          <div style="font-family: ${isElegant ? 'Playfair Display, serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: ${isBrutalist ? '1.75rem' : '1.5rem'}; font-weight: 900; color: var(--color-accent); text-transform: uppercase; letter-spacing: 0.05em;">
+            ${data.trainerName || 'Fitness Coach'}
           </div>
-          <nav style="display: flex; gap: 2rem; align-items: center; font-weight: 700; text-transform: uppercase; font-size: 0.875rem;">
+          <nav class="desktop-nav" style="display: flex; gap: 2rem; align-items: center; font-weight: ${isBrutalist ? '900' : '700'}; text-transform: uppercase; font-size: 0.875rem;">
             <a href="#programs" style="color: var(--color-text); text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">Programs</a>
             <a href="#about" style="color: var(--color-text); text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">About</a>
             <a href="#results" style="color: var(--color-text); text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">Results</a>
             <a href="#contact" style="color: var(--color-text); text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">Contact</a>
-            <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle theme">
-              <span class="theme-icon">ðŸŒ™</span>
-            </button>
+            <label class="theme-toggle-switch-wrapper" style="cursor: pointer; ${isNeumorphism ? 'padding: 0.5rem; border-radius: 12px; display: inline-block; box-shadow: 6px 6px 12px rgba(163, 177, 198, 0.6), -6px -6px 12px rgba(255, 255, 255, 0.9);' : ''}">
+              <input type="checkbox" class="theme-toggle-switch" onclick="toggleTheme()" aria-label="Toggle theme">
+              <span class="theme-toggle-slider"></span>
+            </label>
           </nav>
         </div>
       </header>
 
       <!-- Hero -->
-      <section style="padding: 10rem 0 8rem; background: linear-gradient(135deg, var(--color-accent), var(--color-text)); color: var(--color-bg); position: relative; overflow: hidden;">
-        <div style="position: absolute; inset: 0; opacity: 0.1; background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, currentColor 10px, currentColor 11px);"></div>
-        <div class="container" style="text-align: center; position: relative; z-index: 1;">
-          <div style="font-size: 6rem; margin-bottom: 2rem; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));">ðŸ‹ï¸</div>
-          <h1 style="font-size: clamp(3rem, 8vw, 5.5rem); font-weight: 900; margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: -0.02em; line-height: 1;">
+      <section style="padding: 10rem 0 8rem; background: ${isBrutalist ? 'var(--color-accent)' : isGradient ? 'linear-gradient(135deg, #667eea, #764ba2)' : isRetro ? 'linear-gradient(135deg, var(--color-accent), #b537f2)' : 'linear-gradient(135deg, var(--color-accent), var(--color-text))'}; color: ${isBrutalist ? 'var(--color-text)' : 'var(--color-bg)'}; position: relative; overflow: hidden;">
+        ${isBrutalist || isRetro ? `<div style="position: absolute; inset: 0; opacity: 0.1; background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, currentColor 10px, currentColor 11px);"></div>` : ''}
+        <div class="container" style="text-align: center; position: relative; z-index: 1; margin: 0 auto; padding: 0 2rem;">
+          <h1 style="font-family: ${isElegant ? 'Playfair Display, serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: clamp(${isBrutalist ? '2.5rem' : '3rem'}, 8vw, ${isBrutalist ? '4.5rem' : '5.5rem'}); font-weight: 900; margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: -0.02em; line-height: 1;">
             ${data.trainerName || 'Elite Personal Training'}
           </h1>
-          <p style="font-size: 1.75rem; margin-bottom: 3rem; font-weight: 700; opacity: 0.95; text-transform: uppercase; letter-spacing: 0.05em;">
+          <p style="font-family: ${isElegant ? 'Lato, sans-serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: ${isBrutalist ? '1.5rem' : '1.75rem'}; margin-bottom: 3rem; font-weight: 700; opacity: 0.95; text-transform: uppercase; letter-spacing: 0.05em;">
             ${data.tagline || 'Transform Your Body. Transform Your Life.'}
           </p>
           ${data.bookingLink ? `
-          <a href="${data.bookingLink}" target="_blank" style="display: inline-block; padding: 1.5rem 3.5rem; background: var(--color-bg); color: var(--color-accent); text-decoration: none; font-weight: 900; font-size: 1.25rem; border-radius: var(--radius-sm); transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.05em; box-shadow: 0 8px 24px rgba(0,0,0,0.3);" onmouseover="this.style.transform='translateY(-4px) scale(1.02)'; this.style.boxShadow='0 12px 32px rgba(0,0,0,0.4)'" onmouseout="this.style.transform='translateY(0) scale(1)'; this.style.boxShadow='0 8px 24px rgba(0,0,0,0.3)'">
+          <a href="${data.bookingLink}" target="_blank" style="display: inline-block; padding: ${isBrutalist ? '2rem 4rem' : '1.5rem 3.5rem'}; background: ${isBrutalist ? 'var(--color-text)' : 'var(--color-bg)'}; color: ${isBrutalist ? 'var(--color-bg)' : 'var(--color-accent)'}; text-decoration: none; font-weight: 900; font-size: 1.25rem; ${isBrutalist ? 'border: 4px solid var(--color-text); box-shadow: 8px 8px 0 var(--color-text);' : isNeumorphism ? 'box-shadow: 10px 10px 20px rgba(163, 177, 198, 0.6), -10px -10px 20px rgba(255, 255, 255, 0.9); border-radius: var(--radius-sm);' : 'border-radius: var(--radius-sm); box-shadow: 0 8px 24px rgba(0,0,0,0.3);'} transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.05em;" onmouseover="${isBrutalist ? `this.style.transform='translate(-6px, -6px)'; this.style.boxShadow='14px 14px 0 var(--color-text)'` : `this.style.transform='translateY(-4px) scale(1.02)'; this.style.boxShadow='0 12px 32px rgba(0,0,0,0.4)'`}" onmouseout="${isBrutalist ? `this.style.transform='translate(0, 0)'; this.style.boxShadow='8px 8px 0 var(--color-text)'` : `this.style.transform='translateY(0) scale(1)'; this.style.boxShadow='0 8px 24px rgba(0,0,0,0.3)'`}">
             Start Your Transformation
           </a>
           ` : ''}
         </div>
       </section>
 
-      ${data.specialties && data.specialties.trim() !== '' && data.specialties !== '[]' ? `
+      ${data.specialties && data.specialties.length > 0 ? `
       <!-- Specialties -->
       <section style="padding: 6rem 0; background: var(--color-bg);">
-        <div class="container">
+        <div class="container" style="margin: 0 auto; padding: 0 2rem;">
           <div style="text-align: center; margin-bottom: 4rem;">
-            <h2 style="font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: 900; margin-bottom: 1rem; text-transform: uppercase;">
+            <h2 style="font-family: ${isElegant ? 'Playfair Display, serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: 900; margin-bottom: 1rem; text-transform: uppercase; ${isBrutalist || isRetro ? 'letter-spacing: -0.02em;' : ''}">
               My Specialties
             </h2>
           </div>
           
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem;">
-            ${(() => {
-              try {
-                const specialties = JSON.parse(data.specialties || '[]');
-                return specialties.map(specialty => `
-                  <div style="background: var(--color-surface); border: 3px solid var(--color-border); padding: 2.5rem; text-align: center; transition: all 0.2s;" onmouseover="this.style.borderColor='var(--color-accent)'; this.style.transform='translateY(-6px)'" onmouseout="this.style.borderColor='var(--color-border)'; this.style.transform='translateY(0)'">
-                    <div style="font-size: 3rem; margin-bottom: 1rem;">${specialty.icon || 'âš¡'}</div>
-                    <h3 style="font-size: 1.375rem; font-weight: 900; margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">
-                      ${specialty.name || 'Specialty'}
-                    </h3>
-                    ${specialty.description ? `
-                    <p style="color: var(--color-text-secondary); line-height: 1.6;">
-                      ${specialty.description}
-                    </p>
-                    ` : ''}
-                  </div>
-                `).join('');
-              } catch (e) {
-                return '';
-              }
-            })()}
+          <div class="specialties-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem;">
+            ${data.specialties.map(specialty => `
+              <div style="background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.05)' : isNeumorphism ? 'var(--color-bg)' : 'var(--color-surface)'}; border: ${isBrutalist ? '4px' : '3px'} solid var(--color-border); ${isBrutalist ? '' : isNeumorphism ? 'box-shadow: 10px 10px 20px rgba(163, 177, 198, 0.6), -10px -10px 20px rgba(255, 255, 255, 0.9);' : isGlassmorphism ? 'backdrop-filter: blur(10px);' : ''} padding: 2.5rem; text-align: center; transition: all 0.2s;" onmouseover="${isBrutalist ? `this.style.transform='translate(-4px, -4px)'; this.style.boxShadow='8px 8px 0 var(--color-text)'` : isNeumorphism ? `this.style.boxShadow='inset 4px 4px 8px rgba(163, 177, 198, 0.6), inset -4px -4px 8px rgba(255, 255, 255, 0.9)'` : `this.style.borderColor='var(--color-accent)'; this.style.transform='translateY(-6px)'`}" onmouseout="${isBrutalist ? `this.style.transform='translate(0, 0)'; this.style.boxShadow='none'` : isNeumorphism ? `this.style.boxShadow='10px 10px 20px rgba(163, 177, 198, 0.6), -10px -10px 20px rgba(255, 255, 255, 0.9)'` : `this.style.borderColor='var(--color-border)'; this.style.transform='translateY(0)'`}">
+                <h3 style="font-family: ${isElegant ? 'Playfair Display, serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: 1.375rem; font-weight: 900; margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">
+                  ${specialty.name || 'Specialty'}
+                </h3>
+                ${specialty.description ? `
+                <p style="font-family: ${isElegant ? 'Lato, sans-serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; color: var(--color-text-secondary); line-height: 1.6; font-weight: ${isElegant ? '300' : 'normal'};">
+                  ${specialty.description}
+                </p>
+                ` : ''}
+              </div>
+            `).join('')}
           </div>
         </div>
       </section>
       ` : ''}
 
-      ${data.programs && data.programs.trim() !== '' && data.programs !== '[]' ? `
+      ${data.programs && data.programs.length > 0 ? `
       <!-- Programs -->
-      <section id="programs" style="padding: 6rem 0; background: var(--color-surface);">
-        <div class="container">
+      <section id="programs" style="padding: 6rem 0; background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.02)' : isNeumorphism ? 'var(--color-surface)' : 'var(--color-surface)'};">
+        <div class="container" style="margin: 0 auto; padding: 0 2rem;">
           <div style="text-align: center; margin-bottom: 4rem;">
-            <h2 style="font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: 900; margin-bottom: 1rem; text-transform: uppercase;">
+            <h2 style="font-family: ${isElegant ? 'Playfair Display, serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: 900; margin-bottom: 1rem; text-transform: uppercase;">
               Training Programs
             </h2>
-            <p style="font-size: 1.125rem; color: var(--color-text-secondary); font-weight: 600;">
+            <p style="font-family: ${isElegant ? 'Lato, sans-serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: 1.125rem; color: var(--color-text-secondary); font-weight: ${isBrutalist ? '900' : '600'}; font-weight: ${isElegant ? '300' : 'normal'};">
               Customized programs designed for your goals
             </p>
           </div>
           
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem; max-width: 1100px; margin: 0 auto;">
-            ${(() => {
-              try {
-                const programs = JSON.parse(data.programs || '[]');
-                return programs.map((program, i) => `
-                  <div style="background: var(--color-bg); border: 3px solid ${i === 1 ? 'var(--color-accent)' : 'var(--color-border)'}; padding: 2.5rem; position: relative; transition: all 0.2s;" onmouseover="this.style.borderColor='var(--color-accent)'; this.style.transform='translateY(-4px)'" onmouseout="this.style.borderColor='${i === 1 ? 'var(--color-accent)' : 'var(--color-border)'}'; this.style.transform='translateY(0)'">
-                    ${i === 1 ? '<div style="position: absolute; top: -15px; left: 50%; transform: translateX(-50%); background: var(--color-accent); color: var(--color-bg); padding: 0.5rem 1.5rem; font-weight: 900; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em;">Most Popular</div>' : ''}
-                    <h3 style="font-size: 1.75rem; font-weight: 900; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em;">
-                      ${program.name || 'Program'}
-                    </h3>
-                    ${program.duration ? `
-                    <div style="font-size: 0.875rem; color: var(--color-text-secondary); font-weight: 700; margin-bottom: 1rem; text-transform: uppercase;">
-                      ${program.duration}
-                    </div>
-                    ` : ''}
-                    ${program.price ? `
-                    <div style="font-size: 2.5rem; font-weight: 900; color: var(--color-accent); margin-bottom: 1.5rem;">
-                      ${program.price}
-                    </div>
-                    ` : ''}
-                    ${program.description ? `
-                    <p style="color: var(--color-text-secondary); line-height: 1.6; margin-bottom: 2rem;">
-                      ${program.description}
-                    </p>
-                    ` : ''}
-                    ${program.features ? `
-                    <ul style="list-style: none; padding: 0; margin-bottom: 2rem;">
-                      ${program.features.split('\n').map(feature => `
-                        <li style="padding: 0.5rem 0; color: var(--color-text); display: flex; align-items: start; gap: 0.75rem;">
-                          <span style="color: var(--color-accent); font-weight: 900; font-size: 1.125rem;">âœ“</span>
-                          <span>${feature.trim()}</span>
-                        </li>
-                      `).join('')}
-                    </ul>
-                    ` : ''}
-                  </div>
-                `).join('');
-              } catch (e) {
-                return '';
-              }
-            })()}
+          <div class="programs-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem; max-width: 1100px; margin: 0 auto;">
+            ${data.programs.map((program, i) => `
+              <div style="background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.05)' : isNeumorphism ? 'var(--color-bg)' : 'var(--color-bg)'}; border: ${isBrutalist ? '4px' : '3px'} solid ${i === 1 ? 'var(--color-accent)' : 'var(--color-border)'}; ${isBrutalist ? '' : isNeumorphism ? 'box-shadow: 10px 10px 20px rgba(163, 177, 198, 0.6), -10px -10px 20px rgba(255, 255, 255, 0.9);' : isGlassmorphism ? 'backdrop-filter: blur(10px);' : ''} padding: 2.5rem; position: relative; transition: all 0.2s;" onmouseover="${isBrutalist ? `this.style.transform='translate(-4px, -4px)'; this.style.boxShadow='8px 8px 0 var(--color-text)'` : isNeumorphism ? `this.style.boxShadow='inset 4px 4px 8px rgba(163, 177, 198, 0.6), inset -4px -4px 8px rgba(255, 255, 255, 0.9)'` : `this.style.borderColor='var(--color-accent)'; this.style.transform='translateY(-4px)'`}" onmouseout="${isBrutalist ? `this.style.transform='translate(0, 0)'; this.style.boxShadow='none'` : isNeumorphism ? `this.style.boxShadow='10px 10px 20px rgba(163, 177, 198, 0.6), -10px -10px 20px rgba(255, 255, 255, 0.9)'` : `this.style.borderColor='${i === 1 ? 'var(--color-accent)' : 'var(--color-border)'}'; this.style.transform='translateY(0)'`}">
+                ${i === 1 ? `<div style="position: absolute; top: -15px; left: 50%; transform: translateX(-50%); background: var(--color-accent); color: ${isBrutalist ? 'var(--color-text)' : 'var(--color-bg)'}; padding: 0.5rem 1.5rem; font-weight: 900; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; ${isBrutalist ? 'border: 3px solid var(--color-text);' : ''}">Most Popular</div>` : ''}
+                <h3 style="font-family: ${isElegant ? 'Playfair Display, serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: 1.75rem; font-weight: 900; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em;">
+                  ${program.name || 'Program'}
+                </h3>
+                ${program.duration ? `
+                <div style="font-size: 0.875rem; color: var(--color-text-secondary); font-weight: ${isBrutalist ? '900' : '700'}; margin-bottom: 1rem; text-transform: uppercase;">
+                  ${program.duration}
+                </div>
+                ` : ''}
+                ${program.price ? `
+                <div style="font-size: ${isBrutalist ? '3rem' : '2.5rem'}; font-weight: 900; color: var(--color-accent); margin-bottom: 1.5rem;">
+                  ${program.price}
+                </div>
+                ` : ''}
+                ${program.description ? `
+                <p style="font-family: ${isElegant ? 'Lato, sans-serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; color: var(--color-text-secondary); line-height: 1.6; margin-bottom: 2rem; font-weight: ${isElegant ? '300' : 'normal'};">
+                  ${program.description}
+                </p>
+                ` : ''}
+                ${program.features ? `
+                <ul style="list-style: none; padding: 0; margin-bottom: 2rem;">
+                  ${program.features.split(',').map(feature => `
+                    <li style="padding: 0.5rem 0; color: var(--color-text); display: flex; align-items: start; gap: 0.75rem;">
+                      <span style="color: var(--color-accent); font-weight: 900; font-size: 1.125rem;">✓</span>
+                      <span>${feature.trim()}</span>
+                    </li>
+                  `).join('')}
+                </ul>
+                ` : ''}
+              </div>
+            `).join('')}
           </div>
         </div>
       </section>
@@ -6479,25 +7010,25 @@ END:VCARD\`;
 
       <!-- About -->
       <section id="about" style="padding: 6rem 0; background: var(--color-bg);">
-        <div class="container" style="max-width: 900px;">
+        <div class="container" style="max-width: 900px; margin: 0 auto; padding: 0 2rem;">
           <div style="text-align: center; margin-bottom: 4rem;">
-            <h2 style="font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: 900; text-transform: uppercase;">
+            <h2 style="font-family: ${isElegant ? 'Playfair Display, serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: 900; text-transform: uppercase;">
               About Me
             </h2>
           </div>
           
           ${data.bio ? `
-          <div style="font-size: 1.125rem; line-height: 1.8; color: var(--color-text); margin-bottom: 3rem; white-space: pre-line;">
+          <div style="font-family: ${isElegant ? 'Lato, sans-serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: 1.125rem; line-height: 1.8; color: var(--color-text); margin-bottom: 3rem; white-space: pre-line; font-weight: ${isElegant ? '300' : 'normal'};">
             ${data.bio}
           </div>
           ` : ''}
           
           ${data.certifications ? `
-          <div style="background: var(--color-surface); border-left: 5px solid var(--color-accent); padding: 2rem; margin-top: 3rem;">
+          <div style="background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.05)' : isNeumorphism ? 'var(--color-bg)' : 'var(--color-surface)'}; border-left: ${isBrutalist ? '8px' : '5px'} solid var(--color-accent); ${isBrutalist ? 'border: 4px solid var(--color-text); border-left: 8px solid var(--color-accent);' : isNeumorphism ? 'box-shadow: 6px 6px 12px rgba(163, 177, 198, 0.6), -6px -6px 12px rgba(255, 255, 255, 0.9);' : isGlassmorphism ? 'backdrop-filter: blur(10px);' : ''} padding: 2rem; margin-top: 3rem;">
             <h3 style="font-size: 1.25rem; font-weight: 900; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.05em;">
               Certifications & Credentials
             </h3>
-            <div style="color: var(--color-text-secondary); line-height: 1.8; white-space: pre-line; font-weight: 600;">
+            <div style="font-family: ${isElegant ? 'Lato, sans-serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; color: var(--color-text-secondary); line-height: 1.8; white-space: pre-line; font-weight: ${isBrutalist ? '700' : '600'}; font-weight: ${isElegant ? '300' : 'normal'};">
               ${data.certifications}
             </div>
           </div>
@@ -6505,92 +7036,85 @@ END:VCARD\`;
         </div>
       </section>
 
-      ${data.transformations && data.transformations.trim() !== '' && data.transformations !== '[]' ? `
+      ${data.transformations && data.transformations.length > 0 ? `
       <!-- Transformations -->
-      <section id="results" style="padding: 6rem 0; background: var(--color-surface);">
-        <div class="container">
+      <section id="results" style="padding: 6rem 0; background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.02)' : isNeumorphism ? 'var(--color-surface)' : 'var(--color-surface)'};">
+        <div class="container" style="margin: 0 auto; padding: 0 2rem;">
           <div style="text-align: center; margin-bottom: 4rem;">
-            <h2 style="font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: 900; text-transform: uppercase;">
+            <h2 style="font-family: ${isElegant ? 'Playfair Display, serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: 900; text-transform: uppercase;">
               Real Results
             </h2>
-            <p style="font-size: 1.125rem; color: var(--color-text-secondary); font-weight: 600;">
+            <p style="font-family: ${isElegant ? 'Lato, sans-serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: 1.125rem; color: var(--color-text-secondary); font-weight: ${isBrutalist ? '900' : '600'}; font-weight: ${isElegant ? '300' : 'normal'};">
               Success stories from clients who transformed their lives
             </p>
           </div>
           
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
-            ${(() => {
-              try {
-                const transformations = JSON.parse(data.transformations || '[]');
-                return transformations.map(story => `
-                  <div style="background: var(--color-bg); border: 3px solid var(--color-border); padding: 2rem; transition: all 0.2s;" onmouseover="this.style.borderColor='var(--color-accent)'; this.style.transform='translateY(-4px)'" onmouseout="this.style.borderColor='var(--color-border)'; this.style.transform='translateY(0)'">
-                    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
-                      <div style="width: 60px; height: 60px; background: var(--color-accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 900; color: var(--color-bg);">
-                        ${(story.name || 'C').charAt(0)}
-                      </div>
-                      <div>
-                        <div style="font-weight: 900; font-size: 1.125rem;">${story.name || 'Client'}</div>
-                        ${story.result ? `
-                        <div style="font-size: 0.875rem; color: var(--color-accent); font-weight: 700; text-transform: uppercase;">
-                          ${story.result}
-                        </div>
-                        ` : ''}
-                      </div>
+          <div class="transformations-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+            ${data.transformations.map(story => `
+              <div style="background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.05)' : isNeumorphism ? 'var(--color-bg)' : 'var(--color-bg)'}; border: ${isBrutalist ? '4px' : '3px'} solid var(--color-border); ${isBrutalist ? '' : isNeumorphism ? 'box-shadow: 10px 10px 20px rgba(163, 177, 198, 0.6), -10px -10px 20px rgba(255, 255, 255, 0.9);' : isGlassmorphism ? 'backdrop-filter: blur(10px);' : ''} padding: 2rem; transition: all 0.2s;" onmouseover="${isBrutalist ? `this.style.transform='translate(-4px, -4px)'; this.style.boxShadow='8px 8px 0 var(--color-text)'` : isNeumorphism ? `this.style.boxShadow='inset 4px 4px 8px rgba(163, 177, 198, 0.6), inset -4px -4px 8px rgba(255, 255, 255, 0.9)'` : `this.style.borderColor='var(--color-accent)'; this.style.transform='translateY(-4px)'`}" onmouseout="${isBrutalist ? `this.style.transform='translate(0, 0)'; this.style.boxShadow='none'` : isNeumorphism ? `this.style.boxShadow='10px 10px 20px rgba(163, 177, 198, 0.6), -10px -10px 20px rgba(255, 255, 255, 0.9)'` : `this.style.borderColor='var(--color-border)'; this.style.transform='translateY(0)'`}">
+                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
+                  <div style="width: 60px; height: 60px; background: var(--color-accent); ${isBrutalist ? 'border: 3px solid var(--color-text);' : isNeumorphism ? 'box-shadow: 6px 6px 12px rgba(163, 177, 198, 0.6), -6px -6px 12px rgba(255, 255, 255, 0.9); border-radius: 50%;' : 'border-radius: 50%;'} display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 900; color: ${isBrutalist ? 'var(--color-text)' : 'var(--color-bg)'};">
+                    ${(story.name || 'C').charAt(0)}
+                  </div>
+                  <div>
+                    <div style="font-weight: 900; font-size: 1.125rem;">${story.name || 'Client'}</div>
+                    ${story.result ? `
+                    <div style="font-size: 0.875rem; color: var(--color-accent); font-weight: ${isBrutalist ? '900' : '700'}; text-transform: uppercase;">
+                      ${story.result}
                     </div>
-                    ${story.time ? `
-                    <div style="font-size: 0.875rem; color: var(--color-text-secondary); font-weight: 700; margin-bottom: 1rem; text-transform: uppercase;">
-                      In ${story.time}
-                    </div>
-                    ` : ''}
-                    ${story.testimonial ? `
-                    <p style="font-style: italic; color: var(--color-text-secondary); line-height: 1.6;">
-                      "${story.testimonial}"
-                    </p>
                     ` : ''}
                   </div>
-                `).join('');
-              } catch (e) {
-                return '';
-              }
-            })()}
+                </div>
+                ${story.time ? `
+                <div style="font-size: 0.875rem; color: var(--color-text-secondary); font-weight: ${isBrutalist ? '900' : '700'}; margin-bottom: 1rem; text-transform: uppercase;">
+                  In ${story.time}
+                </div>
+                ` : ''}
+                ${story.testimonial ? `
+                <p style="font-family: ${isElegant ? 'Lato, sans-serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; ${isElegant ? 'font-style: italic;' : ''} color: var(--color-text-secondary); line-height: 1.6; font-weight: ${isElegant ? '300' : 'normal'};">
+                  "${story.testimonial}"
+                </p>
+                ` : ''}
+              </div>
+            `).join('')}
           </div>
         </div>
       </section>
       ` : ''}
 
       <!-- Contact -->
-      <section id="contact" style="padding: 8rem 0; background: var(--color-accent); color: var(--color-bg);">
-        <div class="container" style="max-width: 700px; text-align: center;">
-          <h2 style="font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 900; margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: -0.02em;">
+      <section id="contact" style="padding: 8rem 0; background: ${isBrutalist ? 'var(--color-accent)' : isGradient ? 'linear-gradient(135deg, #667eea, #764ba2)' : isRetro ? 'linear-gradient(135deg, var(--color-accent), #b537f2)' : 'var(--color-accent)'}; color: ${isBrutalist ? 'var(--color-text)' : 'var(--color-bg)'};">
+        <div class="container" style="max-width: 700px; text-align: center; margin: 0 auto; padding: 0 2rem;">
+          <h2 style="font-family: ${isElegant ? 'Playfair Display, serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 900; margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: -0.02em;">
             Ready to Start?
           </h2>
-          <p style="font-size: 1.375rem; margin-bottom: 3rem; opacity: 0.95; font-weight: 600;">
+          <p style="font-family: ${isElegant ? 'Lato, sans-serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: 1.375rem; margin-bottom: 3rem; opacity: 0.95; font-weight: ${isBrutalist ? '900' : '600'}; font-weight: ${isElegant ? '300' : 'normal'};">
             Let's build your dream physique together
           </p>
           
           <div style="display: flex; flex-direction: column; gap: 1.5rem; align-items: center; margin-bottom: 3rem;">
             ${data.contact ? `
-            <a href="mailto:${data.contact}" style="display: flex; align-items: center; gap: 1rem; font-size: 1.125rem; color: var(--color-bg); text-decoration: none; font-weight: 700; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
-              <span style="font-size: 1.5rem;">âœ‰ï¸</span>
+            <a href="mailto:${data.contact}" style="display: flex; align-items: center; gap: 1rem; font-size: 1.125rem; color: ${isBrutalist ? 'var(--color-text)' : 'var(--color-bg)'}; text-decoration: none; font-weight: ${isBrutalist ? '900' : '700'}; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+              <span style="font-size: 1.5rem;">✉</span>
               ${data.contact}
             </a>
             ` : ''}
             ${data.phone ? `
-            <a href="tel:${data.phone}" style="display: flex; align-items: center; gap: 1rem; font-size: 1.125rem; color: var(--color-bg); text-decoration: none; font-weight: 700; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
-              <span style="font-size: 1.5rem;">ðŸ“ž</span>
+            <a href="tel:${data.phone}" style="display: flex; align-items: center; gap: 1rem; font-size: 1.125rem; color: ${isBrutalist ? 'var(--color-text)' : 'var(--color-bg)'}; text-decoration: none; font-weight: ${isBrutalist ? '900' : '700'}; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+              <span style="font-size: 1.5rem;">☎</span>
               ${data.phone}
             </a>
             ` : ''}
             ${data.instagram ? `
-            <a href="${data.instagram}" target="_blank" style="display: flex; align-items: center; gap: 1rem; font-size: 1.125rem; color: var(--color-bg); text-decoration: none; font-weight: 700; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
-              <span style="font-size: 1.5rem;">ðŸ“¸</span>
+            <a href="${data.instagram}" target="_blank" style="display: flex; align-items: center; gap: 1rem; font-size: 1.125rem; color: ${isBrutalist ? 'var(--color-text)' : 'var(--color-bg)'}; text-decoration: none; font-weight: ${isBrutalist ? '900' : '700'}; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+              <span style="font-size: 1.5rem;">📸</span>
               Follow on Instagram
             </a>
             ` : ''}
           </div>
           
           ${data.bookingLink ? `
-          <a href="${data.bookingLink}" target="_blank" style="display: inline-block; padding: 1.5rem 3.5rem; background: var(--color-bg); color: var(--color-accent); text-decoration: none; font-weight: 900; font-size: 1.25rem; border-radius: var(--radius-sm); transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.05em; box-shadow: 0 8px 24px rgba(0,0,0,0.3);" onmouseover="this.style.transform='translateY(-4px) scale(1.02)'" onmouseout="this.style.transform='translateY(0) scale(1)'">
+          <a href="${data.bookingLink}" target="_blank" style="display: inline-block; padding: ${isBrutalist ? '2rem 4rem' : '1.5rem 3.5rem'}; background: ${isBrutalist ? 'var(--color-text)' : 'var(--color-bg)'}; color: ${isBrutalist ? 'var(--color-bg)' : 'var(--color-accent)'}; text-decoration: none; font-weight: 900; font-size: 1.25rem; ${isBrutalist ? 'border: 4px solid var(--color-text); box-shadow: 8px 8px 0 var(--color-text);' : isNeumorphism ? 'box-shadow: 10px 10px 20px rgba(163, 177, 198, 0.6), -10px -10px 20px rgba(255, 255, 255, 0.9); border-radius: var(--radius-sm);' : 'border-radius: var(--radius-sm); box-shadow: 0 8px 24px rgba(0,0,0,0.3);'} transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.05em;" onmouseover="${isBrutalist ? `this.style.transform='translate(-6px, -6px)'; this.style.boxShadow='14px 14px 0 var(--color-text)'` : `this.style.transform='translateY(-4px) scale(1.02)'`}" onmouseout="${isBrutalist ? `this.style.transform='translate(0, 0)'; this.style.boxShadow='8px 8px 0 var(--color-text)'` : `this.style.transform='translateY(0) scale(1)'`}">
             Book Free Consultation
           </a>
           ` : ''}
@@ -6598,19 +7122,1508 @@ END:VCARD\`;
       </section>
 
       <!-- Footer -->
-      <footer style="padding: 2rem 0; background: var(--color-bg); text-align: center; color: var(--color-text-secondary); font-size: 0.875rem; border-top: 3px solid var(--color-accent); font-weight: 700;">
+      <footer style="padding: 2rem 0; background: var(--color-bg); text-align: center; color: var(--color-text-secondary); font-size: 0.875rem; ${isBrutalist ? 'border-top: 4px solid var(--color-accent);' : 'border-top: 3px solid var(--color-accent);'} font-weight: ${isBrutalist ? '900' : '700'};">
         <div class="container">
-          <p style="text-transform: uppercase; letter-spacing: 0.05em;">Â© 2024 ${data.trainerName || 'Fitness Training'}. All rights reserved.</p>
+          <p style="text-transform: uppercase; letter-spacing: 0.05em;">© 2024 ${data.trainerName || 'Fitness Training'}. All rights reserved.</p>
         </div>
       </footer>
 
       <style>
         @media (max-width: 768px) {
-          header nav { display: none !important; }
+          .desktop-nav { display: none !important; }
+          .specialties-grid {
+            grid-template-columns: 1fr !important;
+          }
+          .programs-grid {
+            grid-template-columns: 1fr !important;
+          }
+          .transformations-grid {
+            grid-template-columns: 1fr !important;
+          }
+          section[style*="padding: 10rem"] {
+            padding: 6rem 0 !important;
+          }
+          section[style*="padding: 8rem"] {
+            padding: 5rem 0 !important;
+          }
+          section[style*="padding: 6rem"] {
+            padding: 4rem 0 !important;
+          }
+        }
+        
+        @media (max-width: 480px) {
+          .container {
+            padding: 0 1rem !important;
+          }
         }
       </style>
     `
-  }),
+  }
+}),
+'contact-form': new Template('contact-form', {
+  name: 'Contact Form',
+  description: 'Professional contact form with customizable fields',
+  category: 'Forms',
+  defaultTheme: 'minimal',
+  image: 'contact-form',
+  fields: {
+    formTitle: { type: 'text', default: 'Get in Touch', label: 'Form Title', required: true },
+    formSubtitle: { 
+      type: 'textarea',
+      default: 'Have a question or want to work together? Fill out the form below and I\'ll get back to you as soon as possible.',
+      label: 'Form Subtitle',
+      required: false 
+    },
+    submitText: { type: 'text', default: 'Send Message', label: 'Submit Button Text', required: true },
+    successMessage: { 
+      type: 'text',
+      default: 'Thank you! Your message has been sent successfully.',
+      label: 'Success Message',
+      required: true 
+    },
+    recipientEmail: { 
+      type: 'email',
+      default: 'your@email.com',
+      label: 'Your Email (where form submissions go)',
+      required: true 
+    },
+    showName: { type: 'text', default: 'true', label: 'Show Name Field (true/false)', required: false },
+    showEmail: { type: 'text', default: 'true', label: 'Show Email Field (true/false)', required: false },
+    showPhone: { type: 'text', default: 'false', label: 'Show Phone Field (true/false)', required: false },
+    showCompany: { type: 'text', default: 'false', label: 'Show Company Field (true/false)', required: false },
+    showSubject: { type: 'text', default: 'false', label: 'Show Subject Field (true/false)', required: false },
+    showMessage: { type: 'text', default: 'true', label: 'Show Message Field (true/false)', required: false },
+    contactInfo: {
+      type: 'group',
+      label: 'Contact Information',
+      itemLabel: 'Contact Item',
+      min: 0,
+      max: 6,
+      fields: {
+        label: { type: 'text', label: 'Label', default: '' },
+        value: { type: 'text', label: 'Value', default: '' },
+        link: { type: 'url', label: 'Link (optional)', default: '' }
+      },
+      default: [
+        { label: 'Email', value: 'hello@example.com', link: 'mailto:hello@example.com' },
+        { label: 'Phone', value: '+1 (555) 123-4567', link: 'tel:+15551234567' },
+        { label: 'Address', value: '123 Main Street, City, State 12345', link: '' }
+      ]
+    },
+    socialLinks: {
+      type: 'group',
+      label: 'Social Links',
+      itemLabel: 'Social Link',
+      min: 0,
+      max: 8,
+      fields: {
+        platform: { type: 'text', label: 'Platform Name', default: '' },
+        url: { type: 'url', label: 'URL', default: '' }
+      },
+      default: [
+        { platform: 'LinkedIn', url: '' },
+        { platform: 'Twitter', url: '' }
+      ]
+    }
+  },
+  structure: (data, theme) => {
+    const isBrutalist = theme.id === 'brutalist';
+    const isMinimal = theme.id === 'minimal';
+    const isGradient = theme.id === 'gradient';
+    const isElegant = theme.id === 'elegant';
+    const isRetro = theme.id === 'retro';
+    const isGlassmorphism = theme.id === 'glassmorphism';
+    const isNeumorphism = theme.id === 'neumorphism';
+
+    const showName = data.showName !== 'false';
+    const showEmail = data.showEmail !== 'false';
+    const showPhone = data.showPhone === 'true';
+    const showCompany = data.showCompany === 'true';
+    const showSubject = data.showSubject === 'true';
+    const showMessage = data.showMessage !== 'false';
+
+    return `
+      <!-- Header -->
+      <header style="padding: 2rem 0; background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.1)' : isNeumorphism ? 'var(--color-bg)' : 'var(--color-bg)'}; ${isBrutalist ? 'border-bottom: 4px solid var(--color-border);' : 'border-bottom: 1px solid var(--color-border);'} ${isGlassmorphism ? 'backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);' : ''} ${isNeumorphism ? 'box-shadow: 0 4px 6px rgba(163, 177, 198, 0.3), 0 -1px 3px rgba(255, 255, 255, 0.5);' : ''}">
+        <div class="container" style="max-width: 1200px; margin: 0 auto; padding: 0 2rem; display: flex; justify-content: space-between; align-items: center;">
+          <div style="font-family: ${isElegant ? 'Playfair Display, serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: ${isBrutalist ? '1.75rem' : '1.5rem'}; font-weight: ${isBrutalist ? '900' : '800'}; color: var(--color-accent); ${isBrutalist || isRetro ? 'text-transform: uppercase;' : ''}">
+            Contact
+          </div>
+          <label class="theme-toggle-switch-wrapper" style="cursor: pointer; ${isNeumorphism ? 'padding: 0.5rem; border-radius: 12px; display: inline-block; box-shadow: 6px 6px 12px rgba(163, 177, 198, 0.6), -6px -6px 12px rgba(255, 255, 255, 0.9);' : ''}">
+            <input type="checkbox" class="theme-toggle-switch" onclick="toggleTheme()" aria-label="Toggle theme">
+            <span class="theme-toggle-slider"></span>
+          </label>
+        </div>
+      </header>
+
+      <!-- Contact Form Section -->
+      <section style="min-height: calc(100vh - 120px); padding: ${isBrutalist ? '4rem 0' : '6rem 0'}; background: ${isGradient ? 'linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05))' : 'var(--color-bg)'};">
+        <div class="container" style="max-width: 1200px; margin: 0 auto; padding: 0 2rem;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: start;">
+            
+            <!-- Left Column - Form Header & Contact Info -->
+            <div>
+              <div style="margin-bottom: 3rem;">
+                <h1 style="font-family: ${isElegant ? 'Playfair Display, serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: clamp(${isBrutalist ? '2.5rem' : '2.75rem'}, 6vw, ${isBrutalist ? '4rem' : '4.5rem'}); font-weight: ${isBrutalist ? '900' : isRetro ? '700' : '800'}; margin-bottom: 1.5rem; letter-spacing: ${isBrutalist ? '-0.04em' : '-0.03em'}; line-height: 1.1; ${isBrutalist || isRetro ? 'text-transform: uppercase;' : ''}">
+                  ${data.formTitle || 'Get in Touch'}
+                </h1>
+                ${data.formSubtitle ? `
+                <p style="font-family: ${isElegant ? 'Lato, sans-serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: 1.125rem; line-height: 1.7; color: var(--color-text-secondary); font-weight: ${isElegant ? '300' : 'normal'};">
+                  ${data.formSubtitle}
+                </p>
+                ` : ''}
+              </div>
+
+              ${data.contactInfo && data.contactInfo.length > 0 ? `
+              <!-- Contact Information -->
+              <div style="margin-bottom: 3rem;">
+                <h2 style="font-family: ${isElegant ? 'Playfair Display, serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: 1.25rem; font-weight: ${isBrutalist ? '900' : '700'}; margin-bottom: 1.5rem; ${isBrutalist ? 'text-transform: uppercase;' : ''}">
+                  Contact Information
+                </h2>
+                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                  ${data.contactInfo.map(info => `
+                    ${info.link ? `
+                    <a href="${info.link}" style="display: flex; flex-direction: column; gap: 0.25rem; text-decoration: none; color: var(--color-text); transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">
+                      <div style="font-size: 0.875rem; font-weight: ${isBrutalist ? '900' : '600'}; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.05em;">
+                        ${info.label}
+                      </div>
+                      <div style="font-size: 1.0625rem; font-weight: ${isBrutalist ? '700' : '500'};">
+                        ${info.value}
+                      </div>
+                    </a>
+                    ` : `
+                    <div style="display: flex; flex-direction: column; gap: 0.25rem;">
+                      <div style="font-size: 0.875rem; font-weight: ${isBrutalist ? '900' : '600'}; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.05em;">
+                        ${info.label}
+                      </div>
+                      <div style="font-size: 1.0625rem; font-weight: ${isBrutalist ? '700' : '500'}; color: var(--color-text);">
+                        ${info.value}
+                      </div>
+                    </div>
+                    `}
+                  `).join('')}
+                </div>
+              </div>
+              ` : ''}
+
+              ${data.socialLinks && data.socialLinks.length > 0 && data.socialLinks.some(link => link.url) ? `
+              <!-- Social Links -->
+              <div>
+                <h2 style="font-family: ${isElegant ? 'Playfair Display, serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: 1.25rem; font-weight: ${isBrutalist ? '900' : '700'}; margin-bottom: 1.5rem; ${isBrutalist ? 'text-transform: uppercase;' : ''}">
+                  Follow Me
+                </h2>
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                  ${data.socialLinks.filter(link => link.url).map(link => `
+                    <a href="${link.url}" target="_blank" style="padding: ${isBrutalist ? '0.875rem 1.5rem' : '0.75rem 1.25rem'}; background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.05)' : isNeumorphism ? 'var(--color-bg)' : 'var(--color-surface)'}; border: ${isBrutalist ? '3px' : '1px'} solid var(--color-border); ${isBrutalist ? '' : isNeumorphism ? 'box-shadow: 6px 6px 12px rgba(163, 177, 198, 0.6), -6px -6px 12px rgba(255, 255, 255, 0.9); border-radius: 8px;' : isGlassmorphism ? 'backdrop-filter: blur(10px); border-radius: 8px;' : 'border-radius: 8px;'} text-decoration: none; color: var(--color-text); font-weight: ${isBrutalist ? '900' : '600'}; font-size: 0.9375rem; transition: all 0.2s; ${isBrutalist ? 'text-transform: uppercase;' : ''}" onmouseover="${isBrutalist ? `this.style.transform='translate(-2px, -2px)'; this.style.boxShadow='4px 4px 0 var(--color-text)'` : isNeumorphism ? `this.style.boxShadow='inset 4px 4px 8px rgba(163, 177, 198, 0.6), inset -4px -4px 8px rgba(255, 255, 255, 0.9)'` : `this.style.borderColor='var(--color-accent)'; this.style.transform='translateY(-2px)'`}" onmouseout="${isBrutalist ? `this.style.transform='translate(0, 0)'; this.style.boxShadow='none'` : isNeumorphism ? `this.style.boxShadow='6px 6px 12px rgba(163, 177, 198, 0.6), -6px -6px 12px rgba(255, 255, 255, 0.9)'` : `this.style.borderColor='var(--color-border)'; this.style.transform='translateY(0)'`}">
+                      ${link.platform}
+                    </a>
+                  `).join('')}
+                </div>
+              </div>
+              ` : ''}
+            </div>
+
+            <!-- Right Column - Form -->
+            <div style="background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.05)' : isNeumorphism ? 'var(--color-bg)' : 'var(--color-surface)'}; border: ${isBrutalist ? '4px' : '1px'} solid var(--color-border); ${isBrutalist ? '' : isNeumorphism ? 'box-shadow: 10px 10px 20px rgba(163, 177, 198, 0.6), -10px -10px 20px rgba(255, 255, 255, 0.9); border-radius: 20px;' : isGlassmorphism ? 'backdrop-filter: blur(10px); border-radius: 20px;' : 'border-radius: 12px;'} padding: ${isBrutalist ? '3rem' : '2.5rem'};">
+              <form id="contactForm" onsubmit="handleFormSubmit(event)" style="display: flex; flex-direction: column; gap: 1.5rem;">
+                
+                ${showName ? `
+                <div>
+                  <label for="name" style="display: block; font-weight: ${isBrutalist ? '900' : '600'}; font-size: 0.875rem; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text);">
+                    Name *
+                  </label>
+                  <input type="text" id="name" name="name" required style="width: 100%; padding: ${isBrutalist ? '1rem' : '0.875rem'}; background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.05)' : isNeumorphism ? 'var(--color-bg)' : 'var(--color-bg)'}; border: ${isBrutalist ? '3px' : '2px'} solid var(--color-border); ${isBrutalist ? '' : isNeumorphism ? 'box-shadow: inset 4px 4px 8px rgba(163, 177, 198, 0.6), inset -4px -4px 8px rgba(255, 255, 255, 0.9); border-radius: 8px;' : isGlassmorphism ? 'backdrop-filter: blur(10px); border-radius: 8px;' : 'border-radius: 8px;'} color: var(--color-text); font-size: 1rem; font-family: inherit; transition: all 0.2s;" onfocus="this.style.borderColor='var(--color-accent)'; ${isNeumorphism ? 'this.style.boxShadow=\'inset 2px 2px 4px rgba(163, 177, 198, 0.6), inset -2px -2px 4px rgba(255, 255, 255, 0.9)\'' : ''}" onblur="this.style.borderColor='var(--color-border)'; ${isNeumorphism ? 'this.style.boxShadow=\'inset 4px 4px 8px rgba(163, 177, 198, 0.6), inset -4px -4px 8px rgba(255, 255, 255, 0.9)\'' : ''}">
+                </div>
+                ` : ''}
+
+                ${showEmail ? `
+                <div>
+                  <label for="email" style="display: block; font-weight: ${isBrutalist ? '900' : '600'}; font-size: 0.875rem; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text);">
+                    Email *
+                  </label>
+                  <input type="email" id="email" name="email" required style="width: 100%; padding: ${isBrutalist ? '1rem' : '0.875rem'}; background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.05)' : isNeumorphism ? 'var(--color-bg)' : 'var(--color-bg)'}; border: ${isBrutalist ? '3px' : '2px'} solid var(--color-border); ${isBrutalist ? '' : isNeumorphism ? 'box-shadow: inset 4px 4px 8px rgba(163, 177, 198, 0.6), inset -4px -4px 8px rgba(255, 255, 255, 0.9); border-radius: 8px;' : isGlassmorphism ? 'backdrop-filter: blur(10px); border-radius: 8px;' : 'border-radius: 8px;'} color: var(--color-text); font-size: 1rem; font-family: inherit; transition: all 0.2s;" onfocus="this.style.borderColor='var(--color-accent)'; ${isNeumorphism ? 'this.style.boxShadow=\'inset 2px 2px 4px rgba(163, 177, 198, 0.6), inset -2px -2px 4px rgba(255, 255, 255, 0.9)\'' : ''}" onblur="this.style.borderColor='var(--color-border)'; ${isNeumorphism ? 'this.style.boxShadow=\'inset 4px 4px 8px rgba(163, 177, 198, 0.6), inset -4px -4px 8px rgba(255, 255, 255, 0.9)\'' : ''}">
+                </div>
+                ` : ''}
+
+                ${showPhone ? `
+                <div>
+                  <label for="phone" style="display: block; font-weight: ${isBrutalist ? '900' : '600'}; font-size: 0.875rem; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text);">
+                    Phone
+                  </label>
+                  <input type="tel" id="phone" name="phone" style="width: 100%; padding: ${isBrutalist ? '1rem' : '0.875rem'}; background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.05)' : isNeumorphism ? 'var(--color-bg)' : 'var(--color-bg)'}; border: ${isBrutalist ? '3px' : '2px'} solid var(--color-border); ${isBrutalist ? '' : isNeumorphism ? 'box-shadow: inset 4px 4px 8px rgba(163, 177, 198, 0.6), inset -4px -4px 8px rgba(255, 255, 255, 0.9); border-radius: 8px;' : isGlassmorphism ? 'backdrop-filter: blur(10px); border-radius: 8px;' : 'border-radius: 8px;'} color: var(--color-text); font-size: 1rem; font-family: inherit; transition: all 0.2s;" onfocus="this.style.borderColor='var(--color-accent)'; ${isNeumorphism ? 'this.style.boxShadow=\'inset 2px 2px 4px rgba(163, 177, 198, 0.6), inset -2px -2px 4px rgba(255, 255, 255, 0.9)\'' : ''}" onblur="this.style.borderColor='var(--color-border)'; ${isNeumorphism ? 'this.style.boxShadow=\'inset 4px 4px 8px rgba(163, 177, 198, 0.6), inset -4px -4px 8px rgba(255, 255, 255, 0.9)\'' : ''}">
+                </div>
+                ` : ''}
+
+                ${showCompany ? `
+                <div>
+                  <label for="company" style="display: block; font-weight: ${isBrutalist ? '900' : '600'}; font-size: 0.875rem; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text);">
+                    Company
+                  </label>
+                  <input type="text" id="company" name="company" style="width: 100%; padding: ${isBrutalist ? '1rem' : '0.875rem'}; background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.05)' : isNeumorphism ? 'var(--color-bg)' : 'var(--color-bg)'}; border: ${isBrutalist ? '3px' : '2px'} solid var(--color-border); ${isBrutalist ? '' : isNeumorphism ? 'box-shadow: inset 4px 4px 8px rgba(163, 177, 198, 0.6), inset -4px -4px 8px rgba(255, 255, 255, 0.9); border-radius: 8px;' : isGlassmorphism ? 'backdrop-filter: blur(10px); border-radius: 8px;' : 'border-radius: 8px;'} color: var(--color-text); font-size: 1rem; font-family: inherit; transition: all 0.2s;" onfocus="this.style.borderColor='var(--color-accent)'; ${isNeumorphism ? 'this.style.boxShadow=\'inset 2px 2px 4px rgba(163, 177, 198, 0.6), inset -2px -2px 4px rgba(255, 255, 255, 0.9)\'' : ''}" onblur="this.style.borderColor='var(--color-border)'; ${isNeumorphism ? 'this.style.boxShadow=\'inset 4px 4px 8px rgba(163, 177, 198, 0.6), inset -4px -4px 8px rgba(255, 255, 255, 0.9)\'' : ''}">
+                </div>
+                ` : ''}
+
+                ${showSubject ? `
+                <div>
+                  <label for="subject" style="display: block; font-weight: ${isBrutalist ? '900' : '600'}; font-size: 0.875rem; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text);">
+                    Subject
+                  </label>
+                  <input type="text" id="subject" name="subject" style="width: 100%; padding: ${isBrutalist ? '1rem' : '0.875rem'}; background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.05)' : isNeumorphism ? 'var(--color-bg)' : 'var(--color-bg)'}; border: ${isBrutalist ? '3px' : '2px'} solid var(--color-border); ${isBrutalist ? '' : isNeumorphism ? 'box-shadow: inset 4px 4px 8px rgba(163, 177, 198, 0.6), inset -4px -4px 8px rgba(255, 255, 255, 0.9); border-radius: 8px;' : isGlassmorphism ? 'backdrop-filter: blur(10px); border-radius: 8px;' : 'border-radius: 8px;'} color: var(--color-text); font-size: 1rem; font-family: inherit; transition: all 0.2s;" onfocus="this.style.borderColor='var(--color-accent)'; ${isNeumorphism ? 'this.style.boxShadow=\'inset 2px 2px 4px rgba(163, 177, 198, 0.6), inset -2px -2px 4px rgba(255, 255, 255, 0.9)\'' : ''}" onblur="this.style.borderColor='var(--color-border)'; ${isNeumorphism ? 'this.style.boxShadow=\'inset 4px 4px 8px rgba(163, 177, 198, 0.6), inset -4px -4px 8px rgba(255, 255, 255, 0.9)\'' : ''}">
+                </div>
+                ` : ''}
+
+                ${showMessage ? `
+                <div>
+                  <label for="message" style="display: block; font-weight: ${isBrutalist ? '900' : '600'}; font-size: 0.875rem; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text);">
+                    Message *
+                  </label>
+                  <textarea id="message" name="message" required rows="6" style="width: 100%; padding: ${isBrutalist ? '1rem' : '0.875rem'}; background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.05)' : isNeumorphism ? 'var(--color-bg)' : 'var(--color-bg)'}; border: ${isBrutalist ? '3px' : '2px'} solid var(--color-border); ${isBrutalist ? '' : isNeumorphism ? 'box-shadow: inset 4px 4px 8px rgba(163, 177, 198, 0.6), inset -4px -4px 8px rgba(255, 255, 255, 0.9); border-radius: 8px;' : isGlassmorphism ? 'backdrop-filter: blur(10px); border-radius: 8px;' : 'border-radius: 8px;'} color: var(--color-text); font-size: 1rem; font-family: inherit; resize: vertical; transition: all 0.2s;" onfocus="this.style.borderColor='var(--color-accent)'; ${isNeumorphism ? 'this.style.boxShadow=\'inset 2px 2px 4px rgba(163, 177, 198, 0.6), inset -2px -2px 4px rgba(255, 255, 255, 0.9)\'' : ''}" onblur="this.style.borderColor='var(--color-border)'; ${isNeumorphism ? 'this.style.boxShadow=\'inset 4px 4px 8px rgba(163, 177, 198, 0.6), inset -4px -4px 8px rgba(255, 255, 255, 0.9)\'' : ''}"></textarea>
+                </div>
+                ` : ''}
+
+                <button type="submit" style="width: 100%; padding: ${isBrutalist ? '1.25rem' : '1rem'}; background: var(--color-accent); color: ${isBrutalist ? 'var(--color-text)' : 'var(--color-bg)'}; border: ${isBrutalist ? '4px solid var(--color-text)' : 'none'}; ${isBrutalist ? 'box-shadow: 4px 4px 0 var(--color-text);' : isNeumorphism ? 'box-shadow: 10px 10px 20px rgba(163, 177, 198, 0.6), -10px -10px 20px rgba(255, 255, 255, 0.9); border-radius: 8px;' : 'border-radius: 8px;'} font-weight: ${isBrutalist ? '900' : '700'}; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; transition: all 0.2s;" onmouseover="${isBrutalist ? `this.style.transform='translate(-4px, -4px)'; this.style.boxShadow='8px 8px 0 var(--color-text)'` : `this.style.transform='translateY(-2px)'; ${isNeumorphism ? 'this.style.boxShadow=\'12px 12px 24px rgba(163, 177, 198, 0.6), -12px -12px 24px rgba(255, 255, 255, 0.9)\'' : 'this.style.boxShadow=\'0 4px 12px rgba(0,0,0,0.15)\''}`}" onmouseout="${isBrutalist ? `this.style.transform='translate(0, 0)'; this.style.boxShadow='4px 4px 0 var(--color-text)'` : `this.style.transform='translateY(0)'; ${isNeumorphism ? 'this.style.boxShadow=\'10px 10px 20px rgba(163, 177, 198, 0.6), -10px -10px 20px rgba(255, 255, 255, 0.9)\'' : 'this.style.boxShadow=\'none\''}`}">
+                  ${data.submitText || 'Send Message'}
+                </button>
+
+                <div id="formMessage" style="display: none; padding: 1rem; border-radius: 8px; text-align: center; font-weight: 600;"></div>
+              </form>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <style>
+        /* Form input placeholders */
+        input::placeholder,
+        textarea::placeholder {
+          color: var(--color-text-secondary);
+          opacity: 0.6;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 968px) {
+          section > div > div[style*="grid-template-columns: 1fr 1fr"] {
+            grid-template-columns: 1fr !important;
+            gap: 3rem !important;
+          }
+          
+          section[style*="padding: 6rem"] {
+            padding: 4rem 0 !important;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .container {
+            padding: 0 1rem !important;
+          }
+          
+          section > div > div > div[style*="padding: 3rem"],
+          section > div > div > div[style*="padding: 2.5rem"] {
+            padding: 1.5rem !important;
+          }
+        }
+      </style>
+
+      <script>
+        function handleFormSubmit(event) {
+          event.preventDefault();
+          
+          const form = event.target;
+          const formData = new FormData(form);
+          const messageDiv = document.getElementById('formMessage');
+          const submitButton = form.querySelector('button[type="submit"]');
+          
+          // Disable submit button
+          submitButton.disabled = true;
+          submitButton.textContent = 'Sending...';
+          
+          // Create mailto link (fallback method)
+          const emailBody = Array.from(formData.entries())
+            .map(([key, value]) => \`\${key.charAt(0).toUpperCase() + key.slice(1)}: \${value}\`)
+            .join('%0D%0A%0D%0A');
+          
+          const subject = formData.get('subject') || 'New Contact Form Submission';
+          const mailtoLink = \`mailto:${data.recipientEmail}?subject=\${encodeURIComponent(subject)}&body=\${emailBody}\`;
+          
+          // Show success message
+          messageDiv.style.display = 'block';
+          messageDiv.style.background = 'var(--color-accent)';
+          messageDiv.style.color = '${isBrutalist ? 'var(--color-text)' : 'var(--color-bg)'}';
+          messageDiv.textContent = '${data.successMessage || 'Thank you! Your message has been sent.'}';
+          
+          // Open mailto link
+          window.location.href = mailtoLink;
+          
+          // Reset form
+          setTimeout(() => {
+            form.reset();
+            submitButton.disabled = false;
+            submitButton.textContent = '${data.submitText || 'Send Message'}';
+            
+            setTimeout(() => {
+              messageDiv.style.display = 'none';
+            }, 5000);
+          }, 1000);
+        }
+      </script>
+    `
+  }
+}),
+'slideshow-gallery': new Template('slideshow-gallery', {
+  name: 'Slideshow Gallery',
+  description: 'Full-screen image slideshow gallery with controls',
+  category: 'Portfolio',
+  defaultTheme: 'minimal',
+  image: 'slideshow-gallery',
+  fields: {
+    galleryTitle: { type: 'text', default: 'Gallery', label: 'Gallery Title', required: false },
+    autoplay: { type: 'text', default: 'true', label: 'Autoplay (true/false)', required: false },
+    autoplaySpeed: { type: 'text', default: '5000', label: 'Autoplay Speed (milliseconds)', required: false },
+    showCaptions: { type: 'text', default: 'true', label: 'Show Captions (true/false)', required: false },
+    slides: {
+      type: 'group',
+      label: 'Slides',
+      itemLabel: 'Slide',
+      min: 1,
+      max: 50,
+      fields: {
+        imageUrl: { type: 'url', label: 'Image URL', default: '' },
+        caption: { type: 'text', label: 'Caption', default: '' }
+      },
+      default: [
+        { 
+          imageUrl: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&q=80',
+          caption: 'Mountain Landscape'
+        },
+        { 
+          imageUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1920&q=80',
+          caption: 'Ocean Waves'
+        },
+        { 
+          imageUrl: 'https://images.unsplash.com/photo-1511593358241-7eea1f3c84e5?w=1920&q=80',
+          caption: 'Desert Dunes'
+        },
+        { 
+          imageUrl: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=1920&q=80',
+          caption: 'Forest Path'
+        },
+        { 
+          imageUrl: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=1920&q=80',
+          caption: 'Northern Lights'
+        }
+      ]
+    }
+  },
+  structure: (data, theme) => {
+    const isBrutalist = theme.id === 'brutalist';
+    const isMinimal = theme.id === 'minimal';
+    const isGradient = theme.id === 'gradient';
+    const isElegant = theme.id === 'elegant';
+    const isRetro = theme.id === 'retro';
+    const isGlassmorphism = theme.id === 'glassmorphism';
+    const isNeumorphism = theme.id === 'neumorphism';
+
+    const autoplay = data.autoplay !== 'false';
+    const autoplaySpeed = parseInt(data.autoplaySpeed) || 5000;
+    const showCaptions = data.showCaptions !== 'false';
+
+    return `
+      <!-- Slideshow Container -->
+      <div id="slideshowContainer" style="position: relative; width: 100%; height: 100vh; overflow: hidden; background: #000;">
+        
+        <!-- Slides -->
+        <div id="slidesWrapper" style="position: relative; width: 100%; height: 100%;">
+          ${data.slides.map((slide, index) => `
+            <div class="slide" data-index="${index}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: ${index === 0 ? '1' : '0'}; transition: opacity 1s ease-in-out;">
+              ${slide.imageUrl ? `
+              <img src="${slide.imageUrl}" alt="${slide.caption || `Slide ${index + 1}`}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+              <div style="display: none; width: 100%; height: 100%; background: ${isGradient ? 'linear-gradient(135deg, #667eea, #764ba2)' : isBrutalist ? '#000' : isRetro ? 'linear-gradient(135deg, #ff6ec4, #7873f5)' : '#1a1a1a'}; align-items: center; justify-content: center; font-size: 6rem; color: white; font-weight: 900;">
+                ${index + 1}
+              </div>
+              ` : `
+              <div style="width: 100%; height: 100%; background: ${isGradient ? 'linear-gradient(135deg, #667eea, #764ba2)' : isBrutalist ? '#000' : isRetro ? 'linear-gradient(135deg, #ff6ec4, #7873f5)' : '#1a1a1a'}; display: flex; align-items: center; justify-content: center; font-size: 6rem; color: white; font-weight: 900;">
+                ${index + 1}
+              </div>
+              `}
+            </div>
+          `).join('')}
+        </div>
+
+        <!-- Controls Container - Bottom Right -->
+        <div style="position: fixed; bottom: 2rem; right: 2rem; z-index: 1000; display: flex; flex-direction: column; align-items: flex-end; gap: 1rem;">
+          
+          ${data.galleryTitle ? `
+          <!-- Title -->
+          <div style="font-family: ${isElegant ? 'Playfair Display, serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: ${isBrutalist ? '0.75rem' : '0.6875rem'}; font-weight: ${isBrutalist ? '900' : '600'}; color: white; text-transform: uppercase; letter-spacing: 0.1em; ${isGlassmorphism ? 'text-shadow: 0 2px 8px rgba(0,0,0,0.5);' : 'text-shadow: 0 1px 4px rgba(0,0,0,0.8);'}">
+            ${data.galleryTitle}
+          </div>
+          ` : ''}
+
+          ${showCaptions ? `
+          <!-- Caption -->
+          <div id="slideCaption" style="font-family: ${isElegant ? 'Lato, sans-serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: ${isBrutalist ? '0.875rem' : '0.8125rem'}; font-weight: ${isElegant ? '300' : isBrutalist ? '700' : '400'}; color: white; max-width: 300px; text-align: right; ${isGlassmorphism ? 'text-shadow: 0 2px 8px rgba(0,0,0,0.5);' : 'text-shadow: 0 1px 4px rgba(0,0,0,0.8);'}">
+            ${data.slides[0]?.caption || ''}
+          </div>
+          ` : ''}
+
+          <!-- Control Bar -->
+          <div style="display: flex; align-items: center; gap: ${isBrutalist ? '0.75rem' : '0.5rem'}; padding: ${isBrutalist ? '0.75rem 1rem' : '0.625rem 0.875rem'}; background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.15)' : isNeumorphism ? 'rgba(255, 255, 255, 0.95)' : isBrutalist ? '#000' : 'rgba(0, 0, 0, 0.7)'}; ${isGlassmorphism ? 'backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);' : ''} ${isBrutalist ? 'border: 2px solid white;' : isNeumorphism ? 'box-shadow: 4px 4px 8px rgba(163, 177, 198, 0.6), -4px -4px 8px rgba(255, 255, 255, 0.9); border-radius: 50px;' : 'border-radius: 50px;'}">
+            
+            <!-- Previous -->
+            <button onclick="changeSlide(-1)" style="background: transparent; border: none; color: ${isNeumorphism ? 'var(--color-text)' : 'white'}; font-size: ${isBrutalist ? '1.25rem' : '1.125rem'}; font-weight: 900; cursor: pointer; padding: 0.25rem 0.5rem; transition: all 0.2s; display: flex; align-items: center; justify-content: center;" onmouseover="this.style.opacity='0.6'" onmouseout="this.style.opacity='1'">
+              ‹
+            </button>
+
+            <!-- Counter -->
+            <div id="slideCounter" style="font-family: ${isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: ${isBrutalist ? '0.8125rem' : '0.75rem'}; font-weight: ${isBrutalist ? '900' : '600'}; color: ${isNeumorphism ? 'var(--color-text)' : 'white'}; min-width: ${isBrutalist ? '3.5rem' : '3rem'}; text-align: center; ${isBrutalist || isRetro ? 'text-transform: uppercase;' : ''}">
+              1/${data.slides.length}
+            </div>
+
+            <!-- Next -->
+            <button onclick="changeSlide(1)" style="background: transparent; border: none; color: ${isNeumorphism ? 'var(--color-text)' : 'white'}; font-size: ${isBrutalist ? '1.25rem' : '1.125rem'}; font-weight: 900; cursor: pointer; padding: 0.25rem 0.5rem; transition: all 0.2s; display: flex; align-items: center; justify-content: center;" onmouseover="this.style.opacity='0.6'" onmouseout="this.style.opacity='1'">
+              ›
+            </button>
+
+            <!-- Divider -->
+            <div style="width: 1px; height: 1.25rem; background: ${isNeumorphism ? 'var(--color-border)' : 'rgba(255, 255, 255, 0.3)'}; margin: 0 0.25rem;"></div>
+
+            <!-- Play/Pause -->
+            <button id="playPauseBtn" onclick="toggleAutoplay()" style="background: transparent; border: none; color: ${isNeumorphism ? 'var(--color-text)' : 'white'}; font-size: ${isBrutalist ? '0.875rem' : '0.75rem'}; font-weight: 900; cursor: pointer; padding: 0.25rem 0.5rem; transition: all 0.2s; display: flex; align-items: center; justify-content: center;" onmouseover="this.style.opacity='0.6'" onmouseout="this.style.opacity='1'">
+              <span id="playPauseIcon">${autoplay ? '❚❚' : '▶'}</span>
+            </button>
+
+            <!-- Fullscreen -->
+            <button onclick="toggleFullscreen()" style="background: transparent; border: none; color: ${isNeumorphism ? 'var(--color-text)' : 'white'}; font-size: ${isBrutalist ? '0.875rem' : '0.75rem'}; font-weight: 900; cursor: pointer; padding: 0.25rem 0.5rem; transition: all 0.2s; display: flex; align-items: center; justify-content: center;" onmouseover="this.style.opacity='0.6'" onmouseout="this.style.opacity='1'">
+              ⛶
+            </button>
+
+            <!-- Theme Toggle -->
+            <div style="width: 1px; height: 1.25rem; background: ${isNeumorphism ? 'var(--color-border)' : 'rgba(255, 255, 255, 0.3)'}; margin: 0 0.25rem;"></div>
+            
+            <label class="theme-toggle-switch-wrapper" style="cursor: pointer; ${isNeumorphism ? 'padding: 0.375rem; border-radius: 50%; display: inline-flex;' : 'display: inline-flex;'}">
+              <input type="checkbox" class="theme-toggle-switch" onclick="toggleTheme()" aria-label="Toggle theme" style="position: absolute; opacity: 0;">
+              <span class="theme-toggle-slider" style="width: 1.25rem; height: 1.25rem;"></span>
+            </label>
+          </div>
+
+        </div>
+
+      </div>
+
+      <style>
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
+
+        body {
+          overflow: hidden;
+        }
+
+        /* Keyboard Navigation Focus */
+        button:focus-visible {
+          outline: 2px solid white;
+          outline-offset: 2px;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+          div[style*="bottom: 2rem; right: 2rem"] {
+            bottom: 1rem !important;
+            right: 1rem !important;
+            gap: 0.75rem !important;
+          }
+
+          div[style*="bottom: 2rem; right: 2rem"] > div:first-child {
+            font-size: 0.625rem !important;
+          }
+
+          #slideCaption {
+            font-size: 0.75rem !important;
+            max-width: 200px !important;
+          }
+
+          div[style*="bottom: 2rem; right: 2rem"] > div:last-child {
+            padding: 0.5rem 0.75rem !important;
+            gap: 0.375rem !important;
+          }
+
+          button[onclick*="changeSlide"] {
+            font-size: 1rem !important;
+            padding: 0.125rem 0.375rem !important;
+          }
+
+          #slideCounter {
+            font-size: 0.6875rem !important;
+            min-width: 2.5rem !important;
+          }
+
+          #playPauseBtn,
+          button[onclick="toggleFullscreen()"] {
+            font-size: 0.6875rem !important;
+            padding: 0.125rem 0.375rem !important;
+          }
+        }
+
+        @media (max-width: 480px) {
+          div[style*="bottom: 2rem; right: 2rem"] {
+            bottom: 0.75rem !important;
+            right: 0.75rem !important;
+          }
+
+          #slideCaption {
+            max-width: 150px !important;
+            font-size: 0.6875rem !important;
+          }
+
+          div[style*="bottom: 2rem; right: 2rem"] > div:last-child {
+            padding: 0.375rem 0.625rem !important;
+          }
+        }
+
+        /* Slide transitions */
+        .slide {
+          will-change: opacity;
+        }
+      </style>
+
+      <script>
+        let currentSlide = 0;
+        let autoplayEnabled = ${autoplay ? 'true' : 'false'};
+        let autoplayInterval = null;
+        const autoplaySpeed = ${autoplaySpeed};
+        const totalSlides = ${data.slides.length};
+        const captions = ${JSON.stringify(data.slides.map(s => s.caption || ''))};
+        const showCaptions = ${showCaptions};
+
+        function showSlide(index) {
+          const slides = document.querySelectorAll('.slide');
+          
+          // Wrap around
+          if (index >= totalSlides) currentSlide = 0;
+          else if (index < 0) currentSlide = totalSlides - 1;
+          else currentSlide = index;
+
+          // Update slides
+          slides.forEach((slide, i) => {
+            slide.style.opacity = i === currentSlide ? '1' : '0';
+            slide.style.zIndex = i === currentSlide ? '1' : '0';
+          });
+
+          // Update counter
+          document.getElementById('slideCounter').textContent = \`\${currentSlide + 1}/\${totalSlides}\`;
+
+          // Update caption
+          if (showCaptions) {
+            const captionEl = document.getElementById('slideCaption');
+            if (captionEl) {
+              captionEl.textContent = captions[currentSlide] || '';
+            }
+          }
+        }
+
+        function changeSlide(direction) {
+          showSlide(currentSlide + direction);
+          if (autoplayEnabled) {
+            resetAutoplay();
+          }
+        }
+
+        function toggleAutoplay() {
+          autoplayEnabled = !autoplayEnabled;
+          const icon = document.getElementById('playPauseIcon');
+          icon.textContent = autoplayEnabled ? '❚❚' : '▶';
+
+          if (autoplayEnabled) {
+            startAutoplay();
+          } else {
+            stopAutoplay();
+          }
+        }
+
+        function startAutoplay() {
+          if (autoplayInterval) clearInterval(autoplayInterval);
+          autoplayInterval = setInterval(() => {
+            changeSlide(1);
+          }, autoplaySpeed);
+        }
+
+        function stopAutoplay() {
+          if (autoplayInterval) {
+            clearInterval(autoplayInterval);
+            autoplayInterval = null;
+          }
+        }
+
+        function resetAutoplay() {
+          stopAutoplay();
+          startAutoplay();
+        }
+
+        function toggleFullscreen() {
+          const elem = document.getElementById('slideshowContainer');
+          
+          if (!document.fullscreenElement) {
+            if (elem.requestFullscreen) {
+              elem.requestFullscreen();
+            } else if (elem.webkitRequestFullscreen) {
+              elem.webkitRequestFullscreen();
+            } else if (elem.msRequestFullscreen) {
+              elem.msRequestFullscreen();
+            }
+          } else {
+            if (document.exitFullscreen) {
+              document.exitFullscreen();
+            } else if (document.webkitExitFullscreen) {
+              document.webkitExitFullscreen();
+            } else if (document.msExitFullscreen) {
+              document.msExitFullscreen();
+            }
+          }
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'ArrowLeft') changeSlide(-1);
+          if (e.key === 'ArrowRight') changeSlide(1);
+          if (e.key === ' ') {
+            e.preventDefault();
+            toggleAutoplay();
+          }
+          if (e.key === 'f' || e.key === 'F') toggleFullscreen();
+          if (e.key === 'Escape' && document.fullscreenElement) toggleFullscreen();
+        });
+
+        // Touch swipe support
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        document.getElementById('slideshowContainer').addEventListener('touchstart', (e) => {
+          touchStartX = e.changedTouches[0].screenX;
+        }, { passive: true });
+
+        document.getElementById('slideshowContainer').addEventListener('touchend', (e) => {
+          touchEndX = e.changedTouches[0].screenX;
+          handleSwipe();
+        }, { passive: true });
+
+        function handleSwipe() {
+          const swipeThreshold = 50;
+          if (touchEndX < touchStartX - swipeThreshold) changeSlide(1);
+          if (touchEndX > touchStartX + swipeThreshold) changeSlide(-1);
+        }
+
+        // Initialize
+        if (autoplayEnabled) {
+          startAutoplay();
+        }
+
+        // Pause autoplay when page is not visible
+        document.addEventListener('visibilitychange', () => {
+          if (document.hidden) {
+            stopAutoplay();
+          } else if (autoplayEnabled) {
+            startAutoplay();
+          }
+        });
+
+        // Preload next/prev images
+        function preloadImages() {
+          const slides = document.querySelectorAll('.slide img');
+          slides.forEach(img => {
+            if (img.complete) return;
+            const preload = new Image();
+            preload.src = img.src;
+          });
+        }
+
+        window.addEventListener('load', preloadImages);
+      </script>
+    `
+  }
+}),
+'event-signup': new Template('event-signup', {
+  name: 'Event Signup',
+  description: 'Event registration and signup page with details',
+  category: 'Forms',
+  defaultTheme: 'gradient',
+  image: 'event-signup',
+  fields: {
+    eventName: { type: 'text', default: 'Tech Conference 2024', label: 'Event Name', required: true },
+    eventTagline: { 
+      type: 'text',
+      default: 'Join us for an inspiring day of innovation and networking',
+      label: 'Event Tagline',
+      required: false 
+    },
+    eventDate: { type: 'text', default: 'June 15, 2024', label: 'Event Date', required: true },
+    eventTime: { type: 'text', default: '9:00 AM - 5:00 PM', label: 'Event Time', required: true },
+    eventLocation: { 
+      type: 'textarea',
+      default: 'Convention Center\n123 Main Street\nSan Francisco, CA 94102',
+      label: 'Event Location',
+      required: true 
+    },
+    eventDescription: { 
+      type: 'textarea',
+      default: 'Experience a full day of cutting-edge presentations, interactive workshops, and networking opportunities with industry leaders. This conference brings together innovators, entrepreneurs, and tech enthusiasts to explore the latest trends and technologies shaping our future.',
+      label: 'Event Description',
+      required: true 
+    },
+    eventImage: { 
+      type: 'url',
+      default: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1920&q=80',
+      label: 'Event Image URL',
+      required: false 
+    },
+    price: { type: 'text', default: '$99', label: 'Ticket Price', required: false },
+    capacity: { type: 'text', default: '500', label: 'Event Capacity', required: false },
+    organizerName: { type: 'text', default: 'Tech Events Inc.', label: 'Organizer Name', required: false },
+    organizerEmail: { 
+      type: 'email',
+      default: 'events@techconference.com',
+      label: 'Organizer Email (where signups go)',
+      required: true 
+    },
+    highlights: {
+      type: 'group',
+      label: 'Event Highlights',
+      itemLabel: 'Highlight',
+      min: 0,
+      max: 10,
+      fields: {
+        title: { type: 'text', label: 'Title', default: '' },
+        description: { type: 'text', label: 'Description', default: '' }
+      },
+      default: [
+        { title: '10+ Speakers', description: 'Industry experts and thought leaders' },
+        { title: 'Networking', description: 'Connect with 500+ attendees' },
+        { title: 'Workshops', description: 'Hands-on learning sessions' },
+        { title: 'Lunch Included', description: 'Catered meals and refreshments' }
+      ]
+    },
+    schedule: {
+      type: 'group',
+      label: 'Event Schedule',
+      itemLabel: 'Schedule Item',
+      min: 0,
+      max: 20,
+      fields: {
+        time: { type: 'text', label: 'Time', default: '' },
+        title: { type: 'text', label: 'Title', default: '' },
+        speaker: { type: 'text', label: 'Speaker (optional)', default: '' }
+      },
+      default: [
+        { time: '9:00 AM', title: 'Registration & Coffee', speaker: '' },
+        { time: '10:00 AM', title: 'Opening Keynote', speaker: 'Dr. Sarah Chen' },
+        { time: '11:30 AM', title: 'Panel Discussion: The Future of AI', speaker: '' },
+        { time: '1:00 PM', title: 'Lunch & Networking', speaker: '' },
+        { time: '2:30 PM', title: 'Breakout Sessions', speaker: '' },
+        { time: '4:30 PM', title: 'Closing Remarks', speaker: '' }
+      ]
+    },
+    showNameField: { type: 'text', default: 'true', label: 'Show Name Field (true/false)', required: false },
+    showEmailField: { type: 'text', default: 'true', label: 'Show Email Field (true/false)', required: false },
+    showPhoneField: { type: 'text', default: 'false', label: 'Show Phone Field (true/false)', required: false },
+    showCompanyField: { type: 'text', default: 'false', label: 'Show Company Field (true/false)', required: false },
+    showTicketType: { type: 'text', default: 'false', label: 'Show Ticket Type Selector (true/false)', required: false },
+    successMessage: { 
+      type: 'text',
+      default: 'Registration successful! Check your email for confirmation.',
+      label: 'Success Message',
+      required: true 
+    }
+  },
+  structure: (data, theme) => {
+    const isBrutalist = theme.id === 'brutalist';
+    const isMinimal = theme.id === 'minimal';
+    const isGradient = theme.id === 'gradient';
+    const isElegant = theme.id === 'elegant';
+    const isRetro = theme.id === 'retro';
+    const isGlassmorphism = theme.id === 'glassmorphism';
+    const isNeumorphism = theme.id === 'neumorphism';
+
+    const showName = data.showNameField !== 'false';
+    const showEmail = data.showEmailField !== 'false';
+    const showPhone = data.showPhoneField === 'true';
+    const showCompany = data.showCompanyField === 'true';
+    const showTicketType = data.showTicketType === 'true';
+
+    return `
+      <!-- Header -->
+      <header style="position: sticky; top: 0; z-index: 1000; background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.1)' : isNeumorphism ? 'var(--color-bg)' : 'var(--color-bg)'}; ${isBrutalist ? 'border-bottom: 4px solid var(--color-border);' : 'border-bottom: 1px solid var(--color-border);'} ${isGlassmorphism ? 'backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);' : ''} ${isNeumorphism ? 'box-shadow: 0 4px 6px rgba(163, 177, 198, 0.3), 0 -1px 3px rgba(255, 255, 255, 0.5);' : ''}">
+        <div class="container" style="max-width: 1200px; margin: 0 auto; padding: 1.5rem 2rem; display: flex; justify-content: space-between; align-items: center;">
+          <div style="font-family: ${isElegant ? 'Playfair Display, serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: ${isBrutalist ? '1.5rem' : '1.25rem'}; font-weight: ${isBrutalist ? '900' : '800'}; color: var(--color-accent); ${isBrutalist || isRetro ? 'text-transform: uppercase;' : ''}">
+            ${data.eventName || 'Event'}
+          </div>
+          <label class="theme-toggle-switch-wrapper" style="cursor: pointer; ${isNeumorphism ? 'padding: 0.5rem; border-radius: 12px; display: inline-block; box-shadow: 6px 6px 12px rgba(163, 177, 198, 0.6), -6px -6px 12px rgba(255, 255, 255, 0.9);' : ''}">
+            <input type="checkbox" class="theme-toggle-switch" onclick="toggleTheme()" aria-label="Toggle theme">
+            <span class="theme-toggle-slider"></span>
+          </label>
+        </div>
+      </header>
+
+      <!-- Hero Section -->
+      <section style="position: relative; padding: 0; background: var(--color-bg); overflow: hidden;">
+        ${data.eventImage ? `
+        <div style="position: relative; height: 400px; overflow: hidden;">
+          <img src="${data.eventImage}" alt="${data.eventName}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.style.display='none'">
+          <div style="position: absolute; inset: 0; background: ${isGradient ? 'linear-gradient(135deg, rgba(102, 126, 234, 0.85), rgba(118, 75, 162, 0.85))' : isBrutalist ? 'rgba(0, 0, 0, 0.7)' : isRetro ? 'linear-gradient(135deg, rgba(255, 110, 196, 0.85), rgba(120, 115, 245, 0.85))' : 'linear-gradient(to top, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.4))'}; display: flex; align-items: center; justify-content: center;">
+            <div class="container" style="max-width: 1200px; margin: 0 auto; padding: 0 2rem; text-align: center; color: white;">
+              <h1 style="font-family: ${isElegant ? 'Playfair Display, serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: clamp(2.5rem, 6vw, 4rem); font-weight: ${isBrutalist ? '900' : isRetro ? '700' : '800'}; margin-bottom: 1rem; ${isBrutalist || isRetro ? 'text-transform: uppercase;' : ''}">
+                ${data.eventName || 'Event Registration'}
+              </h1>
+              ${data.eventTagline ? `
+              <p style="font-family: ${isElegant ? 'Lato, sans-serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: clamp(1.125rem, 3vw, 1.5rem); opacity: 0.95; font-weight: ${isElegant ? '300' : 'normal'};">
+                ${data.eventTagline}
+              </p>
+              ` : ''}
+            </div>
+          </div>
+        </div>
+        ` : `
+        <div style="padding: 5rem 0; background: ${isGradient ? 'linear-gradient(135deg, #667eea, #764ba2)' : isBrutalist ? 'var(--color-accent)' : isRetro ? 'linear-gradient(135deg, #ff6ec4, #7873f5)' : 'var(--color-accent)'}; text-align: center; color: ${isBrutalist ? 'var(--color-text)' : 'white'};">
+          <div class="container" style="max-width: 1200px; margin: 0 auto; padding: 0 2rem;">
+            <h1 style="font-family: ${isElegant ? 'Playfair Display, serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: clamp(2.5rem, 6vw, 4rem); font-weight: ${isBrutalist ? '900' : isRetro ? '700' : '800'}; margin-bottom: 1rem; ${isBrutalist || isRetro ? 'text-transform: uppercase;' : ''}">
+              ${data.eventName || 'Event Registration'}
+            </h1>
+            ${data.eventTagline ? `
+            <p style="font-family: ${isElegant ? 'Lato, sans-serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: clamp(1.125rem, 3vw, 1.5rem); opacity: 0.95; font-weight: ${isElegant ? '300' : 'normal'};">
+              ${data.eventTagline}
+            </p>
+            ` : ''}
+          </div>
+        </div>
+        `}
+      </section>
+
+      <!-- Main Content -->
+      <section style="padding: 4rem 0;">
+        <div class="container" style="max-width: 1200px; margin: 0 auto; padding: 0 2rem;">
+          <div class="main-grid" style="display: grid; grid-template-columns: 1fr 500px; gap: 4rem; align-items: start;">
+            
+            <!-- Left Column - Event Details -->
+            <div>
+              <!-- Event Info Cards -->
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 3rem;">
+                <div style="background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.05)' : isNeumorphism ? 'var(--color-bg)' : 'var(--color-surface)'}; border: ${isBrutalist ? '3px' : '1px'} solid var(--color-border); ${isBrutalist ? '' : isNeumorphism ? 'box-shadow: 6px 6px 12px rgba(163, 177, 198, 0.6), -6px -6px 12px rgba(255, 255, 255, 0.9); border-radius: 12px;' : isGlassmorphism ? 'backdrop-filter: blur(10px); border-radius: 12px;' : 'border-radius: 12px;'} padding: 1.5rem;">
+                  <div style="font-size: 0.75rem; font-weight: ${isBrutalist ? '900' : '600'}; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">
+                    Date
+                  </div>
+                  <div style="font-family: ${isElegant ? 'Playfair Display, serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: 1.125rem; font-weight: ${isBrutalist ? '900' : '700'}; color: var(--color-text);">
+                    ${data.eventDate}
+                  </div>
+                </div>
+
+                <div style="background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.05)' : isNeumorphism ? 'var(--color-bg)' : 'var(--color-surface)'}; border: ${isBrutalist ? '3px' : '1px'} solid var(--color-border); ${isBrutalist ? '' : isNeumorphism ? 'box-shadow: 6px 6px 12px rgba(163, 177, 198, 0.6), -6px -6px 12px rgba(255, 255, 255, 0.9); border-radius: 12px;' : isGlassmorphism ? 'backdrop-filter: blur(10px); border-radius: 12px;' : 'border-radius: 12px;'} padding: 1.5rem;">
+                  <div style="font-size: 0.75rem; font-weight: ${isBrutalist ? '900' : '600'}; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">
+                    Time
+                  </div>
+                  <div style="font-family: ${isElegant ? 'Playfair Display, serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: 1.125rem; font-weight: ${isBrutalist ? '900' : '700'}; color: var(--color-text);">
+                    ${data.eventTime}
+                  </div>
+                </div>
+
+                ${data.price ? `
+                <div style="background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.05)' : isNeumorphism ? 'var(--color-bg)' : 'var(--color-surface)'}; border: ${isBrutalist ? '3px' : '1px'} solid var(--color-accent); ${isBrutalist ? '' : isNeumorphism ? 'box-shadow: 6px 6px 12px rgba(163, 177, 198, 0.6), -6px -6px 12px rgba(255, 255, 255, 0.9); border-radius: 12px;' : isGlassmorphism ? 'backdrop-filter: blur(10px); border-radius: 12px;' : 'border-radius: 12px;'} padding: 1.5rem;">
+                  <div style="font-size: 0.75rem; font-weight: ${isBrutalist ? '900' : '600'}; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">
+                    Price
+                  </div>
+                  <div style="font-family: ${isElegant ? 'Playfair Display, serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: 1.5rem; font-weight: 900; color: var(--color-accent);">
+                    ${data.price}
+                  </div>
+                </div>
+                ` : ''}
+              </div>
+
+              <!-- Description -->
+              <div style="margin-bottom: 3rem;">
+                <h2 style="font-family: ${isElegant ? 'Playfair Display, serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: 1.75rem; font-weight: ${isBrutalist ? '900' : '800'}; margin-bottom: 1rem; ${isBrutalist || isRetro ? 'text-transform: uppercase;' : ''}">
+                  About This Event
+                </h2>
+                <p style="font-family: ${isElegant ? 'Lato, sans-serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: 1.0625rem; line-height: 1.7; color: var(--color-text); white-space: pre-line; font-weight: ${isElegant ? '300' : 'normal'};">
+                  ${data.eventDescription}
+                </p>
+              </div>
+
+              <!-- Location -->
+              <div style="margin-bottom: 3rem;">
+                <h2 style="font-family: ${isElegant ? 'Playfair Display, serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: 1.75rem; font-weight: ${isBrutalist ? '900' : '800'}; margin-bottom: 1rem; ${isBrutalist || isRetro ? 'text-transform: uppercase;' : ''}">
+                  Location
+                </h2>
+                <p style="font-family: ${isElegant ? 'Lato, sans-serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: 1.0625rem; line-height: 1.7; color: var(--color-text); white-space: pre-line; font-weight: ${isElegant ? '300' : 'normal'};">
+                  ${data.eventLocation}
+                </p>
+              </div>
+
+              ${data.highlights && data.highlights.length > 0 ? `
+              <!-- Highlights -->
+              <div style="margin-bottom: 3rem;">
+                <h2 style="font-family: ${isElegant ? 'Playfair Display, serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: 1.75rem; font-weight: ${isBrutalist ? '900' : '800'}; margin-bottom: 1.5rem; ${isBrutalist || isRetro ? 'text-transform: uppercase;' : ''}">
+                  Event Highlights
+                </h2>
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1.5rem;">
+                  ${data.highlights.map(highlight => `
+                    <div style="background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.05)' : isNeumorphism ? 'var(--color-bg)' : 'var(--color-surface)'}; border: ${isBrutalist ? '3px' : '1px'} solid var(--color-border); ${isBrutalist ? '' : isNeumorphism ? 'box-shadow: 6px 6px 12px rgba(163, 177, 198, 0.6), -6px -6px 12px rgba(255, 255, 255, 0.9); border-radius: 12px;' : isGlassmorphism ? 'backdrop-filter: blur(10px); border-radius: 12px;' : 'border-radius: 12px;'} padding: 1.5rem;">
+                      <div style="font-weight: ${isBrutalist ? '900' : '700'}; font-size: 1.125rem; margin-bottom: 0.5rem; color: var(--color-accent);">
+                        ${highlight.title}
+                      </div>
+                      <div style="font-size: 0.9375rem; color: var(--color-text-secondary); font-weight: ${isElegant ? '300' : 'normal'};">
+                        ${highlight.description}
+                      </div>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+              ` : ''}
+
+              ${data.schedule && data.schedule.length > 0 ? `
+              <!-- Schedule -->
+              <div>
+                <h2 style="font-family: ${isElegant ? 'Playfair Display, serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: 1.75rem; font-weight: ${isBrutalist ? '900' : '800'}; margin-bottom: 1.5rem; ${isBrutalist || isRetro ? 'text-transform: uppercase;' : ''}">
+                  Schedule
+                </h2>
+                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                  ${data.schedule.map((item, index) => `
+                    <div style="display: flex; gap: 1.5rem; padding-bottom: 1rem; ${index < data.schedule.length - 1 ? `border-bottom: ${isBrutalist ? '2px' : '1px'} solid var(--color-border);` : ''}">
+                      <div style="font-family: ${isRetro ? 'Space Mono, monospace' : 'inherit'}; font-weight: ${isBrutalist ? '900' : '700'}; color: var(--color-accent); min-width: 100px; ${isBrutalist ? 'text-transform: uppercase;' : ''}">
+                        ${item.time}
+                      </div>
+                      <div style="flex: 1;">
+                        <div style="font-weight: ${isBrutalist ? '900' : '600'}; margin-bottom: 0.25rem;">
+                          ${item.title}
+                        </div>
+                        ${item.speaker ? `
+                        <div style="font-size: 0.875rem; color: var(--color-text-secondary); font-style: italic;">
+                          ${item.speaker}
+                        </div>
+                        ` : ''}
+                      </div>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+              ` : ''}
+            </div>
+
+            <!-- Right Column - Registration Form -->
+            <div class="signup-form" style="position: sticky; top: 6rem;">
+              <div style="background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.05)' : isNeumorphism ? 'var(--color-bg)' : 'var(--color-surface)'}; border: ${isBrutalist ? '4px' : '2px'} solid var(--color-border); ${isBrutalist ? '' : isNeumorphism ? 'box-shadow: 10px 10px 20px rgba(163, 177, 198, 0.6), -10px -10px 20px rgba(255, 255, 255, 0.9); border-radius: 20px;' : isGlassmorphism ? 'backdrop-filter: blur(10px); border-radius: 20px;' : 'border-radius: 16px;'} padding: 2.5rem;">
+                <h2 style="font-family: ${isElegant ? 'Playfair Display, serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: 1.75rem; font-weight: ${isBrutalist ? '900' : '800'}; margin-bottom: 0.5rem; ${isBrutalist || isRetro ? 'text-transform: uppercase;' : ''}">
+                  Register Now
+                </h2>
+                ${data.capacity ? `
+                <p style="font-size: 0.875rem; color: var(--color-text-secondary); margin-bottom: 2rem; font-weight: ${isBrutalist ? '700' : '500'};">
+                  Limited to ${data.capacity} attendees
+                </p>
+                ` : ''}
+
+                <form id="signupForm" onsubmit="handleSignup(event)" style="display: flex; flex-direction: column; gap: 1.25rem;">
+                  
+                  ${showName ? `
+                  <div>
+                    <label for="name" style="display: block; font-weight: ${isBrutalist ? '900' : '600'}; font-size: 0.875rem; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text);">
+                      Full Name *
+                    </label>
+                    <input type="text" id="name" name="name" required style="width: 100%; padding: ${isBrutalist ? '1rem' : '0.875rem'}; background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.05)' : isNeumorphism ? 'var(--color-bg)' : 'var(--color-bg)'}; border: ${isBrutalist ? '3px' : '2px'} solid var(--color-border); ${isBrutalist ? '' : isNeumorphism ? 'box-shadow: inset 4px 4px 8px rgba(163, 177, 198, 0.6), inset -4px -4px 8px rgba(255, 255, 255, 0.9); border-radius: 8px;' : isGlassmorphism ? 'backdrop-filter: blur(10px); border-radius: 8px;' : 'border-radius: 8px;'} color: var(--color-text); font-size: 1rem; font-family: inherit; transition: all 0.2s;" onfocus="this.style.borderColor='var(--color-accent)'" onblur="this.style.borderColor='var(--color-border)'">
+                  </div>
+                  ` : ''}
+
+                  ${showEmail ? `
+                  <div>
+                    <label for="email" style="display: block; font-weight: ${isBrutalist ? '900' : '600'}; font-size: 0.875rem; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text);">
+                      Email *
+                    </label>
+                    <input type="email" id="email" name="email" required style="width: 100%; padding: ${isBrutalist ? '1rem' : '0.875rem'}; background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.05)' : isNeumorphism ? 'var(--color-bg)' : 'var(--color-bg)'}; border: ${isBrutalist ? '3px' : '2px'} solid var(--color-border); ${isBrutalist ? '' : isNeumorphism ? 'box-shadow: inset 4px 4px 8px rgba(163, 177, 198, 0.6), inset -4px -4px 8px rgba(255, 255, 255, 0.9); border-radius: 8px;' : isGlassmorphism ? 'backdrop-filter: blur(10px); border-radius: 8px;' : 'border-radius: 8px;'} color: var(--color-text); font-size: 1rem; font-family: inherit; transition: all 0.2s;" onfocus="this.style.borderColor='var(--color-accent)'" onblur="this.style.borderColor='var(--color-border)'">
+                  </div>
+                  ` : ''}
+
+                  ${showPhone ? `
+                  <div>
+                    <label for="phone" style="display: block; font-weight: ${isBrutalist ? '900' : '600'}; font-size: 0.875rem; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text);">
+                      Phone
+                    </label>
+                    <input type="tel" id="phone" name="phone" style="width: 100%; padding: ${isBrutalist ? '1rem' : '0.875rem'}; background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.05)' : isNeumorphism ? 'var(--color-bg)' : 'var(--color-bg)'}; border: ${isBrutalist ? '3px' : '2px'} solid var(--color-border); ${isBrutalist ? '' : isNeumorphism ? 'box-shadow: inset 4px 4px 8px rgba(163, 177, 198, 0.6), inset -4px -4px 8px rgba(255, 255, 255, 0.9); border-radius: 8px;' : isGlassmorphism ? 'backdrop-filter: blur(10px); border-radius: 8px;' : 'border-radius: 8px;'} color: var(--color-text); font-size: 1rem; font-family: inherit; transition: all 0.2s;" onfocus="this.style.borderColor='var(--color-accent)'" onblur="this.style.borderColor='var(--color-border)'">
+                  </div>
+                  ` : ''}
+
+                  ${showCompany ? `
+                  <div>
+                    <label for="company" style="display: block; font-weight: ${isBrutalist ? '900' : '600'}; font-size: 0.875rem; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text);">
+                      Company
+                    </label>
+                    <input type="text" id="company" name="company" style="width: 100%; padding: ${isBrutalist ? '1rem' : '0.875rem'}; background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.05)' : isNeumorphism ? 'var(--color-bg)' : 'var(--color-bg)'}; border: ${isBrutalist ? '3px' : '2px'} solid var(--color-border); ${isBrutalist ? '' : isNeumorphism ? 'box-shadow: inset 4px 4px 8px rgba(163, 177, 198, 0.6), inset -4px -4px 8px rgba(255, 255, 255, 0.9); border-radius: 8px;' : isGlassmorphism ? 'backdrop-filter: blur(10px); border-radius: 8px;' : 'border-radius: 8px;'} color: var(--color-text); font-size: 1rem; font-family: inherit; transition: all 0.2s;" onfocus="this.style.borderColor='var(--color-accent)'" onblur="this.style.borderColor='var(--color-border)'">
+                  </div>
+                  ` : ''}
+
+                  ${showTicketType ? `
+                  <div>
+                    <label for="ticketType" style="display: block; font-weight: ${isBrutalist ? '900' : '600'}; font-size: 0.875rem; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text);">
+                      Ticket Type *
+                    </label>
+                    <select id="ticketType" name="ticketType" required style="width: 100%; padding: ${isBrutalist ? '1rem' : '0.875rem'}; background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.05)' : isNeumorphism ? 'var(--color-bg)' : 'var(--color-bg)'}; border: ${isBrutalist ? '3px' : '2px'} solid var(--color-border); ${isBrutalist ? '' : isNeumorphism ? 'box-shadow: inset 4px 4px 8px rgba(163, 177, 198, 0.6), inset -4px -4px 8px rgba(255, 255, 255, 0.9); border-radius: 8px;' : isGlassmorphism ? 'backdrop-filter: blur(10px); border-radius: 8px;' : 'border-radius: 8px;'} color: var(--color-text); font-size: 1rem; font-family: inherit; transition: all 0.2s;" onfocus="this.style.borderColor='var(--color-accent)'" onblur="this.style.borderColor='var(--color-border)'">
+                      <option value="general">General Admission</option>
+                      <option value="vip">VIP Pass</option>
+                      <option value="student">Student Ticket</option>
+                    </select>
+                  </div>
+                  ` : ''}
+
+                  <button type="submit" style="width: 100%; padding: ${isBrutalist ? '1.25rem' : '1rem'}; background: var(--color-accent); color: ${isBrutalist ? 'var(--color-text)' : 'var(--color-bg)'}; border: ${isBrutalist ? '4px solid var(--color-text)' : 'none'}; ${isBrutalist ? 'box-shadow: 4px 4px 0 var(--color-text);' : isNeumorphism ? 'box-shadow: 10px 10px 20px rgba(163, 177, 198, 0.6), -10px -10px 20px rgba(255, 255, 255, 0.9); border-radius: 8px;' : 'border-radius: 8px;'} font-weight: ${isBrutalist ? '900' : '700'}; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; transition: all 0.2s;" onmouseover="${isBrutalist ? `this.style.transform='translate(-4px, -4px)'; this.style.boxShadow='8px 8px 0 var(--color-text)'` : `this.style.transform='translateY(-2px)'; ${isNeumorphism ? 'this.style.boxShadow=\'12px 12px 24px rgba(163, 177, 198, 0.6), -12px -12px 24px rgba(255, 255, 255, 0.9)\'' : 'this.style.boxShadow=\'0 4px 12px rgba(0,0,0,0.15)\''}`}" onmouseout="${isBrutalist ? `this.style.transform='translate(0, 0)'; this.style.boxShadow='4px 4px 0 var(--color-text)'` : `this.style.transform='translateY(0)'; ${isNeumorphism ? 'this.style.boxShadow=\'10px 10px 20px rgba(163, 177, 198, 0.6), -10px -10px 20px rgba(255, 255, 255, 0.9)\'' : 'this.style.boxShadow=\'none\''}`}">
+                    Secure Your Spot
+                  </button>
+
+                  <div id="formMessage" style="display: none; padding: 1rem; border-radius: 8px; text-align: center; font-weight: 600;"></div>
+                </form>
+
+                ${data.organizerName ? `
+                <p style="margin-top: 2rem; padding-top: 1.5rem; border-top: ${isBrutalist ? '2px' : '1px'} solid var(--color-border); font-size: 0.875rem; color: var(--color-text-secondary); text-align: center;">
+                  Organized by ${data.organizerName}
+                </p>
+                ` : ''}
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <style>
+        input::placeholder,
+        select::placeholder {
+          color: var(--color-text-secondary);
+          opacity: 0.6;
+        }
+
+        select {
+          appearance: none;
+          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+          background-repeat: no-repeat;
+          background-position: right 1rem center;
+          padding-right: 2.5rem;
+        }
+
+        @media (max-width: 968px) {
+          .main-grid {
+            grid-template-columns: 1fr !important;
+            gap: 3rem !important;
+          }
+
+          .signup-form {
+            position: static !important;
+          }
+
+          section[style*="padding: 4rem"] {
+            padding: 3rem 0 !important;
+          }
+
+          div[style*="height: 400px"] {
+            height: 300px !important;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .container {
+            padding: 0 1rem !important;
+          }
+
+          div[style*="padding: 2.5rem"] {
+            padding: 1.5rem !important;
+          }
+
+          div[style*="height: 400px"] {
+            height: 250px !important;
+          }
+        }
+      </style>
+
+      <script>
+        function handleSignup(event) {
+          event.preventDefault();
+          
+          const form = event.target;
+          const formData = new FormData(form);
+          const messageDiv = document.getElementById('formMessage');
+          const submitButton = form.querySelector('button[type="submit"]');
+          
+          // Disable submit button
+          submitButton.disabled = true;
+          submitButton.textContent = 'Registering...';
+          
+          // Create mailto link
+          const emailBody = Array.from(formData.entries())
+            .map(([key, value]) => \`\${key.charAt(0).toUpperCase() + key.slice(1)}: \${value}\`)
+            .join('%0D%0A%0D%0A');
+          
+          const subject = 'Event Registration: ${data.eventName}';
+          const mailtoLink = \`mailto:${data.organizerEmail}?subject=\${encodeURIComponent(subject)}&body=\${emailBody}\`;
+          
+          // Show success message
+          messageDiv.style.display = 'block';
+          messageDiv.style.background = 'var(--color-accent)';
+          messageDiv.style.color = '${isBrutalist ? 'var(--color-text)' : 'var(--color-bg)'}';
+          messageDiv.textContent = '${data.successMessage}';
+          
+          // Open mailto link
+          window.location.href = mailtoLink;
+          
+          // Reset form
+          setTimeout(() => {
+            form.reset();
+            submitButton.disabled = false;
+            submitButton.textContent = 'Secure Your Spot';
+            
+            setTimeout(() => {
+              messageDiv.style.display = 'none';
+            }, 5000);
+          }, 1000);
+        }
+      </script>
+    `
+  }
+}),
+'coming-soon': new Template('coming-soon', {
+  name: 'Coming Soon',
+  description: 'Countdown landing page for upcoming launches',
+  category: 'Landing',
+  defaultTheme: 'gradient',
+  image: 'coming-soon',
+  fields: {
+    title: { 
+      type: 'text',
+      default: 'Something Big Is Coming',
+      label: 'Main Title',
+      required: true 
+    },
+    subtitle: { 
+      type: 'text',
+      default: 'Stay tuned for the reveal',
+      label: 'Subtitle',
+      required: false 
+    },
+    description: { 
+      type: 'textarea',
+      default: 'Get ready for an experience like no other. Sign up to be the first to know when we launch.',
+      label: 'Description',
+      required: false 
+    },
+    launchDate: { 
+      type: 'text',
+      default: '2024-12-31',
+      label: 'Launch Date (YYYY-MM-DD)',
+      required: true 
+    },
+    showCountdown: { 
+      type: 'text',
+      default: 'true',
+      label: 'Show Countdown Timer (true/false)',
+      required: false 
+    },
+    logoText: { 
+      type: 'text',
+      default: 'BRAND',
+      label: 'Logo/Brand Name',
+      required: false 
+    },
+    notifyEmail: { 
+      type: 'email',
+      default: 'notify@brand.com',
+      label: 'Notification Email (where signups go)',
+      required: true 
+    },
+    socialLinks: {
+      type: 'group',
+      label: 'Social Links',
+      itemLabel: 'Social Link',
+      min: 0,
+      max: 6,
+      fields: {
+        platform: { type: 'text', label: 'Platform Name', default: '' },
+        url: { type: 'url', label: 'URL', default: '' }
+      },
+      default: [
+        { platform: 'Twitter', url: '' },
+        { platform: 'Instagram', url: '' },
+        { platform: 'YouTube', url: '' }
+      ]
+    },
+    features: {
+      type: 'group',
+      label: 'Key Features/Teasers',
+      itemLabel: 'Feature',
+      min: 0,
+      max: 6,
+      fields: {
+        title: { type: 'text', label: 'Title', default: '' },
+        description: { type: 'text', label: 'Description', default: '' }
+      },
+      default: [
+        { title: 'Revolutionary', description: 'A completely new experience' },
+        { title: 'Innovative', description: 'Pushing boundaries' },
+        { title: 'Unforgettable', description: 'Something you\'ve never seen before' }
+      ]
+    }
+  },
+  structure: (data, theme) => {
+    const isBrutalist = theme.id === 'brutalist';
+    const isMinimal = theme.id === 'minimal';
+    const isGradient = theme.id === 'gradient';
+    const isElegant = theme.id === 'elegant';
+    const isRetro = theme.id === 'retro';
+    const isGlassmorphism = theme.id === 'glassmorphism';
+    const isNeumorphism = theme.id === 'neumorphism';
+
+    const showCountdown = data.showCountdown !== 'false';
+
+    return `
+      <!-- Full Screen Container -->
+      <div style="position: relative; width: 100%; min-height: 100vh; overflow: hidden; display: flex; align-items: center; justify-content: center; background: ${isGradient ? 'linear-gradient(135deg, #667eea, #764ba2)' : isBrutalist ? 'linear-gradient(135deg, var(--color-bg), var(--color-surface))' : isRetro ? 'linear-gradient(135deg, #ff6ec4, #7873f5)' : isGlassmorphism ? 'linear-gradient(135deg, rgba(102, 126, 234, 0.3), rgba(118, 75, 162, 0.3))' : isNeumorphism ? 'var(--color-bg)' : 'linear-gradient(135deg, var(--color-accent), var(--color-text))'}; ${isGlassmorphism ? 'background-color: var(--color-bg);' : ''}">
+        
+        <!-- Pattern Overlay -->
+        ${isBrutalist || isRetro ? `
+        <div style="position: absolute; inset: 0; opacity: 0.05; background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, currentColor 10px, currentColor 11px); color: var(--color-text);"></div>
+        ` : ''}
+
+        <!-- Content -->
+        <div style="position: relative; z-index: 1; width: 100%; max-width: 1200px; padding: 2rem; text-align: center;">
+          
+          <!-- Logo/Brand -->
+          ${data.logoText ? `
+          <div style="margin-bottom: 3rem;">
+            <div style="font-family: ${isElegant ? 'Playfair Display, serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: ${isBrutalist ? '1.5rem' : '1.25rem'}; font-weight: 900; color: ${isNeumorphism ? 'var(--color-accent)' : isGradient || isRetro ? 'rgba(255, 255, 255, 0.95)' : isBrutalist ? 'var(--color-accent)' : isGlassmorphism ? 'var(--color-text)' : 'white'}; letter-spacing: 0.2em; ${isBrutalist || isRetro ? 'text-transform: uppercase;' : ''}">
+              ${data.logoText}
+            </div>
+          </div>
+          ` : ''}
+
+          <!-- Main Title -->
+          <h1 style="font-family: ${isElegant ? 'Playfair Display, serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: clamp(${isBrutalist ? '2.5rem' : '3rem'}, 8vw, ${isBrutalist ? '5rem' : '6rem'}); font-weight: ${isBrutalist ? '900' : isRetro ? '700' : '900'}; color: ${isNeumorphism ? 'var(--color-text)' : isGradient || isRetro ? 'white' : isBrutalist ? 'var(--color-text)' : isGlassmorphism ? 'var(--color-text)' : 'white'}; margin-bottom: 1.5rem; line-height: 1.1; ${isBrutalist || isRetro ? 'text-transform: uppercase;' : ''}">
+            ${data.title || 'Coming Soon'}
+          </h1>
+
+          <!-- Subtitle -->
+          ${data.subtitle ? `
+          <p style="font-family: ${isElegant ? 'Lato, sans-serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: clamp(1.125rem, 3vw, 1.75rem); color: ${isNeumorphism ? 'var(--color-text-secondary)' : isGradient || isRetro ? 'rgba(255, 255, 255, 0.9)' : isBrutalist ? 'var(--color-text-secondary)' : isGlassmorphism ? 'var(--color-text-secondary)' : 'rgba(255, 255, 255, 0.9)'}; margin-bottom: 3rem; font-weight: ${isElegant ? '300' : isBrutalist ? '700' : '500'};">
+            ${data.subtitle}
+          </p>
+          ` : ''}
+
+          ${showCountdown ? `
+          <!-- Countdown Timer -->
+          <div id="countdown" style="display: flex; justify-content: center; gap: ${isBrutalist ? '2rem' : '1.5rem'}; margin-bottom: 4rem; flex-wrap: wrap;">
+            <div class="countdown-item" style="min-width: ${isBrutalist ? '100px' : '90px'};">
+              <div id="days" style="font-family: ${isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: clamp(2.5rem, 8vw, 4rem); font-weight: 900; color: ${isNeumorphism ? 'var(--color-accent)' : isGradient || isRetro ? 'white' : isBrutalist ? 'var(--color-accent)' : isGlassmorphism ? 'var(--color-accent)' : 'white'}; line-height: 1; margin-bottom: 0.5rem;">00</div>
+              <div style="font-size: ${isBrutalist ? '0.875rem' : '0.8125rem'}; color: ${isNeumorphism ? 'var(--color-text-secondary)' : isGradient || isRetro ? 'rgba(255, 255, 255, 0.75)' : isBrutalist ? 'var(--color-text-secondary)' : isGlassmorphism ? 'var(--color-text-secondary)' : 'rgba(255, 255, 255, 0.75)'}; font-weight: ${isBrutalist ? '900' : '600'}; text-transform: uppercase; letter-spacing: 0.1em;">Days</div>
+            </div>
+            <div class="countdown-item" style="min-width: ${isBrutalist ? '100px' : '90px'};">
+              <div id="hours" style="font-family: ${isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: clamp(2.5rem, 8vw, 4rem); font-weight: 900; color: ${isNeumorphism ? 'var(--color-accent)' : isGradient || isRetro ? 'white' : isBrutalist ? 'var(--color-accent)' : isGlassmorphism ? 'var(--color-accent)' : 'white'}; line-height: 1; margin-bottom: 0.5rem;">00</div>
+              <div style="font-size: ${isBrutalist ? '0.875rem' : '0.8125rem'}; color: ${isNeumorphism ? 'var(--color-text-secondary)' : isGradient || isRetro ? 'rgba(255, 255, 255, 0.75)' : isBrutalist ? 'var(--color-text-secondary)' : isGlassmorphism ? 'var(--color-text-secondary)' : 'rgba(255, 255, 255, 0.75)'}; font-weight: ${isBrutalist ? '900' : '600'}; text-transform: uppercase; letter-spacing: 0.1em;">Hours</div>
+            </div>
+            <div class="countdown-item" style="min-width: ${isBrutalist ? '100px' : '90px'};">
+              <div id="minutes" style="font-family: ${isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: clamp(2.5rem, 8vw, 4rem); font-weight: 900; color: ${isNeumorphism ? 'var(--color-accent)' : isGradient || isRetro ? 'white' : isBrutalist ? 'var(--color-accent)' : isGlassmorphism ? 'var(--color-accent)' : 'white'}; line-height: 1; margin-bottom: 0.5rem;">00</div>
+              <div style="font-size: ${isBrutalist ? '0.875rem' : '0.8125rem'}; color: ${isNeumorphism ? 'var(--color-text-secondary)' : isGradient || isRetro ? 'rgba(255, 255, 255, 0.75)' : isBrutalist ? 'var(--color-text-secondary)' : isGlassmorphism ? 'var(--color-text-secondary)' : 'rgba(255, 255, 255, 0.75)'}; font-weight: ${isBrutalist ? '900' : '600'}; text-transform: uppercase; letter-spacing: 0.1em;">Minutes</div>
+            </div>
+            <div class="countdown-item" style="min-width: ${isBrutalist ? '100px' : '90px'};">
+              <div id="seconds" style="font-family: ${isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: clamp(2.5rem, 8vw, 4rem); font-weight: 900; color: ${isNeumorphism ? 'var(--color-accent)' : isGradient || isRetro ? 'white' : isBrutalist ? 'var(--color-accent)' : isGlassmorphism ? 'var(--color-accent)' : 'white'}; line-height: 1; margin-bottom: 0.5rem;">00</div>
+              <div style="font-size: ${isBrutalist ? '0.875rem' : '0.8125rem'}; color: ${isNeumorphism ? 'var(--color-text-secondary)' : isGradient || isRetro ? 'rgba(255, 255, 255, 0.75)' : isBrutalist ? 'var(--color-text-secondary)' : isGlassmorphism ? 'var(--color-text-secondary)' : 'rgba(255, 255, 255, 0.75)'}; font-weight: ${isBrutalist ? '900' : '600'}; text-transform: uppercase; letter-spacing: 0.1em;">Seconds</div>
+            </div>
+          </div>
+          ` : ''}
+
+          <!-- Description -->
+          ${data.description ? `
+          <p style="font-family: ${isElegant ? 'Lato, sans-serif' : isRetro ? 'Space Mono, monospace' : 'inherit'}; font-size: 1.125rem; color: ${isNeumorphism ? 'var(--color-text)' : isGradient || isRetro ? 'rgba(255, 255, 255, 0.85)' : isBrutalist ? 'var(--color-text)' : isGlassmorphism ? 'var(--color-text)' : 'rgba(255, 255, 255, 0.85)'}; max-width: 600px; margin: 0 auto 3rem; line-height: 1.7; font-weight: ${isElegant ? '300' : 'normal'};">
+            ${data.description}
+          </p>
+          ` : ''}
+
+          <!-- Email Signup -->
+          <div style="max-width: 500px; margin: 0 auto 4rem;">
+            <form id="notifyForm" onsubmit="handleNotify(event)" style="display: flex; gap: ${isBrutalist ? '1rem' : '0.75rem'}; flex-direction: column; align-items: stretch;">
+              <div style="display: flex; gap: ${isBrutalist ? '1rem' : '0.75rem'}; flex-wrap: wrap;">
+                <input type="email" id="email" name="email" placeholder="Enter your email" required style="flex: 1; min-width: 250px; padding: ${isBrutalist ? '1.25rem 1.5rem' : '1rem 1.25rem'}; background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.15)' : isNeumorphism ? 'var(--color-surface)' : 'rgba(255, 255, 255, 0.95)'}; ${isGlassmorphism ? 'backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);' : ''} border: ${isBrutalist ? '3px solid var(--color-border)' : isNeumorphism ? '2px solid var(--color-border)' : '2px solid transparent'}; ${isBrutalist ? '' : isNeumorphism ? 'box-shadow: inset 4px 4px 8px rgba(163, 177, 198, 0.6), inset -4px -4px 8px rgba(255, 255, 255, 0.9); border-radius: 50px;' : 'border-radius: 50px;'} color: ${isGlassmorphism ? 'white' : 'var(--color-text)'}; font-size: 1rem; font-family: inherit; transition: all 0.2s;" onfocus="${isNeumorphism ? `this.style.boxShadow='inset 2px 2px 4px rgba(163, 177, 198, 0.6), inset -2px -2px 4px rgba(255, 255, 255, 0.9)'` : isBrutalist ? `this.style.transform='translate(-2px, -2px)'; this.style.boxShadow='4px 4px 0 var(--color-border)'` : `this.style.borderColor='rgba(255, 255, 255, 0.8)'`}" onblur="${isNeumorphism ? `this.style.boxShadow='inset 4px 4px 8px rgba(163, 177, 198, 0.6), inset -4px -4px 8px rgba(255, 255, 255, 0.9)'` : isBrutalist ? `this.style.transform='translate(0, 0)'; this.style.boxShadow='none'` : `this.style.borderColor='transparent'`}">
+                <button type="submit" style="padding: ${isBrutalist ? '1.25rem 2.5rem' : '1rem 2rem'}; background: ${isNeumorphism ? 'var(--color-accent)' : isGradient || isRetro ? 'white' : isBrutalist ? 'var(--color-accent)' : isGlassmorphism ? 'var(--color-accent)' : 'white'}; color: ${isNeumorphism ? 'var(--color-bg)' : isGradient || isRetro ? '#333' : isBrutalist ? 'var(--color-bg)' : isGlassmorphism ? 'var(--color-bg)' : '#333'}; border: ${isBrutalist ? '3px solid var(--color-text)' : 'none'}; ${isBrutalist ? 'box-shadow: 4px 4px 0 var(--color-text);' : isNeumorphism ? 'box-shadow: 10px 10px 20px rgba(163, 177, 198, 0.6), -10px -10px 20px rgba(255, 255, 255, 0.9); border-radius: 50px;' : 'border-radius: 50px;'} font-weight: ${isBrutalist ? '900' : '700'}; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; transition: all 0.2s; white-space: nowrap;" onmouseover="${isBrutalist ? `this.style.transform='translate(-4px, -4px)'; this.style.boxShadow='8px 8px 0 var(--color-text)'` : isNeumorphism ? `this.style.boxShadow='12px 12px 24px rgba(163, 177, 198, 0.6), -12px -12px 24px rgba(255, 255, 255, 0.9)'` : `this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 20px rgba(0, 0, 0, 0.15)'`}" onmouseout="${isBrutalist ? `this.style.transform='translate(0, 0)'; this.style.boxShadow='4px 4px 0 var(--color-text)'` : isNeumorphism ? `this.style.boxShadow='10px 10px 20px rgba(163, 177, 198, 0.6), -10px -10px 20px rgba(255, 255, 255, 0.9)'` : `this.style.transform='translateY(0)'; this.style.boxShadow='none'`}">
+                  Notify Me
+                </button>
+              </div>
+              <div id="notifyMessage" style="display: none; padding: 0.875rem; border-radius: 8px; text-align: center; font-weight: 600; font-size: 0.9375rem;"></div>
+            </form>
+          </div>
+
+          ${data.features && data.features.length > 0 ? `
+          <!-- Features/Teasers -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem; max-width: 900px; margin: 0 auto 4rem;">
+            ${data.features.map(feature => `
+              <div style="background: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.1)' : isNeumorphism ? 'var(--color-surface)' : 'rgba(255, 255, 255, 0.1)'}; ${isGlassmorphism ? 'backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);' : ''} border: ${isBrutalist ? '3px solid var(--color-border)' : isNeumorphism ? '1px solid var(--color-border)' : '1px solid rgba(255, 255, 255, 0.2)'}; ${isBrutalist ? '' : isNeumorphism ? 'box-shadow: 6px 6px 12px rgba(163, 177, 198, 0.6), -6px -6px 12px rgba(255, 255, 255, 0.9); border-radius: 12px;' : 'border-radius: 12px;'} padding: 2rem; text-align: center;">
+                <div style="font-weight: ${isBrutalist ? '900' : '700'}; font-size: 1.125rem; color: ${isNeumorphism ? 'var(--color-accent)' : isGradient || isRetro ? 'white' : isBrutalist ? 'var(--color-accent)' : isGlassmorphism ? 'var(--color-accent)' : 'white'}; margin-bottom: 0.5rem; ${isBrutalist || isRetro ? 'text-transform: uppercase;' : ''}">
+                  ${feature.title}
+                </div>
+                <div style="font-size: 0.9375rem; color: ${isNeumorphism ? 'var(--color-text-secondary)' : isGradient || isRetro ? 'rgba(255, 255, 255, 0.75)' : isBrutalist ? 'var(--color-text-secondary)' : isGlassmorphism ? 'var(--color-text-secondary)' : 'rgba(255, 255, 255, 0.75)'}; font-weight: ${isElegant ? '300' : 'normal'};">
+                  ${feature.description}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+          ` : ''}
+
+          ${data.socialLinks && data.socialLinks.length > 0 && data.socialLinks.some(link => link.url) ? `
+          <!-- Social Links -->
+          <div style="display: flex; justify-content: center; gap: 1.5rem; flex-wrap: wrap;">
+            ${data.socialLinks.filter(link => link.url).map(link => `
+              <a href="${link.url}" target="_blank" style="color: ${isNeumorphism ? 'var(--color-text)' : isGradient || isRetro ? 'white' : isBrutalist ? 'var(--color-text)' : isGlassmorphism ? 'var(--color-text)' : 'white'}; text-decoration: none; font-weight: ${isBrutalist ? '900' : '600'}; font-size: 0.9375rem; transition: all 0.2s; ${isBrutalist || isRetro ? 'text-transform: uppercase;' : ''}" onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'">
+                ${link.platform}
+              </a>
+            `).join('')}
+          </div>
+          ` : ''}
+
+        </div>
+
+        <!-- Theme Toggle - Bottom Right -->
+        <div style="position: fixed; bottom: 2rem; right: 2rem; z-index: 1000;">
+          <label class="theme-toggle-switch-wrapper" style="cursor: pointer; ${isNeumorphism ? 'padding: 0.5rem; border-radius: 12px; display: inline-block; box-shadow: 6px 6px 12px rgba(163, 177, 198, 0.6), -6px -6px 12px rgba(255, 255, 255, 0.9);' : isGlassmorphism ? 'padding: 0.625rem; background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(10px); border-radius: 50%; display: inline-flex;' : isBrutalist ? 'padding: 0.625rem; background: var(--color-surface); border: 3px solid var(--color-border); display: inline-flex;' : 'padding: 0.625rem; background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(10px); border-radius: 50%; display: inline-flex;'}">
+            <input type="checkbox" class="theme-toggle-switch" onclick="toggleTheme()" aria-label="Toggle theme">
+            <span class="theme-toggle-slider"></span>
+          </label>
+        </div>
+
+      </div>
+
+      <style>
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
+
+        body {
+          overflow-x: hidden;
+        }
+
+        input::placeholder {
+          color: ${isGlassmorphism ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.5)'};
+          opacity: 0.8;
+        }
+
+        @media (max-width: 768px) {
+          #countdown {
+            gap: 1rem !important;
+          }
+
+          .countdown-item {
+            min-width: 70px !important;
+          }
+
+          form[id="notifyForm"] > div {
+            flex-direction: column !important;
+          }
+
+          input[type="email"] {
+            min-width: 100% !important;
+          }
+
+          button[type="submit"] {
+            width: 100%;
+          }
+
+          div[style*="grid-template-columns: repeat(auto-fit"] {
+            grid-template-columns: 1fr !important;
+          }
+
+          div[style*="position: fixed; bottom: 2rem"] {
+            bottom: 1rem !important;
+            right: 1rem !important;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .countdown-item > div:first-child {
+            font-size: 2rem !important;
+          }
+
+          div[style*="padding: 2rem"] {
+            padding: 0 1rem !important;
+          }
+        }
+      </style>
+
+      <script>
+        ${showCountdown ? `
+        // Countdown Timer
+        const launchDate = new Date('${data.launchDate}T00:00:00').getTime();
+
+        function updateCountdown() {
+          const now = new Date().getTime();
+          const distance = launchDate - now;
+
+          if (distance < 0) {
+            document.getElementById('days').textContent = '00';
+            document.getElementById('hours').textContent = '00';
+            document.getElementById('minutes').textContent = '00';
+            document.getElementById('seconds').textContent = '00';
+            return;
+          }
+
+          const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+          const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+          const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+          const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+          document.getElementById('days').textContent = String(days).padStart(2, '0');
+          document.getElementById('hours').textContent = String(hours).padStart(2, '0');
+          document.getElementById('minutes').textContent = String(minutes).padStart(2, '0');
+          document.getElementById('seconds').textContent = String(seconds).padStart(2, '0');
+        }
+
+        updateCountdown();
+        setInterval(updateCountdown, 1000);
+        ` : ''}
+
+        // Email Notification
+        function handleNotify(event) {
+          event.preventDefault();
+          
+          const form = event.target;
+          const formData = new FormData(form);
+          const messageDiv = document.getElementById('notifyMessage');
+          const submitButton = form.querySelector('button[type="submit"]');
+          
+          // Disable submit button
+          submitButton.disabled = true;
+          submitButton.textContent = 'Sending...';
+          
+          // Create mailto link
+          const email = formData.get('email');
+          const subject = 'Notify Me - ${data.title}';
+          const body = \`Email: \${email}%0D%0A%0D%0APlease notify me when ${data.title} launches.\`;
+          const mailtoLink = \`mailto:${data.notifyEmail}?subject=\${encodeURIComponent(subject)}&body=\${body}\`;
+          
+          // Show success message
+          messageDiv.style.display = 'block';
+          messageDiv.style.background = 'rgba(255, 255, 255, 0.95)';
+          messageDiv.style.color = '#333';
+          messageDiv.textContent = 'Thanks! We\\'ll notify you when we launch.';
+          
+          // Open mailto link
+          window.location.href = mailtoLink;
+          
+          // Reset form
+          setTimeout(() => {
+            form.reset();
+            submitButton.disabled = false;
+            submitButton.textContent = 'Notify Me';
+            
+            setTimeout(() => {
+              messageDiv.style.display = 'none';
+            }, 5000);
+          }, 1000);
+        }
+      </script>
+    `
+  }
+}),
 };
 
 // Helper functions
@@ -6640,8 +8653,3 @@ export function renderTemplate(templateId, customization, themeId, colorMode = '
   
   return template.render(customization, theme, colorMode);
 }
-
-// CONTACT FORM
-// LANDING PAGE SLIDE SHOW GALLERY
-// EVENT SIGNUP
-// COMING SOON

@@ -488,6 +488,11 @@
   }
 }
 
+.mobile-filter-divider {
+  width: 33%;
+  margin: 0.25rem auto;
+}
+
 .mobile-filter-button {
   @media (max-width: $breakpoint-md) {
     width: 42px;

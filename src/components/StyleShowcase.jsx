@@ -1299,18 +1299,21 @@ function StyleShowcase() {
     return () => observer.disconnect();
   }, []);
 
+  // Use the global theme for the section background, previewMode for iframe only
+  const sectionTheme = theme;
+
   return (
     <section
       className="style-showcase"
       id="styles"
       style={{
-        "--style-bg": styleThemes[activeStyle][theme].bg,
-        "--style-surface": styleThemes[activeStyle][theme].surface,
-        "--style-border": styleThemes[activeStyle][theme].border,
-        "--style-text": styleThemes[activeStyle][theme].text,
-        "--style-text-secondary": styleThemes[activeStyle][theme].textSecondary,
-        "--style-accent": styleThemes[activeStyle][theme].accent,
-        "--style-gradient": styleThemes[activeStyle][theme].gradient,
+        "--style-bg": styleThemes[activeStyle][sectionTheme].bg,
+        "--style-surface": styleThemes[activeStyle][sectionTheme].surface,
+        "--style-border": styleThemes[activeStyle][sectionTheme].border,
+        "--style-text": styleThemes[activeStyle][sectionTheme].text,
+        "--style-text-secondary": styleThemes[activeStyle][sectionTheme].textSecondary,
+        "--style-accent": styleThemes[activeStyle][sectionTheme].accent,
+        "--style-gradient": styleThemes[activeStyle][sectionTheme].gradient,
       }}
     >
       {/* Bottom overlay gradient */}
@@ -1350,12 +1353,12 @@ function StyleShowcase() {
             <div
               className={`style-control-panel mobile-only ${isPinned ? "pinned" : "unpinned"}`}
               style={{
-                "--style-bg": styleThemes[activeStyle][theme].bg,
-                "--style-surface": styleThemes[activeStyle][theme].surface,
-                "--style-border": styleThemes[activeStyle][theme].border,
-                "--style-text": styleThemes[activeStyle][theme].text,
-                "--style-text-secondary": styleThemes[activeStyle][theme].textSecondary,
-                "--style-accent": styleThemes[activeStyle][theme].accent,
+                "--style-bg": styleThemes[activeStyle][sectionTheme].bg,
+                "--style-surface": styleThemes[activeStyle][sectionTheme].surface,
+                "--style-border": styleThemes[activeStyle][sectionTheme].border,
+                "--style-text": styleThemes[activeStyle][sectionTheme].text,
+                "--style-text-secondary": styleThemes[activeStyle][sectionTheme].textSecondary,
+                "--style-accent": styleThemes[activeStyle][sectionTheme].accent,
               }}
             >
               {/* Style selector */}
