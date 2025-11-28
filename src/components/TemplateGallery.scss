@@ -481,7 +481,7 @@
     gap: 6px;
 
     background: rgba(255, 255, 255, 0.9);
-    padding: 8px;
+    padding: 6px;
     border-radius: 18px;
     box-shadow: 0 6px 28px rgba(0,0,0,0.18);
     backdrop-filter: blur(8px);
@@ -631,5 +631,11 @@
   .template-gallery__grid,
   .template-gallery__empty {
     margin-top: -640px;
+  }
+}
+
+@media (max-width: 768px) {
+  .template-gallery__grid {
+    margin-top: -560px;
   }
 }

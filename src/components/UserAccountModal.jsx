@@ -35,6 +35,7 @@ function UserAccountModal({ isOpen, onClose }) {
 
   // Password form state
   const [passwordForm, setPasswordForm] = useState({
+    currentPassword: '',  // ADD THIS
     newPassword: '',
     confirmPassword: ''
   });
@@ -151,17 +152,29 @@ function UserAccountModal({ isOpen, onClose }) {
     setSuccessMessage('');
     setErrorMessage('');
 
-    // Validation
-    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+    // Validation - Check current password is provided
+    if (!passwordForm.currentPassword) {
       setNotification({
         isOpen: true,
-        message: 'Passwords do not match',
+        message: 'Please enter your current password',
         type: 'error'
       });
       setIsLoading(false);
       return;
     }
 
+    // Validation - Check passwords match
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      setNotification({
+        isOpen: true,
+        message: 'New passwords do not match',
+        type: 'error'
+      });
+      setIsLoading(false);
+      return;
+    }
+
+    // Validation - Check minimum length
     if (passwordForm.newPassword.length < 8) {
       setNotification({
         isOpen: true,
@@ -172,7 +185,35 @@ function UserAccountModal({ isOpen, onClose }) {
       return;
     }
 
+    // Validation - Check password is different
+    if (passwordForm.currentPassword === passwordForm.newPassword) {
+      setNotification({
+        isOpen: true,
+        message: 'New password must be different from current password',
+        type: 'error'
+      });
+      setIsLoading(false);
+      return;
+    }
+
     try {
+      // STEP 1: Reauthenticate with current password
+      const { error: reauthError } = await supabase.auth.signInWithPassword({
+        email: user.email,
+        password: passwordForm.currentPassword
+      });
+
+      if (reauthError) {
+        setNotification({
+          isOpen: true,
+          message: 'Current password is incorrect',
+          type: 'error'
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      // STEP 2: Now update to new password (session is fresh)
       const result = await updatePassword(passwordForm.newPassword);
       
       if (result.success) {
@@ -181,7 +222,12 @@ function UserAccountModal({ isOpen, onClose }) {
           message: 'Password updated successfully',
           type: 'success'
         });
-        setPasswordForm({ newPassword: '', confirmPassword: '' });
+        // Clear all fields
+        setPasswordForm({ 
+          currentPassword: '', 
+          newPassword: '', 
+          confirmPassword: '' 
+        });
       } else {
         setNotification({
           isOpen: true,
@@ -698,6 +744,23 @@ function UserAccountModal({ isOpen, onClose }) {
                 <div className="form-section">
                   <h3>Change Password</h3>
 
+                  {/* ADD THIS FIELD */}
+                  <div className="form-field">
+                    <label htmlFor="currentPassword">Current Password</label>
+                    <input
+                      id="currentPassword"
+                      type="password"
+                      value={passwordForm.currentPassword}
+                      onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
+                      placeholder="••••••••"
+                      autoComplete="current-password"
+                      required
+                    />
+                    <span className="form-hint">
+                      Required for security verification
+                    </span>
+                  </div>
+
                   <div className="form-field">
                     <label htmlFor="newPassword">New Password</label>
                     <input
@@ -707,6 +770,7 @@ function UserAccountModal({ isOpen, onClose }) {
                       onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
                       placeholder="••••••••"
                       autoComplete="new-password"
+                      required
                     />
                     <span className="form-hint">
                       Must be at least 8 characters
@@ -722,6 +786,7 @@ function UserAccountModal({ isOpen, onClose }) {
                       onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
                       placeholder="••••••••"
                       autoComplete="new-password"
+                      required
                     />
                   </div>
                 </div>
@@ -729,7 +794,7 @@ function UserAccountModal({ isOpen, onClose }) {
                 <button 
                   type="submit" 
                   className="btn btn-primary"
-                  disabled={isLoading || !passwordForm.newPassword || !passwordForm.confirmPassword}
+                  disabled={isLoading || !passwordForm.currentPassword || !passwordForm.newPassword || !passwordForm.confirmPassword}
                 >
                   {isLoading ? (
                     <>

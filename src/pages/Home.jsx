@@ -51,13 +51,21 @@ function Home() {
   ];
 
   const handleTemplateSelect = (templateId) => {
+    // FIX: Set template first, THEN open modal after a brief delay
     setSelectedTemplate(templateId);
-    setIsModalOpen(true);
+    
+    // Small delay to ensure modal mounts before animation starts
+    setTimeout(() => {
+      setIsModalOpen(true);
+    }, 10);
   };
 
   const handleCloseModal = () => {
+    // Close the modal (triggers slide-down animation)
     setIsModalOpen(false);
-    setTimeout(() => setSelectedTemplate(null), 300);
+    
+    // Clear the template after animation completes
+    setTimeout(() => setSelectedTemplate(null), 400); // Match animation duration
   };
 
   return (
@@ -140,7 +148,7 @@ function Home() {
         </div>
       </section>
 
-      {/* Customize Modal */}
+      {/* Customize Modal - FIX: Always render when template is selected */}
       {selectedTemplate && (
         <CustomizeModal
           templateId={selectedTemplate}

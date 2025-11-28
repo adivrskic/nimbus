@@ -9,6 +9,7 @@ import { renderTemplate, getTemplate } from '../utils/templateSystem';
 import { getAllThemes } from '../styles/themes';
 import PaymentModal from './PaymentModal';
 import NotificationModal from './NotificationModal';
+import SaveDraftModal from './SaveDraftModal';
 import './CustomizeModal.scss';
 
 const defaultTheme = 'minimal';
@@ -73,6 +74,7 @@ function CustomizeModal({ templateId, isOpen, onClose }) {
   const [isSavingDraft, setIsSavingDraft] = useState(false);
   const [draftSaved, setDraftSaved] = useState(false);
   const [notification, setNotification] = useState({ isOpen: false, message: '', type: 'success' });
+  const [isSaveDraftModalOpen, setIsSaveDraftModalOpen] = useState(false);
 
   
   // Build template config from template system
@@ -227,10 +229,11 @@ function CustomizeModal({ templateId, isOpen, onClose }) {
       return;
     }
 
-    // Prompt for draft name
-    const draftName = prompt('Enter a name for this draft:', template.name);
-    if (!draftName) return;
+    // Open the save draft modal
+    setIsSaveDraftModalOpen(true);
+  };
 
+  const handleSaveDraftConfirm = async (draftName) => {
     setIsSavingDraft(true);
     setDraftSaved(false);
 
@@ -251,6 +254,7 @@ function CustomizeModal({ templateId, isOpen, onClose }) {
       if (error) throw error;
 
       setDraftSaved(true);
+      setIsSaveDraftModalOpen(false);
       setTimeout(() => setDraftSaved(false), 3000);
       setNotification({
         isOpen: true,
@@ -390,6 +394,14 @@ function CustomizeModal({ templateId, isOpen, onClose }) {
         onClose={() => setNotification({ ...notification, isOpen: false })}
         message={notification.message}
         type={notification.type}
+      />
+
+      <SaveDraftModal
+        isOpen={isSaveDraftModalOpen}
+        onClose={() => setIsSaveDraftModalOpen(false)}
+        onSave={handleSaveDraftConfirm}
+        defaultName={template?.name}
+        isSaving={isSavingDraft}
       />
     </>
   );
