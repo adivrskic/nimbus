@@ -6,9 +6,12 @@ import { useAuth } from '../contexts/AuthContext';
 import AuthModal from './AuthModal';
 import ForgotPasswordModal from './ForgotPasswordModal';
 import UserAccountModal from './UserAccountModal';
+import { useTheme } from '../contexts/ThemeContext';
 import './Header.scss';
 
-function Header({ theme, toggleTheme }) {
+function Header() {
+  const { theme, toggleTheme } = useTheme();
+
   const location = useLocation();
   const isHomePage = location.pathname === '/';
   

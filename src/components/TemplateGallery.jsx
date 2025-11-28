@@ -2,6 +2,7 @@ import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom';
 import { getAllTemplates } from '../utils/templateSystem';
 import { getAllThemes } from '../styles/themes';
+import { useTheme } from '../contexts/ThemeContext';
 import {
   ArrowRight,
   Star,
@@ -91,8 +92,20 @@ const categories = [
   { name: 'Services', count: templates.filter(t => t.category === 'Services').length },
 ];
 
+const getTemplateImagePath = (templateName, theme) => {
+  // Convert template name to kebab-case
+  console.log(templateName, theme);
+  const kebabName = templateName
+    ?.toLowerCase()
+    ?.replace(/\s+/g, '-')
+    ?.replace(/[^a-z0-9-]/g, '');
+  
+  return `/templates/${kebabName}-${theme}.png`;
+};
+
 function TemplateGallery({ onTemplateSelect }) {
   const navigate = useNavigate();
+  const { theme } = useTheme();
   const [activeFilter, setActiveFilter] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [visibleCount, setVisibleCount] = useState(12);
@@ -326,18 +339,20 @@ function TemplateGallery({ onTemplateSelect }) {
 
       {/* Mobile/Tablet Floating Filter Buttons */}
       <div className="mobile-filter-fab">
-        {categories.map(cat => {
+        {categories.map((cat, i) => {
           const Icon = FILTER_ICONS[cat.name] || List;
 
           return (
-            <button
-              key={cat.name}
-              className={`mobile-filter-button ${activeFilter === cat.name ? 'active' : ''}`}
-              onClick={() => setActiveFilter(cat.name)}
-              title={cat.name}
-            >
-              <Icon size={18} />
-            </button>
+            <React.Fragment key={cat.name}>
+              {i === 2 && <hr className='mobile-filter-divider' />}
+              <button
+                className={`mobile-filter-button ${activeFilter === cat.name ? 'active' : ''}`}
+                onClick={() => setActiveFilter(cat.name)}
+                title={cat.name}
+              >
+                <Icon size={18} />
+              </button>
+            </React.Fragment>
           );
         })}
       </div>
@@ -362,7 +377,8 @@ function TemplateGallery({ onTemplateSelect }) {
                 )}
                 
                 <div className="template-card__preview">
-                  <img src={template.preview} alt={template.name} />
+                  <img src={getTemplateImagePath(template?.name, theme)} alt={template.name} key={theme} />
+
                   <div className="template-card__overlay">
                     <button className="btn btn-primary">
                       Customize
