@@ -624,7 +624,7 @@ export const templates = {
       
       return `
       <!-- Sticky Header with Theme-Specific Styling -->
-      <header style="padding: ${isBrutalist ? '2rem 0' : isElegant ? '2rem 0' : isNeumorphism ? '2rem 0' : '1.5rem 0'}; ${isBrutalist ? 'border-bottom: 4px solid var(--color-accent);' : isRetro ? 'border-bottom: 3px solid var(--color-accent);' : isNeumorphism ? '' : isGlassmorphism ? '' : 'border-bottom: 1px solid var(--color-border);'} position: sticky; top: 0; ${isGlassmorphism ? 'background: rgba(255, 255, 255, 0.1);' : 'background: var(--color-bg);'} z-index: 100; backdrop-filter: blur(${isGlassmorphism ? '20px' : '10px'}); ${isGlassmorphism ? 'box-shadow: 0 8px 32px rgba(31, 38, 135, 0.1);' : ''}">
+      <header style="padding: ${isBrutalist ? '2rem 0' : isElegant ? '2rem 0' : isNeumorphism ? '2rem 0' : '1.5rem 0'}; ${isBrutalist ? 'border-bottom: 4px solid var(--color-accent);' : isRetro ? 'border-bottom: 3px solid var(--color-accent);' : isNeumorphism ? '' : isGlassmorphism ? '' : 'border-bottom: 1px solid var(--color-border);'} position: sticky; top: 0; ${isGlassmorphism ? 'background: rgba(255, 255, 255, 0.1);' : 'background: var(--color-bg);'} z-index: 100; backdrop-filter: blur(${isGlassmorphism ? '20px' : '10px'}); ${isGlassmorphism ? 'box-shadow: 0 8px 32px rgba(31, 38, 135, 0.1);' : ''} ${isNeumorphism && 'background: none'}">
         <div class="container">
           <nav style="${isNeumorphism ? `display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 2rem; border-radius: 20px; ${getNeumorphismShadow(false)}` : 'display: flex; justify-content: space-between; align-items: center;'}">
             <div class="logo" style="font-weight: ${isBrutalist ? '900' : isNeumorphism || isElegant ? '700' : '600'}; font-size: ${isBrutalist ? '2rem' : isRetro ? '1.5rem' : isElegant ? '1.5rem' : isNeumorphism ? '1.25rem' : '1.125rem'}; letter-spacing: ${isBrutalist ? '2px' : isRetro ? '0' : isElegant ? '0' : '-0.02em'}; ${isBrutalist || isRetro ? 'text-transform: uppercase;' : ''} ${isGradient ? 'background: linear-gradient(135deg, #667eea, #764ba2, #f093fb); -webkit-background-clip: text; -webkit-text-fill-color: transparent;' : isRetro ? 'background: linear-gradient(90deg, var(--color-accent), #00f5ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent;' : isElegant ? 'font-family: Playfair Display, serif; color: var(--color-accent);' : isNeumorphism || isGlassmorphism ? 'color: var(--color-accent);' : ''}">${data.companyName || 'MINIMAL'}</div>
@@ -676,7 +676,7 @@ export const templates = {
         <!-- Hero Section with Theme-Specific Styling -->
         <section style="padding: ${isBrutalist ? '6rem 0' : isElegant ? '8rem 0' : isNeumorphism ? '2rem 0 0 0' : '8rem 0 6rem'}; text-align: center; position: relative;">
           <div class="container">
-            ${isNeumorphism ? `<div class="hero-content" style="padding: 4rem 3rem; border-radius: 32px; ${getNeumorphismShadow(false)} max-width: 900px; margin: 0 auto;">` : ''}
+            ${isNeumorphism ? `<div class="hero-content" style="padding: 4rem 3rem; border-radius: 32px; ${getNeumorphismShadow(false)} max-width: 900px; margin: 4rem auto;">` : ''}
             ${isGradient ? `<div style="display: inline-block; padding: 0.5rem 1.25rem; background: linear-gradient(135deg, rgba(102,126,234,0.1), rgba(118,75,162,0.1)); border-radius: 999px; margin-bottom: 2rem; font-size: 0.875rem; font-weight: 600;">New Features Available</div>` : ''}
             ${isElegant ? `<div style="color: var(--color-accent); font-size: 0.875rem; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 1.5rem; font-weight: 400;">Timeless Design</div>` : ''}
             
@@ -775,7 +775,7 @@ export const templates = {
             
             <div class="features-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(${isBrutalist || isElegant ? '320px' : '280px'}, 1fr)); gap: ${isElegant ? '4rem 3rem' : isNeumorphism ? '2.5rem' : '2rem'};">
               ${data.features && data.features.length > 0 ? data.features.map((feature, index) => `
-                <div class="feature-card" style="${isElegant ? 'text-align: center;' : ''} padding: ${isBrutalist || isElegant ? '3rem' : isGradient ? '2.5rem' : isRetro ? '2rem' : isNeumorphism ? '2.5rem' : '2rem'}; border-radius: ${isGradient ? '24px' : isBrutalist || isElegant ? '0' : isRetro ? '0' : isNeumorphism ? '24px' : isGlassmorphism ? '24px' : '12px'}; border: ${isBrutalist ? '4px' : isRetro ? '2px' : isElegant ? '0' : '1px'} solid ${isBrutalist ? 'var(--color-text)' : isRetro ? 'var(--color-accent)' : isElegant ? 'transparent' : 'var(--color-border)'}; transition: all ${isBrutalist || isRetro ? '0.2s' : '0.3s'}; background: ${isGradient ? 'linear-gradient(135deg, rgba(102,126,234,0.03), rgba(118,75,162,0.03))' : isRetro ? 'rgba(255,47,181,0.05)' : isGlassmorphism ? 'rgba(255,255,255,0.05)' : isNeumorphism ? 'var(--color-bg)' : 'var(--color-bg)'}; ${isGlassmorphism ? 'backdrop-filter: blur(20px); box-shadow: 0 8px 32px rgba(0,0,0,0.1);' : isNeumorphism ? getNeumorphismShadow(false) : ''} ${isRetro ? 'position: relative;' : ''}" 
+                <div class="feature-card" style="max-width: calc(100% - 3rem); ${isElegant ? 'text-align: center;' : ''} padding: ${isBrutalist || isElegant ? '3rem' : isGradient ? '2.5rem' : isRetro ? '2rem' : isNeumorphism ? '2.5rem' : '2rem'}; border-radius: ${isGradient ? '24px' : isBrutalist || isElegant ? '0' : isRetro ? '0' : isNeumorphism ? '24px' : isGlassmorphism ? '24px' : '12px'}; border: ${isBrutalist ? '4px' : isRetro ? '2px' : isElegant ? '0' : '1px'} solid ${isBrutalist ? 'var(--color-text)' : isRetro ? 'var(--color-accent)' : isElegant ? 'transparent' : 'var(--color-border)'}; transition: all ${isBrutalist || isRetro ? '0.2s' : '0.3s'}; background: ${isGradient ? 'linear-gradient(135deg, rgba(102,126,234,0.03), rgba(118,75,162,0.03))' : isRetro ? 'rgba(255,47,181,0.05)' : isGlassmorphism ? 'rgba(255,255,255,0.05)' : isNeumorphism ? 'var(--color-bg)' : 'var(--color-bg)'}; ${isGlassmorphism ? 'backdrop-filter: blur(20px); box-shadow: 0 8px 32px rgba(0,0,0,0.1);' : isNeumorphism ? getNeumorphismShadow(false) : ''} ${isRetro ? 'position: relative;' : ''}" 
                   onmouseover="${isBrutalist ? `this.style.transform='translate(-4px, -4px)'; this.style.boxShadow='8px 8px 0 var(--color-text)'` : isGradient ? `this.style.transform='translateY(-8px)'; this.style.boxShadow='0 20px 60px rgba(102,126,234,0.15)'` : isRetro ? `this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 40px rgba(255,47,181,0.3)'` : isGlassmorphism ? `this.style.transform='translateY(-8px)'` : isNeumorphism ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'` : `this.style.borderColor='var(--color-accent)'; this.style.transform='translateY(-4px)'`}" 
                   onmouseout="${isBrutalist ? `this.style.transform='translate(0, 0)'; this.style.boxShadow='none'` : isGradient ? `this.style.transform='translateY(0)'; this.style.boxShadow='none'` : isRetro ? `this.style.transform='translateY(0)'; this.style.boxShadow='none'` : isGlassmorphism ? `this.style.transform='translateY(0)'` : isNeumorphism ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'` : `this.style.borderColor='var(--color-border)'; this.style.transform='translateY(0)'`}">
                   ${isGradient ? `
@@ -783,7 +783,7 @@ export const templates = {
                     ${index + 1}
                   </div>
                   ` : 
-                    `<div class="feature-icon" style="flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem; font-weight: 700; text-align:center; width: 48px; height: 48px; background: var(--color-accent); border-radius: 8px; margin-bottom: 1.5rem; opacity: 0.1;">${index + 1}</div>`
+                    `<div class="feature-icon" style="display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem; font-weight: 700; text-align:center; width: 48px; height: 48px; background: var(--color-accent); border-radius: 8px; margin-bottom: 1.5rem;">${index + 1}</div>`
                   }
                   <h3 style="font-family: ${isElegant ? 'Playfair Display, serif' : 'inherit'}; font-size: ${isBrutalist || isElegant ? '1.75rem' : isGradient ? '1.375rem' : isRetro ? '1.25rem' : isNeumorphism || isGlassmorphism ? '1.5rem' : '1.25rem'}; font-weight: ${isBrutalist ? '900' : isElegant ? '600' : isRetro ? '700' : isNeumorphism || isGlassmorphism ? '700' : '700'}; margin-bottom: ${isBrutalist || isElegant ? '1.5rem' : isRetro ? '1rem' : isNeumorphism || isGlassmorphism ? '1rem' : '0.75rem'}; ${isBrutalist || isRetro ? 'text-transform: uppercase;' : ''} ${isRetro ? 'letter-spacing: 2px; color: var(--color-accent);' : isNeumorphism || isGlassmorphism ? 'color: var(--color-accent);' : ''}">
                     ${feature.title || ''}
@@ -3716,7 +3716,7 @@ END:VCARD\`;
 'local-business': new Template('local-business', {
     name: 'Local Small Business',
     description: 'Perfect for local shops, services, and small businesses',
-    category: 'business',
+    category: 'Landing Page',
     image: 'local-business',
     defaultTheme: 'minimal',
     fields: [
@@ -4086,7 +4086,7 @@ END:VCARD\`;
 'designer-portfolio': new Template('designer-portfolio', {
   name: 'Designer Portfolio',
   description: 'Showcase your design work with style',
-  category: 'portfolio',
+  category: 'Portfolio',
   image: 'designer-portfolio',
   defaultTheme: 'brutalist',
   fields: {
@@ -4454,7 +4454,7 @@ END:VCARD\`;
 'writer-portfolio': new Template('writer-portfolio', {
   name: 'Writer Portfolio',
   description: 'Perfect for authors, journalists, and content creators',
-  category: 'portfolio',
+  category: 'Portfolio',
   image: 'writer-portfolio',
   defaultTheme: 'elegant',
   fields: {
@@ -4803,7 +4803,7 @@ END:VCARD\`;
 'wedding': new Template('wedding', {
   name: 'Wedding',
   description: 'Elegant wedding invitation and details',
-  category: 'event',
+  category: 'Events',
   image: 'wedding',
   defaultTheme: 'elegant',
   fields: {
@@ -5116,7 +5116,7 @@ END:VCARD\`;
 'conference': new Template('conference', {
   name: 'Conference',
   description: 'Professional conference or event website',
-  category: 'event',
+  category: 'Events',
   defaultTheme: 'minimal',
   image: 'conference',
   fields: {
@@ -8287,7 +8287,7 @@ END:VCARD\`;
 'coming-soon': new Template('coming-soon', {
   name: 'Coming Soon',
   description: 'Countdown landing page for upcoming launches',
-  category: 'Landing',
+  category: 'Landing Page',
   defaultTheme: 'gradient',
   image: 'coming-soon',
   fields: {

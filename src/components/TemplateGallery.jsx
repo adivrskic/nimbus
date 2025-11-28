@@ -36,9 +36,9 @@ const UNSPLASH_CATEGORY_MAP = {
   "Landing Page": "website,landing page,ui",
   Restaurant: "restaurant,food,dining",
   Events: "events,concert,party",
-  Education: "education,school,students",
-  "Health & Wellness": "wellness,health,spa",
-  Services: "services,agency,workplace",
+  // Education: "education,school,students",
+  // "Health & Wellness": "wellness,health,spa",
+  // Services: "services,agency,workplace",
 };
 
 const FILTER_ICONS = {
@@ -50,9 +50,9 @@ const FILTER_ICONS = {
   "Landing Page": Monitor,
   Restaurant: UtensilsCrossed,
   Events: CalendarDays,
-  Education: GraduationCap,
-  "Health & Wellness": HeartPulse,
-  Services: Wrench
+  // Forms: GraduationCap,
+  // "Health & Wellness": HeartPulse,
+  // Services: Wrench,
 };
 
 
@@ -87,9 +87,10 @@ const categories = [
   { name: 'Landing Page', count: templates.filter(t => t.category === 'Landing Page').length },
   { name: 'Restaurant', count: templates.filter(t => t.category === 'Restaurant').length },
   { name: 'Events', count: templates.filter(t => t.category === 'Events').length },
-  { name: 'Education', count: templates.filter(t => t.category === 'Education').length },
-  { name: 'Health & Wellness', count: templates.filter(t => t.category === 'Health & Wellness').length },
-  { name: 'Services', count: templates.filter(t => t.category === 'Services').length },
+  // { name: 'Education', count: templates.filter(t => t.category === 'Education').length },
+  // { name: 'Health & Wellness', count: templates.filter(t => t.category === 'Health & Wellness').length },
+  // { name: 'Services', count: templates.filter(t => t.category === 'Services').length },
+  { name: 'Forms', count: templates.filter(t => t.category === 'Forms').length },
 ];
 
 const getTemplateImagePath = (templateName, theme) => {
