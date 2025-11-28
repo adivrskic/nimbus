@@ -1,13 +1,31 @@
-import { useState, useEffect } from 'react';
-import { X, CreditCard, Check, Loader, AlertCircle, Globe, Shield, Zap, Lock, Calendar } from 'lucide-react';
-import { loadStripe } from '@stripe/stripe-js';
-import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
-import { supabase } from '../lib/supabaseClient';
-import { useAuth } from '../contexts/AuthContext';
-import './PaymentModal.scss';
+import { useState, useEffect } from "react";
+import {
+  X,
+  CreditCard,
+  Check,
+  Loader,
+  AlertCircle,
+  Globe,
+  Shield,
+  Zap,
+  Lock,
+  Calendar,
+} from "lucide-react";
+import { loadStripe } from "@stripe/stripe-js";
+import {
+  Elements,
+  CardElement,
+  useStripe,
+  useElements,
+} from "@stripe/react-stripe-js";
+import { supabase } from "../lib/supabaseClient";
+import { useAuth } from "../contexts/AuthContext";
+import "./PaymentModal.scss";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
-const CARD_ELEMENT_OPTIONS = { /* same as original */ };
+const CARD_ELEMENT_OPTIONS = {
+  /* same as original */
+};
 
 function PaymentForm({ templateId, customization, onSuccess, onClose }) {
   const stripe = useStripe();
@@ -15,8 +33,8 @@ function PaymentForm({ templateId, customization, onSuccess, onClose }) {
   const { user } = useAuth();
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState(null);
-  const [siteName, setSiteName] = useState('');
-  const [customDomain, setCustomDomain] = useState('');
+  const [siteName, setSiteName] = useState("");
+  const [customDomain, setCustomDomain] = useState("");
   const [cardComplete, setCardComplete] = useState(false);
 
   useEffect(() => {
@@ -32,36 +50,87 @@ function PaymentForm({ templateId, customization, onSuccess, onClose }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log("hellopre: ", stripe, elements, !stripe || !elements);
+
     if (!stripe || !elements) return;
+
     setProcessing(true);
     setError(null);
+
     try {
-      const { data: paymentData, error: paymentError } = await supabase.functions.invoke('create-payment-intent', {
-        body: { templateId, customization, siteName, customDomain, amount: 500, currency: 'usd' }
-      });
-      if (paymentError) throw paymentError;
+      // Step 1: Log before invoking Supabase function
+      console.log("Before Supabase invoke");
 
-      const { error: stripeError, paymentIntent } = await stripe.confirmCardPayment(paymentData.clientSecret, {
-        payment_method: {
-          card: elements.getElement(CardElement),
-          billing_details: { email: user.email },
-        },
-      });
-      if (stripeError) throw stripeError;
+      let paymentData;
+      try {
+        const response = await supabase.functions.invoke(
+          "create-payment-intent",
+          {
+            body: {
+              templateId,
+              customization,
+              siteName,
+              customDomain,
+              amount: 500,
+              currency: "usd",
+            },
+          }
+        );
+        console.log("Supabase invoke response:", response);
+        paymentData = response.data;
+      } catch (invokeErr) {
+        console.error("Supabase invoke threw an error:", invokeErr);
+        throw invokeErr; // Re-throw to catch below
+      }
 
-      const { data: deployData, error: deployError } = await supabase.functions.invoke('deploy-to-netlify', {
-        body: { paymentIntentId: paymentIntent.id, templateId, customization, siteName, customDomain }
-      });
-      if (deployError) throw deployError;
+      // Step 2: Log after successful Supabase invoke
+      console.log("hello: paymentData =", paymentData);
 
-      onSuccess({
-        url: deployData.url,
-        siteName: deployData.siteName,
-        deploymentId: deployData.deploymentId
-      });
+      // Step 3: Confirm payment with Stripe
+      let paymentIntent;
+      try {
+        const { error: stripeError, paymentIntent: pi } =
+          await stripe.confirmCardPayment(paymentData.clientSecret, {
+            payment_method: {
+              card: elements.getElement(CardElement),
+              billing_details: { email: user.email },
+            },
+          });
+        if (stripeError) throw stripeError;
+        paymentIntent = pi;
+        console.log("PaymentIntent confirmed:", paymentIntent);
+      } catch (stripeErr) {
+        console.error("Stripe confirmCardPayment error:", stripeErr);
+        throw stripeErr;
+      }
+
+      // Step 4: Deploy to Netlify via Supabase function
+      try {
+        const { data: deployData, error: deployError } =
+          await supabase.functions.invoke("deploy-to-netlify", {
+            body: {
+              paymentIntentId: paymentIntent.id,
+              templateId,
+              customization,
+              siteName,
+              customDomain,
+            },
+          });
+        if (deployError) throw deployError;
+        console.log("Deployment successful:", deployData);
+
+        onSuccess({
+          url: deployData.url,
+          siteName: deployData.siteName,
+          deploymentId: deployData.deploymentId,
+        });
+      } catch (deployErr) {
+        console.error("Deployment function error:", deployErr);
+        throw deployErr;
+      }
     } catch (err) {
-      console.error('Payment/Deployment error:', err);
-      setError(err.message || 'An error occurred during payment or deployment');
+      console.error("Payment/Deployment outer error:", err);
+      setError(err.message || "An error occurred during payment or deployment");
     } finally {
       setProcessing(false);
     }
@@ -83,7 +152,11 @@ function PaymentForm({ templateId, customization, onSuccess, onClose }) {
               id="siteName"
               type="text"
               value={siteName}
-              onChange={(e) => setSiteName(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
+              onChange={(e) =>
+                setSiteName(
+                  e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "")
+                )
+              }
               placeholder="my-awesome-site"
               pattern="[a-z0-9-]+"
               required
@@ -92,7 +165,8 @@ function PaymentForm({ templateId, customization, onSuccess, onClose }) {
             <span className="url-suffix">.netlify.app</span>
           </div>
           <p className="field-hint">
-            Your site will be live at: <strong>https://{siteName || 'your-site'}.netlify.app</strong>
+            Your site will be live at:{" "}
+            <strong>https://{siteName || "your-site"}.netlify.app</strong>
           </p>
         </div>
 
@@ -124,7 +198,11 @@ function PaymentForm({ templateId, customization, onSuccess, onClose }) {
         <div className="form-group">
           <label htmlFor="card-element">Card Information</label>
           <div className="card-element-container">
-            <CardElement id="card-element" options={CARD_ELEMENT_OPTIONS} onChange={handleCardChange} />
+            <CardElement
+              id="card-element"
+              options={CARD_ELEMENT_OPTIONS}
+              onChange={handleCardChange}
+            />
           </div>
           <p className="field-hint secure-hint">
             <Lock size={12} /> Your payment info is secure and encrypted
@@ -147,10 +225,15 @@ function PaymentForm({ templateId, customization, onSuccess, onClose }) {
           </div>
         )}
 
-        <button type="submit" className="btn btn-primary submit-button" disabled={!stripe || processing || !cardComplete || !siteName}>
+        <button
+          type="submit"
+          className="btn btn-primary submit-button"
+          disabled={!stripe || processing || !cardComplete || !siteName}
+        >
           {processing ? (
             <>
-              <Loader className="spinning" size={20} /> <span>Processing...</span>
+              <Loader className="spinning" size={20} />{" "}
+              <span>Processing...</span>
             </>
           ) : (
             <>
@@ -160,8 +243,9 @@ function PaymentForm({ templateId, customization, onSuccess, onClose }) {
         </button>
 
         <p className="terms-text">
-          By completing your purchase, you agree to our Terms of Service and Privacy Policy.
-          You'll be charged $5 monthly. Cancel anytime from your dashboard.
+          By completing your purchase, you agree to our Terms of Service and
+          Privacy Policy. You'll be charged $5 monthly. Cancel anytime from your
+          dashboard.
         </p>
       </div>
     </form>
@@ -193,11 +277,20 @@ function DeploymentSuccess({ deployment, onClose }) {
       <div className="deployment-info">
         <div className="url-display">
           <Globe size={20} />
-          <a href={deployment.url} target="_blank" rel="noopener noreferrer" className="deployment-url">
+          <a
+            href={deployment.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="deployment-url"
+          >
             {deployment.url}
           </a>
-          <button onClick={copyUrl} className="btn btn-secondary copy-button" title="Copy URL">
-            {copied ? 'Copied!' : 'Copy'}
+          <button
+            onClick={copyUrl}
+            className="btn btn-secondary copy-button"
+            title="Copy URL"
+          >
+            {copied ? "Copied!" : "Copy"}
           </button>
         </div>
 
@@ -221,7 +314,12 @@ function DeploymentSuccess({ deployment, onClose }) {
         <button className="btn btn-secondary" onClick={onClose}>
           Continue Building
         </button>
-        <a href={deployment.url} target="_blank" rel="noopener noreferrer" className="btn btn-primary">
+        <a
+          href={deployment.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="btn btn-primary"
+        >
           Visit Your Site →
         </a>
       </div>
@@ -239,17 +337,28 @@ function DeploymentSuccess({ deployment, onClose }) {
   );
 }
 
-export default function PaymentModal({ isOpen, onClose, templateId, customization }) {
+export default function PaymentModal({
+  isOpen,
+  onClose,
+  templateId,
+  customization,
+}) {
   const [deployment, setDeployment] = useState(null);
 
   const handleSuccess = (deploymentData) => setDeployment(deploymentData);
-  const handleClose = () => { setDeployment(null); onClose(); };
+  const handleClose = () => {
+    setDeployment(null);
+    onClose();
+  };
 
   if (!isOpen) return null;
 
   return (
     <>
-      <div className="modal-backdrop modal-backdrop--visible" onClick={handleClose} />
+      <div
+        className="modal-backdrop modal-backdrop--visible"
+        onClick={handleClose}
+      />
       <div className="payment-modal payment-modal--visible">
         <div className="payment-modal__header">
           <div className="payment-modal__header-left">
@@ -258,12 +367,12 @@ export default function PaymentModal({ isOpen, onClose, templateId, customizatio
             </button>
             <div>
               <h2 className="payment-modal__title">
-                {deployment ? 'Success!' : 'Deploy Your Website'}
+                {deployment ? "Success!" : "Deploy Your Website"}
               </h2>
               <p className="payment-modal__subtitle">
                 {deployment
-                  ? 'Your website is now live on the internet'
-                  : 'Get your website online in seconds with secure hosting'}
+                  ? "Your website is now live on the internet"
+                  : "Get your website online in seconds with secure hosting"}
               </p>
             </div>
           </div>
@@ -273,9 +382,17 @@ export default function PaymentModal({ isOpen, onClose, templateId, customizatio
           <div className="payment-left">
             <Elements stripe={stripePromise}>
               {!deployment ? (
-                <PaymentForm templateId={templateId} customization={customization} onSuccess={handleSuccess} onClose={handleClose} />
+                <PaymentForm
+                  templateId={templateId}
+                  customization={customization}
+                  onSuccess={handleSuccess}
+                  onClose={handleClose}
+                />
               ) : (
-                <DeploymentSuccess deployment={deployment} onClose={handleClose} />
+                <DeploymentSuccess
+                  deployment={deployment}
+                  onClose={handleClose}
+                />
               )}
             </Elements>
           </div>
@@ -289,16 +406,29 @@ export default function PaymentModal({ isOpen, onClose, templateId, customizatio
                     <span className="price-period">per month</span>
                   </div>
                   <div className="price-features">
-                    <div className="feature"><Zap size={16} /> <span>Instant deployment</span></div>
-                    <div className="feature"><Shield size={16} /> <span>Free SSL certificate</span></div>
-                    <div className="feature"><Globe size={16} /> <span>Global CDN hosting</span></div>
-                    <div className="feature"><Calendar size={16} /> <span>Cancel anytime</span></div>
+                    <div className="feature">
+                      <Zap size={16} /> <span>Instant deployment</span>
+                    </div>
+                    <div className="feature">
+                      <Shield size={16} /> <span>Free SSL certificate</span>
+                    </div>
+                    <div className="feature">
+                      <Globe size={16} /> <span>Global CDN hosting</span>
+                    </div>
+                    <div className="feature">
+                      <Calendar size={16} /> <span>Cancel anytime</span>
+                    </div>
                   </div>
                 </div>
               </div>
             )}
 
-            {deployment && <DeploymentSuccess deployment={deployment} onClose={handleClose} />}
+            {deployment && (
+              <DeploymentSuccess
+                deployment={deployment}
+                onClose={handleClose}
+              />
+            )}
           </div>
         </div>
       </div>

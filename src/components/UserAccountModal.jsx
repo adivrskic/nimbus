@@ -1,43 +1,82 @@
 // src/components/UserAccountModal.jsx
-import { useState, useEffect } from 'react';
-import { 
-  X, User, Mail, Lock, CreditCard, Globe, 
-  Loader, CheckCircle, AlertCircle, ExternalLink,
-  Trash2, Eye, FileText, Edit
-} from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
-import { renderTemplate } from '../utils/templateSystem';
-import ConfirmModal from './ConfirmModal';
-import NotificationModal from './NotificationModal';
-import PaymentModal from './PaymentModal';
-import './UserAccountModal.scss';
+import { useState, useEffect } from "react";
+import {
+  X,
+  User,
+  Mail,
+  Lock,
+  CreditCard,
+  Globe,
+  Loader,
+  CheckCircle,
+  AlertCircle,
+  ExternalLink,
+  Trash2,
+  Eye,
+  FileText,
+  Edit,
+} from "lucide-react";
+import { useAuth } from "../contexts/AuthContext";
+import { renderTemplate } from "../utils/templateSystem";
+import ConfirmModal from "./ConfirmModal";
+import NotificationModal from "./NotificationModal";
+import PaymentModal from "./PaymentModal";
+import "./UserAccountModal.scss";
 
 function UserAccountModal({ isOpen, onClose }) {
-  const { user, profile, updateProfile, updateEmail, updatePassword, supabase } = useAuth();
-  const [activeTab, setActiveTab] = useState('profile'); // 'profile', 'sites', 'drafts', 'billing', 'security'
+  const {
+    user,
+    profile,
+    updateProfile,
+    updateEmail,
+    updatePassword,
+    supabase,
+  } = useAuth();
+  const [activeTab, setActiveTab] = useState("profile"); // 'profile', 'sites', 'drafts', 'billing', 'security'
   const [isLoading, setIsLoading] = useState(false);
-  const [successMessage, setSuccessMessage] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
   const [sites, setSites] = useState([]);
   const [drafts, setDrafts] = useState([]);
   const [billingSummary, setBillingSummary] = useState(null);
-  
+
   // Modal states
-  const [confirmModal, setConfirmModal] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
-  const [notification, setNotification] = useState({ isOpen: false, message: '', type: 'success' });
-  const [deployModal, setDeployModal] = useState({ isOpen: false, draft: null });
+  const [confirmModal, setConfirmModal] = useState({
+    isOpen: false,
+    title: "",
+    message: "",
+    onConfirm: null,
+  });
+  const [notification, setNotification] = useState({
+    isOpen: false,
+    message: "",
+    type: "success",
+  });
+  const [deployModal, setDeployModal] = useState({
+    isOpen: false,
+    draft: null,
+  });
 
   // Profile form state
   const [profileForm, setProfileForm] = useState({
-    full_name: '',
-    billing_email: ''
+    full_name: "",
+    billing_email: "",
   });
+
+  useEffect(() => {
+    if (profile) {
+      setProfileForm({
+        full_name: profile.full_name || "",
+        billing_email: profile.billing_email || "",
+      });
+    }
+  }, [profile]);
 
   // Password form state
   const [passwordForm, setPasswordForm] = useState({
-    currentPassword: '',  // ADD THIS
-    newPassword: '',
-    confirmPassword: ''
+    currentPassword: "", // ADD THIS
+    newPassword: "",
+    confirmPassword: "",
   });
 
   // Load user data when modal opens
@@ -53,17 +92,17 @@ function UserAccountModal({ isOpen, onClose }) {
     // Set profile form
     if (profile) {
       setProfileForm({
-        full_name: profile.full_name || '',
-        billing_email: profile.billing_email || ''
+        full_name: profile.full_name || "",
+        billing_email: profile.billing_email || "",
       });
     }
 
     // Load sites
     await loadSites();
-    
+
     // Load drafts
     await loadDrafts();
-    
+
     // Load billing summary
     await loadBillingSummary();
   };
@@ -71,75 +110,75 @@ function UserAccountModal({ isOpen, onClose }) {
   const loadSites = async () => {
     try {
       const { data, error } = await supabase
-        .from('sites')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
+        .from("sites")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
 
       if (error) throw error;
       setSites(data || []);
     } catch (error) {
-      console.error('Error loading sites:', error);
+      console.error("Error loading sites:", error);
     }
   };
 
   const loadDrafts = async () => {
     try {
       const { data, error } = await supabase
-        .from('template_drafts')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
+        .from("template_drafts")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
 
       if (error) throw error;
       setDrafts(data || []);
     } catch (error) {
-      console.error('Error loading drafts:', error);
+      console.error("Error loading drafts:", error);
     }
   };
 
   const loadBillingSummary = async () => {
     try {
       const { data, error } = await supabase
-        .from('user_billing_summary')
-        .select('*')
-        .eq('user_id', user.id)
+        .from("user_billing_summary")
+        .select("*")
+        .eq("user_id", user.id)
         .single();
 
       if (error) throw error;
       setBillingSummary(data);
     } catch (error) {
-      console.error('Error loading billing summary:', error);
+      console.error("Error loading billing summary:", error);
     }
   };
 
   const handleProfileUpdate = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    setSuccessMessage('');
-    setErrorMessage('');
+    setSuccessMessage("");
+    setErrorMessage("");
 
     try {
       const result = await updateProfile(profileForm);
-      
+
       if (result.success) {
         setNotification({
           isOpen: true,
-          message: 'Profile updated successfully',
-          type: 'success'
+          message: "Profile updated successfully",
+          type: "success",
         });
       } else {
         setNotification({
           isOpen: true,
-          message: result.error || 'Failed to update profile',
-          type: 'error'
+          message: result.error || "Failed to update profile",
+          type: "error",
         });
       }
     } catch (error) {
       setNotification({
         isOpen: true,
-        message: error.message || 'Failed to update profile',
-        type: 'error'
+        message: error.message || "Failed to update profile",
+        type: "error",
       });
     } finally {
       setIsLoading(false);
@@ -149,15 +188,15 @@ function UserAccountModal({ isOpen, onClose }) {
   const handlePasswordUpdate = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    setSuccessMessage('');
-    setErrorMessage('');
+    setSuccessMessage("");
+    setErrorMessage("");
 
     // Validation - Check current password is provided
     if (!passwordForm.currentPassword) {
       setNotification({
         isOpen: true,
-        message: 'Please enter your current password',
-        type: 'error'
+        message: "Please enter your current password",
+        type: "error",
       });
       setIsLoading(false);
       return;
@@ -167,8 +206,8 @@ function UserAccountModal({ isOpen, onClose }) {
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
       setNotification({
         isOpen: true,
-        message: 'New passwords do not match',
-        type: 'error'
+        message: "New passwords do not match",
+        type: "error",
       });
       setIsLoading(false);
       return;
@@ -178,8 +217,8 @@ function UserAccountModal({ isOpen, onClose }) {
     if (passwordForm.newPassword.length < 8) {
       setNotification({
         isOpen: true,
-        message: 'Password must be at least 8 characters',
-        type: 'error'
+        message: "Password must be at least 8 characters",
+        type: "error",
       });
       setIsLoading(false);
       return;
@@ -189,8 +228,8 @@ function UserAccountModal({ isOpen, onClose }) {
     if (passwordForm.currentPassword === passwordForm.newPassword) {
       setNotification({
         isOpen: true,
-        message: 'New password must be different from current password',
-        type: 'error'
+        message: "New password must be different from current password",
+        type: "error",
       });
       setIsLoading(false);
       return;
@@ -200,14 +239,14 @@ function UserAccountModal({ isOpen, onClose }) {
       // STEP 1: Reauthenticate with current password
       const { error: reauthError } = await supabase.auth.signInWithPassword({
         email: user.email,
-        password: passwordForm.currentPassword
+        password: passwordForm.currentPassword,
       });
 
       if (reauthError) {
         setNotification({
           isOpen: true,
-          message: 'Current password is incorrect',
-          type: 'error'
+          message: "Current password is incorrect",
+          type: "error",
         });
         setIsLoading(false);
         return;
@@ -215,31 +254,31 @@ function UserAccountModal({ isOpen, onClose }) {
 
       // STEP 2: Now update to new password (session is fresh)
       const result = await updatePassword(passwordForm.newPassword);
-      
+
       if (result.success) {
         setNotification({
           isOpen: true,
-          message: 'Password updated successfully',
-          type: 'success'
+          message: "Password updated successfully",
+          type: "success",
         });
         // Clear all fields
-        setPasswordForm({ 
-          currentPassword: '', 
-          newPassword: '', 
-          confirmPassword: '' 
+        setPasswordForm({
+          currentPassword: "",
+          newPassword: "",
+          confirmPassword: "",
         });
       } else {
         setNotification({
           isOpen: true,
-          message: result.error || 'Failed to update password',
-          type: 'error'
+          message: result.error || "Failed to update password",
+          type: "error",
         });
       }
     } catch (error) {
       setNotification({
         isOpen: true,
-        message: error.message || 'Failed to update password',
-        type: 'error'
+        message: error.message || "Failed to update password",
+        type: "error",
       });
     } finally {
       setIsLoading(false);
@@ -249,105 +288,106 @@ function UserAccountModal({ isOpen, onClose }) {
   const handleCancelSite = async (siteId, siteName) => {
     setConfirmModal({
       isOpen: true,
-      title: 'Cancel Site?',
+      title: "Cancel Site?",
       message: `Are you sure you want to cancel "${siteName}"? It will remain active until the end of your billing period.`,
       onConfirm: async () => {
         setIsLoading(true);
         try {
           const { error } = await supabase
-            .from('sites')
-            .update({ 
+            .from("sites")
+            .update({
               cancelled_at: new Date().toISOString(),
-              billing_status: 'cancelled'
+              billing_status: "cancelled",
             })
-            .eq('id', siteId);
+            .eq("id", siteId);
 
           if (error) throw error;
 
           setNotification({
             isOpen: true,
-            message: 'Site cancelled successfully',
-            type: 'success'
+            message: "Site cancelled successfully",
+            type: "success",
           });
           await loadSites();
           await loadBillingSummary();
         } catch (error) {
           setNotification({
             isOpen: true,
-            message: error.message || 'Failed to cancel site',
-            type: 'error'
+            message: error.message || "Failed to cancel site",
+            type: "error",
           });
         } finally {
           setIsLoading(false);
         }
-      }
+      },
     });
   };
 
   const handleDeleteDraft = async (draftId, draftName) => {
     setConfirmModal({
       isOpen: true,
-      title: 'Delete Draft?',
+      title: "Delete Draft?",
       message: `Are you sure you want to delete "${draftName}"? This action cannot be undone.`,
       onConfirm: async () => {
         setIsLoading(true);
         try {
-          console.log('Deleting draft:', draftId, 'for user:', user.id);
-          
-          const { error } = await supabase
-            .from('template_drafts')
-            .delete()
-            .eq('id', draftId)
-            .eq('user_id', user.id);
+          console.log("Deleting draft:", draftId, "for user:", user.id);
 
-          console.log('Delete result:', { error });
+          const { error } = await supabase
+            .from("template_drafts")
+            .delete()
+            .eq("id", draftId)
+            .eq("user_id", user.id);
+
+          console.log("Delete result:", { error });
 
           if (error) {
-            console.error('Delete error details:', error);
+            console.error("Delete error details:", error);
             throw error;
           }
 
-          console.log('Draft deleted successfully');
+          console.log("Draft deleted successfully");
           setNotification({
             isOpen: true,
-            message: 'Draft deleted successfully',
-            type: 'success'
+            message: "Draft deleted successfully",
+            type: "success",
           });
           await loadDrafts();
         } catch (error) {
-          console.error('Delete error:', error);
+          console.error("Delete error:", error);
           setNotification({
             isOpen: true,
-            message: error.message || 'Failed to delete draft',
-            type: 'error'
+            message: error.message || "Failed to delete draft",
+            type: "error",
           });
         } finally {
           setIsLoading(false);
         }
-      }
+      },
     });
   };
 
   const handleDeployDraft = (draft) => {
     setDeployModal({
       isOpen: true,
-      draft: draft
+      draft: draft,
     });
   };
 
   const handlePreviewDraft = (draft) => {
-    const effectiveColorMode = draft.color_mode?.toLowerCase() === 'auto'
-      ? (document.documentElement.getAttribute('data-theme') || 'light')
-      : (draft.color_mode?.toLowerCase() || 'light');
+    const effectiveColorMode =
+      draft.color_mode?.toLowerCase() === "auto"
+        ? document.documentElement.getAttribute("data-theme") || "light"
+        : draft.color_mode?.toLowerCase() || "light";
 
     const html = renderTemplate(
       draft.template_id,
       draft.customization,
-      draft.theme || 'minimal',
+      draft.theme || "minimal",
       effectiveColorMode
     );
 
-    const previewWindow = window.open('', '_blank');
+    const previewWindow = window.open("", "_blank");
     if (previewWindow) {
       previewWindow.document.open();
       previewWindow.document.write(html);
@@ -356,24 +396,24 @@ function UserAccountModal({ isOpen, onClose }) {
   };
 
   const formatCurrency = (cents) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
     }).format(cents / 100);
   };
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
     });
   };
 
   const handleClose = () => {
-    setActiveTab('profile');
-    setSuccessMessage('');
-    setErrorMessage('');
+    setActiveTab("profile");
+    setSuccessMessage("");
+    setErrorMessage("");
     onClose();
   };
 
@@ -381,7 +421,10 @@ function UserAccountModal({ isOpen, onClose }) {
 
   return (
     <>
-      <div className="modal-backdrop modal-backdrop--visible" onClick={handleClose} />
+      <div
+        className="modal-backdrop modal-backdrop--visible"
+        onClick={handleClose}
+      />
       <div className="account-modal">
         <button className="account-modal__close" onClick={handleClose}>
           <X size={20} />
@@ -396,36 +439,44 @@ function UserAccountModal({ isOpen, onClose }) {
           {/* Tabs */}
           <div className="account-tabs">
             <button
-              className={`account-tab ${activeTab === 'profile' ? 'active' : ''}`}
-              onClick={() => setActiveTab('profile')}
+              className={`account-tab ${
+                activeTab === "profile" ? "active" : ""
+              }`}
+              onClick={() => setActiveTab("profile")}
             >
               <User size={18} />
               Profile
             </button>
             <button
-              className={`account-tab ${activeTab === 'sites' ? 'active' : ''}`}
-              onClick={() => setActiveTab('sites')}
+              className={`account-tab ${activeTab === "sites" ? "active" : ""}`}
+              onClick={() => setActiveTab("sites")}
             >
               <Globe size={18} />
               My Sites
             </button>
             <button
-              className={`account-tab ${activeTab === 'drafts' ? 'active' : ''}`}
-              onClick={() => setActiveTab('drafts')}
+              className={`account-tab ${
+                activeTab === "drafts" ? "active" : ""
+              }`}
+              onClick={() => setActiveTab("drafts")}
             >
               <FileText size={18} />
               Drafts
             </button>
             <button
-              className={`account-tab ${activeTab === 'billing' ? 'active' : ''}`}
-              onClick={() => setActiveTab('billing')}
+              className={`account-tab ${
+                activeTab === "billing" ? "active" : ""
+              }`}
+              onClick={() => setActiveTab("billing")}
             >
               <CreditCard size={18} />
               Billing
             </button>
             <button
-              className={`account-tab ${activeTab === 'security' ? 'active' : ''}`}
-              onClick={() => setActiveTab('security')}
+              className={`account-tab ${
+                activeTab === "security" ? "active" : ""
+              }`}
+              onClick={() => setActiveTab("security")}
             >
               <Lock size={18} />
               Security
@@ -449,17 +500,17 @@ function UserAccountModal({ isOpen, onClose }) {
           {/* Tab Content */}
           <div className="account-tab-content">
             {/* Profile Tab */}
-            {activeTab === 'profile' && (
+            {activeTab === "profile" && (
               <form onSubmit={handleProfileUpdate} className="account-form">
                 <div className="form-section">
                   <h3>Personal Information</h3>
-                  
+
                   <div className="form-field">
                     <label htmlFor="email">Email Address</label>
                     <input
                       id="email"
                       type="email"
-                      value={user?.email || ''}
+                      value={user?.email || ""}
                       disabled
                     />
                     <span className="form-hint">
@@ -473,18 +524,30 @@ function UserAccountModal({ isOpen, onClose }) {
                       id="full_name"
                       type="text"
                       value={profileForm.full_name}
-                      onChange={(e) => setProfileForm({ ...profileForm, full_name: e.target.value })}
+                      onChange={(e) =>
+                        setProfileForm({
+                          ...profileForm,
+                          full_name: e.target.value,
+                        })
+                      }
                       placeholder="John Doe"
                     />
                   </div>
 
                   <div className="form-field">
-                    <label htmlFor="billing_email">Billing Email (Optional)</label>
+                    <label htmlFor="billing_email">
+                      Billing Email (Optional)
+                    </label>
                     <input
                       id="billing_email"
                       type="email"
                       value={profileForm.billing_email}
-                      onChange={(e) => setProfileForm({ ...profileForm, billing_email: e.target.value })}
+                      onChange={(e) =>
+                        setProfileForm({
+                          ...profileForm,
+                          billing_email: e.target.value,
+                        })
+                      }
                       placeholder="billing@company.com"
                     />
                     <span className="form-hint">
@@ -493,8 +556,8 @@ function UserAccountModal({ isOpen, onClose }) {
                   </div>
                 </div>
 
-                <button 
-                  type="submit" 
+                <button
+                  type="submit"
                   className="btn btn-primary"
                   disabled={isLoading}
                 >
@@ -504,14 +567,14 @@ function UserAccountModal({ isOpen, onClose }) {
                       Saving...
                     </>
                   ) : (
-                    'Save Changes'
+                    "Save Changes"
                   )}
                 </button>
               </form>
             )}
 
             {/* Sites Tab */}
-            {activeTab === 'sites' && (
+            {activeTab === "sites" && (
               <div className="sites-list">
                 <div className="sites-header">
                   <h3>Your Deployed Sites</h3>
@@ -526,17 +589,19 @@ function UserAccountModal({ isOpen, onClose }) {
                   </div>
                 ) : (
                   <div className="sites-grid">
-                    {sites.map(site => (
+                    {sites.map((site) => (
                       <div key={site.id} className="site-card">
                         <div className="site-card__header">
                           <div>
                             <h4>{site.site_name}</h4>
-                            <span className={`status-badge status-badge--${site.status}`}>
+                            <span
+                              className={`status-badge status-badge--${site.status}`}
+                            >
                               {site.status}
                             </span>
                           </div>
                           {site.deployment_url && (
-                            <a 
+                            <a
                               href={site.deployment_url}
                               target="_blank"
                               rel="noopener noreferrer"
@@ -551,11 +616,15 @@ function UserAccountModal({ isOpen, onClose }) {
                         <div className="site-card__info">
                           <div className="info-row">
                             <span className="info-label">Template:</span>
-                            <span className="info-value">{site.template_id}</span>
+                            <span className="info-value">
+                              {site.template_id}
+                            </span>
                           </div>
                           <div className="info-row">
                             <span className="info-label">Status:</span>
-                            <span className={`billing-status billing-status--${site.billing_status}`}>
+                            <span
+                              className={`billing-status billing-status--${site.billing_status}`}
+                            >
                               {site.billing_status}
                             </span>
                           </div>
@@ -575,16 +644,19 @@ function UserAccountModal({ isOpen, onClose }) {
                           )}
                         </div>
 
-                        {site.billing_status === 'active' && !site.cancelled_at && (
-                          <button
-                            className="btn btn-danger btn-small"
-                            onClick={() => handleCancelSite(site.id, site.site_name)}
-                            disabled={isLoading}
-                          >
-                            <Trash2 size={16} />
-                            Cancel Subscription
-                          </button>
-                        )}
+                        {site.billing_status === "active" &&
+                          !site.cancelled_at && (
+                            <button
+                              className="btn btn-danger btn-small"
+                              onClick={() =>
+                                handleCancelSite(site.id, site.site_name)
+                              }
+                              disabled={isLoading}
+                            >
+                              <Trash2 size={16} />
+                              Cancel Subscription
+                            </button>
+                          )}
 
                         {site.cancelled_at && (
                           <div className="cancellation-notice">
@@ -599,7 +671,7 @@ function UserAccountModal({ isOpen, onClose }) {
             )}
 
             {/* Drafts Tab */}
-            {activeTab === 'drafts' && (
+            {activeTab === "drafts" && (
               <div className="drafts-list">
                 <div className="drafts-header">
                   <h3>Saved Template Drafts</h3>
@@ -610,16 +682,21 @@ function UserAccountModal({ isOpen, onClose }) {
                   <div className="empty-state">
                     <FileText size={48} />
                     <h4>No drafts yet</h4>
-                    <p>Save template configurations from the customize modal to access them later</p>
+                    <p>
+                      Save template configurations from the customize modal to
+                      access them later
+                    </p>
                   </div>
                 ) : (
                   <div className="drafts-grid">
-                    {drafts.map(draft => (
+                    {drafts.map((draft) => (
                       <div key={draft.id} className="draft-card">
                         <div className="draft-card__header">
                           <div>
                             <h4>{draft.draft_name}</h4>
-                            <span className="draft-template">{draft.template_id}</span>
+                            <span className="draft-template">
+                              {draft.template_id}
+                            </span>
                           </div>
                         </div>
 
@@ -663,7 +740,9 @@ function UserAccountModal({ isOpen, onClose }) {
                           </button>
                           <button
                             className="btn btn-danger btn-small"
-                            onClick={() => handleDeleteDraft(draft.id, draft.draft_name)}
+                            onClick={() =>
+                              handleDeleteDraft(draft.id, draft.draft_name)
+                            }
                             disabled={isLoading}
                             title="Delete draft"
                           >
@@ -679,11 +758,11 @@ function UserAccountModal({ isOpen, onClose }) {
             )}
 
             {/* Billing Tab */}
-            {activeTab === 'billing' && (
+            {activeTab === "billing" && (
               <div className="billing-section">
                 <div className="billing-summary">
                   <h3>Billing Summary</h3>
-                  
+
                   {billingSummary && (
                     <div className="summary-cards">
                       <div className="summary-card">
@@ -695,7 +774,9 @@ function UserAccountModal({ isOpen, onClose }) {
                       <div className="summary-card">
                         <span className="summary-label">Total Monthly</span>
                         <span className="summary-value">
-                          {formatCurrency(billingSummary.total_monthly_cost_cents)}
+                          {formatCurrency(
+                            billingSummary.total_monthly_cost_cents
+                          )}
                         </span>
                       </div>
                       {billingSummary.trial_sites > 0 && (
@@ -711,10 +792,13 @@ function UserAccountModal({ isOpen, onClose }) {
 
                   <div className="billing-info">
                     <p>
-                      <strong>Pricing:</strong> ${(500 / 100).toFixed(2)} per site per month
+                      <strong>Pricing:</strong> ${(500 / 100).toFixed(2)} per
+                      site per month
                     </p>
                     <p>
-                      Each site is billed separately. You can cancel anytime and the site will remain active until the end of your billing period.
+                      Each site is billed separately. You can cancel anytime and
+                      the site will remain active until the end of your billing
+                      period.
                     </p>
                   </div>
                 </div>
@@ -722,12 +806,15 @@ function UserAccountModal({ isOpen, onClose }) {
                 {profile?.stripe_customer_id && (
                   <div className="stripe-portal">
                     <h3>Payment Methods</h3>
-                    <p>Manage your payment methods and view invoices through Stripe.</p>
-                    <button 
+                    <p>
+                      Manage your payment methods and view invoices through
+                      Stripe.
+                    </p>
+                    <button
                       className="btn btn-secondary"
                       onClick={() => {
                         // TODO: Create Stripe Customer Portal session
-                        alert('Stripe Customer Portal integration coming soon');
+                        alert("Stripe Customer Portal integration coming soon");
                       }}
                     >
                       <ExternalLink size={18} />
@@ -739,7 +826,7 @@ function UserAccountModal({ isOpen, onClose }) {
             )}
 
             {/* Security Tab */}
-            {activeTab === 'security' && (
+            {activeTab === "security" && (
               <form onSubmit={handlePasswordUpdate} className="account-form">
                 <div className="form-section">
                   <h3>Change Password</h3>
@@ -751,7 +838,12 @@ function UserAccountModal({ isOpen, onClose }) {
                       id="currentPassword"
                       type="password"
                       value={passwordForm.currentPassword}
-                      onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
+                      onChange={(e) =>
+                        setPasswordForm({
+                          ...passwordForm,
+                          currentPassword: e.target.value,
+                        })
+                      }
                       placeholder="••••••••"
                       autoComplete="current-password"
                       required
@@ -767,7 +859,12 @@ function UserAccountModal({ isOpen, onClose }) {
                       id="newPassword"
                       type="password"
                       value={passwordForm.newPassword}
-                      onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
+                      onChange={(e) =>
+                        setPasswordForm({
+                          ...passwordForm,
+                          newPassword: e.target.value,
+                        })
+                      }
                       placeholder="••••••••"
                       autoComplete="new-password"
                       required
@@ -778,12 +875,19 @@ function UserAccountModal({ isOpen, onClose }) {
                   </div>
 
                   <div className="form-field">
-                    <label htmlFor="confirmPassword">Confirm New Password</label>
+                    <label htmlFor="confirmPassword">
+                      Confirm New Password
+                    </label>
                     <input
                       id="confirmPassword"
                       type="password"
                       value={passwordForm.confirmPassword}
-                      onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
+                      onChange={(e) =>
+                        setPasswordForm({
+                          ...passwordForm,
+                          confirmPassword: e.target.value,
+                        })
+                      }
                       placeholder="••••••••"
                       autoComplete="new-password"
                       required
@@ -791,10 +895,15 @@ function UserAccountModal({ isOpen, onClose }) {
                   </div>
                 </div>
 
-                <button 
-                  type="submit" 
+                <button
+                  type="submit"
                   className="btn btn-primary"
-                  disabled={isLoading || !passwordForm.currentPassword || !passwordForm.newPassword || !passwordForm.confirmPassword}
+                  disabled={
+                    isLoading ||
+                    !passwordForm.currentPassword ||
+                    !passwordForm.newPassword ||
+                    !passwordForm.confirmPassword
+                  }
                 >
                   {isLoading ? (
                     <>
@@ -802,7 +911,7 @@ function UserAccountModal({ isOpen, onClose }) {
                       Updating...
                     </>
                   ) : (
-                    'Update Password'
+                    "Update Password"
                   )}
                 </button>
               </form>
