@@ -12,6 +12,8 @@
   "dependencies": {
     "@react-three/drei": "^10.7.6",
     "@react-three/fiber": "^9.3.0",
+    "@stripe/react-stripe-js": "^3.6.0",
+    "@stripe/stripe-js": "^8.4.0",
     "@supabase/supabase-js": "^2.84.0",
     "file-saver": "^2.0.5",
     "jszip": "^3.10.1",

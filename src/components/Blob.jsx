@@ -9,7 +9,11 @@ const Blob = ({
   const rendererRef = useRef(null);
   const cameraRef = useRef(null);
   const animationRef = useRef();
+
   const [isLoaded, setIsLoaded] = useState(false);
+
+  // --- NEW: flowing blur state ---
+  const [dynamicBlur, setDynamicBlur] = useState(1);
 
   useEffect(() => {
     const mount = mountRef.current;
@@ -35,9 +39,9 @@ const Blob = ({
 
     // ----- RANDOM STRETCH -----
     const stretchSeed = new THREE.Vector3(
-      Math.random() * 2 - 1,
-      Math.random() * 2 - 1,
-      Math.random() * 2 - 1
+      Math.random() * 1 - 1,
+      Math.random() * 1 - 1,
+      Math.random() * 1 - 1
     ).normalize();
 
     // ----- SHADERS -----
@@ -52,14 +56,14 @@ const Blob = ({
         vec3 pos = position;
 
         float noise1 = sin(pos.x * 2.0 + u_time * 0.8)
-                     * sin(pos.y * 2.5 + u_time * 0.6)
+                     * sin(pos.y * 2.5 + u_time * 1.6)
                      * sin(pos.z * 2.2 + u_time * 0.5);
 
         float noise2 = sin(pos.x * 4.5 + u_time * 1.2)
-                     * cos(pos.y * 3.8 + u_time * 0.9)
+                     * cos(pos.y * 3.8 + u_time * 1.9)
                      * sin(pos.z * 4.2 + u_time * 1.1);
 
-        float combinedNoise = noise1 * 0.7 + noise2 * 0.3;
+        float combinedNoise = noise1 * 0.7 + noise2 * 0.5;
         pos += normal * combinedNoise * 0.8;
 
         float s = sin(u_time * 0.9) * 0.5 + 0.5;
@@ -111,29 +115,28 @@ const Blob = ({
     // ----- RESPONSIVE SCALE & ANIMATION -----
     const getScaleFactor = () => {
       const width = window.innerWidth;
-      if (width < 480) return 0.6;   // tiny phones
-      if (width < 768) return 0.9;   // tablets
-      if (width < 1200) return 1.2;  // small desktops
-      return 1.6;                     // large desktops
+      if (width < 480) return 0.6;
+      if (width < 768) return 0.9;
+      if (width < 1200) return 1.2;
+      return 1.6;
     };
 
     const updateForScreen = () => {
       const scale = getScaleFactor();
 
-      // Mobile: slower rotation + subtle pulsing
       if (window.innerWidth < 768) {
-        uniforms.u_stretchAmp.value = 0.1;
+        uniforms.u_stretchAmp.value = 0.001;
         mesh.userData.rotationXSpeed = 0.0001;
         mesh.userData.rotationYSpeed = 0.0001;
         mesh.userData.pulse = true;
       } else {
-        uniforms.u_stretchAmp.value = 0.2;
+        uniforms.u_stretchAmp.value = 0.002;
         mesh.userData.rotationXSpeed = 0.00015;
         mesh.userData.rotationYSpeed = 0.0002;
         mesh.userData.pulse = false;
       }
 
-      mesh.scale.set(scale, scale * 0.6, scale * 0.8);
+      mesh.scale.set(scale, scale * 0.5, scale * 0.8);
     };
 
     updateForScreen();
@@ -153,12 +156,19 @@ const Blob = ({
       uniforms.u_time.value = t;
 
       if (mesh.userData.pulse) {
-        const pulse = 0.95 + 0.05 * Math.sin(t * 4);
-        mesh.scale.set(pulse, pulse * 0.6, pulse * 0.8);
+        const pulse = 0.95 + 0.05 * Math.sin(t * 3);
+        mesh.scale.set(pulse, pulse * 0.5, pulse * 0.8);
       }
 
       mesh.rotation.x += mesh.userData.rotationXSpeed;
       mesh.rotation.y += mesh.userData.rotationYSpeed;
+
+      // ----- NEW: Random flowing blur animation -----
+      const base = 20;               // minimum blur
+      const range = 10;              // oscillation
+      const noise = Math.sin(t * 0.6) * range;
+      const jitter = (Math.random() - 0.5) * 2; // subtle random shake
+      setDynamicBlur(base + noise + jitter);
 
       renderer.render(scene, camera);
       animationRef.current = requestAnimationFrame(animate);
@@ -172,7 +182,6 @@ const Blob = ({
     // ----- CLEANUP -----
     return () => {
       cancelAnimationFrame(animationRef.current);
-      window.removeEventListener("resize", updateForScreen);
       mount.removeChild(renderer.domElement);
       geo.dispose();
       mat.dispose();
@@ -186,15 +195,22 @@ const Blob = ({
         position: "absolute",
         inset: 0,
         width: "100%",
-        height: "67%",   // adjust as needed
+        height: "67%",
         maxHeight: "100%",
         overflow: "hidden",
         zIndex: 1,
         opacity: isLoaded ? 1 : 0,
-        filter: isLoaded ? "blur(26px)" : "blur(64px)",
-        transform: isLoaded ? "translateY(20px) scale(1)" : "translateY(0px) scale(1.3)",
+
+        // --- NEW: animated blur here ---
+        filter: isLoaded
+          ? `blur(${dynamicBlur.toFixed(1)}px)`
+          : "blur(64px)",
+
+        transform: isLoaded
+          ? "translateY(20px) scale(1)"
+          : "translateY(0px) scale(1.3)",
         pointerEvents: "none",
-        transition: "opacity 1.2s ease-out, filter 1.2s ease-out, transform 1.2s ease-out",
+        transition: "opacity 1.2s ease-out, transform 1.2s ease-out",
       }}
     />
   );
