@@ -26,54 +26,70 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  transform: translateY(100%);
-  transition: transform 400ms cubic-bezier(0.16, 1, 0.3, 1);
   max-width: 2000px;
   margin: auto;
+  
+  /* FIX: Start completely off-screen below viewport */
+  transform: translateY(calc(100% + 2.5vh + 20px));
+  
+  /* Smooth slide-up animation */
+  transition: transform 400ms cubic-bezier(0.16, 1, 0.3, 1);
+  
+  /* Add GPU acceleration for smooth animation */
+  will-change: transform;
+  backface-visibility: hidden;
 
   &__content {
-  display: grid;
-  grid-template-columns: 400px 1fr;
-  overflow: hidden;
+    display: grid;
+    grid-template-columns: 400px 1fr;
+    overflow: hidden;
 
-  @media (max-width: 1024px) {
-    display: block;
-    height: calc(100vh - 140px); // header + toggle bar
-  }
+    @media (max-width: 1024px) {
+      display: block;
+      height: calc(100vh - 140px); // header + toggle bar
+    }
 
-  .customize-modal__panel {
-    overflow-y: auto;
-  }
+    .customize-modal__panel {
+      overflow-y: auto;
+    }
 
-  .customize-modal__panel,
-  .customize-modal__preview {
-    height: 100%;
-  }
-
-  @media (max-width: 1024px) {
     .customize-modal__panel,
     .customize-modal__preview {
-      display: none;
+      height: 100%;
     }
 
-    &.mobile-view-editor .customize-modal__panel {
-      display: block;
-    }
+    @media (max-width: 1024px) {
+      .customize-modal__panel,
+      .customize-modal__preview {
+        display: none;
+      }
 
-    &.mobile-view-preview .customize-modal__preview {
-      display: block;
+      &.mobile-view-editor .customize-modal__panel {
+        display: block;
+      }
+
+      &.mobile-view-preview .customize-modal__preview {
+        display: block;
+      }
     }
   }
-}
 
-  
+  /* FIX: Slide to final position */
   &--visible {
     transform: translateY(0);
+    will-change: auto; /* Remove will-change after animation */
   }
   
   @media (max-width: $breakpoint-md) {
     inset: 0;
     border-radius: 0;
+    
+    /* Mobile: simpler calculation since there's no inset */
+    transform: translateY(100%);
+    
+    &--visible {
+      transform: translateY(0);
+    }
   }
   
   &__header {
@@ -177,7 +193,6 @@
   }
 }
 
-
 .customize-modal__mobile-toggle {
   display: none;
   background: var(--color-surface);
@@ -237,7 +252,6 @@
 }
 
 .customize-modal__content {
-
   @media (max-width: 1024px) {
     display: block;
     height: calc(100vh - 160px); // header + tabs
@@ -274,8 +288,6 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    // width: 44px;
-    // height: 44px;
     padding: 0;
   }
 
@@ -299,5 +311,12 @@
         display: inline; // Only deploy shows text
       }
     }
+  }
+}
+
+/* Accessibility - respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .customize-modal {
+    transition-duration: 0.01ms !important;
   }
 }
