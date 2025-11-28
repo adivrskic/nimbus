@@ -1,50 +1,50 @@
-import { useState, useEffect } from 'react';
-import { X, Download, ExternalLink, Eye, Save } from 'lucide-react';
-import { useTheme } from '../contexts/ThemeContext';
-import { useAuth } from '../contexts/AuthContext';
-import CustomizationPanel from './CustomizationPanel';
-import LivePreview from './LivePreview';
-import { generateZip } from '../utils/generateZip';
-import { renderTemplate, getTemplate } from '../utils/templateSystem';
-import { getAllThemes } from '../styles/themes';
-import PaymentModal from './PaymentModal';
-import NotificationModal from './NotificationModal';
-import SaveDraftModal from './SaveDraftModal';
-import './CustomizeModal.scss';
+import { useState, useEffect } from "react";
+import { X, Download, ExternalLink, Eye, Save } from "lucide-react";
+import { useTheme } from "../contexts/ThemeContext";
+import { useAuth } from "../contexts/AuthContext";
+import CustomizationPanel from "./CustomizationPanel";
+import LivePreview from "./LivePreview";
+import { generateZip } from "../utils/generateZip";
+import { renderTemplate, getTemplate } from "../utils/templateSystem";
+import { getAllThemes } from "../styles/themes";
+import PaymentModal from "./PaymentModal";
+import NotificationModal from "./NotificationModal";
+import SaveDraftModal from "./SaveDraftModal";
+import "./CustomizeModal.scss";
 
-const defaultTheme = 'minimal';
+const defaultTheme = "minimal";
 
 // Helper function to extract customizable fields from template
 function getTemplateFields(template) {
-  console.log('template: ', template);
+  console.log("template: ", template);
   if (!template || !template.fields) return {};
-  
+
   const customizable = {};
-  
+
   // Convert template fields to customization format
   Object.entries(template.fields).forEach(([key, field]) => {
     customizable[key] = {
       type: field.type,
       label: field.label,
-      default: field.default || '',
+      default: field.default || "",
       required: field.required || false,
       ...(field.options && { options: field.options }),
       ...(field.fields && { fields: field.fields }),
       ...(field.min && { min: field.min }),
       ...(field.max && { max: field.max }),
       ...(field.accept && { accept: field.accept }),
-      ...(field.itemLabel && { itemLabel: field.itemLabel })
+      ...(field.itemLabel && { itemLabel: field.itemLabel }),
     };
   });
-  
+
   // Add theme selector (will be synced with global state)
   customizable.theme = {
-    type: 'theme-selector',
-    default: template.defaultTheme || 'minimal',
-    label: 'Design Style',
-    supportedThemes: template.supportedThemes
+    type: "theme-selector",
+    default: template.defaultTheme || "minimal",
+    label: "Design Style",
+    supportedThemes: template.supportedThemes,
   };
-  
+
   // Add color mode selector (local to preview only, doesn't affect global)
   // customizable.colorMode = {
   //   type: 'select',
@@ -52,7 +52,7 @@ function getTemplateFields(template) {
   //   default: 'Auto',
   //   label: 'Preview Color Mode'
   // };
-  
+
   // Add optional accent color override
   // customizable.accentOverride = {
   //   type: 'color',
@@ -60,7 +60,7 @@ function getTemplateFields(template) {
   //   label: 'Custom Accent (Optional)',
   //   optional: true
   // };
-  
+
   return customizable;
 }
 
@@ -69,46 +69,51 @@ function CustomizeModal({ templateId, isOpen, onClose }) {
   const themes = getAllThemes();
   const { theme: globalTheme, selectedStyleTheme, setStyleTheme } = useTheme();
   const { user, isAuthenticated, supabase } = useAuth();
-  console.log(globalTheme, selectedStyleTheme)
-  const [mobileView, setMobileView] = useState('editor'); // 'editor' | 'preview'
+  console.log(globalTheme, selectedStyleTheme);
+  const [mobileView, setMobileView] = useState("editor"); // 'editor' | 'preview'
   const [isSavingDraft, setIsSavingDraft] = useState(false);
   const [draftSaved, setDraftSaved] = useState(false);
-  const [notification, setNotification] = useState({ isOpen: false, message: '', type: 'success' });
+  const [notification, setNotification] = useState({
+    isOpen: false,
+    message: "",
+    type: "success",
+  });
   const [isSaveDraftModalOpen, setIsSaveDraftModalOpen] = useState(false);
 
-  
   // Build template config from template system
-  const templateConfig = template ? {
-    id: template.id,
-    name: template.name,
-    category: template.category,
-    customizable: getTemplateFields(template)
-  } : null;
-  
+  const templateConfig = template
+    ? {
+        id: template.id,
+        name: template.name,
+        category: template.category,
+        customizable: getTemplateFields(template),
+      }
+    : null;
+
   const [customization, setCustomization] = useState(() => {
     // First, get defaults from template
     const defaults = {};
     if (templateConfig && templateConfig.customizable) {
       Object.entries(templateConfig.customizable).forEach(([key, config]) => {
-        if (key === 'theme') {
+        if (key === "theme") {
           // Initialize with global selected style theme
           defaults[key] = selectedStyleTheme;
-        } else if (key === 'colorMode') {
+        } else if (key === "colorMode") {
           // Default to Auto for preview
-          defaults[key] = 'Auto';
+          defaults[key] = "Auto";
         } else {
           defaults[key] = config.default;
         }
       });
     }
-    
+
     // Then, try to load saved data
     const saved = localStorage.getItem(`template_${templateId}`);
     if (saved) {
       const data = JSON.parse(saved);
       // Migration for old data
       let savedCustomization = data.customization || data;
-      
+
       if (savedCustomization.darkMode) {
         savedCustomization.colorMode = savedCustomization.darkMode;
         delete savedCustomization.darkMode;
@@ -116,12 +121,12 @@ function CustomizeModal({ templateId, isOpen, onClose }) {
       if (!savedCustomization.theme) {
         savedCustomization.theme = selectedStyleTheme;
       }
-      
+
       // IMPORTANT: Merge saved data with defaults to ensure new fields appear
       // Defaults come first, then override with saved values
       return { ...defaults, ...savedCustomization };
     }
-    
+
     // No saved data, return defaults
     return defaults;
   });
@@ -131,10 +136,14 @@ function CustomizeModal({ templateId, isOpen, onClose }) {
 
   // Initialize customization theme from global state when modal opens
   useEffect(() => {
-    if (isOpen && selectedStyleTheme && customization.theme !== selectedStyleTheme) {
-      setCustomization(prev => ({
+    if (
+      isOpen &&
+      selectedStyleTheme &&
+      customization.theme !== selectedStyleTheme
+    ) {
+      setCustomization((prev) => ({
         ...prev,
-        theme: selectedStyleTheme
+        theme: selectedStyleTheme,
       }));
     }
   }, [isOpen, selectedStyleTheme]);
@@ -142,53 +151,56 @@ function CustomizeModal({ templateId, isOpen, onClose }) {
   // Save to localStorage
   useEffect(() => {
     if (customization && templateId) {
-      localStorage.setItem(`template_${templateId}`, JSON.stringify({
-        templateId,
-        customization,
-        theme: customization.theme || 'minimal',
-        timestamp: Date.now()
-      }));
+      localStorage.setItem(
+        `template_${templateId}`,
+        JSON.stringify({
+          templateId,
+          customization,
+          theme: customization.theme || "minimal",
+          timestamp: Date.now(),
+        })
+      );
     }
   }, [customization, templateId]);
 
   const handleCustomizationChange = (field, value) => {
-    setCustomization(prev => ({
+    setCustomization((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
-    
+
     // If theme is changed in customization panel, update global state
-    if (field === 'theme') {
+    if (field === "theme") {
       setStyleTheme(value);
     }
   };
 
   const handlePreviewNewTab = () => {
-    const effectiveColorMode = customization.colorMode?.toLowerCase() === 'auto'
-      ? globalTheme
-      : (customization.colorMode?.toLowerCase() || globalTheme);
+    const effectiveColorMode =
+      customization.colorMode?.toLowerCase() === "auto"
+        ? globalTheme
+        : customization.colorMode?.toLowerCase() || globalTheme;
 
     const html = renderTemplate(
       templateId,
       customization,
-      customization.theme || 'minimal',
+      customization.theme || "minimal",
       effectiveColorMode
     );
 
-    const previewWindow = window.open('', '_blank');
+    const previewWindow = window.open("", "_blank");
     previewWindow.document.open();
     previewWindow.document.write(html);
     previewWindow.document.close();
   };
 
-
   const handleImageUpload = (fieldPath, file) => {
     const reader = new FileReader();
     reader.onload = (e) => {
       const imageData = e.target.result;
-      setUploadedImages(prev => ({
+      setUploadedImages((prev) => ({
         ...prev,
-        [fieldPath]: imageData
+        [fieldPath]: imageData,
       }));
       handleCustomizationChange(fieldPath, imageData);
     };
@@ -198,23 +210,23 @@ function CustomizeModal({ templateId, isOpen, onClose }) {
   const handleDownload = async () => {
     try {
       const blob = await generateZip(
-        templateId, 
-        customization, 
-        customization.theme || 'minimal',
-        customization.colorMode || 'auto'
+        templateId,
+        customization,
+        customization.theme || "minimal",
+        customization.colorMode || "auto"
       );
       const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
+      const a = document.createElement("a");
       a.href = url;
       a.download = `${templateId}-website.zip`;
       a.click();
       URL.revokeObjectURL(url);
     } catch (error) {
-      console.error('Failed to generate download:', error);
+      console.error("Failed to generate download:", error);
       setNotification({
         isOpen: true,
-        message: 'Failed to generate download. Please try again.',
-        type: 'error'
+        message: "Failed to generate download. Please try again.",
+        type: "error",
       });
     }
   };
@@ -223,8 +235,8 @@ function CustomizeModal({ templateId, isOpen, onClose }) {
     if (!isAuthenticated) {
       setNotification({
         isOpen: true,
-        message: 'Please sign in to save drafts',
-        type: 'error'
+        message: "Please sign in to save drafts",
+        type: "error",
       });
       return;
     }
@@ -239,14 +251,14 @@ function CustomizeModal({ templateId, isOpen, onClose }) {
 
     try {
       const { data, error } = await supabase
-        .from('template_drafts')
+        .from("template_drafts")
         .insert({
           user_id: user.id,
           template_id: templateId,
           draft_name: draftName,
           customization: customization,
-          theme: customization.theme || 'minimal',
-          color_mode: customization.colorMode || 'auto'
+          theme: customization.theme || "minimal",
+          color_mode: customization.colorMode || "auto",
         })
         .select()
         .single();
@@ -258,15 +270,15 @@ function CustomizeModal({ templateId, isOpen, onClose }) {
       setTimeout(() => setDraftSaved(false), 3000);
       setNotification({
         isOpen: true,
-        message: 'Draft saved successfully!',
-        type: 'success'
+        message: "Draft saved successfully!",
+        type: "success",
       });
     } catch (error) {
-      console.error('Failed to save draft:', error);
+      console.error("Failed to save draft:", error);
       setNotification({
         isOpen: true,
-        message: error.message || 'Failed to save draft. Please try again.',
-        type: 'error'
+        message: error.message || "Failed to save draft. Please try again.",
+        type: "error",
       });
     } finally {
       setIsSavingDraft(false);
@@ -281,7 +293,10 @@ function CustomizeModal({ templateId, isOpen, onClose }) {
 
   return (
     <>
-      <div className="modal-backdrop modal-backdrop--visible" onClick={onClose} />
+      <div
+        className="modal-backdrop modal-backdrop--visible"
+        onClick={onClose}
+      />
       <div className="customize-modal customize-modal--visible">
         <div className="customize-modal__header">
           <div className="customize-modal__header-left">
@@ -290,20 +305,27 @@ function CustomizeModal({ templateId, isOpen, onClose }) {
             </button>
             <div>
               <h2 className="customize-modal__title">{templateConfig.name}</h2>
-              <p className="customize-modal__subtitle">Customize your template and see changes in real-time</p>
+              <p className="customize-modal__subtitle">
+                Customize your template and see changes in real-time
+              </p>
             </div>
           </div>
           <div className="customize-modal__actions">
-
-            <button 
-              className={`btn btn-secondary ${draftSaved ? 'btn-success' : ''}`}
+            <button
+              className={`btn btn-secondary ${draftSaved ? "btn-success" : ""}`}
               onClick={handleSaveDraft}
               disabled={!isAuthenticated || isSavingDraft}
-              title={!isAuthenticated ? 'Sign in to save drafts' : 'Save as draft'}
+              title={
+                !isAuthenticated ? "Sign in to save drafts" : "Save as draft"
+              }
             >
               <Save size={20} />
               <span className="btn-text">
-                {isSavingDraft ? 'Saving...' : draftSaved ? 'Saved!' : 'Save Draft'}
+                {isSavingDraft
+                  ? "Saving..."
+                  : draftSaved
+                  ? "Saved!"
+                  : "Save Draft"}
               </span>
             </button>
 
@@ -317,32 +339,37 @@ function CustomizeModal({ templateId, isOpen, onClose }) {
               <span className="btn-text">Download</span>
             </button>
 
-            <button className="btn btn-primary" onClick={handleDeploy}>
+            <button
+              className="btn btn-primary"
+              onClick={handleDeploy}
+              disabled={!isAuthenticated}
+              title={
+                !isAuthenticated ? "Sign in to deploy" : "Deploy your site"
+              }
+            >
               <ExternalLink size={20} />
               <span className="btn-text">Deploy</span>
             </button>
-
           </div>
         </div>
 
-        { /* Mobile Editor/Preview Switch */ }
+        {/* Mobile Editor/Preview Switch */}
         <div className="customize-modal__mobile-tabs">
           <button
-            className={mobileView === 'editor' ? 'active' : ''}
-            onClick={() => setMobileView('editor')}
+            className={mobileView === "editor" ? "active" : ""}
+            onClick={() => setMobileView("editor")}
           >
             Editor
           </button>
           <button
-            className={mobileView === 'preview' ? 'active' : ''}
-            onClick={() => setMobileView('preview')}
+            className={mobileView === "preview" ? "active" : ""}
+            onClick={() => setMobileView("preview")}
           >
             Preview
           </button>
         </div>
 
-
-        { /* Mobile Toggle Bar */ }
+        {/* Mobile Toggle Bar */}
         {/* <div className="customize-modal__mobile-toggle">
           <button
             className={mobileView === 'editor' ? 'active' : ''}
@@ -357,7 +384,6 @@ function CustomizeModal({ templateId, isOpen, onClose }) {
             Preview
           </button>
         </div> */}
-
 
         <div className={`customize-modal__content mobile-${mobileView}`}>
           <div className="customize-modal__panel">
@@ -378,8 +404,6 @@ function CustomizeModal({ templateId, isOpen, onClose }) {
             />
           </div>
         </div>
-
-
       </div>
 
       <PaymentModal
