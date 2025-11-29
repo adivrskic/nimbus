@@ -9,7 +9,6 @@ import {
   Shield,
   Zap,
   Lock,
-  Calendar,
 } from "lucide-react";
 import { loadStripe } from "@stripe/stripe-js";
 import {
@@ -24,7 +23,17 @@ import "./PaymentModal.scss";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 const CARD_ELEMENT_OPTIONS = {
-  /* same as original */
+  style: {
+    base: {
+      fontSize: "16px",
+      color: "#1d1d1f",
+      fontFamily:
+        '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+      "::placeholder": {
+        color: "#a1a1a6",
+      },
+    },
+  },
 };
 
 function PaymentForm({ templateId, customization, onSuccess, onClose }) {
@@ -50,7 +59,6 @@ function PaymentForm({ templateId, customization, onSuccess, onClose }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("hellopre: ", stripe, elements, !stripe || !elements);
 
     if (!stripe || !elements) return;
 
@@ -58,78 +66,52 @@ function PaymentForm({ templateId, customization, onSuccess, onClose }) {
     setError(null);
 
     try {
-      // Step 1: Log before invoking Supabase function
-      console.log("Before Supabase invoke");
+      const response = await supabase.functions.invoke(
+        "create-payment-intent",
+        {
+          body: {
+            templateId,
+            customization,
+            siteName,
+            customDomain,
+            amount: 500,
+            currency: "usd",
+          },
+        }
+      );
 
-      let paymentData;
-      try {
-        const response = await supabase.functions.invoke(
-          "create-payment-intent",
-          {
-            body: {
-              templateId,
-              customization,
-              siteName,
-              customDomain,
-              amount: 500,
-              currency: "usd",
-            },
-          }
-        );
-        console.log("Supabase invoke response:", response);
-        paymentData = response.data;
-      } catch (invokeErr) {
-        console.error("Supabase invoke threw an error:", invokeErr);
-        throw invokeErr; // Re-throw to catch below
-      }
+      const paymentData = response.data;
 
-      // Step 2: Log after successful Supabase invoke
-      console.log("hello: paymentData =", paymentData);
-
-      // Step 3: Confirm payment with Stripe
-      let paymentIntent;
-      try {
-        const { error: stripeError, paymentIntent: pi } =
-          await stripe.confirmCardPayment(paymentData.clientSecret, {
-            payment_method: {
-              card: elements.getElement(CardElement),
-              billing_details: { email: user.email },
-            },
-          });
-        if (stripeError) throw stripeError;
-        paymentIntent = pi;
-        console.log("PaymentIntent confirmed:", paymentIntent);
-      } catch (stripeErr) {
-        console.error("Stripe confirmCardPayment error:", stripeErr);
-        throw stripeErr;
-      }
-
-      // Step 4: Deploy to Netlify via Supabase function
-      try {
-        const { data: deployData, error: deployError } =
-          await supabase.functions.invoke("deploy-to-netlify", {
-            body: {
-              paymentIntentId: paymentIntent.id,
-              templateId,
-              customization,
-              siteName,
-              customDomain,
-            },
-          });
-        if (deployError) throw deployError;
-        console.log("Deployment successful:", deployData);
-
-        onSuccess({
-          url: deployData.url,
-          siteName: deployData.siteName,
-          deploymentId: deployData.deploymentId,
+      const { error: stripeError, paymentIntent } =
+        await stripe.confirmCardPayment(paymentData.clientSecret, {
+          payment_method: {
+            card: elements.getElement(CardElement),
+            billing_details: { email: user.email },
+          },
         });
-      } catch (deployErr) {
-        console.error("Deployment function error:", deployErr);
-        throw deployErr;
-      }
+
+      if (stripeError) throw stripeError;
+
+      const { data: deployData, error: deployError } =
+        await supabase.functions.invoke("deploy-to-netlify", {
+          body: {
+            paymentIntentId: paymentIntent.id,
+            templateId,
+            customization,
+            siteName,
+            customDomain,
+          },
+        });
+
+      if (deployError) throw deployError;
+
+      onSuccess({
+        url: deployData.url,
+        siteName: deployData.siteName,
+        deploymentId: deployData.deploymentId,
+      });
     } catch (err) {
-      console.error("Payment/Deployment outer error:", err);
+      console.error("Payment/Deployment error:", err);
       setError(err.message || "An error occurred during payment or deployment");
     } finally {
       setProcessing(false);
@@ -138,7 +120,6 @@ function PaymentForm({ templateId, customization, onSuccess, onClose }) {
 
   return (
     <form onSubmit={handleSubmit} className="payment-form">
-      {/* Deployment Configuration */}
       <div className="form-section">
         <div className="section-header">
           <Globe size={20} />
@@ -188,7 +169,6 @@ function PaymentForm({ templateId, customization, onSuccess, onClose }) {
         </div>
       </div>
 
-      {/* Payment Section */}
       <div className="form-section">
         <div className="section-header">
           <Lock size={20} />
@@ -209,7 +189,6 @@ function PaymentForm({ templateId, customization, onSuccess, onClose }) {
           </p>
         </div>
 
-        {/* Test Mode Notice */}
         <div className="test-mode-notice">
           <AlertCircle size={16} />
           <div>
@@ -232,7 +211,7 @@ function PaymentForm({ templateId, customization, onSuccess, onClose }) {
         >
           {processing ? (
             <>
-              <Loader className="spinning" size={20} />{" "}
+              <Loader className="spinning" size={20} />
               <span>Processing...</span>
             </>
           ) : (
@@ -379,56 +358,85 @@ export default function PaymentModal({
         </div>
 
         <div className="payment-modal__content">
+          {/* Left Column - Form */}
           <div className="payment-left">
-            <Elements stripe={stripePromise}>
-              {!deployment ? (
+            {!deployment ? (
+              <Elements stripe={stripePromise}>
                 <PaymentForm
                   templateId={templateId}
                   customization={customization}
                   onSuccess={handleSuccess}
                   onClose={handleClose}
                 />
-              ) : (
-                <DeploymentSuccess
-                  deployment={deployment}
-                  onClose={handleClose}
-                />
-              )}
-            </Elements>
-          </div>
-
-          <div className="payment-right">
-            {!deployment && (
-              <div className="pricing-section">
-                <div className="price-card">
-                  <div className="price-header">
-                    <span className="price-amount">$5</span>
-                    <span className="price-period">per month</span>
-                  </div>
-                  <div className="price-features">
-                    <div className="feature">
-                      <Zap size={16} /> <span>Instant deployment</span>
-                    </div>
-                    <div className="feature">
-                      <Shield size={16} /> <span>Free SSL certificate</span>
-                    </div>
-                    <div className="feature">
-                      <Globe size={16} /> <span>Global CDN hosting</span>
-                    </div>
-                    <div className="feature">
-                      <Calendar size={16} /> <span>Cancel anytime</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {deployment && (
+              </Elements>
+            ) : (
               <DeploymentSuccess
                 deployment={deployment}
                 onClose={handleClose}
               />
             )}
+          </div>
+
+          {/* Right Column - Features & Benefits */}
+          <div className="payment-right">
+            <div className="features-column">
+              <div className="features-header">
+                <h3>Why Deploy With Us?</h3>
+                <p>Professional hosting made simple</p>
+              </div>
+
+              <div className="features-list">
+                <div className="feature-item">
+                  <div className="feature-icon">
+                    <Zap size={24} />
+                  </div>
+                  <div className="feature-content">
+                    <h4>Lightning Fast</h4>
+                    <p>
+                      Your site goes live in seconds with our instant deployment
+                    </p>
+                  </div>
+                </div>
+
+                <div className="feature-item">
+                  <div className="feature-icon">
+                    <Globe size={24} />
+                  </div>
+                  <div className="feature-content">
+                    <h4>Global CDN</h4>
+                    <p>Loads instantly for visitors worldwide</p>
+                  </div>
+                </div>
+
+                <div className="feature-item">
+                  <div className="feature-icon">
+                    <Shield size={24} />
+                  </div>
+                  <div className="feature-content">
+                    <h4>Secure & Protected</h4>
+                    <p>Free SSL certificates and DDoS protection included</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pricing-highlight">
+                <div className="price-tag">
+                  <span className="price">$5</span>
+                  <span className="period">/month</span>
+                </div>
+                <ul className="pricing-features">
+                  <li>
+                    <Check size={16} /> Unlimited bandwidth
+                  </li>
+                  <li>
+                    <Check size={16} /> Custom domain support
+                  </li>
+                  <li>
+                    <Check size={16} /> Cancel anytime
+                  </li>
+                </ul>
+              </div>
+            </div>
           </div>
         </div>
       </div>

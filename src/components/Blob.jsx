@@ -1,10 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 
-const Blob = ({
-  color = "#eb1736",
-  wireframe = false,
-}) => {
+const Blob = ({ color = "#eb1736", wireframe = false }) => {
   const mountRef = useRef(null);
   const rendererRef = useRef(null);
   const cameraRef = useRef(null);
@@ -128,7 +125,7 @@ const Blob = ({
         uniforms.u_stretchAmp.value = 0.001;
         mesh.userData.rotationXSpeed = 0.0001;
         mesh.userData.rotationYSpeed = 0.0001;
-        mesh.userData.pulse = true;
+        mesh.userData.pulse = false;
       } else {
         uniforms.u_stretchAmp.value = 0.002;
         mesh.userData.rotationXSpeed = 0.00015;
@@ -164,8 +161,8 @@ const Blob = ({
       mesh.rotation.y += mesh.userData.rotationYSpeed;
 
       // ----- NEW: Random flowing blur animation -----
-      const base = 20;               // minimum blur
-      const range = 10;              // oscillation
+      const base = 20; // minimum blur
+      const range = 10; // oscillation
       const noise = Math.sin(t * 0.6) * range;
       const jitter = (Math.random() - 0.5) * 2; // subtle random shake
       setDynamicBlur(base + noise + jitter);
@@ -202,9 +199,7 @@ const Blob = ({
         opacity: isLoaded ? 1 : 0,
 
         // --- NEW: animated blur here ---
-        filter: isLoaded
-          ? `blur(${dynamicBlur.toFixed(1)}px)`
-          : "blur(64px)",
+        filter: isLoaded ? `blur(${dynamicBlur.toFixed(1)}px)` : "blur(64px)",
 
         transform: isLoaded
           ? "translateY(20px) scale(1)"

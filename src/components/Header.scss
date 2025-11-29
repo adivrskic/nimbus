@@ -1,5 +1,5 @@
 // src/components/Header.scss
-@import '../styles/variables.scss';
+@import "../styles/variables.scss";
 
 .header {
   position: sticky;
@@ -30,7 +30,7 @@
     &-text {
       margin-left: 20px;
     }
-    
+
     &-icon {
       display: flex;
       color: var(--color-text-secondary);
@@ -120,7 +120,7 @@
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
-      border-radius: var(--radius-md);
+      // border-radius: var(--radius-md);
 
       @media (max-width: $breakpoint-sm) {
         display: none;
@@ -144,8 +144,7 @@
     background: var(--color-background);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
-    box-shadow: 
-      0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
       0 10px 10px -5px rgba(0, 0, 0, 0.04);
     overflow: hidden;
     animation: slideDown 0.2s cubic-bezier(0.16, 1, 0.3, 1);
