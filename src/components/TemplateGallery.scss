@@ -23,13 +23,17 @@
 
 // Filter Container with Sticky Filters and Scroll Arrows
 .template-filters-wrapper {
-  position: relative;
+  position: sticky;
+  top: 64px;
+  z-index: 50;
+  background: var(--color-background);
+  padding: calc(var(--spacing-unit) * 2) 0;
+
   width: 100%;
   display: flex;
   gap: calc(var(--spacing-unit) * 2);
   align-items: center;
 }
-
 // Sticky filters on the left (All Templates & Featured)
 .template-filters-sticky {
   display: flex;
@@ -346,7 +350,7 @@
 // Template Cards
 .template-card {
   position: relative;
-  background: var(--color-background);
+  background: var(--color-surface);
   // border: 2px solid var(--color-border);
   box-shadow: var(--shadow-lg);
   border-radius: var(--radius-lg);
@@ -390,7 +394,7 @@
     height: 240px;
     overflow: hidden;
     background: var(--color-surface);
-    border-bottom: 1px solid var(--color-border);
+    // border-bottom: 1px solid var(--color-border);
 
     img {
       width: 100%;
@@ -644,6 +648,12 @@
 
 @media (max-width: 768px) {
   .template-gallery__grid {
-    margin-top: -560px;
+    margin-top: -520px;
+  }
+}
+
+@media (max-width: 480px) {
+  .template-gallery__grid {
+    margin-top: -460px;
   }
 }

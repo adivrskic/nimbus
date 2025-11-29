@@ -1,8 +1,14 @@
-import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { getAllTemplates } from '../utils/templateSystem';
-import { getAllThemes } from '../styles/themes';
-import { useTheme } from '../contexts/ThemeContext';
+import React, {
+  useState,
+  useMemo,
+  useCallback,
+  useRef,
+  useEffect,
+} from "react";
+import { useNavigate } from "react-router-dom";
+import { getAllTemplates } from "../utils/templateSystem";
+import { getAllThemes } from "../styles/themes";
+import { useTheme } from "../contexts/ThemeContext";
 import {
   ArrowRight,
   Star,
@@ -19,9 +25,9 @@ import {
   CalendarDays,
   GraduationCap,
   HeartPulse,
-  Wrench
-} from 'lucide-react';
-import './TemplateGallery.scss';
+  Wrench,
+} from "lucide-react";
+import "./TemplateGallery.scss";
 
 // Get templates from the new system
 const templateData = getAllTemplates();
@@ -55,7 +61,6 @@ const FILTER_ICONS = {
   // Services: Wrench,
 };
 
-
 // Helper to generate a random Unsplash image URL
 const generateUnsplashImage = (category) => {
   const query = UNSPLASH_CATEGORY_MAP[category] || "website,minimal";
@@ -64,8 +69,7 @@ const generateUnsplashImage = (category) => {
   return `https://source.unsplash.com/600x400/?${query}&sig=${randomSig}`;
 };
 
-
-const templates = templateData.map(template => ({
+const templates = templateData.map((template) => ({
   id: template.id,
   name: template.name,
   description: template.description,
@@ -73,24 +77,46 @@ const templates = templateData.map(template => ({
   featured: Math.random() > 0.5,
   preview: template.image,
   supportedThemes: template.supportedThemes,
-  defaultTheme: template.defaultTheme
+  defaultTheme: template.defaultTheme,
 }));
-
 
 // Categories with counts
 const categories = [
-  { name: 'All', count: templates.length },
-  { name: 'Featured', count: templates.filter(t => t.featured).length },
-  { name: 'Personal', count: templates.filter(t => t.category === 'Personal').length },
-  { name: 'Business', count: templates.filter(t => t.category === 'Business').length },
-  { name: 'Portfolio', count: templates.filter(t => t.category === 'Portfolio' || t.category === 'Creative').length },
-  { name: 'Landing Page', count: templates.filter(t => t.category === 'Landing Page').length },
-  { name: 'Restaurant', count: templates.filter(t => t.category === 'Restaurant').length },
-  { name: 'Events', count: templates.filter(t => t.category === 'Events').length },
+  { name: "All", count: templates.length },
+  { name: "Featured", count: templates.filter((t) => t.featured).length },
+  {
+    name: "Personal",
+    count: templates.filter((t) => t.category === "Personal").length,
+  },
+  {
+    name: "Business",
+    count: templates.filter((t) => t.category === "Business").length,
+  },
+  {
+    name: "Portfolio",
+    count: templates.filter(
+      (t) => t.category === "Portfolio" || t.category === "Creative"
+    ).length,
+  },
+  {
+    name: "Landing Page",
+    count: templates.filter((t) => t.category === "Landing Page").length,
+  },
+  {
+    name: "Restaurant",
+    count: templates.filter((t) => t.category === "Restaurant").length,
+  },
+  {
+    name: "Events",
+    count: templates.filter((t) => t.category === "Events").length,
+  },
   // { name: 'Education', count: templates.filter(t => t.category === 'Education').length },
   // { name: 'Health & Wellness', count: templates.filter(t => t.category === 'Health & Wellness').length },
   // { name: 'Services', count: templates.filter(t => t.category === 'Services').length },
-  { name: 'Forms', count: templates.filter(t => t.category === 'Forms').length },
+  {
+    name: "Forms",
+    count: templates.filter((t) => t.category === "Forms").length,
+  },
 ];
 
 const getTemplateImagePath = (templateName, theme) => {
@@ -98,17 +124,17 @@ const getTemplateImagePath = (templateName, theme) => {
   console.log(templateName, theme);
   const kebabName = templateName
     ?.toLowerCase()
-    ?.replace(/\s+/g, '-')
-    ?.replace(/[^a-z0-9-]/g, '');
-  
+    ?.replace(/\s+/g, "-")
+    ?.replace(/[^a-z0-9-]/g, "");
+
   return `/templates/${kebabName}-${theme}.png`;
 };
 
 function TemplateGallery({ onTemplateSelect }) {
   const navigate = useNavigate();
   const { theme } = useTheme();
-  const [activeFilter, setActiveFilter] = useState('All');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [activeFilter, setActiveFilter] = useState("All");
+  const [searchQuery, setSearchQuery] = useState("");
   const [visibleCount, setVisibleCount] = useState(12);
   const [leftArrowOpacity, setLeftArrowOpacity] = useState(0);
   const [rightArrowOpacity, setRightArrowOpacity] = useState(1);
@@ -117,28 +143,38 @@ function TemplateGallery({ onTemplateSelect }) {
   const startXRef = useRef(0);
   const scrollLeftRef = useRef(0);
 
+  const scrollTemplatesToTop = () => {
+    const section = document.getElementById("templates-section");
+    if (section) {
+      section.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   const filteredTemplates = useMemo(() => {
     let filtered = [...templates];
 
     // Apply category filter
-    if (activeFilter === 'Featured') {
-      filtered = filtered.filter(t => t.featured);
-    } else if (activeFilter !== 'All') {
+    if (activeFilter === "Featured") {
+      filtered = filtered.filter((t) => t.featured);
+    } else if (activeFilter !== "All") {
       // Handle Portfolio/Creative mapping
-      if (activeFilter === 'Portfolio') {
-        filtered = filtered.filter(t => t.category === 'Portfolio' || t.category === 'Creative');
+      if (activeFilter === "Portfolio") {
+        filtered = filtered.filter(
+          (t) => t.category === "Portfolio" || t.category === "Creative"
+        );
       } else {
-        filtered = filtered.filter(t => t.category === activeFilter);
+        filtered = filtered.filter((t) => t.category === activeFilter);
       }
     }
 
     // Apply search filter
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(t => 
-        t.name.toLowerCase().includes(query) ||
-        t.description.toLowerCase().includes(query) ||
-        t.category.toLowerCase().includes(query)
+      filtered = filtered.filter(
+        (t) =>
+          t.name.toLowerCase().includes(query) ||
+          t.description.toLowerCase().includes(query) ||
+          t.category.toLowerCase().includes(query)
       );
     }
 
@@ -149,11 +185,11 @@ function TemplateGallery({ onTemplateSelect }) {
   const hasMore = visibleCount < filteredTemplates.length;
 
   const handleLoadMore = () => {
-    setVisibleCount(prev => prev + 12);
+    setVisibleCount((prev) => prev + 12);
   };
 
   const clearSearch = () => {
-    setSearchQuery('');
+    setSearchQuery("");
   };
 
   // Check scroll position to update arrow opacity
@@ -163,17 +199,17 @@ function TemplateGallery({ onTemplateSelect }) {
 
   //   const { scrollLeft, scrollWidth, clientWidth } = container;
   //   const maxScroll = scrollWidth - clientWidth;
-    
+
   //   // Calculate opacity based on scroll position
   //   // Fade in over the first/last 50px of scroll
   //   const fadeDistance = 50;
-    
+
   //   // Left arrow: 0 opacity at start, 1 opacity after fadeDistance
   //   const leftOpacity = Math.min(scrollLeft / fadeDistance, 1);
-    
+
   //   // Right arrow: 1 opacity at start, 0 opacity at end
   //   const rightOpacity = Math.min((maxScroll - scrollLeft) / fadeDistance, 1);
-    
+
   //   setLeftArrowOpacity(leftOpacity);
   //   setRightArrowOpacity(rightOpacity);
   // }, []);
@@ -185,8 +221,8 @@ function TemplateGallery({ onTemplateSelect }) {
 
     const scrollAmount = 300;
     container.scrollBy({
-      left: direction === 'left' ? -scrollAmount : scrollAmount,
-      behavior: 'smooth'
+      left: direction === "left" ? -scrollAmount : scrollAmount,
+      behavior: "smooth",
     });
   };
 
@@ -198,14 +234,14 @@ function TemplateGallery({ onTemplateSelect }) {
     isDraggingRef.current = true;
     startXRef.current = e.pageX - container.offsetLeft;
     scrollLeftRef.current = container.scrollLeft;
-    container.style.cursor = 'grabbing';
-    container.style.userSelect = 'none';
+    container.style.cursor = "grabbing";
+    container.style.userSelect = "none";
   };
 
   const handleMouseMove = (e) => {
     if (!isDraggingRef.current) return;
     e.preventDefault();
-    
+
     const container = scrollContainerRef.current;
     if (!container) return;
 
@@ -218,8 +254,8 @@ function TemplateGallery({ onTemplateSelect }) {
     const container = scrollContainerRef.current;
     if (container) {
       isDraggingRef.current = false;
-      container.style.cursor = 'grab';
-      container.style.removeProperty('user-select');
+      container.style.cursor = "grab";
+      container.style.removeProperty("user-select");
     }
   };
 
@@ -238,14 +274,17 @@ function TemplateGallery({ onTemplateSelect }) {
   //   };
   // }, [checkScrollPosition]);
 
-  const handleTemplateClick = useCallback((templateId) => {
-    if (onTemplateSelect) {
-      onTemplateSelect(templateId);
-    }
-  }, [onTemplateSelect]);
+  const handleTemplateClick = useCallback(
+    (templateId) => {
+      if (onTemplateSelect) {
+        onTemplateSelect(templateId);
+      }
+    },
+    [onTemplateSelect]
+  );
 
   return (
-    <div className="template-gallery">
+    <div id="templates-section" className="template-gallery">
       {/* Search */}
       <div className="template-search">
         <div className="search-input-wrapper">
@@ -275,15 +314,18 @@ function TemplateGallery({ onTemplateSelect }) {
       <div className="template-filters-wrapper">
         {/* Sticky filters on the left */}
         <div className="template-filters-sticky">
-          {categories.slice(0, 2).map(category => (
+          {categories.slice(0, 2).map((category) => (
             <button
               key={category.name}
-              className={`filter-tab ${activeFilter === category.name ? 'active' : ''} ${
-                category.name === 'Featured' ? 'filter-tab--featured' : ''
-              }`}
-              onClick={() => setActiveFilter(category.name)}
+              className={`filter-tab ${
+                activeFilter === category.name ? "active" : ""
+              } ${category.name === "Featured" ? "filter-tab--featured" : ""}`}
+              onClick={() => {
+                setActiveFilter(category.name);
+                scrollTemplatesToTop();
+              }}
             >
-              {category.name === 'Featured' && <Star size={16} />}
+              {category.name === "Featured" && <Star size={16} />}
               <span>{category.name}</span>
               <span className="filter-count">{category.count}</span>
             </button>
@@ -292,19 +334,19 @@ function TemplateGallery({ onTemplateSelect }) {
 
         {/* Scrollable filters container */}
         <div className="template-filters-scroll-container">
-          <button 
+          <button
             className="scroll-arrow scroll-arrow-left"
-            onClick={() => scroll('left')}
+            onClick={() => scroll("left")}
             aria-label="Scroll left"
-            // style={{ 
+            // style={{
             //   opacity: leftArrowOpacity,
             //   pointerEvents: leftArrowOpacity < 0.1 ? 'none' : 'auto'
             // }}
           >
             <ChevronLeft size={20} />
           </button>
-          
-          <div 
+
+          <div
             className="template-filters-scrollable"
             ref={scrollContainerRef}
             onMouseDown={handleMouseDown}
@@ -312,11 +354,16 @@ function TemplateGallery({ onTemplateSelect }) {
             onMouseUp={handleMouseUpOrLeave}
             onMouseLeave={handleMouseUpOrLeave}
           >
-            {categories.slice(2).map(category => (
+            {categories.slice(2).map((category) => (
               <button
                 key={category.name}
-                className={`filter-tab ${activeFilter === category.name ? 'active' : ''}`}
-                onClick={() => setActiveFilter(category.name)}
+                className={`filter-tab ${
+                  activeFilter === category.name ? "active" : ""
+                }`}
+                onClick={() => {
+                  setActiveFilter(category.name);
+                  scrollTemplatesToTop();
+                }}
               >
                 <span>{category.name}</span>
                 <span className="filter-count">{category.count}</span>
@@ -324,11 +371,11 @@ function TemplateGallery({ onTemplateSelect }) {
             ))}
           </div>
 
-          <button 
+          <button
             className="scroll-arrow scroll-arrow-right"
-            onClick={() => scroll('right')}
+            onClick={() => scroll("right")}
             aria-label="Scroll right"
-            // style={{ 
+            // style={{
             //   opacity: rightArrowOpacity,
             //   pointerEvents: rightArrowOpacity < 0.1 ? 'none' : 'auto'
             // }}
@@ -345,9 +392,11 @@ function TemplateGallery({ onTemplateSelect }) {
 
           return (
             <React.Fragment key={cat.name}>
-              {i === 2 && <hr className='mobile-filter-divider' />}
+              {i === 2 && <hr className="mobile-filter-divider" />}
               <button
-                className={`mobile-filter-button ${activeFilter === cat.name ? 'active' : ''}`}
+                className={`mobile-filter-button ${
+                  activeFilter === cat.name ? "active" : ""
+                }`}
                 onClick={() => setActiveFilter(cat.name)}
                 title={cat.name}
               >
@@ -362,41 +411,48 @@ function TemplateGallery({ onTemplateSelect }) {
       {visibleTemplates.length > 0 ? (
         <>
           <div className="template-gallery__grid">
-            {visibleTemplates.map(template => {
-              console.log('Template image path:', template.preview);// Add this
+            {visibleTemplates.map((template) => {
               return (
-              <div
-                key={template.id}
-                className="template-card"
-                onClick={() => handleTemplateClick(template.id)}
-              >
-                {template.featured && (
-                  <div className="template-card__badge">
-                    <Star size={14} />
-                    <span>Featured</span>
-                  </div>
-                )}
-                
-                <div className="template-card__preview">
-                  <img src={getTemplateImagePath(template?.name, theme)} alt={template.name} key={theme} />
+                <div
+                  key={template.id}
+                  className="template-card"
+                  onClick={() => handleTemplateClick(template.id)}
+                >
+                  {template.featured && (
+                    <div className="template-card__badge">
+                      <Star size={14} />
+                      <span>Featured</span>
+                    </div>
+                  )}
 
-                  <div className="template-card__overlay">
-                    <button className="btn btn-primary">
-                      Customize
-                      <ArrowRight size={18} />
-                    </button>
+                  <div className="template-card__preview">
+                    <img
+                      src={getTemplateImagePath(template?.name, theme)}
+                      alt={template.name}
+                      key={theme}
+                    />
+
+                    <div className="template-card__overlay">
+                      <button className="btn btn-primary">
+                        Customize
+                        <ArrowRight size={18} />
+                      </button>
+                    </div>
                   </div>
-                </div>
-                
-                <div className="template-card__content">
-                  <div className="template-card__header">
-                    <h3 className="template-card__title">{template.name}</h3>
-                    <span className="template-card__category">{template.category}</span>
-                  </div>
-                  <p className="template-card__description">{template.description}</p>
-                  
-                  {/* Theme badges */}
-                  {/* <div className="template-card__themes">
+
+                  <div className="template-card__content">
+                    <div className="template-card__header">
+                      <h3 className="template-card__title">{template.name}</h3>
+                      <span className="template-card__category">
+                        {template.category}
+                      </span>
+                    </div>
+                    <p className="template-card__description">
+                      {template.description}
+                    </p>
+
+                    {/* Theme badges */}
+                    {/* <div className="template-card__themes">
                     {template.supportedThemes && template.supportedThemes.slice(0, 3).map(themeId => {
                       const theme = themes.find(t => t.id === themeId);
                       return (
@@ -409,8 +465,8 @@ function TemplateGallery({ onTemplateSelect }) {
                       <span className="theme-badge">+{template.supportedThemes.length - 3}</span>
                     )}
                   </div> */}
+                  </div>
                 </div>
-              </div>
               );
             })}
           </div>
