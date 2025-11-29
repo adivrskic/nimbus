@@ -36,7 +36,13 @@ const CARD_ELEMENT_OPTIONS = {
   },
 };
 
-function PaymentForm({ templateId, customization, onSuccess, onClose }) {
+function PaymentForm({
+  templateId,
+  customization,
+  onSuccess,
+  onClose,
+  htmlContent,
+}) {
   const stripe = useStripe();
   const elements = useElements();
   const { user } = useAuth();
@@ -100,6 +106,7 @@ function PaymentForm({ templateId, customization, onSuccess, onClose }) {
             customization,
             siteName,
             customDomain,
+            htmlContent,
           },
         });
 
@@ -321,6 +328,7 @@ export default function PaymentModal({
   onClose,
   templateId,
   customization,
+  htmlContent,
 }) {
   const [deployment, setDeployment] = useState(null);
 
@@ -367,6 +375,7 @@ export default function PaymentModal({
                   customization={customization}
                   onSuccess={handleSuccess}
                   onClose={handleClose}
+                  htmlContent={htmlContent}
                 />
               </Elements>
             ) : (
