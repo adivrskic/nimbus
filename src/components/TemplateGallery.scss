@@ -1,4 +1,4 @@
-@import '../styles/variables.scss';
+@import "../styles/variables.scss";
 
 .template-gallery {
   display: flex;
@@ -8,11 +8,11 @@
   &__load-more {
     margin-top: 48px;
     text-align: center;
-    
+
     .btn {
       gap: 12px;
     }
-    
+
     .load-more-count {
       opacity: 0.7;
       font-size: 14px;
@@ -35,7 +35,7 @@
   display: flex;
   gap: calc(var(--spacing-unit) * 1.5);
   flex-shrink: 0;
-  
+
   @media (max-width: $breakpoint-md) {
     display: none; // Hide on mobile to save space
   }
@@ -66,21 +66,21 @@
   cursor: pointer;
   transition: all var(--transition-fast);
   box-shadow: var(--shadow-md);
-  
+
   &:hover {
     background: var(--color-surface-elevated);
     border-color: var(--color-text-tertiary);
     transform: scale(1.05);
   }
-  
+
   &:active {
     // transform: scale(0.98);
   }
-  
+
   &-left {
     left: 1px;
   }
-  
+
   &-right {
     right: 1px;
   }
@@ -94,31 +94,31 @@
   overflow-y: hidden;
   width: 100%;
   cursor: grab;
-  
+
   &:active {
     cursor: grabbing;
   }
-  
+
   // Hide scrollbar but keep functionality
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE and Edge */
-  
+
   &::-webkit-scrollbar {
     display: none; /* Chrome, Safari, Opera */
   }
-  
+
   // Smooth scrolling
   scroll-behavior: smooth;
-  
+
   // iOS momentum scrolling
   -webkit-overflow-scrolling: touch;
-  
+
   // Prevent y-axis scrolling
   touch-action: pan-x;
-  
+
   // Add padding for arrows
   padding: 0 26px;
-  
+
   @media (max-width: $breakpoint-sm) {
     gap: calc(var(--spacing-unit) * 1);
     padding: calc(var(--spacing-unit) * 1.5);
@@ -126,12 +126,14 @@
 }
 
 // When there's no left arrow, remove left padding
-.template-filters-scroll-container:not(:has(.scroll-arrow-left)) .template-filters-scrollable {
+.template-filters-scroll-container:not(:has(.scroll-arrow-left))
+  .template-filters-scrollable {
   padding-left: 0;
 }
 
 // When there's no right arrow, remove right padding
-.template-filters-scroll-container:not(:has(.scroll-arrow-right)) .template-filters-scrollable {
+.template-filters-scroll-container:not(:has(.scroll-arrow-right))
+  .template-filters-scrollable {
   padding-right: 0;
 }
 
@@ -151,55 +153,55 @@
   transition: all var(--transition-fast);
   white-space: nowrap; // Keep text on one line
   user-select: none;
-  
+
   @media (max-width: $breakpoint-sm) {
     padding: calc(var(--spacing-unit) * 1.25) calc(var(--spacing-unit) * 2);
     font-size: 14px;
   }
-  
+
   &:hover {
     background: var(--color-background);
     color: var(--color-text-primary);
   }
-  
+
   &.active {
     background: var(--color-text-primary);
     color: var(--color-background);
     border-color: var(--color-text-primary);
   }
-  
+
   // Featured Filter - Special Style
   &--featured {
     background: var(--color-accent-light);
     color: var(--color-accent);
     border-color: transparent;
-    
+
     svg {
       transition: all var(--transition-fast);
     }
-    
+
     &:hover {
       background: var(--color-accent);
       color: white;
       border-color: var(--color-accent);
-      
+
       .filter-count {
         color: var(--color-accent);
         border-color: white;
       }
     }
-    
+
     &.active {
       background: var(--color-accent);
       color: white;
       border-color: var(--color-accent);
-      
+
       .filter-count {
         background: white;
         color: var(--color-accent);
         border-color: white;
       }
-      
+
       svg {
         fill: currentColor;
       }
@@ -221,13 +223,13 @@
   font-weight: 600;
   transition: all var(--transition-fast);
   flex-shrink: 0;
-  
+
   .filter-tab.active & {
     background: var(--color-background);
     color: var(--color-text-primary);
     border-color: var(--color-border);
   }
-  
+
   .filter-tab:hover:not(.active) & {
     background: var(--color-surface);
     border-color: var(--color-text-tertiary);
@@ -245,7 +247,7 @@
     color: white;
     border-color: var(--color-accent);
   }
-  
+
   .filter-tab--featured:not(.active) & {
     background: var(--color-accent);
     color: white;
@@ -330,36 +332,42 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: calc(var(--spacing-unit) * 4);
-  
+
   @media (max-width: $breakpoint-sm) {
     grid-template-columns: 1fr;
   }
+}
+
+.templates__header {
+  flex-direction: column;
+  border: none;
 }
 
 // Template Cards
 .template-card {
   position: relative;
   background: var(--color-background);
-  border: 2px solid var(--color-border);
+  // border: 2px solid var(--color-border);
+  box-shadow: var(--shadow-lg);
   border-radius: var(--radius-lg);
   overflow: hidden;
   cursor: pointer;
   transition: all var(--transition-base);
-  
+
   &:hover {
     // transform: translateY(-2px);
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
     border-color: var(--color-text-tertiary);
-    
+
     .template-card__overlay {
       opacity: 1;
     }
-    
+
     .template-card__preview img {
       transform: scale(1.05);
     }
   }
-  
+
   &__badge {
     position: absolute;
     top: calc(var(--spacing-unit) * 2);
@@ -375,7 +383,7 @@
     font-weight: 600;
     border-radius: var(--radius-sm);
   }
-  
+
   &__preview {
     position: relative;
     width: 100%;
@@ -383,7 +391,7 @@
     overflow: hidden;
     background: var(--color-surface);
     border-bottom: 1px solid var(--color-border);
-    
+
     img {
       width: 100%;
       height: 100%;
@@ -391,7 +399,7 @@
       transition: transform var(--transition-slow);
     }
   }
-  
+
   &__overlay {
     position: absolute;
     inset: 0;
@@ -404,11 +412,11 @@
     opacity: 0;
     transition: opacity var(--transition-base);
   }
-  
+
   &__content {
     padding: calc(var(--spacing-unit) * 3);
   }
-  
+
   &__header {
     display: flex;
     justify-content: space-between;
@@ -416,13 +424,13 @@
     margin-bottom: calc(var(--spacing-unit) * 1.5);
     gap: calc(var(--spacing-unit) * 2);
   }
-  
+
   &__title {
     font-size: 1.25rem;
     font-weight: 600;
     color: var(--color-text-primary);
   }
-  
+
   &__category {
     padding: calc(var(--spacing-unit) * 0.5) calc(var(--spacing-unit) * 1.5);
     background: var(--color-surface);
@@ -433,7 +441,7 @@
     border: 1px solid var(--color-border);
     white-space: nowrap;
   }
-  
+
   &__description {
     color: var(--color-text-secondary);
     font-size: 0.9375rem;
@@ -483,7 +491,7 @@
     background: rgba(255, 255, 255, 0.9);
     padding: 6px;
     border-radius: 18px;
-    box-shadow: 0 6px 28px rgba(0,0,0,0.18);
+    box-shadow: 0 6px 28px rgba(0, 0, 0, 0.18);
     backdrop-filter: blur(8px);
   }
 }
@@ -533,9 +541,9 @@
 }
 
 .mobile-filter-fab {
-    position: sticky;
-    top: 72px;
-    left: 100%;
+  position: sticky;
+  top: 72px;
+  left: 100%;
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -591,7 +599,7 @@
 
     background: var(--color-background);
     border-radius: 18px;
-    box-shadow: 0 6px 28px rgba(0,0,0,0.18);
+    box-shadow: 0 6px 28px rgba(0, 0, 0, 0.18);
     backdrop-filter: blur(8px);
   }
 

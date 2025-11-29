@@ -1,4 +1,4 @@
-@import '../styles/variables.scss';
+@import "../styles/variables.scss";
 
 .home {
   min-height: 100vh;
@@ -33,7 +33,7 @@
       -webkit-text-stroke: 2px var(--color-text-primary);
       -webkit-text-fill-color: transparent;
       color: transparent;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
       display: flex;
       justify-content: center;
     }
@@ -90,6 +90,13 @@
   }
 }
 
+.steps__heading {
+  flex-direction: column;
+  border: none;
+}
+
+// Step Card Styles - Shadow-based design
+
 .step-card {
   position: relative;
   display: flex;
@@ -98,13 +105,13 @@
   text-align: center;
   padding: calc(var(--spacing-unit) * 5);
   background: var(--color-background);
-  border: 2px solid var(--color-border);
   border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
   transition: all var(--transition-base);
 
   &:hover {
-    border-color: var(--color-accent);
-    box-shadow: var(--shadow-lg);
+    box-shadow: var(--shadow-lg), 0 0 0 2px var(--color-accent-light);
+    transform: translateY(-4px);
 
     .step-card__number {
       color: var(--color-accent);
@@ -113,6 +120,7 @@
     .step-card__icon {
       background: var(--color-accent);
       color: white;
+      box-shadow: 0 8px 20px rgba(235, 23, 54, 0.2);
     }
   }
 
@@ -122,7 +130,7 @@
     left: calc(var(--spacing-unit) * 2);
     font-size: 3rem;
     font-weight: 900;
-    color: var(--color-surface);
+    color: var(--color-border);
     line-height: 1;
     transition: color var(--transition-base);
   }
@@ -138,11 +146,11 @@
     justify-content: center;
     width: 80px;
     height: 80px;
-    background: var(--color-surface);
+    background: var(--color-background);
     color: var(--color-text-primary);
     border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
     transition: all var(--transition-base);
-    border: 1px solid var(--color-border);
 
     svg {
       width: 36px;
@@ -157,7 +165,6 @@
   &__title {
     font-size: 1.5rem;
     font-weight: 700;
-    // margin-bottom: calc(var(--spacing-unit) * 2);
     color: var(--color-text-primary);
   }
 
@@ -188,7 +195,8 @@
   opacity: 0;
   transform: translateY(30px);
   filter: blur(64px);
-  transition: opacity 0.8s ease-out, transform 0.8s ease-out, filter 0.8s ease-out;
+  transition: opacity 0.8s ease-out, transform 0.8s ease-out,
+    filter 0.8s ease-out;
 }
 
 .reveal.visible {
@@ -201,7 +209,8 @@
   opacity: 0;
   transform: translateY(30px);
   filter: blur(64px);
-  transition: opacity 0.8s ease-out, transform 0.8s ease-out, filter 0.8s ease-out;
+  transition: opacity 0.8s ease-out, transform 0.8s ease-out,
+    filter 0.8s ease-out;
 }
 
 .reveal-stagger.visible > * {
@@ -210,16 +219,23 @@
   filter: blur(0);
 }
 
-.reveal-stagger.visible > *:nth-child(1) { transition-delay: 0.1s; }
-.reveal-stagger.visible > *:nth-child(2) { transition-delay: 0.25s; }
-.reveal-stagger.visible > *:nth-child(3) { transition-delay: 0.4s; }
-.reveal-stagger.visible > *:nth-child(4) { transition-delay: 0.55s; }
-
+.reveal-stagger.visible > *:nth-child(1) {
+  transition-delay: 0.1s;
+}
+.reveal-stagger.visible > *:nth-child(2) {
+  transition-delay: 0.25s;
+}
+.reveal-stagger.visible > *:nth-child(3) {
+  transition-delay: 0.4s;
+}
+.reveal-stagger.visible > *:nth-child(4) {
+  transition-delay: 0.55s;
+}
 
 @media screen and (max-width: 680px) {
   .hero {
     &__title {
-      font-size: 64px
+      font-size: 64px;
     }
   }
 }
@@ -237,7 +253,8 @@
 }
 
 @keyframes floatLetter {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0);
   }
   25% {
