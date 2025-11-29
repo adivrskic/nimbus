@@ -406,12 +406,30 @@ function CustomizeModal({ templateId, isOpen, onClose }) {
         </div>
       </div>
 
-      <PaymentModal
-        isOpen={isPaymentModalOpen}
-        onClose={() => setIsPaymentModalOpen(false)}
-        templateId={templateId}
-        customization={customization}
-      />
+      {/* Generate HTML to send to deployment */}
+      {(() => {
+        const effectiveColorMode =
+          customization.colorMode?.toLowerCase() === "auto"
+            ? globalTheme
+            : customization.colorMode?.toLowerCase() || globalTheme;
+
+        var htmlContent = renderTemplate(
+          templateId,
+          customization,
+          customization.theme || "minimal",
+          effectiveColorMode
+        );
+
+        return (
+          <PaymentModal
+            isOpen={isPaymentModalOpen}
+            onClose={() => setIsPaymentModalOpen(false)}
+            templateId={templateId}
+            customization={customization}
+            htmlContent={htmlContent} // <-- IMPORTANT
+          />
+        );
+      })()}
 
       <NotificationModal
         isOpen={notification.isOpen}

@@ -8,7 +8,7 @@ export function AuthProvider({ children }) {
   const [profile, setProfile] = useState(null);
   const [rememberedEmail, setRememberedEmail] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [showResetPassword, setShowResetPassword] = useState(false); // <-- new
+  const [showResetPassword, setShowResetPassword] = useState(false);
 
   // Load remembered email on boot
   useEffect(() => {
@@ -32,6 +32,8 @@ export function AuthProvider({ children }) {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log("Auth state change:", event, session?.user?.email);
+
       if (session?.user) {
         setUser(session.user);
         await loadUserProfile(session.user.id);
@@ -47,18 +49,58 @@ export function AuthProvider({ children }) {
     };
   }, []);
 
-  // Load user profile
+  // Load user profile (with auto-create if missing)
   const loadUserProfile = async (userId) => {
     try {
+      console.log("Loading profile for user:", userId);
+
       const { data, error } = await supabase
         .from("profiles")
         .select("*")
         .eq("id", userId)
         .single();
-      if (error) throw error;
+
+      if (error) {
+        // If profile doesn't exist (error code 406 or PGRST116), create it
+        if (error.code === "PGRST116" || error.message.includes("0 rows")) {
+          console.log("Profile not found, creating new profile...");
+          return await createUserProfile(userId);
+        }
+        throw error;
+      }
+
+      console.log("Profile loaded:", data);
       setProfile(data);
     } catch (err) {
-      console.error("Profile load error:", err.message);
+      console.error("Profile load error:", err.message, err);
+      // Don't throw - just log the error and continue
+    }
+  };
+
+  // Create user profile if it doesn't exist
+  const createUserProfile = async (userId) => {
+    try {
+      console.log("Creating profile for user:", userId);
+
+      const { data: userData } = await supabase.auth.getUser();
+
+      const { data, error } = await supabase
+        .from("profiles")
+        .insert({
+          id: userId,
+          email: userData?.user?.email,
+          full_name: userData?.user?.user_metadata?.full_name || null,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      console.log("Profile created:", data);
+      setProfile(data);
+      return data;
+    } catch (err) {
+      console.error("Profile creation error:", err.message, err);
     }
   };
 
@@ -179,9 +221,7 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // ... other OAuth functions (GitHub, Facebook, Apple, LinkedIn) omitted for brevity
-
-  // **New helper to set session from URL hash**
+  // **Helper to set session from URL hash**
   const setSessionFromHash = async (hash) => {
     const params = Object.fromEntries(
       hash
@@ -194,8 +234,8 @@ export function AuthProvider({ children }) {
         access_token: params.access_token,
         refresh_token: params.refresh_token,
       });
-      setShowResetPassword(true); // show modal
-      window.history.replaceState({}, document.title, window.location.pathname); // clear hash
+      setShowResetPassword(true);
+      window.history.replaceState({}, document.title, window.location.pathname);
     }
   };
 
@@ -216,6 +256,8 @@ export function AuthProvider({ children }) {
     setSessionFromHash,
     supabase,
   };
+
+  console.log("auth context: ", value);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

@@ -34,7 +34,7 @@ function Home() {
       icon: <Palette size={40} />,
       number: "01",
       title: "Choose Style",
-      description: "Pick from 5 unique design styles that match your aesthetic",
+      description: "Pick from 7 unique design styles that match your aesthetic",
     },
     {
       icon: <Layout size={40} />,
