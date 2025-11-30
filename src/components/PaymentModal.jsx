@@ -22,6 +22,119 @@ import { useAuth } from "../contexts/AuthContext";
 import "./PaymentModal.scss";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
+
+// Cloud-themed site name prefixes
+const CLOUD_TERMS = [
+  "sky",
+  "cloud",
+  "stratus",
+  "cumulus",
+  "nimbus",
+  "cirrus",
+  "alto",
+  "aero",
+  "atmosphere",
+  "azure",
+  "breeze",
+  "celestial",
+  "cumulonimbus",
+  "drifter",
+  "ether",
+  "fluffy",
+  "gale",
+  "heaven",
+  "horizon",
+  "jetstream",
+  "kite",
+  "lift",
+  "mistral",
+  "nimbostratus",
+  "ozone",
+  "puff",
+  "quasar",
+  "rainbow",
+  "skyward",
+  "tempest",
+  "updraft",
+  "vapor",
+  "whisp",
+  "zephyr",
+  "aether",
+  "billow",
+  "cirrostratus",
+  "dawn",
+  "eclipse",
+  "firmament",
+  "glacier",
+  "haze",
+  "ionosphere",
+  "jet",
+  "karma",
+  "luminous",
+  "monsoon",
+  "nebula",
+  "orion",
+  "pinnacle",
+  "quantum",
+  "radiance",
+  "stratosphere",
+  "twilight",
+  "umbra",
+  "vortex",
+  "whirlwind",
+  "xenon",
+  "zenith",
+  "altocumulus",
+  "blizzard",
+  "cyclone",
+  "dew",
+  "eddy",
+  "flurry",
+  "gust",
+  "hail",
+  "ice",
+  "jetty",
+  "kaleido",
+  "lightning",
+  "mirage",
+  "noctilucent",
+  "overcast",
+  "precipitation",
+  "quiver",
+  "rhapsody",
+  "squall",
+  "thunder",
+  "typhoon",
+  "upwind",
+  "virga",
+  "whirlpool",
+  "yonder",
+  "zodiac",
+  "aurora",
+  "blossom",
+  "cascade",
+  "drizzle",
+  "echo",
+  "foam",
+  "glitter",
+  "harbor",
+  "infinity",
+  "jewel",
+  "keystone",
+  "lagoon",
+  "meadow",
+  "nectar",
+  "oasis",
+  "pearl",
+  "quartz",
+  "reef",
+  "sapphire",
+  "tide",
+  "umbriel",
+  "vale",
+  "wonder",
+];
+
 const CARD_ELEMENT_OPTIONS = {
   style: {
     base: {
@@ -34,6 +147,24 @@ const CARD_ELEMENT_OPTIONS = {
       },
     },
   },
+};
+
+// Function to generate random alphanumeric suffix
+const generateRandomSuffix = (length = 6) => {
+  const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+  let result = "";
+  for (let i = 0; i < length; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+};
+
+// Function to generate cloud-themed site name
+const generateCloudSiteName = () => {
+  const randomTerm =
+    CLOUD_TERMS[Math.floor(Math.random() * CLOUD_TERMS.length)];
+  const randomSuffix = generateRandomSuffix(6);
+  return `${randomTerm}-${randomSuffix}`;
 };
 
 function PaymentForm({
@@ -53,14 +184,17 @@ function PaymentForm({
   const [cardComplete, setCardComplete] = useState(false);
 
   useEffect(() => {
-    const timestamp = Date.now();
-    setSiteName(`site-${timestamp}`);
+    setSiteName(generateCloudSiteName());
   }, []);
 
   const handleCardChange = (event) => {
     setCardComplete(event.complete);
     if (event.error) setError(event.error.message);
     else setError(null);
+  };
+
+  const handleRegenerateName = () => {
+    setSiteName(generateCloudSiteName());
   };
 
   const handleSubmit = async (e) => {
@@ -72,50 +206,78 @@ function PaymentForm({
     setError(null);
 
     try {
-      const response = await supabase.functions.invoke(
-        "create-payment-intent",
-        {
+      console.log("Creating payment intent...");
+
+      // Create payment intent
+      const { data: paymentData, error: paymentError } =
+        await supabase.functions.invoke("create-payment-intent", {
           body: {
             templateId,
             customization,
             siteName,
             customDomain,
-            amount: 500,
+            amount: 500, // $5.00
             currency: "usd",
           },
-        }
-      );
+        });
 
-      const paymentData = response.data;
+      if (paymentError) {
+        throw new Error(
+          paymentError.message || "Failed to create payment intent"
+        );
+      }
 
+      console.log("Payment intent created:", paymentData);
+
+      // Confirm card payment
       const { error: stripeError, paymentIntent } =
         await stripe.confirmCardPayment(paymentData.clientSecret, {
           payment_method: {
             card: elements.getElement(CardElement),
-            billing_details: { email: user.email },
+            billing_details: {
+              email: user?.email,
+              name: user?.user_metadata?.full_name || "Customer",
+            },
           },
         });
 
-      if (stripeError) throw stripeError;
+      if (stripeError) {
+        throw stripeError;
+      }
 
+      console.log("Payment successful, deploying to Vercel...");
+
+      // Deploy to Vercel
       const { data: deployData, error: deployError } =
-        await supabase.functions.invoke("deploy-to-netlify", {
-          body: {
-            paymentIntentId: paymentIntent.id,
-            templateId,
-            customization,
-            siteName,
-            customDomain,
-            htmlContent,
-          },
-        });
+        await supabase.functions.invoke(
+          "deploy-to-vercel", // Use the new Vercel function
+          {
+            body: {
+              paymentIntentId: paymentIntent.id,
+              templateId,
+              customization,
+              siteName,
+              customDomain,
+              htmlContent,
+            },
+          }
+        );
 
-      if (deployError) throw deployError;
+      if (deployError) {
+        console.error("Deployment error:", deployError);
+        throw new Error(deployError.message || "Deployment failed");
+      }
+
+      if (!deployData || !deployData.success) {
+        throw new Error(deployData?.error || "Deployment failed");
+      }
+
+      console.log("Deployment successful:", deployData);
 
       onSuccess({
         url: deployData.url,
-        siteName: deployData.siteName,
-        deploymentId: deployData.deploymentId,
+        siteName: deployData.siteName || siteName,
+        deploymentId: deployData.deployId,
       });
     } catch (err) {
       console.error("Payment/Deployment error:", err);
@@ -124,7 +286,6 @@ function PaymentForm({
       setProcessing(false);
     }
   };
-
   return (
     <form onSubmit={handleSubmit} className="payment-form">
       <div className="form-section">
@@ -134,7 +295,17 @@ function PaymentForm({
         </div>
 
         <div className="form-group">
-          <label htmlFor="siteName">Site Name</label>
+          <div className="label-with-action">
+            <label htmlFor="siteName">Site Name</label>
+            <button
+              type="button"
+              className="regenerate-btn"
+              onClick={handleRegenerateName}
+              disabled={processing}
+            >
+              🔄 New Name
+            </button>
+          </div>
           <div className="input-with-suffix">
             <input
               id="siteName"
@@ -145,16 +316,17 @@ function PaymentForm({
                   e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "")
                 )
               }
-              placeholder="my-awesome-site"
+              placeholder="sky-abc123"
               pattern="[a-z0-9-]+"
               required
               disabled={processing}
             />
-            <span className="url-suffix">.netlify.app</span>
+            <span className="url-suffix">.vercel.app</span>{" "}
+            {/* Updated to Vercel */}
           </div>
           <p className="field-hint">
             Your site will be live at:{" "}
-            <strong>https://{siteName || "your-site"}.netlify.app</strong>
+            <strong>https://{siteName || "your-site"}.vercel.app</strong>
           </p>
         </div>
 
@@ -171,7 +343,7 @@ function PaymentForm({
             disabled={processing}
           />
           <p className="field-hint">
-            Connect your own domain after deployment through Netlify's dashboard
+            Connect your own domain after deployment through Vercel's dashboard
           </p>
         </div>
       </div>
@@ -247,6 +419,8 @@ function DeploymentSuccess({ deployment, onClose }) {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  console.log("deploymetn: ", deployment);
+
   return (
     <div className="deployment-success">
       <div className="success-animation">
@@ -257,7 +431,7 @@ function DeploymentSuccess({ deployment, onClose }) {
 
       <h2 className="success-title">Your Website is Live! 🎉</h2>
       <p className="success-subtitle">
-        Your website has been successfully deployed and is accessible worldwide
+        Your website has been successfully deployed on Vercel
       </p>
 
       <div className="deployment-info">
@@ -286,8 +460,8 @@ function DeploymentSuccess({ deployment, onClose }) {
             <span className="detail-value">{deployment.siteName}</span>
           </div>
           <div className="detail-item">
-            <span className="detail-label">Deployment ID:</span>
-            <span className="detail-value mono">{deployment.deploymentId}</span>
+            <span className="detail-label">Platform:</span>
+            <span className="detail-value">Vercel</span>
           </div>
           <div className="detail-item">
             <span className="detail-label">Billing:</span>
@@ -314,7 +488,7 @@ function DeploymentSuccess({ deployment, onClose }) {
         <h3>What's Next?</h3>
         <ul>
           <li>Share your new website with friends and clients</li>
-          <li>Connect a custom domain through Netlify dashboard</li>
+          <li>Connect a custom domain through Vercel dashboard</li>
           <li>Set up analytics to track your visitors</li>
           <li>Manage your subscription in your account settings</li>
         </ul>

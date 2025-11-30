@@ -1616,7 +1616,7 @@ export const templates = {
               }">
           <div class="container" style="${
             isGlassmorphism || isNeumorphism
-              ? `padding: 5rem 3rem; border-radius: 32px; max-width: 900px; ${
+              ? `padding: 5rem 3rem!important; border-radius: 32px; max-width: 90%; ${
                   isGlassmorphism
                     ? "background: rgba(255,255,255,0.05); backdrop-filter: blur(20px); box-shadow: 0 8px 32px rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.1);"
                     : getNeumorphismShadow(false)
@@ -2231,6 +2231,8 @@ export const templates = {
               ? "rgba(255,255,255,0.1)"
               : isNeumorphism
               ? "var(--color-bg)"
+              : isBrutalist
+              ? "var(--color-bg)"
               : "var(--color-surface)"
           }; border: ${isBrutalist ? "3px" : isRetro ? "2px" : "1px"} solid ${
                   isBrutalist || isRetro
@@ -2362,7 +2364,7 @@ export const templates = {
                       ? "text-transform: uppercase; letter-spacing: 1px;"
                       : ""
                   }">
-              {data.location}
+              ${data.location}
             </p>
             `
                 : ""
@@ -2631,6 +2633,8 @@ export const templates = {
                       ? "var(--color-bg)"
                       : isRetro
                       ? "rgba(255,47,181,0.05)"
+                      : isBrutalist
+                      ? "var(--color-bg)"
                       : "var(--color-surface)"
                   }; border: ${
                     isBrutalist ? "3px" : isRetro ? "2px" : "1px"
@@ -2676,7 +2680,7 @@ export const templates = {
                   }" 
                   onmouseout="${
                     isBrutalist
-                      ? `this.style.background='var(--color-surface)'; this.style.color='var(--color-text-secondary)'`
+                      ? `this.style.background='var(--color-bg)'; this.style.color='var(--color-text-secondary)'`
                       : isRetro
                       ? `this.style.borderColor='var(--color-accent)'; this.style.color='var(--color-text-secondary)'; this.style.boxShadow='none'`
                       : isGlassmorphism
@@ -3055,6 +3059,8 @@ export const templates = {
                     ? "var(--color-bg)"
                     : isRetro
                     ? "rgba(255,47,181,0.05)"
+                    : isBrutalist
+                    ? "var(--color-bg)"
                     : "var(--color-surface)"
                 }; border: ${
                   isBrutalist ? "3px" : isRetro ? "2px" : "2px"
@@ -3104,7 +3110,7 @@ export const templates = {
                 }" 
                 onmouseout="${
                   isBrutalist
-                    ? `this.style.background='var(--color-surface)'; this.style.color='var(--color-text)'`
+                    ? `this.style.background='var(--color-bg)'; this.style.color='var(--color-text)'`
                     : isGradient
                     ? `this.style.borderColor='var(--color-border)'; this.style.transform='translateY(0)'; this.style.boxShadow='none'`
                     : isRetro
@@ -3634,7 +3640,7 @@ export const templates = {
           isNeumorphism || isGlassmorphism ? "800px" : "700px"
         }; ${
         isGlassmorphism || isNeumorphism
-          ? `padding: 5rem 3rem; border-radius: 32px; ${
+          ? `padding: 5rem 3rem!important; border-radius: 32px; ${
               isGlassmorphism
                 ? "background: rgba(255,255,255,0.05); backdrop-filter: blur(20px); box-shadow: 0 8px 32px rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.1);"
                 : getNeumorphismShadow(false)
