@@ -425,14 +425,17 @@ function UserAccountModal({ isOpen, onClose }) {
         className="modal-backdrop modal-backdrop--visible"
         onClick={handleClose}
       />
-      <div className="account-modal">
-        <button className="account-modal__close" onClick={handleClose}>
-          <X size={20} />
-        </button>
-
+      <div className="account-modal account-modal--visible">
         <div className="account-modal__header">
-          <h2>Account Settings</h2>
-          <p>{user?.email}</p>
+          <div className="account-modal__header-left">
+            <button className="account-modal__close" onClick={handleClose}>
+              <X size={24} />
+            </button>
+            <div>
+              <h2 className="account-modal__title">Account Settings</h2>
+              <p className="account-modal__subtitle">{user?.email}</p>
+            </div>
+          </div>
         </div>
 
         <div className="account-modal__content">

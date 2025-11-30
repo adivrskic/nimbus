@@ -162,9 +162,9 @@ const Blob = ({ color = "#eb1736", wireframe = false }) => {
 
       // ----- NEW: Random flowing blur animation -----
       const base = 20; // minimum blur
-      const range = 10; // oscillation
+      const range = 13; // oscillation
       const noise = Math.sin(t * 0.6) * range;
-      const jitter = (Math.random() - 0.5) * 2; // subtle random shake
+      const jitter = (Math.random() - 0.5) * 1.2; // subtle random shake
       setDynamicBlur(base + noise + jitter);
 
       renderer.render(scene, camera);

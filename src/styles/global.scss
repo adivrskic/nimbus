@@ -135,6 +135,10 @@ section:first-of-type {
   }
 }
 
+.steps.section {
+  min-height: 100vh;
+}
+
 // Section spacing
 .section {
   padding: calc(var(--spacing-unit) * 12) 0;

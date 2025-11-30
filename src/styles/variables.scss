@@ -6,38 +6,38 @@
   --color-surface-elevated: #ffffff;
   --color-border: #eeeef1;
   --color-border-hover: #d1d1d6;
-  
+
   --color-text-primary: #1d1d1f;
   --color-text-secondary: #86868b;
   --color-text-tertiary: #a1a1a6;
-  
+
   // Subtle Pink Accent - used sparingly
   --color-accent: #eb1736;
   --color-accent-hover: #d11530;
   --color-accent-light: rgba(235, 23, 54, 0.08);
-  
+
   // Minimal Gradients
-  --gradient-accent: linear-gradient(135deg, #eb1736 0%, #ff1f47 100%);  
+  --gradient-accent: linear-gradient(135deg, #eb1736 0%, #ff1f47 100%);
 
   // Subtle Glassmorphism
   --glass-background: rgba(255, 255, 255, 0.8);
   --glass-border: rgba(0, 0, 0, 0.06);
   --glass-blur: blur(20px) saturate(180%);
-  
+
   // Minimal Shadows
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
   --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.08);
-  
+  --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.18);
+
   // Spacing
   --spacing-unit: 8px;
-  
+
   // Border radius
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 14px;
   --radius-xl: 20px;
-  
+
   // Transitions
   --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
   --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -51,28 +51,30 @@
   --color-surface-elevated: #2c2c2e;
   --color-border: #222223;
   --color-border-hover: #2a2a2b;
-  
+
   --color-text-primary: #f5f5f7;
   --color-text-secondary: #98989d;
   --color-text-tertiary: #636366;
-  
+
   --color-accent: #eb1736;
   --color-accent-hover: #d11530;
   --color-accent-light: rgba(235, 23, 54, 0.08);
-  
+
   // Dark Glassmorphism
   --glass-background: rgba(28, 28, 30, 0.7);
   --glass-border: rgba(255, 255, 255, 0.08);
   --glass-blur: blur(20px) saturate(180%);
-  
+
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
   --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.6);
   --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.7);
 }
 
 // Typography
-$font-family-base: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
-$font-family-display: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+$font-family-base: -apple-system, BlinkMacSystemFont, "SF Pro Display",
+  "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif;
+$font-family-display: "SF Pro Display", -apple-system, BlinkMacSystemFont,
+  "Segoe UI", sans-serif;
 
 // Breakpoints
 $breakpoint-sm: 640px;

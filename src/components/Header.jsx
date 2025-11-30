@@ -121,12 +121,12 @@ function Header() {
       <header className="header">
         <div className="container">
           <div className="header__content">
-            <Link to="/" className="header__logo">
+            <a href="/" className="header__logo">
               <span className="header__logo-icon">
                 <Cloudy size={40} />
               </span>
               <span className="header__logo-text">nimbus</span>
-            </Link>
+            </a>
 
             <nav className="header__nav">
               {isHomePage && (
@@ -177,8 +177,6 @@ function Header() {
                         </div>
                       </div>
 
-                      <div className="dropdown-divider"></div>
-
                       <button
                         className="dropdown-item"
                         onClick={handleOpenAccountModal}
@@ -186,8 +184,6 @@ function Header() {
                         <Settings size={16} />
                         Account Settings
                       </button>
-
-                      <div className="dropdown-divider"></div>
 
                       <button
                         className="dropdown-item dropdown-item--danger"
