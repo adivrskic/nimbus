@@ -70,6 +70,8 @@ function CustomizeModal({ templateId, isOpen, onClose }) {
   const { theme: globalTheme, selectedStyleTheme, setStyleTheme } = useTheme();
   const { user, isAuthenticated, supabase } = useAuth();
   console.log(globalTheme, selectedStyleTheme);
+  const [editingDraftId, setEditingDraftId] = useState(null);
+  const [isEditingDraft, setIsEditingDraft] = useState(false);
   const [mobileView, setMobileView] = useState("editor"); // 'editor' | 'preview'
   const [isSavingDraft, setIsSavingDraft] = useState(false);
   const [draftSaved, setDraftSaved] = useState(false);
@@ -134,6 +136,47 @@ function CustomizeModal({ templateId, isOpen, onClose }) {
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [uploadedImages, setUploadedImages] = useState({});
 
+  // Add this useEffect after your existing useEffects (around line ~120)
+  useEffect(() => {
+    // Check if we're editing a draft from localStorage
+    const editDraftData = localStorage.getItem("editDraft");
+    const isEditing = localStorage.getItem("isEditingDraft");
+
+    if (isOpen && isEditing && editDraftData) {
+      try {
+        const draft = JSON.parse(editDraftData);
+
+        console.log("Loading draft for editing:", draft);
+
+        // Update customization with draft data
+        setCustomization({
+          ...customization, // Keep any existing defaults
+          ...draft.customization,
+          theme: draft.theme || selectedStyleTheme,
+          colorMode: draft.colorMode || "Auto",
+        });
+
+        setEditingDraftId(draft.id);
+        setIsEditingDraft(true);
+
+        // Clear the localStorage flags
+        localStorage.removeItem("editDraft");
+        localStorage.removeItem("isEditingDraft");
+
+        // Show notification
+        setNotification({
+          isOpen: true,
+          message: `Loaded draft: "${draft.draftName || draft.templateId}"`,
+          type: "success",
+        });
+      } catch (error) {
+        console.error("Error loading draft data:", error);
+        localStorage.removeItem("editDraft");
+        localStorage.removeItem("isEditingDraft");
+      }
+    }
+  }, [isOpen]);
+
   // Initialize customization theme from global state when modal opens
   useEffect(() => {
     if (
@@ -194,6 +237,14 @@ function CustomizeModal({ templateId, isOpen, onClose }) {
     previewWindow.document.close();
   };
 
+  useEffect(() => {
+    return () => {
+      // Clean up on unmount
+      localStorage.removeItem("editDraft");
+      localStorage.removeItem("isEditingDraft");
+    };
+  }, []);
+
   const handleImageUpload = (fieldPath, file) => {
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -245,32 +296,62 @@ function CustomizeModal({ templateId, isOpen, onClose }) {
     setIsSaveDraftModalOpen(true);
   };
 
+  // Replace the existing handleSaveDraftConfirm function (around line ~190)
   const handleSaveDraftConfirm = async (draftName) => {
     setIsSavingDraft(true);
     setDraftSaved(false);
 
     try {
-      const { data, error } = await supabase
-        .from("template_drafts")
-        .insert({
-          user_id: user.id,
-          template_id: templateId,
-          draft_name: draftName,
-          customization: customization,
-          theme: customization.theme || "minimal",
-          color_mode: customization.colorMode || "auto",
-        })
-        .select()
-        .single();
+      let result;
 
-      if (error) throw error;
+      if (isEditingDraft && editingDraftId) {
+        // Update existing draft
+        const { data, error } = await supabase
+          .from("template_drafts")
+          .update({
+            draft_name: draftName,
+            customization: customization,
+            theme: customization.theme || "minimal",
+            color_mode: customization.colorMode || "auto",
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", editingDraftId)
+          .eq("user_id", user.id)
+          .select()
+          .single();
+
+        if (error) throw error;
+        result = data;
+      } else {
+        // Create new draft
+        const { data, error } = await supabase
+          .from("template_drafts")
+          .insert({
+            user_id: user.id,
+            template_id: templateId,
+            draft_name: draftName,
+            customization: customization,
+            theme: customization.theme || "minimal",
+            color_mode: customization.colorMode || "auto",
+          })
+          .select()
+          .single();
+
+        if (error) throw error;
+        result = data;
+      }
 
       setDraftSaved(true);
       setIsSaveDraftModalOpen(false);
+      setIsEditingDraft(false);
+      setEditingDraftId(null);
+
       setTimeout(() => setDraftSaved(false), 3000);
       setNotification({
         isOpen: true,
-        message: "Draft saved successfully!",
+        message: isEditingDraft
+          ? "Draft updated successfully!"
+          : "Draft saved successfully!",
         type: "success",
       });
     } catch (error) {
@@ -316,7 +397,11 @@ function CustomizeModal({ templateId, isOpen, onClose }) {
               onClick={handleSaveDraft}
               disabled={!isAuthenticated || isSavingDraft}
               title={
-                !isAuthenticated ? "Sign in to save drafts" : "Save as draft"
+                !isAuthenticated
+                  ? "Sign in to save drafts"
+                  : isEditingDraft
+                  ? "Update draft"
+                  : "Save as draft"
               }
             >
               <Save size={20} />
@@ -325,20 +410,19 @@ function CustomizeModal({ templateId, isOpen, onClose }) {
                   ? "Saving..."
                   : draftSaved
                   ? "Saved!"
+                  : isEditingDraft
+                  ? "Update Draft"
                   : "Save Draft"}
               </span>
             </button>
-
             <button className="btn btn-secondary" onClick={handlePreviewNewTab}>
               <Eye size={20} />
               <span className="btn-text">Preview</span>
             </button>
-
             <button className="btn btn-secondary" onClick={handleDownload}>
               <Download size={20} />
               <span className="btn-text">Download</span>
             </button>
-
             <button
               className="btn btn-primary"
               onClick={handleDeploy}
@@ -437,13 +521,17 @@ function CustomizeModal({ templateId, isOpen, onClose }) {
         message={notification.message}
         type={notification.type}
       />
-
       <SaveDraftModal
         isOpen={isSaveDraftModalOpen}
         onClose={() => setIsSaveDraftModalOpen(false)}
         onSave={handleSaveDraftConfirm}
-        defaultName={template?.name}
+        defaultName={
+          isEditingDraft
+            ? localStorage.getItem("editDraftName") || template?.name
+            : template?.name
+        }
         isSaving={isSavingDraft}
+        isEditing={isEditingDraft}
       />
     </>
   );

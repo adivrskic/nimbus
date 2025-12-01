@@ -128,7 +128,7 @@ section:first-of-type {
   width: 100%;
   max-width: 1280px;
   margin: 0 auto;
-  padding: 0 calc(var(--spacing-unit) * 3);
+  padding: 0 calc(var(--spacing-unit));
 
   @media (max-width: $breakpoint-md) {
     padding: 0 calc(var(--spacing-unit) * 2);

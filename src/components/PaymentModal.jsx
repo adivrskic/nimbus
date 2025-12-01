@@ -183,6 +183,8 @@ function PaymentForm({
   const [customDomain, setCustomDomain] = useState("");
   const [cardComplete, setCardComplete] = useState(false);
 
+  console.log(customization, htmlContent);
+
   useEffect(() => {
     setSiteName(generateCloudSiteName());
   }, []);
@@ -288,6 +290,9 @@ function PaymentForm({
         siteName: deployData.siteName || siteName,
         deploymentId: deployData.deployId,
       });
+
+      // Dispatch event to notify other components
+      window.dispatchEvent(new CustomEvent("deployment-success"));
     } catch (err) {
       console.error("Payment/Deployment error:", err);
       setError(err.message || "An error occurred during payment or deployment");
@@ -515,7 +520,24 @@ export default function PaymentModal({
 }) {
   const [deployment, setDeployment] = useState(null);
 
-  const handleSuccess = (deploymentData) => setDeployment(deploymentData);
+  const handleSuccess = (deploymentData) => {
+    console.log("✅ Deployment successful, updating state...");
+    setDeployment(deploymentData);
+
+    // Dispatch a custom event to notify other components
+    window.dispatchEvent(
+      new CustomEvent("deployment-success", {
+        detail: deploymentData,
+      })
+    );
+
+    // Also refresh sites immediately for the current modal
+    setTimeout(() => {
+      // This will update the sites tab if UserAccountModal is open
+      const event = new Event("refresh-sites");
+      window.dispatchEvent(event);
+    }, 1000);
+  };
   const handleClose = () => {
     setDeployment(null);
     onClose();

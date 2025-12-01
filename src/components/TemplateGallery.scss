@@ -26,15 +26,19 @@
 // Filter Container with Integrated Search
 .template-filters-wrapper {
   position: sticky;
-  top: 52px;
+  top: 72px;
   z-index: 50;
-  background: var(--color-background);
+  background: var(--glass-background);
+  backdrop-filter: blur(10px);
   padding: calc(var(--spacing-unit) * 2) 0;
 
   width: 100%;
   display: flex;
   gap: calc(var(--spacing-unit));
   align-items: center;
+  padding: var(--spacing-unit);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
 
   @media (max-width: $breakpoint-md) {
     display: none; // Hide on mobile/tablet
@@ -189,11 +193,11 @@
   }
 
   &-left {
-    left: 1px;
+    left: 0px;
   }
 
   &-right {
-    right: 1px;
+    right: 0px;
   }
 }
 
@@ -369,7 +373,7 @@
 // Grid
 .template-gallery__grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(325px, 1fr));
   gap: calc(var(--spacing-unit) * 4);
   margin-top: calc(var(--spacing-unit) * 4);
 
