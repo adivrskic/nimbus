@@ -12,6 +12,8 @@ import ScrollToTop from "./components/ScrollToTop";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import ResetPasswordModal from "./components/ResetPasswordModal";
+import { AuthDebug } from "./components/debug/AuthDebug";
+
 import "./styles/global.scss";
 
 const Home = lazy(() => import("./pages/Home"));
@@ -64,10 +66,24 @@ function AppContent() {
 }
 
 function App() {
+  useEffect(() => {
+    // Check for verification success in URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const verified = urlParams.get("verified");
+
+    if (verified === "true") {
+      // Show success message
+      console.log("Email verified successfully!");
+      // Clean URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, []);
+
   return (
     <Router>
       <AuthProvider>
         <ThemeProvider>
+          <AuthDebug />
           <ScrollToTop />
           <div className="app">
             <AppContent />

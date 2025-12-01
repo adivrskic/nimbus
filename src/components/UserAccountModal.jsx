@@ -72,6 +72,27 @@ function UserAccountModal({ isOpen, onClose }) {
     }
   }, [profile]);
 
+  useEffect(() => {
+    let timeoutId;
+
+    if (isLoading) {
+      // Safety timeout - clear loading after 30 seconds
+      timeoutId = setTimeout(() => {
+        console.warn("Loading timeout - clearing loading state");
+        setIsLoading(false);
+        setNotification({
+          isOpen: true,
+          message: "Operation timed out. Please try again.",
+          type: "error",
+        });
+      }, 30000); // 30 seconds
+    }
+
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [isLoading]);
+
   // Password form state
   const [passwordForm, setPasswordForm] = useState({
     currentPassword: "", // ADD THIS
@@ -83,28 +104,20 @@ function UserAccountModal({ isOpen, onClose }) {
   useEffect(() => {
     if (isOpen && user) {
       loadUserData();
+      setBillingSummary(calculateBillingSummary());
     }
   }, [isOpen, user]);
 
   const loadUserData = async () => {
     if (!user) return;
 
-    // Set profile form
-    if (profile) {
-      setProfileForm({
-        full_name: profile.full_name || "",
-        billing_email: profile.billing_email || "",
-      });
-    }
-
-    // Load sites
+    // Load sites - just one query now
     await loadSites();
 
-    // Load drafts
+    // Load drafts - just one query now
     await loadDrafts();
 
-    // Load billing summary
-    await loadBillingSummary();
+    // No need for billing summary - calculate on the fly
   };
 
   const loadSites = async () => {
@@ -119,6 +132,7 @@ function UserAccountModal({ isOpen, onClose }) {
       setSites(data || []);
     } catch (error) {
       console.error("Error loading sites:", error);
+      setSites([]);
     }
   };
 
@@ -134,6 +148,7 @@ function UserAccountModal({ isOpen, onClose }) {
       setDrafts(data || []);
     } catch (error) {
       console.error("Error loading drafts:", error);
+      setDrafts([]);
     }
   };
 
@@ -198,7 +213,7 @@ function UserAccountModal({ isOpen, onClose }) {
         message: "Please enter your current password",
         type: "error",
       });
-      setIsLoading(false);
+      setIsLoading(false); // Make sure to clear loading state
       return;
     }
 
@@ -209,7 +224,7 @@ function UserAccountModal({ isOpen, onClose }) {
         message: "New passwords do not match",
         type: "error",
       });
-      setIsLoading(false);
+      setIsLoading(false); // Make sure to clear loading state
       return;
     }
 
@@ -220,7 +235,7 @@ function UserAccountModal({ isOpen, onClose }) {
         message: "Password must be at least 8 characters",
         type: "error",
       });
-      setIsLoading(false);
+      setIsLoading(false); // Make sure to clear loading state
       return;
     }
 
@@ -231,7 +246,7 @@ function UserAccountModal({ isOpen, onClose }) {
         message: "New password must be different from current password",
         type: "error",
       });
-      setIsLoading(false);
+      setIsLoading(false); // Make sure to clear loading state
       return;
     }
 
@@ -248,7 +263,7 @@ function UserAccountModal({ isOpen, onClose }) {
           message: "Current password is incorrect",
           type: "error",
         });
-        setIsLoading(false);
+        setIsLoading(false); // Clear loading state
         return;
       }
 
@@ -275,16 +290,19 @@ function UserAccountModal({ isOpen, onClose }) {
         });
       }
     } catch (error) {
+      console.error("Password update error:", error);
       setNotification({
         isOpen: true,
         message: error.message || "Failed to update password",
         type: "error",
       });
     } finally {
+      // CRITICAL: Always clear loading state in finally block
       setIsLoading(false);
     }
   };
 
+  // Cancel site - much simpler
   const handleCancelSite = async (siteId, siteName) => {
     setConfirmModal({
       isOpen: true,
@@ -296,10 +314,11 @@ function UserAccountModal({ isOpen, onClose }) {
           const { error } = await supabase
             .from("sites")
             .update({
-              cancelled_at: new Date().toISOString(),
               billing_status: "cancelled",
+              cancelled_at: new Date().toISOString(),
             })
-            .eq("id", siteId);
+            .eq("id", siteId)
+            .eq("user_id", user.id); // Security check
 
           if (error) throw error;
 
@@ -308,8 +327,8 @@ function UserAccountModal({ isOpen, onClose }) {
             message: "Site cancelled successfully",
             type: "success",
           });
-          await loadSites();
-          await loadBillingSummary();
+
+          await loadSites(); // Reload sites
         } catch (error) {
           setNotification({
             isOpen: true,
@@ -323,38 +342,31 @@ function UserAccountModal({ isOpen, onClose }) {
     });
   };
 
+  // Delete draft - simpler
   const handleDeleteDraft = async (draftId, draftName) => {
     setConfirmModal({
       isOpen: true,
       title: "Delete Draft?",
-      message: `Are you sure you want to delete "${draftName}"? This action cannot be undone.`,
+      message: `Are you sure you want to delete "${draftName}"?`,
       onConfirm: async () => {
         setIsLoading(true);
         try {
-          console.log("Deleting draft:", draftId, "for user:", user.id);
-
           const { error } = await supabase
             .from("template_drafts")
             .delete()
             .eq("id", draftId)
             .eq("user_id", user.id);
 
-          console.log("Delete result:", { error });
+          if (error) throw error;
 
-          if (error) {
-            console.error("Delete error details:", error);
-            throw error;
-          }
-
-          console.log("Draft deleted successfully");
           setNotification({
             isOpen: true,
             message: "Draft deleted successfully",
             type: "success",
           });
+
           await loadDrafts();
         } catch (error) {
-          console.error("Delete error:", error);
           setNotification({
             isOpen: true,
             message: error.message || "Failed to delete draft",
@@ -415,6 +427,20 @@ function UserAccountModal({ isOpen, onClose }) {
     setSuccessMessage("");
     setErrorMessage("");
     onClose();
+  };
+
+  // Calculate billing summary on the fly - no database query needed
+  const calculateBillingSummary = () => {
+    const activeSites = sites.filter(
+      (site) => site.billing_status === "active" && !site.cancelled_at
+    );
+
+    return {
+      active_sites: activeSites.length,
+      total_monthly_cost_cents: activeSites.length * 500, // $5 per site
+      trial_sites: sites.filter((site) => site.billing_status === "trial")
+        .length,
+    };
   };
 
   if (!isOpen) return null;
@@ -834,7 +860,6 @@ function UserAccountModal({ isOpen, onClose }) {
                 <div className="form-section">
                   <h3>Change Password</h3>
 
-                  {/* ADD THIS FIELD */}
                   <div className="form-field">
                     <label htmlFor="currentPassword">Current Password</label>
                     <input
@@ -850,6 +875,7 @@ function UserAccountModal({ isOpen, onClose }) {
                       placeholder="••••••••"
                       autoComplete="current-password"
                       required
+                      disabled={isLoading} // Disable inputs during loading
                     />
                     <span className="form-hint">
                       Required for security verification
@@ -871,6 +897,7 @@ function UserAccountModal({ isOpen, onClose }) {
                       placeholder="••••••••"
                       autoComplete="new-password"
                       required
+                      disabled={isLoading} // Disable inputs during loading
                     />
                     <span className="form-hint">
                       Must be at least 8 characters
@@ -894,6 +921,7 @@ function UserAccountModal({ isOpen, onClose }) {
                       placeholder="••••••••"
                       autoComplete="new-password"
                       required
+                      disabled={isLoading} // Disable inputs during loading
                     />
                   </div>
                 </div>
@@ -911,7 +939,7 @@ function UserAccountModal({ isOpen, onClose }) {
                   {isLoading ? (
                     <>
                       <Loader size={18} className="spinning" />
-                      Updating...
+                      Updating Password...
                     </>
                   ) : (
                     "Update Password"

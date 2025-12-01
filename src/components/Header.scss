@@ -45,11 +45,7 @@
   &__nav {
     display: flex;
     align-items: center;
-    gap: calc(var(--spacing-unit) * 3);
-
-    @media (max-width: $breakpoint-md) {
-      gap: calc(var(--spacing-unit) * 2);
-    }
+    gap: calc(var(--spacing-unit) * 2);
 
     @media (max-width: $breakpoint-sm) {
       gap: calc(var(--spacing-unit) * 1.5);
@@ -272,6 +268,10 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+.header .container {
+  padding: 0 var(--spacing-unit);
 }
 
 // Button styles

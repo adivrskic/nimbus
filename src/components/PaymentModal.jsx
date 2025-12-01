@@ -247,21 +247,30 @@ function PaymentForm({
 
       console.log("Payment successful, deploying to Vercel...");
 
-      // Deploy to Vercel
+      // Clean HTML content before sending
+      const cleanHtmlContent = htmlContent
+        .replace(/[\0-\x1F\x7F]/g, "")
+        .replace(/\r\n/g, "\n")
+        .replace(/\r/g, "\n");
+
+      console.log("Sending deployment request with:", {
+        paymentIntentId: paymentIntent.id,
+        siteName,
+        templateId,
+        htmlContentLength: cleanHtmlContent.length,
+      });
+
+      // Deploy to Vercel - MAKE SURE ALL REQUIRED PARAMETERS ARE INCLUDED
       const { data: deployData, error: deployError } =
-        await supabase.functions.invoke(
-          "deploy-to-vercel", // Use the new Vercel function
-          {
-            body: {
-              paymentIntentId: paymentIntent.id,
-              templateId,
-              customization,
-              siteName,
-              customDomain,
-              htmlContent,
-            },
-          }
-        );
+        await supabase.functions.invoke("deploy-to-vercel", {
+          body: {
+            paymentIntentId: paymentIntent.id, // REQUIRED
+            siteName: siteName, // REQUIRED
+            htmlContent: cleanHtmlContent, // REQUIRED
+            templateId: templateId, // Also include templateId
+            customization: customization, // Also include customization
+          },
+        });
 
       if (deployError) {
         console.error("Deployment error:", deployError);

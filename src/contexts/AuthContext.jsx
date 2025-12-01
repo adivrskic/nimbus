@@ -16,44 +16,109 @@ export function AuthProvider({ children }) {
     if (savedEmail) setRememberedEmail(savedEmail);
   }, []);
 
-  // Initialize Supabase auth state
+  // Handle email verification and auth state
   useEffect(() => {
     let active = true;
 
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      if (!active) return;
-      if (session?.user) {
-        setUser(session.user);
-        await loadUserProfile(session.user.id);
-      }
-      setIsLoading(false);
-    });
+    const initializeAuth = async () => {
+      try {
+        // First, check for existing session
+        const {
+          data: { session },
+          error: sessionError,
+        } = await supabase.auth.getSession();
 
+        if (sessionError) {
+          console.error("Session error:", sessionError);
+        }
+
+        console.log("Initial session check:", session?.user?.email);
+
+        // Handle email verification from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const type = urlParams.get("type");
+        const token = urlParams.get("token");
+
+        if (type === "signup" && token) {
+          console.log("Email verification detected, verifying...");
+          const { data: verificationData, error: verificationError } =
+            await supabase.auth.verifyOtp({
+              token_hash: token,
+              type: "signup",
+            });
+
+          if (verificationError) {
+            console.error("Email verification error:", verificationError);
+          } else if (verificationData?.user) {
+            console.log(
+              "Email verification successful:",
+              verificationData.user.email
+            );
+            setUser(verificationData.user);
+            await loadUserProfile(verificationData.user.id);
+
+            // Clean up URL
+            window.history.replaceState(
+              {},
+              document.title,
+              window.location.pathname
+            );
+          }
+        } else if (session?.user) {
+          // Regular session exists
+          setUser(session.user);
+          await loadUserProfile(session.user.id);
+        }
+      } catch (error) {
+        console.error("Auth initialization error:", error);
+      } finally {
+        if (active) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    initializeAuth();
+
+    // Listen for auth state changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log("Auth state change:", event, session?.user?.email);
 
+      if (!active) return;
+
       if (session?.user) {
         setUser(session.user);
         await loadUserProfile(session.user.id);
+
+        // Handle specific events
+        if (event === "SIGNED_IN") {
+          console.log("User signed in successfully");
+        } else if (event === "USER_UPDATED") {
+          console.log("User updated");
+        }
       } else {
         setUser(null);
         setProfile(null);
+        console.log("User signed out");
       }
+
+      setIsLoading(false);
     });
 
     return () => {
       active = false;
-      subscription.unsubscribe();
+      subscription?.unsubscribe();
     };
   }, []);
 
-  // Load user profile (with auto-create if missing)
+  // In your AuthContext - simplify loadUserProfile
   const loadUserProfile = async (userId) => {
     try {
       console.log("Loading profile for user:", userId);
 
+      // Simple profile fetch
       const { data, error } = await supabase
         .from("profiles")
         .select("*")
@@ -61,27 +126,27 @@ export function AuthProvider({ children }) {
         .single();
 
       if (error) {
-        // If profile doesn't exist (error code 406 or PGRST116), create it
-        if (error.code === "PGRST116" || error.message.includes("0 rows")) {
-          console.log("Profile not found, creating new profile...");
+        // If profile doesn't exist, create it with minimal data
+        if (error.code === "PGRST116") {
+          console.log("Creating minimal profile...");
           return await createUserProfile(userId);
         }
-        throw error;
+        console.error("Profile load error:", error);
+        return null;
       }
 
       console.log("Profile loaded:", data);
       setProfile(data);
+      return data;
     } catch (err) {
-      console.error("Profile load error:", err.message, err);
-      // Don't throw - just log the error and continue
+      console.error("Profile load error:", err);
+      return null;
     }
   };
 
-  // Create user profile if it doesn't exist
+  // Simplify createUserProfile
   const createUserProfile = async (userId) => {
     try {
-      console.log("Creating profile for user:", userId);
-
       const { data: userData } = await supabase.auth.getUser();
 
       const { data, error } = await supabase
@@ -94,35 +159,63 @@ export function AuthProvider({ children }) {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Profile creation error:", error);
+        return null;
+      }
 
       console.log("Profile created:", data);
       setProfile(data);
       return data;
     } catch (err) {
-      console.error("Profile creation error:", err.message, err);
+      console.error("Profile creation error:", err);
+      return null;
     }
   };
 
-  // Signup
   const signup = async (email, password, fullName) => {
     try {
+      console.log("Starting signup for:", email);
+
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
-        options: { data: { full_name: fullName } },
+        options: {
+          data: { full_name: fullName },
+          emailRedirectTo: `${window.location.origin}?verified=true`,
+        },
       });
-      if (error) throw error;
+
+      if (error) {
+        console.error("Signup error:", error);
+        throw error;
+      }
+
+      console.log("Signup response:", data);
 
       if (data?.user && !data.session) {
         return {
           success: true,
           requiresEmailConfirmation: true,
-          message: "Please check your email to confirm your account",
+          message:
+            "Please check your email to confirm your account. You'll be able to sign in after verification.",
         };
       }
-      return { success: true, user: data.user };
+
+      if (data?.user && data.session) {
+        // Auto-confirmed (might happen in development)
+        setUser(data.user);
+        await loadUserProfile(data.user.id);
+        return { success: true, user: data.user };
+      }
+
+      return {
+        success: true,
+        requiresEmailConfirmation: true,
+        message: "Please check your email to confirm your account.",
+      };
     } catch (e) {
+      console.error("Signup exception:", e);
       return { success: false, error: e.message };
     }
   };
@@ -174,19 +267,19 @@ export function AuthProvider({ children }) {
 
   const updatePassword = async (newPassword) => {
     try {
-      const {
-        data: { session },
-        error: sessionError,
-      } = await supabase.auth.getSession();
-      if (sessionError || !session) {
-        throw new Error("No active session. Please log in again.");
-      }
       const { data, error } = await supabase.auth.updateUser({
         password: newPassword,
       });
-      if (error) throw error;
+
+      if (error) {
+        console.error("Password update error:", error);
+        throw error;
+      }
+
+      console.log("Password updated successfully");
       return { success: true };
     } catch (e) {
+      console.error("Update password exception:", e);
       return {
         success: false,
         error: e.message || "Failed to update password",
@@ -255,9 +348,15 @@ export function AuthProvider({ children }) {
     setShowResetPassword,
     setSessionFromHash,
     supabase,
+    refreshProfile: () => user && loadUserProfile(user.id), // Add this helper
   };
 
-  console.log("auth context: ", value);
+  console.log("Auth context state:", {
+    user: user?.email,
+    profile: !!profile,
+    isLoading,
+    isAuthenticated: !!user,
+  });
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
