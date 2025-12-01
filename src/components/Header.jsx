@@ -1,4 +1,3 @@
-// src/components/Header.jsx
 import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
@@ -19,11 +18,20 @@ import "./Header.scss";
 
 function Header() {
   const { theme, toggleTheme } = useTheme();
-
   const location = useLocation();
   const isHomePage = location.pathname === "/";
 
-  const { user, profile, isAuthenticated, logout, refreshProfile } = useAuth();
+  const {
+    user,
+    profile,
+    isAuthenticated,
+    logout,
+    refreshProfile,
+    justVerifiedEmail,
+    clearJustVerifiedFlag,
+    isLoading,
+  } = useAuth();
+
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
@@ -32,11 +40,28 @@ function Header() {
   const userMenuRef = useRef(null);
 
   useEffect(() => {
+    if (!isAuthenticated && !isLoading) {
+      console.log("🎯 Header: User not authenticated, closing modals");
+      setIsAuthModalOpen(false);
+      setIsAccountModalOpen(false);
+      setIsUserMenuOpen(false);
+    }
+  }, [isAuthenticated, isLoading]);
+
+  useEffect(() => {
     if (isAuthenticated && user && !profile) {
       console.log("User authenticated but profile missing, refreshing...");
       refreshProfile();
     }
   }, [isAuthenticated, user, profile, refreshProfile]);
+
+  // Auto-open auth modal when user just verified email but isn't signed in
+  useEffect(() => {
+    if (justVerifiedEmail && !isAuthenticated) {
+      console.log("User just verified email, opening auth modal...");
+      setIsAuthModalOpen(true);
+    }
+  }, [justVerifiedEmail, isAuthenticated]);
 
   useEffect(() => {
     const hash = window.location.hash;
@@ -82,8 +107,18 @@ function Header() {
   }, [isUserMenuOpen]);
 
   const handleLogout = async () => {
-    await logout();
+    console.log("🎯 Header: Logout initiated");
     setIsUserMenuOpen(false);
+    setIsAccountModalOpen(false);
+
+    await logout();
+
+    // Force close any open modals
+    setIsAuthModalOpen(false);
+    setIsAccountModalOpen(false);
+    setIsUserMenuOpen(false);
+
+    console.log("🎯 Header: Logout completed");
   };
 
   const handleOpenAccountModal = () => {
@@ -93,6 +128,12 @@ function Header() {
 
   const handleAuthSuccess = () => {
     setIsAuthModalOpen(false);
+    clearJustVerifiedFlag();
+  };
+
+  const handleCloseAuthModal = () => {
+    setIsAuthModalOpen(false);
+    clearJustVerifiedFlag();
   };
 
   const handleForgotPassword = () => {
@@ -220,7 +261,7 @@ function Header() {
       {/* Auth Modal */}
       <AuthModal
         isOpen={isAuthModalOpen}
-        onClose={() => setIsAuthModalOpen(false)}
+        onClose={handleCloseAuthModal}
         onAuthSuccess={handleAuthSuccess}
         onForgotPassword={handleForgotPassword}
       />

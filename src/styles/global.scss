@@ -58,7 +58,7 @@ section:first-of-type {
   align-items: center;
   justify-content: center;
   gap: calc(var(--spacing-unit) * 1.5);
-  padding: calc(var(--spacing-unit) * 1.5) calc(var(--spacing-unit) * 3);
+  padding: calc(var(--spacing-unit)) calc(var(--spacing-unit) * 2);
   font-size: 1rem;
   font-weight: 300;
   border: none;
@@ -67,7 +67,7 @@ section:first-of-type {
   transition: all var(--transition-fast);
   text-decoration: none;
   white-space: nowrap;
-  min-height: 44px; // Standard button height
+  // min-height: 44px; // Standard button height
 
   &:disabled {
     opacity: 0.5;
@@ -133,10 +133,6 @@ section:first-of-type {
   @media (max-width: $breakpoint-md) {
     padding: 0 calc(var(--spacing-unit) * 2);
   }
-}
-
-.steps.section {
-  min-height: 100vh;
 }
 
 // Section spacing

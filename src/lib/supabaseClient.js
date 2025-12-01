@@ -1,5 +1,5 @@
 // src/lib/supabaseClient.js
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from "@supabase/supabase-js";
 
 // Get these from your Supabase project settings
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
@@ -7,7 +7,7 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error(
-    'Missing Supabase environment variables. Please add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to your .env file'
+    "Missing Supabase environment variables. Please add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to your .env file"
   );
 }
 
@@ -17,16 +17,16 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     autoRefreshToken: true,
     detectSessionInUrl: true,
     storage: window.localStorage,
-    storageKey: 'supabase.auth.token',
-    flowType: 'pkce',
+    storageKey: "supabase.auth.token",
+    flowType: "pkce",
   },
   global: {
     headers: {
-      'x-client-info': 'supabase-js-web',
+      "x-client-info": "supabase-js-web",
     },
   },
   db: {
-    schema: 'public',
+    schema: "public",
   },
   realtime: {
     timeout: 30000,

@@ -83,7 +83,7 @@ function App() {
     <Router>
       <AuthProvider>
         <ThemeProvider>
-          <AuthDebug />
+          {/* <AuthDebug /> */}
           <ScrollToTop />
           <div className="app">
             <AppContent />

@@ -25,13 +25,13 @@
     text-align: center;
     position: relative;
     z-index: 1;
-    margin-top: 80px;
+    // margin-top: 80px;
   }
 
   &__title {
     // margin-bottom: calc(var(--spacing-unit) * 3);
     text-transform: uppercase;
-    font-size: 96px;
+    font-size: 100px;
 
     &-outline {
       -webkit-text-stroke: 2px var(--color-text-primary);
@@ -113,9 +113,9 @@
   align-items: center;
   text-align: center;
   padding: calc(var(--spacing-unit) * 5);
-  background: var(--color-background);
+  background: var(--color-surface);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-md);
   transition: all var(--transition-base);
 
   &:hover {

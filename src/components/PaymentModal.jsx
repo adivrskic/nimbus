@@ -164,7 +164,7 @@ const generateCloudSiteName = () => {
   const randomTerm =
     CLOUD_TERMS[Math.floor(Math.random() * CLOUD_TERMS.length)];
   const randomSuffix = generateRandomSuffix(6);
-  return `${randomTerm}-${randomSuffix}`;
+  return `nimbus-${randomTerm}-${randomSuffix}`;
 };
 
 function PaymentForm({
