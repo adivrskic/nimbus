@@ -10920,71 +10920,129 @@ END:VCARD\`;
     category: "Landing Page",
     image: "local-business",
     defaultTheme: "minimal",
-    fields: [
-      {
-        name: "businessName",
+    fields: {
+      businessName: {
+        type: "text",
         label: "Business Name",
-        type: "text",
         required: true,
+        default: "Your Business Name",
       },
-      { name: "tagline", label: "Tagline", type: "text", required: true },
-      {
-        name: "description",
+      tagline: {
+        type: "text",
+        label: "Tagline",
+        required: true,
+        default: "Quality Service You Can Trust",
+      },
+      description: {
+        type: "textarea",
         label: "About Your Business",
-        type: "textarea",
         required: true,
+        default:
+          "Serving our community with dedication and excellence for years.",
       },
-      {
-        name: "address",
-        label: "Street Address",
+      address: {
         type: "text",
+        label: "Street Address",
         required: false,
+        default: "",
       },
-      { name: "city", label: "City, State ZIP", type: "text", required: false },
-      { name: "phone", label: "Phone Number", type: "text", required: true },
-      { name: "email", label: "Email Address", type: "email", required: true },
-      {
-        name: "hours",
-        label: "Business Hours",
+      city: {
+        type: "text",
+        label: "City, State ZIP",
+        required: false,
+        default: "",
+      },
+      phone: {
+        type: "tel",
+        label: "Phone Number",
+        required: true,
+        default: "(555) 123-4567",
+      },
+      email: {
+        type: "email",
+        label: "Email Address",
+        required: true,
+        default: "hello@yourbusiness.com",
+      },
+      hours: {
         type: "textarea",
+        label: "Business Hours",
         placeholder: "Mon-Fri: 9am-6pm\nSat: 10am-4pm\nSun: Closed",
         required: false,
+        default: "",
       },
-      {
-        name: "services",
-        label: "Services/Products (one per line)",
+      services: {
         type: "textarea",
+        label: "Services/Products (one per line)",
         required: true,
+        default:
+          "Professional Consultation\nQuality Products\nExpert Installation\nCustomer Support",
       },
-      {
-        name: "ctaText",
+      ctaText: {
+        type: "text",
         label: "Call-to-Action Button Text",
-        type: "text",
         required: false,
+        default: "Get Started Today",
       },
-      {
-        name: "ctaLink",
-        label: "Call-to-Action Link",
+      ctaLink: {
         type: "url",
+        label: "Call-to-Action Link",
         required: false,
+        default: "",
       },
-      { name: "facebook", label: "Facebook URL", type: "url", required: false },
-      {
-        name: "instagram",
-        label: "Instagram Handle",
+      facebook: {
+        type: "url",
+        label: "Facebook URL",
+        required: false,
+        default: "",
+      },
+      instagram: {
         type: "text",
+        label: "Instagram Handle",
         placeholder: "@yourbusiness",
         required: false,
+        default: "",
       },
-      {
-        name: "testimonials",
-        label: "Customer Testimonials (JSON format)",
-        type: "textarea",
-        placeholder:
-          '[{"name": "John Doe", "text": "Great service!", "rating": 5}]',
-        required: false,
+      testimonials: {
+        type: "group",
+        label: "Customer Testimonials",
+        itemLabel: "Testimonial",
+        min: 0,
+        max: 6,
+        fields: {
+          name: {
+            type: "text",
+            label: "Customer Name",
+            required: true,
+            default: "John Doe",
+          },
+          text: {
+            type: "textarea",
+            label: "Testimonial Text",
+            required: true,
+            default: "Great service and excellent results!",
+          },
+          rating: {
+            type: "select",
+            label: "Rating",
+            options: ["5", "4", "3", "2", "1"],
+            default: "5",
+          },
+        },
+        default: [
+          {
+            name: "Sarah Johnson",
+            text: "Outstanding service! They went above and beyond to help us.",
+            rating: "5",
+          },
+          {
+            name: "Mike Chen",
+            text: "Professional, reliable, and great quality work. Highly recommend!",
+            rating: "5",
+          },
+        ],
       },
-    ],
+    },
     structure: (data, theme, colorMode) => {
       // Detect theme style for dynamic elements
       const themeId = theme?.id || "minimal";
@@ -11828,9 +11886,8 @@ END:VCARD\`;
           </div>
         </div>
       </section>
-
       ${
-        data.testimonials && data.testimonials.trim() !== ""
+        data.testimonials && data.testimonials.length > 0
           ? `
       <!-- Customer Reviews -->
       <section id="reviews" style="padding: ${
@@ -11903,146 +11960,137 @@ END:VCARD\`;
           }, 1fr)); gap: ${
               isBrutalist || isElegant ? "2.5rem" : "2rem"
             }; max-width: 1200px; margin: 0 auto;">
-            ${(() => {
-              try {
-                const testimonials = JSON.parse(data.testimonials);
-                return testimonials
-                  .map(
-                    (t) => `
-                  <div style="background: ${
-                    isGlassmorphism
-                      ? "rgba(255,255,255,0.05)"
-                      : isBrutalist
-                      ? "var(--color-bg)"
-                      : "var(--color-bg)"
-                  }; padding: ${
-                      isBrutalist || isElegant ? "3rem" : "2.5rem"
-                    }; border-radius: ${
-                      isGradient
-                        ? "20px"
-                        : isBrutalist || isElegant || isRetro
-                        ? "0"
-                        : isNeumorphism || isGlassmorphism
-                        ? "20px"
-                        : "12px"
-                    }; ${
-                      isBrutalist
-                        ? "box-shadow: 8px 8px 0 var(--color-bg); border: 4px solid var(--color-bg);"
-                        : isGradient
-                        ? "box-shadow: 0 4px 20px rgba(102,126,234,0.1);"
-                        : isRetro
-                        ? "border: 3px solid var(--color-accent);"
-                        : isNeumorphism
-                        ? getNeumorphismShadow(false)
-                        : isGlassmorphism
-                        ? "backdrop-filter: blur(20px); box-shadow: 0 4px 20px rgba(0,0,0,0.08); border: 1px solid rgba(255,255,255,0.1);"
-                        : "box-shadow: 0 4px 20px rgba(0,0,0,0.08);"
-                    } border-top: ${isBrutalist ? "6px" : "4px"} solid ${
-                      isBrutalist ? "var(--color-bg)" : "var(--color-accent)"
-                    }; transition: all ${
-                      isBrutalist || isRetro ? "0.2s" : "0.3s"
-                    };" onmouseover="${
-                      isBrutalist
-                        ? `this.style.transform='translate(-4px, -4px)'; this.style.boxShadow='12px 12px 0 var(--color-bg)'`
-                        : isRetro
-                        ? `this.style.transform='translateY(-4px)'; this.style.boxShadow='0 10px 30px rgba(255,47,181,0.15)'`
-                        : isNeumorphism
-                        ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
-                        : `this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 30px rgba(0,0,0,0.12)'`
-                    }" onmouseout="${
-                      isBrutalist
-                        ? `this.style.transform='translate(0, 0)'; this.style.boxShadow='8px 8px 0 var(--color-bg)'`
-                        : isRetro
-                        ? `this.style.transform='translateY(0)'; this.style.boxShadow='none'`
-                        : isNeumorphism
-                        ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
-                        : `this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 20px rgba(0,0,0,0.08)'`
-                    }">
-                    ${
-                      t.rating
-                        ? `
-                    <div style="color: #FFB800; font-size: ${
-                      isBrutalist ? "1.5rem" : "1.25rem"
-                    }; margin-bottom: 1.25rem; letter-spacing: 0.25rem;">
-                      ${"★".repeat(t.rating)}${"☆".repeat(5 - t.rating)}
-                    </div>
-                    `
-                        : ""
-                    }
-                    <p style="font-family: ${
-                      isElegant
-                        ? "Lato, sans-serif"
-                        : isRetro
-                        ? "Space Mono, monospace"
-                        : "inherit"
-                    }; font-size: ${
-                      isBrutalist || isRetro ? "1.0625rem" : "1rem"
-                    }; line-height: ${
-                      isElegant ? "1.9" : "1.7"
-                    }; margin-bottom: 1.5rem; font-style: ${
-                      isElegant ? "italic" : "normal"
-                    }; color: ${
-                      isBrutalist ? "var(--color-accent)" : "var(--color-text)"
-                    }; ${isBrutalist ? "font-weight: 700;" : ""}">
-                      "${t.text}"
-                    </p>
-                    <div style="display: flex; align-items: center; gap: ${
-                      isBrutalist ? "1.5rem" : "1rem"
-                    };">
-                      <div style="width: ${
-                        isBrutalist ? "56px" : "48px"
-                      }; height: ${
-                      isBrutalist ? "56px" : "48px"
-                    }; background: ${
-                      isGradient
-                        ? "linear-gradient(135deg, #667eea, #764ba2)"
-                        : isRetro
-                        ? "linear-gradient(90deg, var(--color-accent), #b537f2)"
-                        : isBrutalist
-                        ? "var(--color-bg)"
-                        : "var(--color-accent)"
-                    }; border-radius: ${
-                      isBrutalist || isElegant || isRetro ? "0" : "50%"
-                    }; display: flex; align-items: center; justify-content: center; color: ${
-                      isBrutalist ? "var(--color-accent)" : "white"
-                    }; font-weight: 900; font-size: ${
-                      isBrutalist ? "1.5rem" : "1.25rem"
-                    }; flex-shrink: 0; ${
-                      isBrutalist
-                        ? "border: 3px solid var(--color-accent);"
-                        : ""
-                    }">
-                        ${t.name.charAt(0).toUpperCase()}
-                      </div>
-                      <div>
-                        <div style="font-family: ${
-                          isRetro ? "Space Mono, monospace" : "inherit"
-                        }; font-weight: ${
-                      isBrutalist ? "900" : "700"
-                    }; font-size: ${
-                      isBrutalist || isRetro ? "1.125rem" : "1rem"
-                    }; color: ${
-                      isBrutalist ? "var(--color-accent)" : "var(--color-text)"
-                    }; ${
-                      isBrutalist || isRetro ? "text-transform: uppercase;" : ""
-                    }">${t.name}</div>
-                        <div style="font-family: ${
-                          isRetro ? "Space Mono, monospace" : "inherit"
-                        }; font-size: ${
-                      isBrutalist || isRetro ? "0.9375rem" : "0.875rem"
-                    }; color: var(--color-text-secondary); ${
-                      isBrutalist || isRetro ? "font-weight: 700;" : ""
-                    }">Verified Customer</div>
-                      </div>
-                    </div>
-                  </div>
+            ${data.testimonials
+              .map(
+                (t) => `
+              <div style="background: ${
+                isGlassmorphism
+                  ? "rgba(255,255,255,0.05)"
+                  : isBrutalist
+                  ? "var(--color-bg)"
+                  : "var(--color-bg)"
+              }; padding: ${
+                  isBrutalist || isElegant ? "3rem" : "2.5rem"
+                }; border-radius: ${
+                  isGradient
+                    ? "20px"
+                    : isBrutalist || isElegant || isRetro
+                    ? "0"
+                    : isNeumorphism || isGlassmorphism
+                    ? "20px"
+                    : "12px"
+                }; ${
+                  isBrutalist
+                    ? "box-shadow: 8px 8px 0 var(--color-bg); border: 4px solid var(--color-bg);"
+                    : isGradient
+                    ? "box-shadow: 0 4px 20px rgba(102,126,234,0.1);"
+                    : isRetro
+                    ? "border: 3px solid var(--color-accent);"
+                    : isNeumorphism
+                    ? getNeumorphismShadow(false)
+                    : isGlassmorphism
+                    ? "backdrop-filter: blur(20px); box-shadow: 0 4px 20px rgba(0,0,0,0.08); border: 1px solid rgba(255,255,255,0.1);"
+                    : "box-shadow: 0 4px 20px rgba(0,0,0,0.08);"
+                } border-top: ${isBrutalist ? "6px" : "4px"} solid ${
+                  isBrutalist ? "var(--color-bg)" : "var(--color-accent)"
+                }; transition: all ${
+                  isBrutalist || isRetro ? "0.2s" : "0.3s"
+                };" onmouseover="${
+                  isBrutalist
+                    ? `this.style.transform='translate(-4px, -4px)'; this.style.boxShadow='12px 12px 0 var(--color-bg)'`
+                    : isRetro
+                    ? `this.style.transform='translateY(-4px)'; this.style.boxShadow='0 10px 30px rgba(255,47,181,0.15)'`
+                    : isNeumorphism
+                    ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
+                    : `this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 30px rgba(0,0,0,0.12)'`
+                }" onmouseout="${
+                  isBrutalist
+                    ? `this.style.transform='translate(0, 0)'; this.style.boxShadow='8px 8px 0 var(--color-bg)'`
+                    : isRetro
+                    ? `this.style.transform='translateY(0)'; this.style.boxShadow='none'`
+                    : isNeumorphism
+                    ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
+                    : `this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 20px rgba(0,0,0,0.08)'`
+                }">
+                ${
+                  t.rating
+                    ? `
+                <div style="color: #FFB800; font-size: ${
+                  isBrutalist ? "1.5rem" : "1.25rem"
+                }; margin-bottom: 1.25rem; letter-spacing: 0.25rem;">
+                  ${"★".repeat(parseInt(t.rating))}${"☆".repeat(
+                        5 - parseInt(t.rating)
+                      )}
+                </div>
                 `
-                  )
-                  .join("");
-              } catch (e) {
-                return "";
-              }
-            })()}
+                    : ""
+                }
+                <p style="font-family: ${
+                  isElegant
+                    ? "Lato, sans-serif"
+                    : isRetro
+                    ? "Space Mono, monospace"
+                    : "inherit"
+                }; font-size: ${
+                  isBrutalist || isRetro ? "1.0625rem" : "1rem"
+                }; line-height: ${
+                  isElegant ? "1.9" : "1.7"
+                }; margin-bottom: 1.5rem; font-style: ${
+                  isElegant ? "italic" : "normal"
+                }; color: ${
+                  isBrutalist ? "var(--color-accent)" : "var(--color-text)"
+                }; ${isBrutalist ? "font-weight: 700;" : ""}">
+                  "${t.text}"
+                </p>
+                <div style="display: flex; align-items: center; gap: ${
+                  isBrutalist ? "1.5rem" : "1rem"
+                };">
+                  <div style="width: ${
+                    isBrutalist ? "56px" : "48px"
+                  }; height: ${isBrutalist ? "56px" : "48px"}; background: ${
+                  isGradient
+                    ? "linear-gradient(135deg, #667eea, #764ba2)"
+                    : isRetro
+                    ? "linear-gradient(90deg, var(--color-accent), #b537f2)"
+                    : isBrutalist
+                    ? "var(--color-bg)"
+                    : "var(--color-accent)"
+                }; border-radius: ${
+                  isBrutalist || isElegant || isRetro ? "0" : "50%"
+                }; display: flex; align-items: center; justify-content: center; color: ${
+                  isBrutalist ? "var(--color-accent)" : "white"
+                }; font-weight: 900; font-size: ${
+                  isBrutalist ? "1.5rem" : "1.25rem"
+                }; flex-shrink: 0; ${
+                  isBrutalist ? "border: 3px solid var(--color-accent);" : ""
+                }">
+                    ${t.name.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <div style="font-family: ${
+                      isRetro ? "Space Mono, monospace" : "inherit"
+                    }; font-weight: ${
+                  isBrutalist ? "900" : "700"
+                }; font-size: ${
+                  isBrutalist || isRetro ? "1.125rem" : "1rem"
+                }; color: ${
+                  isBrutalist ? "var(--color-accent)" : "var(--color-text)"
+                }; ${
+                  isBrutalist || isRetro ? "text-transform: uppercase;" : ""
+                }">${t.name}</div>
+                    <div style="font-family: ${
+                      isRetro ? "Space Mono, monospace" : "inherit"
+                    }; font-size: ${
+                  isBrutalist || isRetro ? "0.9375rem" : "0.875rem"
+                }; color: var(--color-text-secondary); ${
+                  isBrutalist || isRetro ? "font-weight: 700;" : ""
+                }">Verified Customer</div>
+                  </div>
+                </div>
+              </div>
+            `
+              )
+              .join("")}
           </div>
         </div>
       </section>
