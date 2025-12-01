@@ -31,6 +31,7 @@ function UserAccountModal({ isOpen, onClose }) {
     updateEmail,
     updatePassword,
     supabase,
+    isAuthenticated,
   } = useAuth();
   const [activeTab, setActiveTab] = useState("profile"); // 'profile', 'sites', 'drafts', 'billing', 'security'
   const [isLoading, setIsLoading] = useState(false);
@@ -71,6 +72,25 @@ function UserAccountModal({ isOpen, onClose }) {
       });
     }
   }, [profile]);
+
+  useEffect(() => {
+    if (!isAuthenticated && isOpen) {
+      console.log("User logged out, closing account modal");
+      onClose();
+    }
+  }, [isAuthenticated, isOpen, onClose]);
+
+  useEffect(() => {
+    if (!isOpen || !isAuthenticated) {
+      // Reset all form states
+      setPasswordForm({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+      // Add any other state resets here
+    }
+  }, [isOpen, isAuthenticated]);
 
   useEffect(() => {
     let timeoutId;
@@ -206,71 +226,71 @@ function UserAccountModal({ isOpen, onClose }) {
     setSuccessMessage("");
     setErrorMessage("");
 
-    // Validation - Check current password is provided
-    if (!passwordForm.currentPassword) {
-      setNotification({
-        isOpen: true,
-        message: "Please enter your current password",
-        type: "error",
-      });
-      setIsLoading(false); // Make sure to clear loading state
-      return;
-    }
-
-    // Validation - Check passwords match
-    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-      setNotification({
-        isOpen: true,
-        message: "New passwords do not match",
-        type: "error",
-      });
-      setIsLoading(false); // Make sure to clear loading state
-      return;
-    }
-
-    // Validation - Check minimum length
-    if (passwordForm.newPassword.length < 8) {
-      setNotification({
-        isOpen: true,
-        message: "Password must be at least 8 characters",
-        type: "error",
-      });
-      setIsLoading(false); // Make sure to clear loading state
-      return;
-    }
-
-    // Validation - Check password is different
-    if (passwordForm.currentPassword === passwordForm.newPassword) {
-      setNotification({
-        isOpen: true,
-        message: "New password must be different from current password",
-        type: "error",
-      });
-      setIsLoading(false); // Make sure to clear loading state
-      return;
-    }
-
     try {
+      // Validation - Check current password is provided
+      if (!passwordForm.currentPassword) {
+        setNotification({
+          isOpen: true,
+          message: "Please enter your current password",
+          type: "error",
+        });
+        return;
+      }
+
+      // Validation - Check passwords match
+      if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+        setNotification({
+          isOpen: true,
+          message: "New passwords do not match",
+          type: "error",
+        });
+        return;
+      }
+
+      // Validation - Check minimum length
+      if (passwordForm.newPassword.length < 8) {
+        setNotification({
+          isOpen: true,
+          message: "Password must be at least 8 characters",
+          type: "error",
+        });
+        return;
+      }
+
+      // Validation - Check password is different
+      if (passwordForm.currentPassword === passwordForm.newPassword) {
+        setNotification({
+          isOpen: true,
+          message: "New password must be different from current password",
+          type: "error",
+        });
+        return;
+      }
+
       // STEP 1: Reauthenticate with current password
+      console.log("Reauthenticating user...");
       const { error: reauthError } = await supabase.auth.signInWithPassword({
         email: user.email,
         password: passwordForm.currentPassword,
       });
 
       if (reauthError) {
+        console.error("Reauthentication failed:", reauthError);
         setNotification({
           isOpen: true,
           message: "Current password is incorrect",
           type: "error",
         });
-        setIsLoading(false); // Clear loading state
         return;
       }
 
-      // STEP 2: Now update to new password (session is fresh)
+      console.log("Reauthentication successful, updating password...");
+
+      // STEP 2: Now update to new password
       const result = await updatePassword(passwordForm.newPassword);
 
       if (result.success) {
+        console.log("Password update completed successfully");
         setNotification({
           isOpen: true,
           message: "Password updated successfully",
@@ -283,6 +303,7 @@ function UserAccountModal({ isOpen, onClose }) {
           confirmPassword: "",
         });
       } else {
+        console.error("Password update failed:", result.error);
         setNotification({
           isOpen: true,
           message: result.error || "Failed to update password",
@@ -290,14 +311,15 @@ function UserAccountModal({ isOpen, onClose }) {
         });
       }
     } catch (error) {
-      console.error("Password update error:", error);
+      console.error("Unexpected error in password update:", error);
       setNotification({
         isOpen: true,
-        message: error.message || "Failed to update password",
+        message: "An unexpected error occurred. Please try again.",
         type: "error",
       });
     } finally {
-      // CRITICAL: Always clear loading state in finally block
+      // ✅ CRITICAL: Always clear loading state
+      console.log("Clearing loading state");
       setIsLoading(false);
     }
   };
@@ -443,7 +465,7 @@ function UserAccountModal({ isOpen, onClose }) {
     };
   };
 
-  if (!isOpen) return null;
+  if (!isOpen || !isAuthenticated) return null;
 
   return (
     <>

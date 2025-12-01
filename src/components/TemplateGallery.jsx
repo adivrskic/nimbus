@@ -42,9 +42,6 @@ const UNSPLASH_CATEGORY_MAP = {
   "Landing Page": "website,landing page,ui",
   Restaurant: "restaurant,food,dining",
   Events: "events,concert,party",
-  // Education: "education,school,students",
-  // "Health & Wellness": "wellness,health,spa",
-  // Services: "services,agency,workplace",
 };
 
 const FILTER_ICONS = {
@@ -56,9 +53,6 @@ const FILTER_ICONS = {
   "Landing Page": Monitor,
   Restaurant: UtensilsCrossed,
   Events: CalendarDays,
-  // Forms: GraduationCap,
-  // "Health & Wellness": HeartPulse,
-  // Services: Wrench,
 };
 
 // Helper to generate a random Unsplash image URL
@@ -110,9 +104,6 @@ const categories = [
     name: "Events",
     count: templates.filter((t) => t.category === "Events").length,
   },
-  // { name: 'Education', count: templates.filter(t => t.category === 'Education').length },
-  // { name: 'Health & Wellness', count: templates.filter(t => t.category === 'Health & Wellness').length },
-  // { name: 'Services', count: templates.filter(t => t.category === 'Services').length },
   {
     name: "Forms",
     count: templates.filter((t) => t.category === "Forms").length,
@@ -135,10 +126,12 @@ function TemplateGallery({ onTemplateSelect }) {
   const { theme } = useTheme();
   const [activeFilter, setActiveFilter] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
+  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const [visibleCount, setVisibleCount] = useState(12);
   const [leftArrowOpacity, setLeftArrowOpacity] = useState(0);
   const [rightArrowOpacity, setRightArrowOpacity] = useState(1);
   const scrollContainerRef = useRef(null);
+  const searchInputRef = useRef(null);
   const isDraggingRef = useRef(false);
   const startXRef = useRef(0);
   const scrollLeftRef = useRef(0);
@@ -190,29 +183,45 @@ function TemplateGallery({ onTemplateSelect }) {
 
   const clearSearch = () => {
     setSearchQuery("");
+    if (searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
   };
 
-  // Check scroll position to update arrow opacity
-  // const checkScrollPosition = useCallback(() => {
-  //   const container = scrollContainerRef.current;
-  //   if (!container) return;
+  const handleSearchToggle = () => {
+    setIsSearchExpanded(!isSearchExpanded);
+    if (!isSearchExpanded) {
+      // Focus input when expanding
+      setTimeout(() => {
+        if (searchInputRef.current) {
+          searchInputRef.current.focus();
+        }
+      }, 100);
+    } else {
+      // Clear search when collapsing
+      setSearchQuery("");
+    }
+  };
 
-  //   const { scrollLeft, scrollWidth, clientWidth } = container;
-  //   const maxScroll = scrollWidth - clientWidth;
+  // Close search when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        isSearchExpanded &&
+        searchInputRef.current &&
+        !searchInputRef.current.contains(event.target) &&
+        !event.target.closest(".search-toggle")
+      ) {
+        setIsSearchExpanded(false);
+        setSearchQuery("");
+      }
+    };
 
-  //   // Calculate opacity based on scroll position
-  //   // Fade in over the first/last 50px of scroll
-  //   const fadeDistance = 50;
-
-  //   // Left arrow: 0 opacity at start, 1 opacity after fadeDistance
-  //   const leftOpacity = Math.min(scrollLeft / fadeDistance, 1);
-
-  //   // Right arrow: 1 opacity at start, 0 opacity at end
-  //   const rightOpacity = Math.min((maxScroll - scrollLeft) / fadeDistance, 1);
-
-  //   setLeftArrowOpacity(leftOpacity);
-  //   setRightArrowOpacity(rightOpacity);
-  // }, []);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isSearchExpanded]);
 
   // Scroll handler
   const scroll = (direction) => {
@@ -259,21 +268,6 @@ function TemplateGallery({ onTemplateSelect }) {
     }
   };
 
-  // Setup scroll listener
-  // useEffect(() => {
-  //   const container = scrollContainerRef.current;
-  //   if (!container) return;
-
-  //   checkScrollPosition();
-  //   container.addEventListener('scroll', checkScrollPosition);
-  //   window.addEventListener('resize', checkScrollPosition);
-
-  //   return () => {
-  //     container.removeEventListener('scroll', checkScrollPosition);
-  //     window.removeEventListener('resize', checkScrollPosition);
-  //   };
-  // }, [checkScrollPosition]);
-
   const handleTemplateClick = useCallback(
     (templateId) => {
       if (onTemplateSelect) {
@@ -285,34 +279,40 @@ function TemplateGallery({ onTemplateSelect }) {
 
   return (
     <div id="templates-section" className="template-gallery">
-      {/* Search */}
-      <div className="template-search">
-        <div className="search-input-wrapper">
-          <Search className="search-icon" size={20} />
-          <input
-            type="text"
-            className="search-input"
-            placeholder="Search templates..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-          {searchQuery && (
-            <button className="search-clear" onClick={clearSearch}>
-              <X size={16} />
-            </button>
-          )}
-        </div>
-        {/* {searchQuery && (
-          <p className="search-results-text">
-            Found {filteredTemplates.length} template{filteredTemplates.length !== 1 ? 's' : ''} 
-            {searchQuery && ` for "${searchQuery}"`}
-          </p>
-        )} */}
-      </div>
-
-      {/* Filters */}
+      {/* Integrated Search & Filters for Desktop */}
       <div className="template-filters-wrapper">
-        {/* Sticky filters on the left */}
+        {/* Search Toggle Button - Always visible */}
+        <button
+          className={`search-toggle ${isSearchExpanded ? "expanded" : ""}`}
+          onClick={handleSearchToggle}
+          title="Search templates"
+        >
+          <Search size={20} />
+        </button>
+
+        {/* Search Input - Expands when active */}
+        <div
+          className={`search-container ${isSearchExpanded ? "expanded" : ""}`}
+        >
+          <div className="search-input-wrapper">
+            <Search className="search-icon" size={20} />
+            <input
+              ref={searchInputRef}
+              type="text"
+              className="search-input"
+              placeholder="Search templates..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            {searchQuery && (
+              <button className="search-clear" onClick={clearSearch}>
+                <X size={16} />
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Sticky filters on the left (All Templates & Featured) */}
         <div className="template-filters-sticky">
           {categories.slice(0, 2).map((category) => (
             <button
@@ -338,10 +338,6 @@ function TemplateGallery({ onTemplateSelect }) {
             className="scroll-arrow scroll-arrow-left"
             onClick={() => scroll("left")}
             aria-label="Scroll left"
-            // style={{
-            //   opacity: leftArrowOpacity,
-            //   pointerEvents: leftArrowOpacity < 0.1 ? 'none' : 'auto'
-            // }}
           >
             <ChevronLeft size={20} />
           </button>
@@ -375,10 +371,6 @@ function TemplateGallery({ onTemplateSelect }) {
             className="scroll-arrow scroll-arrow-right"
             onClick={() => scroll("right")}
             aria-label="Scroll right"
-            // style={{
-            //   opacity: rightArrowOpacity,
-            //   pointerEvents: rightArrowOpacity < 0.1 ? 'none' : 'auto'
-            // }}
           >
             <ChevronRight size={20} />
           </button>
@@ -450,21 +442,6 @@ function TemplateGallery({ onTemplateSelect }) {
                     <p className="template-card__description">
                       {template.description}
                     </p>
-
-                    {/* Theme badges */}
-                    {/* <div className="template-card__themes">
-                    {template.supportedThemes && template.supportedThemes.slice(0, 3).map(themeId => {
-                      const theme = themes.find(t => t.id === themeId);
-                      return (
-                        <span key={themeId} className="theme-badge" title={theme?.name}>
-                          {theme?.name.charAt(0)}
-                        </span>
-                      );
-                    })}
-                    {template.supportedThemes && template.supportedThemes.length > 3 && (
-                      <span className="theme-badge">+{template.supportedThemes.length - 3}</span>
-                    )}
-                  </div> */}
                   </div>
                 </div>
               );

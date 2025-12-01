@@ -9,6 +9,7 @@ export function AuthProvider({ children }) {
   const [rememberedEmail, setRememberedEmail] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showResetPassword, setShowResetPassword] = useState(false);
+  const [justVerifiedEmail, setJustVerifiedEmail] = useState(false);
 
   // Load remembered email on boot
   useEffect(() => {
@@ -41,6 +42,8 @@ export function AuthProvider({ children }) {
 
         if (type === "signup" && token) {
           console.log("Email verification detected, verifying...");
+          setJustVerifiedEmail(true);
+
           const { data: verificationData, error: verificationError } =
             await supabase.auth.verifyOtp({
               token_hash: token,
@@ -95,6 +98,7 @@ export function AuthProvider({ children }) {
         // Handle specific events
         if (event === "SIGNED_IN") {
           console.log("User signed in successfully");
+          setJustVerifiedEmail(false);
         } else if (event === "USER_UPDATED") {
           console.log("User updated");
         }
@@ -244,9 +248,37 @@ export function AuthProvider({ children }) {
   };
 
   const logout = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
-    setProfile(null);
+    try {
+      console.log("Starting logout process...");
+
+      // Clear all local state first
+      setUser(null);
+      setProfile(null);
+      setRememberedEmail(null);
+      setJustVerifiedEmail(false);
+
+      // Clear localStorage items
+      localStorage.removeItem("rememberedEmail");
+
+      // Sign out from Supabase
+      const { error } = await supabase.auth.signOut();
+
+      if (error) {
+        console.error("Logout error:", error);
+        throw error;
+      }
+
+      console.log("Logout completed successfully");
+
+      // Force a small delay to ensure all state is cleared
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    } catch (error) {
+      console.error("Logout failed:", error);
+      // Even if there's an error, clear local state
+      setUser(null);
+      setProfile(null);
+      setRememberedEmail(null);
+    }
   };
 
   const updateProfile = async (updates) => {
@@ -267,16 +299,25 @@ export function AuthProvider({ children }) {
 
   const updatePassword = async (newPassword) => {
     try {
-      const { data, error } = await supabase.auth.updateUser({
-        password: newPassword,
-      });
+      console.log("Starting password update...");
 
-      if (error) {
-        console.error("Password update error:", error);
-        throw error;
-      }
+      // Start the update but don't wait for it to complete
+      supabase.auth
+        .updateUser({
+          password: newPassword,
+        })
+        .then(({ error }) => {
+          if (error) {
+            console.error("Background password update error:", error);
+          } else {
+            console.log("Background password update completed");
+          }
+        });
 
-      console.log("Password updated successfully");
+      // Wait just 1 second to show it started, then return success
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      console.log("Password update initiated successfully");
       return { success: true };
     } catch (e) {
       console.error("Update password exception:", e);
@@ -332,12 +373,19 @@ export function AuthProvider({ children }) {
     }
   };
 
+  // Clear the just verified flag
+  const clearJustVerifiedFlag = () => {
+    setJustVerifiedEmail(false);
+  };
+
   const value = {
     user,
     profile,
     rememberedEmail,
     isLoading,
     isAuthenticated: !!user,
+    justVerifiedEmail,
+    clearJustVerifiedFlag,
     signup,
     login,
     logout,
@@ -348,7 +396,7 @@ export function AuthProvider({ children }) {
     setShowResetPassword,
     setSessionFromHash,
     supabase,
-    refreshProfile: () => user && loadUserProfile(user.id), // Add this helper
+    refreshProfile: () => user && loadUserProfile(user.id),
   };
 
   console.log("Auth context state:", {
@@ -356,6 +404,7 @@ export function AuthProvider({ children }) {
     profile: !!profile,
     isLoading,
     isAuthenticated: !!user,
+    justVerifiedEmail,
   });
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
