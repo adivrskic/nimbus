@@ -68,6 +68,50 @@ function Home() {
     setTimeout(() => setSelectedTemplate(null), 400); // Match animation duration
   };
 
+  // Add this useEffect in the Home component
+  useEffect(() => {
+    const handleOpenCustomizeWithDraft = (event) => {
+      const { templateId, draft } = event.detail;
+
+      console.log("Opening customize modal with draft:", draft);
+
+      // Set the template and open the modal
+      setSelectedTemplate(templateId);
+
+      // Store draft data for the CustomizeModal to pick up
+      localStorage.setItem(
+        "editDraft",
+        JSON.stringify({
+          id: draft.id,
+          templateId: draft.template_id,
+          customization: draft.customization,
+          theme: draft.theme || "minimal",
+          colorMode: draft.color_mode || "auto",
+          draftName: draft.draft_name,
+        })
+      );
+
+      localStorage.setItem("isEditingDraft", "true");
+
+      // Open the modal
+      setTimeout(() => {
+        setIsModalOpen(true);
+      }, 10);
+    };
+
+    window.addEventListener(
+      "open-customize-with-draft",
+      handleOpenCustomizeWithDraft
+    );
+
+    return () => {
+      window.removeEventListener(
+        "open-customize-with-draft",
+        handleOpenCustomizeWithDraft
+      );
+    };
+  }, []);
+
   return (
     <div className="home">
       {/* Hero Section */}

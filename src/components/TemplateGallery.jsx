@@ -112,7 +112,6 @@ const categories = [
 
 const getTemplateImagePath = (templateName, theme) => {
   // Convert template name to kebab-case
-  console.log(templateName, theme);
   const kebabName = templateName
     ?.toLowerCase()
     ?.replace(/\s+/g, "-")
@@ -139,7 +138,9 @@ function TemplateGallery({ onTemplateSelect }) {
   const scrollTemplatesToTop = () => {
     const section = document.getElementById("templates-section");
     if (section) {
-      section.scrollIntoView({ behavior: "smooth" });
+      section.scrollIntoView({
+        behavior: "smooth",
+      });
     }
   };
 

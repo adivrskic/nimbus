@@ -67,14 +67,10 @@ function AppContent() {
 
 function App() {
   useEffect(() => {
-    // Check for verification success in URL
     const urlParams = new URLSearchParams(window.location.search);
     const verified = urlParams.get("verified");
 
     if (verified === "true") {
-      // Show success message
-      console.log("Email verified successfully!");
-      // Clean URL
       window.history.replaceState({}, document.title, window.location.pathname);
     }
   }, []);
@@ -83,7 +79,7 @@ function App() {
     <Router>
       <AuthProvider>
         <ThemeProvider>
-          {/* <AuthDebug /> */}
+          <AuthDebug />
           <ScrollToTop />
           <div className="app">
             <AppContent />

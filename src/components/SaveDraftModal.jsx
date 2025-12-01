@@ -1,10 +1,23 @@
-// src/components/SaveDraftModal.jsx
-import { useState } from 'react';
-import { X, Save, Loader } from 'lucide-react';
-import './SaveDraftModal.scss';
+import { useState, useEffect } from "react";
+import { X, Save, Loader, Edit } from "lucide-react";
+import "./SaveDraftModal.scss";
 
-function SaveDraftModal({ isOpen, onClose, onSave, defaultName, isSaving }) {
-  const [draftName, setDraftName] = useState(defaultName || '');
+function SaveDraftModal({
+  isOpen,
+  onClose,
+  onSave,
+  defaultName,
+  isSaving,
+  isEditing = false,
+}) {
+  const [draftName, setDraftName] = useState(defaultName || "");
+
+  // Update draft name when defaultName changes
+  useEffect(() => {
+    if (defaultName) {
+      setDraftName(defaultName);
+    }
+  }, [defaultName]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -14,7 +27,7 @@ function SaveDraftModal({ isOpen, onClose, onSave, defaultName, isSaving }) {
   };
 
   const handleClose = () => {
-    setDraftName(defaultName || '');
+    setDraftName(defaultName || "");
     onClose();
   };
 
@@ -22,12 +35,15 @@ function SaveDraftModal({ isOpen, onClose, onSave, defaultName, isSaving }) {
 
   return (
     <>
-      <div className="modal-backdrop modal-backdrop--visible" onClick={handleClose} />
+      <div
+        className="modal-backdrop modal-backdrop--visible"
+        onClick={handleClose}
+      />
       <div className="save-draft-modal">
         <div className="save-draft-modal__header">
-          <h3>Save Draft</h3>
-          <button 
-            className="save-draft-modal__close" 
+          <h3>{isEditing ? "Update Draft" : "Save Draft"}</h3>
+          <button
+            className="save-draft-modal__close"
             onClick={handleClose}
             disabled={isSaving}
           >
@@ -35,49 +51,66 @@ function SaveDraftModal({ isOpen, onClose, onSave, defaultName, isSaving }) {
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="save-draft-modal__form">
-          <div className="form-group">
-            <label htmlFor="draftName">Draft Name</label>
-            <input
-              id="draftName"
-              type="text"
-              value={draftName}
-              onChange={(e) => setDraftName(e.target.value)}
-              placeholder="Enter a name for this draft"
-              autoFocus
-              disabled={isSaving}
-              required
-            />
-          </div>
+        <div className="save-draft-modal__content">
+          <p className="save-draft-modal__description">
+            {isEditing
+              ? "Enter a new name for your draft or keep the existing one."
+              : "Give your draft a name to save it for later editing or deployment."}
+          </p>
 
-          <div className="save-draft-modal__actions">
-            <button
-              type="button"
-              className="btn btn-secondary"
-              onClick={handleClose}
-              disabled={isSaving}
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="btn btn-primary"
-              disabled={!draftName.trim() || isSaving}
-            >
-              {isSaving ? (
-                <>
-                  <Loader size={18} className="spinning" />
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <Save size={18} />
-                  Save Draft
-                </>
+          <form onSubmit={handleSubmit} className="save-draft-modal__form">
+            <div className="form-group">
+              <label htmlFor="draftName">
+                Draft Name
+                {isEditing && <span className="edit-badge">Editing</span>}
+              </label>
+              <input
+                id="draftName"
+                type="text"
+                value={draftName}
+                onChange={(e) => setDraftName(e.target.value)}
+                placeholder="Enter a name for this draft"
+                autoFocus
+                disabled={isSaving}
+                required
+              />
+              {isEditing && (
+                <p className="form-hint">
+                  Updating will overwrite the existing draft with your current
+                  changes.
+                </p>
               )}
-            </button>
-          </div>
-        </form>
+            </div>
+
+            <div className="save-draft-modal__actions">
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={handleClose}
+                disabled={isSaving}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className={`btn ${isEditing ? "btn-warning" : "btn-primary"}`}
+                disabled={!draftName.trim() || isSaving}
+              >
+                {isSaving ? (
+                  <>
+                    <Loader size={18} className="spinning" />
+                    {isEditing ? "Updating..." : "Saving..."}
+                  </>
+                ) : (
+                  <>
+                    {isEditing ? <Edit size={18} /> : <Save size={18} />}
+                    {isEditing ? "Update Draft" : "Save Draft"}
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </>
   );

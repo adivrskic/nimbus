@@ -10,6 +10,7 @@ export function AuthProvider({ children }) {
   const [isLoading, setIsLoading] = useState(true);
   const [showResetPassword, setShowResetPassword] = useState(false);
   const [justVerifiedEmail, setJustVerifiedEmail] = useState(false);
+  const [lastAuthCheck, setLastAuthCheck] = useState(Date.now());
 
   // Load remembered email on boot
   useEffect(() => {
@@ -17,17 +18,119 @@ export function AuthProvider({ children }) {
     if (savedEmail) setRememberedEmail(savedEmail);
   }, []);
 
+  // Session validation function
+  const validateSession = async () => {
+    try {
+      const {
+        data: { session },
+        error,
+      } = await supabase.auth.getSession();
+
+      if (error || !session?.access_token) {
+        console.log("Invalid or expired session detected");
+        setUser(null);
+        setProfile(null);
+        return false;
+      }
+
+      // Verify the session is still valid
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+
+      if (userError || !user) {
+        console.log("User verification failed:", userError);
+        setUser(null);
+        setProfile(null);
+        return false;
+      }
+
+      return true;
+    } catch (err) {
+      console.error("Session validation error:", err);
+      setUser(null);
+      setProfile(null);
+      return false;
+    }
+  };
+
+  // Refresh session function
+  const refreshSession = async () => {
+    try {
+      const {
+        data: { session },
+        error,
+      } = await supabase.auth.getSession();
+
+      if (error || !session) {
+        console.log("No valid session found");
+        setUser(null);
+        setProfile(null);
+        return;
+      }
+
+      // Get fresh user data
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (user) {
+        console.log("Session refreshed for:", user.email);
+        setUser(user);
+        await loadUserProfile(user.id);
+      } else {
+        console.log("No user found in session");
+        setUser(null);
+        setProfile(null);
+      }
+    } catch (err) {
+      console.error("Session refresh error:", err);
+      setUser(null);
+      setProfile(null);
+    }
+  };
+
   // Handle email verification and auth state
   useEffect(() => {
     let active = true;
+    let timeoutId = null;
 
     const initializeAuth = async () => {
       try {
-        // First, check for existing session
+        console.log("🔐 Initializing auth...");
+
+        // First, validate the existing session
+        const isValidSession = await validateSession();
+
+        if (!isValidSession) {
+          // Clear any stale data
+          setUser(null);
+          setProfile(null);
+          if (active) {
+            setIsLoading(false);
+          }
+          return;
+        }
+
+        // Rest of your initialization code...
         const {
           data: { session },
           error: sessionError,
         } = await supabase.auth.getSession();
+
+        if (session && !session.access_token) {
+          console.warn(
+            "Invalid Supabase session detected — forcing logout cleanup."
+          );
+          await supabase.auth.signOut();
+          setUser(null);
+          setProfile(null);
+          if (active) {
+            setIsLoading(false);
+          }
+          return;
+        }
 
         if (sessionError) {
           console.error("Session error:", sessionError);
@@ -74,6 +177,8 @@ export function AuthProvider({ children }) {
         }
       } catch (error) {
         console.error("Auth initialization error:", error);
+        setUser(null);
+        setProfile(null);
       } finally {
         if (active) {
           setIsLoading(false);
@@ -91,11 +196,30 @@ export function AuthProvider({ children }) {
 
       if (!active) return;
 
-      if (session?.user) {
+      setIsLoading(true); // Start loading for any auth state change
+      setLastAuthCheck(Date.now());
+
+      if (event === "SIGNED_OUT" || event === "USER_DELETED") {
+        // Clear all state on sign out
+        console.log("🔄 Auth state: SIGNED_OUT event detected");
+        setUser(null);
+        setProfile(null);
+        setJustVerifiedEmail(false);
+        localStorage.removeItem("rememberedEmail");
+        setRememberedEmail(null);
+
+        // Clear any pending timeouts
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+          timeoutId = null;
+        }
+
+        console.log("✅ User signed out - state cleared");
+      } else if (session?.user) {
+        console.log("🔄 Auth state: User session found");
         setUser(session.user);
         await loadUserProfile(session.user.id);
 
-        // Handle specific events
         if (event === "SIGNED_IN") {
           console.log("User signed in successfully");
           setJustVerifiedEmail(false);
@@ -103,17 +227,34 @@ export function AuthProvider({ children }) {
           console.log("User updated");
         }
       } else {
+        // No session and not SIGNED_OUT event (initial state)
+        console.log("🔄 Auth state: No active session");
         setUser(null);
         setProfile(null);
-        console.log("User signed out");
       }
 
       setIsLoading(false);
     });
 
+    // Periodic session check
+    const checkSession = async () => {
+      if (user && active) {
+        const isValid = await validateSession();
+        if (!isValid) {
+          console.log("Periodic check: Session is invalid, clearing state");
+          setUser(null);
+          setProfile(null);
+        }
+      }
+    };
+
+    // Check session every 5 minutes
+    timeoutId = setInterval(checkSession, 5 * 60 * 1000);
+
     return () => {
       active = false;
-      subscription?.unsubscribe();
+      if (subscription) subscription.unsubscribe();
+      if (timeoutId) clearInterval(timeoutId);
     };
   }, []);
 
@@ -241,6 +382,10 @@ export function AuthProvider({ children }) {
         localStorage.removeItem("rememberedEmail");
         setRememberedEmail(null);
       }
+
+      // Refresh the session to ensure consistency
+      await refreshSession();
+
       return { success: true, user: data.user };
     } catch (e) {
       return { success: false, error: e.message };
@@ -249,35 +394,60 @@ export function AuthProvider({ children }) {
 
   const logout = async () => {
     try {
-      console.log("Starting logout process...");
+      console.log("🚪 Starting logout...");
 
-      // Clear all local state first
+      // Clear all local state FIRST
+      console.log("Clearing local state...");
       setUser(null);
       setProfile(null);
       setRememberedEmail(null);
+      localStorage.removeItem("rememberedEmail");
       setJustVerifiedEmail(false);
 
-      // Clear localStorage items
-      localStorage.removeItem("rememberedEmail");
-
-      // Sign out from Supabase
-      const { error } = await supabase.auth.signOut();
-
-      if (error) {
-        console.error("Logout error:", error);
-        throw error;
+      // Clear any cached Supabase data
+      if (typeof window !== "undefined") {
+        // Clear Supabase related localStorage
+        Object.keys(localStorage).forEach((key) => {
+          if (key.includes("supabase") || key.includes("sb-")) {
+            localStorage.removeItem(key);
+          }
+        });
       }
 
-      console.log("Logout completed successfully");
+      // Sign out from Supabase with error handling
+      console.log("Signing out from Supabase...");
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error("Supabase logout error:", error);
+      } else {
+        console.log("Supabase session cleared");
+      }
 
-      // Force a small delay to ensure all state is cleared
-      await new Promise((resolve) => setTimeout(resolve, 100));
-    } catch (error) {
-      console.error("Logout failed:", error);
-      // Even if there's an error, clear local state
-      setUser(null);
-      setProfile(null);
-      setRememberedEmail(null);
+      // Force a small delay to ensure Supabase cleans up
+      await new Promise((resolve) => setTimeout(resolve, 300));
+
+      // Double-check session is cleared
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (session) {
+        console.warn("Session still exists after logout, forcing cleanup");
+        // Force clear all auth storage
+        if (typeof window !== "undefined") {
+          localStorage.clear();
+          sessionStorage.clear();
+        }
+      }
+
+      console.log("✅ Logout completed, reloading page...");
+
+      // Force hard reload to clear all React state and Supabase caches
+      window.location.href = "/";
+      window.location.reload();
+    } catch (err) {
+      console.error("Logout failed:", err);
+      // Still force refresh even on error
+      window.location.href = "/";
     }
   };
 
@@ -383,7 +553,7 @@ export function AuthProvider({ children }) {
     profile,
     rememberedEmail,
     isLoading,
-    isAuthenticated: !!user,
+    isAuthenticated: !!user && !!user.id, // More strict check
     justVerifiedEmail,
     clearJustVerifiedFlag,
     signup,
@@ -397,6 +567,9 @@ export function AuthProvider({ children }) {
     setSessionFromHash,
     supabase,
     refreshProfile: () => user && loadUserProfile(user.id),
+    refreshSession,
+    validateSession,
+    lastAuthCheck,
   };
 
   console.log("Auth context state:", {
@@ -405,6 +578,7 @@ export function AuthProvider({ children }) {
     isLoading,
     isAuthenticated: !!user,
     justVerifiedEmail,
+    lastAuthCheck,
   });
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

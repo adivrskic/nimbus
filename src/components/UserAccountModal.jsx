@@ -1,5 +1,4 @@
-// src/components/UserAccountModal.jsx
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   X,
   User,
@@ -15,6 +14,9 @@ import {
   Eye,
   FileText,
   Edit,
+  RefreshCw,
+  AlertTriangle,
+  Info,
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { renderTemplate } from "../utils/templateSystem";
@@ -33,13 +35,15 @@ function UserAccountModal({ isOpen, onClose }) {
     supabase,
     isAuthenticated,
   } = useAuth();
-  const [activeTab, setActiveTab] = useState("profile"); // 'profile', 'sites', 'drafts', 'billing', 'security'
+  const [activeTab, setActiveTab] = useState("profile");
   const [isLoading, setIsLoading] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [sites, setSites] = useState([]);
   const [drafts, setDrafts] = useState([]);
   const [billingSummary, setBillingSummary] = useState(null);
+  const [subscriptions, setSubscriptions] = useState([]);
 
   // Modal states
   const [confirmModal, setConfirmModal] = useState({
@@ -64,6 +68,13 @@ function UserAccountModal({ isOpen, onClose }) {
     billing_email: "",
   });
 
+  // Password form state
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
+
   useEffect(() => {
     if (profile) {
       setProfileForm({
@@ -73,6 +84,7 @@ function UserAccountModal({ isOpen, onClose }) {
     }
   }, [profile]);
 
+  // Close modal if user logs out
   useEffect(() => {
     if (!isAuthenticated && isOpen) {
       console.log("User logged out, closing account modal");
@@ -80,68 +92,76 @@ function UserAccountModal({ isOpen, onClose }) {
     }
   }, [isAuthenticated, isOpen, onClose]);
 
+  // Reset form states when modal closes
   useEffect(() => {
     if (!isOpen || !isAuthenticated) {
-      // Reset all form states
       setPasswordForm({
         currentPassword: "",
         newPassword: "",
         confirmPassword: "",
       });
-      // Add any other state resets here
+      setSuccessMessage("");
+      setErrorMessage("");
     }
   }, [isOpen, isAuthenticated]);
 
+  // Calculate billing summary whenever sites change
   useEffect(() => {
-    let timeoutId;
-
-    if (isLoading) {
-      // Safety timeout - clear loading after 30 seconds
-      timeoutId = setTimeout(() => {
-        console.warn("Loading timeout - clearing loading state");
-        setIsLoading(false);
-        setNotification({
-          isOpen: true,
-          message: "Operation timed out. Please try again.",
-          type: "error",
-        });
-      }, 30000); // 30 seconds
-    }
-
-    return () => {
-      if (timeoutId) clearTimeout(timeoutId);
-    };
-  }, [isLoading]);
-
-  // Password form state
-  const [passwordForm, setPasswordForm] = useState({
-    currentPassword: "", // ADD THIS
-    newPassword: "",
-    confirmPassword: "",
-  });
+    calculateBillingSummary();
+  }, [sites]);
 
   // Load user data when modal opens
   useEffect(() => {
     if (isOpen && user) {
       loadUserData();
-      setBillingSummary(calculateBillingSummary());
+      loadStripeSubscriptions();
     }
+  }, [isOpen, user]);
+
+  // Listen for deployment success from PaymentModal
+  useEffect(() => {
+    const handleDeploymentSuccess = async () => {
+      console.log("📡 Deployment success detected, refreshing sites...");
+      if (isOpen && user) {
+        await loadSites();
+        await loadStripeSubscriptions();
+        // Switch to sites tab to show the new site
+        setActiveTab("sites");
+
+        // Show success notification
+        setNotification({
+          isOpen: true,
+          message:
+            "Site deployed successfully! Your sites list has been updated.",
+          type: "success",
+        });
+      }
+    };
+
+    // Listen for a custom event that PaymentModal can dispatch
+    window.addEventListener("deployment-success", handleDeploymentSuccess);
+
+    return () => {
+      window.removeEventListener("deployment-success", handleDeploymentSuccess);
+    };
   }, [isOpen, user]);
 
   const loadUserData = async () => {
     if (!user) return;
 
-    // Load sites - just one query now
-    await loadSites();
-
-    // Load drafts - just one query now
-    await loadDrafts();
-
-    // No need for billing summary - calculate on the fly
+    setIsLoading(true);
+    try {
+      await Promise.all([loadSites(), loadDrafts()]);
+    } catch (error) {
+      console.error("Error loading user data:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const loadSites = async () => {
     try {
+      console.log("Loading sites for user:", user.id);
       const { data, error } = await supabase
         .from("sites")
         .select("*")
@@ -149,10 +169,14 @@ function UserAccountModal({ isOpen, onClose }) {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
+
+      console.log("Sites loaded:", data?.length || 0, "sites");
       setSites(data || []);
+      return data || [];
     } catch (error) {
       console.error("Error loading sites:", error);
       setSites([]);
+      return [];
     }
   };
 
@@ -172,20 +196,67 @@ function UserAccountModal({ isOpen, onClose }) {
     }
   };
 
-  const loadBillingSummary = async () => {
+  // Load Stripe subscriptions
+  const loadStripeSubscriptions = async () => {
     try {
+      console.log("Loading Stripe subscriptions...");
       const { data, error } = await supabase
-        .from("user_billing_summary")
+        .from("subscriptions")
         .select("*")
         .eq("user_id", user.id)
-        .single();
+        .eq("status", "active")
+        .order("created_at", { ascending: false });
 
       if (error) throw error;
-      setBillingSummary(data);
+
+      console.log("Stripe subscriptions loaded:", data?.length || 0);
+      setSubscriptions(data || []);
+      return data || [];
     } catch (error) {
-      console.error("Error loading billing summary:", error);
+      console.error("Error loading Stripe subscriptions:", error);
+      setSubscriptions([]);
+      return [];
     }
   };
+
+  const calculateBillingSummary = useCallback(() => {
+    console.log("Calculating billing summary for", sites.length, "sites");
+
+    // Count active sites (not cancelled and billing_status is active)
+    const activeSites = sites.filter(
+      (site) => site.billing_status === "active" && !site.cancelled_at
+    );
+
+    // Count trial sites
+    const trialSites = sites.filter((site) => site.billing_status === "trial");
+
+    // Count cancelled but still active (until period ends)
+    const cancelledButActive = sites.filter(
+      (site) =>
+        site.cancelled_at &&
+        site.current_period_end &&
+        new Date(site.current_period_end) > new Date()
+    );
+
+    // Calculate total monthly cost
+    const activeSiteCost = activeSites.length * 500; // $5 each
+    const cancelledSiteCost = cancelledButActive.length * 500;
+    const totalMonthlyCostCents = activeSiteCost + cancelledSiteCost;
+
+    const summary = {
+      total_sites: sites.length,
+      active_sites: activeSites.length,
+      trial_sites: trialSites.length,
+      cancelled_but_active: cancelledButActive.length,
+      active_subscriptions: subscriptions.length,
+      total_monthly_cost_cents: totalMonthlyCostCents,
+      upcoming_monthly_cost_cents: activeSites.length * 500, // After cancelled sites expire
+    };
+
+    console.log("Billing summary:", summary);
+    setBillingSummary(summary);
+    return summary;
+  }, [sites, subscriptions]);
 
   const handleProfileUpdate = async (e) => {
     e.preventDefault();
@@ -227,7 +298,6 @@ function UserAccountModal({ isOpen, onClose }) {
     setErrorMessage("");
 
     try {
-      // Validation - Check current password is provided
       if (!passwordForm.currentPassword) {
         setNotification({
           isOpen: true,
@@ -237,7 +307,6 @@ function UserAccountModal({ isOpen, onClose }) {
         return;
       }
 
-      // Validation - Check passwords match
       if (passwordForm.newPassword !== passwordForm.confirmPassword) {
         setNotification({
           isOpen: true,
@@ -247,7 +316,6 @@ function UserAccountModal({ isOpen, onClose }) {
         return;
       }
 
-      // Validation - Check minimum length
       if (passwordForm.newPassword.length < 8) {
         setNotification({
           isOpen: true,
@@ -257,7 +325,6 @@ function UserAccountModal({ isOpen, onClose }) {
         return;
       }
 
-      // Validation - Check password is different
       if (passwordForm.currentPassword === passwordForm.newPassword) {
         setNotification({
           isOpen: true,
@@ -267,7 +334,6 @@ function UserAccountModal({ isOpen, onClose }) {
         return;
       }
 
-      // STEP 1: Reauthenticate with current password
       console.log("Reauthenticating user...");
       const { error: reauthError } = await supabase.auth.signInWithPassword({
         email: user.email,
@@ -285,8 +351,6 @@ function UserAccountModal({ isOpen, onClose }) {
       }
 
       console.log("Reauthentication successful, updating password...");
-
-      // STEP 2: Now update to new password
       const result = await updatePassword(passwordForm.newPassword);
 
       if (result.success) {
@@ -296,7 +360,6 @@ function UserAccountModal({ isOpen, onClose }) {
           message: "Password updated successfully",
           type: "success",
         });
-        // Clear all fields
         setPasswordForm({
           currentPassword: "",
           newPassword: "",
@@ -318,43 +381,78 @@ function UserAccountModal({ isOpen, onClose }) {
         type: "error",
       });
     } finally {
-      // ✅ CRITICAL: Always clear loading state
       console.log("Clearing loading state");
       setIsLoading(false);
     }
   };
 
-  // Cancel site - much simpler
   const handleCancelSite = async (siteId, siteName) => {
     setConfirmModal({
       isOpen: true,
-      title: "Cancel Site?",
-      message: `Are you sure you want to cancel "${siteName}"? It will remain active until the end of your billing period.`,
+      title: "Cancel Site Subscription?",
+      message: `Are you sure you want to cancel the subscription for "${siteName}"? It will remain active until the end of your billing period.`,
       onConfirm: async () => {
         setIsLoading(true);
         try {
-          const { error } = await supabase
+          // First, find the subscription for this site
+          const { data: subscription, error: subError } = await supabase
+            .from("subscriptions")
+            .select("*")
+            .eq("site_id", siteId)
+            .eq("user_id", user.id)
+            .single();
+
+          if (subError) {
+            console.error("Error finding subscription:", subError);
+            throw new Error("Could not find subscription for this site");
+          }
+
+          // Update site status
+          const { error: siteError } = await supabase
             .from("sites")
             .update({
               billing_status: "cancelled",
               cancelled_at: new Date().toISOString(),
             })
             .eq("id", siteId)
-            .eq("user_id", user.id); // Security check
+            .eq("user_id", user.id);
 
-          if (error) throw error;
+          if (siteError) throw siteError;
 
-          setNotification({
-            isOpen: true,
-            message: "Site cancelled successfully",
-            type: "success",
-          });
+          // Cancel the Stripe subscription via edge function
+          const { error: stripeError } = await supabase.functions.invoke(
+            "cancel-subscription",
+            {
+              body: {
+                subscriptionId: subscription.stripe_subscription_id,
+              },
+            }
+          );
 
-          await loadSites(); // Reload sites
+          if (stripeError) {
+            console.error("Stripe cancellation error:", stripeError);
+            // Still mark as cancelled locally even if Stripe fails
+            setNotification({
+              isOpen: true,
+              message:
+                "Site marked as cancelled locally. Please contact support to cancel your Stripe subscription.",
+              type: "warning",
+            });
+          } else {
+            setNotification({
+              isOpen: true,
+              message: "Site subscription cancelled successfully",
+              type: "success",
+            });
+          }
+
+          // Refresh data
+          await Promise.all([loadSites(), loadStripeSubscriptions()]);
         } catch (error) {
+          console.error("Error cancelling site:", error);
           setNotification({
             isOpen: true,
-            message: error.message || "Failed to cancel site",
+            message: error.message || "Failed to cancel site subscription",
             type: "error",
           });
         } finally {
@@ -364,7 +462,6 @@ function UserAccountModal({ isOpen, onClose }) {
     });
   };
 
-  // Delete draft - simpler
   const handleDeleteDraft = async (draftId, draftName) => {
     setConfirmModal({
       isOpen: true,
@@ -429,6 +526,108 @@ function UserAccountModal({ isOpen, onClose }) {
     }
   };
 
+  // Add this function after other handler functions (around line ~180)
+  const handleEditDraft = (draft) => {
+    console.log("Editing draft:", draft);
+
+    // Store the draft data to pass to customizer
+    localStorage.setItem(
+      "editDraft",
+      JSON.stringify({
+        id: draft.id,
+        templateId: draft.template_id,
+        customization: draft.customization,
+        theme: draft.theme || "minimal",
+        colorMode: draft.color_mode || "auto",
+        draftName: draft.draft_name,
+      })
+    );
+
+    // Store as a flag to indicate we're editing a draft
+    localStorage.setItem("isEditingDraft", "true");
+
+    // Close the account modal
+    onClose();
+
+    // Open the customize modal for this template
+    // You'll need to pass this up to the parent component
+    // or use a global state management solution
+
+    // Option A: If you have a global state or context for modal management
+    window.dispatchEvent(
+      new CustomEvent("open-customize-with-draft", {
+        detail: {
+          templateId: draft.template_id,
+          draft: draft,
+        },
+      })
+    );
+
+    // Option B: If you can pass a callback from Home to UserAccountModal
+    // This requires modifying how UserAccountModal is called in Header.jsx
+  };
+
+  const handleRefreshSites = async () => {
+    setIsRefreshing(true);
+    try {
+      await Promise.all([loadSites(), loadStripeSubscriptions()]);
+      setNotification({
+        isOpen: true,
+        message: "Sites and subscriptions refreshed",
+        type: "success",
+      });
+    } catch (error) {
+      setNotification({
+        isOpen: true,
+        message: "Failed to refresh data",
+        type: "error",
+      });
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
+  const handleCancelStripeSubscription = async (subscriptionId) => {
+    setConfirmModal({
+      isOpen: true,
+      title: "Cancel Subscription?",
+      message:
+        "Are you sure you want to cancel this subscription? The site will remain active until the end of the billing period.",
+      onConfirm: async () => {
+        setIsLoading(true);
+        try {
+          const { error } = await supabase.functions.invoke(
+            "cancel-subscription",
+            {
+              body: {
+                subscriptionId: subscriptionId,
+              },
+            }
+          );
+
+          if (error) throw error;
+
+          setNotification({
+            isOpen: true,
+            message: "Subscription cancelled successfully",
+            type: "success",
+          });
+
+          await Promise.all([loadSites(), loadStripeSubscriptions()]);
+        } catch (error) {
+          console.error("Error cancelling subscription:", error);
+          setNotification({
+            isOpen: true,
+            message: error.message || "Failed to cancel subscription",
+            type: "error",
+          });
+        } finally {
+          setIsLoading(false);
+        }
+      },
+    });
+  };
+
   const formatCurrency = (cents) => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
@@ -449,20 +648,6 @@ function UserAccountModal({ isOpen, onClose }) {
     setSuccessMessage("");
     setErrorMessage("");
     onClose();
-  };
-
-  // Calculate billing summary on the fly - no database query needed
-  const calculateBillingSummary = () => {
-    const activeSites = sites.filter(
-      (site) => site.billing_status === "active" && !site.cancelled_at
-    );
-
-    return {
-      active_sites: activeSites.length,
-      total_monthly_cost_cents: activeSites.length * 500, // $5 per site
-      trial_sites: sites.filter((site) => site.billing_status === "trial")
-        .length,
-    };
   };
 
   if (!isOpen || !isAuthenticated) return null;
@@ -533,20 +718,6 @@ function UserAccountModal({ isOpen, onClose }) {
               Security
             </button>
           </div>
-
-          {/* Messages */}
-          {successMessage && (
-            <div className="message message--success">
-              <CheckCircle size={18} />
-              {successMessage}
-            </div>
-          )}
-          {errorMessage && (
-            <div className="message message--error">
-              <AlertCircle size={18} />
-              {errorMessage}
-            </div>
-          )}
 
           {/* Tab Content */}
           <div className="account-tab-content">
@@ -628,8 +799,22 @@ function UserAccountModal({ isOpen, onClose }) {
             {activeTab === "sites" && (
               <div className="sites-list">
                 <div className="sites-header">
-                  <h3>Your Deployed Sites</h3>
-                  <span className="sites-count">{sites.length} sites</span>
+                  <div>
+                    <h3>Your Deployed Sites</h3>
+                    <span className="sites-count">{sites.length} sites</span>
+                  </div>
+                  <button
+                    className="btn btn-secondary btn-small"
+                    onClick={handleRefreshSites}
+                    disabled={isRefreshing || isLoading}
+                    title="Refresh sites list"
+                  >
+                    <RefreshCw
+                      size={16}
+                      className={isRefreshing ? "spinning" : ""}
+                    />
+                    {isRefreshing ? "Refreshing..." : "Refresh"}
+                  </button>
                 </div>
 
                 {sites.length === 0 ? (
@@ -682,7 +867,9 @@ function UserAccountModal({ isOpen, onClose }) {
                           <div className="info-row">
                             <span className="info-label">Monthly:</span>
                             <span className="info-value">
-                              {formatCurrency(site.price_per_month_cents)}
+                              {formatCurrency(
+                                site.price_per_month_cents || 500
+                              )}
                             </span>
                           </div>
                           {site.current_period_end && (
@@ -711,6 +898,7 @@ function UserAccountModal({ isOpen, onClose }) {
 
                         {site.cancelled_at && (
                           <div className="cancellation-notice">
+                            <AlertTriangle size={16} />
                             Cancels on {formatDate(site.current_period_end)}
                           </div>
                         )}
@@ -773,6 +961,15 @@ function UserAccountModal({ isOpen, onClose }) {
                         <div className="draft-card__actions">
                           <button
                             className="btn btn-secondary btn-small"
+                            onClick={() => handleEditDraft(draft)}
+                            disabled={isLoading}
+                            title="Edit draft in customizer"
+                          >
+                            <Edit size={16} />
+                            <span className="btn-text">Edit</span>
+                          </button>
+                          <button
+                            className="btn btn-secondary btn-small"
                             onClick={() => handlePreviewDraft(draft)}
                             disabled={isLoading}
                             title="Preview draft"
@@ -812,64 +1009,117 @@ function UserAccountModal({ isOpen, onClose }) {
             {activeTab === "billing" && (
               <div className="billing-section">
                 <div className="billing-summary">
-                  <h3>Billing Summary</h3>
+                  <div className="billing-header">
+                    <h3>Billing Summary</h3>
+                  </div>
 
                   {billingSummary && (
-                    <div className="summary-cards">
-                      <div className="summary-card">
-                        <span className="summary-label">Active Sites</span>
-                        <span className="summary-value">
-                          {billingSummary.active_sites}
-                        </span>
-                      </div>
-                      <div className="summary-card">
-                        <span className="summary-label">Total Monthly</span>
-                        <span className="summary-value">
-                          {formatCurrency(
-                            billingSummary.total_monthly_cost_cents
-                          )}
-                        </span>
-                      </div>
-                      {billingSummary.trial_sites > 0 && (
+                    <>
+                      <div className="summary-cards">
                         <div className="summary-card">
-                          <span className="summary-label">Trial Sites</span>
+                          <span className="summary-label">Total Sites</span>
                           <span className="summary-value">
-                            {billingSummary.trial_sites}
+                            {billingSummary.total_sites}
                           </span>
                         </div>
-                      )}
-                    </div>
+                        <div className="summary-card">
+                          <span className="summary-label">Current Monthly</span>
+                          <span className="summary-value">
+                            {formatCurrency(
+                              billingSummary.total_monthly_cost_cents
+                            )}
+                          </span>
+                        </div>
+                      </div>
+                    </>
                   )}
 
                   <div className="billing-info">
-                    <p>
-                      <strong>Pricing:</strong> ${(500 / 100).toFixed(2)} per
-                      site per month
-                    </p>
-                    <p>
-                      Each site is billed separately. You can cancel anytime and
-                      the site will remain active until the end of your billing
-                      period.
-                    </p>
+                    <div className="info-card">
+                      <Info size={20} />
+                      <div>
+                        <p>
+                          <strong>Pricing:</strong> ${(500 / 100).toFixed(2)}{" "}
+                          per site per month
+                        </p>
+                        <p>
+                          Each active site is billed separately. Cancel anytime
+                          - sites remain active until the end of the billing
+                          period.
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
                 {profile?.stripe_customer_id && (
                   <div className="stripe-portal">
-                    <h3>Payment Methods</h3>
+                    <h3>Payment Methods & Invoices</h3>
                     <p>
-                      Manage your payment methods and view invoices through
-                      Stripe.
+                      Manage your payment methods, update billing info, and view
+                      invoices through Stripe Customer Portal.
                     </p>
                     <button
-                      className="btn btn-secondary"
-                      onClick={() => {
-                        // TODO: Create Stripe Customer Portal session
-                        alert("Stripe Customer Portal integration coming soon");
+                      className="btn btn-primary"
+                      onClick={async () => {
+                        setIsLoading(true);
+                        try {
+                          const { data, error } =
+                            await supabase.functions.invoke(
+                              "create-portal-session",
+                              {
+                                body: {
+                                  userId: user.id,
+                                  returnUrl: window.location.href,
+                                },
+                              }
+                            );
+
+                          if (error) {
+                            throw new Error(
+                              error.message || "Failed to create portal session"
+                            );
+                          }
+
+                          if (data?.url) {
+                            // Open Stripe Customer Portal in new tab
+                            window.open(
+                              data.url,
+                              "_blank",
+                              "noopener,noreferrer"
+                            );
+                          } else {
+                            throw new Error("No portal URL returned");
+                          }
+                        } catch (error) {
+                          console.error(
+                            "Error creating portal session:",
+                            error
+                          );
+                          setNotification({
+                            isOpen: true,
+                            message:
+                              error.message ||
+                              "Failed to open billing portal. Please try again or contact support.",
+                            type: "error",
+                          });
+                        } finally {
+                          setIsLoading(false);
+                        }
                       }}
+                      disabled={isLoading}
                     >
-                      <ExternalLink size={18} />
-                      Manage Billing
+                      {isLoading ? (
+                        <>
+                          <Loader size={18} className="spinning" />
+                          Loading...
+                        </>
+                      ) : (
+                        <>
+                          <ExternalLink size={18} />
+                          Manage Billing & Invoices
+                        </>
+                      )}
                     </button>
                   </div>
                 )}
@@ -897,7 +1147,7 @@ function UserAccountModal({ isOpen, onClose }) {
                       placeholder="••••••••"
                       autoComplete="current-password"
                       required
-                      disabled={isLoading} // Disable inputs during loading
+                      disabled={isLoading}
                     />
                     <span className="form-hint">
                       Required for security verification
@@ -919,7 +1169,7 @@ function UserAccountModal({ isOpen, onClose }) {
                       placeholder="••••••••"
                       autoComplete="new-password"
                       required
-                      disabled={isLoading} // Disable inputs during loading
+                      disabled={isLoading}
                     />
                     <span className="form-hint">
                       Must be at least 8 characters
@@ -943,7 +1193,7 @@ function UserAccountModal({ isOpen, onClose }) {
                       placeholder="••••••••"
                       autoComplete="new-password"
                       required
-                      disabled={isLoading} // Disable inputs during loading
+                      disabled={isLoading}
                     />
                   </div>
                 </div>
@@ -993,9 +1243,21 @@ function UserAccountModal({ isOpen, onClose }) {
       {deployModal.isOpen && deployModal.draft && (
         <PaymentModal
           isOpen={deployModal.isOpen}
-          onClose={() => setDeployModal({ isOpen: false, draft: null })}
+          onClose={() => {
+            setDeployModal({ isOpen: false, draft: null });
+            // Refresh data when PaymentModal closes
+            if (user) {
+              handleRefreshSites();
+            }
+          }}
           templateId={deployModal.draft.template_id}
           customization={deployModal.draft.customization}
+          htmlContent={renderTemplate(
+            deployModal.draft.template_id,
+            deployModal.draft.customization,
+            deployModal.draft.theme || "minimal",
+            deployModal.draft.color_mode || "auto"
+          )}
         />
       )}
     </>

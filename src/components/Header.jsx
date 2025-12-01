@@ -1,14 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-import { Link, useLocation } from "react-router-dom";
-import {
-  Moon,
-  Sun,
-  Cloudy,
-  User,
-  Settings,
-  LogOut,
-  ChevronDown,
-} from "lucide-react";
+import { useLocation } from "react-router-dom";
+import { Moon, Sun, Cloudy, Settings, LogOut, ChevronDown } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import AuthModal from "./AuthModal";
 import ForgotPasswordModal from "./ForgotPasswordModal";
@@ -36,9 +28,11 @@ function Header() {
   const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const userMenuRef = useRef(null);
 
+  // Close all modals when not authenticated
   useEffect(() => {
     if (!isAuthenticated && !isLoading) {
       console.log("🎯 Header: User not authenticated, closing modals");
@@ -48,6 +42,7 @@ function Header() {
     }
   }, [isAuthenticated, isLoading]);
 
+  // Refresh profile when authenticated but profile missing
   useEffect(() => {
     if (isAuthenticated && user && !profile) {
       console.log("User authenticated but profile missing, refreshing...");
@@ -63,6 +58,7 @@ function Header() {
     }
   }, [justVerifiedEmail, isAuthenticated]);
 
+  // Handle URL hash changes (email verification, password reset)
   useEffect(() => {
     const hash = window.location.hash;
 
@@ -106,19 +102,14 @@ function Header() {
     };
   }, [isUserMenuOpen]);
 
+  // Improved logout handler
   const handleLogout = async () => {
     console.log("🎯 Header: Logout initiated");
     setIsUserMenuOpen(false);
     setIsAccountModalOpen(false);
 
     await logout();
-
-    // Force close any open modals
-    setIsAuthModalOpen(false);
-    setIsAccountModalOpen(false);
-    setIsUserMenuOpen(false);
-
-    console.log("🎯 Header: Logout completed");
+    // No need to set isLoggingOut or do anything else - logout() will reload the page
   };
 
   const handleOpenAccountModal = () => {
@@ -206,6 +197,7 @@ function Header() {
                   <button
                     className="header__user-button"
                     onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                    disabled={isLoggingOut}
                   >
                     <div className="user-avatar">{getUserInitials()}</div>
                     <span className="user-name">{getUserDisplayName()}</span>
@@ -230,6 +222,7 @@ function Header() {
                       <button
                         className="dropdown-item"
                         onClick={handleOpenAccountModal}
+                        disabled={isLoggingOut}
                       >
                         <Settings size={16} />
                         Account Settings
@@ -238,9 +231,19 @@ function Header() {
                       <button
                         className="dropdown-item dropdown-item--danger"
                         onClick={handleLogout}
+                        disabled={isLoggingOut}
                       >
-                        <LogOut size={16} />
-                        Sign Out
+                        {isLoggingOut ? (
+                          <>
+                            <span className="spinner-small"></span>
+                            Signing Out...
+                          </>
+                        ) : (
+                          <>
+                            <LogOut size={16} />
+                            Sign Out
+                          </>
+                        )}
                       </button>
                     </div>
                   )}
@@ -249,8 +252,9 @@ function Header() {
                 <button
                   className="btn btn-primary"
                   onClick={() => setIsAuthModalOpen(true)}
+                  disabled={isLoading}
                 >
-                  Get Started
+                  {isLoading ? "Loading..." : "Get Started"}
                 </button>
               )}
             </nav>
@@ -273,10 +277,12 @@ function Header() {
       />
 
       {/* User Account Modal */}
-      <UserAccountModal
-        isOpen={isAccountModalOpen}
-        onClose={() => setIsAccountModalOpen(false)}
-      />
+      {isAuthenticated && (
+        <UserAccountModal
+          isOpen={isAccountModalOpen}
+          onClose={() => setIsAccountModalOpen(false)}
+        />
+      )}
     </>
   );
 }
