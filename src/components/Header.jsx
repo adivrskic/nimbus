@@ -23,7 +23,7 @@ function Header() {
   const location = useLocation();
   const isHomePage = location.pathname === "/";
 
-  const { user, profile, isAuthenticated, logout } = useAuth();
+  const { user, profile, isAuthenticated, logout, refreshProfile } = useAuth();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
@@ -31,7 +31,13 @@ function Header() {
 
   const userMenuRef = useRef(null);
 
-  // Check URL hash for email confirmation redirect
+  useEffect(() => {
+    if (isAuthenticated && user && !profile) {
+      console.log("User authenticated but profile missing, refreshing...");
+      refreshProfile();
+    }
+  }, [isAuthenticated, user, profile, refreshProfile]);
+
   useEffect(() => {
     const hash = window.location.hash;
 
@@ -43,6 +49,9 @@ function Header() {
       // Open auth modal if not already authenticated
       if (!isAuthenticated) {
         setIsAuthModalOpen(true);
+      } else {
+        // If already authenticated, refresh profile
+        refreshProfile();
       }
     }
 
@@ -53,7 +62,7 @@ function Header() {
         setIsAccountModalOpen(true);
       }
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, refreshProfile]);
 
   // Close user menu when clicking outside
   useEffect(() => {
