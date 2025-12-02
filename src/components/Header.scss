@@ -18,7 +18,39 @@
     transform: rotate(360deg);
   }
 }
+// Add to Header.scss
+.loading-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 
+  .spinner-small {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: spin 0.8s linear infinite;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Update existing spinner styles if needed
+.spinner-small {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 0.8s linear infinite;
+}
 .header {
   position: sticky;
   top: 0;

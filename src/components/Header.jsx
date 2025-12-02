@@ -21,7 +21,7 @@ function Header() {
     refreshProfile,
     justVerifiedEmail,
     clearJustVerifiedFlag,
-    isLoading,
+    isLoading: authIsLoading,
   } = useAuth();
 
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
@@ -29,18 +29,29 @@ function Header() {
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [isPageLoading, setIsPageLoading] = useState(false); // New state for page loading
 
   const userMenuRef = useRef(null);
 
+  // Show a brief loading state when page first loads
+  useEffect(() => {
+    setIsPageLoading(true);
+    const timer = setTimeout(() => {
+      setIsPageLoading(false);
+    }, 2000); // Show loading for 2 seconds max
+
+    return () => clearTimeout(timer);
+  }, []);
+
   // Close all modals when not authenticated
   useEffect(() => {
-    if (!isAuthenticated && !isLoading) {
+    if (!isAuthenticated && !authIsLoading) {
       console.log("🎯 Header: User not authenticated, closing modals");
       setIsAuthModalOpen(false);
       setIsAccountModalOpen(false);
       setIsUserMenuOpen(false);
     }
-  }, [isAuthenticated, isLoading]);
+  }, [isAuthenticated, authIsLoading]);
 
   // Refresh profile when authenticated but profile missing
   useEffect(() => {
@@ -107,9 +118,10 @@ function Header() {
     console.log("🎯 Header: Logout initiated");
     setIsUserMenuOpen(false);
     setIsAccountModalOpen(false);
+    setIsLoggingOut(true);
 
     await logout();
-    // No need to set isLoggingOut or do anything else - logout() will reload the page
+    // logout() will reload the page, so we don't need to reset isLoggingOut
   };
 
   const handleOpenAccountModal = () => {
@@ -157,6 +169,18 @@ function Header() {
     return "U";
   };
 
+  // Determine if we should show loading
+  const shouldShowLoading = () => {
+    // Only show loading for a limited time after page load
+    if (isPageLoading) return true;
+
+    // Don't show loading if we're authenticated
+    if (isAuthenticated) return false;
+
+    // Don't show loading if it's been more than 5 seconds
+    return authIsLoading;
+  };
+
   return (
     <>
       <header className="header">
@@ -188,6 +212,7 @@ function Header() {
                 className="header__theme-toggle"
                 onClick={toggleTheme}
                 aria-label="Toggle theme"
+                disabled={shouldShowLoading()}
               >
                 {theme === "light" ? <Moon size={20} /> : <Sun size={20} />}
               </button>
@@ -197,7 +222,7 @@ function Header() {
                   <button
                     className="header__user-button"
                     onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                    disabled={isLoggingOut}
+                    disabled={isLoggingOut || authIsLoading}
                   >
                     <div className="user-avatar">{getUserInitials()}</div>
                     <span className="user-name">{getUserDisplayName()}</span>
@@ -222,7 +247,7 @@ function Header() {
                       <button
                         className="dropdown-item"
                         onClick={handleOpenAccountModal}
-                        disabled={isLoggingOut}
+                        disabled={isLoggingOut || authIsLoading}
                       >
                         <Settings size={16} />
                         Account Settings
@@ -231,7 +256,7 @@ function Header() {
                       <button
                         className="dropdown-item dropdown-item--danger"
                         onClick={handleLogout}
-                        disabled={isLoggingOut}
+                        disabled={isLoggingOut || authIsLoading}
                       >
                         {isLoggingOut ? (
                           <>
@@ -252,9 +277,16 @@ function Header() {
                 <button
                   className="btn btn-primary"
                   onClick={() => setIsAuthModalOpen(true)}
-                  disabled={isLoading}
+                  disabled={shouldShowLoading()}
                 >
-                  {isLoading ? "Loading..." : "Get Started"}
+                  {shouldShowLoading() ? (
+                    <span className="loading-indicator">
+                      <span className="spinner-small"></span>
+                      Loading...
+                    </span>
+                  ) : (
+                    "Get Started"
+                  )}
                 </button>
               )}
             </nav>

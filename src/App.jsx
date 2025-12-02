@@ -3,7 +3,6 @@ import {
   Routes,
   Route,
   useLocation,
-  useNavigate,
 } from "react-router-dom";
 import { useEffect, lazy, Suspense } from "react";
 import Header from "./components/Header";
@@ -12,7 +11,6 @@ import ScrollToTop from "./components/ScrollToTop";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import ResetPasswordModal from "./components/ResetPasswordModal";
-import { AuthDebug } from "./components/debug/AuthDebug";
 
 import "./styles/global.scss";
 
@@ -36,7 +34,6 @@ const PageLoader = () => (
 
 function AppContent() {
   const location = useLocation();
-  const navigate = useNavigate();
   const { showResetPassword, setShowResetPassword, setSessionFromHash } =
     useAuth();
 
@@ -79,7 +76,6 @@ function App() {
     <Router>
       <AuthProvider>
         <ThemeProvider>
-          <AuthDebug />
           <ScrollToTop />
           <div className="app">
             <AppContent />

@@ -200,11 +200,13 @@ function UserAccountModal({ isOpen, onClose }) {
   const loadStripeSubscriptions = async () => {
     try {
       console.log("Loading Stripe subscriptions...");
+      // Load sites that have payment_intent_id (indicating they have a Stripe subscription)
       const { data, error } = await supabase
-        .from("subscriptions")
+        .from("sites")
         .select("*")
         .eq("user_id", user.id)
-        .eq("status", "active")
+        .eq("billing_status", "active")
+        .not("payment_intent_id", "is", null)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -248,7 +250,7 @@ function UserAccountModal({ isOpen, onClose }) {
       active_sites: activeSites.length,
       trial_sites: trialSites.length,
       cancelled_but_active: cancelledButActive.length,
-      active_subscriptions: subscriptions.length,
+      // Remove subscriptions count since you don't track them separately
       total_monthly_cost_cents: totalMonthlyCostCents,
       upcoming_monthly_cost_cents: activeSites.length * 500, // After cancelled sites expire
     };
@@ -256,7 +258,7 @@ function UserAccountModal({ isOpen, onClose }) {
     console.log("Billing summary:", summary);
     setBillingSummary(summary);
     return summary;
-  }, [sites, subscriptions]);
+  }, [sites]); // Remove subscriptions from dependency
 
   const handleProfileUpdate = async (e) => {
     e.preventDefault();
@@ -389,70 +391,66 @@ function UserAccountModal({ isOpen, onClose }) {
   const handleCancelSite = async (siteId, siteName) => {
     setConfirmModal({
       isOpen: true,
-      title: "Cancel Site Subscription?",
-      message: `Are you sure you want to cancel the subscription for "${siteName}"? It will remain active until the end of your billing period.`,
+      title: "Cancel and Delete Site?",
+      message: `Are you sure you want to cancel and delete "${siteName}"? This will:
+      • Cancel any active subscription
+      • Remove the site from Vercel
+      • Delete the site from your account
+      • Make the site URL inaccessible immediately
+      
+      This action cannot be undone.`,
       onConfirm: async () => {
         setIsLoading(true);
         try {
-          // First, find the subscription for this site
-          const { data: subscription, error: subError } = await supabase
-            .from("subscriptions")
-            .select("*")
-            .eq("site_id", siteId)
-            .eq("user_id", user.id)
-            .single();
-
-          if (subError) {
-            console.error("Error finding subscription:", subError);
-            throw new Error("Could not find subscription for this site");
-          }
-
-          // Update site status
-          const { error: siteError } = await supabase
-            .from("sites")
-            .update({
-              billing_status: "cancelled",
-              cancelled_at: new Date().toISOString(),
-            })
-            .eq("id", siteId)
-            .eq("user_id", user.id);
-
-          if (siteError) throw siteError;
-
-          // Cancel the Stripe subscription via edge function
-          const { error: stripeError } = await supabase.functions.invoke(
-            "cancel-subscription",
+          // First, try to delete from Vercel
+          const { error: deleteError } = await supabase.functions.invoke(
+            "delete-vercel-project",
             {
               body: {
-                subscriptionId: subscription.stripe_subscription_id,
+                siteId: siteId,
+                siteName: siteName,
               },
             }
           );
 
-          if (stripeError) {
-            console.error("Stripe cancellation error:", stripeError);
-            // Still mark as cancelled locally even if Stripe fails
+          if (deleteError) {
+            console.error("Error deleting from Vercel:", deleteError);
+            // Continue anyway to delete from our DB
             setNotification({
               isOpen: true,
-              message:
-                "Site marked as cancelled locally. Please contact support to cancel your Stripe subscription.",
+              message: `Site will be deleted from database. Vercel deletion failed: ${deleteError.message}`,
               type: "warning",
             });
           } else {
             setNotification({
               isOpen: true,
-              message: "Site subscription cancelled successfully",
+              message: "Site deleted from Vercel successfully",
               type: "success",
             });
           }
 
+          // Delete the site from our database
+          const { error: dbError } = await supabase
+            .from("sites")
+            .delete()
+            .eq("id", siteId)
+            .eq("user_id", user.id);
+
+          if (dbError) throw dbError;
+
+          setNotification({
+            isOpen: true,
+            message: "Site cancelled and deleted successfully from database",
+            type: "success",
+          });
+
           // Refresh data
-          await Promise.all([loadSites(), loadStripeSubscriptions()]);
+          await loadSites();
         } catch (error) {
           console.error("Error cancelling site:", error);
           setNotification({
             isOpen: true,
-            message: error.message || "Failed to cancel site subscription",
+            message: error.message || "Failed to cancel site",
             type: "error",
           });
         } finally {
@@ -652,6 +650,8 @@ function UserAccountModal({ isOpen, onClose }) {
 
   if (!isOpen || !isAuthenticated) return null;
 
+  console.log("SITES: ", sites);
+
   return (
     <>
       <div
@@ -799,22 +799,8 @@ function UserAccountModal({ isOpen, onClose }) {
             {activeTab === "sites" && (
               <div className="sites-list">
                 <div className="sites-header">
-                  <div>
-                    <h3>Your Deployed Sites</h3>
-                    <span className="sites-count">{sites.length} sites</span>
-                  </div>
-                  <button
-                    className="btn btn-secondary btn-small"
-                    onClick={handleRefreshSites}
-                    disabled={isRefreshing || isLoading}
-                    title="Refresh sites list"
-                  >
-                    <RefreshCw
-                      size={16}
-                      className={isRefreshing ? "spinning" : ""}
-                    />
-                    {isRefreshing ? "Refreshing..." : "Refresh"}
-                  </button>
+                  <h3>Your Deployed Sites</h3>
+                  <span className="sites-count">{sites.length} sites</span>
                 </div>
 
                 {sites.length === 0 ? (
@@ -838,7 +824,7 @@ function UserAccountModal({ isOpen, onClose }) {
                           </div>
                           {site.deployment_url && (
                             <a
-                              href={site.deployment_url}
+                              href={`https://${site.deployment_url}.vercel.app`}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="btn-icon"
@@ -882,8 +868,21 @@ function UserAccountModal({ isOpen, onClose }) {
                           )}
                         </div>
 
-                        {site.billing_status === "active" &&
-                          !site.cancelled_at && (
+                        {site.cancelled_at ? (
+                          <div className="cancellation-notice">
+                            <AlertTriangle size={16} />
+                            <div>
+                              <p>
+                                <strong>Cancelled:</strong>{" "}
+                                {formatDate(site.cancelled_at)}
+                              </p>
+                              <p className="small-text">
+                                Site will be removed within 24 hours
+                              </p>
+                            </div>
+                          </div>
+                        ) : (
+                          site.billing_status === "active" && (
                             <button
                               className="btn btn-danger btn-small"
                               onClick={() =>
@@ -892,15 +891,9 @@ function UserAccountModal({ isOpen, onClose }) {
                               disabled={isLoading}
                             >
                               <Trash2 size={16} />
-                              Cancel Subscription
+                              Cancel & Delete Site
                             </button>
-                          )}
-
-                        {site.cancelled_at && (
-                          <div className="cancellation-notice">
-                            <AlertTriangle size={16} />
-                            Cancels on {formatDate(site.current_period_end)}
-                          </div>
+                          )
                         )}
                       </div>
                     ))}

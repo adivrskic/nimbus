@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect, useRef } from "react";
 import { supabase } from "../lib/supabaseClient";
 
 const AuthContext = createContext();
@@ -12,10 +12,62 @@ export function AuthProvider({ children }) {
   const [justVerifiedEmail, setJustVerifiedEmail] = useState(false);
   const [lastAuthCheck, setLastAuthCheck] = useState(Date.now());
 
+  // Refs to track state and prevent re-initialization
+  const isInitializedRef = useRef(false);
+  const isLoadingRef = useRef(false);
+  const isTabVisibleRef = useRef(true);
+  const pendingAuthActionsRef = useRef([]);
+
   // Load remembered email on boot
   useEffect(() => {
     const savedEmail = localStorage.getItem("rememberedEmail");
     if (savedEmail) setRememberedEmail(savedEmail);
+  }, []);
+
+  // Track tab visibility
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      isTabVisibleRef.current = !document.hidden;
+      console.log("Tab visibility changed:", isTabVisibleRef.current);
+
+      // Don't trigger auth refreshes on tab visibility changes
+      // Only refresh if we need to handle something specific
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, []);
+
+  // Safe loading state setter
+  const setLoadingSafe = (loading) => {
+    if (isTabVisibleRef.current) {
+      isLoadingRef.current = loading;
+      setIsLoading(loading);
+    }
+  };
+
+  useEffect(() => {
+    const init = async () => {
+      try {
+        setLoadingSafe(true);
+
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+
+        if (session?.user) {
+          setUser(session.user);
+          await loadUserProfile(session.user.id);
+        }
+      } finally {
+        setLoadingSafe(false);
+      }
+    };
+
+    init();
   }, []);
 
   // Session validation function
@@ -52,6 +104,8 @@ export function AuthProvider({ children }) {
       setUser(null);
       setProfile(null);
       return false;
+    } finally {
+      setLoadingSafe(false);
     }
   };
 
@@ -88,17 +142,35 @@ export function AuthProvider({ children }) {
       console.error("Session refresh error:", err);
       setUser(null);
       setProfile(null);
+    } finally {
+      setLoadingSafe(false);
     }
   };
 
   // Handle email verification and auth state
   useEffect(() => {
+    // Prevent multiple initializations
+    if (isInitializedRef.current) return;
+    isInitializedRef.current = true;
+
     let active = true;
     let timeoutId = null;
+    let authSubscription = null;
 
     const initializeAuth = async () => {
       try {
         console.log("🔐 Initializing auth...");
+
+        // Only proceed if tab is visible
+        if (!isTabVisibleRef.current) {
+          console.log("Tab not visible, delaying auth initialization");
+          setTimeout(() => {
+            if (active) initializeAuth();
+          }, 1000);
+          return;
+        }
+
+        setLoadingSafe(true);
 
         // First, validate the existing session
         const isValidSession = await validateSession();
@@ -108,7 +180,7 @@ export function AuthProvider({ children }) {
           setUser(null);
           setProfile(null);
           if (active) {
-            setIsLoading(false);
+            setLoadingSafe(false);
           }
           return;
         }
@@ -127,7 +199,7 @@ export function AuthProvider({ children }) {
           setUser(null);
           setProfile(null);
           if (active) {
-            setIsLoading(false);
+            setLoadingSafe(false);
           }
           return;
         }
@@ -181,64 +253,92 @@ export function AuthProvider({ children }) {
         setProfile(null);
       } finally {
         if (active) {
-          setIsLoading(false);
+          setLoadingSafe(false);
         }
       }
     };
 
     initializeAuth();
 
-    // Listen for auth state changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("Auth state change:", event, session?.user?.email);
-
-      if (!active) return;
-
-      setIsLoading(true); // Start loading for any auth state change
-      setLastAuthCheck(Date.now());
-
-      if (event === "SIGNED_OUT" || event === "USER_DELETED") {
-        // Clear all state on sign out
-        console.log("🔄 Auth state: SIGNED_OUT event detected");
-        setUser(null);
-        setProfile(null);
-        setJustVerifiedEmail(false);
-        localStorage.removeItem("rememberedEmail");
-        setRememberedEmail(null);
-
-        // Clear any pending timeouts
-        if (timeoutId) {
-          clearTimeout(timeoutId);
-          timeoutId = null;
-        }
-
-        console.log("✅ User signed out - state cleared");
-      } else if (session?.user) {
-        console.log("🔄 Auth state: User session found");
-        setUser(session.user);
-        await loadUserProfile(session.user.id);
-
-        if (event === "SIGNED_IN") {
-          console.log("User signed in successfully");
-          setJustVerifiedEmail(false);
-        } else if (event === "USER_UPDATED") {
-          console.log("User updated");
-        }
-      } else {
-        // No session and not SIGNED_OUT event (initial state)
-        console.log("🔄 Auth state: No active session");
-        setUser(null);
-        setProfile(null);
+    // Listen for auth state changes with debouncing
+    let authChangeTimeout = null;
+    const handleAuthStateChange = async (event, session) => {
+      // Clear any pending auth change
+      if (authChangeTimeout) {
+        clearTimeout(authChangeTimeout);
       }
 
-      setIsLoading(false);
-    });
+      // Debounce auth state changes to prevent rapid updates
+      authChangeTimeout = setTimeout(async () => {
+        if (!active) return;
 
-    // Periodic session check
+        console.log("Auth state change:", event, session?.user?.email);
+
+        // Only process if tab is visible
+        if (!isTabVisibleRef.current) {
+          console.log("Tab not visible, queuing auth state change");
+          pendingAuthActionsRef.current.push({ event, session });
+          return;
+        }
+
+        setLoadingSafe(true);
+        setLastAuthCheck(Date.now());
+
+        if (event === "SIGNED_OUT" || event === "USER_DELETED") {
+          // Clear all state on sign out
+          console.log("🔄 Auth state: SIGNED_OUT event detected");
+          setUser(null);
+          setProfile(null);
+          setJustVerifiedEmail(false);
+          localStorage.removeItem("rememberedEmail");
+          setRememberedEmail(null);
+
+          console.log("✅ User signed out - state cleared");
+        } else if (session?.user) {
+          console.log("🔄 Auth state: User session found");
+          setUser(session.user);
+          await loadUserProfile(session.user.id);
+
+          if (event === "SIGNED_IN") {
+            console.log("User signed in successfully");
+            setJustVerifiedEmail(false);
+          } else if (event === "USER_UPDATED") {
+            console.log("User updated");
+          }
+        } else {
+          // No session and not SIGNED_OUT event (initial state)
+          console.log("🔄 Auth state: No active session");
+          setUser(null);
+          setProfile(null);
+        }
+
+        setLoadingSafe(false);
+      }, 500); // 500ms debounce
+    };
+
+    authSubscription = supabase.auth.onAuthStateChange(handleAuthStateChange);
+
+    // Process pending auth actions when tab becomes visible
+    const processPendingAuthActions = () => {
+      if (pendingAuthActionsRef.current.length > 0 && isTabVisibleRef.current) {
+        console.log(
+          "Processing pending auth actions:",
+          pendingAuthActionsRef.current.length
+        );
+        const actions = [...pendingAuthActionsRef.current];
+        pendingAuthActionsRef.current = [];
+
+        // Process the most recent auth action
+        if (actions.length > 0) {
+          const lastAction = actions[actions.length - 1];
+          handleAuthStateChange(lastAction.event, lastAction.session);
+        }
+      }
+    };
+
+    // Check session periodically (but less frequently)
     const checkSession = async () => {
-      if (user && active) {
+      if (user && active && isTabVisibleRef.current) {
         const isValid = await validateSession();
         if (!isValid) {
           console.log("Periodic check: Session is invalid, clearing state");
@@ -248,13 +348,42 @@ export function AuthProvider({ children }) {
       }
     };
 
-    // Check session every 5 minutes
-    timeoutId = setInterval(checkSession, 5 * 60 * 1000);
+    // Check session every 10 minutes (increased from 5)
+    timeoutId = setInterval(checkSession, 10 * 60 * 1000);
 
     return () => {
       active = false;
-      if (subscription) subscription.unsubscribe();
+      if (authSubscription?.subscription) {
+        authSubscription.subscription.unsubscribe();
+      }
       if (timeoutId) clearInterval(timeoutId);
+      if (authChangeTimeout) clearTimeout(authChangeTimeout);
+    };
+  }, []);
+
+  // Process pending actions when tab becomes visible
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      const isVisible = !document.hidden;
+      isTabVisibleRef.current = isVisible;
+
+      if (isVisible) {
+        // Tab became visible, process any pending auth actions
+        setTimeout(() => {
+          if (pendingAuthActionsRef.current.length > 0) {
+            console.log("Tab visible, processing pending auth actions");
+            // Just refresh session instead of processing all pending actions
+            refreshSession();
+            pendingAuthActionsRef.current = [];
+          }
+        }, 1000); // Delay to let everything stabilize
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, []);
 
@@ -365,9 +494,11 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // Login
+  // Login with safe loading
   const login = async (email, password, rememberMe = false) => {
     try {
+      setLoadingSafe(true);
+
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -389,12 +520,16 @@ export function AuthProvider({ children }) {
       return { success: true, user: data.user };
     } catch (e) {
       return { success: false, error: e.message };
+    } finally {
+      setLoadingSafe(false);
     }
   };
 
   const logout = async () => {
     try {
       console.log("🚪 Starting logout...");
+
+      setLoadingSafe(true);
 
       // Clear all local state FIRST
       console.log("Clearing local state...");
@@ -448,6 +583,8 @@ export function AuthProvider({ children }) {
       console.error("Logout failed:", err);
       // Still force refresh even on error
       window.location.href = "/";
+    } finally {
+      setLoadingSafe(false);
     }
   };
 
@@ -570,6 +707,8 @@ export function AuthProvider({ children }) {
     refreshSession,
     validateSession,
     lastAuthCheck,
+    // Expose safe loading setter for components
+    setLoadingSafe,
   };
 
   console.log("Auth context state:", {

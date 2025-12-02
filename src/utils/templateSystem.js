@@ -1,5 +1,5 @@
 // MVP Template System - Landing Page, Personal Profile, Restaurant
-import { generateThemeCSS, getTheme } from "./styleThemes";
+import { generateThemeCSS, getTheme } from "../styles/themes";
 
 class Template {
   constructor(id, config) {
