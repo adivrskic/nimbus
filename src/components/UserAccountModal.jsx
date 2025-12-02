@@ -388,64 +388,135 @@ function UserAccountModal({ isOpen, onClose }) {
     }
   };
 
+  // Add this to your AuthContext or UserAccountModal
+  const handleOpenBillingPortal = async () => {
+    setIsLoading(true);
+    try {
+      // Get customer ID from user's profile or sites
+      const { data: site } = await supabase
+        .from("sites")
+        .select("stripe_customer_id")
+        .eq("user_id", user.id)
+        .not("stripe_customer_id", "is", null)
+        .limit(1)
+        .single();
+
+      if (!site?.stripe_customer_id) {
+        throw new Error("No billing information found");
+      }
+
+      const { data, error } = await supabase.functions.invoke(
+        "create-portal-session",
+        {
+          body: {
+            customerId: site.stripe_customer_id,
+            returnUrl: window.location.href,
+          },
+        }
+      );
+
+      if (error) throw error;
+
+      if (data?.url) {
+        window.open(data.url, "_blank", "noopener,noreferrer");
+      }
+    } catch (error) {
+      setNotification({
+        isOpen: true,
+        message: error.message || "Failed to open billing portal",
+        type: "error",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleCancelSite = async (siteId, siteName) => {
     setConfirmModal({
       isOpen: true,
-      title: "Cancel and Delete Site?",
-      message: `Are you sure you want to cancel and delete "${siteName}"? This will:
-      • Cancel any active subscription
-      • Remove the site from Vercel
-      • Delete the site from your account
-      • Make the site URL inaccessible immediately
+      title: "Cancel Site Subscription?",
+      message: `Are you sure you want to cancel "${siteName}"? 
       
-      This action cannot be undone.`,
+      • Site will remain active until the end of your billing period
+      • You will not be charged again after this period
+      • You can resubscribe anytime
+      • Site files will be removed from Vercel`,
       onConfirm: async () => {
         setIsLoading(true);
         try {
-          // First, try to delete from Vercel
-          const { error: deleteError } = await supabase.functions.invoke(
-            "delete-vercel-project",
-            {
-              body: {
-                siteId: siteId,
-                siteName: siteName,
-              },
-            }
-          );
+          // 1. Get site to get subscription ID
+          const { data: site, error: siteError } = await supabase
+            .from("sites")
+            .select("*")
+            .eq("id", siteId)
+            .eq("user_id", user.id)
+            .single();
 
-          if (deleteError) {
-            console.error("Error deleting from Vercel:", deleteError);
-            // Continue anyway to delete from our DB
-            setNotification({
-              isOpen: true,
-              message: `Site will be deleted from database. Vercel deletion failed: ${deleteError.message}`,
-              type: "warning",
-            });
-          } else {
-            setNotification({
-              isOpen: true,
-              message: "Site deleted from Vercel successfully",
-              type: "success",
-            });
+          if (siteError) throw siteError;
+
+          // 2. Cancel Stripe subscription
+          if (site.stripe_subscription_id) {
+            const { error: cancelError } = await supabase.functions.invoke(
+              "cancel-subscription",
+              {
+                body: {
+                  subscriptionId: site.stripe_subscription_id,
+                },
+              }
+            );
+
+            if (cancelError) {
+              console.error("Stripe cancellation error:", cancelError);
+              setNotification({
+                isOpen: true,
+                message:
+                  "Failed to cancel subscription. Please contact support.",
+                type: "error",
+              });
+              return;
+            }
           }
 
-          // Delete the site from our database
-          const { error: dbError } = await supabase
+          // 3. Delete from Vercel
+          if (site.deployment_url) {
+            const { error: deleteError } = await supabase.functions.invoke(
+              "delete-vercel-project",
+              {
+                body: {
+                  siteId: siteId,
+                  siteName: site.deployment_url,
+                },
+              }
+            );
+
+            if (deleteError) {
+              console.error("Vercel deletion error:", deleteError);
+              // Continue anyway - mark as deleted in DB
+            }
+          }
+
+          // 4. Update database - mark as cancelled
+          const { error: updateError } = await supabase
             .from("sites")
-            .delete()
+            .update({
+              billing_status: "cancelled",
+              cancelled_at: new Date().toISOString(),
+              deployment_status: "deleted",
+            })
             .eq("id", siteId)
             .eq("user_id", user.id);
 
-          if (dbError) throw dbError;
+          if (updateError) throw updateError;
 
           setNotification({
             isOpen: true,
-            message: "Site cancelled and deleted successfully from database",
+            message:
+              "Site subscription cancelled successfully. You will not be charged again.",
             type: "success",
           });
 
-          // Refresh data
-          await loadSites();
+          // 5. Refresh data
+          await Promise.all([loadSites(), loadStripeSubscriptions()]);
         } catch (error) {
           console.error("Error cancelling site:", error);
           setNotification({

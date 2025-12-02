@@ -208,74 +208,85 @@ function PaymentForm({
     setError(null);
 
     try {
-      console.log("Creating payment intent...");
+      console.log("Creating Stripe customer and subscription...");
 
-      // Create payment intent
-      const { data: paymentData, error: paymentError } =
-        await supabase.functions.invoke("create-payment-intent", {
+      // 1. First, create or retrieve Stripe customer
+      const { data: customerData, error: customerError } =
+        await supabase.functions.invoke("create-stripe-customer", {
           body: {
-            templateId,
-            customization,
-            siteName,
-            customDomain,
-            amount: 500, // $5.00
-            currency: "usd",
+            email: user.email,
+            name: user.user_metadata?.full_name || "Customer",
           },
         });
 
-      if (paymentError) {
+      if (customerError) {
+        throw new Error(customerError.message || "Failed to create customer");
+      }
+
+      const stripeCustomerId = customerData.customerId;
+      console.log("Stripe customer ID:", stripeCustomerId);
+
+      // 2. Set up payment method
+      const cardElement = elements.getElement(CardElement);
+      const { error: setupError, setupIntent } = await stripe.confirmCardSetup(
+        customerData.clientSecret,
+        {
+          payment_method: {
+            card: cardElement,
+          },
+        }
+      );
+
+      if (setupError) {
+        throw setupError;
+      }
+
+      const paymentMethodId = setupIntent.payment_method;
+      console.log("Payment method ID:", paymentMethodId);
+
+      // 3. Create subscription
+      const { data: subscriptionData, error: subscriptionError } =
+        await supabase.functions.invoke("create-subscription", {
+          body: {
+            customerId: stripeCustomerId,
+            paymentMethodId: paymentMethodId,
+            siteName: siteName,
+            templateId: templateId,
+            customization: customization,
+          },
+        });
+
+      if (subscriptionError) {
         throw new Error(
-          paymentError.message || "Failed to create payment intent"
+          subscriptionError.message || "Failed to create subscription"
         );
       }
 
-      console.log("Payment intent created:", paymentData);
+      console.log("Subscription created:", subscriptionData);
 
-      // Confirm card payment
-      const { error: stripeError, paymentIntent } =
-        await stripe.confirmCardPayment(paymentData.clientSecret, {
-          payment_method: {
-            card: elements.getElement(CardElement),
-            billing_details: {
-              email: user?.email,
-              name: user?.user_metadata?.full_name || "Customer",
-            },
-          },
-        });
-
-      if (stripeError) {
-        throw stripeError;
-      }
-
-      console.log("Payment successful, deploying to Vercel...");
-
-      // Clean HTML content before sending
+      // 4. Deploy to Vercel
       const cleanHtmlContent = htmlContent
         .replace(/[\0-\x1F\x7F]/g, "")
         .replace(/\r\n/g, "\n")
         .replace(/\r/g, "\n");
 
-      console.log("Sending deployment request with:", {
-        paymentIntentId: paymentIntent.id,
-        siteName,
-        templateId,
-        htmlContentLength: cleanHtmlContent.length,
-      });
-
-      // Deploy to Vercel - MAKE SURE ALL REQUIRED PARAMETERS ARE INCLUDED
+      console.log("Deploying to Vercel...");
       const { data: deployData, error: deployError } =
         await supabase.functions.invoke("deploy-to-vercel", {
           body: {
-            paymentIntentId: paymentIntent.id, // REQUIRED
-            siteName: siteName, // REQUIRED
-            htmlContent: cleanHtmlContent, // REQUIRED
-            templateId: templateId, // Also include templateId
-            customization: customization, // Also include customization
+            siteName: siteName,
+            htmlContent: cleanHtmlContent,
+            templateId: templateId,
+            customization: customization,
+            stripeSubscriptionId: subscriptionData.subscriptionId, // Link to subscription
+            stripeCustomerId: stripeCustomerId,
           },
         });
 
       if (deployError) {
         console.error("Deployment error:", deployError);
+        // Note: Subscription was created, so we need to handle this case
+        // You might want to cancel subscription if deployment fails
         throw new Error(deployError.message || "Deployment failed");
       }
 
@@ -283,15 +294,36 @@ function PaymentForm({
         throw new Error(deployData?.error || "Deployment failed");
       }
 
-      console.log("Deployment successful:", deployData);
+      console.log("✅ Deployment successful");
+
+      // 5. Save subscription details to your database
+      const { error: dbError } = await supabase.from("sites").insert({
+        user_id: user.id,
+        site_name: siteName,
+        slug: siteName,
+        template_id: templateId,
+        customization: customization,
+        deployment_url: deployData.siteName || siteName,
+        deployment_status: "deployed",
+        billing_status: "active",
+        price_per_month_cents: 500,
+        stripe_subscription_id: subscriptionData.subscriptionId,
+        stripe_customer_id: stripeCustomerId,
+        current_period_end: subscriptionData.currentPeriodEnd,
+      });
+
+      if (dbError) {
+        console.error("Failed to save to database:", dbError);
+        // Still show success but warn user
+      }
 
       onSuccess({
         url: deployData.url,
         siteName: deployData.siteName || siteName,
         deploymentId: deployData.deployId,
+        subscriptionId: subscriptionData.subscriptionId,
       });
 
-      // Dispatch event to notify other components
       window.dispatchEvent(new CustomEvent("deployment-success"));
     } catch (err) {
       console.error("Payment/Deployment error:", err);

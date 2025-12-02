@@ -13,15 +13,11 @@ function Home() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
-  // IntersectionObserver hooks for reveal animations
   const [heroRef, heroVisible] = useReveal();
   const [stepsRef, stepsVisible] = useReveal();
   const [showcaseRef, showcaseVisible] = useReveal();
   const [templatesRef, templatesVisible] = useReveal();
 
-  console.log(templatesRef, templatesVisible);
-
-  // Check screen size on mount and resize
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
     checkMobile();
@@ -51,34 +47,25 @@ function Home() {
   ];
 
   const handleTemplateSelect = (templateId) => {
-    // FIX: Set template first, THEN open modal after a brief delay
     setSelectedTemplate(templateId);
 
-    // Small delay to ensure modal mounts before animation starts
     setTimeout(() => {
       setIsModalOpen(true);
     }, 10);
   };
 
   const handleCloseModal = () => {
-    // Close the modal (triggers slide-down animation)
     setIsModalOpen(false);
 
-    // Clear the template after animation completes
-    setTimeout(() => setSelectedTemplate(null), 400); // Match animation duration
+    setTimeout(() => setSelectedTemplate(null), 400);
   };
 
-  // Add this useEffect in the Home component
   useEffect(() => {
     const handleOpenCustomizeWithDraft = (event) => {
       const { templateId, draft } = event.detail;
 
-      console.log("Opening customize modal with draft:", draft);
-
-      // Set the template and open the modal
       setSelectedTemplate(templateId);
 
-      // Store draft data for the CustomizeModal to pick up
       localStorage.setItem(
         "editDraft",
         JSON.stringify({
@@ -93,7 +80,6 @@ function Home() {
 
       localStorage.setItem("isEditingDraft", "true");
 
-      // Open the modal
       setTimeout(() => {
         setIsModalOpen(true);
       }, 10);

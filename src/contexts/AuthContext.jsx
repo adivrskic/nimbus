@@ -12,26 +12,20 @@ export function AuthProvider({ children }) {
   const [justVerifiedEmail, setJustVerifiedEmail] = useState(false);
   const [lastAuthCheck, setLastAuthCheck] = useState(Date.now());
 
-  // Refs to track state and prevent re-initialization
   const isInitializedRef = useRef(false);
   const isLoadingRef = useRef(false);
   const isTabVisibleRef = useRef(true);
   const pendingAuthActionsRef = useRef([]);
 
-  // Load remembered email on boot
   useEffect(() => {
     const savedEmail = localStorage.getItem("rememberedEmail");
     if (savedEmail) setRememberedEmail(savedEmail);
   }, []);
 
-  // Track tab visibility
   useEffect(() => {
     const handleVisibilityChange = () => {
       isTabVisibleRef.current = !document.hidden;
       console.log("Tab visibility changed:", isTabVisibleRef.current);
-
-      // Don't trigger auth refreshes on tab visibility changes
-      // Only refresh if we need to handle something specific
     };
 
     document.addEventListener("visibilitychange", handleVisibilityChange);
@@ -41,7 +35,6 @@ export function AuthProvider({ children }) {
     };
   }, []);
 
-  // Safe loading state setter
   const setLoadingSafe = (loading) => {
     if (isTabVisibleRef.current) {
       isLoadingRef.current = loading;
@@ -70,7 +63,6 @@ export function AuthProvider({ children }) {
     init();
   }, []);
 
-  // Session validation function
   const validateSession = async () => {
     try {
       const {
@@ -85,7 +77,6 @@ export function AuthProvider({ children }) {
         return false;
       }
 
-      // Verify the session is still valid
       const {
         data: { user },
         error: userError,
@@ -109,7 +100,6 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // Refresh session function
   const refreshSession = async () => {
     try {
       const {
@@ -124,7 +114,6 @@ export function AuthProvider({ children }) {
         return;
       }
 
-      // Get fresh user data
       const {
         data: { user },
       } = await supabase.auth.getUser();
@@ -147,9 +136,7 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // Handle email verification and auth state
   useEffect(() => {
-    // Prevent multiple initializations
     if (isInitializedRef.current) return;
     isInitializedRef.current = true;
 
@@ -161,7 +148,6 @@ export function AuthProvider({ children }) {
       try {
         console.log("🔐 Initializing auth...");
 
-        // Only proceed if tab is visible
         if (!isTabVisibleRef.current) {
           console.log("Tab not visible, delaying auth initialization");
           setTimeout(() => {
@@ -172,11 +158,9 @@ export function AuthProvider({ children }) {
 
         setLoadingSafe(true);
 
-        // First, validate the existing session
         const isValidSession = await validateSession();
 
         if (!isValidSession) {
-          // Clear any stale data
           setUser(null);
           setProfile(null);
           if (active) {
@@ -185,7 +169,6 @@ export function AuthProvider({ children }) {
           return;
         }
 
-        // Rest of your initialization code...
         const {
           data: { session },
           error: sessionError,
@@ -210,7 +193,6 @@ export function AuthProvider({ children }) {
 
         console.log("Initial session check:", session?.user?.email);
 
-        // Handle email verification from URL
         const urlParams = new URLSearchParams(window.location.search);
         const type = urlParams.get("type");
         const token = urlParams.get("token");
@@ -260,7 +242,6 @@ export function AuthProvider({ children }) {
 
     initializeAuth();
 
-    // Listen for auth state changes with debouncing
     let authChangeTimeout = null;
     const handleAuthStateChange = async (event, session) => {
       // Clear any pending auth change

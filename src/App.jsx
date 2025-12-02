@@ -17,6 +17,7 @@ import "./styles/global.scss";
 const Home = lazy(() => import("./pages/Home"));
 const Roadmap = lazy(() => import("./pages/Roadmap"));
 const Support = lazy(() => import("./pages/Support"));
+const Legal = lazy(() => import("./pages/Legal"));
 
 const PageLoader = () => (
   <div
@@ -51,6 +52,7 @@ function AppContent() {
           <Route path="/" element={<Home />} />
           <Route path="/roadmap" element={<Roadmap />} />
           <Route path="/support" element={<Support />} />
+          <Route path="/legal" element={<Legal />} />
         </Routes>
       </Suspense>
       <Footer />
