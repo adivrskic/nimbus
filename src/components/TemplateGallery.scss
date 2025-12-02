@@ -288,7 +288,7 @@
   // Featured Filter - Special Style
   &--featured {
     background: var(--color-accent-light);
-    color: var(--color-accent);
+    color: var(--color-background);
     border-color: transparent;
 
     svg {
@@ -308,7 +308,7 @@
 
     &.active {
       background: var(--color-accent);
-      color: white;
+      color: var(--color-background);
       border-color: var(--color-accent);
 
       .filter-count {
@@ -352,7 +352,7 @@
 
   .filter-tab--featured:hover:not(.active) & {
     background: var(--color-background);
-    color: var(--color-text-primary);
+    color: var(--color-background);
     border-color: var(--color-border);
   }
 

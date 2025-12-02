@@ -233,6 +233,10 @@ function PaymentForm({
         {
           payment_method: {
             card: cardElement,
+            billing_details: {
+              email: user.email,
+              name: user.user_metadata?.full_name || "Customer",
+            },
           },
         }
       );
@@ -278,8 +282,8 @@ function PaymentForm({
             htmlContent: cleanHtmlContent,
             templateId: templateId,
             customization: customization,
-            stripeSubscriptionId: subscriptionData.subscriptionId, // Link to subscription
-            stripeCustomerId: stripeCustomerId,
+            subscriptionId: subscriptionData.subscriptionId,
+            customerId: stripeCustomerId,
           },
         });
 
@@ -303,8 +307,10 @@ function PaymentForm({
         slug: siteName,
         template_id: templateId,
         customization: customization,
-        deployment_url: deployData.siteName || siteName,
+        deployment_url: deployData.url || `https://${siteName}.vercel.app`,
+        deployment_provider: "vercel",
         deployment_status: "deployed",
+        deployed_at: new Date().toISOString(),
         billing_status: "active",
         price_per_month_cents: 500,
         stripe_subscription_id: subscriptionData.subscriptionId,
@@ -318,7 +324,7 @@ function PaymentForm({
       }
 
       onSuccess({
-        url: deployData.url,
+        url: deployData.url || `https://${siteName}.vercel.app`,
         siteName: deployData.siteName || siteName,
         deploymentId: deployData.deployId,
         subscriptionId: subscriptionData.subscriptionId,
@@ -332,6 +338,7 @@ function PaymentForm({
       setProcessing(false);
     }
   };
+
   return (
     <form onSubmit={handleSubmit} className="payment-form">
       <div className="form-section">
@@ -367,8 +374,7 @@ function PaymentForm({
               required
               disabled={processing}
             />
-            <span className="url-suffix">.vercel.app</span>{" "}
-            {/* Updated to Vercel */}
+            <span className="url-suffix">.vercel.app</span>
           </div>
           <p className="field-hint">
             Your site will be live at:{" "}
@@ -448,8 +454,8 @@ function PaymentForm({
 
         <p className="terms-text">
           By completing your purchase, you agree to our Terms of Service and
-          Privacy Policy. You'll be charged $5 monthly. Cancel anytime from your
-          dashboard.
+          Privacy Policy. You'll be charged $5 monthly per site. Cancel anytime
+          from your dashboard.
         </p>
       </div>
     </form>
@@ -465,7 +471,7 @@ function DeploymentSuccess({ deployment, onClose }) {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  console.log("deploymetn: ", deployment);
+  console.log("deployment: ", deployment);
 
   return (
     <div className="deployment-success">
@@ -570,6 +576,7 @@ export default function PaymentModal({
       window.dispatchEvent(event);
     }, 1000);
   };
+
   const handleClose = () => {
     setDeployment(null);
     onClose();
@@ -679,6 +686,9 @@ export default function PaymentModal({
                   </li>
                   <li>
                     <Check size={16} /> Cancel anytime
+                  </li>
+                  <li>
+                    <Check size={16} /> $5/month per site
                   </li>
                 </ul>
               </div>

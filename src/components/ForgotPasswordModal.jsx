@@ -1,15 +1,15 @@
 // src/components/ForgotPasswordModal.jsx
-import { useState } from 'react';
-import { X, Mail, Loader, CheckCircle } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
-import './AuthModal.scss';
+import { useState } from "react";
+import { X, Mail, Loader, CheckCircle } from "lucide-react";
+import { useAuth } from "../contexts/AuthContext";
+import "./AuthModal.scss";
 
 function ForgotPasswordModal({ isOpen, onClose }) {
   const { resetPassword } = useAuth();
-  const [email, setEmail] = useState('');
-  const [error, setError] = useState('');
+  const [email, setEmail] = useState("");
+  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [successMessage, setSuccessMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState("");
 
   const validateEmail = (email) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -17,44 +17,44 @@ function ForgotPasswordModal({ isOpen, onClose }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!email.trim()) {
-      setError('Email is required');
+      setError("Email is required");
       return;
     }
 
     if (!validateEmail(email)) {
-      setError('Please enter a valid email');
+      setError("Please enter a valid email");
       return;
     }
 
     setIsLoading(true);
-    setError('');
+    setError("");
 
     try {
       const result = await resetPassword(email);
-      
+
       if (result.success) {
         setSuccessMessage(result.message);
-        setEmail('');
+        setEmail("");
         // Close modal after 3 seconds
         setTimeout(() => {
           handleClose();
         }, 3000);
       } else {
-        setError(result.error || 'Failed to send reset email');
+        setError(result.error || "Failed to send reset email");
       }
     } catch (err) {
-      setError(err.message || 'Something went wrong. Please try again.');
+      setError(err.message || "Something went wrong. Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleClose = () => {
-    setEmail('');
-    setError('');
-    setSuccessMessage('');
+    setEmail("");
+    setError("");
+    setSuccessMessage("");
     onClose();
   };
 
@@ -62,20 +62,24 @@ function ForgotPasswordModal({ isOpen, onClose }) {
 
   return (
     <>
-      <div className="modal-backdrop modal-backdrop--visible" onClick={handleClose} />
+      <div
+        className="modal-backdrop modal-backdrop--visible"
+        onClick={handleClose}
+      />
       <div className="auth-modal">
-        <button className="auth-modal__close" onClick={handleClose}>
-          <X size={20} />
-        </button>
-
         <div className="auth-modal__content">
           <div className="auth-modal__header">
-            <h2>Reset Password</h2>
-            <p>
-              {successMessage 
-                ? "Check your email" 
-                : "Enter your email and we'll send you a reset link"}
-            </p>
+            <button className="auth-modal__close" onClick={handleClose}>
+              <X size={20} />
+            </button>
+            <div>
+              <h2>Reset Password</h2>
+              <p>
+                {successMessage
+                  ? "Check your email"
+                  : "Enter your email and we'll send you a reset link"}
+              </p>
+            </div>
           </div>
 
           {successMessage ? (
@@ -96,19 +100,19 @@ function ForgotPasswordModal({ isOpen, onClose }) {
                   value={email}
                   onChange={(e) => {
                     setEmail(e.target.value);
-                    setError('');
+                    setError("");
                   }}
                   placeholder="you@example.com"
                   disabled={isLoading}
-                  className={error ? 'error' : ''}
+                  className={error ? "error" : ""}
                   autoComplete="email"
                   autoFocus
                 />
                 {error && <span className="form-error">{error}</span>}
               </div>
 
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 className="btn btn-primary btn--full"
                 disabled={isLoading}
               >
@@ -118,12 +122,12 @@ function ForgotPasswordModal({ isOpen, onClose }) {
                     Sending...
                   </>
                 ) : (
-                  'Send Reset Link'
+                  "Send Reset Link"
                 )}
               </button>
 
-              <button 
-                type="button" 
+              <button
+                type="button"
                 className="btn btn-secondary btn--full"
                 onClick={handleClose}
                 disabled={isLoading}

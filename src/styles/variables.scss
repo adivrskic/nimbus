@@ -11,13 +11,17 @@
   --color-text-secondary: #86868b;
   --color-text-tertiary: #a1a1a6;
 
-  // Subtle Pink Accent - used sparingly
-  --color-accent: #eb1736;
-  --color-accent-hover: #d11530;
-  --color-accent-light: rgba(235, 23, 54, 0.08);
+  --color-accent: #0a0a0a;
+  --color-accent-hover: #212121;
+  --color-accent-light: rgba(116, 108, 109, 0.08);
 
   // Minimal Gradients
-  --gradient-accent: linear-gradient(135deg, #eb1736 0%, #ff1f47 100%);
+  --gradient-accent: linear-gradient(
+    135deg,
+    #0a0a0a 0%,
+    #2c2c2c 50%,
+    #1a1a1a 100%
+  );
 
   // Subtle Glassmorphism
   --glass-background: rgba(255, 255, 255, 0.8);
@@ -56,9 +60,12 @@
   --color-text-secondary: #98989d;
   --color-text-tertiary: #636366;
 
-  --color-accent: #eb1736;
-  --color-accent-hover: #d11530;
-  --color-accent-light: rgba(235, 23, 54, 0.08);
+  --color-accent: #f5f5f5;
+  --color-accent-hover: #e8e8e8;
+  --color-accent-light: rgba(245, 245, 245, 0.5);
+
+  // Minimal Gradients
+  --gradient-accent: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
 
   // Dark Glassmorphism
   --glass-background: rgba(28, 28, 30, 0.7);

@@ -1,13 +1,13 @@
-import { useState, useRef, useEffect } from 'react';
-import { 
-  ChevronDown, 
-  ChevronRight, 
-  Plus, 
-  Trash2, 
-  Eye, 
-  EyeOff, 
-  X, 
-  Upload, 
+import { useState, useRef, useEffect } from "react";
+import {
+  ChevronDown,
+  ChevronRight,
+  Plus,
+  Trash2,
+  Eye,
+  EyeOff,
+  X,
+  Upload,
   Image as ImageIcon,
   Palette,
   User,
@@ -21,13 +21,18 @@ import {
   Megaphone,
   Mail,
   Share2,
-  Layout
-} from 'lucide-react';
-import { getAllThemes } from '../styles/themes';
-import { useTheme } from '../contexts/ThemeContext';
-import './CustomizationPanel.scss';
+  Layout,
+} from "lucide-react";
+import { getAllThemes } from "../styles/themes";
+import { useTheme } from "../contexts/ThemeContext";
+import "./CustomizationPanel.scss";
 
-function CustomizationPanel({ fields, customization, onChange, onImageUpload }) {
+function CustomizationPanel({
+  fields,
+  customization,
+  onChange,
+  onImageUpload,
+}) {
   const [visibleFields, setVisibleFields] = useState({});
   const [collapsedGroups, setCollapsedGroups] = useState({});
   const [activeSection, setActiveSection] = useState(null);
@@ -38,75 +43,107 @@ function CustomizationPanel({ fields, customization, onChange, onImageUpload }) 
 
   // Icon mapping for sections
   const sectionIcons = {
-    'Design Style': Palette,
-    'Basic Info': User,
-    'Images & Media': ImageIcon,
-    'Content': FileText,
-    'Features': Star,
-    'Portfolio': Briefcase,
-    'Statistics': BarChart3,
-    'Testimonials': MessageSquare,
-    'Team': Users,
-    'Pricing': DollarSign,
-    'Call to Action': Megaphone,
-    'Contact Info': Mail,
-    'Social Links': Share2,
-    'General': Layout
+    "Design Style": Palette,
+    "Basic Info": User,
+    "Images & Media": ImageIcon,
+    Content: FileText,
+    Features: Star,
+    Portfolio: Briefcase,
+    Statistics: BarChart3,
+    Testimonials: MessageSquare,
+    Team: Users,
+    Pricing: DollarSign,
+    "Call to Action": Megaphone,
+    "Contact Info": Mail,
+    "Social Links": Share2,
+    General: Layout,
   };
 
   // Automatically categorize fields into sections
   const categorizeField = (key, field) => {
     // Check if field explicitly defines a section
     if (field.section) return field.section;
-    
+
     // Theme selector gets its own section
-    if (field.type === 'theme-selector') return 'Design Style';
-    
+    if (field.type === "theme-selector") return "Design Style";
+
     // Color mode selector
-    if (key === 'colorMode') return 'Design Style';
-    
+    if (key === "colorMode") return "Design Style";
+
     // Images and visual content
-    if (field.type === 'image' || key.includes('image') || key.includes('photo') || key.includes('logo')) {
-      return 'Images & Media';
+    if (
+      field.type === "image" ||
+      key.includes("image") ||
+      key.includes("photo") ||
+      key.includes("logo")
+    ) {
+      return "Images & Media";
     }
-    
+
     // Group fields for structured content
-    if (field.type === 'group') {
+    if (field.type === "group") {
       // Categorize based on the label or key
-      if (key.includes('feature') || key.includes('service')) return 'Features';
-      if (key.includes('project') || key.includes('work') || key.includes('portfolio')) return 'Portfolio';
-      if (key.includes('testimonial') || key.includes('review')) return 'Testimonials';
-      if (key.includes('team') || key.includes('member') || key.includes('instructor')) return 'Team';
-      if (key.includes('pricing') || key.includes('plan')) return 'Pricing';
-      if (key.includes('stat') || key.includes('metric')) return 'Statistics';
-      if (key.includes('social') || key.includes('link')) return 'Social Links';
-      if (key.includes('curriculum') || key.includes('module')) return 'Content';
-      return 'Content';
+      if (key.includes("feature") || key.includes("service")) return "Features";
+      if (
+        key.includes("project") ||
+        key.includes("work") ||
+        key.includes("portfolio")
+      )
+        return "Portfolio";
+      if (key.includes("testimonial") || key.includes("review"))
+        return "Testimonials";
+      if (
+        key.includes("team") ||
+        key.includes("member") ||
+        key.includes("instructor")
+      )
+        return "Team";
+      if (key.includes("pricing") || key.includes("plan")) return "Pricing";
+      if (key.includes("stat") || key.includes("metric")) return "Statistics";
+      if (key.includes("social") || key.includes("link")) return "Social Links";
+      if (key.includes("curriculum") || key.includes("module"))
+        return "Content";
+      return "Content";
     }
-    
+
     // Contact and social
-    if (key.includes('email') || key.includes('phone') || key.includes('contact') || key.includes('address')) {
-      return 'Contact Info';
+    if (
+      key.includes("email") ||
+      key.includes("phone") ||
+      key.includes("contact") ||
+      key.includes("address")
+    ) {
+      return "Contact Info";
     }
-    
-    if (key.includes('social') || key.includes('twitter') || key.includes('linkedin')) {
-      return 'Social Links';
+
+    if (
+      key.includes("social") ||
+      key.includes("twitter") ||
+      key.includes("linkedin")
+    ) {
+      return "Social Links";
     }
-    
+
     // Main content fields
-    if (key.includes('title') || key.includes('headline') || key.includes('name') || 
-        key.includes('tagline') || key.includes('bio') || key.includes('description') ||
-        key.includes('about')) {
-      return 'Basic Info';
+    if (
+      key.includes("title") ||
+      key.includes("headline") ||
+      key.includes("name") ||
+      key.includes("tagline") ||
+      key.includes("bio") ||
+      key.includes("description") ||
+      key.includes("about")
+    ) {
+      return "Basic Info";
     }
-    
+
     // CTA and buttons
-    if (key.includes('cta') || key.includes('button')) {
-      return 'Call to Action';
+    if (key.includes("cta") || key.includes("button")) {
+      return "Call to Action";
     }
-    
+
     // Default section
-    return 'Basic Info';
+    return "Basic Info";
   };
 
   // Group fields into sections with smart categorization
@@ -121,30 +158,30 @@ function CustomizationPanel({ fields, customization, onChange, onImageUpload }) 
 
   // Define a preferred order for sections
   const sectionOrder = [
-    'Design Style',
-    'Basic Info',
-    'Images & Media',
-    'Content',
-    'Features',
-    'Portfolio',
-    'Statistics',
-    'Testimonials',
-    'Team',
-    'Pricing',
-    'Call to Action',
-    'Contact Info',
-    'Social Links'
+    "Design Style",
+    "Basic Info",
+    "Images & Media",
+    "Content",
+    "Features",
+    "Portfolio",
+    "Statistics",
+    "Testimonials",
+    "Team",
+    "Pricing",
+    "Call to Action",
+    "Contact Info",
+    "Social Links",
   ];
 
   // Sort sections by preferred order
   const orderedSections = {};
-  sectionOrder.forEach(sectionName => {
+  sectionOrder.forEach((sectionName) => {
     if (sections[sectionName]) {
       orderedSections[sectionName] = sections[sectionName];
     }
   });
   // Add any remaining sections not in the preferred order
-  Object.keys(sections).forEach(sectionName => {
+  Object.keys(sections).forEach((sectionName) => {
     if (!orderedSections[sectionName]) {
       orderedSections[sectionName] = sections[sectionName];
     }
@@ -180,7 +217,7 @@ function CustomizationPanel({ fields, customization, onChange, onImageUpload }) 
       for (let i = sectionKeys.length - 1; i >= 0; i--) {
         const sectionKey = sectionKeys[i];
         const sectionElement = sectionRefs.current[sectionKey];
-        
+
         if (sectionElement) {
           const sectionTop = sectionElement.offsetTop - offset;
           if (scrollTop >= sectionTop) {
@@ -193,8 +230,8 @@ function CustomizationPanel({ fields, customization, onChange, onImageUpload }) 
 
     const content = contentRef.current;
     if (content) {
-      content.addEventListener('scroll', handleScroll);
-      return () => content.removeEventListener('scroll', handleScroll);
+      content.addEventListener("scroll", handleScroll);
+      return () => content.removeEventListener("scroll", handleScroll);
     }
   }, [sectionKeys]);
 
@@ -205,13 +242,12 @@ function CustomizationPanel({ fields, customization, onChange, onImageUpload }) 
       const elementPosition = sectionElement.offsetTop;
       contentRef.current.scrollTo({
         top: elementPosition - offset,
-        behavior: 'smooth'
+        behavior: "smooth",
       });
     }
   };
 
   const handleThemeChange = (path, themeId) => {
-    console.log(themeId);
     onChange(path, themeId);
     setStyleTheme(themeId); // Update global state
   };
@@ -224,11 +260,11 @@ function CustomizationPanel({ fields, customization, onChange, onImageUpload }) 
   };
 
   const toggleFieldVisibility = (fieldKey) => {
-    setVisibleFields(prev => ({
+    setVisibleFields((prev) => ({
       ...prev,
-      [fieldKey]: !prev[fieldKey]
+      [fieldKey]: !prev[fieldKey],
     }));
-    
+
     // Reset to default if hiding
     if (!visibleFields[fieldKey]) {
       onChange(fieldKey, fields[fieldKey].default);
@@ -237,9 +273,9 @@ function CustomizationPanel({ fields, customization, onChange, onImageUpload }) 
 
   const toggleGroupCollapse = (groupKey, index) => {
     const key = `${groupKey}_${index}`;
-    setCollapsedGroups(prev => ({
+    setCollapsedGroups((prev) => ({
       ...prev,
-      [key]: !prev[key]
+      [key]: !prev[key],
     }));
   };
 
@@ -254,7 +290,7 @@ function CustomizationPanel({ fields, customization, onChange, onImageUpload }) 
     const isHidden = visibleFields[key] === false;
 
     // Special handling for theme selector
-    if (field.type === 'theme-selector') {
+    if (field.type === "theme-selector") {
       return (
         <div key={key} className="field field--theme-selector">
           {/* <div className="field__header">
@@ -263,11 +299,11 @@ function CustomizationPanel({ fields, customization, onChange, onImageUpload }) 
             </label>
           </div> */}
           <div className="theme-selector-grid">
-            {themes.map(theme => (
+            {themes.map((theme) => (
               <button
                 key={theme.id}
                 type="button"
-                className={`theme-option ${value === theme.id ? 'active' : ''}`}
+                className={`theme-option ${value === theme.id ? "active" : ""}`}
                 onClick={() => handleThemeChange(path, theme.id)}
               >
                 <div className="theme-info">
@@ -280,12 +316,15 @@ function CustomizationPanel({ fields, customization, onChange, onImageUpload }) 
         </div>
       );
     }
-    
-    if (field.type === 'group') {
+
+    if (field.type === "group") {
       const groupValue = value || field.default || [];
-      
+
       return (
-        <div key={key} className={`field field--group ${isHidden ? 'field--hidden' : ''}`}>
+        <div
+          key={key}
+          className={`field field--group ${isHidden ? "field--hidden" : ""}`}
+        >
           <div className="field__header">
             <label className="field__label">
               {field.label}
@@ -299,7 +338,7 @@ function CustomizationPanel({ fields, customization, onChange, onImageUpload }) 
                   type="button"
                   className="field__toggle"
                   onClick={() => toggleFieldVisibility(key)}
-                  title={isHidden ? 'Show field' : 'Hide field'}
+                  title={isHidden ? "Show field" : "Hide field"}
                 >
                   {isHidden ? <Eye size={16} /> : <EyeOff size={16} />}
                 </button>
@@ -312,7 +351,7 @@ function CustomizationPanel({ fields, customization, onChange, onImageUpload }) 
               <div className="field__group">
                 {groupValue.map((item, index) => {
                   const isCollapsed = collapsedGroups[`${key}_${index}`];
-                  
+
                   return (
                     <div key={index} className="field__group-item">
                       <div className="field__group-item-header">
@@ -321,10 +360,15 @@ function CustomizationPanel({ fields, customization, onChange, onImageUpload }) 
                           className="field__group-item-toggle"
                           onClick={() => toggleGroupCollapse(key, index)}
                         >
-                          {isCollapsed ? <ChevronRight size={16} /> : <ChevronDown size={16} />}
+                          {isCollapsed ? (
+                            <ChevronRight size={16} />
+                          ) : (
+                            <ChevronDown size={16} />
+                          )}
                           <span className="field__group-item-title">
                             {field.itemLabel} {index + 1}
-                            {item[Object.keys(field.fields)[0]] && `: ${item[Object.keys(field.fields)[0]]}`}
+                            {item[Object.keys(field.fields)[0]] &&
+                              `: ${item[Object.keys(field.fields)[0]]}`}
                           </span>
                         </button>
                         <button
@@ -340,29 +384,40 @@ function CustomizationPanel({ fields, customization, onChange, onImageUpload }) 
                           <Trash2 size={16} />
                         </button>
                       </div>
-                      
+
                       {!isCollapsed && (
                         <div className="field__group-item-fields">
-                          {Object.entries(field.fields).map(([fieldKey, fieldConfig]) => {
-                            const fieldPath = `${path}[${index}].${fieldKey}`;
-                            const fieldValue = item[fieldKey] || fieldConfig.default;
-                            
-                            return (
-                              <div key={fieldKey} className="field__group-field">
-                                <label className="field__group-field-label">
-                                  {fieldConfig.label}
-                                </label>
-                                {renderFieldInput(fieldConfig, fieldValue, (newValue) => {
-                                  const newGroupValue = [...groupValue];
-                                  newGroupValue[index] = {
-                                    ...newGroupValue[index],
-                                    [fieldKey]: newValue
-                                  };
-                                  onChange(path, newGroupValue);
-                                }, fieldPath)}
-                              </div>
-                            );
-                          })}
+                          {Object.entries(field.fields).map(
+                            ([fieldKey, fieldConfig]) => {
+                              const fieldPath = `${path}[${index}].${fieldKey}`;
+                              const fieldValue =
+                                item[fieldKey] || fieldConfig.default;
+
+                              return (
+                                <div
+                                  key={fieldKey}
+                                  className="field__group-field"
+                                >
+                                  <label className="field__group-field-label">
+                                    {fieldConfig.label}
+                                  </label>
+                                  {renderFieldInput(
+                                    fieldConfig,
+                                    fieldValue,
+                                    (newValue) => {
+                                      const newGroupValue = [...groupValue];
+                                      newGroupValue[index] = {
+                                        ...newGroupValue[index],
+                                        [fieldKey]: newValue,
+                                      };
+                                      onChange(path, newGroupValue);
+                                    },
+                                    fieldPath
+                                  )}
+                                </div>
+                              );
+                            }
+                          )}
                         </div>
                       )}
                     </div>
@@ -376,14 +431,16 @@ function CustomizationPanel({ fields, customization, onChange, onImageUpload }) 
                   className="field__group-add"
                   onClick={() => {
                     const newItem = {};
-                    Object.entries(field.fields).forEach(([fieldKey, fieldConfig]) => {
-                      newItem[fieldKey] = fieldConfig.default || '';
-                    });
+                    Object.entries(field.fields).forEach(
+                      ([fieldKey, fieldConfig]) => {
+                        newItem[fieldKey] = fieldConfig.default || "";
+                      }
+                    );
                     onChange(path, [...groupValue, newItem]);
                   }}
                 >
                   <Plus size={16} />
-                  Add {field.itemLabel || 'Item'}
+                  Add {field.itemLabel || "Item"}
                 </button>
               )}
             </>
@@ -392,22 +449,24 @@ function CustomizationPanel({ fields, customization, onChange, onImageUpload }) 
       );
     }
 
-    if (field.type === 'repeatable') {
-      const repeatableValue = value || field.default || [''];
-      
+    if (field.type === "repeatable") {
+      const repeatableValue = value || field.default || [""];
+
       return (
-        <div key={key} className={`field ${isHidden ? 'field--hidden' : ''}`}>
+        <div key={key} className={`field ${isHidden ? "field--hidden" : ""}`}>
           <div className="field__header">
             <label className="field__label">
               {field.label}
-              {field.optional && <span className="field__optional">Optional</span>}
+              {field.optional && (
+                <span className="field__optional">Optional</span>
+              )}
             </label>
             {field.optional && (
               <button
                 type="button"
                 className="field__toggle"
                 onClick={() => toggleFieldVisibility(key)}
-                title={isHidden ? 'Show field' : 'Hide field'}
+                title={isHidden ? "Show field" : "Hide field"}
               >
                 {isHidden ? <Eye size={16} /> : <EyeOff size={16} />}
               </button>
@@ -450,7 +509,7 @@ function CustomizationPanel({ fields, customization, onChange, onImageUpload }) 
                 type="button"
                 className="field__repeatable-add"
                 onClick={() => {
-                  onChange(path, [...repeatableValue, '']);
+                  onChange(path, [...repeatableValue, ""]);
                 }}
               >
                 <Plus size={16} />
@@ -463,63 +522,71 @@ function CustomizationPanel({ fields, customization, onChange, onImageUpload }) 
     }
 
     return (
-      <div key={key} className={`field ${isHidden ? 'field--hidden' : ''}`}>
+      <div key={key} className={`field ${isHidden ? "field--hidden" : ""}`}>
         <div className="field__header">
           <label className="field__label">
             {field.label}
-            {field.optional && <span className="field__optional">Optional</span>}
+            {field.optional && (
+              <span className="field__optional">Optional</span>
+            )}
           </label>
           {field.optional && (
             <button
               type="button"
               className="field__toggle"
               onClick={() => toggleFieldVisibility(key)}
-              title={isHidden ? 'Show field' : 'Hide field'}
+              title={isHidden ? "Show field" : "Hide field"}
             >
               {isHidden ? <Eye size={16} /> : <EyeOff size={16} />}
             </button>
           )}
         </div>
-        {!isHidden && renderFieldInput(field, value, (newValue) => onChange(path, newValue), path)}
+        {!isHidden &&
+          renderFieldInput(
+            field,
+            value,
+            (newValue) => onChange(path, newValue),
+            path
+          )}
       </div>
     );
   };
 
   const renderFieldInput = (field, value, onFieldChange, path) => {
     switch (field.type) {
-      case 'text':
-      case 'email':
-      case 'url':
-      case 'tel':
+      case "text":
+      case "email":
+      case "url":
+      case "tel":
         return (
           <input
             type={field.type}
             className="field__input"
-            value={value || ''}
+            value={value || ""}
             onChange={(e) => onFieldChange(e.target.value)}
             placeholder={field.placeholder}
           />
         );
 
-      case 'textarea':
+      case "textarea":
         return (
           <textarea
             className="field__textarea"
-            value={value || ''}
+            value={value || ""}
             onChange={(e) => onFieldChange(e.target.value)}
             placeholder={field.placeholder}
             rows={field.rows || 4}
           />
         );
 
-      case 'select':
+      case "select":
         return (
           <select
             className="field__select"
             value={value || field.default}
             onChange={(e) => onFieldChange(e.target.value)}
           >
-            {field.options.map(option => (
+            {field.options.map((option) => (
               <option key={option} value={option}>
                 {option}
               </option>
@@ -527,7 +594,7 @@ function CustomizationPanel({ fields, customization, onChange, onImageUpload }) 
           </select>
         );
 
-      case 'color':
+      case "color":
         return (
           <div className="field__color-wrapper">
             <input
@@ -546,7 +613,7 @@ function CustomizationPanel({ fields, customization, onChange, onImageUpload }) 
           </div>
         );
 
-      case 'image':
+      case "image":
         return (
           <div className="field__image">
             <input
@@ -572,7 +639,7 @@ function CustomizationPanel({ fields, customization, onChange, onImageUpload }) 
               <button
                 type="button"
                 className="field__image-remove"
-                onClick={() => onFieldChange('')}
+                onClick={() => onFieldChange("")}
               >
                 <Trash2 size={16} />
                 Remove Image
@@ -594,7 +661,9 @@ function CustomizationPanel({ fields, customization, onChange, onImageUpload }) 
           return (
             <button
               key={sectionKey}
-              className={`customization-panel__tab ${activeSection === sectionKey ? 'active' : ''}`}
+              className={`customization-panel__tab ${
+                activeSection === sectionKey ? "active" : ""
+              }`}
               onClick={() => scrollToSection(sectionKey)}
               title={sectionKey}
             >
@@ -604,16 +673,16 @@ function CustomizationPanel({ fields, customization, onChange, onImageUpload }) 
           );
         })}
       </div>
-      
+
       <div className="customization-panel__content" ref={contentRef}>
         {sectionKeys.map((sectionKey) => (
           <div
             key={sectionKey}
             className="customization-panel__section"
-            ref={(el) => sectionRefs.current[sectionKey] = el}
+            ref={(el) => (sectionRefs.current[sectionKey] = el)}
           >
             <h3 className="customization-panel__section-title">{sectionKey}</h3>
-            {orderedSections[sectionKey].map(({ key, field }) => 
+            {orderedSections[sectionKey].map(({ key, field }) =>
               renderField(key, field, customization[key], key)
             )}
           </div>
