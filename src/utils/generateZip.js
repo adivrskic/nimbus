@@ -1,29 +1,34 @@
-import JSZip from 'jszip';
-import { renderTemplate } from '../utils/templateSystem';
+import JSZip from "jszip";
+import { renderTemplate } from "../utils/templateSystem";
 
-export async function generateZip(templateId, customization, theme = 'minimal', colorMode = 'auto') {
+export async function generateZip(
+  templateId,
+  customization,
+  theme = "minimal",
+  colorMode = "auto"
+) {
   const zip = new JSZip();
-  
-  // Normalize colorMode to lowercase
-  const normalizedColorMode = (colorMode || 'auto').toLowerCase();
-  
-  // Generate HTML with new theme system
-  const html = renderTemplate(templateId, customization, theme, normalizedColorMode);
-  
-  // Add main HTML file
-  zip.file('index.html', html);
-  
-  // Add README with deployment instructions
+
+  const normalizedColorMode = (colorMode || "auto").toLowerCase();
+
+  const html = renderTemplate(
+    templateId,
+    customization,
+    theme,
+    normalizedColorMode
+  );
+
+  zip.file("index.html", html);
+
   const readme = generateReadme(templateId, customization, theme);
-  zip.file('README.md', readme);
-  
-  // Generate the zip file
-  const blob = await zip.generateAsync({ type: 'blob' });
+  zip.file("README.md", readme);
+
+  const blob = await zip.generateAsync({ type: "blob" });
   return blob;
 }
 
 function generateReadme(templateId, customization, theme) {
-  return `# ${customization.name || 'Your'} Website
+  return `# ${customization.name || "Your"} Website
 
 ## Template Details
 - Template: ${templateId}

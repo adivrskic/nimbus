@@ -311,7 +311,7 @@
 
   &:hover {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    transform: translateY(-2px);
+    // transform: translateY(-2px);
   }
 
   &__header {
@@ -836,6 +836,56 @@
       color: #92400e;
       font-size: 0.9rem;
       line-height: 1.4;
+    }
+  }
+}
+.cancellation-notice {
+  background-color: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: 6px;
+  padding: 12px;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+
+  svg {
+    color: #f59e0b;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  > div {
+    flex: 1;
+  }
+
+  p {
+    margin: 0;
+    font-size: 14px;
+
+    &.small-text {
+      font-size: 12px;
+      color: #6b7280;
+      margin-top: 4px;
+    }
+  }
+
+  strong {
+    color: #374151;
+  }
+}
+
+.site-card {
+  &__info {
+    .info-row {
+      .billing-status {
+        &--cancelled {
+          color: #f59e0b;
+          background-color: rgba(245, 158, 11, 0.1);
+          padding: 2px 8px;
+          border-radius: 4px;
+          font-size: 12px;
+        }
+      }
     }
   }
 }
