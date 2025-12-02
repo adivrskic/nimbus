@@ -962,7 +962,7 @@ function UserAccountModal({ isOpen, onClose }) {
                               disabled={isLoading}
                             >
                               <Trash2 size={16} />
-                              Cancel & Delete Site
+                              Cancel Subscription & Delete Site
                             </button>
                           )
                         )}
@@ -1042,7 +1042,7 @@ function UserAccountModal({ isOpen, onClose }) {
                             <span className="btn-text">Preview</span>
                           </button>
                           <button
-                            className="btn btn-secondary btn-small"
+                            className="btn btn-secondary btn-success btn-small"
                             onClick={() => handleDeployDraft(draft)}
                             disabled={isLoading}
                             title="Deploy draft"

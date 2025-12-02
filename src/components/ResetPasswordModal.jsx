@@ -1,34 +1,34 @@
 // src/components/ResetPasswordModal.jsx
-import { useState } from 'react';
-import { X, Lock, Eye, EyeOff, Loader, CheckCircle } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
-import './AuthModal.scss';
+import { useState } from "react";
+import { X, Lock, Eye, EyeOff, Loader, CheckCircle } from "lucide-react";
+import { useAuth } from "../contexts/AuthContext";
+import "./AuthModal.scss";
 
 function ResetPasswordModal({ isOpen, onClose, onSuccess }) {
   const { updatePassword } = useAuth();
   const [formData, setFormData] = useState({
-    password: '',
-    confirmPassword: ''
+    password: "",
+    confirmPassword: "",
   });
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [successMessage, setSuccessMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState("");
 
   const validateForm = () => {
     const newErrors = {};
 
     if (!formData.password) {
-      newErrors.password = 'Password is required';
+      newErrors.password = "Password is required";
     } else if (formData.password.length < 8) {
-      newErrors.password = 'Password must be at least 8 characters';
+      newErrors.password = "Password must be at least 8 characters";
     }
 
     if (!formData.confirmPassword) {
-      newErrors.confirmPassword = 'Please confirm your password';
+      newErrors.confirmPassword = "Please confirm your password";
     } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
+      newErrors.confirmPassword = "Passwords do not match";
     }
 
     setErrors(newErrors);
@@ -37,7 +37,7 @@ function ResetPasswordModal({ isOpen, onClose, onSuccess }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) return;
 
     setIsLoading(true);
@@ -45,11 +45,11 @@ function ResetPasswordModal({ isOpen, onClose, onSuccess }) {
 
     try {
       const result = await updatePassword(formData.password);
-      
+
       if (result.success) {
-        setSuccessMessage('Password updated successfully!');
-        setFormData({ password: '', confirmPassword: '' });
-        
+        setSuccessMessage("Password updated successfully!");
+        setFormData({ password: "", confirmPassword: "" });
+
         // Close modal and notify parent after 2 seconds
         setTimeout(() => {
           if (onSuccess) {
@@ -58,28 +58,30 @@ function ResetPasswordModal({ isOpen, onClose, onSuccess }) {
           handleClose();
         }, 2000);
       } else {
-        setErrors({ submit: result.error || 'Failed to update password' });
+        setErrors({ submit: result.error || "Failed to update password" });
       }
     } catch (error) {
-      setErrors({ submit: error.message || 'Something went wrong. Please try again.' });
+      setErrors({
+        submit: error.message || "Something went wrong. Please try again.",
+      });
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleClose = () => {
-    setFormData({ password: '', confirmPassword: '' });
+    setFormData({ password: "", confirmPassword: "" });
     setErrors({});
-    setSuccessMessage('');
+    setSuccessMessage("");
     setShowPassword(false);
     setShowConfirmPassword(false);
     onClose();
   };
 
   const handleInputChange = (field, value) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: '' }));
+      setErrors((prev) => ({ ...prev, [field]: "" }));
     }
   };
 
@@ -87,20 +89,25 @@ function ResetPasswordModal({ isOpen, onClose, onSuccess }) {
 
   return (
     <>
-      <div className="modal-backdrop modal-backdrop--visible" onClick={handleClose} />
+      <div
+        className="modal-backdrop modal-backdrop--visible"
+        onClick={handleClose}
+      />
       <div className="auth-modal">
-        <button className="auth-modal__close" onClick={handleClose}>
-          <X size={20} />
-        </button>
-
         <div className="auth-modal__content">
           <div className="auth-modal__header">
-            <h2>Reset Your Password</h2>
-            <p>
-              {successMessage 
-                ? "Your password has been updated" 
-                : "Enter your new password below"}
-            </p>
+            <button className="auth-modal__close" onClick={handleClose}>
+              <X size={20} />
+            </button>
+            <div>
+              {" "}
+              <h2>Reset Your Password</h2>
+              <p>
+                {successMessage
+                  ? "Your password has been updated"
+                  : "Enter your new password below"}
+              </p>
+            </div>
           </div>
 
           {successMessage ? (
@@ -118,12 +125,14 @@ function ResetPasswordModal({ isOpen, onClose, onSuccess }) {
                 <div className="password-input">
                   <input
                     id="password"
-                    type={showPassword ? 'text' : 'password'}
+                    type={showPassword ? "text" : "password"}
                     value={formData.password}
-                    onChange={(e) => handleInputChange('password', e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("password", e.target.value)
+                    }
                     placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
                     disabled={isLoading}
-                    className={errors.password ? 'error' : ''}
+                    className={errors.password ? "error" : ""}
                     autoComplete="new-password"
                     autoFocus
                   />
@@ -136,7 +145,9 @@ function ResetPasswordModal({ isOpen, onClose, onSuccess }) {
                     {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
                 </div>
-                {errors.password && <span className="form-error">{errors.password}</span>}
+                {errors.password && (
+                  <span className="form-error">{errors.password}</span>
+                )}
               </div>
 
               <div className="form-field">
@@ -147,12 +158,14 @@ function ResetPasswordModal({ isOpen, onClose, onSuccess }) {
                 <div className="password-input">
                   <input
                     id="confirmPassword"
-                    type={showConfirmPassword ? 'text' : 'password'}
+                    type={showConfirmPassword ? "text" : "password"}
                     value={formData.confirmPassword}
-                    onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("confirmPassword", e.target.value)
+                    }
                     placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
                     disabled={isLoading}
-                    className={errors.confirmPassword ? 'error' : ''}
+                    className={errors.confirmPassword ? "error" : ""}
                     autoComplete="new-password"
                   />
                   <button
@@ -161,10 +174,16 @@ function ResetPasswordModal({ isOpen, onClose, onSuccess }) {
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     tabIndex={-1}
                   >
-                    {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    {showConfirmPassword ? (
+                      <EyeOff size={16} />
+                    ) : (
+                      <Eye size={16} />
+                    )}
                   </button>
                 </div>
-                {errors.confirmPassword && <span className="form-error">{errors.confirmPassword}</span>}
+                {errors.confirmPassword && (
+                  <span className="form-error">{errors.confirmPassword}</span>
+                )}
               </div>
 
               {errors.submit && (
@@ -173,8 +192,8 @@ function ResetPasswordModal({ isOpen, onClose, onSuccess }) {
                 </div>
               )}
 
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 className="btn btn-primary btn--full"
                 disabled={isLoading}
               >
@@ -184,12 +203,12 @@ function ResetPasswordModal({ isOpen, onClose, onSuccess }) {
                     Updating password...
                   </>
                 ) : (
-                  'Update Password'
+                  "Update Password"
                 )}
               </button>
 
-              <button 
-                type="button" 
+              <button
+                type="button"
                 className="btn btn-secondary btn--full"
                 onClick={handleClose}
                 disabled={isLoading}

@@ -1509,8 +1509,9 @@ export const templates = {
                   </div>
                   `
                       : `<div class="feature-icon" style="${
-                          isGlassmorphism &&
-                          "background-color: rgba(255,255,255,.1)!important;"
+                          isGlassmorphism
+                            ? "background-color: rgba(255,255,255,.1)!important;"
+                            : ""
                         } display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem; font-weight: 700; text-align:center; width: 48px; height: 48px; background: var(--color-accent); border-radius: 8px; margin-bottom: 1.5rem;">${
                           index + 1
                         }</div>`
@@ -2148,7 +2149,11 @@ export const templates = {
       }; position: ${
         isBrutalist ? "relative" : "fixed"
       }; top: 0; left: 0; right: 0; background: ${
-        isGlassmorphism ? "rgba(255, 255, 255, 0.1)" : "var(--color-bg)"
+        isGlassmorphism
+          ? "rgba(255, 255, 255, 0.1)"
+          : isNeumorphism
+          ? "none"
+          : "var(--color-bg)"
       }; border-bottom: ${
         isBrutalist ? "4px" : isRetro ? "3px" : "1px"
       } solid ${
@@ -2158,14 +2163,14 @@ export const templates = {
           ? "transparent"
           : "var(--color-border)"
       }; z-index: 1000; backdrop-filter: blur(${
-        isGlassmorphism ? "20px" : "10px"
+        isGlassmorphism ? "20px" : isNeumorphism ? "0px" : "10px"
       }); ${
         isGlassmorphism ? "box-shadow: 0 8px 32px rgba(31, 38, 135, 0.1);" : ""
       }">
         <div class="container">
           <div style="${
             isNeumorphism
-              ? `display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; border-radius: 16px; ${getNeumorphismShadow(
+              ? `background: var(--color-bg); display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; border-radius: 16px; ${getNeumorphismShadow(
                   false
                 )}`
               : "display: flex; justify-content: space-between; align-items: center;"
@@ -4141,16 +4146,20 @@ export const templates = {
           ? "transparent"
           : "var(--color-border)"
       }; position: sticky; top: 0; background: ${
-        isGlassmorphism ? "rgba(255, 255, 255, 0.1)" : "var(--color-bg)"
+        isGlassmorphism
+          ? "rgba(255, 255, 255, 0.1)"
+          : isNeumorphism
+          ? "none"
+          : "var(--color-bg)"
       }; z-index: 100; backdrop-filter: blur(${
-        isGlassmorphism ? "20px" : "10px"
+        isGlassmorphism ? "20px" : isNeumorphism ? "0px" : "10px"
       }); ${
         isGlassmorphism ? "box-shadow: 0 8px 32px rgba(31, 38, 135, 0.1);" : ""
       }">
         <div class="container">
           <nav style="${
             isNeumorphism
-              ? `padding: 1rem 1.5rem; border-radius: 16px; ${getNeumorphismShadow(
+              ? `background: var(--color-bg); padding: 1rem 1.5rem; border-radius: 16px; ${getNeumorphismShadow(
                   false
                 )} display: flex; justify-content: space-between; align-items: center;`
               : "display: flex; justify-content: space-between; align-items: center;"
@@ -4571,7 +4580,7 @@ export const templates = {
             ? `
         <section class="specialties" style="padding: ${
           isRetro || isElegant ? "8rem 0" : "6rem 0"
-        }; background: var(--color-bg);">
+        };">
           <div class="container" style="max-width: 1100px;">
             <h2 style="font-family: ${
               isElegant ? "Playfair Display, serif" : "inherit"

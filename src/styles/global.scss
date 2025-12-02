@@ -76,7 +76,7 @@ section:first-of-type {
 
   &-primary {
     background: var(--color-accent);
-    color: white;
+    color: var(--color-background);
 
     &:hover:not(:disabled) {
       background: var(--color-accent-hover);
