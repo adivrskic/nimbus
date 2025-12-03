@@ -1,4 +1,4 @@
-@import '../styles/variables.scss';
+@import "../styles/variables.scss";
 
 .confirm-modal {
   position: fixed;
@@ -11,8 +11,7 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-xl);
   padding: calc(var(--spacing-unit) * 4);
-  box-shadow: 
-    0 20px 25px -5px rgba(0, 0, 0, 0.1),
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
     0 10px 10px -5px rgba(0, 0, 0, 0.04);
   z-index: 1002;
   text-align: center;
@@ -57,7 +56,7 @@
   &__actions {
     display: flex;
     gap: calc(var(--spacing-unit) * 2);
-    
+
     button {
       flex: 1;
     }
@@ -68,7 +67,7 @@
   background: transparent;
   color: #ef4444;
   border: 1px solid #ef4444;
-  
+
   &:hover:not(:disabled) {
     background: #ef4444;
     color: white;
@@ -91,6 +90,57 @@
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.confirm-modal__input {
+  margin: 20px 0;
+
+  .form-group {
+    margin-bottom: 0;
+  }
+
+  .edit-badge {
+    display: inline-block;
+    background: var(--warning-color);
+    color: white;
+    font-size: 0.75rem;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+
+  .form-hint {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-top: 4px;
+  }
+
+  input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background: var(--background-color);
+    color: var(--text-color);
+    font-size: 1rem;
+    transition: border-color 0.2s;
+
+    &:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.1);
+    }
+
+    &:disabled {
+      background: var(--background-secondary);
+      cursor: not-allowed;
+    }
+  }
 }

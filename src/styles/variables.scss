@@ -36,7 +36,7 @@
 
   // Pressed/active shadows - looks like pressing down into surface
   --shadow-sm-pressed: inset 0 1px 3px rgba(0, 0, 0, 0.08);
-  --shadow-md-pressed: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+  --shadow-md-pressed: 0 4px 12px rgba(0, 0, 0, 0.06);
   --shadow-lg-pressed: inset 0 2px 6px rgba(0, 0, 0, 0.12);
   --shadow-xl-pressed: inset 0 3px 8px rgba(0, 0, 0, 0.15);
 
@@ -87,7 +87,7 @@
 
   // Pressed/active shadows - dark mode (deeper inset)
   --shadow-sm-pressed: inset 0 1px 3px rgba(0, 0, 0, 0.4);
-  --shadow-md-pressed: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+  --shadow-md-pressed: 0 4px 12px rgba(0, 0, 0, 0.06);
   --shadow-lg-pressed: inset 0 2px 6px rgba(0, 0, 0, 0.6);
   --shadow-xl-pressed: inset 0 3px 8px rgba(0, 0, 0, 0.7);
 }

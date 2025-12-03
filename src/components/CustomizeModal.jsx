@@ -17,8 +17,8 @@ import { renderTemplate, getTemplate } from "../utils/templateSystem";
 import { getAllThemes } from "../styles/themes";
 import PaymentModal from "./PaymentModal";
 import NotificationModal from "./NotificationModal";
-import SaveDraftModal from "./SaveDraftModal";
 import RedeployModal from "./RedeployModal"; // We'll create this
+import ConfirmModal from "./ConfirmModal";
 import "./CustomizeModal.scss";
 
 const defaultTheme = "minimal";
@@ -79,7 +79,8 @@ function CustomizeModal({
     message: "",
     type: "success",
   });
-  const [isSaveDraftModalOpen, setIsSaveDraftModalOpen] = useState(false);
+  const [showSaveDraftConfirm, setShowSaveDraftConfirm] = useState(false);
+  const [draftName, setDraftName] = useState("");
   const [isRedeployModalOpen, setIsRedeployModalOpen] = useState(false);
   const [siteData, setSiteData] = useState(null);
 
@@ -304,6 +305,7 @@ function CustomizeModal({
     }
   };
 
+  // Update handleSaveDraft function:
   const handleSaveDraft = async () => {
     if (!isAuthenticated) {
       setNotification({
@@ -314,12 +316,27 @@ function CustomizeModal({
       return;
     }
 
-    setIsSaveDraftModalOpen(true);
+    // Set default draft name
+    setDraftName(
+      isEditingDraft
+        ? localStorage.getItem("editDraftName") || template?.name
+        : template?.name
+    );
+    setShowSaveDraftConfirm(true);
   };
 
-  const handleSaveDraftConfirm = async (draftName) => {
+  // Update handleSaveDraftConfirm function:
+  const handleSaveDraftConfirm = async (name) => {
+    if (!name?.trim()) {
+      setNotification({
+        isOpen: true,
+        message: "Please enter a draft name",
+        type: "error",
+      });
+      return;
+    }
+
     setIsSavingDraft(true);
-    setDraftSaved(false);
 
     try {
       let result;
@@ -328,7 +345,7 @@ function CustomizeModal({
         const { data, error } = await supabase
           .from("template_drafts")
           .update({
-            draft_name: draftName,
+            draft_name: name.trim(),
             customization: customization,
             theme: customization.theme || "minimal",
             color_mode: customization.colorMode || "auto",
@@ -347,7 +364,7 @@ function CustomizeModal({
           .insert({
             user_id: user.id,
             template_id: templateId,
-            draft_name: draftName,
+            draft_name: name.trim(),
             customization: customization,
             theme: customization.theme || "minimal",
             color_mode: customization.colorMode || "auto",
@@ -360,7 +377,7 @@ function CustomizeModal({
       }
 
       setDraftSaved(true);
-      setIsSaveDraftModalOpen(false);
+      setShowSaveDraftConfirm(false);
       setIsEditingDraft(false);
       setEditingDraftId(null);
 
@@ -680,7 +697,35 @@ function CustomizeModal({
         type={notification.type}
       />
 
-      <SaveDraftModal
+      <ConfirmModal
+        isOpen={showSaveDraftConfirm}
+        onClose={() => {
+          setShowSaveDraftConfirm(false);
+          setDraftName("");
+        }}
+        onConfirm={handleSaveDraftConfirm}
+        title={isEditingDraft ? "Update Draft" : "Save Draft"}
+        message={
+          isEditingDraft
+            ? "Enter a new name for your draft or keep the existing one."
+            : "Give your draft a name to save it for later editing or deployment."
+        }
+        confirmText={isEditingDraft ? "Update Draft" : "Save Draft"}
+        cancelText="Cancel"
+        type={isEditingDraft ? "edit" : "save"}
+        inputProps={{
+          label: "Draft Name",
+          defaultValue: draftName,
+          placeholder: "Enter a name for this draft",
+          isEditing: isEditingDraft,
+          hint: isEditingDraft
+            ? "Updating will overwrite the existing draft with your current changes."
+            : undefined,
+        }}
+        isProcessing={isSavingDraft}
+      />
+
+      {/* <SaveDraftModal
         isOpen={isSaveDraftModalOpen}
         onClose={() => setIsSaveDraftModalOpen(false)}
         onSave={handleSaveDraftConfirm}
@@ -691,7 +736,7 @@ function CustomizeModal({
         }
         isSaving={isSavingDraft}
         isEditing={isEditingDraft}
-      />
+      /> */}
     </>
   );
 }

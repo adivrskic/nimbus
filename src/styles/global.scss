@@ -11,6 +11,7 @@ html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   scroll-behavior: smooth;
+  height: 100%;
 }
 
 body {
@@ -20,6 +21,14 @@ body {
   line-height: 1.6;
   transition: background-color var(--transition-base),
     color var(--transition-base);
+  min-height: 100%;
+  min-height: -webkit-fill-available;
+}
+
+@supports (-webkit-touch-callout: none) {
+  html {
+    height: -webkit-fill-available;
+  }
 }
 
 // Typography utilities

@@ -887,8 +887,8 @@
     }
 
     &.active {
-      color: var(--color-accent);
-      border-bottom-color: var(--color-accent);
+      background: var(--color-accent);
+      color: var(--color-background);
 
       svg {
         // transform: scale(1.1);
@@ -896,7 +896,7 @@
 
       @media (max-width: 1024px) {
         background: var(--color-accent);
-        color: white;
+        // color: white;
         border-bottom-color: transparent;
       }
 

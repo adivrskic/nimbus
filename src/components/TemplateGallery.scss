@@ -189,7 +189,7 @@
   &:hover {
     background: var(--color-surface-elevated);
     border-color: var(--color-text-tertiary);
-    transform: scale(1.05);
+    // transform: scale(1.05);
   }
 
   &-left {
@@ -558,14 +558,12 @@
 
     &:hover {
       background: var(--color-surface);
-      transform: scale(1.06);
     }
 
     &.active {
       background: var(--color-text-primary);
       color: var(--color-background);
       border-color: var(--color-text-primary);
-      transform: scale(1.08);
     }
   }
 }
@@ -651,14 +649,12 @@
 
     &:hover {
       background: var(--color-surface);
-      transform: scale(1.06);
     }
 
     &.active {
       background: var(--color-text-primary);
       color: var(--color-background);
       border-color: var(--color-text-primary);
-      transform: scale(1.08);
     }
   }
 }
@@ -684,32 +680,6 @@
   @media (max-width: 768px) {
     gap: 8px;
     right: 8px;
-  }
-
-  .mobile-filter-button {
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
-    border: 1px solid var(--color-border);
-    background: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-
-    &.active {
-      background: var(--color-accent);
-      color: #fff;
-      border-color: var(--color-accent);
-    }
-
-    @media (max-width: 480px) {
-      width: 40px;
-      height: 40px;
-      font-size: 0.875rem;
-    }
   }
 }
 
@@ -748,7 +718,7 @@
 
     &.active {
       background: var(--color-accent);
-      color: #fff;
+      color: var(--color-background);
       border-color: var(--color-accent);
     }
 

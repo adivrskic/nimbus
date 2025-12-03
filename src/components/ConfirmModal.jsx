@@ -1,5 +1,12 @@
-import { useState } from "react";
-import { X, AlertCircle, CheckCircle, Trash2, Loader } from "lucide-react";
+import { useState, useEffect } from "react";
+import {
+  X,
+  AlertCircle,
+  CheckCircle,
+  Trash2,
+  Loader,
+  Save,
+} from "lucide-react";
 import "./ConfirmModal.scss";
 
 function ConfirmModal({
@@ -13,22 +20,36 @@ function ConfirmModal({
   type = "danger", // 'danger' | 'warning' | 'info'
   confirmButtonId, // Optional ID for the confirm button
   confirmButtonClass = "", // Optional additional class for confirm button
+  inputProps = null, // Add this prop for form input
 }) {
   const [isProcessing, setIsProcessing] = useState(false);
+  const [inputValue, setInputValue] = useState("");
+
+  useEffect(() => {
+    if (isOpen && inputProps?.defaultValue) {
+      setInputValue(inputProps.defaultValue);
+    } else if (!isOpen) {
+      setInputValue("");
+    }
+  }, [isOpen, inputProps?.defaultValue]);
 
   if (!isOpen) return null;
 
   const handleConfirm = async () => {
     if (isProcessing) return;
 
-    setIsProcessing(true);
-    try {
+    // If there's an input, pass the value to onConfirm
+    if (inputProps) {
+      await onConfirm(inputValue.trim());
+    } else {
       await onConfirm();
-      onClose();
-    } catch (error) {
-      console.error("Confirm action error:", error);
-    } finally {
-      setIsProcessing(false);
+    }
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter" && inputValue.trim()) {
+      e.preventDefault();
+      handleConfirm();
     }
   };
 
@@ -43,14 +64,43 @@ function ConfirmModal({
           {type === "danger" && <Trash2 size={32} />}
           {type === "warning" && <AlertCircle size={32} />}
           {type === "info" && <CheckCircle size={32} />}
+          {type === "save" && <Save size={32} />}
+          {type === "edit" && <Edit size={32} />}
         </div>
 
         <h3 className="confirm-modal__title">{title}</h3>
 
-        {/* Render message as either string or JSX */}
         <div className="confirm-modal__message">
           {typeof message === "string" ? <p>{message}</p> : message}
         </div>
+
+        {/* Input field for draft name */}
+        {inputProps && (
+          <div className="confirm-modal__input">
+            <div className="form-group">
+              <label htmlFor="confirm-modal-input">
+                {inputProps.label || "Name"}
+                {inputProps.isEditing && (
+                  <span className="edit-badge">Editing</span>
+                )}
+              </label>
+              <input
+                id="confirm-modal-input"
+                type="text"
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                placeholder={inputProps.placeholder || "Enter a name"}
+                autoFocus
+                disabled={isProcessing}
+                required
+                onKeyPress={handleKeyPress}
+              />
+              {inputProps.hint && (
+                <p className="form-hint">{inputProps.hint}</p>
+              )}
+            </div>
+          </div>
+        )}
 
         <div className="confirm-modal__actions">
           <button
@@ -63,18 +113,29 @@ function ConfirmModal({
           <button
             id={confirmButtonId}
             className={`btn btn-${
-              type === "danger" ? "danger" : "primary"
+              type === "danger"
+                ? "danger"
+                : type === "warning"
+                ? "warning"
+                : "primary"
             } ${confirmButtonClass}`}
             onClick={handleConfirm}
-            disabled={isProcessing}
+            disabled={isProcessing || (inputProps && !inputValue.trim())}
           >
             {isProcessing ? (
               <>
                 <Loader size={16} className="spinning" />
-                Processing...
+                {inputProps?.isEditing ? "Updating..." : "Saving..."}
               </>
             ) : (
-              confirmText
+              <>
+                {inputProps?.isEditing ? (
+                  <Edit size={18} />
+                ) : (
+                  <Save size={18} />
+                )}
+                {confirmText}
+              </>
             )}
           </button>
         </div>
