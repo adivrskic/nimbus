@@ -1,113 +1,122 @@
-import { Check, Clock, Sparkles, Rocket, Palette, FileText, Globe, Zap } from 'lucide-react';
-import './Roadmap.scss';
+// pages/Roadmap.jsx
+import { ArrowUp } from "lucide-react";
+import "./SecondaryPages.scss";
 
 function Roadmap() {
   const roadmapItems = [
     {
-      status: 'completed',
-      icon: <Check size={24} />,
-      title: 'Core Template System',
-      description: 'Professional templates with real-time customization and export'
+      status: "completed",
+      title: "Core Template System",
+      description:
+        "Professional templates with real-time customization and export",
     },
     {
-      status: 'completed',
-      icon: <Check size={24} />,
-      title: 'Dark Mode Support',
-      description: 'Light, dark, and auto themes for all templates'
+      status: "completed",
+      title: "Dark Mode Support",
+      description: "Light, dark, and auto themes for all templates",
     },
     {
-      status: 'in-progress',
-      icon: <Clock size={24} />,
-      title: 'Easy Deployments',
-      description: 'One-click deployment to popular hosting platforms (Netlify, Vercel, GitHub Pages)',
-      badge: 'Paid Feature'
+      status: "in-progress",
+      title: "Easy Deployments",
+      description: "One-click deployment to popular hosting platforms",
+      badge: "Paid Feature",
     },
     {
-      status: 'planned',
-      icon: <Palette size={24} />,
-      title: 'Custom Styling Editor',
-      description: 'Advanced visual editor for fine-tuning colors, fonts, and spacing'
+      status: "planned",
+      title: "Custom Styling Editor",
+      description:
+        "Advanced visual editor for fine-tuning colors, fonts, and spacing",
     },
     {
-      status: 'planned',
-      icon: <FileText size={24} />,
-      title: 'Form Builder',
-      description: 'Add contact forms, signup forms, and surveys with backend integration'
+      status: "planned",
+      title: "Form Builder",
+      description:
+        "Add contact forms, signup forms, and surveys with backend integration",
     },
     {
-      status: 'planned',
-      icon: <Globe size={24} />,
-      title: 'Multi-Page Sites',
-      description: 'Create full websites with multiple pages and navigation'
+      status: "planned",
+      title: "Multi-Page Sites",
+      description: "Create full websites with multiple pages and navigation",
     },
     {
-      status: 'planned',
-      icon: <Sparkles size={24} />,
-      title: 'Blog System',
-      description: 'Built-in blog templates with markdown support and RSS feeds'
+      status: "planned",
+      title: "Blog System",
+      description:
+        "Built-in blog templates with markdown support and RSS feeds",
     },
     {
-      status: 'planned',
-      icon: <Zap size={24} />,
-      title: 'Advanced Components',
-      description: 'Galleries, testimonials, pricing tables, and more pre-built sections'
+      status: "planned",
+      title: "Advanced Components",
+      description:
+        "Galleries, testimonials, pricing tables, and more pre-built sections",
     },
     {
-      status: 'planned',
-      icon: <Rocket size={24} />,
-      title: 'Custom Domain Management',
-      description: 'Connect and manage your own domain names directly through SiteForge',
-      badge: 'Paid Feature'
-    }
+      status: "planned",
+      title: "Custom Domain Management",
+      description:
+        "Connect and manage your own domain names directly through Nimbus",
+      badge: "Paid Feature",
+    },
   ];
 
   return (
-    <div className="roadmap-page">
+    <div className="page">
       <div className="container">
-        <div className="roadmap-header">
-          <h1>Roadmap</h1>
-        </div>
+        {/* Header */}
+        <header className="page-header">
+          <h1 className="page-header__title">Roadmap</h1>
+          <p className="page-header__subtitle">
+            What we're building and what's coming next.
+          </p>
+        </header>
 
-        <div className="roadmap-legend">
-          <div className="legend-item">
-            <div className="status-badge status-badge--completed">
+        {/* Main Content */}
+        <div className="page-content">
+          {/* Status Legend */}
+          <div className="status-legend">
+            <div className="status-legend__item">
+              <span className="status-legend__dot status-legend__dot--completed"></span>
               Completed
             </div>
-          </div>
-          <div className="legend-item">
-            <div className="status-badge status-badge--in-progress">
+            <div className="status-legend__item">
+              <span className="status-legend__dot status-legend__dot--in-progress"></span>
               In Progress
             </div>
-          </div>
-          <div className="legend-item">
-            <div className="status-badge status-badge--planned">
+            <div className="status-legend__item">
+              <span className="status-legend__dot"></span>
               Planned
             </div>
           </div>
-        </div>
 
-        <div className="roadmap-timeline">
-          {roadmapItems.map((item, index) => (
-            <div key={index} className={`roadmap-item roadmap-item--${item.status}`}>
-              <div className="roadmap-item__icon">
-                {item.icon}
-              </div>
-              <div className="roadmap-item__content">
-                <div className="roadmap-item__header">
-                  <h3 className="roadmap-item__title">{item.title}</h3>
-                  {item.badge && (
-                    <span className="roadmap-badge">{item.badge}</span>
-                  )}
+          {/* Timeline */}
+          <div className="timeline">
+            {roadmapItems.map((item, index) => (
+              <div
+                key={index}
+                className={`timeline-item timeline-item--${item.status}`}
+              >
+                <div className="timeline-item__marker"></div>
+                <div className="timeline-item__content">
+                  <h3>
+                    {item.title}
+                    {item.badge && (
+                      <span className="timeline-item__badge">{item.badge}</span>
+                    )}
+                  </h3>
+                  <p>{item.description}</p>
                 </div>
-                <p className="roadmap-item__description">{item.description}</p>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
 
-        <div className="roadmap-cta">
-          <h2>Have a feature request?</h2>
-          <p>We'd love to hear your ideas! Reach out to us at <a href="mailto:hello@nimbus.com">hello@nimbus.com</a></p>
+          {/* Feature Request CTA */}
+          <div className="contact-block">
+            <h3 className="contact-block__title">Have a feature request?</h3>
+            <p className="contact-block__text">
+              We'd love to hear your ideas. Reach out at{" "}
+              <a href="mailto:hello@nimbus.com">hello@nimbus.com</a>
+            </p>
+          </div>
         </div>
       </div>
     </div>

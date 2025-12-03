@@ -22,6 +22,17 @@ import {
   Mail,
   Share2,
   Layout,
+  Check,
+  Minus,
+  Calendar,
+  Clock,
+  MapPin,
+  Globe,
+  Phone,
+  Hash,
+  Type,
+  List,
+  CheckSquare,
 } from "lucide-react";
 import { getAllThemes } from "../styles/themes";
 import { useTheme } from "../contexts/ThemeContext";
@@ -57,6 +68,15 @@ function CustomizationPanel({
     "Contact Info": Mail,
     "Social Links": Share2,
     General: Layout,
+    Date: Calendar,
+    Time: Clock,
+    Location: MapPin,
+    Website: Globe,
+    Phone: Phone,
+    Number: Hash,
+    Text: Type,
+    List: List,
+    Checkbox: CheckSquare,
   };
 
   // Automatically categorize fields into sections
@@ -142,6 +162,21 @@ function CustomizationPanel({
       return "Call to Action";
     }
 
+    // Date and time fields
+    if (key.includes("date") || key.includes("time")) {
+      return "Date";
+    }
+
+    // Number fields
+    if (field.type === "number") {
+      return "Number";
+    }
+
+    // Checkbox fields
+    if (field.type === "checkbox") {
+      return "Checkbox";
+    }
+
     // Default section
     return "Basic Info";
   };
@@ -171,6 +206,9 @@ function CustomizationPanel({
     "Call to Action",
     "Contact Info",
     "Social Links",
+    "Date",
+    "Number",
+    "Checkbox",
   ];
 
   // Sort sections by preferred order
@@ -194,6 +232,48 @@ function CustomizationPanel({
       setActiveSection(sectionKeys[0]);
     }
   }, [sectionKeys, activeSection]);
+
+  // Initialize default values
+  useEffect(() => {
+    const newCustomization = { ...customization };
+    let hasChanges = false;
+
+    Object.entries(fields).forEach(([key, field]) => {
+      // If field doesn't exist in customization but has a default, set it
+      if (customization[key] === undefined && field.default !== undefined) {
+        newCustomization[key] = field.default;
+        hasChanges = true;
+      }
+
+      // For group fields, ensure each item has all required sub-fields
+      if (field.type === "group") {
+        const groupValue = newCustomization[key] || field.default || [];
+        const newGroupValue = [...groupValue];
+
+        groupValue.forEach((item, index) => {
+          Object.entries(field.fields).forEach(([subKey, subField]) => {
+            if (item[subKey] === undefined && subField.default !== undefined) {
+              newGroupValue[index] = {
+                ...newGroupValue[index],
+                [subKey]: subField.default,
+              };
+              hasChanges = true;
+            }
+          });
+        });
+
+        if (hasChanges) {
+          newCustomization[key] = newGroupValue;
+        }
+      }
+    });
+
+    if (hasChanges) {
+      // Note: We can't call onChange directly in useEffect without causing infinite loop
+      // This should be handled by the parent component
+      console.log("Setting default values:", newCustomization);
+    }
+  }, [fields]); // Run only when fields change
 
   // Handle scroll to update active section
   useEffect(() => {
@@ -254,9 +334,6 @@ function CustomizationPanel({
 
   const handleColorModeChange = (path, colorMode) => {
     onChange(path, colorMode);
-    // Optionally update global theme if colorMode is changed
-    // This is more complex as colorMode uses "Light"/"Dark"/"Auto" while global uses "light"/"dark"
-    // For now, we'll just update the customization
   };
 
   const toggleFieldVisibility = (fieldKey) => {
@@ -293,11 +370,6 @@ function CustomizationPanel({
     if (field.type === "theme-selector") {
       return (
         <div key={key} className="field field--theme-selector">
-          {/* <div className="field__header">
-            <label className="field__label">
-              <span className="field__required">Choose your design style</span>
-            </label>
-          </div> */}
           <div className="theme-selector-grid">
             {themes.map((theme) => (
               <button
@@ -310,6 +382,39 @@ function CustomizationPanel({
                   <span className="theme-name">{theme.name}</span>
                   <span className="theme-description">{theme.description}</span>
                 </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    // Special handling for color mode selector
+    if (key === "colorMode") {
+      return (
+        <div key={key} className="field field--color-mode">
+          <div className="field__header">
+            <label className="field__label">
+              {field.label || "Color Mode"}
+              {field.optional && (
+                <span className="field__optional">Optional</span>
+              )}
+            </label>
+          </div>
+          <div className="color-mode-selector">
+            {["Auto", "Light", "Dark"].map((mode) => (
+              <button
+                key={mode}
+                type="button"
+                className={`color-mode-option ${
+                  value === mode ? "active" : ""
+                }`}
+                onClick={() => handleColorModeChange(path, mode)}
+              >
+                <div className="color-mode-icon">
+                  {mode === "Light" ? "☀️" : mode === "Dark" ? "🌙" : "⚙️"}
+                </div>
+                <span className="color-mode-label">{mode}</span>
               </button>
             ))}
           </div>
@@ -391,7 +496,11 @@ function CustomizationPanel({
                             ([fieldKey, fieldConfig]) => {
                               const fieldPath = `${path}[${index}].${fieldKey}`;
                               const fieldValue =
-                                item[fieldKey] || fieldConfig.default;
+                                item[fieldKey] !== undefined
+                                  ? item[fieldKey]
+                                  : fieldConfig.default !== undefined
+                                  ? fieldConfig.default
+                                  : "";
 
                               return (
                                 <div
@@ -400,6 +509,9 @@ function CustomizationPanel({
                                 >
                                   <label className="field__group-field-label">
                                     {fieldConfig.label}
+                                    {fieldConfig.required && (
+                                      <span className="field__required">*</span>
+                                    )}
                                   </label>
                                   {renderFieldInput(
                                     fieldConfig,
@@ -413,6 +525,11 @@ function CustomizationPanel({
                                       onChange(path, newGroupValue);
                                     },
                                     fieldPath
+                                  )}
+                                  {fieldConfig.hint && (
+                                    <p className="field__hint">
+                                      {fieldConfig.hint}
+                                    </p>
                                   )}
                                 </div>
                               );
@@ -433,7 +550,10 @@ function CustomizationPanel({
                     const newItem = {};
                     Object.entries(field.fields).forEach(
                       ([fieldKey, fieldConfig]) => {
-                        newItem[fieldKey] = fieldConfig.default || "";
+                        newItem[fieldKey] =
+                          fieldConfig.default !== undefined
+                            ? fieldConfig.default
+                            : "";
                       }
                     );
                     onChange(path, [...groupValue, newItem]);
@@ -526,7 +646,8 @@ function CustomizationPanel({
         <div className="field__header">
           <label className="field__label">
             {field.label}
-            {field.optional && (
+            {field.required && <span className="field__required">*</span>}
+            {field.optional && !field.required && (
               <span className="field__optional">Optional</span>
             )}
           </label>
@@ -541,18 +662,25 @@ function CustomizationPanel({
             </button>
           )}
         </div>
-        {!isHidden &&
-          renderFieldInput(
-            field,
-            value,
-            (newValue) => onChange(path, newValue),
-            path
-          )}
+        {!isHidden && (
+          <>
+            {renderFieldInput(
+              field,
+              value,
+              (newValue) => onChange(path, newValue),
+              path
+            )}
+            {field.hint && <p className="field__hint">{field.hint}</p>}
+          </>
+        )}
       </div>
     );
   };
 
   const renderFieldInput = (field, value, onFieldChange, path) => {
+    // Handle undefined values by using defaults
+    const fieldValue = value !== undefined ? value : field.default || "";
+
     switch (field.type) {
       case "text":
       case "email":
@@ -562,9 +690,11 @@ function CustomizationPanel({
           <input
             type={field.type}
             className="field__input"
-            value={value || ""}
+            value={fieldValue}
             onChange={(e) => onFieldChange(e.target.value)}
             placeholder={field.placeholder}
+            required={field.required}
+            disabled={field.disabled}
           />
         );
 
@@ -572,10 +702,12 @@ function CustomizationPanel({
         return (
           <textarea
             className="field__textarea"
-            value={value || ""}
+            value={fieldValue}
             onChange={(e) => onFieldChange(e.target.value)}
             placeholder={field.placeholder}
             rows={field.rows || 4}
+            required={field.required}
+            disabled={field.disabled}
           />
         );
 
@@ -583,15 +715,65 @@ function CustomizationPanel({
         return (
           <select
             className="field__select"
-            value={value || field.default}
+            value={fieldValue}
             onChange={(e) => onFieldChange(e.target.value)}
+            required={field.required}
+            disabled={field.disabled}
           >
-            {field.options.map((option) => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
+            {field.options.map((option) => {
+              // Handle both string options and object options
+              const optionValue =
+                typeof option === "object" ? option.value : option;
+              const optionLabel =
+                typeof option === "object" ? option.label : option;
+
+              return (
+                <option key={optionValue} value={optionValue}>
+                  {optionLabel}
+                </option>
+              );
+            })}
           </select>
+        );
+
+      case "number":
+        return (
+          <div className="field__number-wrapper">
+            <input
+              type="number"
+              className="field__input field__number"
+              value={fieldValue}
+              onChange={(e) => onFieldChange(parseFloat(e.target.value))}
+              placeholder={field.placeholder}
+              min={field.min}
+              max={field.max}
+              step={field.step || 1}
+              required={field.required}
+              disabled={field.disabled}
+            />
+            {field.unit && <span className="field__unit">{field.unit}</span>}
+          </div>
+        );
+
+      case "checkbox":
+        return (
+          <div className="field__checkbox-wrapper">
+            <label className="field__checkbox-label">
+              <input
+                type="checkbox"
+                className="field__checkbox"
+                checked={fieldValue}
+                onChange={(e) => onFieldChange(e.target.checked)}
+                disabled={field.disabled}
+              />
+              <span className="field__checkbox-custom">
+                <Check size={12} />
+              </span>
+              <span className="field__checkbox-text">
+                {field.checkboxLabel || field.label}
+              </span>
+            </label>
+          </div>
         );
 
       case "color":
@@ -600,15 +782,17 @@ function CustomizationPanel({
             <input
               type="color"
               className="field__color-input"
-              value={value || field.default}
+              value={fieldValue}
               onChange={(e) => onFieldChange(e.target.value)}
+              disabled={field.disabled}
             />
             <input
               type="text"
               className="field__input field__color-text"
-              value={value || field.default}
+              value={fieldValue}
               onChange={(e) => onFieldChange(e.target.value)}
               placeholder="#000000"
+              disabled={field.disabled}
             />
           </div>
         );
@@ -618,15 +802,16 @@ function CustomizationPanel({
           <div className="field__image">
             <input
               type="file"
-              accept="image/*"
+              accept={field.accept || "image/*"}
               className="field__image-input"
               id={`image-${path}`}
               onChange={(e) => handleFileUpload(path, e)}
+              disabled={field.disabled}
             />
             <label htmlFor={`image-${path}`} className="field__image-label">
               <div className="field__image-preview">
-                {value ? (
-                  <img src={value} alt="Preview" />
+                {fieldValue ? (
+                  <img src={fieldValue} alt="Preview" />
                 ) : (
                   <div className="field__image-placeholder">
                     <ImageIcon size={32} />
@@ -635,11 +820,12 @@ function CustomizationPanel({
                 )}
               </div>
             </label>
-            {value && (
+            {fieldValue && (
               <button
                 type="button"
                 className="field__image-remove"
                 onClick={() => onFieldChange("")}
+                disabled={field.disabled}
               >
                 <Trash2 size={16} />
                 Remove Image
@@ -648,7 +834,40 @@ function CustomizationPanel({
           </div>
         );
 
+      case "date":
+      case "time":
+      case "datetime-local":
+        return (
+          <input
+            type={field.type}
+            className="field__input"
+            value={fieldValue}
+            onChange={(e) => onFieldChange(e.target.value)}
+            required={field.required}
+            disabled={field.disabled}
+          />
+        );
+
+      case "range":
+        return (
+          <div className="field__range-wrapper">
+            <input
+              type="range"
+              className="field__range"
+              value={fieldValue}
+              onChange={(e) => onFieldChange(parseFloat(e.target.value))}
+              min={field.min}
+              max={field.max}
+              step={field.step || 1}
+              required={field.required}
+              disabled={field.disabled}
+            />
+            <span className="field__range-value">{fieldValue}</span>
+          </div>
+        );
+
       default:
+        console.warn(`Unsupported field type: ${field.type}`);
         return null;
     }
   };
@@ -668,7 +887,6 @@ function CustomizationPanel({
               title={sectionKey}
             >
               <IconComponent size={20} />
-              {/* <span className="customization-panel__tab-label">{sectionKey}</span> */}
             </button>
           );
         })}

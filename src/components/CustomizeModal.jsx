@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   X,
   Download,
@@ -7,6 +7,7 @@ import {
   Save,
   Upload,
   CheckCircle,
+  LogIn,
 } from "lucide-react";
 import { useTheme } from "../contexts/ThemeContext";
 import { useAuth } from "../contexts/AuthContext";
@@ -19,6 +20,7 @@ import PaymentModal from "./PaymentModal";
 import NotificationModal from "./NotificationModal";
 import RedeployModal from "./RedeployModal"; // We'll create this
 import ConfirmModal from "./ConfirmModal";
+import AuthModal from "./AuthModal";
 import "./CustomizeModal.scss";
 
 const defaultTheme = "minimal";
@@ -82,7 +84,11 @@ function CustomizeModal({
   const [showSaveDraftConfirm, setShowSaveDraftConfirm] = useState(false);
   const [draftName, setDraftName] = useState("");
   const [isRedeployModalOpen, setIsRedeployModalOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [siteData, setSiteData] = useState(null);
+
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [initialCustomization, setInitialCustomization] = useState({});
 
   const templateConfig = template
     ? {
@@ -132,7 +138,7 @@ function CustomizeModal({
   useEffect(() => {
     if (!isOpen) return;
 
-    console.log("🔍 CustomizeModal props:", { editSiteData, editDraftData });
+    console.log("ðŸ” CustomizeModal props:", { editSiteData, editDraftData });
 
     // Check if we're editing a deployed site
     if (editSiteData) {
@@ -142,12 +148,15 @@ function CustomizeModal({
       setSiteData(editSiteData);
 
       // Load site customization
-      setCustomization((prev) => ({
-        ...prev,
+      const newCustomization = {
         ...editSiteData.customization,
         theme: editSiteData.theme || selectedStyleTheme,
         colorMode: editSiteData.colorMode || "Auto",
-      }));
+      };
+
+      setCustomization(newCustomization);
+      setInitialCustomization(newCustomization); // Save initial state
+      setHasUnsavedChanges(false); // Reset changes flag
     }
 
     // Check if we're editing a draft
@@ -157,12 +166,22 @@ function CustomizeModal({
       setIsEditingDraft(true);
       setEditingDraftId(editDraftData.id);
 
-      setCustomization((prev) => ({
-        ...prev,
+      const newCustomization = {
         ...editDraftData.customization,
         theme: editDraftData.theme || selectedStyleTheme,
         colorMode: editDraftData.colorMode || "Auto",
-      }));
+      };
+
+      setCustomization(newCustomization);
+      setInitialCustomization(newCustomization); // Save initial state
+      setHasUnsavedChanges(false); // Reset changes flag
+    }
+  }, [isOpen, editSiteData, editDraftData]);
+
+  useEffect(() => {
+    if (isOpen && !editSiteData && !editDraftData) {
+      setInitialCustomization({});
+      setHasUnsavedChanges(false);
     }
   }, [isOpen, editSiteData, editDraftData]);
 
@@ -230,15 +249,47 @@ function CustomizeModal({
   }, [customization, templateId]);
 
   const handleCustomizationChange = (field, value) => {
-    setCustomization((prev) => ({
-      ...prev,
+    const newCustomization = {
+      ...customization,
       [field]: value,
-    }));
+    };
+
+    setCustomization(newCustomization);
+
+    // Check if the change is different from initial state
+    if (isEditingDeployedSite || isEditingDraft) {
+      const hasChanged =
+        JSON.stringify(newCustomization) !==
+        JSON.stringify(initialCustomization);
+      setHasUnsavedChanges(hasChanged);
+    }
 
     if (field === "theme") {
       setStyleTheme(value);
     }
   };
+
+  // Helper function to compare current customization with initial
+  const checkForChanges = useCallback(() => {
+    if (!isEditingDeployedSite && !isEditingDraft) return false;
+
+    return (
+      JSON.stringify(customization) !== JSON.stringify(initialCustomization)
+    );
+  }, [
+    customization,
+    initialCustomization,
+    isEditingDeployedSite,
+    isEditingDraft,
+  ]);
+
+  // Update hasUnsavedChanges when customization changes
+  useEffect(() => {
+    if (isEditingDeployedSite || isEditingDraft) {
+      const changed = checkForChanges();
+      setHasUnsavedChanges(changed);
+    }
+  }, [customization, checkForChanges, isEditingDeployedSite, isEditingDraft]);
 
   const handlePreviewNewTab = () => {
     const effectiveColorMode =
@@ -585,20 +636,36 @@ function CustomizeModal({
             )}
             <button
               className={`btn ${
-                isEditingDeployedSite ? "btn-success" : "btn-primary"
+                !isAuthenticated
+                  ? "btn-primary"
+                  : isEditingDeployedSite
+                  ? "btn-success"
+                  : "btn-primary"
               }`}
-              onClick={handleDeploy}
-              disabled={!isAuthenticated || isRedeploying}
+              onClick={() => {
+                if (!isAuthenticated) {
+                  setIsAuthModalOpen(true);
+                } else {
+                  handleDeploy();
+                }
+              }}
+              disabled={
+                isRedeploying || (isEditingDeployedSite && !hasUnsavedChanges)
+              }
               title={
                 !isAuthenticated
                   ? "Sign in to deploy"
                   : isEditingDeployedSite
-                  ? "Redeploy site for free"
+                  ? hasUnsavedChanges
+                    ? "Redeploy site with your changes"
+                    : "Make changes to enable redeploy"
                   : "Deploy your site"
               }
             >
               {isRedeploying ? (
                 <span className="spinner" />
+              ) : !isAuthenticated ? (
+                <LogIn size={20} />
               ) : isEditingDeployedSite ? (
                 <Upload size={20} />
               ) : (
@@ -607,6 +674,8 @@ function CustomizeModal({
               <span className="btn-text">
                 {isRedeploying
                   ? "Redeploying..."
+                  : !isAuthenticated
+                  ? "Sign In to Deploy"
                   : isEditingDeployedSite
                   ? "Save & Redeploy"
                   : "Deploy"}
@@ -737,6 +806,17 @@ function CustomizeModal({
         isSaving={isSavingDraft}
         isEditing={isEditingDraft}
       /> */}
+
+      {/* Auth Modal for unauthenticated users */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        onAuthSuccess={() => {
+          setIsAuthModalOpen(false);
+          // After successful auth, open the deploy flow
+          handleDeploy();
+        }}
+      />
     </>
   );
 }
