@@ -18,13 +18,6 @@ function RedeployModal({
         onClick={onClose}
       />
       <div className="redeploy-modal redeploy-modal--visible">
-        <div className="redeploy-modal__header">
-          <button className="redeploy-modal__close" onClick={onClose}>
-            <X size={24} />
-          </button>
-          <h2>Redeploy Site</h2>
-        </div>
-
         <div className="redeploy-modal__content">
           <div className="redeploy-icon">
             <Upload size={48} />
@@ -45,18 +38,6 @@ function RedeployModal({
               <CheckCircle size={20} />
               <span>Live site updates in seconds</span>
             </div>
-            <div className="info-item">
-              <CheckCircle size={20} />
-              <span>Previous version remains accessible during deployment</span>
-            </div>
-          </div>
-
-          <div className="redeploy-warning">
-            <AlertCircle size={20} />
-            <p>
-              Your site will be temporarily unavailable during redeployment
-              (typically less than 30 seconds).
-            </p>
           </div>
         </div>
 

@@ -133,39 +133,35 @@ class Template {
     
     ${this.getThemeSpecificCSS(theme)}
   </style>
+  <script>
+  // Theme management
+  function getStoredTheme() {
+    return localStorage.getItem('theme') || 'light';
+  }
+  
+  function setTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+    
+    // Update all theme toggle switches
+    const switches = document.querySelectorAll('.theme-toggle-switch');
+    switches.forEach(switchEl => {
+      switchEl.checked = theme === 'dark';
+    });
+  }
+  
+  function toggleTheme() {
+    const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    setTheme(newTheme);
+  }
+  
+  // Initialize theme immediately (not waiting for DOMContentLoaded)
+  setTheme(getStoredTheme());
+</script>
 </head>
 <body>
   ${html}
-  
-  <script>
-    // Theme management
-    function getStoredTheme() {
-      return localStorage.getItem('theme') || 'light';
-    }
-    
-    function setTheme(theme) {
-      document.documentElement.setAttribute('data-theme', theme);
-      localStorage.setItem('theme', theme);
-      
-      // Update all theme toggle switches
-      const switches = document.querySelectorAll('.theme-toggle-switch');
-      switches.forEach(switchEl => {
-        switchEl.checked = theme === 'dark';
-      });
-    }
-    
-    function toggleTheme() {
-      const currentTheme = getStoredTheme();
-      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-      setTheme(newTheme);
-    }
-    
-    // Initialize theme on load
-    window.addEventListener('DOMContentLoaded', () => {
-      const savedTheme = getStoredTheme();
-      setTheme(savedTheme);
-    });
-  </script>
 </body>
 </html>`;
   }
@@ -1912,29 +1908,6 @@ export const templates = {
         }
       </style>
       
-      <script>
-        // All interactions are disabled via CSS pointer-events: none
-        // These functions are kept for structure but won't execute from user clicks
-        function toggleMobileMenu() {
-          const mobileMenu = document.querySelector('.mobile-menu');
-          if (mobileMenu.style.display === 'none' || mobileMenu.style.display === '') {
-            mobileMenu.style.display = 'block';
-          } else {
-            mobileMenu.style.display = 'none';
-          }
-        }
-        
-        // Close mobile menu when clicking outside
-        document.addEventListener('click', function(event) {
-          const mobileMenu = document.querySelector('.mobile-menu');
-          const hamburger = document.querySelector('.hamburger-btn');
-          const nav = document.querySelector('nav');
-          
-          if (!nav.contains(event.target) && mobileMenu.style.display === 'block') {
-            mobileMenu.style.display = 'none';
-          }
-        });
-      </script>
     `;
     },
   }),
@@ -23421,6 +23394,4761 @@ END:VCARD\`;
         }
       </script>
     `;
+    },
+  }),
+  musician: new Template("musician", {
+    name: "Musician / Band",
+    description:
+      "Professional musician or band website with music, tour dates, and media",
+    category: "Portfolio",
+    image: "musician",
+    fields: {
+      artistName: {
+        type: "text",
+        default: "THE ECHOES",
+        label: "Artist/Band Name",
+        required: true,
+      },
+      tagline: {
+        type: "text",
+        default: "Indie Rock from Brooklyn",
+        label: "Tagline / Genre",
+      },
+      heroDescription: {
+        type: "textarea",
+        default:
+          "Blending raw emotion with atmospheric soundscapes. Our music explores the spaces between silence and noise, creating sonic landscapes that resonate with the soul.",
+        label: "Hero Description",
+      },
+      ctaListen: {
+        type: "text",
+        default: "Listen Now",
+        label: "Primary CTA",
+      },
+      ctaTour: {
+        type: "text",
+        default: "Tour Dates",
+        label: "Secondary CTA",
+      },
+      latestRelease: {
+        type: "text",
+        default: "Midnight Waves",
+        label: "Latest Release Title",
+      },
+      releaseYear: {
+        type: "text",
+        default: "2024",
+        label: "Release Year",
+      },
+      releaseDescription: {
+        type: "textarea",
+        default:
+          "Our third studio album explores themes of memory, loss, and renewal through 12 tracks of atmospheric indie rock.",
+        label: "Release Description",
+      },
+      tracks: {
+        type: "group",
+        label: "Featured Tracks",
+        itemLabel: "Track",
+        min: 1,
+        max: 6,
+        fields: {
+          title: { type: "text", label: "Track Title", default: "" },
+          duration: { type: "text", label: "Duration", default: "" },
+        },
+        default: [
+          { title: "Midnight Waves", duration: "4:32" },
+          { title: "Echoes in the Dark", duration: "3:58" },
+          { title: "City Lights", duration: "5:14" },
+          { title: "Fading Memories", duration: "4:21" },
+        ],
+      },
+      tourDates: {
+        type: "group",
+        label: "Tour Dates",
+        itemLabel: "Show",
+        min: 0,
+        max: 8,
+        fields: {
+          date: { type: "text", label: "Date", default: "" },
+          venue: { type: "text", label: "Venue", default: "" },
+          city: { type: "text", label: "City", default: "" },
+          ticketStatus: {
+            type: "text",
+            label: "Status (On Sale/Sold Out)",
+            default: "On Sale",
+          },
+        },
+        default: [
+          {
+            date: "Mar 15",
+            venue: "The Bowery Ballroom",
+            city: "New York, NY",
+            ticketStatus: "On Sale",
+          },
+          {
+            date: "Mar 18",
+            venue: "9:30 Club",
+            city: "Washington, DC",
+            ticketStatus: "On Sale",
+          },
+          {
+            date: "Mar 22",
+            venue: "The Fillmore",
+            city: "San Francisco, CA",
+            ticketStatus: "Sold Out",
+          },
+          {
+            date: "Mar 25",
+            venue: "The Troubadour",
+            city: "Los Angeles, CA",
+            ticketStatus: "On Sale",
+          },
+        ],
+      },
+      aboutTitle: {
+        type: "text",
+        default: "About the Band",
+        label: "About Section Title",
+      },
+      aboutText: {
+        type: "textarea",
+        default:
+          "Formed in 2019 in Brooklyn, The Echoes emerged from the city's vibrant indie scene with a sound that defies easy categorization. Drawing influences from post-punk, shoegaze, and electronic music, we create immersive sonic experiences that blur the line between melancholy and hope.",
+        label: "About Text",
+      },
+      pressQuote: {
+        type: "textarea",
+        default:
+          '"One of the most compelling new voices in indie rock. Their sound is both intimate and expansive."',
+        label: "Press Quote",
+      },
+      pressSource: {
+        type: "text",
+        default: "Pitchfork",
+        label: "Press Source",
+      },
+      spotifyUrl: {
+        type: "url",
+        default: "#",
+        label: "Spotify URL",
+      },
+      appleMusicUrl: {
+        type: "url",
+        default: "#",
+        label: "Apple Music URL",
+      },
+      instagramUrl: {
+        type: "url",
+        default: "#",
+        label: "Instagram URL",
+      },
+      youtubeUrl: {
+        type: "url",
+        default: "#",
+        label: "YouTube URL",
+      },
+      contactEmail: {
+        type: "email",
+        default: "booking@theechoes.com",
+        label: "Booking Email",
+      },
+    },
+    structure: (data, theme, colorMode) => {
+      const themeId = theme?.id || "minimal";
+      const isBrutalist = themeId === "brutalist";
+      const isGradient = themeId === "gradient";
+      const isElegant = themeId === "elegant";
+      const isRetro = themeId === "retro";
+      const isGlassmorphism = themeId === "glassmorphism";
+      const isNeumorphism = themeId === "neumorphism";
+      const isDark = colorMode === "dark";
+
+      const getNeumorphismShadow = (inset = false) => {
+        if (!isNeumorphism) return "";
+        return inset
+          ? "box-shadow: var(--neomorph-shadow-in);"
+          : "box-shadow: var(--neomorph-shadow-out);";
+      };
+
+      const getNeumorphismHoverShadow = () =>
+        isNeumorphism ? "var(--neomorph-shadow-in)" : "";
+      const getNeumorphismNormalShadow = () =>
+        isNeumorphism ? "var(--neomorph-shadow-out)" : "";
+
+      return `
+      <!-- Header -->
+      <header style="padding: ${
+        isBrutalist
+          ? "2rem 0"
+          : isElegant
+          ? "2rem 0"
+          : isNeumorphism
+          ? "2rem 0"
+          : "1.5rem 0"
+      }; ${
+        isBrutalist
+          ? "border-bottom: 4px solid var(--color-accent);"
+          : isRetro
+          ? "border-bottom: 3px solid var(--color-accent);"
+          : isNeumorphism || isGlassmorphism
+          ? ""
+          : "border-bottom: 1px solid var(--color-border);"
+      } position: sticky; top: 0; ${
+        isGlassmorphism
+          ? "background: rgba(255, 255, 255, 0.1);"
+          : "background: var(--color-bg);"
+      } z-index: 100; backdrop-filter: blur(${
+        isGlassmorphism ? "20px" : "10px"
+      }); ${
+        isGlassmorphism ? "box-shadow: 0 8px 32px rgba(31, 38, 135, 0.1);" : ""
+      } ${isNeumorphism ? "background: none" : ""}">
+        <div class="container">
+          <nav style="${
+            isNeumorphism
+              ? `display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 2rem; border-radius: 20px; ${getNeumorphismShadow(
+                  false
+                )}`
+              : "display: flex; justify-content: space-between; align-items: center;"
+          }">
+            <div class="logo" style="font-weight: ${
+              isBrutalist ? "900" : isNeumorphism || isElegant ? "700" : "600"
+            }; font-size: ${
+        isBrutalist
+          ? "1.75rem"
+          : isRetro
+          ? "1.5rem"
+          : isElegant
+          ? "1.5rem"
+          : isNeumorphism
+          ? "1.25rem"
+          : "1.125rem"
+      }; letter-spacing: ${
+        isBrutalist ? "4px" : isRetro ? "3px" : isElegant ? "2px" : "0.1em"
+      }; text-transform: uppercase; ${
+        isGradient
+          ? "background: linear-gradient(135deg, #667eea, #764ba2, #f093fb); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"
+          : isRetro
+          ? "background: linear-gradient(90deg, var(--color-accent), #00f5ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"
+          : isElegant
+          ? "font-family: Playfair Display, serif; color: var(--color-accent); text-transform: none; font-style: italic;"
+          : isNeumorphism || isGlassmorphism
+          ? "color: var(--color-accent);"
+          : ""
+      }">${data.artistName || "THE ECHOES"}</div>
+            
+            <ul class="nav-links" style="display: flex; gap: ${
+              isBrutalist || isElegant ? "3rem" : "2rem"
+            }; list-style: none; align-items: center;">
+              <li><a href="#music" style="color: var(--color-text-secondary); text-decoration: none; font-size: ${
+                isBrutalist ? "1rem" : "0.875rem"
+              }; transition: color 0.2s; font-weight: ${
+        isBrutalist ? "700" : "500"
+      }; ${
+        isBrutalist || isRetro
+          ? "text-transform: uppercase; letter-spacing: 1px;"
+          : ""
+      }" onmouseover="this.style.color='var(--color-text)'" onmouseout="this.style.color='var(--color-text-secondary)'">Music</a></li>
+              <li><a href="#tour" style="color: var(--color-text-secondary); text-decoration: none; font-size: ${
+                isBrutalist ? "1rem" : "0.875rem"
+              }; transition: color 0.2s; font-weight: ${
+        isBrutalist ? "700" : "500"
+      }; ${
+        isBrutalist || isRetro
+          ? "text-transform: uppercase; letter-spacing: 1px;"
+          : ""
+      }" onmouseover="this.style.color='var(--color-text)'" onmouseout="this.style.color='var(--color-text-secondary)'">Tour</a></li>
+              <li><a href="#about" style="color: var(--color-text-secondary); text-decoration: none; font-size: ${
+                isBrutalist ? "1rem" : "0.875rem"
+              }; transition: color 0.2s; font-weight: ${
+        isBrutalist ? "700" : "500"
+      }; ${
+        isBrutalist || isRetro
+          ? "text-transform: uppercase; letter-spacing: 1px;"
+          : ""
+      }" onmouseover="this.style.color='var(--color-text)'" onmouseout="this.style.color='var(--color-text-secondary)'">About</a></li>
+              <li>
+                <label class="theme-toggle-switch-wrapper" style="cursor: pointer; ${
+                  isNeumorphism
+                    ? `padding: 0.5rem; border-radius: 12px; display: inline-block; box-shadow: var(--neomorph-shadow-out);`
+                    : ""
+                }">
+                  <input type="checkbox" class="theme-toggle-switch" onclick="toggleTheme()" aria-label="Toggle theme">
+                  <span class="theme-toggle-slider"></span>
+                </label>
+              </li>
+            </ul>
+            
+            <div class="mobile-controls" style="display: none; align-items: center; gap: 1rem;">
+              <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle theme" style="background: none; border: none; cursor: pointer; padding: 0.5rem; color: var(--color-text);">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+              </button>
+              <button class="hamburger-btn" onclick="toggleMobileMenu()" aria-label="Menu" style="background: none; border: none; cursor: pointer; padding: 0.5rem; color: var(--color-text);">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+              </button>
+            </div>
+          </nav>
+          
+          <div class="mobile-menu" style="display: none; padding: 2rem 0 1rem; ${
+            isNeumorphism || isGlassmorphism
+              ? ""
+              : "border-top: 1px solid var(--color-border);"
+          } margin-top: 1rem;">
+            <ul style="list-style: none; display: flex; flex-direction: column; gap: 1.5rem;">
+              <li><a href="#music" onclick="toggleMobileMenu()" style="color: var(--color-text); text-decoration: none; font-size: 1.125rem; font-weight: 500;">Music</a></li>
+              <li><a href="#tour" onclick="toggleMobileMenu()" style="color: var(--color-text); text-decoration: none; font-size: 1.125rem; font-weight: 500;">Tour</a></li>
+              <li><a href="#about" onclick="toggleMobileMenu()" style="color: var(--color-text); text-decoration: none; font-size: 1.125rem; font-weight: 500;">About</a></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+
+      <main>
+        <!-- Hero Section -->
+        <section class="hero" style="padding: ${
+          isBrutalist
+            ? "6rem 0"
+            : isElegant
+            ? "10rem 0 8rem"
+            : isNeumorphism
+            ? "2rem 0 0 0"
+            : "8rem 0 6rem"
+        }; text-align: center; position: relative; overflow: hidden;">
+          <div class="container">
+            ${
+              isNeumorphism
+                ? `<div style="padding: 4rem 3rem; border-radius: 32px; ${getNeumorphismShadow(
+                    false
+                  )} max-width: 900px; margin: 4rem auto;">`
+                : ""
+            }
+            
+            ${
+              isElegant
+                ? `<div style="color: var(--color-accent); font-size: 0.875rem; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 2rem; font-weight: 400;">${
+                    data.tagline || "Indie Rock from Brooklyn"
+                  }</div>`
+                : ""
+            }
+            
+            ${
+              isGradient
+                ? `<div style="display: inline-block; padding: 0.5rem 1.25rem; background: linear-gradient(135deg, rgba(102,126,234,0.1), rgba(118,75,162,0.1)); border-radius: 999px; margin-bottom: 2rem; font-size: 0.875rem; font-weight: 600;">${
+                    data.tagline || "Indie Rock from Brooklyn"
+                  }</div>`
+                : ""
+            }
+            
+            <h1 ${
+              isRetro ? `class="glitch" data-text="${data.artistName}"` : ""
+            } style="font-family: ${
+        isElegant ? "Playfair Display, serif" : "inherit"
+      }; font-size: clamp(${
+        isBrutalist || isRetro ? "3.5rem" : "3rem"
+      }, 12vw, ${isBrutalist || isRetro ? "10rem" : "7rem"}); font-weight: ${
+        isBrutalist || isNeumorphism || isGlassmorphism
+          ? "900"
+          : isRetro
+          ? "700"
+          : isElegant
+          ? "400"
+          : "800"
+      }; line-height: ${
+        isBrutalist || isRetro ? "0.9" : isElegant ? "1.1" : "1"
+      }; letter-spacing: ${
+        isBrutalist
+          ? "0.1em"
+          : isRetro
+          ? "0.05em"
+          : isElegant
+          ? "-0.02em"
+          : "0.05em"
+      }; margin-bottom: ${isElegant ? "2rem" : "1.5rem"}; ${
+        isBrutalist || isRetro ? "text-transform: uppercase;" : ""
+      } ${isRetro ? "position: relative;" : ""}">
+              ${
+                isBrutalist
+                  ? `<span style="background: var(--color-accent); color: var(--color-bg); padding: 0 0.5rem; display: inline-block; transform: rotate(-2deg);">${
+                      data.artistName || "THE ECHOES"
+                    }</span>`
+                  : ""
+              }
+              ${
+                isGradient
+                  ? `<span style="background: linear-gradient(135deg, #667eea, #764ba2, #f093fb); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">${
+                      data.artistName || "THE ECHOES"
+                    }</span>`
+                  : ""
+              }
+              ${
+                isRetro
+                  ? `<span class="gradient-text" style="background: linear-gradient(90deg, var(--color-accent), #00f5ff, var(--color-accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: glow 2s ease-in-out infinite alternate;">${
+                      data.artistName || "THE ECHOES"
+                    }</span>`
+                  : ""
+              }
+              ${
+                !isBrutalist && !isGradient && !isRetro
+                  ? data.artistName || "THE ECHOES"
+                  : ""
+              }
+            </h1>
+            
+            ${
+              !isElegant && !isGradient
+                ? `<p style="font-size: ${
+                    isBrutalist ? "1.25rem" : "1rem"
+                  }; color: var(--color-text-secondary); margin-bottom: 2rem; text-transform: ${
+                    isBrutalist || isRetro ? "uppercase" : "none"
+                  }; letter-spacing: ${
+                    isBrutalist || isRetro ? "3px" : "1px"
+                  }; font-weight: ${isRetro ? "500" : "400"};">${
+                    data.tagline || "Indie Rock from Brooklyn"
+                  }</p>`
+                : ""
+            }
+            
+            <p style="font-family: ${
+              isElegant
+                ? "Lato, sans-serif"
+                : isRetro
+                ? "Space Mono, monospace"
+                : "inherit"
+            }; font-size: ${
+        isBrutalist || isRetro ? "1.25rem" : "1.125rem"
+      }; font-weight: ${
+        isElegant ? "300" : "normal"
+      }; color: var(--color-text-secondary); max-width: 650px; margin: 0 auto 3rem; line-height: ${
+        isBrutalist || isRetro ? "1.6" : "1.8"
+      };">
+              ${
+                data.heroDescription ||
+                "Blending raw emotion with atmospheric soundscapes."
+              }
+            </p>
+            
+            <div class="cta-group" style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+              ${
+                data.ctaListen
+                  ? `<a href="#music" style="padding: ${
+                      isBrutalist ? "1.5rem 3rem" : "1rem 2rem"
+                    }; border-radius: ${
+                      isGradient || isRetro
+                        ? "999px"
+                        : isBrutalist
+                        ? "0"
+                        : isGlassmorphism || isNeumorphism
+                        ? "16px"
+                        : isElegant
+                        ? "0"
+                        : "8px"
+                    }; text-decoration: none; font-weight: ${
+                      isBrutalist || isRetro ? "700" : "500"
+                    }; transition: all 0.2s; display: inline-block; background: ${
+                      isGradient
+                        ? "linear-gradient(135deg, #667eea, #764ba2)"
+                        : isGlassmorphism
+                        ? "rgba(255,255,255,0.15)"
+                        : isNeumorphism
+                        ? "var(--color-bg)"
+                        : isRetro
+                        ? "linear-gradient(90deg, var(--color-accent), #b537f2)"
+                        : "var(--color-accent)"
+                    }; color: ${
+                      isGlassmorphism || isNeumorphism
+                        ? "var(--color-text)"
+                        : "white"
+                    }; ${
+                      isBrutalist
+                        ? "text-transform: uppercase; border: 4px solid var(--color-text); background: var(--color-text); color: var(--color-bg); letter-spacing: 2px;"
+                        : ""
+                    } ${
+                      isRetro
+                        ? "text-transform: uppercase; letter-spacing: 2px; box-shadow: 0 0 30px var(--color-accent); border: 2px solid var(--color-accent);"
+                        : ""
+                    } ${
+                      isElegant
+                        ? "border: 1px solid var(--color-accent); letter-spacing: 1px;"
+                        : ""
+                    } ${
+                      isGlassmorphism
+                        ? "backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 8px 20px rgba(0,0,0,0.3);"
+                        : ""
+                    } ${isNeumorphism ? getNeumorphismShadow(false) : ""} ${
+                      isGradient
+                        ? "box-shadow: 0 10px 30px rgba(102,126,234,0.3);"
+                        : ""
+                    }" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">${
+                      data.ctaListen
+                    }</a>`
+                  : ""
+              }
+              ${
+                data.ctaTour
+                  ? `<a href="#tour" style="padding: ${
+                      isBrutalist ? "1.5rem 3rem" : "1rem 2rem"
+                    }; border-radius: ${
+                      isGradient || isRetro
+                        ? "999px"
+                        : isBrutalist
+                        ? "0"
+                        : isGlassmorphism || isNeumorphism
+                        ? "16px"
+                        : isElegant
+                        ? "0"
+                        : "8px"
+                    }; text-decoration: none; font-weight: ${
+                      isBrutalist || isRetro ? "700" : "500"
+                    }; transition: all 0.2s; display: inline-block; border: ${
+                      isBrutalist ? "4px" : isRetro ? "2px" : "1px"
+                    } solid ${
+                      isBrutalist
+                        ? "var(--color-text)"
+                        : isRetro
+                        ? "#00f5ff"
+                        : "var(--color-border)"
+                    }; color: var(--color-text); background: ${
+                      isGlassmorphism
+                        ? "rgba(255,255,255,0.05)"
+                        : isNeumorphism
+                        ? "var(--color-bg)"
+                        : "transparent"
+                    }; ${
+                      isBrutalist
+                        ? "text-transform: uppercase; letter-spacing: 2px;"
+                        : ""
+                    } ${
+                      isRetro
+                        ? "text-transform: uppercase; letter-spacing: 2px; box-shadow: 0 0 20px #00f5ff;"
+                        : ""
+                    } ${
+                      isGlassmorphism ? "backdrop-filter: blur(10px);" : ""
+                    } ${
+                      isNeumorphism ? getNeumorphismShadow(false) : ""
+                    }" onmouseover="this.style.borderColor='var(--color-accent)'" onmouseout="this.style.borderColor='var(--color-border)'">${
+                      data.ctaTour
+                    }</a>`
+                  : ""
+              }
+            </div>
+            ${isNeumorphism ? `</div>` : ""}
+          </div>
+        </section>
+
+        <!-- Latest Release Section -->
+        <section id="music" style="padding: ${
+          isBrutalist ? "0" : "6rem 0"
+        }; background: ${
+        isBrutalist
+          ? "var(--color-text)"
+          : isGradient
+          ? "linear-gradient(135deg, rgba(102,126,234,0.08), rgba(240,147,251,0.08))"
+          : isRetro
+          ? "var(--color-surface)"
+          : "var(--color-surface)"
+      }; ${
+        !isBrutalist
+          ? "border-top: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border);"
+          : ""
+      } ${
+        isRetro
+          ? "margin: 4rem 0; border-top: 3px solid var(--color-accent); border-bottom: 3px solid #00f5ff;"
+          : ""
+      } ${isGradient ? "border-radius: 32px; margin: 0 2rem;" : ""} ${
+        isGlassmorphism ? "backdrop-filter: blur(20px);" : ""
+      }">
+          <div class="container">
+            ${
+              isBrutalist
+                ? `
+            <div class="brutalist-release" style="display: grid; grid-template-columns: 1fr 1fr; min-height: 500px;">
+              <div style="background: var(--color-accent); padding: 4rem; display: flex; flex-direction: column; justify-content: center;">
+                <h2 style="font-size: clamp(2rem, 5vw, 4rem); font-weight: 900; text-transform: uppercase; color: var(--color-bg); margin-bottom: 1rem;">Latest Release</h2>
+                <p style="font-size: 2rem; font-weight: 900; color: var(--color-bg); text-transform: uppercase;">${
+                  data.latestRelease || "Midnight Waves"
+                }</p>
+                <p style="font-size: 1.25rem; color: var(--color-bg); margin-top: 1rem; opacity: 0.9;">${
+                  data.releaseYear || "2024"
+                }</p>
+              </div>
+              <div style="background: var(--color-bg); padding: 4rem; display: flex; flex-direction: column; justify-content: center; border: 4px solid var(--color-text);">
+                <p style="font-size: 1.25rem; line-height: 1.7; margin-bottom: 2rem;">${
+                  data.releaseDescription ||
+                  "Our third studio album explores themes of memory, loss, and renewal."
+                }</p>
+                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                  ${
+                    data.tracks && data.tracks.length > 0
+                      ? data.tracks
+                          .map(
+                            (track, index) => `
+                  <div style="display: flex; justify-content: space-between; padding: 1rem; border: 2px solid var(--color-text); font-weight: 700; text-transform: uppercase;">
+                    <span>${String(index + 1).padStart(2, "0")}. ${
+                              track.title
+                            }</span>
+                    <span>${track.duration}</span>
+                  </div>`
+                          )
+                          .join("")
+                      : ""
+                  }
+                </div>
+              </div>
+            </div>
+            `
+                : `
+            <div style="text-align: center; margin-bottom: 4rem;">
+              ${
+                isElegant
+                  ? `<div style="color: var(--color-accent); font-size: 0.75rem; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 1rem; font-weight: 400;">New Album</div>`
+                  : ""
+              }
+              <h2 style="font-family: ${
+                isElegant ? "Playfair Display, serif" : "inherit"
+              }; font-size: clamp(2rem, 5vw, 3rem); font-weight: ${
+                    isElegant ? "600" : "700"
+                  }; margin-bottom: 0.5rem; ${
+                    isRetro
+                      ? "text-transform: uppercase; letter-spacing: 3px; background: linear-gradient(90deg, var(--color-accent), #00f5ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"
+                      : ""
+                  }">
+                ${data.latestRelease || "Midnight Waves"}
+              </h2>
+              <p style="color: var(--color-text-secondary); font-size: 0.9375rem; ${
+                isRetro ? "text-transform: uppercase; letter-spacing: 2px;" : ""
+              }">${data.releaseYear || "2024"}</p>
+            </div>
+            
+            <div style="max-width: 800px; margin: 0 auto;">
+              <p style="font-family: ${
+                isElegant
+                  ? "Lato, sans-serif"
+                  : isRetro
+                  ? "Space Mono, monospace"
+                  : "inherit"
+              }; font-size: ${isElegant ? "1.125rem" : "1rem"}; font-weight: ${
+                    isElegant ? "300" : "normal"
+                  }; color: var(--color-text-secondary); line-height: 1.8; text-align: center; margin-bottom: 3rem;">
+                ${
+                  data.releaseDescription ||
+                  "Our third studio album explores themes of memory, loss, and renewal."
+                }
+              </p>
+              
+              <div class="tracks-list" style="display: flex; flex-direction: column; gap: ${
+                isNeumorphism ? "1.5rem" : "0.5rem"
+              };">
+                ${
+                  data.tracks && data.tracks.length > 0
+                    ? data.tracks
+                        .map(
+                          (track, index) => `
+                <div class="track-item" style="display: flex; justify-content: space-between; align-items: center; padding: ${
+                  isNeumorphism || isGlassmorphism
+                    ? "1.25rem 1.5rem"
+                    : "1rem 1.5rem"
+                }; border-radius: ${
+                            isGradient
+                              ? "16px"
+                              : isRetro
+                              ? "0"
+                              : isNeumorphism || isGlassmorphism
+                              ? "16px"
+                              : "8px"
+                          }; background: ${
+                            isGradient
+                              ? "linear-gradient(135deg, rgba(102,126,234,0.05), rgba(118,75,162,0.05))"
+                              : isRetro
+                              ? "rgba(255,47,181,0.05)"
+                              : isGlassmorphism
+                              ? "rgba(255,255,255,0.05)"
+                              : isNeumorphism
+                              ? "var(--color-bg)"
+                              : "var(--color-bg)"
+                          }; border: ${
+                            isRetro
+                              ? "2px solid var(--color-accent)"
+                              : "1px solid var(--color-border)"
+                          }; ${
+                            isGlassmorphism
+                              ? "backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1);"
+                              : ""
+                          } ${
+                            isNeumorphism ? getNeumorphismShadow(false) : ""
+                          } transition: all 0.2s;" onmouseover="this.style.borderColor='var(--color-accent)'" onmouseout="this.style.borderColor='var(--color-border)'">
+                  <div style="display: flex; align-items: center; gap: 1rem;">
+                    <span style="color: var(--color-accent); font-weight: 600; font-size: 0.875rem; ${
+                      isRetro ? "font-family: Space Mono, monospace;" : ""
+                    }">${String(index + 1).padStart(2, "0")}</span>
+                    <span style="font-weight: ${isElegant ? "400" : "500"}; ${
+                            isElegant
+                              ? "font-family: Playfair Display, serif;"
+                              : ""
+                          }">${track.title}</span>
+                  </div>
+                  <span style="color: var(--color-text-secondary); font-size: 0.875rem; ${
+                    isRetro ? "font-family: Space Mono, monospace;" : ""
+                  }">${track.duration}</span>
+                </div>`
+                        )
+                        .join("")
+                    : ""
+                }
+              </div>
+            </div>
+            `
+            }
+          </div>
+        </section>
+
+        <!-- Tour Dates Section -->
+        <section id="tour" style="padding: ${
+          isRetro || isElegant ? "8rem 0" : "6rem 0"
+        };">
+          <div class="container">
+            <div style="text-align: center; margin-bottom: 4rem;">
+              <h2 style="font-family: ${
+                isElegant ? "Playfair Display, serif" : "inherit"
+              }; font-size: clamp(2rem, 5vw, ${
+        isBrutalist ? "5rem" : "3rem"
+      }); font-weight: ${isBrutalist ? "900" : isElegant ? "600" : "700"}; ${
+        isBrutalist ? "text-transform: uppercase;" : ""
+      } ${
+        isRetro
+          ? "text-transform: uppercase; letter-spacing: 4px; background: linear-gradient(90deg, var(--color-accent), #00f5ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"
+          : ""
+      }">
+                ${
+                  isBrutalist
+                    ? `<span style="border-bottom: 8px solid var(--color-accent);">TOUR</span> DATES`
+                    : "Tour Dates"
+                }
+              </h2>
+              ${
+                !isBrutalist && !isRetro
+                  ? `<p style="color: var(--color-text-secondary); font-size: 1.125rem; font-weight: ${
+                      isElegant ? "300" : "normal"
+                    }; max-width: 600px; margin: 1rem auto 0;">Catch us live on tour</p>`
+                  : ""
+              }
+            </div>
+            
+            <div class="tour-list" style="max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: ${
+              isNeumorphism ? "2rem" : isBrutalist ? "0" : "1rem"
+            };">
+              ${
+                data.tourDates && data.tourDates.length > 0
+                  ? data.tourDates
+                      .map(
+                        (show, index) => `
+              <div class="tour-item" style="display: grid; grid-template-columns: ${
+                isBrutalist ? "150px 1fr auto" : "100px 1fr auto"
+              }; gap: 2rem; align-items: center; padding: ${
+                          isBrutalist
+                            ? "2rem"
+                            : isNeumorphism || isGlassmorphism
+                            ? "1.5rem 2rem"
+                            : isElegant
+                            ? "2rem 0"
+                            : "1.5rem"
+                        }; border-radius: ${
+                          isGradient
+                            ? "16px"
+                            : isRetro
+                            ? "0"
+                            : isNeumorphism || isGlassmorphism
+                            ? "20px"
+                            : isBrutalist || isElegant
+                            ? "0"
+                            : "12px"
+                        }; background: ${
+                          isBrutalist
+                            ? index % 2 === 0
+                              ? "var(--color-text)"
+                              : "var(--color-accent)"
+                            : isGradient
+                            ? "linear-gradient(135deg, rgba(102,126,234,0.03), rgba(118,75,162,0.03))"
+                            : isRetro
+                            ? "rgba(255,47,181,0.05)"
+                            : isGlassmorphism
+                            ? "rgba(255,255,255,0.05)"
+                            : isNeumorphism
+                            ? "var(--color-bg)"
+                            : "transparent"
+                        }; ${
+                          isBrutalist
+                            ? `border: 4px solid var(--color-text); color: var(--color-bg);`
+                            : isRetro
+                            ? "border: 2px solid var(--color-accent);"
+                            : isElegant
+                            ? "border-bottom: 1px solid var(--color-border);"
+                            : isGlassmorphism
+                            ? "backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1);"
+                            : "border: 1px solid var(--color-border);"
+                        } ${
+                          isNeumorphism ? getNeumorphismShadow(false) : ""
+                        } transition: all 0.2s;" onmouseover="this.style.borderColor='var(--color-accent)'" onmouseout="this.style.borderColor='var(--color-border)'">
+                <div style="font-weight: ${
+                  isBrutalist ? "900" : "700"
+                }; font-size: ${isBrutalist ? "1.5rem" : "1.125rem"}; ${
+                          isBrutalist ? "text-transform: uppercase;" : ""
+                        } ${
+                          isRetro
+                            ? "font-family: Space Mono, monospace; color: var(--color-accent);"
+                            : isElegant
+                            ? "font-family: Playfair Display, serif; color: var(--color-accent);"
+                            : "color: var(--color-accent);"
+                        }">
+                  ${show.date}
+                </div>
+                <div>
+                  <div style="font-weight: ${
+                    isElegant ? "500" : "600"
+                  }; font-size: ${
+                          isBrutalist ? "1.25rem" : "1rem"
+                        }; margin-bottom: 0.25rem; ${
+                          isBrutalist ? "text-transform: uppercase;" : ""
+                        } ${
+                          isElegant
+                            ? "font-family: Playfair Display, serif;"
+                            : ""
+                        }">
+                    ${show.venue}
+                  </div>
+                  <div style="color: ${
+                    isBrutalist ? "inherit" : "var(--color-text-secondary)"
+                  }; font-size: 0.875rem; opacity: ${
+                          isBrutalist ? "0.8" : "1"
+                        }; ${
+                          isRetro
+                            ? "font-family: Space Mono, monospace; text-transform: uppercase; letter-spacing: 1px;"
+                            : ""
+                        }">
+                    ${show.city}
+                  </div>
+                </div>
+                <div>
+                  <a href="#" style="padding: ${
+                    isBrutalist ? "1rem 2rem" : "0.75rem 1.5rem"
+                  }; border-radius: ${
+                          isGradient || isRetro
+                            ? "999px"
+                            : isBrutalist
+                            ? "0"
+                            : isNeumorphism || isGlassmorphism
+                            ? "12px"
+                            : isElegant
+                            ? "0"
+                            : "6px"
+                        }; text-decoration: none; font-weight: ${
+                          isBrutalist || isRetro ? "700" : "500"
+                        }; font-size: 0.875rem; display: inline-block; ${
+                          show.ticketStatus === "Sold Out"
+                            ? `background: transparent; color: var(--color-text-secondary); border: 1px solid var(--color-text-secondary); pointer-events: none; opacity: 0.6;`
+                            : isBrutalist
+                            ? `background: var(--color-bg); color: var(--color-text); border: 3px solid var(--color-bg); text-transform: uppercase;`
+                            : isGradient
+                            ? `background: linear-gradient(135deg, #667eea, #764ba2); color: white;`
+                            : isRetro
+                            ? `background: #00f5ff; color: #0d001a; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 0 15px #00f5ff;`
+                            : isElegant
+                            ? `background: transparent; color: var(--color-accent); border: 1px solid var(--color-accent);`
+                            : isGlassmorphism
+                            ? `background: rgba(255,255,255,0.1); color: var(--color-text); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2);`
+                            : isNeumorphism
+                            ? `background: var(--color-bg); color: var(--color-text); ${getNeumorphismShadow(
+                                false
+                              )}`
+                            : `background: var(--color-accent); color: white;`
+                        } transition: all 0.2s;" ${
+                          show.ticketStatus !== "Sold Out"
+                            ? `onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'"`
+                            : ""
+                        }>
+                    ${show.ticketStatus === "Sold Out" ? "Sold Out" : "Tickets"}
+                  </a>
+                </div>
+              </div>`
+                      )
+                      .join("")
+                  : ""
+              }
+            </div>
+          </div>
+        </section>
+
+        <!-- About / Press Quote Section -->
+        <section id="about" style="padding: ${
+          isBrutalist || isRetro || isElegant ? "8rem 0" : "6rem 0"
+        }; background: ${
+        isBrutalist
+          ? "var(--color-accent)"
+          : isGradient
+          ? "linear-gradient(135deg, #667eea, #764ba2)"
+          : isRetro
+          ? "linear-gradient(135deg, var(--color-accent), #b537f2)"
+          : isElegant
+          ? "var(--color-surface)"
+          : isGlassmorphism
+          ? "transparent"
+          : "var(--color-surface)"
+      }; ${isBrutalist || isGradient || isRetro ? "color: white;" : ""} ${
+        isElegant
+          ? "border-top: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border);"
+          : ""
+      } ${
+        isRetro
+          ? "border-radius: 20px; margin: 0 2rem; box-shadow: 0 20px 60px rgba(255,47,181,0.4);"
+          : ""
+      }">
+          <div class="container" style="${
+            isGlassmorphism || isNeumorphism
+              ? `padding: 5rem 3rem!important; border-radius: 32px; max-width: 90%; ${
+                  isGlassmorphism
+                    ? "background: rgba(255,255,255,0.05); backdrop-filter: blur(20px); box-shadow: 0 8px 32px rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.1);"
+                    : getNeumorphismShadow(false)
+                }`
+              : ""
+          }">
+            <div style="max-width: 800px; margin: 0 auto; text-align: center;">
+              ${
+                isBrutalist
+                  ? `
+              <h2 style="font-size: clamp(3rem, 8vw, 6rem); text-transform: uppercase; margin-bottom: 2rem; font-weight: 900; color: var(--color-bg);">${
+                data.aboutTitle || "About the Band"
+              }</h2>
+              <p style="font-size: 1.5rem; margin-bottom: 3rem; color: var(--color-bg); line-height: 1.6;">${
+                data.aboutText || "Formed in 2019 in Brooklyn."
+              }</p>
+              `
+                  : isElegant
+                  ? `
+              <p style="font-family: Playfair Display, serif; font-size: clamp(1.5rem, 3vw, 2.25rem); line-height: 1.6; max-width: 800px; margin: 0 auto 3rem; font-style: italic; color: var(--color-text);">${
+                data.pressQuote ||
+                '"One of the most compelling new voices in indie rock."'
+              }</p>
+              <p style="color: var(--color-accent); font-size: 0.875rem; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4rem;">— ${
+                data.pressSource || "Pitchfork"
+              }</p>
+              <div style="width: 60px; height: 1px; background: var(--color-border); margin: 0 auto 4rem;"></div>
+              <h3 style="font-family: Playfair Display, serif; font-size: 1.5rem; font-weight: 600; margin-bottom: 1.5rem;">${
+                data.aboutTitle || "About the Band"
+              }</h3>
+              <p style="font-family: Lato, sans-serif; font-size: 1.125rem; font-weight: 300; color: var(--color-text-secondary); line-height: 1.9;">${
+                data.aboutText || "Formed in 2019 in Brooklyn."
+              }</p>
+              `
+                  : `
+              <p class="quote" style="font-size: ${
+                isGradient ? "1.25rem" : "1.5rem"
+              }; line-height: 1.8; max-width: 800px; margin: 0 auto 2rem; font-weight: 500; color: ${
+                      isGradient || isRetro ? "white" : "var(--color-text)"
+                    }; ${isGradient ? "opacity: 0.9;" : ""}">${
+                      data.pressQuote ||
+                      '"One of the most compelling new voices in indie rock."'
+                    }</p>
+              <p style="color: ${
+                isGradient ? "rgba(255,255,255,0.7)" : "var(--color-accent)"
+              }; font-size: 0.9375rem; font-weight: 600; margin-bottom: 4rem;">— ${
+                      data.pressSource || "Pitchfork"
+                    }</p>
+              <div style="width: 60px; height: 2px; background: ${
+                isGradient ? "rgba(255,255,255,0.3)" : "var(--color-border)"
+              }; margin: 0 auto 4rem;"></div>
+              <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 1.5rem; color: ${
+                isGradient ? "white" : "var(--color-text)"
+              };">${data.aboutTitle || "About the Band"}</h3>
+              <p style="font-size: 1.0625rem; color: ${
+                isGradient
+                  ? "rgba(255,255,255,0.85)"
+                  : "var(--color-text-secondary)"
+              }; line-height: 1.8;">${
+                      data.aboutText || "Formed in 2019 in Brooklyn."
+                    }</p>
+              `
+              }
+            </div>
+          </div>
+        </section>
+
+        <!-- Streaming / Social Links Section -->
+        <section style="padding: ${
+          isBrutalist ? "4rem 0" : "5rem 0"
+        }; text-align: center; ${
+        isBrutalist ? "border-top: 4px solid var(--color-text);" : ""
+      }">
+          <div class="container">
+            <h2 style="font-family: ${
+              isElegant ? "Playfair Display, serif" : "inherit"
+            }; font-size: ${isBrutalist ? "2rem" : "1.5rem"}; font-weight: ${
+        isBrutalist ? "900" : "600"
+      }; margin-bottom: 2rem; ${
+        isBrutalist ? "text-transform: uppercase; letter-spacing: 4px;" : ""
+      } ${
+        isRetro
+          ? "background: linear-gradient(90deg, var(--color-accent), #00f5ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-transform: uppercase; letter-spacing: 3px;"
+          : ""
+      }">Listen & Follow</h2>
+            
+            <div class="social-links" style="display: flex; gap: ${
+              isBrutalist ? "0" : isNeumorphism ? "2rem" : "1.5rem"
+            }; justify-content: center; flex-wrap: wrap; max-width: 600px; margin: 0 auto;">
+              ${
+                data.spotifyUrl
+                  ? `<a href="${
+                      data.spotifyUrl
+                    }" target="_blank" rel="noopener" style="padding: ${
+                      isBrutalist ? "1.25rem 2rem" : "0.75rem 1.5rem"
+                    }; border-radius: ${
+                      isGradient || isRetro
+                        ? "999px"
+                        : isBrutalist
+                        ? "0"
+                        : isNeumorphism || isGlassmorphism
+                        ? "16px"
+                        : isElegant
+                        ? "0"
+                        : "8px"
+                    }; text-decoration: none; font-weight: ${
+                      isBrutalist ? "700" : "500"
+                    }; font-size: 0.9375rem; display: inline-flex; align-items: center; gap: 0.5rem; ${
+                      isBrutalist
+                        ? "background: var(--color-text); color: var(--color-bg); text-transform: uppercase; border: 4px solid var(--color-text);"
+                        : isRetro
+                        ? "background: rgba(255,47,181,0.1); color: var(--color-text); border: 2px solid var(--color-accent);"
+                        : isGlassmorphism
+                        ? "background: rgba(255,255,255,0.05); color: var(--color-text); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1);"
+                        : isNeumorphism
+                        ? `background: var(--color-bg); color: var(--color-text); ${getNeumorphismShadow(
+                            false
+                          )}`
+                        : "background: var(--color-surface); color: var(--color-text); border: 1px solid var(--color-border);"
+                    } transition: all 0.2s;" onmouseover="this.style.borderColor='var(--color-accent)'" onmouseout="this.style.borderColor='var(--color-border)'"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>Spotify</a>`
+                  : ""
+              }
+              ${
+                data.appleMusicUrl
+                  ? `<a href="${
+                      data.appleMusicUrl
+                    }" target="_blank" rel="noopener" style="padding: ${
+                      isBrutalist ? "1.25rem 2rem" : "0.75rem 1.5rem"
+                    }; border-radius: ${
+                      isGradient || isRetro
+                        ? "999px"
+                        : isBrutalist
+                        ? "0"
+                        : isNeumorphism || isGlassmorphism
+                        ? "16px"
+                        : isElegant
+                        ? "0"
+                        : "8px"
+                    }; text-decoration: none; font-weight: ${
+                      isBrutalist ? "700" : "500"
+                    }; font-size: 0.9375rem; display: inline-flex; align-items: center; gap: 0.5rem; ${
+                      isBrutalist
+                        ? "background: var(--color-accent); color: var(--color-bg); text-transform: uppercase; border: 4px solid var(--color-accent);"
+                        : isRetro
+                        ? "background: rgba(0,245,255,0.1); color: var(--color-text); border: 2px solid #00f5ff;"
+                        : isGlassmorphism
+                        ? "background: rgba(255,255,255,0.05); color: var(--color-text); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1);"
+                        : isNeumorphism
+                        ? `background: var(--color-bg); color: var(--color-text); ${getNeumorphismShadow(
+                            false
+                          )}`
+                        : "background: var(--color-surface); color: var(--color-text); border: 1px solid var(--color-border);"
+                    } transition: all 0.2s;" onmouseover="this.style.borderColor='var(--color-accent)'" onmouseout="this.style.borderColor='var(--color-border)'"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M23.997 6.124c0-.738-.065-1.47-.24-2.19-.317-1.31-1.062-2.31-2.18-3.043C21.003.517 20.373.285 19.7.164c-.517-.093-1.038-.135-1.564-.15-.04-.003-.083-.01-.124-.013H5.988c-.152.01-.303.017-.455.026C4.786.07 4.043.15 3.34.428 2.004.958 1.04 1.88.475 3.208c-.192.448-.292.925-.363 1.408-.056.392-.088.785-.1 1.18 0 .032-.007.062-.01.093v12.223c.01.14.017.283.027.424.05.815.154 1.624.497 2.373.65 1.42 1.738 2.353 3.234 2.802.42.127.856.187 1.293.228.555.053 1.11.06 1.667.06h11.03c.525 0 1.048-.034 1.57-.1.823-.106 1.597-.35 2.296-.81.84-.553 1.472-1.287 1.88-2.208.186-.42.293-.87.37-1.324.113-.675.138-1.358.137-2.04-.002-3.8 0-7.595-.004-11.39zm-6.423 3.99v5.712c0 .417-.058.827-.244 1.206-.29.59-.76.962-1.388 1.14-.35.1-.706.157-1.07.173-.95.042-1.873-.143-2.664-.7-.91-.643-1.316-1.52-1.31-2.617.008-1.312.74-2.216 1.91-2.69.468-.188.96-.297 1.46-.36.478-.06.96-.074 1.44-.12.238-.02.477-.054.67-.264.14-.15.21-.333.21-.53V8.536c0-.318-.14-.52-.45-.6-.28-.07-.57-.09-.86-.12l-3.77-.39c-.32-.03-.64-.07-.96-.1-.22-.03-.43.07-.51.3-.05.14-.07.29-.07.44v7.63c0 .44-.05.87-.24 1.27-.29.62-.77 1.01-1.43 1.19-.33.09-.68.15-1.02.17-.96.06-1.9-.11-2.71-.68-.92-.64-1.33-1.54-1.32-2.66.01-1.35.77-2.26 1.98-2.72.46-.17.93-.27 1.42-.33.55-.07 1.1-.07 1.65-.13.2-.02.39-.05.52-.24.1-.14.15-.3.15-.47V5.2c0-.35.04-.42.38-.46.74-.08 1.49-.14 2.24-.21 1.09-.1 2.18-.2 3.27-.3.5-.04 1-.08 1.5-.13.54-.05.81.17.81.71v5.3z"/></svg>Apple Music</a>`
+                  : ""
+              }
+              ${
+                data.instagramUrl
+                  ? `<a href="${
+                      data.instagramUrl
+                    }" target="_blank" rel="noopener" style="padding: ${
+                      isBrutalist ? "1.25rem 2rem" : "0.75rem 1.5rem"
+                    }; border-radius: ${
+                      isGradient || isRetro
+                        ? "999px"
+                        : isBrutalist
+                        ? "0"
+                        : isNeumorphism || isGlassmorphism
+                        ? "16px"
+                        : isElegant
+                        ? "0"
+                        : "8px"
+                    }; text-decoration: none; font-weight: ${
+                      isBrutalist ? "700" : "500"
+                    }; font-size: 0.9375rem; display: inline-flex; align-items: center; gap: 0.5rem; ${
+                      isBrutalist
+                        ? "background: #0000ff; color: var(--color-bg); text-transform: uppercase; border: 4px solid #0000ff;"
+                        : isRetro
+                        ? "background: rgba(255,47,181,0.1); color: var(--color-text); border: 2px solid var(--color-accent);"
+                        : isGlassmorphism
+                        ? "background: rgba(255,255,255,0.05); color: var(--color-text); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1);"
+                        : isNeumorphism
+                        ? `background: var(--color-bg); color: var(--color-text); ${getNeumorphismShadow(
+                            false
+                          )}`
+                        : "background: var(--color-surface); color: var(--color-text); border: 1px solid var(--color-border);"
+                    } transition: all 0.2s;" onmouseover="this.style.borderColor='var(--color-accent)'" onmouseout="this.style.borderColor='var(--color-border)'"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>Instagram</a>`
+                  : ""
+              }
+              ${
+                data.youtubeUrl
+                  ? `<a href="${
+                      data.youtubeUrl
+                    }" target="_blank" rel="noopener" style="padding: ${
+                      isBrutalist ? "1.25rem 2rem" : "0.75rem 1.5rem"
+                    }; border-radius: ${
+                      isGradient || isRetro
+                        ? "999px"
+                        : isBrutalist
+                        ? "0"
+                        : isNeumorphism || isGlassmorphism
+                        ? "16px"
+                        : isElegant
+                        ? "0"
+                        : "8px"
+                    }; text-decoration: none; font-weight: ${
+                      isBrutalist ? "700" : "500"
+                    }; font-size: 0.9375rem; display: inline-flex; align-items: center; gap: 0.5rem; ${
+                      isBrutalist
+                        ? "background: var(--color-text); color: var(--color-bg); text-transform: uppercase; border: 4px solid var(--color-text);"
+                        : isRetro
+                        ? "background: rgba(0,245,255,0.1); color: var(--color-text); border: 2px solid #00f5ff;"
+                        : isGlassmorphism
+                        ? "background: rgba(255,255,255,0.05); color: var(--color-text); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1);"
+                        : isNeumorphism
+                        ? `background: var(--color-bg); color: var(--color-text); ${getNeumorphismShadow(
+                            false
+                          )}`
+                        : "background: var(--color-surface); color: var(--color-text); border: 1px solid var(--color-border);"
+                    } transition: all 0.2s;" onmouseover="this.style.borderColor='var(--color-accent)'" onmouseout="this.style.borderColor='var(--color-border)'"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>YouTube</a>`
+                  : ""
+              }
+            </div>
+          </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section style="padding: ${
+          isBrutalist ? "6rem 0" : "5rem 0"
+        }; text-align: center; background: ${
+        isBrutalist ? "var(--color-text)" : "var(--color-bg)"
+      }; ${isBrutalist ? "color: var(--color-bg);" : ""} ${
+        !isBrutalist ? "border-top: 1px solid var(--color-border);" : ""
+      }">
+          <div class="container">
+            <h2 style="font-family: ${
+              isElegant ? "Playfair Display, serif" : "inherit"
+            }; font-size: ${
+        isBrutalist ? "clamp(2rem, 6vw, 4rem)" : "1.5rem"
+      }; font-weight: ${isBrutalist ? "900" : "600"}; margin-bottom: 1.5rem; ${
+        isBrutalist ? "text-transform: uppercase;" : ""
+      } ${
+        isRetro
+          ? "background: linear-gradient(90deg, var(--color-accent), #00f5ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-transform: uppercase; letter-spacing: 3px;"
+          : ""
+      }">Booking & Press</h2>
+            <p style="color: ${
+              isBrutalist ? "var(--color-bg)" : "var(--color-text-secondary)"
+            }; margin-bottom: 2rem; font-size: ${
+        isElegant ? "1.125rem" : "1rem"
+      }; ${isElegant ? "font-weight: 300;" : ""} opacity: ${
+        isBrutalist ? "0.8" : "1"
+      };">For booking inquiries and press requests</p>
+            <a href="mailto:${
+              data.contactEmail || "booking@theechoes.com"
+            }" style="display: inline-block; padding: ${
+        isBrutalist ? "1.5rem 3rem" : "1rem 2.5rem"
+      }; border-radius: ${
+        isGradient || isRetro
+          ? "999px"
+          : isBrutalist
+          ? "0"
+          : isNeumorphism || isGlassmorphism
+          ? "16px"
+          : isElegant
+          ? "0"
+          : "8px"
+      }; text-decoration: none; font-weight: ${
+        isBrutalist ? "900" : "600"
+      }; font-size: ${isBrutalist ? "1.25rem" : "1rem"}; ${
+        isBrutalist
+          ? "background: var(--color-bg); color: var(--color-text); text-transform: uppercase; letter-spacing: 2px; border: 4px solid var(--color-bg);"
+          : isGradient
+          ? "background: linear-gradient(135deg, #667eea, #764ba2); color: white; box-shadow: 0 10px 30px rgba(102,126,234,0.3);"
+          : isRetro
+          ? "background: linear-gradient(90deg, var(--color-accent), #b537f2); color: white; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 0 30px var(--color-accent); border: 2px solid var(--color-accent);"
+          : isElegant
+          ? "background: var(--color-accent); color: white; border: 1px solid var(--color-accent); letter-spacing: 1px;"
+          : isGlassmorphism
+          ? "background: rgba(255,255,255,0.1); color: var(--color-text); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 8px 20px rgba(0,0,0,0.2);"
+          : isNeumorphism
+          ? `background: var(--color-bg); color: var(--color-text); ${getNeumorphismShadow(
+              false
+            )}`
+          : "background: var(--color-accent); color: white;"
+      } transition: all 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">${
+        data.contactEmail || "booking@theechoes.com"
+      }</a>
+          </div>
+        </section>
+      </main>
+
+      <!-- Footer -->
+      <footer style="padding: ${isBrutalist ? "4rem 0" : "3rem 0"}; ${
+        isBrutalist
+          ? "border-top: 4px solid var(--color-text);"
+          : isRetro
+          ? "border-top: 3px solid var(--color-accent);"
+          : "border-top: 1px solid var(--color-border);"
+      } text-align: center; color: var(--color-text-secondary); font-size: 0.875rem; ${
+        isGlassmorphism
+          ? "backdrop-filter: blur(20px); background: rgba(255,255,255,0.02);"
+          : ""
+      } ${isElegant ? "padding: 4rem 0;" : ""}">
+        <div class="container">
+          <p style="${
+            isBrutalist
+              ? "font-size: 1.25rem; text-transform: uppercase; font-weight: 700; letter-spacing: 2px;"
+              : isRetro
+              ? "text-transform: uppercase; letter-spacing: 2px; font-family: Space Mono, monospace;"
+              : isElegant
+              ? "font-family: Playfair Display, serif; font-style: italic;"
+              : ""
+          }">© 2024 ${data.artistName || "The Echoes"}. All rights reserved.</p>
+        </div>
+      </footer>
+
+      <style>
+        ${
+          isNeumorphism
+            ? `
+        :root {
+          --neomorph-shadow-out: 20px 20px 60px #c5c9ce, -20px -20px 60px #ffffff;
+          --neomorph-shadow-in: inset 20px 20px 60px #c5c9ce, inset -20px -20px 60px #ffffff;
+        }
+        [data-theme="dark"] {
+          --neomorph-shadow-out: 32px 32px 64px #2a2d34, -32px -32px 64px #383d46;
+          --neomorph-shadow-in: inset 32px 32px 64px #2a2d34, inset -32px -32px 64px #383d46;
+        }
+        `
+            : ""
+        }
+        
+        @media (max-width: 768px) {
+          .container { padding: 0 1.5rem !important; }
+          section[style*="padding: 8rem"] { padding: 5rem 0 !important; }
+          section[style*="padding: 6rem"] { padding: 4rem 0 !important; }
+          section[style*="padding: 10rem"] { padding: 6rem 0 4rem !important; }
+          .nav-links { display: none !important; }
+          .mobile-controls { display: flex !important; }
+          .tour-item { grid-template-columns: 1fr !important; gap: 1rem !important; text-align: center; }
+          .tour-item > div:first-child { margin-bottom: 0.5rem; }
+          .tracks-list { gap: 1rem !important; }
+          .social-links { gap: 1rem !important; }
+          .social-links a { flex: 1 1 calc(50% - 0.5rem); justify-content: center; min-width: 140px; }
+          .brutalist-release { grid-template-columns: 1fr !important; }
+        }
+        
+        @media (max-width: 640px) {
+          .cta-group { flex-direction: column !important; max-width: 300px; margin-left: auto; margin-right: auto; }
+          .cta-group a { width: 100%; text-align: center; }
+          .social-links a { flex: 1 1 100%; }
+        }
+        
+        ${
+          isRetro
+            ? `
+        @keyframes glow {
+          from { filter: drop-shadow(0 0 10px var(--color-accent)); }
+          to { filter: drop-shadow(0 0 30px #00f5ff); }
+        }
+        .glitch { position: relative; }
+        .glitch::before, .glitch::after {
+          content: attr(data-text);
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+        }
+        .glitch::before {
+          animation: glitch1 2s infinite;
+          color: var(--color-accent);
+          z-index: -1;
+        }
+        .glitch::after {
+          animation: glitch2 3s infinite;
+          color: #00f5ff;
+          z-index: -2;
+        }
+        @keyframes glitch1 {
+          0%, 100% { transform: translate(0); }
+          20% { transform: translate(-2px, 2px); }
+          40% { transform: translate(-2px, -2px); }
+          60% { transform: translate(2px, 2px); }
+          80% { transform: translate(2px, -2px); }
+        }
+        @keyframes glitch2 {
+          0%, 100% { transform: translate(0); }
+          20% { transform: translate(2px, -2px); }
+          40% { transform: translate(2px, 2px); }
+          60% { transform: translate(-2px, -2px); }
+          80% { transform: translate(-2px, 2px); }
+        }
+        body::before {
+          content: '';
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background-image: linear-gradient(rgba(255,47,181,0.03) 2px, transparent 2px), linear-gradient(90deg, rgba(255,47,181,0.03) 2px, transparent 2px);
+          background-size: 50px 50px;
+          pointer-events: none;
+          z-index: 0;
+        }
+        main { position: relative; z-index: 1; }
+        `
+            : ""
+        }
+        
+        ${
+          isGradient
+            ? `
+        @keyframes gradient {
+          0%, 100% { background-position: 0 50%; }
+          50% { background-position: 100% 50%; }
+        }
+        `
+            : ""
+        }
+      </style>
+    `;
+    },
+  }),
+  "quote-calculator": new Template("quote-calculator", {
+    name: "Quote Calculator",
+    description:
+      "Interactive quote calculator with customizable service fields",
+    category: "Business",
+    image: "quote-calculator",
+    fields: {
+      companyName: {
+        type: "text",
+        default: "QuickQuote",
+        label: "Company Name",
+        required: true,
+      },
+      headline: {
+        type: "text",
+        default: "Get Your Instant Quote",
+        label: "Headline",
+        required: true,
+      },
+      subheadline: {
+        type: "textarea",
+        default:
+          "Select the services you need and get an estimated price instantly. No hidden fees, no surprises.",
+        label: "Subheadline",
+      },
+      currencySymbol: {
+        type: "text",
+        default: "$",
+        label: "Currency Symbol",
+      },
+      services: {
+        type: "group",
+        label: "Services",
+        itemLabel: "Service",
+        min: 1,
+        max: 12,
+        fields: {
+          name: { type: "text", label: "Service Name", default: "" },
+          description: {
+            type: "text",
+            label: "Short Description",
+            default: "",
+          },
+          price: { type: "text", label: "Price", default: "" },
+        },
+        default: [
+          {
+            name: "Basic Consultation",
+            description: "1-hour strategy session",
+            price: "99",
+          },
+          {
+            name: "Website Design",
+            description: "Custom responsive design",
+            price: "1,500",
+          },
+          {
+            name: "Website Development",
+            description: "Full-stack development",
+            price: "3,000",
+          },
+          {
+            name: "SEO Optimization",
+            description: "On-page & technical SEO",
+            price: "500",
+          },
+          {
+            name: "Content Writing",
+            description: "5 pages of content",
+            price: "400",
+          },
+          {
+            name: "Monthly Maintenance",
+            description: "Updates & support",
+            price: "150",
+          },
+        ],
+      },
+      ctaText: {
+        type: "text",
+        default: "Request Full Quote",
+        label: "CTA Button Text",
+      },
+      ctaDescription: {
+        type: "text",
+        default: "Get a detailed proposal within 24 hours",
+        label: "CTA Description",
+      },
+      contactEmail: {
+        type: "email",
+        default: "quotes@company.com",
+        label: "Contact Email",
+      },
+      contactPhone: {
+        type: "text",
+        default: "(555) 123-4567",
+        label: "Contact Phone",
+      },
+      footerText: {
+        type: "text",
+        default:
+          "Prices are estimates. Final quote may vary based on project requirements.",
+        label: "Footer Disclaimer",
+      },
+    },
+    structure: (data, theme, colorMode) => {
+      const themeId = theme?.id || "minimal";
+      const isBrutalist = themeId === "brutalist";
+      const isGradient = themeId === "gradient";
+      const isElegant = themeId === "elegant";
+      const isRetro = themeId === "retro";
+      const isGlassmorphism = themeId === "glassmorphism";
+      const isNeumorphism = themeId === "neumorphism";
+
+      const getNeumorphismShadow = (inset = false) => {
+        if (!isNeumorphism) return "";
+        return inset
+          ? "box-shadow: var(--neomorph-shadow-in);"
+          : "box-shadow: var(--neomorph-shadow-out);";
+      };
+
+      const getNeumorphismHoverShadow = () =>
+        isNeumorphism ? "var(--neomorph-shadow-in)" : "";
+      const getNeumorphismNormalShadow = () =>
+        isNeumorphism ? "var(--neomorph-shadow-out)" : "";
+
+      const currencySymbol = data.currencySymbol || "$";
+
+      return `
+      <!-- Header -->
+      <header style="padding: ${
+        isBrutalist
+          ? "2rem 0"
+          : isElegant
+          ? "2rem 0"
+          : isNeumorphism
+          ? "2rem 0"
+          : "1.5rem 0"
+      }; ${
+        isBrutalist
+          ? "border-bottom: 4px solid var(--color-accent);"
+          : isRetro
+          ? "border-bottom: 3px solid var(--color-accent);"
+          : isNeumorphism || isGlassmorphism
+          ? ""
+          : "border-bottom: 1px solid var(--color-border);"
+      } position: sticky; top: 0; ${
+        isGlassmorphism
+          ? "background: rgba(255, 255, 255, 0.1);"
+          : "background: var(--color-bg);"
+      } z-index: 100; backdrop-filter: blur(${
+        isGlassmorphism ? "20px" : "10px"
+      }); ${
+        isGlassmorphism ? "box-shadow: 0 8px 32px rgba(31, 38, 135, 0.1);" : ""
+      } ${isNeumorphism ? "background: none" : ""}">
+        <div class="container">
+          <nav style="${
+            isNeumorphism
+              ? `display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 2rem; border-radius: 20px; ${getNeumorphismShadow(
+                  false
+                )}`
+              : "display: flex; justify-content: space-between; align-items: center;"
+          }">
+            <div class="logo" style="font-weight: ${
+              isBrutalist ? "900" : isNeumorphism || isElegant ? "700" : "600"
+            }; font-size: ${
+        isBrutalist
+          ? "1.75rem"
+          : isRetro
+          ? "1.5rem"
+          : isElegant
+          ? "1.5rem"
+          : isNeumorphism
+          ? "1.25rem"
+          : "1.125rem"
+      }; letter-spacing: ${
+        isBrutalist ? "2px" : isRetro ? "1px" : "-0.02em"
+      }; ${isBrutalist || isRetro ? "text-transform: uppercase;" : ""} ${
+        isGradient
+          ? "background: linear-gradient(135deg, #667eea, #764ba2, #f093fb); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"
+          : isRetro
+          ? "background: linear-gradient(90deg, var(--color-accent), #00f5ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"
+          : isElegant
+          ? "font-family: Playfair Display, serif; color: var(--color-accent);"
+          : isNeumorphism || isGlassmorphism
+          ? "color: var(--color-accent);"
+          : ""
+      }">${data.companyName || "QuickQuote"}</div>
+            
+            <!-- Desktop Theme Toggle -->
+            <div class="desktop-toggle" style="display: flex; align-items: center;">
+              <label class="theme-toggle-switch-wrapper" style="cursor: pointer; ${
+                isNeumorphism
+                  ? `padding: 0.5rem; border-radius: 12px; display: inline-block; box-shadow: var(--neomorph-shadow-out);`
+                  : ""
+              }">
+                <input type="checkbox" class="theme-toggle-switch" onclick="toggleTheme()" aria-label="Toggle theme">
+                <span class="theme-toggle-slider"></span>
+              </label>
+            </div>
+            
+            <!-- Mobile Controls -->
+            <div class="mobile-controls" style="display: none; align-items: center; gap: 1rem;">
+              <label class="theme-toggle-switch-wrapper" style="cursor: pointer; ${
+                isNeumorphism
+                  ? `padding: 0.5rem; border-radius: 12px; display: inline-block; box-shadow: var(--neomorph-shadow-out);`
+                  : ""
+              }">
+                <input type="checkbox" class="theme-toggle-switch" onclick="toggleTheme()" aria-label="Toggle theme">
+                <span class="theme-toggle-slider"></span>
+              </label>
+            </div>
+          </nav>
+        </div>
+      </header>
+
+      <main>
+        <!-- Hero Section -->
+        <section style="padding: ${
+          isBrutalist
+            ? "4rem 0 3rem"
+            : isElegant
+            ? "5rem 0 4rem"
+            : isNeumorphism
+            ? "2rem 0 3rem"
+            : "4rem 0 3rem"
+        }; text-align: center;">
+          <div class="container">
+            ${
+              isNeumorphism
+                ? `<div style="padding: 3rem 2rem; border-radius: 32px; ${getNeumorphismShadow(
+                    false
+                  )} max-width: 700px; margin: 2rem auto;">`
+                : ""
+            }
+            
+            ${
+              isElegant
+                ? `<div style="color: var(--color-accent); font-size: 0.75rem; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 1rem; font-weight: 400;">Instant Pricing</div>`
+                : ""
+            }
+            
+            ${
+              isGradient
+                ? `<div style="display: inline-block; padding: 0.5rem 1.25rem; background: linear-gradient(135deg, rgba(102,126,234,0.1), rgba(118,75,162,0.1)); border-radius: 999px; margin-bottom: 1.5rem; font-size: 0.875rem; font-weight: 600;">✨ No Commitment Required</div>`
+                : ""
+            }
+            
+            <h1 ${
+              isRetro ? `class="glitch" data-text="${data.headline}"` : ""
+            } style="font-family: ${
+        isElegant ? "Playfair Display, serif" : "inherit"
+      }; font-size: clamp(${isBrutalist ? "2.5rem" : "2rem"}, 6vw, ${
+        isBrutalist ? "4.5rem" : "3.5rem"
+      }); font-weight: ${
+        isBrutalist || isNeumorphism || isGlassmorphism
+          ? "800"
+          : isRetro
+          ? "700"
+          : isElegant
+          ? "600"
+          : "700"
+      }; line-height: 1.1; letter-spacing: ${
+        isBrutalist ? "2px" : "-0.02em"
+      }; margin-bottom: 1.5rem; ${
+        isBrutalist || isRetro ? "text-transform: uppercase;" : ""
+      }">
+              ${
+                isBrutalist
+                  ? `<span style="background: var(--color-accent); color: var(--color-bg); padding: 0 0.5rem;">${
+                      data.headline || "Get Your Instant Quote"
+                    }</span>`
+                  : ""
+              }
+              ${
+                isGradient
+                  ? `<span style="background: linear-gradient(135deg, #667eea, #764ba2, #f093fb); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">${
+                      data.headline || "Get Your Instant Quote"
+                    }</span>`
+                  : ""
+              }
+              ${
+                isRetro
+                  ? `<span style="background: linear-gradient(90deg, var(--color-accent), #00f5ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">${
+                      data.headline || "Get Your Instant Quote"
+                    }</span>`
+                  : ""
+              }
+              ${
+                !isBrutalist && !isGradient && !isRetro
+                  ? data.headline || "Get Your Instant Quote"
+                  : ""
+              }
+            </h1>
+            
+            <p style="font-family: ${
+              isElegant
+                ? "Lato, sans-serif"
+                : isRetro
+                ? "Space Mono, monospace"
+                : "inherit"
+            }; font-size: ${isBrutalist ? "1.125rem" : "1rem"}; font-weight: ${
+        isElegant ? "300" : "normal"
+      }; color: var(--color-text-secondary); max-width: 550px; margin: 0 auto; line-height: 1.7;">
+              ${
+                data.subheadline ||
+                "Select the services you need and get an estimated price instantly."
+              }
+            </p>
+            ${isNeumorphism ? `</div>` : ""}
+          </div>
+        </section>
+
+        <!-- Calculator Section -->
+        <section style="padding: ${isBrutalist ? "0 0 4rem" : "2rem 0 4rem"};">
+          <div class="container">
+            <div style="max-width: 800px; margin: 0 auto;">
+              
+              <!-- Services List -->
+              <div class="services-list" style="display: flex; flex-direction: column; gap: ${
+                isNeumorphism ? "1.5rem" : isBrutalist ? "0" : "1rem"
+              }; margin-bottom: 2rem;">
+                ${
+                  data.services && data.services.length > 0
+                    ? data.services
+                        .map(
+                          (service, index) => `
+                <label class="service-item" style="display: flex; align-items: center; gap: 1rem; padding: ${
+                  isBrutalist
+                    ? "1.5rem"
+                    : isNeumorphism || isGlassmorphism
+                    ? "1.25rem 1.5rem"
+                    : "1.25rem 1.5rem"
+                }; border-radius: ${
+                            isGradient
+                              ? "16px"
+                              : isRetro
+                              ? "0"
+                              : isNeumorphism || isGlassmorphism
+                              ? "16px"
+                              : isBrutalist
+                              ? "0"
+                              : "12px"
+                          }; background: ${
+                            isBrutalist
+                              ? index % 2 === 0
+                                ? "var(--color-surface)"
+                                : "var(--color-bg)"
+                              : isGradient
+                              ? "linear-gradient(135deg, rgba(102,126,234,0.03), rgba(118,75,162,0.03))"
+                              : isRetro
+                              ? "rgba(255,47,181,0.03)"
+                              : isGlassmorphism
+                              ? "rgba(255,255,255,0.05)"
+                              : isNeumorphism
+                              ? "var(--color-bg)"
+                              : "var(--color-surface)"
+                          }; border: ${
+                            isBrutalist ? "3px" : isRetro ? "2px" : "1px"
+                          } solid ${
+                            isBrutalist
+                              ? "var(--color-text)"
+                              : isRetro
+                              ? "var(--color-accent)"
+                              : "var(--color-border)"
+                          }; cursor: pointer; transition: all 0.2s; ${
+                            isGlassmorphism
+                              ? "backdrop-filter: blur(10px);"
+                              : ""
+                          } ${
+                            isNeumorphism ? getNeumorphismShadow(false) : ""
+                          }" 
+                  onmouseover="${
+                    isBrutalist
+                      ? `this.style.transform='translate(-3px, -3px)'; this.style.boxShadow='6px 6px 0 var(--color-text)'`
+                      : isRetro
+                      ? `this.style.boxShadow='0 0 20px var(--color-accent)'; this.style.borderColor='var(--color-accent)'`
+                      : isNeumorphism
+                      ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
+                      : `this.style.borderColor='var(--color-accent)'`
+                  }"
+                  onmouseout="${
+                    isBrutalist
+                      ? `this.style.transform='translate(0, 0)'; this.style.boxShadow='none'`
+                      : isRetro
+                      ? `this.style.boxShadow='none'; this.style.borderColor='var(--color-accent)'`
+                      : isNeumorphism
+                      ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
+                      : `this.style.borderColor='var(--color-border)'`
+                  }">
+                  
+                  <!-- Custom Checkbox -->
+                  <div style="position: relative; flex-shrink: 0;">
+                    <input type="checkbox" class="service-checkbox" data-price="${service.price.replace(
+                      /,/g,
+                      ""
+                    )}" style="position: absolute; opacity: 0; width: 24px; height: 24px; cursor: pointer;" onchange="updateTotal()">
+                    <div class="checkbox-custom" style="width: 24px; height: 24px; border-radius: ${
+                      isBrutalist ? "0" : isRetro ? "0" : "6px"
+                    }; border: ${isBrutalist ? "3px" : "2px"} solid ${
+                            isBrutalist
+                              ? "var(--color-text)"
+                              : "var(--color-border)"
+                          }; display: flex; align-items: center; justify-content: center; transition: all 0.2s; background: var(--color-bg);">
+                      <svg class="check-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0; transition: opacity 0.2s;">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                      </svg>
+                    </div>
+                  </div>
+                  
+                  <!-- Service Info -->
+                  <div style="flex: 1; min-width: 0;">
+                    <div style="font-weight: ${
+                      isBrutalist ? "700" : isElegant ? "500" : "600"
+                    }; font-size: ${
+                            isBrutalist ? "1.125rem" : "1rem"
+                          }; margin-bottom: 0.25rem; ${
+                            isBrutalist ? "text-transform: uppercase;" : ""
+                          } ${
+                            isElegant
+                              ? "font-family: Playfair Display, serif;"
+                              : ""
+                          } ${isRetro ? "letter-spacing: 1px;" : ""}">
+                      ${service.name}
+                    </div>
+                    <div style="color: var(--color-text-secondary); font-size: ${
+                      isBrutalist ? "0.9375rem" : "0.875rem"
+                    }; ${isRetro ? "font-family: Space Mono, monospace;" : ""}">
+                      ${service.description}
+                    </div>
+                  </div>
+                  
+                  <!-- Price -->
+                  <div style="font-weight: ${
+                    isBrutalist ? "900" : "700"
+                  }; font-size: ${
+                            isBrutalist
+                              ? "1.5rem"
+                              : isGradient
+                              ? "1.25rem"
+                              : "1.125rem"
+                          }; flex-shrink: 0; ${
+                            isGradient
+                              ? "background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"
+                              : isRetro
+                              ? "color: var(--color-accent); font-family: Space Mono, monospace;"
+                              : "color: var(--color-accent);"
+                          }">
+                    ${currencySymbol}${service.price}
+                  </div>
+                </label>
+                `
+                        )
+                        .join("")
+                    : ""
+                }
+              </div>
+              
+              <!-- Total Section -->
+              <div class="total-section" style="padding: ${
+                isBrutalist ? "2rem" : isNeumorphism ? "2rem" : "1.5rem 2rem"
+              }; border-radius: ${
+        isGradient
+          ? "20px"
+          : isRetro
+          ? "0"
+          : isNeumorphism || isGlassmorphism
+          ? "20px"
+          : isBrutalist
+          ? "0"
+          : "16px"
+      }; background: ${
+        isBrutalist
+          ? "var(--color-text)"
+          : isGradient
+          ? "linear-gradient(135deg, #667eea, #764ba2)"
+          : isRetro
+          ? "linear-gradient(135deg, var(--color-accent), #b537f2)"
+          : isGlassmorphism
+          ? "rgba(255,255,255,0.08)"
+          : isNeumorphism
+          ? "var(--color-bg)"
+          : "var(--color-surface)"
+      }; ${
+        isBrutalist || isGradient || isRetro ? "color: white;" : ""
+      } border: ${
+        isBrutalist
+          ? "4px solid var(--color-text)"
+          : isRetro
+          ? "3px solid var(--color-accent)"
+          : isElegant
+          ? "1px solid var(--color-border)"
+          : "none"
+      }; ${
+        isGlassmorphism
+          ? "backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 8px 32px rgba(0,0,0,0.1);"
+          : ""
+      } ${isNeumorphism ? getNeumorphismShadow(false) : ""} ${
+        isRetro ? "box-shadow: 0 0 40px var(--color-accent);" : ""
+      }">
+                
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                  <div>
+                    <div style="font-size: ${
+                      isBrutalist ? "1rem" : "0.875rem"
+                    }; ${
+        isBrutalist
+          ? "text-transform: uppercase; font-weight: 700; letter-spacing: 2px;"
+          : ""
+      } opacity: ${
+        isBrutalist || isGradient || isRetro ? "0.8" : "1"
+      }; color: ${
+        isBrutalist || isGradient || isRetro
+          ? "inherit"
+          : "var(--color-text-secondary)"
+      }; margin-bottom: 0.5rem;">
+                      Estimated Total
+                    </div>
+                    <div id="total-amount" style="font-size: ${
+                      isBrutalist
+                        ? "3rem"
+                        : isGradient || isRetro
+                        ? "2.5rem"
+                        : "2rem"
+                    }; font-weight: ${isBrutalist ? "900" : "800"}; ${
+        isBrutalist ? "text-transform: uppercase;" : ""
+      } ${isRetro ? "font-family: Space Mono, monospace;" : ""}">
+                      ${currencySymbol}0
+                    </div>
+                  </div>
+                  
+                  <div style="text-align: right;">
+                    <a href="mailto:${
+                      data.contactEmail || "quotes@company.com"
+                    }?subject=Quote Request&body=I'm interested in getting a quote for the following services:" class="cta-button" style="display: inline-block; padding: ${
+        isBrutalist ? "1.25rem 2.5rem" : "1rem 2rem"
+      }; border-radius: ${
+        isGradient || isRetro
+          ? "999px"
+          : isBrutalist
+          ? "0"
+          : isNeumorphism || isGlassmorphism
+          ? "14px"
+          : isElegant
+          ? "0"
+          : "10px"
+      }; text-decoration: none; font-weight: ${
+        isBrutalist ? "700" : "600"
+      }; font-size: ${
+        isBrutalist ? "1rem" : "0.9375rem"
+      }; transition: all 0.2s; ${
+        isBrutalist
+          ? "background: var(--color-bg); color: var(--color-text); border: 3px solid var(--color-bg); text-transform: uppercase; letter-spacing: 1px;"
+          : isGradient
+          ? "background: white; color: #667eea;"
+          : isRetro
+          ? "background: white; color: var(--color-accent); text-transform: uppercase; letter-spacing: 1px;"
+          : isElegant
+          ? "background: var(--color-bg); color: var(--color-accent); border: 1px solid var(--color-accent);"
+          : isGlassmorphism
+          ? "background: rgba(255,255,255,0.15); color: var(--color-text); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2);"
+          : isNeumorphism
+          ? `background: var(--color-accent); color: white;`
+          : "background: var(--color-accent); color: white;"
+      }" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                      ${data.ctaText || "Request Full Quote"}
+                    </a>
+                    <div style="font-size: 0.8125rem; margin-top: 0.75rem; opacity: 0.7;">
+                      ${
+                        data.ctaDescription ||
+                        "Get a detailed proposal within 24 hours"
+                      }
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+            </div>
+          </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section style="padding: 3rem 0; text-align: center; border-top: 1px solid var(--color-border);">
+          <div class="container">
+            <div style="display: flex; justify-content: center; gap: 3rem; flex-wrap: wrap;">
+              ${
+                data.contactEmail
+                  ? `
+              <a href="mailto:${data.contactEmail}" style="display: flex; align-items: center; gap: 0.75rem; color: var(--color-text); text-decoration: none; font-size: 1rem; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                  <polyline points="22,6 12,13 2,6"></polyline>
+                </svg>
+                ${data.contactEmail}
+              </a>
+              `
+                  : ""
+              }
+              ${
+                data.contactPhone
+                  ? `
+              <a href="tel:${data.contactPhone.replace(
+                /[^0-9+]/g,
+                ""
+              )}" style="display: flex; align-items: center; gap: 0.75rem; color: var(--color-text); text-decoration: none; font-size: 1rem; transition: color 0.2s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                </svg>
+                ${data.contactPhone}
+              </a>
+              `
+                  : ""
+              }
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <!-- Footer -->
+      <footer style="padding: 2rem 0; border-top: 1px solid var(--color-border); text-align: center; color: var(--color-text-secondary); font-size: 0.875rem; ${
+        isGlassmorphism
+          ? "backdrop-filter: blur(20px); background: rgba(255,255,255,0.02);"
+          : ""
+      }">
+        <div class="container">
+          <p style="margin-bottom: 0.5rem; ${
+            isElegant ? "font-style: italic;" : ""
+          }">${
+        data.footerText ||
+        "Prices are estimates. Final quote may vary based on project requirements."
+      }</p>
+          <p style="${
+            isBrutalist
+              ? "text-transform: uppercase; font-weight: 700; letter-spacing: 1px;"
+              : ""
+          }">© 2024 ${
+        data.companyName || "QuickQuote"
+      }. All rights reserved.</p>
+        </div>
+      </footer>
+
+      <style>
+        ${
+          isNeumorphism
+            ? `
+        :root {
+          --neomorph-shadow-out: 20px 20px 60px #c5c9ce, -20px -20px 60px #ffffff;
+          --neomorph-shadow-in: inset 20px 20px 60px #c5c9ce, inset -20px -20px 60px #ffffff;
+        }
+        [data-theme="dark"] {
+          --neomorph-shadow-out: 20px 20px 40px #1a1a1a, -20px -20px 40px #2e2e2e;
+          --neomorph-shadow-in: inset 20px 20px 40px #1a1a1a, inset -20px -20px 40px #2e2e2e;
+        }
+        `
+            : ""
+        }
+        
+        /* Checkbox checked state */
+        .service-checkbox:checked + .checkbox-custom {
+          background: var(--color-accent) !important;
+          border-color: var(--color-accent) !important;
+        }
+        
+        .service-checkbox:checked + .checkbox-custom .check-icon {
+          opacity: 1 !important;
+        }
+        
+        /* Service item selected state */
+        .service-item:has(.service-checkbox:checked) {
+          border-color: var(--color-accent) !important;
+          ${
+            isGradient
+              ? "background: linear-gradient(135deg, rgba(102,126,234,0.08), rgba(118,75,162,0.08)) !important;"
+              : ""
+          }
+          ${
+            isRetro
+              ? "box-shadow: 0 0 15px var(--color-accent) !important;"
+              : ""
+          }
+        }
+        
+        @media (max-width: 768px) {
+          .container { padding: 0 1.5rem !important; }
+          .desktop-toggle { display: none !important; }
+          .mobile-controls { display: flex !important; }
+          .service-item { flex-wrap: wrap; }
+          .service-item > div:nth-child(2) { flex: 1 1 100%; order: 2; margin-top: 0.5rem; }
+          .service-item > div:nth-child(3) { order: 1; }
+          .total-section > div { flex-direction: column; text-align: center !important; }
+          .total-section > div > div:last-child { text-align: center !important; margin-top: 1.5rem; }
+        }
+        
+        @media (max-width: 480px) {
+          .container { padding: 0 1rem !important; }
+        }
+        
+        ${
+          isRetro
+            ? `
+        @keyframes glow {
+          from { filter: drop-shadow(0 0 10px var(--color-accent)); }
+          to { filter: drop-shadow(0 0 30px #00f5ff); }
+        }
+        .glitch { position: relative; }
+        body::before {
+          content: '';
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background-image: linear-gradient(rgba(255,47,181,0.02) 2px, transparent 2px), linear-gradient(90deg, rgba(255,47,181,0.02) 2px, transparent 2px);
+          background-size: 50px 50px;
+          pointer-events: none;
+          z-index: 0;
+        }
+        main, header, footer { position: relative; z-index: 1; }
+        `
+            : ""
+        }
+      </style>
+
+      <script>
+        function updateTotal() {
+          const checkboxes = document.querySelectorAll('.service-checkbox');
+          let total = 0;
+          
+          checkboxes.forEach(checkbox => {
+            if (checkbox.checked) {
+              const price = parseFloat(checkbox.dataset.price) || 0;
+              total += price;
+            }
+          });
+          
+          // Format with commas
+          const formatted = total.toLocaleString('en-US');
+          document.getElementById('total-amount').textContent = '${currencySymbol}' + formatted;
+        }
+      </script>
+    `;
+    },
+  }),
+  // ============================================
+  // TEMPLATE: FOOD TRUCK
+  // ============================================
+  "food-truck": new Template("food-truck", {
+    name: "Food Truck",
+    description: "Mobile food business website with menu and location tracker",
+    category: "Restaurant",
+    image: "food-truck",
+    defaultTheme: "gradient", // Food trucks often have vibrant branding
+    fields: {
+      truckName: {
+        type: "text",
+        default: "MOBILE BITE",
+        label: "Food Truck Name",
+        required: true,
+      },
+      tagline: {
+        type: "text",
+        default: "Gourmet Street Food On Wheels",
+        label: "Tagline",
+        required: true,
+      },
+      description: {
+        type: "textarea",
+        default:
+          "Serving up delicious, locally-sourced street food. Follow our location for fresh meals on the go!",
+        label: "Description",
+      },
+      phone: {
+        type: "text",
+        default: "(555) 123-4567",
+        label: "Phone Number",
+      },
+      email: {
+        type: "text",
+        default: "hello@mobilebite.com",
+        label: "Email Address",
+      },
+      ctaPrimary: {
+        type: "text",
+        default: "View Menu",
+        label: "Primary CTA",
+      },
+      ctaSecondary: {
+        type: "text",
+        default: "Find Our Location",
+        label: "Secondary CTA",
+      },
+      featuredItems: {
+        type: "group",
+        label: "Featured Menu Items",
+        itemLabel: "Menu Item",
+        min: 3,
+        max: 6,
+        fields: {
+          name: { type: "text", label: "Item Name", default: "" },
+          description: { type: "textarea", label: "Description", default: "" },
+          price: { type: "text", label: "Price", default: "" },
+          popular: { type: "checkbox", label: "Most Popular?", default: false },
+        },
+        default: [
+          {
+            name: "The Classic Burger",
+            description:
+              "Grass-fed beef, secret sauce, fresh lettuce, tomato on brioche",
+            price: "$12",
+            popular: true,
+          },
+          {
+            name: "Loaded Street Fries",
+            description:
+              "Crispy fries topped with pulled pork, cheese, and green onions",
+            price: "$9",
+            popular: true,
+          },
+          {
+            name: "Vegan Power Bowl",
+            description: "Quinoa, roasted veggies, avocado, tahini dressing",
+            price: "$11",
+            popular: false,
+          },
+          {
+            name: "Fish Tacos",
+            description:
+              "Beer-battered cod, cabbage slaw, lime crema, corn tortillas",
+            price: "$10",
+            popular: false,
+          },
+        ],
+      },
+      hoursTitle: {
+        type: "text",
+        default: "Hours & Locations",
+        label: "Hours Section Title",
+      },
+      hours: {
+        type: "group",
+        label: "Weekly Schedule",
+        itemLabel: "Day",
+        min: 7,
+        max: 7,
+        fields: {
+          day: { type: "text", label: "Day", default: "" },
+          time: { type: "text", label: "Hours", default: "" },
+          location: { type: "text", label: "Location", default: "" },
+        },
+        default: [
+          { day: "Monday", time: "11AM - 7PM", location: "Downtown Square" },
+          { day: "Tuesday", time: "11AM - 7PM", location: "Tech Park" },
+          { day: "Wednesday", time: "11AM - 8PM", location: "City Center" },
+          { day: "Thursday", time: "11AM - 9PM", location: "Music District" },
+          { day: "Friday", time: "12PM - 10PM", location: "Downtown Square" },
+          { day: "Saturday", time: "12PM - 10PM", location: "Waterfront Park" },
+          { day: "Sunday", time: "12PM - 6PM", location: "Farmers Market" },
+        ],
+      },
+      socialTitle: {
+        type: "text",
+        default: "Follow Our Journey",
+        label: "Social Media Title",
+      },
+      social: {
+        type: "group",
+        label: "Social Media Links",
+        itemLabel: "Platform",
+        min: 0,
+        max: 4,
+        fields: {
+          platform: {
+            type: "select",
+            label: "Platform",
+            options: ["Instagram", "Twitter", "Facebook", "TikTok"],
+            default: "Instagram",
+          },
+          handle: { type: "text", label: "Username", default: "" },
+        },
+        default: [
+          { platform: "Instagram", handle: "@mobilebite" },
+          { platform: "Twitter", handle: "@mobilebites" },
+          { platform: "Facebook", handle: "Mobile Bite Food Truck" },
+        ],
+      },
+      specialsTitle: {
+        type: "text",
+        default: "Daily Specials",
+        label: "Specials Section Title",
+      },
+      specials: {
+        type: "group",
+        label: "Daily Specials",
+        itemLabel: "Special",
+        min: 0,
+        max: 3,
+        fields: {
+          name: { type: "text", label: "Special Name", default: "" },
+          description: { type: "textarea", label: "Description", default: "" },
+          day: {
+            type: "select",
+            label: "Day Available",
+            options: [
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday",
+              "Saturday",
+              "Sunday",
+            ],
+            default: "Monday",
+          },
+        },
+        default: [
+          {
+            name: "Taco Tuesday",
+            description: "2 tacos for $10 + free chips & salsa",
+            day: "Tuesday",
+          },
+          {
+            name: "Burger & Beer",
+            description: "Burger + local craft beer for $15",
+            day: "Thursday",
+          },
+        ],
+      },
+    },
+    structure: (data, theme, colorMode) => {
+      const themeId = theme?.id || "minimal";
+      const isBrutalist = themeId === "brutalist";
+      const isGradient = themeId === "gradient";
+      const isElegant = themeId === "elegant";
+      const isRetro = themeId === "retro";
+      const isGlassmorphism = themeId === "glassmorphism";
+      const isNeumorphism = themeId === "neumorphism";
+
+      // Food-themed colors based on theme
+      const getFoodThemeStyles = () => {
+        if (isBrutalist)
+          return "background: var(--color-text); color: #ffcc00;";
+        if (isGradient)
+          return "background: linear-gradient(135deg, #ff6b6b, #ffa726);";
+        if (isRetro)
+          return "background: linear-gradient(90deg, #ff4081, #7b1fa2);";
+        if (isElegant) return "color: var(--color-accent);";
+        if (isGlassmorphism)
+          return "background: rgba(255, 107, 107, 0.1); backdrop-filter: blur(20px);";
+        if (isNeumorphism) return "color: var(--color-accent);";
+        return "color: var(--color-accent);";
+      };
+
+      const getFoodCardStyle = () => {
+        if (isGradient)
+          return "background: linear-gradient(135deg, rgba(255, 107, 107, 0.05), rgba(255, 167, 38, 0.05));";
+        if (isRetro)
+          return "background: rgba(255, 64, 129, 0.05); border: 2px solid var(--color-accent);";
+        if (isGlassmorphism)
+          return "background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1);";
+        if (isNeumorphism)
+          return "box-shadow: 8px 8px 16px rgba(0,0,0,0.1), -8px -8px 16px rgba(255,255,255,0.7);";
+        return "";
+      };
+
+      return `
+      <!-- Header with Food Truck Branding -->
+      <header style="padding: 1.5rem 0; ${
+        isBrutalist
+          ? "border-bottom: 4px solid #ffcc00;"
+          : isRetro
+          ? "border-bottom: 3px solid var(--color-accent);"
+          : isGlassmorphism
+          ? ""
+          : "border-bottom: 1px solid var(--color-border);"
+      } position: sticky; top: 0; background: var(--color-bg); z-index: 100; backdrop-filter: blur(${
+        isGlassmorphism ? "20px" : "10px"
+      });">
+        <div class="container">
+          <nav style="display: flex; justify-content: space-between; align-items: center;">
+            <div class="logo" style="font-weight: ${
+              isBrutalist ? "900" : "700"
+            }; font-size: 1.5rem; ${getFoodThemeStyles()}; ${
+        isBrutalist ? "text-transform: uppercase;" : ""
+      }">
+              ${data.truckName || "MOBILE BITE"}
+            </div>
+            
+            <!-- Desktop Navigation -->
+            <ul class="nav-links" style="display: flex; gap: 2rem; list-style: none; align-items: center;">
+              <li><a href="#menu" style="color: var(--color-text-secondary); text-decoration: none; font-size: 0.875rem; font-weight: 500; transition: color 0.2s;" 
+                onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text-secondary)'">Menu</a></li>
+              <li><a href="#hours" style="color: var(--color-text-secondary); text-decoration: none; font-size: 0.875rem; font-weight: 500; transition: color 0.2s;" 
+                onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text-secondary)'">Hours</a></li>
+              <li><a href="#specials" style="color: var(--color-text-secondary); text-decoration: none; font-size: 0.875rem; font-weight: 500; transition: color 0.2s;" 
+                onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text-secondary)'">Specials</a></li>
+              <li>
+                <label class="theme-toggle-switch-wrapper" style="cursor: pointer;">
+                  <input type="checkbox" class="theme-toggle-switch" onclick="toggleTheme()" aria-label="Toggle theme">
+                  <span class="theme-toggle-slider"></span>
+                </label>
+              </li>
+            </ul>
+            
+            <!-- Mobile Menu Button -->
+            <div class="mobile-controls" style="display: none; align-items: center; gap: 1rem;">
+              <button class="hamburger-btn" onclick="toggleMobileMenu()" aria-label="Menu" style="background: none; border: none; cursor: pointer; padding: 0.5rem; color: var(--color-text);">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                  <line x1="3" y1="12" x2="21" y2="12"></line>
+                  <line x1="3" y1="6" x2="21" y2="6"></line>
+                  <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+              </button>
+            </div>
+          </nav>
+          
+          <!-- Mobile Menu Dropdown -->
+          <div class="mobile-menu" style="display: none; padding: 2rem 0 1rem; margin-top: 1rem; border-top: 1px solid var(--color-border);">
+            <ul style="list-style: none; display: flex; flex-direction: column; gap: 1.5rem;">
+              <li><a href="#menu" onclick="toggleMobileMenu()" style="color: var(--color-text); text-decoration: none; font-size: 1.125rem; font-weight: 500;">Menu</a></li>
+              <li><a href="#hours" onclick="toggleMobileMenu()" style="color: var(--color-text); text-decoration: none; font-size: 1.125rem; font-weight: 500;">Hours</a></li>
+              <li><a href="#specials" onclick="toggleMobileMenu()" style="color: var(--color-text); text-decoration: none; font-size: 1.125rem; font-weight: 500;">Specials</a></li>
+              <li>
+                <label class="theme-toggle-switch-wrapper" style="cursor: pointer;">
+                  <input type="checkbox" class="theme-toggle-switch" onclick="toggleTheme()" aria-label="Toggle theme">
+                  <span class="theme-toggle-slider"></span>
+                </label>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </header>
+
+      <main>
+        <!-- Hero Section - Food Truck Focus -->
+        <section style="padding: 6rem 0 4rem; text-align: center; position: relative; ${
+          isGradient
+            ? "background: linear-gradient(135deg, #ff6b6b20, #ffa72620);"
+            : isRetro
+            ? "background: rgba(255, 64, 129, 0.05);"
+            : ""
+        }">
+          <div class="container">
+            <h1 style="font-size: clamp(2.5rem, 7vw, 4.5rem); font-weight: ${
+              isBrutalist ? "900" : "800"
+            }; line-height: 1.1; margin-bottom: 1rem; ${
+        isBrutalist
+          ? "text-transform: uppercase; color: #ffcc00;"
+          : isGradient
+          ? "background: linear-gradient(135deg, #ff6b6b, #ffa726); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"
+          : isRetro
+          ? "background: linear-gradient(90deg, #ff4081, #7b1fa2); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"
+          : "color: var(--color-text);"
+      }">
+              ${data.truckName || "MOBILE BITE"}
+            </h1>
+            
+            <p style="font-size: 1.25rem; color: var(--color-text-secondary); max-width: 600px; margin: 0 auto 2rem; line-height: 1.6;">
+              ${data.tagline || "Gourmet Street Food On Wheels"}
+            </p>
+            
+            <p style="font-size: 1rem; color: var(--color-text-secondary); max-width: 700px; margin: 0 auto 3rem; line-height: 1.7;">
+              ${
+                data.description ||
+                "Serving up delicious, locally-sourced street food. Follow our location for fresh meals on the go!"
+              }
+            </p>
+            
+            <!-- Contact Info -->
+            <div style="display: flex; justify-content: center; gap: 2rem; margin-bottom: 3rem; flex-wrap: wrap;">
+              ${
+                data.phone
+                  ? `<div style="display: flex; align-items: center; gap: 0.5rem;">
+                  <span style="font-size: 1.125rem; font-weight: 600; color: var(--color-accent);">${data.phone}</span>
+                </div>`
+                  : ""
+              }
+              ${
+                data.email
+                  ? `<div style="display: flex; align-items: center; gap: 0.5rem;">
+                  <span style="font-size: 1.125rem; font-weight: 600; color: var(--color-accent);">${data.email}</span>
+                </div>`
+                  : ""
+              }
+            </div>
+            
+            <!-- CTA Buttons -->
+            <div class="cta-group" style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+              ${
+                data.ctaPrimary
+                  ? `<a href="#menu" style="padding: 1rem 2.5rem; border-radius: 999px; text-decoration: none; font-weight: 600; transition: all 0.3s; display: inline-block; background: ${
+                      isBrutalist
+                        ? "#ffcc00"
+                        : isGradient
+                        ? "linear-gradient(135deg, #ff6b6b, #ffa726)"
+                        : isRetro
+                        ? "#ff4081"
+                        : "var(--color-accent)"
+                    }; color: ${
+                      isBrutalist ? "#000" : "white"
+                    }; border: 2px solid ${
+                      isBrutalist
+                        ? "#ffcc00"
+                        : isGradient
+                        ? "transparent"
+                        : isRetro
+                        ? "#ff4081"
+                        : "var(--color-accent)"
+                    };" 
+                  onmouseover="this.style.transform='translateY(-2px)'; ${
+                    isBrutalist
+                      ? "this.style.boxShadow='0 8px 24px rgba(255, 204, 0, 0.4)'"
+                      : isGradient
+                      ? "this.style.boxShadow='0 10px 30px rgba(255, 107, 107, 0.4)'"
+                      : "this.style.boxShadow='0 8px 24px rgba(var(--primary-rgb), 0.2)'"
+                  }" 
+                  onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                  ${data.ctaPrimary}
+                </a>`
+                  : ""
+              }
+              ${
+                data.ctaSecondary
+                  ? `<a href="#hours" style="padding: 1rem 2.5rem; border-radius: 999px; text-decoration: none; font-weight: 600; transition: all 0.3s; display: inline-block; background: transparent; color: var(--color-text); border: 2px solid var(--color-border);" 
+                  onmouseover="this.style.background='var(--color-surface)'; this.style.borderColor='var(--color-accent)'" 
+                  onmouseout="this.style.background='transparent'; this.style.borderColor='var(--color-border)'">
+                  ${data.ctaSecondary}
+                </a>`
+                  : ""
+              }
+            </div>
+          </div>
+        </section>
+
+        <!-- Featured Menu Items Section -->
+        <section id="menu" style="padding: 4rem 0; ${
+          isGlassmorphism ? "background: rgba(255, 255, 255, 0.02);" : ""
+        }">
+          <div class="container">
+            <h2 style="font-size: clamp(2rem, 5vw, 3rem); font-weight: 700; text-align: center; margin-bottom: 1rem;">
+              Featured Menu
+            </h2>
+            <p style="text-align: center; color: var(--color-text-secondary); max-width: 600px; margin: 0 auto 3rem; font-size: 1.125rem;">
+              Fresh, flavorful, and made to order
+            </p>
+            
+            <div class="menu-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem;">
+              ${
+                data.featuredItems && data.featuredItems.length > 0
+                  ? data.featuredItems
+                      .map(
+                        (item) => `
+                <div class="menu-item" style="padding: 2rem; border-radius: 16px; border: 1px solid var(--color-border); background: var(--color-bg); transition: all 0.3s; ${
+                  item.popular ? "border: 2px solid var(--color-accent);" : ""
+                } ${getFoodCardStyle()}" 
+                  onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 12px 32px rgba(0,0,0,0.1)'" 
+                  onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                  ${
+                    item.popular
+                      ? `<span style="display: inline-block; padding: 0.25rem 1rem; background: var(--color-accent); color: white; font-size: 0.75rem; font-weight: 600; border-radius: 999px; margin-bottom: 1rem;">Most Popular</span>`
+                      : ""
+                  }
+                  <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+                    <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--color-text); margin: 0;">
+                      ${item.name || ""}
+                    </h3>
+                    <span style="font-size: 1.125rem; font-weight: 700; color: var(--color-accent);">
+                      ${item.price || ""}
+                    </span>
+                  </div>
+                  <p style="color: var(--color-text-secondary); line-height: 1.6; font-size: 0.9375rem;">
+                    ${item.description || ""}
+                  </p>
+                </div>
+              `
+                      )
+                      .join("")
+                  : ""
+              }
+            </div>
+          </div>
+        </section>
+
+        <!-- Hours & Locations Section -->
+        <section id="hours" style="padding: 4rem 0; background: var(--color-surface);">
+          <div class="container">
+            <h2 style="font-size: clamp(2rem, 5vw, 3rem); font-weight: 700; text-align: center; margin-bottom: 1rem;">
+              ${data.hoursTitle || "Hours & Locations"}
+            </h2>
+            <p style="text-align: center; color: var(--color-text-secondary); max-width: 600px; margin: 0 auto 3rem; font-size: 1.125rem;">
+              Find us on the streets! Follow our social media for real-time updates.
+            </p>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+              ${
+                data.hours && data.hours.length > 0
+                  ? data.hours
+                      .map(
+                        (day) => `
+                <div class="schedule-item" style="padding: 1.5rem; border-radius: 12px; background: var(--color-bg); border: 1px solid var(--color-border); transition: all 0.3s;" 
+                  onmouseover="this.style.borderColor='var(--color-accent)'" 
+                  onmouseout="this.style.borderColor='var(--color-border)'">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                    <h3 style="font-size: 1.125rem; font-weight: 600; color: var(--color-text);">
+                      ${day.day || ""}
+                    </h3>
+                    <span style="font-size: 1rem; font-weight: 700; color: var(--color-accent);">
+                      ${day.time || ""}
+                    </span>
+                  </div>
+                  <p style="color: var(--color-text-secondary); font-size: 0.9375rem;">
+                    📍 ${day.location || "Check social media"}
+                  </p>
+                </div>
+              `
+                      )
+                      .join("")
+                  : ""
+              }
+            </div>
+            
+            <!-- Social Media Links -->
+            ${
+              data.social && data.social.length > 0
+                ? `
+            <div style="margin-top: 4rem; text-align: center;">
+              <h3 style="font-size: 1.5rem; font-weight: 600; margin-bottom: 1.5rem; color: var(--color-text);">
+                ${data.socialTitle || "Follow Our Journey"}
+              </h3>
+              <div style="display: flex; justify-content: center; gap: 1.5rem; flex-wrap: wrap;">
+                ${data.social
+                  .map(
+                    (platform) => `
+                <a href="#" style="padding: 0.75rem 1.5rem; border-radius: 999px; text-decoration: none; font-weight: 500; transition: all 0.3s; background: var(--color-surface); color: var(--color-text); border: 1px solid var(--color-border);" 
+                  onmouseover="this.style.background='var(--color-accent)'; this.style.color='white'; this.style.borderColor='var(--color-accent)'" 
+                  onmouseout="this.style.background='var(--color-surface)'; this.style.color='var(--color-text)'; this.style.borderColor='var(--color-border)'">
+                  ${platform.platform}: ${platform.handle}
+                </a>
+              `
+                  )
+                  .join("")}
+              </div>
+            </div>
+            `
+                : ""
+            }
+          </div>
+        </section>
+
+        <!-- Daily Specials Section -->
+        ${
+          data.specials && data.specials.length > 0
+            ? `
+        <section id="specials" style="padding: 4rem 0;">
+          <div class="container">
+            <h2 style="font-size: clamp(2rem, 5vw, 3rem); font-weight: 700; text-align: center; margin-bottom: 1rem;">
+              ${data.specialsTitle || "Daily Specials"}
+            </h2>
+            <p style="text-align: center; color: var(--color-text-secondary); max-width: 600px; margin: 0 auto 3rem; font-size: 1.125rem;">
+              Exclusive deals on select days
+            </p>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+              ${data.specials
+                .map(
+                  (special) => `
+              <div class="special-item" style="padding: 2rem; border-radius: 16px; background: linear-gradient(135deg, rgba(255, 107, 107, 0.1), rgba(255, 167, 38, 0.1)); border: 2px dashed var(--color-accent); text-align: center;">
+                <div style="display: inline-block; padding: 0.5rem 1.5rem; background: var(--color-accent); color: white; font-size: 0.875rem; font-weight: 600; border-radius: 999px; margin-bottom: 1rem;">
+                  ${special.day}
+                </div>
+                <h3 style="font-size: 1.5rem; font-weight: 700; color: var(--color-text); margin-bottom: 0.5rem;">
+                  ${special.name}
+                </h3>
+                <p style="color: var(--color-text-secondary); line-height: 1.6; font-size: 1rem;">
+                  ${special.description}
+                </p>
+              </div>
+            `
+                )
+                .join("")}
+            </div>
+          </div>
+        </section>
+        `
+            : ""
+        }
+
+        <!-- Call to Action Section -->
+        <section style="padding: 6rem 0; text-align: center; ${
+          isGradient
+            ? "background: linear-gradient(135deg, #ff6b6b, #ffa726); color: white;"
+            : isRetro
+            ? "background: linear-gradient(90deg, #ff4081, #7b1fa2); color: white;"
+            : "background: var(--color-accent); color: white;"
+        }">
+          <div class="container">
+            <h2 style="font-size: clamp(2rem, 5vw, 3rem); font-weight: 700; margin-bottom: 1rem;">
+              Ready to Eat?
+            </h2>
+            <p style="font-size: 1.125rem; max-width: 600px; margin: 0 auto 2rem; line-height: 1.6; opacity: 0.9;">
+              Follow us on social media for real-time location updates and daily specials!
+            </p>
+            <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
+              <a href="#hours" style="padding: 1rem 2.5rem; border-radius: 999px; text-decoration: none; font-weight: 600; transition: all 0.3s; background: white; color: ${
+                isGradient
+                  ? "#ff6b6b"
+                  : isRetro
+                  ? "#ff4081"
+                  : "var(--color-accent)"
+              };" 
+                onmouseover="this.style.transform='scale(1.05)'" 
+                onmouseout="this.style.transform='scale(1)'">
+                View Schedule
+              </a>
+              ${
+                data.phone
+                  ? `<a href="tel:${data.phone}" style="padding: 1rem 2.5rem; border-radius: 999px; text-decoration: none; font-weight: 600; transition: all 0.3s; background: transparent; color: white; border: 2px solid white;" 
+                onmouseover="this.style.background='rgba(255,255,255,0.1)'" 
+                onmouseout="this.style.background='transparent'">
+                Call Now
+              </a>`
+                  : ""
+              }
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <!-- Footer -->
+      <footer style="padding: 3rem 0; text-align: center; color: var(--color-text-secondary); font-size: 0.875rem; ${
+        isGlassmorphism
+          ? "backdrop-filter: blur(20px); background: rgba(255,255,255,0.02);"
+          : ""
+      }">
+        <div class="container">
+          <p style="margin-bottom: 1rem; font-weight: 600; color: var(--color-text);">
+            ${data.truckName || "Mobile Bite"}
+          </p>
+          <p style="margin-bottom: 2rem;">
+            Fresh street food served daily. Follow us for location updates!
+          </p>
+          ${
+            data.phone || data.email
+              ? `
+          <div style="display: flex; justify-content: center; gap: 2rem; margin-bottom: 2rem; flex-wrap: wrap;">
+            ${data.phone ? `<div>📞 ${data.phone}</div>` : ""}
+            ${data.email ? `<div>✉️ ${data.email}</div>` : ""}
+          </div>
+          `
+              : ""
+          }
+          <p style="font-size: 0.75rem; opacity: 0.7;">
+            © ${new Date().getFullYear()} ${
+        data.truckName || "Mobile Bite"
+      }. All rights reserved.
+          </p>
+        </div>
+      </footer>
+
+      <style>
+        /* Mobile Responsive Styles */
+        @media (max-width: 768px) {
+          .container { padding: 0 1.5rem !important; }
+          section[style*="padding: 6rem"] { padding: 4rem 0 2rem !important; }
+          section[style*="padding: 4rem"] { padding: 3rem 0 !important; }
+          .nav-links { display: none !important; }
+          .mobile-controls { display: flex !important; }
+          .menu-grid { grid-template-columns: 1fr !important; }
+          .cta-group { flex-direction: column; align-items: center; }
+          .cta-group a { width: 100%; max-width: 300px; text-align: center; }
+        }
+        
+        @media (max-width: 480px) {
+          h1 { font-size: 2.5rem !important; }
+          .menu-item, .schedule-item { padding: 1.5rem !important; }
+        }
+        
+        /* Food-themed animations */
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.8; }
+        }
+        
+        .menu-item:hover {
+          animation: pulse 0.5s ease-in-out;
+        }
+      </style>
+      
+      <script>
+        // Mobile menu toggle
+        function toggleMobileMenu() {
+          const mobileMenu = document.querySelector('.mobile-menu');
+          const isVisible = mobileMenu.style.display === 'block';
+          mobileMenu.style.display = isVisible ? 'none' : 'block';
+        }
+      </script>
+    `;
+    },
+  }),
+  // ============================================
+  // TEMPLATE: CAFE & BAKERY
+  // ============================================
+  "cafe-bakery": new Template("cafe-bakery", {
+    name: "Café & Bakery",
+    description: "Elegant coffee shop and bakery with timeless design",
+    category: "Restaurant",
+    image: "cafe-bakery",
+    defaultTheme: "elegant", // Perfect for café aesthetic
+    fields: {
+      cafeName: {
+        type: "text",
+        default: "AURORA CAFÉ",
+        label: "Café Name",
+        required: true,
+      },
+      tagline: {
+        type: "text",
+        default: "Artisan Coffee & Handcrafted Pastries",
+        label: "Tagline",
+        required: true,
+      },
+      description: {
+        type: "textarea",
+        default:
+          "A cozy neighborhood café where every cup is poured with care and every pastry is baked fresh daily. Join us for moments of quiet contemplation or joyful conversation.",
+        label: "Description",
+      },
+      address: {
+        type: "text",
+        default: "123 Artisan Lane, Coffee District",
+        label: "Address",
+      },
+      hours: {
+        type: "group",
+        label: "Opening Hours",
+        itemLabel: "Day Range",
+        min: 3,
+        max: 3,
+        fields: {
+          days: { type: "text", label: "Days", default: "" },
+          hours: { type: "text", label: "Hours", default: "" },
+        },
+        default: [
+          { days: "Monday - Friday", hours: "7:00 AM - 8:00 PM" },
+          { days: "Saturday", hours: "8:00 AM - 9:00 PM" },
+          { days: "Sunday", hours: "8:00 AM - 6:00 PM" },
+        ],
+      },
+      signatureDrinks: {
+        type: "group",
+        label: "Signature Drinks",
+        itemLabel: "Drink",
+        min: 4,
+        max: 6,
+        fields: {
+          name: { type: "text", label: "Drink Name", default: "" },
+          description: { type: "textarea", label: "Description", default: "" },
+          price: { type: "text", label: "Price", default: "" },
+        },
+        default: [
+          {
+            name: "Artisan Pour Over",
+            description:
+              "Single-origin beans, hand-poured for optimal extraction",
+            price: "$5.50",
+          },
+          {
+            name: "Velvet Latte",
+            description: "House-blend espresso with velvet microfoam",
+            price: "$6.25",
+          },
+          {
+            name: "Golden Turmeric Chai",
+            description: "Spiced chai with turmeric, ginger, and honey",
+            price: "$5.75",
+          },
+          {
+            name: "Cold Brew Noir",
+            description: "18-hour steeped cold brew with cocoa notes",
+            price: "$6.00",
+          },
+        ],
+      },
+      featuredPastries: {
+        type: "group",
+        label: "Featured Pastries",
+        itemLabel: "Pastry",
+        min: 4,
+        max: 6,
+        fields: {
+          name: { type: "text", label: "Pastry Name", default: "" },
+          description: { type: "textarea", label: "Description", default: "" },
+          price: { type: "text", label: "Price", default: "" },
+          glutenFree: {
+            type: "checkbox",
+            label: "Gluten Free?",
+            default: false,
+          },
+          vegan: { type: "checkbox", label: "Vegan?", default: false },
+        },
+        default: [
+          {
+            name: "Almond Croissant",
+            description:
+              "Flaky croissant filled with marzipan, topped with sliced almonds",
+            price: "$4.75",
+            glutenFree: false,
+            vegan: false,
+          },
+          {
+            name: "Morning Bun",
+            description: "Cinnamon-sugar spiral with orange zest",
+            price: "$4.25",
+            glutenFree: false,
+            vegan: false,
+          },
+          {
+            name: "Chocolate & Sea Salt Cookie",
+            description: "72% dark chocolate with flaky sea salt",
+            price: "$3.75",
+            glutenFree: true,
+            vegan: true,
+          },
+          {
+            name: "Seasonal Fruit Tart",
+            description:
+              "Vanilla pastry cream in buttery crust with fresh fruit",
+            price: "$6.50",
+            glutenFree: false,
+            vegan: false,
+          },
+        ],
+      },
+      aboutTitle: {
+        type: "text",
+        default: "Our Story",
+        label: "About Section Title",
+      },
+      aboutContent: {
+        type: "textarea",
+        default:
+          "Founded in 2015 by two pastry chefs who believed coffee and conversation are essential ingredients for community. Every morning, our bakers arrive before dawn to prepare fresh batches using locally sourced ingredients. We believe in taking time—time to roast beans properly, time to let dough rise naturally, and time to connect with our neighbors.",
+        label: "About Content",
+      },
+      ambianceImages: {
+        type: "group",
+        label: "Ambiance Images",
+        itemLabel: "Image Caption",
+        min: 0,
+        max: 4,
+        fields: {
+          caption: { type: "text", label: "Caption", default: "" },
+          description: { type: "textarea", label: "Description", default: "" },
+        },
+        default: [
+          {
+            caption: "Morning Light",
+            description: "Sunlight through our front windows",
+          },
+          {
+            caption: "Coffee Bar",
+            description: "Our espresso station at golden hour",
+          },
+          {
+            caption: "Bakery Display",
+            description: "Fresh pastries from our kitchen",
+          },
+        ],
+      },
+      eventsTitle: {
+        type: "text",
+        default: "Upcoming Events",
+        label: "Events Section Title",
+      },
+      events: {
+        type: "group",
+        label: "Events",
+        itemLabel: "Event",
+        min: 0,
+        max: 3,
+        fields: {
+          title: { type: "text", label: "Event Title", default: "" },
+          date: { type: "text", label: "Date & Time", default: "" },
+          description: { type: "textarea", label: "Description", default: "" },
+        },
+        default: [
+          {
+            title: "Latte Art Workshop",
+            date: "Every Saturday, 10 AM",
+            description: "Learn basic latte art techniques from our baristas",
+          },
+          {
+            title: "Poetry Reading Night",
+            date: "First Thursday of each month, 7 PM",
+            description: "Local poets share their work in our cozy corner",
+          },
+        ],
+      },
+      reservationText: {
+        type: "text",
+        default: "Reserve a Table",
+        label: "Reservation Button Text",
+      },
+    },
+    structure: (data, theme, colorMode) => {
+      const themeId = theme?.id || "elegant";
+      const isElegant = themeId === "elegant";
+      const isMinimal = themeId === "minimal";
+      const isGlassmorphism = themeId === "glassmorphism";
+      const isBrutalist = themeId === "brutalist"; // Not recommended for café but included for consistency
+
+      // Café-specific elegant styles
+      const getCafeStyle = () => {
+        if (isElegant) {
+          return {
+            primaryColor: "var(--color-accent)",
+            secondaryColor: "#8B7355", // Coffee brown
+            lightBg: "rgba(139, 115, 85, 0.05)",
+            borderStyle: "1px solid rgba(139, 115, 85, 0.2)",
+            fontHeading: "'Playfair Display', serif",
+            fontBody: "'Lato', sans-serif",
+          };
+        }
+        if (isGlassmorphism) {
+          return {
+            primaryColor: "var(--color-accent)",
+            secondaryColor: "var(--color-text)",
+            lightBg: "rgba(255, 255, 255, 0.05)",
+            borderStyle: "1px solid rgba(255, 255, 255, 0.1)",
+            fontHeading: "'Cormorant Garamond', serif",
+            fontBody: "'Inter', sans-serif",
+          };
+        }
+        return {
+          primaryColor: "var(--color-accent)",
+          secondaryColor: "var(--color-text-secondary)",
+          lightBg: "var(--color-surface)",
+          borderStyle: "1px solid var(--color-border)",
+          fontHeading: "inherit",
+          fontBody: "inherit",
+        };
+      };
+
+      const cafeStyle = getCafeStyle();
+
+      return `
+      <!-- Header - Elegant Café Design -->
+      <header style="padding: 1.5rem 0; position: sticky; top: 0; background: var(--color-bg); z-index: 100; ${
+        isGlassmorphism ? "backdrop-filter: blur(20px);" : ""
+      } border-bottom: ${cafeStyle.borderStyle};">
+        <div class="container">
+          <nav style="display: flex; justify-content: space-between; align-items: center;">
+            <div class="logo" style="font-family: ${
+              cafeStyle.fontHeading
+            }; font-weight: 600; font-size: 1.5rem; color: ${
+        cafeStyle.primaryColor
+      }; letter-spacing: 0.5px;">
+              ${data.cafeName || "AURORA CAFÉ"}
+            </div>
+            
+            <!-- Desktop Navigation -->
+            <ul class="nav-links" style="display: flex; gap: 3rem; list-style: none; align-items: center;">
+              <li><a href="#menu" style="color: var(--color-text-secondary); text-decoration: none; font-size: 0.875rem; font-weight: 400; letter-spacing: 0.5px; transition: color 0.3s;" 
+                onmouseover="this.style.color='${
+                  cafeStyle.primaryColor
+                }'" onmouseout="this.style.color='var(--color-text-secondary)'">Menu</a></li>
+              <li><a href="#about" style="color: var(--color-text-secondary); text-decoration: none; font-size: 0.875rem; font-weight: 400; letter-spacing: 0.5px; transition: color 0.3s;" 
+                onmouseover="this.style.color='${
+                  cafeStyle.primaryColor
+                }'" onmouseout="this.style.color='var(--color-text-secondary)'">Story</a></li>
+              <li><a href="#hours" style="color: var(--color-text-secondary); text-decoration: none; font-size: 0.875rem; font-weight: 400; letter-spacing: 0.5px; transition: color 0.3s;" 
+                onmouseover="this.style.color='${
+                  cafeStyle.primaryColor
+                }'" onmouseout="this.style.color='var(--color-text-secondary)'">Hours</a></li>
+              <li>
+                <label class="theme-toggle-switch-wrapper" style="cursor: pointer;">
+                  <input type="checkbox" class="theme-toggle-switch" onclick="toggleTheme()" aria-label="Toggle theme">
+                  <span class="theme-toggle-slider"></span>
+                </label>
+              </li>
+            </ul>
+            
+            <!-- Mobile Menu Button -->
+            <div class="mobile-controls" style="display: none; align-items: center; gap: 1rem;">
+              <button class="hamburger-btn" onclick="toggleMobileMenu()" aria-label="Menu" style="background: none; border: none; cursor: pointer; padding: 0.5rem; color: var(--color-text);">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+                  <line x1="3" y1="12" x2="21" y2="12"></line>
+                  <line x1="3" y1="6" x2="21" y2="6"></line>
+                  <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+              </button>
+            </div>
+          </nav>
+          
+          <!-- Mobile Menu Dropdown -->
+          <div class="mobile-menu" style="display: none; padding: 2rem 0 1rem; margin-top: 1rem; border-top: ${
+            cafeStyle.borderStyle
+          };">
+            <ul style="list-style: none; display: flex; flex-direction: column; gap: 1.5rem;">
+              <li><a href="#menu" onclick="toggleMobileMenu()" style="color: var(--color-text); text-decoration: none; font-size: 1.125rem; font-weight: 400; letter-spacing: 0.5px;">Menu</a></li>
+              <li><a href="#about" onclick="toggleMobileMenu()" style="color: var(--color-text); text-decoration: none; font-size: 1.125rem; font-weight: 400; letter-spacing: 0.5px;">Story</a></li>
+              <li><a href="#hours" onclick="toggleMobileMenu()" style="color: var(--color-text); text-decoration: none; font-size: 1.125rem; font-weight: 400; letter-spacing: 0.5px;">Hours</a></li>
+              <li>
+                <label class="theme-toggle-switch-wrapper" style="cursor: pointer;">
+                  <input type="checkbox" class="theme-toggle-switch" onclick="toggleTheme()" aria-label="Toggle theme">
+                  <span class="theme-toggle-slider"></span>
+                </label>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </header>
+
+      <main>
+        <!-- Hero Section - Timeless Elegance -->
+        <section style="padding: 8rem 0 6rem; text-align: center; position: relative;">
+          <div class="container">
+            <!-- Subtle decorative element -->
+            <div style="width: 40px; height: 1px; background: ${
+              cafeStyle.primaryColor
+            }; margin: 0 auto 2rem; opacity: 0.5;"></div>
+            
+            <h1 style="font-family: ${
+              cafeStyle.fontHeading
+            }; font-size: clamp(2.5rem, 5vw, 4.5rem); font-weight: 400; line-height: 1.2; margin-bottom: 1.5rem; letter-spacing: -0.01em; color: var(--color-text);">
+              ${data.cafeName || "AURORA CAFÉ"}
+            </h1>
+            
+            <p style="font-family: ${
+              cafeStyle.fontBody
+            }; font-size: 1.25rem; color: ${
+        cafeStyle.secondaryColor
+      }; max-width: 600px; margin: 0 auto 1.5rem; line-height: 1.6; letter-spacing: 0.2px; font-weight: 300;">
+              ${data.tagline || "Artisan Coffee & Handcrafted Pastries"}
+            </p>
+            
+            <div style="width: 80px; height: 1px; background: ${
+              cafeStyle.primaryColor
+            }; margin: 2rem auto; opacity: 0.3;"></div>
+            
+            <p style="font-family: ${
+              cafeStyle.fontBody
+            }; font-size: 1.125rem; color: var(--color-text-secondary); max-width: 700px; margin: 0 auto 3rem; line-height: 1.8; font-weight: 300; letter-spacing: 0.1px;">
+              ${
+                data.description ||
+                "A cozy neighborhood café where every cup is poured with care..."
+              }
+            </p>
+            
+            <!-- Address & Hours Summary -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 3rem; margin-bottom: 4rem;">
+              ${
+                data.address
+                  ? `<div>
+                  <h3 style="font-family: ${cafeStyle.fontHeading}; font-size: 0.875rem; font-weight: 600; color: ${cafeStyle.primaryColor}; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 0.75rem;">Location</h3>
+                  <p style="font-family: ${cafeStyle.fontBody}; color: var(--color-text-secondary); font-size: 1rem; line-height: 1.6;">${data.address}</p>
+                </div>`
+                  : ""
+              }
+              ${
+                data.hours && data.hours.length > 0
+                  ? `<div>
+                  <h3 style="font-family: ${
+                    cafeStyle.fontHeading
+                  }; font-size: 0.875rem; font-weight: 600; color: ${
+                      cafeStyle.primaryColor
+                    }; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 0.75rem;">Hours</h3>
+                  ${data.hours
+                    .map(
+                      (h) => `
+                    <div style="margin-bottom: 0.5rem;">
+                      <p style="font-family: ${cafeStyle.fontBody}; color: var(--color-text); font-size: 0.9375rem; margin-bottom: 0.25rem;">${h.days}</p>
+                      <p style="font-family: ${cafeStyle.fontBody}; color: var(--color-text-secondary); font-size: 0.9375rem;">${h.hours}</p>
+                    </div>
+                  `
+                    )
+                    .join("")}
+                </div>`
+                  : ""
+              }
+            </div>
+            
+            <!-- Reservation Button -->
+            ${
+              data.reservationText
+                ? `<a href="#" style="display: inline-block; padding: 1rem 2.5rem; border-radius: 0; text-decoration: none; font-family: ${cafeStyle.fontBody}; font-weight: 400; letter-spacing: 0.5px; transition: all 0.3s; background: transparent; color: ${cafeStyle.primaryColor}; border: 1px solid ${cafeStyle.primaryColor};" 
+                onmouseover="this.style.background='${cafeStyle.primaryColor}'; this.style.color='var(--color-bg)'" 
+                onmouseout="this.style.background='transparent'; this.style.color='${cafeStyle.primaryColor}'">
+                ${data.reservationText}
+              </a>`
+                : ""
+            }
+          </div>
+        </section>
+
+        <!-- Menu Section - Coffee & Pastries -->
+        <section id="menu" style="padding: 6rem 0; background: ${
+          cafeStyle.lightBg
+        };">
+          <div class="container">
+            <!-- Signature Drinks -->
+            <div style="margin-bottom: 6rem;">
+              <div style="text-align: center; margin-bottom: 4rem;">
+                <h2 style="font-family: ${
+                  cafeStyle.fontHeading
+                }; font-size: clamp(2rem, 4vw, 2.5rem); font-weight: 400; margin-bottom: 1rem; color: var(--color-text); letter-spacing: 0.5px;">
+                  Signature Drinks
+                </h2>
+                <p style="font-family: ${
+                  cafeStyle.fontBody
+                }; color: var(--color-text-secondary); max-width: 500px; margin: 0 auto; font-weight: 300; line-height: 1.6;">
+                  Carefully crafted beverages using specialty beans
+                </p>
+              </div>
+              
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem;">
+                ${
+                  data.signatureDrinks && data.signatureDrinks.length > 0
+                    ? data.signatureDrinks
+                        .map(
+                          (drink) => `
+                  <div class="menu-item" style="padding: 2.5rem 2rem; border: ${cafeStyle.borderStyle}; background: var(--color-bg); transition: all 0.3s; position: relative;" 
+                    onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 12px 32px rgba(0,0,0,0.05)'" 
+                    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.25rem; padding-bottom: 1.25rem; border-bottom: ${cafeStyle.borderStyle};">
+                      <h3 style="font-family: ${cafeStyle.fontHeading}; font-size: 1.25rem; font-weight: 400; color: var(--color-text); margin: 0;">
+                        ${drink.name}
+                      </h3>
+                      <span style="font-family: ${cafeStyle.fontBody}; font-size: 1.125rem; font-weight: 400; color: ${cafeStyle.primaryColor};">
+                        ${drink.price}
+                      </span>
+                    </div>
+                    <p style="font-family: ${cafeStyle.fontBody}; color: var(--color-text-secondary); line-height: 1.7; font-size: 0.9375rem; font-weight: 300;">
+                      ${drink.description}
+                    </p>
+                  </div>
+                `
+                        )
+                        .join("")
+                    : ""
+                }
+              </div>
+            </div>
+            
+            <!-- Featured Pastries -->
+            <div>
+              <div style="text-align: center; margin-bottom: 4rem;">
+                <h2 style="font-family: ${
+                  cafeStyle.fontHeading
+                }; font-size: clamp(2rem, 4vw, 2.5rem); font-weight: 400; margin-bottom: 1rem; color: var(--color-text); letter-spacing: 0.5px;">
+                  Fresh Pastries
+                </h2>
+                <p style="font-family: ${
+                  cafeStyle.fontBody
+                }; color: var(--color-text-secondary); max-width: 500px; margin: 0 auto; font-weight: 300; line-height: 1.6;">
+                  Baked daily in our kitchen
+                </p>
+              </div>
+              
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem;">
+                ${
+                  data.featuredPastries && data.featuredPastries.length > 0
+                    ? data.featuredPastries
+                        .map(
+                          (pastry) => `
+                  <div class="menu-item" style="padding: 2.5rem 2rem; border: ${
+                    cafeStyle.borderStyle
+                  }; background: var(--color-bg); transition: all 0.3s;" 
+                    onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 12px 32px rgba(0,0,0,0.05)'" 
+                    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.25rem; padding-bottom: 1.25rem; border-bottom: ${
+                      cafeStyle.borderStyle
+                    };">
+                      <div>
+                        <h3 style="font-family: ${
+                          cafeStyle.fontHeading
+                        }; font-size: 1.25rem; font-weight: 400; color: var(--color-text); margin: 0 0 0.5rem 0;">
+                          ${pastry.name}
+                        </h3>
+                        <div style="display: flex; gap: 0.5rem;">
+                          ${
+                            pastry.glutenFree
+                              ? `<span style="font-family: ${cafeStyle.fontBody}; font-size: 0.75rem; padding: 0.125rem 0.5rem; background: rgba(139, 115, 85, 0.1); color: ${cafeStyle.secondaryColor}; border-radius: 2px;">GF</span>`
+                              : ""
+                          }
+                          ${
+                            pastry.vegan
+                              ? `<span style="font-family: ${cafeStyle.fontBody}; font-size: 0.75rem; padding: 0.125rem 0.5rem; background: rgba(139, 115, 85, 0.1); color: ${cafeStyle.secondaryColor}; border-radius: 2px;">V</span>`
+                              : ""
+                          }
+                        </div>
+                      </div>
+                      <span style="font-family: ${
+                        cafeStyle.fontBody
+                      }; font-size: 1.125rem; font-weight: 400; color: ${
+                            cafeStyle.primaryColor
+                          };">
+                        ${pastry.price}
+                      </span>
+                    </div>
+                    <p style="font-family: ${
+                      cafeStyle.fontBody
+                    }; color: var(--color-text-secondary); line-height: 1.7; font-size: 0.9375rem; font-weight: 300;">
+                      ${pastry.description}
+                    </p>
+                  </div>
+                `
+                        )
+                        .join("")
+                    : ""
+                }
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- About Section - Timeless Story -->
+        <section id="about" style="padding: 6rem 0;">
+          <div class="container">
+            <div style="max-width: 800px; margin: 0 auto;">
+              <div style="text-align: center; margin-bottom: 4rem;">
+                <h2 style="font-family: ${
+                  cafeStyle.fontHeading
+                }; font-size: clamp(2rem, 4vw, 2.5rem); font-weight: 400; margin-bottom: 1rem; color: var(--color-text); letter-spacing: 0.5px;">
+                  ${data.aboutTitle || "Our Story"}
+                </h2>
+                <div style="width: 60px; height: 1px; background: ${
+                  cafeStyle.primaryColor
+                }; margin: 1.5rem auto; opacity: 0.5;"></div>
+              </div>
+              
+              <div style="font-family: ${
+                cafeStyle.fontBody
+              }; font-size: 1.125rem; color: var(--color-text-secondary); line-height: 1.8; font-weight: 300; letter-spacing: 0.1px;">
+                <p style="margin-bottom: 2rem;">
+                  ${
+                    data.aboutContent ||
+                    "Founded in 2015 by two pastry chefs..."
+                  }
+                </p>
+                
+                <!-- Ambiance Images Grid -->
+                ${
+                  data.ambianceImages && data.ambianceImages.length > 0
+                    ? `
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin: 3rem 0;">
+                  ${data.ambianceImages
+                    .map(
+                      (img) => `
+                  <div style="padding: 1.5rem; border: ${cafeStyle.borderStyle}; background: ${cafeStyle.lightBg}; text-align: center;">
+                    <div style="width: 100%; height: 150px; background: rgba(139, 115, 85, 0.1); margin-bottom: 1rem; display: flex; align-items: center; justify-content: center; color: ${cafeStyle.secondaryColor}; opacity: 0.5;">
+                      <span style="font-size: 2rem;">☕</span>
+                    </div>
+                    <h4 style="font-family: ${cafeStyle.fontHeading}; font-size: 1rem; font-weight: 400; color: var(--color-text); margin-bottom: 0.5rem;">
+                      ${img.caption}
+                    </h4>
+                    <p style="font-family: ${cafeStyle.fontBody}; color: var(--color-text-secondary); font-size: 0.875rem; font-weight: 300;">
+                      ${img.description}
+                    </p>
+                  </div>
+                `
+                    )
+                    .join("")}
+                </div>
+                `
+                    : ""
+                }
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Events Section -->
+        ${
+          data.events && data.events.length > 0
+            ? `
+        <section style="padding: 6rem 0; background: ${cafeStyle.lightBg};">
+          <div class="container">
+            <div style="text-align: center; margin-bottom: 4rem;">
+              <h2 style="font-family: ${
+                cafeStyle.fontHeading
+              }; font-size: clamp(2rem, 4vw, 2.5rem); font-weight: 400; margin-bottom: 1rem; color: var(--color-text); letter-spacing: 0.5px;">
+                ${data.eventsTitle || "Upcoming Events"}
+              </h2>
+              <p style="font-family: ${
+                cafeStyle.fontBody
+              }; color: var(--color-text-secondary); max-width: 500px; margin: 0 auto; font-weight: 300; line-height: 1.6;">
+                Join us for community gatherings
+              </p>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; max-width: 900px; margin: 0 auto;">
+              ${data.events
+                .map(
+                  (event) => `
+              <div style="padding: 2.5rem; border: ${
+                cafeStyle.borderStyle
+              }; background: var(--color-bg); transition: all 0.3s;" 
+                onmouseover="this.style.borderColor='${
+                  cafeStyle.primaryColor
+                }'" 
+                onmouseout="this.style.borderColor='${
+                  cafeStyle.borderStyle.split(" ")[2]
+                }'">
+                <div style="margin-bottom: 1.5rem;">
+                  <h3 style="font-family: ${
+                    cafeStyle.fontHeading
+                  }; font-size: 1.25rem; font-weight: 400; color: var(--color-text); margin-bottom: 0.5rem;">
+                    ${event.title}
+                  </h3>
+                  <p style="font-family: ${cafeStyle.fontBody}; color: ${
+                    cafeStyle.primaryColor
+                  }; font-size: 0.875rem; font-weight: 400; letter-spacing: 0.5px;">
+                    ${event.date}
+                  </p>
+                </div>
+                <p style="font-family: ${
+                  cafeStyle.fontBody
+                }; color: var(--color-text-secondary); line-height: 1.7; font-size: 0.9375rem; font-weight: 300;">
+                  ${event.description}
+                </p>
+              </div>
+            `
+                )
+                .join("")}
+            </div>
+          </div>
+        </section>
+        `
+            : ""
+        }
+
+        <!-- Final CTA Section -->
+        <section style="padding: 6rem 0; text-align: center;">
+          <div class="container">
+            <h2 style="font-family: ${
+              cafeStyle.fontHeading
+            }; font-size: clamp(2rem, 4vw, 2.5rem); font-weight: 400; margin-bottom: 1.5rem; color: var(--color-text); letter-spacing: 0.5px;">
+              Visit Us Soon
+            </h2>
+            <p style="font-family: ${
+              cafeStyle.fontBody
+            }; font-size: 1.125rem; color: var(--color-text-secondary); max-width: 600px; margin: 0 auto 3rem; line-height: 1.7; font-weight: 300;">
+              We look forward to welcoming you. Whether for morning coffee, afternoon tea, or quiet moments with a good book.
+            </p>
+            
+            <!-- Contact Info Footer -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem; max-width: 600px; margin: 0 auto 4rem;">
+              ${
+                data.address
+                  ? `<div>
+                  <h3 style="font-family: ${cafeStyle.fontHeading}; font-size: 0.875rem; font-weight: 600; color: ${cafeStyle.primaryColor}; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 0.75rem;">Location</h3>
+                  <p style="font-family: ${cafeStyle.fontBody}; color: var(--color-text-secondary); font-size: 1rem; line-height: 1.6;">${data.address}</p>
+                </div>`
+                  : ""
+              }
+              ${
+                data.hours && data.hours.length > 0
+                  ? `<div>
+                  <h3 style="font-family: ${
+                    cafeStyle.fontHeading
+                  }; font-size: 0.875rem; font-weight: 600; color: ${
+                      cafeStyle.primaryColor
+                    }; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 0.75rem;">Hours</h3>
+                  ${data.hours
+                    .map(
+                      (h) => `
+                    <div style="margin-bottom: 0.5rem;">
+                      <p style="font-family: ${cafeStyle.fontBody}; color: var(--color-text); font-size: 0.9375rem; margin-bottom: 0.25rem;">${h.days}</p>
+                      <p style="font-family: ${cafeStyle.fontBody}; color: var(--color-text-secondary); font-size: 0.9375rem;">${h.hours}</p>
+                    </div>
+                  `
+                    )
+                    .join("")}
+                </div>`
+                  : ""
+              }
+            </div>
+            
+            <div style="width: 40px; height: 1px; background: ${
+              cafeStyle.primaryColor
+            }; margin: 0 auto; opacity: 0.3;"></div>
+          </div>
+        </section>
+      </main>
+
+      <!-- Elegant Footer -->
+      <footer style="padding: 3rem 0; text-align: center; border-top: ${
+        cafeStyle.borderStyle
+      };">
+        <div class="container">
+          <div style="margin-bottom: 2rem;">
+            <div class="logo" style="font-family: ${
+              cafeStyle.fontHeading
+            }; font-weight: 600; font-size: 1.25rem; color: ${
+        cafeStyle.primaryColor
+      }; letter-spacing: 0.5px; margin-bottom: 1rem;">
+              ${data.cafeName || "AURORA CAFÉ"}
+            </div>
+            <p style="font-family: ${
+              cafeStyle.fontBody
+            }; color: var(--color-text-secondary); font-size: 0.875rem; line-height: 1.6; max-width: 400px; margin: 0 auto; font-weight: 300;">
+              Artisan coffee and pastries served with care
+            </p>
+          </div>
+          
+          <p style="font-family: ${
+            cafeStyle.fontBody
+          }; color: var(--color-text-secondary); font-size: 0.75rem; opacity: 0.7; letter-spacing: 0.5px;">
+            © ${new Date().getFullYear()} ${
+        data.cafeName || "Aurora Café"
+      }. All rights reserved.
+          </p>
+        </div>
+      </footer>
+
+      <style>
+        /* Café-specific elegant typography */
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Inter:wght@300;400;500&family=Lato:wght@300;400&family=Playfair+Display:wght@400;500;600&display=swap');
+        
+        /* Mobile Responsive Styles */
+        @media (max-width: 768px) {
+          .container { padding: 0 1.5rem !important; }
+          section[style*="padding: 8rem"] { padding: 5rem 0 3rem !important; }
+          section[style*="padding: 6rem"] { padding: 4rem 0 !important; }
+          .nav-links { display: none !important; }
+          .mobile-controls { display: flex !important; }
+          
+          h1 { font-size: 2.5rem !important; }
+          h2 { font-size: 2rem !important; }
+          
+          .menu-item { padding: 2rem 1.5rem !important; }
+        }
+        
+        @media (max-width: 480px) {
+          section[style*="padding: 6rem"] { padding: 3rem 0 !important; }
+          
+          /* Single column for very small screens */
+          .menu-grid { grid-template-columns: 1fr !important; }
+          
+          /* Adjust padding */
+          .menu-item, .event-item { padding: 1.5rem !important; }
+        }
+        
+        /* Smooth transitions */
+        * {
+          transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+        
+        /* Decorative hover effects */
+        .menu-item:hover {
+          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        /* Scroll behavior */
+        html {
+          scroll-behavior: smooth;
+        }
+      </style>
+      
+      <script>
+        // Mobile menu toggle
+        function toggleMobileMenu() {
+          const mobileMenu = document.querySelector('.mobile-menu');
+          const isVisible = mobileMenu.style.display === 'block';
+          mobileMenu.style.display = isVisible ? 'none' : 'block';
+        }
+        
+        // Add subtle parallax effect to hero (optional)
+        window.addEventListener('scroll', function() {
+          const scrolled = window.pageYOffset;
+          const hero = document.querySelector('section:first-of-type');
+          if (hero && window.innerWidth > 768) {
+            hero.style.backgroundPosition = 'center ' + (scrolled * 0.5) + 'px';
+          }
+        });
+      </script>
+    `;
+    },
+  }),
+  // ============================================
+  // TEMPLATE: SPLIT-SCREEN SLIDESHOW
+  // ============================================
+  "modern-gallery": new Template("modern-gallery", {
+    name: "Modern Gallery",
+    description:
+      "Contemporary split-screen image gallery with smooth transitions",
+    category: "Portfolio",
+    defaultTheme: "minimal",
+    image: "modern-gallery",
+    fields: {
+      galleryTitle: {
+        type: "text",
+        default: "GALLERY TITLE",
+        label: "Gallery Title",
+        required: false,
+      },
+      subtitle: {
+        type: "text",
+        default: "Curated Collections",
+        label: "Subtitle",
+        required: false,
+      },
+      slides: {
+        type: "group",
+        label: "Slides",
+        itemLabel: "Slide",
+        min: 3,
+        max: 12,
+        fields: {
+          imageUrl: {
+            type: "url",
+            label: "Image URL",
+            default: "",
+            placeholder: "https://images.unsplash.com/photo-...",
+          },
+          title: {
+            type: "text",
+            label: "Image Title",
+            default: "",
+            placeholder: "Mountain Sunrise",
+          },
+          description: {
+            type: "textarea",
+            label: "Description",
+            default: "",
+            placeholder: "Captured at dawn in the Swiss Alps",
+          },
+          year: {
+            type: "text",
+            label: "Year",
+            default: "2024",
+          },
+        },
+        default: [
+          {
+            imageUrl:
+              "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&q=80",
+            title: "Alpine Majesty",
+            description: "The Matterhorn at golden hour, Switzerland",
+            year: "2024",
+          },
+          {
+            imageUrl:
+              "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1920&q=80",
+            title: "Coastal Serenity",
+            description: "Turquoise waters of the Maldives at midday",
+            year: "2024",
+          },
+          {
+            imageUrl:
+              "https://images.unsplash.com/photo-1511593358241-7eea1f3c84e5?w=1920&q=80",
+            title: "Desert Dreams",
+            description: "Sand dunes in the Sahara at sunset",
+            year: "2023",
+          },
+          {
+            imageUrl:
+              "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=1920&q=80",
+            title: "Forest Whispers",
+            description: "Ancient redwood forest in California",
+            year: "2023",
+          },
+          {
+            imageUrl:
+              "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=1920&q=80",
+            title: "Aurora Nights",
+            description: "Northern lights over Icelandic landscape",
+            year: "2024",
+          },
+        ],
+      },
+      transitionSpeed: {
+        type: "select",
+        label: "Transition Speed",
+        options: ["Slow", "Medium", "Fast"],
+        default: "Medium",
+      },
+      showInfoPanel: {
+        type: "checkbox",
+        label: "Show Info Panel",
+        default: true,
+      },
+      autoRotate: {
+        type: "checkbox",
+        label: "Auto Rotate Slides",
+        default: true,
+      },
+      rotationInterval: {
+        type: "number",
+        label: "Rotation Interval (seconds)",
+        default: 8,
+        min: 3,
+        max: 30,
+      },
+    },
+    structure: (data, theme) => {
+      const isBrutalist = theme.id === "brutalist";
+      const isMinimal = theme.id === "minimal";
+      const isGradient = theme.id === "gradient";
+      const isElegant = theme.id === "elegant";
+      const isRetro = theme.id === "retro";
+      const isGlassmorphism = theme.id === "glassmorphism";
+      const isNeumorphism = theme.id === "neumorphism";
+
+      const transitionSpeeds = {
+        Slow: "1200ms",
+        Medium: "800ms",
+        Fast: "500ms",
+      };
+      const transitionSpeed = transitionSpeeds[data.transitionSpeed] || "800ms";
+      const autoRotate = data.autoRotate;
+      const rotationInterval = (data.rotationInterval || 8) * 1000;
+
+      // Get theme-specific colors
+      const getThemeColors = () => {
+        if (isBrutalist)
+          return {
+            bg: "#000",
+            text: "#fff",
+            accent: "#ff0000",
+            surface: "#111",
+          };
+        if (isMinimal)
+          return {
+            bg: "#0a0a0a",
+            text: "#fff",
+            accent: "#fff",
+            surface: "#1a1a1a",
+          };
+        if (isGradient)
+          return {
+            bg: "linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%)",
+            text: "#fff",
+            accent: "#64ffda",
+            surface: "rgba(100, 255, 218, 0.1)",
+          };
+        if (isElegant)
+          return {
+            bg: "#1a1a1a",
+            text: "#fff",
+            accent: "#d4af37",
+            surface: "#2a2a2a",
+          };
+        if (isRetro)
+          return {
+            bg: "#000",
+            text: "#ff00ff",
+            accent: "#00ffff",
+            surface: "#111",
+          };
+        if (isGlassmorphism)
+          return {
+            bg: "rgba(10, 10, 10, 0.8)",
+            text: "#fff",
+            accent: "#fff",
+            surface: "rgba(255, 255, 255, 0.1)",
+          };
+        if (isNeumorphism)
+          return {
+            bg: "#1a1a1a",
+            text: "#fff",
+            accent: "#64ffda",
+            surface: "#2a2a2a",
+          };
+        return {
+          bg: "#0a0a0a",
+          text: "#fff",
+          accent: "#fff",
+          surface: "#1a1a1a",
+        };
+      };
+
+      const colors = getThemeColors();
+
+      return `
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${data.galleryTitle || "Modern Gallery"}</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+  
+      html, body {
+        height: 100%;
+        overflow: hidden;
+        background: ${colors.bg};
+        color: ${colors.text};
+        font-family: ${
+          isElegant
+            ? "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+            : isBrutalist
+            ? "'Arial Black', 'Arial Bold', sans-serif"
+            : "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+        };
+      }
+  
+      .split-gallery {
+        position: relative;
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+        display: flex;
+      }
+  
+      /* Left/Top Section - Current Image */
+      .gallery-left {
+        position: absolute;
+        width: 50vw;
+        height: 100vh;
+        top: 0;
+        left: 0;
+        z-index: 2;
+        overflow: hidden;
+        will-change: transform;
+      }
+  
+      .gallery-left .slider {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+      }
+  
+      .gallery-left .slide {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        transition: opacity ${transitionSpeed} cubic-bezier(0.7, 0, 0.3, 1);
+      }
+  
+      .gallery-left .slide.active {
+        opacity: 1;
+      }
+  
+      .gallery-left .slide img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        position: absolute;
+        top: 0;
+        left: 0;
+      }
+  
+      .gallery-left .image-placeholder {
+        width: 100%;
+        height: 100%;
+        background: ${
+          isGradient
+            ? "linear-gradient(135deg, #667eea, #764ba2)"
+            : isRetro
+            ? "linear-gradient(135deg, #ff6ec4, #7873f5)"
+            : colors.surface
+        };
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        color: ${colors.accent};
+        font-weight: 700;
+      }
+  
+      /* Right/Bottom Section - Next Image (Mirrored) */
+      .gallery-right {
+        position: absolute;
+        width: 50vw;
+        height: 100vh;
+        top: 0;
+        left: 50vw;
+        z-index: 1;
+        overflow: hidden;
+        pointer-events: none;
+        will-change: transform;
+      }
+  
+      .gallery-right .slider {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+      }
+  
+      .gallery-right .slide {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        transition: opacity ${transitionSpeed} cubic-bezier(0.7, 0, 0.3, 1);
+        transform: scale(-1, -1);
+      }
+  
+      .gallery-right .slide.active {
+        opacity: 1;
+      }
+  
+      .gallery-right .slide img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        position: absolute;
+        top: 0;
+        left: 0;
+      }
+  
+      /* Info Panel */
+      .info-panel {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        padding: 3rem 4rem;
+        z-index: 100;
+        background: ${isGlassmorphism ? "rgba(0, 0, 0, 0.7)" : "transparent"};
+        backdrop-filter: ${isGlassmorphism ? "blur(20px)" : "none"};
+        border-top: ${
+          isBrutalist
+            ? "4px solid " + colors.accent
+            : isElegant
+            ? "1px solid rgba(255, 255, 255, 0.1)"
+            : "none"
+        };
+        display: ${data.showInfoPanel ? "block" : "none"};
+      }
+  
+      .slide-info {
+        max-width: 600px;
+        opacity: 0;
+        transform: translateY(20px);
+        transition: all ${transitionSpeed} cubic-bezier(0.7, 0, 0.3, 1);
+      }
+  
+      .slide-info.active {
+        opacity: 1;
+        transform: translateY(0);
+      }
+  
+      .slide-number {
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: ${colors.accent};
+        margin-bottom: 0.5rem;
+        display: block;
+      }
+  
+      .slide-title {
+        font-size: clamp(2rem, 4vw, 3.5rem);
+        font-weight: ${isBrutalist ? "900" : "700"};
+        line-height: 1.1;
+        margin-bottom: 1rem;
+        letter-spacing: ${isBrutalist ? "0.02em" : "-0.01em"};
+        ${isRetro ? "text-transform: uppercase; letter-spacing: 0.1em;" : ""}
+        ${
+          isElegant
+            ? "font-family: 'Playfair Display', serif; font-weight: 600;"
+            : ""
+        }
+      }
+  
+      .slide-description {
+        font-size: 1rem;
+        line-height: 1.6;
+        color: rgba(255, 255, 255, 0.7);
+        max-width: 500px;
+        margin-bottom: 1rem;
+        font-weight: ${isElegant ? "300" : "400"};
+      }
+  
+      .slide-meta {
+        display: flex;
+        gap: 2rem;
+        font-size: 0.875rem;
+        color: rgba(255, 255, 255, 0.5);
+      }
+  
+      /* Gallery Header */
+      .gallery-header {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        padding: 3rem 4rem;
+        z-index: 100;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        pointer-events: none;
+      }
+  
+      .gallery-title {
+        font-size: ${isBrutalist ? "1.25rem" : "1rem"};
+        font-weight: ${isBrutalist ? "900" : "600"};
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: ${colors.text};
+      }
+  
+      .gallery-subtitle {
+        font-size: 0.875rem;
+        font-weight: 400;
+        color: rgba(255, 255, 255, 0.5);
+        margin-top: 0.25rem;
+        letter-spacing: 0.1em;
+      }
+  
+      /* Navigation Controls */
+      .navigation {
+        position: absolute;
+        top: 50%;
+        right: 4rem;
+        transform: translateY(-50%);
+        z-index: 100;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 1.5rem;
+      }
+  
+      .nav-btn {
+        background: ${
+          isGlassmorphism ? "rgba(255, 255, 255, 0.1)" : "transparent"
+        };
+        border: ${
+          isBrutalist
+            ? "2px solid " + colors.accent
+            : isElegant
+            ? "1px solid rgba(255, 255, 255, 0.2)"
+            : "none"
+        };
+        color: ${colors.text};
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        backdrop-filter: ${isGlassmorphism ? "blur(10px)" : "none"};
+        pointer-events: all;
+      }
+  
+      .nav-btn:hover {
+        background: ${
+          isGlassmorphism
+            ? "rgba(255, 255, 255, 0.2)"
+            : "rgba(255, 255, 255, 0.1)"
+        };
+        transform: scale(1.1);
+      }
+  
+      .nav-btn:active {
+        transform: scale(0.95);
+      }
+  
+      .nav-btn svg {
+        width: 20px;
+        height: 20px;
+        stroke: currentColor;
+        stroke-width: ${isBrutalist ? "3" : "2"};
+      }
+  
+      /* Navigation Dots - Modern Horizontal Lines */
+      .navigation-dots {
+        position: absolute;
+        bottom: 3rem;
+        right: 4rem;
+        z-index: 100;
+        display: flex;
+        gap: 1rem;
+        pointer-events: all;
+      }
+  
+      .dot {
+        width: 40px;
+        height: 3px;
+        background: rgba(255, 255, 255, 0.3);
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+      }
+  
+      .dot:hover {
+        background: rgba(255, 255, 255, 0.6);
+        width: 50px;
+      }
+  
+      .dot.active {
+        background: ${colors.accent};
+        width: 60px;
+      }
+  
+      .dot.active::after {
+        content: '';
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background: ${colors.accent};
+        opacity: 0.3;
+        animation: pulse 2s infinite;
+      }
+  
+      /* Progress Bar */
+      .progress-container {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        z-index: 100;
+        background: rgba(255, 255, 255, 0.1);
+      }
+  
+      .progress-bar {
+        height: 100%;
+        width: 0%;
+        background: ${colors.accent};
+        transition: width 0.1s linear;
+      }
+  
+      /* Theme Toggle */
+      .theme-toggle {
+        position: absolute;
+        bottom: 3rem;
+        left: 4rem;
+        z-index: 100;
+        pointer-events: all;
+      }
+  
+      .theme-toggle-switch-wrapper {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+      }
+  
+      .theme-toggle-switch {
+        opacity: 0;
+        width: 0;
+        height: 0;
+        position: absolute;
+      }
+  
+      .theme-toggle-slider {
+        position: relative;
+        display: block;
+        width: 48px;
+        height: 24px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 24px;
+        transition: all 0.3s ease;
+      }
+  
+      .theme-toggle-slider::before {
+        content: '';
+        position: absolute;
+        width: 18px;
+        height: 18px;
+        left: 3px;
+        top: 3px;
+        background: ${colors.accent};
+        border-radius: 50%;
+        transition: transform 0.3s ease;
+      }
+  
+      .theme-toggle-switch:checked + .theme-toggle-slider::before {
+        transform: translateX(24px);
+      }
+  
+      .theme-toggle-label {
+        font-size: 0.75rem;
+        color: rgba(255, 255, 255, 0.5);
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+
+      .loading {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: ${colors.bg};
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        transition: opacity 0.5s ease;
+        opacity: 1;
+        pointer-events: none;
+      }
+      
+      .loading.hidden {
+        opacity: 0;
+      }
+      
+      /* When page is loaded, hide loading */
+      body.loaded .loading {
+        opacity: 0;
+      }
+  
+      /* Animations */
+      @keyframes pulse {
+        0%, 100% { opacity: 0.3; }
+        50% { opacity: 0.6; }
+      }
+  
+      /* Mobile Responsive */
+      @media (max-width: 1024px) {
+        .gallery-left,
+        .gallery-right {
+          width: 100vw;
+          height: 50vh;
+        }
+  
+        .gallery-right {
+          top: 50vh;
+          left: 0;
+        }
+  
+        .info-panel,
+        .gallery-header {
+          padding: 2rem;
+        }
+  
+        .navigation {
+          right: 2rem;
+        }
+  
+        .navigation-dots {
+          bottom: 2rem;
+          right: 2rem;
+        }
+  
+        .theme-toggle {
+          bottom: 2rem;
+          left: 2rem;
+        }
+      }
+  
+      @media (max-width: 768px) {
+        .split-gallery {
+          flex-direction: column;
+        }
+  
+        .slide-title {
+          font-size: 2rem;
+        }
+  
+        .slide-description {
+          font-size: 0.875rem;
+        }
+  
+        .nav-btn {
+          width: 40px;
+          height: 40px;
+        }
+  
+        .dot {
+          width: 30px;
+        }
+  
+        .dot:hover,
+        .dot.active {
+          width: 40px;
+        }
+  
+        .info-panel {
+          padding: 1.5rem;
+        }
+      }
+  
+      @media (max-width: 480px) {
+        .gallery-header {
+          padding: 1.5rem;
+        }
+  
+        .navigation {
+          right: 1.5rem;
+          gap: 1rem;
+        }
+  
+        .navigation-dots {
+          bottom: 1.5rem;
+          right: 1.5rem;
+          gap: 0.5rem;
+        }
+  
+        .theme-toggle {
+          bottom: 1.5rem;
+          left: 1.5rem;
+        }
+  
+        .slide-meta {
+          flex-direction: column;
+          gap: 0.5rem;
+        }
+      }
+  
+      /* Loading State */
+      .loading {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: ${colors.bg};
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        transition: opacity 0.5s ease;
+      }
+  
+      .loading.hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+  
+      /* Accessibility */
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="split-gallery" id="gallery">
+      <!-- Loading Overlay -->
+      <div class="loading" id="loading">
+        <div style="font-size: 1rem; color: ${
+          colors.accent
+        }; letter-spacing: 0.1em;">LOADING GALLERY</div>
+      </div>
+  
+      <!-- Gallery Header -->
+      <div class="gallery-header">
+        <div>
+          <div class="gallery-title">${data.galleryTitle || "GALLERY"}</div>
+          ${
+            data.subtitle
+              ? `<div class="gallery-subtitle">${data.subtitle}</div>`
+              : ""
+          }
+        </div>
+        <div style="text-align: right;">
+          <div class="slide-number" id="currentSlideNumber">01/${String(
+            data.slides.length
+          ).padStart(2, "0")}</div>
+        </div>
+      </div>
+  
+      <!-- Left Section - Current Slide -->
+      <div class="gallery-left">
+        <div class="slider" id="slider-left">
+          ${data.slides
+            .map(
+              (slide, index) => `
+            <div class="slide ${
+              index === 0 ? "active" : ""
+            }" data-index="${index}">
+              ${
+                slide.imageUrl
+                  ? `
+                <img src="${slide.imageUrl}" 
+                     alt="${slide.title || "Gallery Image"}" 
+                     loading="${index === 0 ? "eager" : "lazy"}"
+                     onload="window.handleImageLoad()"
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+                <div class="image-placeholder" style="display: none;">
+                  ${slide.title ? slide.title.charAt(0) : index + 1}
+                </div>
+              `
+                  : `
+                <div class="image-placeholder">
+                  ${slide.title ? slide.title.charAt(0) : index + 1}
+                </div>
+              `
+              }
+            </div>
+          `
+            )
+            .join("")}
+        </div>
+      </div>
+  
+      <!-- Right Section - Next Slide (Mirrored) -->
+      <div class="gallery-right">
+        <div class="slider" id="slider-right">
+          ${[...data.slides]
+            .reverse()
+            .map(
+              (slide, index) => `
+            <div class="slide ${
+              index === data.slides.length - 1 ? "active" : ""
+            }" 
+                 data-index="${data.slides.length - 1 - index}">
+              ${
+                slide.imageUrl
+                  ? `
+                <img src="${slide.imageUrl}" 
+                     alt="${slide.title || "Gallery Image"}" 
+                     loading="lazy"
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+                <div class="image-placeholder" style="display: none;">
+                  ${
+                    slide.title
+                      ? slide.title.charAt(0)
+                      : data.slides.length - index
+                  }
+                </div>
+              `
+                  : `
+                <div class="image-placeholder">
+                  ${
+                    slide.title
+                      ? slide.title.charAt(0)
+                      : data.slides.length - index
+                  }
+                </div>
+              `
+              }
+            </div>
+          `
+            )
+            .join("")}
+        </div>
+      </div>
+  
+      <!-- Info Panel -->
+      <div class="info-panel">
+        <div class="slide-info ${
+          data.showInfoPanel ? "active" : ""
+        }" id="currentSlideInfo">
+          <div class="slide-title">${data.slides[0]?.title || ""}</div>
+          ${
+            data.slides[0]?.description
+              ? `<div class="slide-description">${data.slides[0].description}</div>`
+              : ""
+          }
+          ${
+            data.slides[0]?.year
+              ? `
+            <div class="slide-meta">
+              <span>${data.slides[0].year}</span>
+            </div>
+          `
+              : ""
+          }
+        </div>
+      </div>
+  
+      <!-- Navigation Controls -->
+      <div class="navigation">
+        <button class="nav-btn" id="prevBtn" aria-label="Previous slide">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M15 18l-6-6 6-6"/>
+          </svg>
+        </button>
+        <button class="nav-btn" id="playPauseBtn" aria-label="${
+          autoRotate ? "Pause slideshow" : "Play slideshow"
+        }">
+          <svg viewBox="0 0 24 24" fill="none" id="pauseIcon">
+            <rect x="6" y="4" width="4" height="16" rx="1"/>
+            <rect x="14" y="4" width="4" height="16" rx="1"/>
+          </svg>
+          <svg viewBox="0 0 24 24" fill="none" id="playIcon" style="display: none;">
+            <path d="M5 3l14 9-14 9V3z"/>
+          </svg>
+        </button>
+        <button class="nav-btn" id="nextBtn" aria-label="Next slide">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M9 18l6-6-6-6"/>
+          </svg>
+        </button>
+      </div>
+  
+      <!-- Navigation Dots -->
+      <div class="navigation-dots" id="navigationDots">
+        ${data.slides
+          .map(
+            (_, index) => `
+          <div class="dot ${
+            index === 0 ? "active" : ""
+          }" data-index="${index}"></div>
+        `
+          )
+          .join("")}
+      </div>
+  
+      <!-- Progress Bar -->
+      <div class="progress-container">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+  
+      <!-- Theme Toggle -->
+      <div class="theme-toggle">
+        <label class="theme-toggle-switch-wrapper">
+          <span class="theme-toggle-label">Theme</span>
+          <input type="checkbox" class="theme-toggle-switch" onclick="toggleTheme()" aria-label="Toggle theme">
+          <span class="theme-toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+  
+    <script>
+      function hideLoading() {
+        const loadingOverlay = document.getElementById('loading');
+        if (loadingOverlay) {
+          loadingOverlay.classList.add('hidden');
+        }
+        document.body.classList.add('loaded');
+      }
+    
+      // Hide loading when page is fully loaded
+      if (document.readyState === 'complete') {
+        hideLoading();
+      } else {
+        window.addEventListener('load', hideLoading);
+        // Fallback timeout
+        setTimeout(hideLoading, 2000);
+      }
+    
+      class ModernGallery {
+        constructor() {
+          this.currentSlide = 0;
+          this.totalSlides = ${data.slides.length};
+          this.isPlaying = ${autoRotate};
+          this.rotationInterval = ${rotationInterval};
+          this.transitionSpeed = "${transitionSpeed}";
+          this.showInfoPanel = ${data.showInfoPanel};
+          
+          this.slidesLeft = document.querySelectorAll('#slider-left .slide');
+          this.slidesRight = document.querySelectorAll('#slider-right .slide');
+          this.dots = document.querySelectorAll('.dot');
+          this.progressBar = document.getElementById('progressBar');
+          this.slideNumber = document.getElementById('currentSlideNumber');
+          this.slideInfo = document.getElementById('currentSlideInfo');
+          
+          this.autoPlayTimer = null;
+          this.progressInterval = null;
+          this.startTime = Date.now();
+          this.isTransitioning = false;
+          this.loadedImages = 0;
+          
+          this.init();
+        }
+        
+        init() {
+          this.setupEventListeners();
+          this.updateSlideInfo();
+          if (this.isPlaying) {
+            this.startAutoPlay();
+          }
+          this.updatePlayPauseButton();
+          this.updateProgressBar();
+          this.preloadImages();
+        }
+        
+        setupEventListeners() {
+          // Navigation buttons
+          document.getElementById('prevBtn').addEventListener('click', () => this.prevSlide());
+          document.getElementById('nextBtn').addEventListener('click', () => this.nextSlide());
+          document.getElementById('playPauseBtn').addEventListener('click', () => this.togglePlayPause());
+          
+          // Navigation dots
+          this.dots.forEach(dot => {
+            dot.addEventListener('click', (e) => {
+              const index = parseInt(e.target.dataset.index);
+              this.goToSlide(index);
+            });
+          });
+          
+          // Keyboard navigation
+          document.addEventListener('keydown', (e) => {
+            switch(e.key) {
+              case 'ArrowLeft':
+              case 'ArrowUp':
+                e.preventDefault();
+                this.prevSlide();
+                break;
+              case 'ArrowRight':
+              case 'ArrowDown':
+              case ' ':
+                e.preventDefault();
+                this.nextSlide();
+                break;
+              case 'Escape':
+                this.togglePlayPause();
+                break;
+            }
+          });
+          
+          // Mouse wheel
+          document.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            if (this.isTransitioning) return;
+            
+            if (e.deltaY > 0 || e.deltaX > 0) {
+              this.nextSlide();
+            } else {
+              this.prevSlide();
+            }
+          }, { passive: false });
+          
+          // Touch events
+          let touchStartY = 0;
+          document.addEventListener('touchstart', (e) => {
+            touchStartY = e.touches[0].clientY;
+          }, { passive: true });
+          
+          document.addEventListener('touchend', (e) => {
+            const touchEndY = e.changedTouches[0].clientY;
+            const diff = touchStartY - touchEndY;
+            
+            if (Math.abs(diff) > 50 && !this.isTransitioning) {
+              if (diff > 0) {
+                this.nextSlide();
+              } else {
+                this.prevSlide();
+              }
+            }
+          }, { passive: true });
+          
+          // Handle visibility change
+          document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+              this.stopAutoPlay();
+            } else if (this.isPlaying) {
+              this.startAutoPlay();
+            }
+          });
+        }
+        
+        preloadImages() {
+          const images = document.querySelectorAll('img');
+          images.forEach(img => {
+            if (img.complete) {
+              this.handleImageLoad();
+            }
+          });
+        }
+        
+        handleImageLoad() {
+          this.loadedImages++;
+          if (this.loadedImages >= this.totalSlides * 2) {
+            setTimeout(() => {
+              document.getElementById('loading').classList.add('hidden');
+            }, 500);
+          }
+        }
+        
+        goToSlide(index) {
+          if (this.isTransitioning || index === this.currentSlide) return;
+          
+          this.isTransitioning = true;
+          const prevSlide = this.currentSlide;
+          this.currentSlide = index;
+          
+          // Update slides with split-screen effect
+          this.updateSlides(prevSlide, this.currentSlide);
+          
+          // Update dots
+          this.dots.forEach(dot => {
+            dot.classList.toggle('active', parseInt(dot.dataset.index) === this.currentSlide);
+          });
+          
+          // Update slide info
+          this.updateSlideInfo();
+          
+          // Update slide number
+          this.slideNumber.textContent = \`\${String(this.currentSlide + 1).padStart(2, '0')}/\${String(this.totalSlides).padStart(2, '0')}\`;
+          
+          // Reset autoplay
+          if (this.isPlaying) {
+            this.startProgressBar();
+          }
+          
+          // Reset transition lock
+          setTimeout(() => {
+            this.isTransitioning = false;
+          }, parseInt(this.transitionSpeed));
+        }
+        
+        updateSlides(prevIndex, newIndex) {
+          // Update left slides
+          this.slidesLeft[prevIndex].classList.remove('active');
+          this.slidesLeft[newIndex].classList.add('active');
+          
+          // Update right slides (mirrored - next slide in sequence)
+          const nextIndex = (newIndex + 1) % this.totalSlides;
+          const rightPrevIndex = this.totalSlides - 1 - prevIndex;
+          const rightNewIndex = this.totalSlides - 1 - nextIndex;
+          
+          this.slidesRight[rightPrevIndex].classList.remove('active');
+          this.slidesRight[rightNewIndex].classList.add('active');
+        }
+        
+        updateSlideInfo() {
+          if (!this.showInfoPanel) return;
+          
+          const slideData = ${JSON.stringify(data.slides)}[this.currentSlide];
+          this.slideInfo.innerHTML = \`
+            <div class="slide-title">\${slideData.title || ''}</div>
+            \${slideData.description ? \`<div class="slide-description">\${slideData.description}</div>\` : ''}
+            \${slideData.year ? \`
+              <div class="slide-meta">
+                <span>\${slideData.year}</span>
+              </div>
+            \` : ''}
+          \`;
+        }
+        
+        nextSlide() {
+          const nextIndex = (this.currentSlide + 1) % this.totalSlides;
+          this.goToSlide(nextIndex);
+        }
+        
+        prevSlide() {
+          const prevIndex = this.currentSlide === 0 ? this.totalSlides - 1 : this.currentSlide - 1;
+          this.goToSlide(prevIndex);
+        }
+        
+        startAutoPlay() {
+          this.clearTimers();
+          this.isPlaying = true;
+          this.updatePlayPauseButton();
+          
+          this.autoPlayTimer = setInterval(() => {
+            this.nextSlide();
+          }, this.rotationInterval);
+          
+          this.startProgressBar();
+        }
+        
+        stopAutoPlay() {
+          this.clearTimers();
+          this.isPlaying = false;
+          this.updatePlayPauseButton();
+        }
+        
+        togglePlayPause() {
+          if (this.isPlaying) {
+            this.stopAutoPlay();
+          } else {
+            this.startAutoPlay();
+          }
+        }
+        
+        clearTimers() {
+          if (this.autoPlayTimer) clearInterval(this.autoPlayTimer);
+          if (this.progressInterval) clearInterval(this.progressInterval);
+        }
+        
+        startProgressBar() {
+          this.startTime = Date.now();
+          this.progressInterval = setInterval(() => {
+            this.updateProgressBar();
+          }, 50);
+        }
+        
+        updateProgressBar() {
+          if (!this.isPlaying) {
+            this.progressBar.style.width = '0%';
+            return;
+          }
+          
+          const elapsed = Date.now() - this.startTime;
+          const progress = Math.min((elapsed / this.rotationInterval) * 100, 100);
+          this.progressBar.style.width = progress + '%';
+        }
+        
+        updatePlayPauseButton() {
+          const pauseIcon = document.getElementById('pauseIcon');
+          const playIcon = document.getElementById('playIcon');
+          const button = document.getElementById('playPauseBtn');
+          
+          if (this.isPlaying) {
+            pauseIcon.style.display = 'block';
+            playIcon.style.display = 'none';
+            button.setAttribute('aria-label', 'Pause slideshow');
+          } else {
+            pauseIcon.style.display = 'none';
+            playIcon.style.display = 'block';
+            button.setAttribute('aria-label', 'Play slideshow');
+          }
+        }
+        
+        destroy() {
+          this.clearTimers();
+        }
+      }
+      
+      // Initialize gallery
+      document.addEventListener('DOMContentLoaded', () => {
+        window.gallery = new ModernGallery();
+      });
+      
+      // Make handleImageLoad globally accessible
+      window.handleImageLoad = () => {
+        if (window.gallery) {
+          window.gallery.handleImageLoad();
+        }
+      };
+    </script>
+  </body>
+  </html>`;
     },
   }),
 };

@@ -79,10 +79,12 @@ function ConfirmModal({
           <div className="confirm-modal__input">
             <div className="form-group">
               <label htmlFor="confirm-modal-input">
-                {inputProps.label || "Name"}
-                {inputProps.isEditing && (
-                  <span className="edit-badge">Editing</span>
-                )}
+                <strong>
+                  {inputProps.label || "Name"}
+                  {inputProps.isEditing && (
+                    <span className="edit-badge">Editing</span>
+                  )}
+                </strong>
               </label>
               <input
                 id="confirm-modal-input"

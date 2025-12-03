@@ -12,11 +12,13 @@ import {
   ExternalLink,
   Trash2,
   Eye,
+  EyeOff,
   FileText,
   Edit,
   RefreshCw,
   AlertTriangle,
   Info,
+  Copy,
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { renderTemplate } from "../utils/templateSystem";
@@ -44,6 +46,7 @@ function UserAccountModal({ isOpen, onClose }) {
   const [drafts, setDrafts] = useState([]);
   const [billingSummary, setBillingSummary] = useState(null);
   const [subscriptions, setSubscriptions] = useState([]);
+  const [revealedDeploymentIds, setRevealedDeploymentIds] = useState({});
 
   // Modal states
   const [confirmModal, setConfirmModal] = useState({
@@ -102,6 +105,7 @@ function UserAccountModal({ isOpen, onClose }) {
       });
       setSuccessMessage("");
       setErrorMessage("");
+      setRevealedDeploymentIds({});
     }
   }, [isOpen, isAuthenticated]);
 
@@ -740,6 +744,31 @@ function UserAccountModal({ isOpen, onClose }) {
     });
   };
 
+  const toggleRevealDeploymentId = (siteId) => {
+    setRevealedDeploymentIds((prev) => ({
+      ...prev,
+      [siteId]: !prev[siteId],
+    }));
+  };
+
+  const copyToClipboard = async (text, siteId) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setNotification({
+        isOpen: true,
+        message: "Deployment ID copied to clipboard",
+        type: "success",
+      });
+    } catch (error) {
+      console.error("Failed to copy:", error);
+      setNotification({
+        isOpen: true,
+        message: "Failed to copy to clipboard",
+        type: "error",
+      });
+    }
+  };
+
   const formatCurrency = (cents) => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
@@ -759,6 +788,7 @@ function UserAccountModal({ isOpen, onClose }) {
     setActiveTab("profile");
     setSuccessMessage("");
     setErrorMessage("");
+    setRevealedDeploymentIds({});
     onClose();
   };
 
@@ -968,6 +998,58 @@ function UserAccountModal({ isOpen, onClose }) {
                               {site.custom_domain ||
                                 `${site.site_name}.vercel.app`}
                             </span>
+                          </div>
+                          <div className="info-row info-row--deployment-id">
+                            <span className="info-label">Deployment ID:</span>
+                            <div className="info-value info-value--revealable">
+                              {revealedDeploymentIds[
+                                site.vercel_deployment_id
+                              ] ? (
+                                <div className="deployment-id-revealed">
+                                  <span className="deployment-id-text">
+                                    {site.vercel_deployment_id}
+                                  </span>
+                                  <button
+                                    type="button"
+                                    className="btn-icon-small"
+                                    onClick={() =>
+                                      copyToClipboard(
+                                        site.vercel_deployment_id,
+                                        site.id
+                                      )
+                                    }
+                                    title="Copy to clipboard"
+                                  >
+                                    <Copy size={14} />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className="btn-icon-small"
+                                    onClick={() =>
+                                      toggleRevealDeploymentId(
+                                        site.vercel_deployment_id
+                                      )
+                                    }
+                                    title="Hide"
+                                  >
+                                    <EyeOff size={14} />
+                                  </button>
+                                </div>
+                              ) : (
+                                <button
+                                  type="button"
+                                  className="reveal-btn"
+                                  onClick={() =>
+                                    toggleRevealDeploymentId(
+                                      site.vercel_deployment_id
+                                    )
+                                  }
+                                >
+                                  <Eye size={14} />
+                                  <span>Click to reveal</span>
+                                </button>
+                              )}
+                            </div>
                           </div>
                           <div className="info-row">
                             <span className="info-label">Monthly:</span>

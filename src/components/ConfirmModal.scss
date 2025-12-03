@@ -144,3 +144,22 @@
     }
   }
 }
+
+#confirm-modal-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 2px solid var(--color-border);
+  border-radius: 6px;
+  font-size: 14px;
+  margin-top: 8px;
+
+  &:focus {
+    outline: none;
+    border-color: #ef4444;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}

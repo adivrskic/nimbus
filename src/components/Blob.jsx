@@ -345,7 +345,7 @@ const Blob = ({ color = "#efeff0", wireframe = false }) => {
         height: "100%",
         overflow: "hidden",
         zIndex: 1,
-        opacity: isLoaded ? (theme === "dark" ? 0.6 : 1) : 0,
+        opacity: isLoaded ? (theme === "dark" ? 0.75 : 1) : 0,
         filter: isLoaded ? `blur(${dynamicBlur.toFixed(1)}px)` : "blur(64px)",
         pointerEvents: "none",
         transition:
