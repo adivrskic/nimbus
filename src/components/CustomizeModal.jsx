@@ -1,5 +1,13 @@
 import { useState, useEffect } from "react";
-import { X, Download, ExternalLink, Eye, Save } from "lucide-react";
+import {
+  X,
+  Download,
+  ExternalLink,
+  Eye,
+  Save,
+  Upload,
+  CheckCircle,
+} from "lucide-react";
 import { useTheme } from "../contexts/ThemeContext";
 import { useAuth } from "../contexts/AuthContext";
 import CustomizationPanel from "./CustomizationPanel";
@@ -10,18 +18,17 @@ import { getAllThemes } from "../styles/themes";
 import PaymentModal from "./PaymentModal";
 import NotificationModal from "./NotificationModal";
 import SaveDraftModal from "./SaveDraftModal";
+import RedeployModal from "./RedeployModal"; // We'll create this
 import "./CustomizeModal.scss";
 
 const defaultTheme = "minimal";
 
-// Helper function to extract customizable fields from template
 function getTemplateFields(template) {
   console.log("template: ", template);
   if (!template || !template.fields) return {};
 
   const customizable = {};
 
-  // Convert template fields to customization format
   Object.entries(template.fields).forEach(([key, field]) => {
     customizable[key] = {
       type: field.type,
@@ -37,7 +44,6 @@ function getTemplateFields(template) {
     };
   });
 
-  // Add theme selector (will be synced with global state)
   customizable.theme = {
     type: "theme-selector",
     default: template.defaultTheme || "minimal",
@@ -45,35 +51,28 @@ function getTemplateFields(template) {
     supportedThemes: template.supportedThemes,
   };
 
-  // Add color mode selector (local to preview only, doesn't affect global)
-  // customizable.colorMode = {
-  //   type: 'select',
-  //   options: ['Light', 'Dark', 'Auto'],
-  //   default: 'Auto',
-  //   label: 'Preview Color Mode'
-  // };
-
-  // Add optional accent color override
-  // customizable.accentOverride = {
-  //   type: 'color',
-  //   default: '',
-  //   label: 'Custom Accent (Optional)',
-  //   optional: true
-  // };
-
   return customizable;
 }
 
-function CustomizeModal({ templateId, isOpen, onClose }) {
+function CustomizeModal({
+  templateId,
+  isOpen,
+  onClose,
+  editSiteData,
+  editDraftData,
+}) {
   const template = getTemplate(templateId);
   const themes = getAllThemes();
   const { theme: globalTheme, selectedStyleTheme, setStyleTheme } = useTheme();
   const { user, isAuthenticated, supabase } = useAuth();
-  console.log(globalTheme, selectedStyleTheme);
+
   const [editingDraftId, setEditingDraftId] = useState(null);
+  const [editingSiteId, setEditingSiteId] = useState(null);
   const [isEditingDraft, setIsEditingDraft] = useState(false);
-  const [mobileView, setMobileView] = useState("editor"); // 'editor' | 'preview'
+  const [isEditingDeployedSite, setIsEditingDeployedSite] = useState(false);
+  const [mobileView, setMobileView] = useState("editor");
   const [isSavingDraft, setIsSavingDraft] = useState(false);
+  const [isRedeploying, setIsRedeploying] = useState(false);
   const [draftSaved, setDraftSaved] = useState(false);
   const [notification, setNotification] = useState({
     isOpen: false,
@@ -81,8 +80,9 @@ function CustomizeModal({ templateId, isOpen, onClose }) {
     type: "success",
   });
   const [isSaveDraftModalOpen, setIsSaveDraftModalOpen] = useState(false);
+  const [isRedeployModalOpen, setIsRedeployModalOpen] = useState(false);
+  const [siteData, setSiteData] = useState(null);
 
-  // Build template config from template system
   const templateConfig = template
     ? {
         id: template.id,
@@ -93,15 +93,12 @@ function CustomizeModal({ templateId, isOpen, onClose }) {
     : null;
 
   const [customization, setCustomization] = useState(() => {
-    // First, get defaults from template
     const defaults = {};
     if (templateConfig && templateConfig.customizable) {
       Object.entries(templateConfig.customizable).forEach(([key, config]) => {
         if (key === "theme") {
-          // Initialize with global selected style theme
           defaults[key] = selectedStyleTheme;
         } else if (key === "colorMode") {
-          // Default to Auto for preview
           defaults[key] = "Auto";
         } else {
           defaults[key] = config.default;
@@ -109,11 +106,9 @@ function CustomizeModal({ templateId, isOpen, onClose }) {
       });
     }
 
-    // Then, try to load saved data
     const saved = localStorage.getItem(`template_${templateId}`);
     if (saved) {
       const data = JSON.parse(saved);
-      // Migration for old data
       let savedCustomization = data.customization || data;
 
       if (savedCustomization.darkMode) {
@@ -124,60 +119,88 @@ function CustomizeModal({ templateId, isOpen, onClose }) {
         savedCustomization.theme = selectedStyleTheme;
       }
 
-      // IMPORTANT: Merge saved data with defaults to ensure new fields appear
-      // Defaults come first, then override with saved values
       return { ...defaults, ...savedCustomization };
     }
 
-    // No saved data, return defaults
     return defaults;
   });
 
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [uploadedImages, setUploadedImages] = useState({});
 
-  // Add this useEffect after your existing useEffects (around line ~120)
   useEffect(() => {
-    // Check if we're editing a draft from localStorage
-    const editDraftData = localStorage.getItem("editDraft");
-    const isEditing = localStorage.getItem("isEditingDraft");
+    if (!isOpen) return;
 
-    if (isOpen && isEditing && editDraftData) {
-      try {
-        const draft = JSON.parse(editDraftData);
+    console.log("🔍 CustomizeModal props:", { editSiteData, editDraftData });
 
-        console.log("Loading draft for editing:", draft);
+    // Check if we're editing a deployed site
+    if (editSiteData) {
+      console.log("✅ Editing deployed site:", editSiteData.siteName);
 
-        // Update customization with draft data
-        setCustomization({
-          ...customization, // Keep any existing defaults
-          ...draft.customization,
-          theme: draft.theme || selectedStyleTheme,
-          colorMode: draft.colorMode || "Auto",
-        });
+      setIsEditingDeployedSite(true);
+      setSiteData(editSiteData);
 
-        setEditingDraftId(draft.id);
-        setIsEditingDraft(true);
-
-        // Clear the localStorage flags
-        localStorage.removeItem("editDraft");
-        localStorage.removeItem("isEditingDraft");
-
-        // Show notification
-        setNotification({
-          isOpen: true,
-          message: `Loaded draft: "${draft.draftName || draft.templateId}"`,
-          type: "success",
-        });
-      } catch (error) {
-        console.error("Error loading draft data:", error);
-        localStorage.removeItem("editDraft");
-        localStorage.removeItem("isEditingDraft");
-      }
+      // Load site customization
+      setCustomization((prev) => ({
+        ...prev,
+        ...editSiteData.customization,
+        theme: editSiteData.theme || selectedStyleTheme,
+        colorMode: editSiteData.colorMode || "Auto",
+      }));
     }
-  }, [isOpen]);
 
-  // Initialize customization theme from global state when modal opens
+    // Check if we're editing a draft
+    if (editDraftData) {
+      console.log("📝 Editing draft:", editDraftData.draft_name);
+
+      setIsEditingDraft(true);
+      setEditingDraftId(editDraftData.id);
+
+      setCustomization((prev) => ({
+        ...prev,
+        ...editDraftData.customization,
+        theme: editDraftData.theme || selectedStyleTheme,
+        colorMode: editDraftData.colorMode || "Auto",
+      }));
+    }
+  }, [isOpen, editSiteData, editDraftData]);
+
+  // Check if editing a draft
+  // useEffect(() => {
+  //   const editDraftData = localStorage.getItem("editDraft");
+  //   const isEditing = localStorage.getItem("isEditingDraft");
+
+  //   if (isOpen && isEditing && editDraftData && !isEditingDeployedSite) {
+  //     try {
+  //       const draft = JSON.parse(editDraftData);
+  //       console.log("Loading draft for editing:", draft);
+
+  //       setCustomization({
+  //         ...customization,
+  //         ...draft.customization,
+  //         theme: draft.theme || selectedStyleTheme,
+  //         colorMode: draft.colorMode || "Auto",
+  //       });
+
+  //       setEditingDraftId(draft.id);
+  //       setIsEditingDraft(true);
+
+  //       localStorage.removeItem("editDraft");
+  //       localStorage.removeItem("isEditingDraft");
+
+  //       setNotification({
+  //         isOpen: true,
+  //         message: `Loaded draft: "${draft.draftName || draft.templateId}"`,
+  //         type: "success",
+  //       });
+  //     } catch (error) {
+  //       console.error("Error loading draft data:", error);
+  //       localStorage.removeItem("editDraft");
+  //       localStorage.removeItem("isEditingDraft");
+  //     }
+  //   }
+  // }, [isOpen]);
+
   useEffect(() => {
     if (
       isOpen &&
@@ -191,7 +214,6 @@ function CustomizeModal({ templateId, isOpen, onClose }) {
     }
   }, [isOpen, selectedStyleTheme]);
 
-  // Save to localStorage
   useEffect(() => {
     if (customization && templateId) {
       localStorage.setItem(
@@ -212,7 +234,6 @@ function CustomizeModal({ templateId, isOpen, onClose }) {
       [field]: value,
     }));
 
-    // If theme is changed in customization panel, update global state
     if (field === "theme") {
       setStyleTheme(value);
     }
@@ -239,9 +260,10 @@ function CustomizeModal({ templateId, isOpen, onClose }) {
 
   useEffect(() => {
     return () => {
-      // Clean up on unmount
       localStorage.removeItem("editDraft");
       localStorage.removeItem("isEditingDraft");
+      localStorage.removeItem("editSite");
+      localStorage.removeItem("isEditingDeployedSite");
     };
   }, []);
 
@@ -292,11 +314,9 @@ function CustomizeModal({ templateId, isOpen, onClose }) {
       return;
     }
 
-    // Open the save draft modal
     setIsSaveDraftModalOpen(true);
   };
 
-  // Replace the existing handleSaveDraftConfirm function (around line ~190)
   const handleSaveDraftConfirm = async (draftName) => {
     setIsSavingDraft(true);
     setDraftSaved(false);
@@ -305,7 +325,6 @@ function CustomizeModal({ templateId, isOpen, onClose }) {
       let result;
 
       if (isEditingDraft && editingDraftId) {
-        // Update existing draft
         const { data, error } = await supabase
           .from("template_drafts")
           .update({
@@ -323,7 +342,6 @@ function CustomizeModal({ templateId, isOpen, onClose }) {
         if (error) throw error;
         result = data;
       } else {
-        // Create new draft
         const { data, error } = await supabase
           .from("template_drafts")
           .insert({
@@ -366,8 +384,106 @@ function CustomizeModal({ templateId, isOpen, onClose }) {
     }
   };
 
+  // NEW: Handle redeploying an existing site
+  const handleRedeploySite = async () => {
+    if (!isAuthenticated || !siteData) return;
+
+    setIsRedeploying(true);
+    try {
+      const effectiveColorMode =
+        customization.colorMode?.toLowerCase() === "auto"
+          ? globalTheme
+          : customization.colorMode?.toLowerCase() || globalTheme;
+
+      const htmlContent = renderTemplate(
+        templateId,
+        customization,
+        customization.theme || "minimal",
+        effectiveColorMode
+      );
+
+      // Clean HTML content
+      const cleanHtmlContent = htmlContent
+        .replace(/[\0-\x1F\x7F]/g, "")
+        .replace(/\r\n/g, "\n")
+        .replace(/\r/g, "\n");
+
+      // Call redeploy function
+      const { data, error } = await supabase.functions.invoke(
+        "redeploy-to-vercel",
+        {
+          body: {
+            siteId: siteData.id,
+            siteName: siteData.siteName,
+            htmlContent: cleanHtmlContent,
+            templateId: templateId,
+            customization: customization,
+            vercelProjectId: siteData.vercelProjectId,
+            stripeSubscriptionId: siteData.stripeSubscriptionId,
+            stripeCustomerId: siteData.stripeCustomerId,
+            customDomain: siteData.customDomain || null,
+          },
+        }
+      );
+
+      if (error) throw error;
+
+      // Update site record in database
+      const { error: updateError } = await supabase
+        .from("sites")
+        .update({
+          customization: customization,
+          theme: customization.theme || "minimal",
+          updated_at: new Date().toISOString(),
+          deployment_status: "deployed",
+          deployed_at: new Date().toISOString(),
+          last_redeployed_at: new Date().toISOString(),
+        })
+        .eq("id", siteData.id)
+        .eq("user_id", user.id);
+
+      if (updateError) {
+        console.warn("Database update warning:", updateError);
+        // Continue anyway since Vercel deployment succeeded
+      }
+
+      setNotification({
+        isOpen: true,
+        message: "Site redeployed successfully!",
+        type: "success",
+      });
+
+      // Close modal after successful redeployment
+      setTimeout(() => {
+        onClose();
+        // Trigger refresh in parent component
+        window.dispatchEvent(new CustomEvent("site-redeployed"));
+      }, 1500);
+    } catch (error) {
+      console.error("Error redeploying site:", error);
+      setNotification({
+        isOpen: true,
+        message: error.message || "Failed to redeploy site. Please try again.",
+        type: "error",
+      });
+    } finally {
+      setIsRedeploying(false);
+    }
+  };
+
   const handleDeploy = () => {
-    setIsPaymentModalOpen(true);
+    if (isEditingDeployedSite) {
+      // For deployed sites, open redeploy confirmation
+      setIsRedeployModalOpen(true);
+    } else {
+      // For new sites, open payment modal
+      setIsPaymentModalOpen(true);
+    }
+  };
+
+  const handleRedeployConfirm = () => {
+    setIsRedeployModalOpen(false);
+    handleRedeploySite();
   };
 
   if (!isOpen || !templateConfig) return null;
@@ -385,59 +501,91 @@ function CustomizeModal({ templateId, isOpen, onClose }) {
               <X size={24} />
             </button>
             <div>
-              <h2 className="customize-modal__title">{templateConfig.name}</h2>
+              <h2 className="customize-modal__title">
+                {isEditingDeployedSite
+                  ? `Edit ${siteData?.siteName || "Site"}`
+                  : templateConfig.name}
+              </h2>
               <p className="customize-modal__subtitle">
-                Customize your template and see changes in real-time
+                {isEditingDeployedSite
+                  ? "Edit your deployed site and redeploy for free"
+                  : "Customize your template and see changes in real-time"}
               </p>
             </div>
           </div>
           <div className="customize-modal__actions">
+            {!isEditingDeployedSite && (
+              <>
+                <button
+                  className={`btn btn-secondary ${
+                    draftSaved ? "btn-success" : ""
+                  }`}
+                  onClick={handleSaveDraft}
+                  disabled={!isAuthenticated || isSavingDraft}
+                  title={
+                    !isAuthenticated
+                      ? "Sign in to save drafts"
+                      : isEditingDraft
+                      ? "Update draft"
+                      : "Save draft"
+                  }
+                >
+                  <Save size={20} />
+                  <span className="btn-text">
+                    {isSavingDraft
+                      ? "Saving..."
+                      : draftSaved
+                      ? "Saved!"
+                      : isEditingDraft
+                      ? "Update Draft"
+                      : "Save Draft"}
+                  </span>
+                </button>
+                <button
+                  className="btn btn-secondary"
+                  onClick={handlePreviewNewTab}
+                >
+                  <Eye size={20} />
+                  <span className="btn-text">Preview</span>
+                </button>
+                <button className="btn btn-secondary" onClick={handleDownload}>
+                  <Download size={20} />
+                  <span className="btn-text">Download</span>
+                </button>
+              </>
+            )}
             <button
-              className={`btn btn-secondary ${draftSaved ? "btn-success" : ""}`}
-              onClick={handleSaveDraft}
-              disabled={!isAuthenticated || isSavingDraft}
+              className={`btn ${
+                isEditingDeployedSite ? "btn-success" : "btn-primary"
+              }`}
+              onClick={handleDeploy}
+              disabled={!isAuthenticated || isRedeploying}
               title={
                 !isAuthenticated
-                  ? "Sign in to save drafts"
-                  : isEditingDraft
-                  ? "Update draft"
-                  : "Save as draft"
+                  ? "Sign in to deploy"
+                  : isEditingDeployedSite
+                  ? "Redeploy site for free"
+                  : "Deploy your site"
               }
             >
-              <Save size={20} />
+              {isRedeploying ? (
+                <span className="spinner" />
+              ) : isEditingDeployedSite ? (
+                <Upload size={20} />
+              ) : (
+                <ExternalLink size={20} />
+              )}
               <span className="btn-text">
-                {isSavingDraft
-                  ? "Saving..."
-                  : draftSaved
-                  ? "Saved!"
-                  : isEditingDraft
-                  ? "Update Draft"
-                  : "Save Draft"}
+                {isRedeploying
+                  ? "Redeploying..."
+                  : isEditingDeployedSite
+                  ? "Save & Redeploy"
+                  : "Deploy"}
               </span>
-            </button>
-            <button className="btn btn-secondary" onClick={handlePreviewNewTab}>
-              <Eye size={20} />
-              <span className="btn-text">Preview</span>
-            </button>
-            <button className="btn btn-secondary" onClick={handleDownload}>
-              <Download size={20} />
-              <span className="btn-text">Download</span>
-            </button>
-            <button
-              className="btn btn-primary"
-              onClick={handleDeploy}
-              disabled={!isAuthenticated}
-              title={
-                !isAuthenticated ? "Sign in to deploy" : "Deploy your site"
-              }
-            >
-              <ExternalLink size={20} />
-              <span className="btn-text">Deploy</span>
             </button>
           </div>
         </div>
 
-        {/* Mobile Editor/Preview Switch */}
         <div className="customize-modal__mobile-tabs">
           <button
             className={mobileView === "editor" ? "active" : ""}
@@ -452,22 +600,6 @@ function CustomizeModal({ templateId, isOpen, onClose }) {
             Preview
           </button>
         </div>
-
-        {/* Mobile Toggle Bar */}
-        {/* <div className="customize-modal__mobile-toggle">
-          <button
-            className={mobileView === 'editor' ? 'active' : ''}
-            onClick={() => setMobileView('editor')}
-          >
-            Editor
-          </button>
-          <button
-            className={mobileView === 'preview' ? 'active' : ''}
-            onClick={() => setMobileView('preview')}
-          >
-            Preview
-          </button>
-        </div> */}
 
         <div className={`customize-modal__content mobile-${mobileView}`}>
           <div className="customize-modal__panel">
@@ -485,35 +617,49 @@ function CustomizeModal({ templateId, isOpen, onClose }) {
               templateId={templateId}
               customization={customization}
               images={uploadedImages}
+              isEditingDeployedSite={isEditingDeployedSite}
+              siteName={siteData?.siteName}
             />
           </div>
         </div>
       </div>
 
-      {/* Generate HTML to send to deployment */}
-      {(() => {
-        const effectiveColorMode =
-          customization.colorMode?.toLowerCase() === "auto"
-            ? globalTheme
-            : customization.colorMode?.toLowerCase() || globalTheme;
+      {/* Payment Modal for NEW deployments */}
+      {!isEditingDeployedSite &&
+        (() => {
+          const effectiveColorMode =
+            customization.colorMode?.toLowerCase() === "auto"
+              ? globalTheme
+              : customization.colorMode?.toLowerCase() || globalTheme;
 
-        var htmlContent = renderTemplate(
-          templateId,
-          customization,
-          customization.theme || "minimal",
-          effectiveColorMode
-        );
+          var htmlContent = renderTemplate(
+            templateId,
+            customization,
+            customization.theme || "minimal",
+            effectiveColorMode
+          );
 
-        return (
-          <PaymentModal
-            isOpen={isPaymentModalOpen}
-            onClose={() => setIsPaymentModalOpen(false)}
-            templateId={templateId}
-            customization={customization}
-            htmlContent={htmlContent} // <-- IMPORTANT
-          />
-        );
-      })()}
+          return (
+            <PaymentModal
+              isOpen={isPaymentModalOpen}
+              onClose={() => setIsPaymentModalOpen(false)}
+              templateId={templateId}
+              customization={customization}
+              htmlContent={htmlContent}
+            />
+          );
+        })()}
+
+      {/* Redeploy Confirmation Modal */}
+      {isEditingDeployedSite && (
+        <RedeployModal
+          isOpen={isRedeployModalOpen}
+          onClose={() => setIsRedeployModalOpen(false)}
+          onConfirm={handleRedeployConfirm}
+          siteName={siteData?.siteName}
+          isRedeploying={isRedeploying}
+        />
+      )}
 
       <NotificationModal
         isOpen={notification.isOpen}
@@ -521,6 +667,7 @@ function CustomizeModal({ templateId, isOpen, onClose }) {
         message={notification.message}
         type={notification.type}
       />
+
       <SaveDraftModal
         isOpen={isSaveDraftModalOpen}
         onClose={() => setIsSaveDraftModalOpen(false)}

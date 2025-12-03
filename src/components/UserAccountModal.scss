@@ -303,6 +303,9 @@
 }
 
 .site-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   padding: calc(var(--spacing-unit) * 3);
   background: var(--color-surface);
   border-radius: var(--radius-lg);
@@ -797,7 +800,7 @@
 }
 
 .stripe-portal {
-  margin-top: 2rem;
+  // margin-top: 2rem;
   padding: 1.5rem;
   background: var(--color-surface, #f9f9fb);
   border-radius: 12px;
@@ -885,6 +888,57 @@
           border-radius: 4px;
           font-size: 12px;
         }
+      }
+    }
+  }
+}
+.sites-header-actions {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--spacing-unit) * 1.5);
+}
+
+.site-tags {
+  display: flex;
+  gap: calc(var(--spacing-unit) * 1);
+  flex-wrap: wrap;
+}
+
+.site-actions {
+  display: flex;
+  gap: calc(var(--spacing-unit) * 0.5);
+}
+
+.site-card__actions {
+  display: flex;
+  gap: calc(var(--spacing-unit) * 2);
+  margin-top: calc(var(--spacing-unit) * 2);
+
+  .btn {
+    flex: 1;
+    justify-content: center;
+  }
+}
+
+// Update button styles
+.btn-success {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border: none;
+
+  &:hover:not(:disabled) {
+    box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
+  }
+}
+
+// For CustomizeModal buttons when editing deployed site
+.customize-modal {
+  &__actions {
+    .btn-success {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+
+      &:hover:not(:disabled) {
+        background: linear-gradient(135deg, #059669 0%, #047857 100%);
       }
     }
   }

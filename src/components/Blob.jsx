@@ -1,15 +1,13 @@
 import React, { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 
-const Blob = ({ color = "#eb1736", wireframe = false }) => {
+const Blob = ({ color = "#efeff0", wireframe = false }) => {
   const mountRef = useRef(null);
   const rendererRef = useRef(null);
   const cameraRef = useRef(null);
   const animationRef = useRef();
 
   const [isLoaded, setIsLoaded] = useState(false);
-
-  // --- NEW: flowing blur state ---
   const [dynamicBlur, setDynamicBlur] = useState(1);
 
   useEffect(() => {
@@ -41,31 +39,35 @@ const Blob = ({ color = "#eb1736", wireframe = false }) => {
       Math.random() * 1 - 1
     ).normalize();
 
-    // ----- SHADERS -----
+    // ----- SHADERS - Updated for matte gray appearance -----
     const vertexShader = `
       uniform float u_time;
       uniform float u_stretchAmp;
       uniform vec3 u_stretchSeed;
       varying vec3 vNormal;
+      varying vec3 vPosition;
 
       void main() {
         vNormal = normal;
+        vPosition = position;
         vec3 pos = position;
 
-        float noise1 = sin(pos.x * 2.0 + u_time * 0.8)
-                     * sin(pos.y * 2.5 + u_time * 1.6)
-                     * sin(pos.z * 2.2 + u_time * 0.5);
+        // More subtle noise for matte look
+        float noise1 = sin(pos.x * 1.8 + u_time * 0.6)
+                     * sin(pos.y * 1.5 + u_time * 1.3)
+                     * sin(pos.z * 1.2 + u_time * 0.4) * 0.5;
 
-        float noise2 = sin(pos.x * 4.5 + u_time * 1.2)
-                     * cos(pos.y * 3.8 + u_time * 1.9)
-                     * sin(pos.z * 4.2 + u_time * 1.1);
+        float noise2 = sin(pos.x * 3.5 + u_time * 0.9)
+                     * cos(pos.y * 2.8 + u_time * 1.5)
+                     * sin(pos.z * 3.2 + u_time * 0.8) * 0.3;
 
-        float combinedNoise = noise1 * 0.7 + noise2 * 0.5;
-        pos += normal * combinedNoise * 0.8;
+        float combinedNoise = (noise1 + noise2) * 0.6;
+        pos += normal * combinedNoise * 0.5; // Reduced amplitude for smoother look
 
-        float s = sin(u_time * 0.9) * 0.5 + 0.5;
+        // Subtle stretching
+        float s = sin(u_time * 0.6) * 0.5 + 0.5;
         vec3 stretch = u_stretchSeed * u_stretchAmp * s;
-        pos *= (1.0 + stretch);
+        pos *= (1.0 + stretch * 0.5); // Reduced stretch effect
 
         gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
       }
@@ -75,35 +77,58 @@ const Blob = ({ color = "#eb1736", wireframe = false }) => {
       uniform float u_red;
       uniform float u_green;
       uniform float u_blue;
+      uniform float u_time;
       varying vec3 vNormal;
+      varying vec3 vPosition;
 
       void main() {
-        float intensity = dot(vNormal, vec3(0.0,0.0,1.0)) * 0.4 + 0.6;
-        vec3 brightColor = vec3(u_red, u_green, u_blue);
-        vec3 darkColor = brightColor * 0.5;
-        vec3 color = mix(darkColor, brightColor, intensity);
-        gl_FragColor = vec4(color, 0.85);
+        // Matte finish calculation
+        vec3 lightDir = normalize(vec3(0.3, 0.5, 1.0));
+        float diff = max(dot(vNormal, lightDir), 0.0);
+        
+        // Very subtle rim lighting
+        vec3 viewDir = normalize(-vPosition);
+        float rim = 1.0 - max(dot(viewDir, vNormal), 0.0);
+        rim = smoothstep(0.4, 1.0, rim) * 0.15;
+        
+        // Base matte color with slight variation
+        vec3 baseColor = vec3(u_red, u_green, u_blue);
+        
+        // Add subtle surface noise
+        float grain = fract(sin(dot(vPosition.xy, vec2(12.9898, 78.233))) * 43758.5453) * 0.02;
+        
+        // Matte shading - reduced contrast
+        vec3 color = baseColor * (0.7 + diff * 0.3 + rim) + grain;
+        
+        // Subtle color variation over time
+        float timeVar = sin(u_time * 0.3) * 0.02;
+        color = mix(color, color * 0.95, timeVar);
+        
+        gl_FragColor = vec4(color, 0.92); // Slightly more opaque for matte look
       }
     `;
 
     const col = new THREE.Color(color);
     const uniforms = {
       u_time: { value: 0 },
-      u_red: { value: col.r },
-      u_green: { value: col.g },
-      u_blue: { value: col.b },
-      u_stretchAmp: { value: 0.2 },
+      u_red: { value: col.r * 0.9 }, // Darker base for matte
+      u_green: { value: col.g * 0.9 },
+      u_blue: { value: col.b * 0.9 },
+      u_stretchAmp: { value: 0.15 }, // Reduced amplitude
       u_stretchSeed: { value: stretchSeed },
     };
 
     // ----- MESH -----
-    const geo = new THREE.IcosahedronGeometry(4, 30);
+    const geo = new THREE.IcosahedronGeometry(4, 25); // Reduced detail for smoother look
     const mat = new THREE.ShaderMaterial({
       uniforms,
       vertexShader,
       fragmentShader,
       transparent: true,
       wireframe,
+      // Add flat shading for matte appearance
+      flatShading: false,
+      side: THREE.DoubleSide,
     });
 
     const mesh = new THREE.Mesh(geo, mat);
@@ -112,28 +137,29 @@ const Blob = ({ color = "#eb1736", wireframe = false }) => {
     // ----- RESPONSIVE SCALE & ANIMATION -----
     const getScaleFactor = () => {
       const width = window.innerWidth;
-      if (width < 480) return 0.6;
-      if (width < 768) return 0.9;
-      if (width < 1200) return 1.2;
-      return 1.6;
+      if (width < 480) return 0.5;
+      if (width < 768) return 0.8;
+      if (width < 1200) return 1.0;
+      return 1.3;
     };
 
     const updateForScreen = () => {
       const scale = getScaleFactor();
 
+      // Slower, more subtle animations for matte look
       if (window.innerWidth < 768) {
-        uniforms.u_stretchAmp.value = 0.001;
-        mesh.userData.rotationXSpeed = 0.0001;
+        uniforms.u_stretchAmp.value = 0.08;
+        mesh.userData.rotationXSpeed = 0.00008;
         mesh.userData.rotationYSpeed = 0.0001;
         mesh.userData.pulse = false;
       } else {
-        uniforms.u_stretchAmp.value = 0.002;
-        mesh.userData.rotationXSpeed = 0.00015;
-        mesh.userData.rotationYSpeed = 0.0002;
+        uniforms.u_stretchAmp.value = 0.12;
+        mesh.userData.rotationXSpeed = 0.0001;
+        mesh.userData.rotationYSpeed = 0.00015;
         mesh.userData.pulse = false;
       }
 
-      mesh.scale.set(scale, scale * 0.5, scale * 0.8);
+      mesh.scale.set(scale, scale * 0.6, scale * 0.9); // Flatter, more subtle shape
     };
 
     updateForScreen();
@@ -152,19 +178,21 @@ const Blob = ({ color = "#eb1736", wireframe = false }) => {
       const t = clock.getElapsedTime();
       uniforms.u_time.value = t;
 
+      // Very subtle scaling for matte look
       if (mesh.userData.pulse) {
-        const pulse = 0.95 + 0.05 * Math.sin(t * 3);
-        mesh.scale.set(pulse, pulse * 0.5, pulse * 0.8);
+        const pulse = 0.97 + 0.03 * Math.sin(t * 4); // Much subtler pulse
+        mesh.scale.set(pulse, pulse * 0.6, pulse * 0.7);
       }
 
+      // Slower rotation
       mesh.rotation.x += mesh.userData.rotationXSpeed;
       mesh.rotation.y += mesh.userData.rotationYSpeed;
 
-      // ----- NEW: Random flowing blur animation -----
-      const base = 20; // minimum blur
-      const range = 13; // oscillation
-      const noise = Math.sin(t * 0.6) * range;
-      const jitter = (Math.random() - 0.5) * 1.2; // subtle random shake
+      // Softer, more subtle blur animation
+      const base = 8; // Reduced base blur
+      const range = 4; // Smaller oscillation range
+      const noise = Math.sin(t * 0.4) * range; // Slower oscillation
+      const jitter = (Math.random() - 0.5) * 0.4; // Reduced random shake
       setDynamicBlur(base + noise + jitter);
 
       renderer.render(scene, camera);
@@ -190,22 +218,21 @@ const Blob = ({ color = "#eb1736", wireframe = false }) => {
       ref={mountRef}
       style={{
         position: "absolute",
-        inset: 0,
+        top: "40%",
+        left: "50%",
+        transform: isLoaded
+          ? "translate(-50%, -50%) scale(0.8)" // Just this line changed
+          : "translate(-50%, -50%) scale(1.04)",
         width: "100%",
-        height: "67%",
-        maxHeight: "100%",
+        height: "100%",
         overflow: "hidden",
         zIndex: 1,
         opacity: isLoaded ? 1 : 0,
-
-        // --- NEW: animated blur here ---
         filter: isLoaded ? `blur(${dynamicBlur.toFixed(1)}px)` : "blur(64px)",
-
-        transform: isLoaded
-          ? "translateY(20px) scale(1)"
-          : "translateY(0px) scale(1.3)",
         pointerEvents: "none",
-        transition: "opacity 1.2s ease-out, transform 1.2s ease-out",
+        transition:
+          "opacity 1.5s ease-out, transform 1.5s ease-out, filter 0.5s ease-out",
+        backdropFilter: "blur(2px)",
       }}
     />
   );

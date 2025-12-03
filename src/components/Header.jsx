@@ -30,6 +30,7 @@ function Header() {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isPageLoading, setIsPageLoading] = useState(false); // New state for page loading
+  console.log("is open: ", isAuthModalOpen);
 
   const userMenuRef = useRef(null);
 
@@ -44,14 +45,14 @@ function Header() {
   }, []);
 
   // Close all modals when not authenticated
-  useEffect(() => {
-    if (!isAuthenticated && !authIsLoading) {
-      console.log("🎯 Header: User not authenticated, closing modals");
-      setIsAuthModalOpen(false);
-      setIsAccountModalOpen(false);
-      setIsUserMenuOpen(false);
-    }
-  }, [isAuthenticated, authIsLoading]);
+  // useEffect(() => {
+  //   if (!isAuthenticated && !authIsLoading) {
+  //     console.log("🎯 Header: User not authenticated, closing modals");
+  //     setIsAuthModalOpen(false);
+  //     setIsAccountModalOpen(false);
+  //     setIsUserMenuOpen(false);
+  //   }
+  // }, [isAuthenticated, authIsLoading]);
 
   // Refresh profile when authenticated but profile missing
   useEffect(() => {
