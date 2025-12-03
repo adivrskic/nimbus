@@ -77,6 +77,10 @@
 
 .steps__heading.section-header {
   margin-bottom: 6rem !important;
+
+  @media screen and (max-width: 680px) {
+    margin-bottom: 3rem !important;
+  }
 }
 
 /* Steps Section */
@@ -129,7 +133,7 @@
 
     .step-card__icon {
       background: var(--color-accent);
-      color: white;
+      color: var(--color-background);
       box-shadow: 0 8px 20px rgba(235, 23, 54, 0.2);
     }
   }
@@ -194,6 +198,10 @@
   &__header {
     text-align: center;
     margin-bottom: 6rem;
+
+    @media screen and (max-width: 680px) {
+      margin-bottom: 3rem;
+    }
 
     p {
       font-size: 1.125rem;
