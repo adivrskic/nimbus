@@ -1,4 +1,4 @@
-@import '../styles/variables.scss';
+@import "../styles/variables.scss";
 
 .notification-modal {
   position: fixed;
@@ -6,11 +6,11 @@
   right: calc(var(--spacing-unit) * 3);
   max-width: 400px;
   display: flex;
-  align-items: center;
+  align-items: baseline;
   gap: calc(var(--spacing-unit) * 1.5);
   padding: calc(var(--spacing-unit) * 2) calc(var(--spacing-unit) * 2.5);
   background: var(--color-background);
-  border: 1px solid var(--color-border);
+  border: none;
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
   z-index: 1003;
@@ -24,7 +24,7 @@
 
   &--success {
     border-color: #10b981;
-    
+
     .notification-modal__icon {
       color: #10b981;
     }
@@ -32,13 +32,14 @@
 
   &--error {
     border-color: #ef4444;
-    
+
     .notification-modal__icon {
       color: #ef4444;
     }
   }
 
   &__icon {
+    display: flex;
     flex-shrink: 0;
   }
 

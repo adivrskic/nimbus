@@ -416,62 +416,67 @@ function UserAccountModal({ isOpen, onClose }) {
     }
   };
 
-  // Add this to your AuthContext or UserAccountModal
-  const handleOpenBillingPortal = async () => {
-    setIsLoading(true);
-    try {
-      // Get customer ID from user's profile or sites
-      const { data: site } = await supabase
-        .from("sites")
-        .select("stripe_customer_id")
-        .eq("user_id", user.id)
-        .not("stripe_customer_id", "is", null)
-        .limit(1)
-        .single();
-
-      if (!site?.stripe_customer_id) {
-        throw new Error("No billing information found");
-      }
-
-      const { data, error } = await supabase.functions.invoke(
-        "create-portal-session",
-        {
-          body: {
-            customerId: site.stripe_customer_id,
-            returnUrl: window.location.href,
-          },
-        }
-      );
-
-      if (error) throw error;
-
-      if (data?.url) {
-        window.open(data.url, "_blank", "noopener,noreferrer");
-      }
-    } catch (error) {
-      setNotification({
-        isOpen: true,
-        message: error.message || "Failed to open billing portal",
-        type: "error",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const handleCancelSite = async (siteId, siteName) => {
     setConfirmModal({
       isOpen: true,
-      title: "Cancel Site Subscription?",
-      message: `Are you sure you want to cancel "${siteName}"? 
-      
-      • Site will remain active until the end of your billing period
-      • You will not be charged again after this period
-      • You can resubscribe anytime
-      • Site files will be removed from Vercel`,
+      title: "Cancel and Delete Site",
+      message: (
+        <div className="cancel-site-message">
+          <p>
+            <strong>
+              Are you sure you want to completely delete "{siteName}"?
+            </strong>
+          </p>
+          <div className="cancel-site-warning">
+            <p>
+              <strong>Warning:</strong> This action cannot be undone.
+            </p>
+            <p>
+              Your site will be permanently deleted and cannot be recovered.
+            </p>
+          </div>
+
+          <div className="cancel-site-alternative">
+            <p>
+              <strong>Alternative:</strong> If you just want to stop billing but
+              keep your site online, consider updating your billing method
+              instead of cancelling.
+            </p>
+          </div>
+
+          <p>
+            Type <code>{siteName}</code> below to confirm deletion:
+          </p>
+          <input
+            type="text"
+            id="siteNameConfirmation"
+            placeholder={`Type "${siteName}" to confirm`}
+            className="cancel-site-confirm-input"
+            onChange={(e) => {
+              const confirmBtn = document.getElementById("confirmDeleteBtn");
+              if (confirmBtn) {
+                confirmBtn.disabled = e.target.value !== siteName;
+              }
+            }}
+          />
+        </div>
+      ),
       onConfirm: async () => {
         setIsLoading(true);
         try {
+          // Verify confirmation text
+          const confirmationInput = document.getElementById(
+            "siteNameConfirmation"
+          );
+          if (!confirmationInput || confirmationInput.value !== siteName) {
+            setNotification({
+              isOpen: true,
+              message: "Please type the site name exactly to confirm deletion.",
+              type: "error",
+            });
+            return;
+          }
+
           // 1. Get site to get subscription ID
           const { data: site, error: siteError } = await supabase
             .from("sites")
@@ -512,24 +517,30 @@ function UserAccountModal({ isOpen, onClose }) {
               {
                 body: {
                   siteId: siteId,
-                  siteName: site.deployment_url,
+                  siteName: site.site_name || site.deployment_url,
+                  vercelProjectId: site.vercel_project_id,
                 },
               }
             );
 
             if (deleteError) {
               console.error("Vercel deletion error:", deleteError);
-              // Continue anyway - mark as deleted in DB
+              // Continue with database update even if Vercel deletion fails
+              setNotification({
+                isOpen: true,
+                message:
+                  "Site marked as cancelled, but Vercel deletion failed. We'll retry automatically.",
+                type: "warning",
+              });
             }
           }
 
-          // 4. Update database - mark as cancelled
+          // 4. Update database - mark as cancelled and deleted
           const { error: updateError } = await supabase
             .from("sites")
             .update({
               billing_status: "cancelled",
               cancelled_at: new Date().toISOString(),
-              deployment_status: "deleted",
             })
             .eq("id", siteId)
             .eq("user_id", user.id);
@@ -538,8 +549,7 @@ function UserAccountModal({ isOpen, onClose }) {
 
           setNotification({
             isOpen: true,
-            message:
-              "Site subscription cancelled successfully. You will not be charged again.",
+            message: `Your subscription has been cancelled and you will not be charged again.`,
             type: "success",
           });
 
@@ -549,13 +559,18 @@ function UserAccountModal({ isOpen, onClose }) {
           console.error("Error cancelling site:", error);
           setNotification({
             isOpen: true,
-            message: error.message || "Failed to cancel site",
+            message:
+              error.message ||
+              "Failed to delete site. Please try again or contact support.",
             type: "error",
           });
         } finally {
           setIsLoading(false);
         }
       },
+      confirmButtonId: "confirmDeleteBtn", // Add ID to confirm button
+      confirmButtonText: "Yes, Delete Site Permanently",
+      confirmButtonClass: "btn-danger",
     });
   };
 
@@ -987,9 +1002,6 @@ function UserAccountModal({ isOpen, onClose }) {
                               <p>
                                 <strong>Cancelled:</strong>{" "}
                                 {formatDate(site.cancelled_at)}
-                              </p>
-                              <p className="small-text">
-                                Site will be removed within 24 hours
                               </p>
                             </div>
                           </div>

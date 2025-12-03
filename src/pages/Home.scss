@@ -55,7 +55,7 @@
   }
 
   &__subtitle {
-    font-size: 1.25rem;
+    font-size: 1.125rem;
     color: var(--color-text-secondary);
     margin-bottom: calc(var(--spacing-unit) * 2);
     line-height: 1.6;
@@ -76,7 +76,7 @@
 }
 
 .steps__heading.section-header {
-  margin-bottom: 4rem !important;
+  margin-bottom: 6rem !important;
 }
 
 /* Steps Section */
@@ -120,7 +120,7 @@
   transition: all var(--transition-base);
 
   &:hover {
-    // box-shadow: var(--shadow-lg), 0 0 0 1px var(--color-accent-light);
+    box-shadow: var(--shadow-md-pressed);
     // transform: translateY(-2px);
 
     .step-card__number {
@@ -193,7 +193,7 @@
 
   &__header {
     text-align: center;
-    margin-bottom: calc(var(--spacing-unit) * 4);
+    margin-bottom: 6rem;
 
     p {
       font-size: 1.125rem;
@@ -247,7 +247,7 @@
 @media screen and (max-width: 680px) {
   .hero {
     &__title {
-      font-size: 64px;
+      font-size: 76px;
     }
   }
 }

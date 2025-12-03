@@ -408,6 +408,17 @@ function CustomizeModal({
         .replace(/\r\n/g, "\n")
         .replace(/\r/g, "\n");
 
+      console.log({
+        siteId: siteData.id,
+        siteName: siteData.siteName,
+        htmlContent: cleanHtmlContent,
+        templateId: templateId,
+        customization: customization,
+        vercelProjectId: siteData.vercelProjectId,
+        stripeSubscriptionId: siteData.stripeSubscriptionId,
+        stripeCustomerId: siteData.stripeCustomerId,
+        customDomain: siteData.customDomain || null,
+      });
       // Call redeploy function
       const { data, error } = await supabase.functions.invoke(
         "redeploy-to-vercel",
@@ -438,6 +449,7 @@ function CustomizeModal({
           deployment_status: "deployed",
           deployed_at: new Date().toISOString(),
           last_redeployed_at: new Date().toISOString(),
+          redeployment_count: (siteData.redeployment_count || 0) + 1,
         })
         .eq("id", siteData.id)
         .eq("user_id", user.id);

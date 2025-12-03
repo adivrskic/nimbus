@@ -146,8 +146,8 @@ function Home() {
 
           <div className="hero__subtitle-container">
             <p className="hero__subtitle">
-              No coding required. Customize and deploy your perfect website
-              today.
+              No coding required.
+              <br /> Customize and deploy your perfect website today.
             </p>
             <div className="hero__cta">
               <a href="#templates" className="btn btn-primary">
