@@ -131,17 +131,34 @@ function TemplateGallery({ onTemplateSelect }) {
   const [rightArrowOpacity, setRightArrowOpacity] = useState(1);
   const scrollContainerRef = useRef(null);
   const searchInputRef = useRef(null);
+  const gridRef = useRef(null);
   const isDraggingRef = useRef(false);
   const startXRef = useRef(0);
   const scrollLeftRef = useRef(0);
 
   const scrollTemplatesToTop = () => {
-    const section = document.getElementById("templates-section");
-    if (section) {
-      section.scrollIntoView({
+    // Use the grid ref for more reliable targeting
+    const grid =
+      gridRef.current || document.querySelector(".template-gallery__grid");
+    if (grid) {
+      const offset = 170; // Account for sticky header/filters
+      const elementPosition = grid.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - offset;
+
+      window.scrollTo({
+        top: offsetPosition,
         behavior: "smooth",
       });
     }
+  };
+
+  const handleFilterClick = (categoryName) => {
+    setActiveFilter(categoryName);
+    setVisibleCount(12); // Reset visible count when changing filters
+    // Small delay to allow state update before scrolling
+    setTimeout(() => {
+      scrollTemplatesToTop();
+    }, 50);
   };
 
   const filteredTemplates = useMemo(() => {
@@ -320,11 +337,8 @@ function TemplateGallery({ onTemplateSelect }) {
               key={category.name}
               className={`filter-tab ${
                 activeFilter === category.name ? "active" : ""
-              } ${category.name === "Featured" ? "filter-tab--featured" : ""}`}
-              onClick={() => {
-                setActiveFilter(category.name);
-                scrollTemplatesToTop();
-              }}
+              }`}
+              onClick={() => handleFilterClick(category.name)}
             >
               {category.name === "Featured" && <Star size={16} />}
               <span>{category.name}</span>
@@ -357,10 +371,7 @@ function TemplateGallery({ onTemplateSelect }) {
                 className={`filter-tab ${
                   activeFilter === category.name ? "active" : ""
                 }`}
-                onClick={() => {
-                  setActiveFilter(category.name);
-                  scrollTemplatesToTop();
-                }}
+                onClick={() => handleFilterClick(category.name)}
               >
                 <span>{category.name}</span>
                 <span className="filter-count">{category.count}</span>
@@ -390,7 +401,7 @@ function TemplateGallery({ onTemplateSelect }) {
                 className={`mobile-filter-button ${
                   activeFilter === cat.name ? "active" : ""
                 }`}
-                onClick={() => setActiveFilter(cat.name)}
+                onClick={() => handleFilterClick(cat.name)}
                 title={cat.name}
               >
                 <Icon size={18} />
@@ -403,7 +414,7 @@ function TemplateGallery({ onTemplateSelect }) {
       {/* Grid */}
       {visibleTemplates.length > 0 ? (
         <>
-          <div className="template-gallery__grid">
+          <div className="template-gallery__grid" ref={gridRef}>
             {visibleTemplates.map((template) => {
               return (
                 <div

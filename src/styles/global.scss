@@ -67,6 +67,7 @@ section:first-of-type {
   transition: all var(--transition-fast);
   text-decoration: none;
   white-space: nowrap;
+  box-shadow: var(--shadow-md);
   // min-height: 44px; // Standard button height
 
   &:disabled {
@@ -80,6 +81,7 @@ section:first-of-type {
 
     &:hover:not(:disabled) {
       background: var(--color-accent-hover);
+      box-shadow: var(--shadow-md-pressed);
     }
 
     &:active:not(:disabled) {

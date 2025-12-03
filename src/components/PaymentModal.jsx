@@ -38,6 +38,249 @@ import "./PaymentModal.scss";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
+// Cloud, sky, and space related terms for site name generation
+const NIMBUS_TERMS = [
+  // Cloud types & formations
+  "cirrus",
+  "stratus",
+  "cumulus",
+  "alto",
+  "cirro",
+  "mammatus",
+  "lenticular",
+  "contrail",
+  "virga",
+  "pileus",
+  "arcus",
+  "volutus",
+  "floccus",
+  "castellanus",
+  "stratocumulus",
+  "cumulonimbus",
+  "altostratus",
+  "cirrostratus",
+
+  // Sky & atmosphere
+  "aurora",
+  "zenith",
+  "horizon",
+  "twilight",
+  "dusk",
+  "dawn",
+  "haze",
+  "mist",
+  "fog",
+  "ether",
+  "aether",
+  "ozone",
+  "troposphere",
+  "mesosphere",
+  "ionosphere",
+  "exosphere",
+  "thermosphere",
+  "stratosphere",
+  "skyline",
+  "firmament",
+
+  // Space & cosmos
+  "nebula",
+  "nova",
+  "supernova",
+  "quasar",
+  "pulsar",
+  "cosmos",
+  "galaxy",
+  "stellar",
+  "astral",
+  "celestial",
+  "lunar",
+  "solar",
+  "orbital",
+  "cosmic",
+  "comet",
+  "meteor",
+  "asteroid",
+  "eclipse",
+  "equinox",
+  "solstice",
+
+  // Stars & constellations
+  "polaris",
+  "vega",
+  "sirius",
+  "rigel",
+  "altair",
+  "deneb",
+  "antares",
+  "spica",
+  "betelgeuse",
+  "proxima",
+  "arcturus",
+  "capella",
+  "aldebaran",
+  "castor",
+  "orion",
+  "lyra",
+  "cygnus",
+  "draco",
+  "phoenix",
+  "hydra",
+  "andromeda",
+
+  // Planets & moons
+  "titan",
+  "europa",
+  "callisto",
+  "ganymede",
+  "triton",
+  "phobos",
+  "deimos",
+  "charon",
+  "io",
+  "enceladus",
+  "rhea",
+  "dione",
+  "tethys",
+  "iapetus",
+
+  // Weather & wind
+  "zephyr",
+  "breeze",
+  "gale",
+  "tempest",
+  "cyclone",
+  "vortex",
+  "updraft",
+  "jetstream",
+  "trade",
+  "monsoon",
+  "squall",
+  "chinook",
+  "sirocco",
+  "mistral",
+  "harmattan",
+  "bora",
+  "foehn",
+  "levanter",
+  "tramontane",
+  "pampero",
+
+  // Light & color phenomena
+  "prism",
+  "spectrum",
+  "halo",
+  "corona",
+  "rainbow",
+  "sundog",
+  "glory",
+  "airglow",
+  "zodiacal",
+  "gegenschein",
+  "earthshine",
+  "albedo",
+  "luminance",
+
+  // Abstract & poetic
+  "drift",
+  "float",
+  "wisp",
+  "billow",
+  "plume",
+  "swirl",
+  "cascade",
+  "flow",
+  "glide",
+  "soar",
+  "ascend",
+  "hover",
+  "loft",
+  "waft",
+  "eddy",
+  "current",
+  "stream",
+  "ribbon",
+  "veil",
+  "shroud",
+  "mantle",
+  "canopy",
+  "dome",
+  "vault",
+
+  // Mythological sky references
+  "aether",
+  "olympus",
+  "elysium",
+  "empyrean",
+  "avalon",
+  "asgard",
+  "helios",
+  "selene",
+  "eos",
+  "nyx",
+  "hemera",
+  "uranus",
+  "caelus",
+  "nut",
+  "shu",
+
+  // Scientific & technical
+  "photon",
+  "ion",
+  "plasma",
+  "flux",
+  "radiant",
+  "spectral",
+  "thermal",
+  "kinetic",
+  "dynamic",
+  "static",
+  "gradient",
+  "vector",
+  "scalar",
+  "tensor",
+
+  // Additional evocative terms
+  "apex",
+  "vertex",
+  "summit",
+  "peak",
+  "crest",
+  "ridge",
+  "tier",
+  "stratum",
+  "layer",
+  "band",
+  "zone",
+  "sphere",
+  "field",
+  "realm",
+  "domain",
+  "expanse",
+];
+
+/**
+ * Generates a random alphanumeric string of specified length
+ * Uses lowercase letters and numbers for URL-friendliness
+ */
+const generateAlphanumeric = (length = 6) => {
+  const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+  let result = "";
+  for (let i = 0; i < length; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+};
+
+/**
+ * Generates a site name in the format: nimbus-xxx-abc123
+ * where xxx is a cloud/sky/space term and abc123 is a 6-char alphanumeric
+ */
+const generateNimbusSiteName = () => {
+  const term = NIMBUS_TERMS[Math.floor(Math.random() * NIMBUS_TERMS.length)];
+  const suffix = generateAlphanumeric(6);
+  return `nimbus-${term}-${suffix}`;
+};
+
 // Step Indicator Component
 const StepIndicator = ({ currentStep }) => {
   const steps = [
@@ -81,24 +324,11 @@ const SiteDetailsStep = ({
     error: null,
   });
 
-  const generateName = () => {
-    const adjectives = [
-      "modern",
-      "creative",
-      "dynamic",
-      "professional",
-      "innovative",
-    ];
-    const nouns = ["portfolio", "agency", "studio", "hub", "platform"];
-    const randomAdjective =
-      adjectives[Math.floor(Math.random() * adjectives.length)];
-    const randomNoun = nouns[Math.floor(Math.random() * nouns.length)];
-    const randomNum = Math.floor(Math.random() * 1000);
-    return `${randomAdjective}-${randomNoun}-${randomNum}`;
-  };
-
+  // Generate initial site name on mount if not already set
   useEffect(() => {
-    if (!siteName) setSiteName(generateName());
+    if (!siteName) {
+      setSiteName(generateNimbusSiteName());
+    }
   }, []);
 
   // Validate domain
@@ -174,13 +404,13 @@ const SiteDetailsStep = ({
                     e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "")
                   )
                 }
-                placeholder="my-awesome-site"
+                placeholder="nimbus-aurora-x7k2m9"
                 className="site-name-input-field"
               />
               <div className="url-preview">
                 <span className="preview-text">Default URL:</span>
                 <span className="preview-url">
-                  https://{siteName || "site-name"}.vercel.app
+                  https://{siteName || "nimbus-site-name"}.vercel.app
                 </span>
               </div>
             </div>
@@ -189,10 +419,10 @@ const SiteDetailsStep = ({
               <button
                 type="button"
                 className="btn btn-secondary"
-                onClick={() => setSiteName(generateName())}
+                onClick={() => setSiteName(generateNimbusSiteName())}
               >
                 <RefreshCw size={16} />
-                Generate Random Name
+                Generate New Name
               </button>
             </div>
 
@@ -200,10 +430,6 @@ const SiteDetailsStep = ({
               <div className="tip">
                 <CheckCircle size={16} />
                 <span>Use lowercase letters, numbers, and hyphens</span>
-              </div>
-              <div className="tip">
-                <CheckCircle size={16} />
-                <span>Keep it short and memorable</span>
               </div>
             </div>
           </div>
@@ -323,7 +549,7 @@ const SiteDetailsStep = ({
 
         <div className="step-actions">
           <button
-            className="btn btn-primary btn-large"
+            className="btn btn-primary"
             onClick={onNext}
             disabled={!isSiteNameValid || !isCustomDomainValid}
           >
@@ -410,7 +636,7 @@ const HostingStep = ({ onNext, onBack, useCustomDomain }) => {
             <ChevronLeft size={20} />
             Back
           </button>
-          <button className="btn btn-primary btn-large" onClick={onNext}>
+          <button className="btn btn-primary" onClick={onNext}>
             Continue to Payment
             <ChevronRight size={20} />
           </button>
@@ -623,14 +849,6 @@ const PaymentStep = ({
             <span>Your payment is secure and encrypted</span>
           </div>
 
-          <div className="test-mode-notice">
-            <AlertCircle size={16} />
-            <div>
-              <strong>Test Mode</strong>
-              <p>Use 4242 4242 4242 4242 for card testing</p>
-            </div>
-          </div>
-
           {error && (
             <div className="payment-error">
               <AlertCircle size={16} />
@@ -638,14 +856,6 @@ const PaymentStep = ({
             </div>
           )}
         </form>
-
-        <div className="guarantee-card">
-          <Shield size={20} />
-          <div>
-            <strong>30-Day Money-Back Guarantee</strong>
-            <p>If you're not satisfied, we'll refund your first month.</p>
-          </div>
-        </div>
 
         <div className="step-actions">
           <button
@@ -659,7 +869,7 @@ const PaymentStep = ({
           </button>
           <button
             type="submit"
-            className="btn btn-primary btn-large"
+            className="btn btn-primary"
             disabled={!stripe || processing || !cardComplete}
             onClick={handleSubmit}
           >
@@ -694,12 +904,8 @@ const SuccessStep = ({ deployment, onClose }) => {
 
   return (
     <div className="success-container">
-      <div className="success-icon-circle">
-        <Check size={48} />
-      </div>
-
       <div className="success-content">
-        <h2>Your Website is Live! 🎉</h2>
+        <h2>Your Website is Live!</h2>
         <p className="success-subtitle">
           Your website has been successfully deployed and is now accessible
           online
@@ -885,7 +1091,8 @@ export default function PaymentModal({
   useEffect(() => {
     if (isOpen) {
       setCurrentStep(1);
-      setSiteName("");
+      // Generate a new nimbus site name when modal opens
+      setSiteName(generateNimbusSiteName());
       setUseCustomDomain(false);
       setCustomDomain("");
       setDeployment(null);
@@ -992,7 +1199,7 @@ export default function PaymentModal({
           <div className="modal-sidebar">
             <div className="sidebar-card why-deploy">
               <div className="sidebar-card-header">
-                <h3>Why Choose Vercel?</h3>
+                <h3>Why Choose Us?</h3>
                 <p>Professional hosting for modern websites</p>
               </div>
 
@@ -1024,16 +1231,6 @@ export default function PaymentModal({
                   <div className="benefit-content">
                     <h4>Easy Custom Domains</h4>
                     <p>Connect any domain in minutes</p>
-                  </div>
-                </div>
-
-                <div className="benefit-item">
-                  <div className="benefit-icon">
-                    <BarChart size={24} />
-                  </div>
-                  <div className="benefit-content">
-                    <h4>Built-in Analytics</h4>
-                    <p>Monitor traffic and performance</p>
                   </div>
                 </div>
               </div>

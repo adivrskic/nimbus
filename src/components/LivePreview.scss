@@ -9,6 +9,7 @@
 
   &__toolbar {
     display: flex;
+    flex-direction: row-reverse;
     align-items: center;
     justify-content: space-between;
     padding: calc(var(--spacing-unit) * 2) calc(var(--spacing-unit) * 3);
