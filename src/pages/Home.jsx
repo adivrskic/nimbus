@@ -5,13 +5,14 @@ import CustomizeModal from "../components/CustomizeModal";
 import StyleShowcase from "../components/StyleShowcase";
 import Blob from "../components/Blob";
 import useReveal from "../hooks/useReveal";
-
 import "./Home.scss";
 
 function Home() {
   const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [editSiteData, setEditSiteData] = useState(null); // NEW: Store site data
+  const [editDraftData, setEditDraftData] = useState(null); // For drafts too
 
   const [heroRef, heroVisible] = useReveal();
   const [stepsRef, stepsVisible] = useReveal();
@@ -23,6 +24,72 @@ function Home() {
     checkMobile();
     window.addEventListener("resize", checkMobile);
     return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  // Listen for events from UserAccountModal
+  useEffect(() => {
+    // Event for editing drafts
+    const handleOpenCustomizeWithDraft = (event) => {
+      console.log("Received open-customize-with-draft event:", event.detail);
+      const { templateId, draft } = event.detail;
+
+      setSelectedTemplate(templateId);
+
+      localStorage.setItem(
+        "editDraft",
+        JSON.stringify({
+          id: draft.id,
+          templateId: draft.template_id,
+          customization: draft.customization,
+          theme: draft.theme || "minimal",
+          colorMode: draft.color_mode || "auto",
+          draftName: draft.draft_name,
+        })
+      );
+
+      localStorage.setItem("isEditingDraft", "true");
+
+      // Open modal after a short delay
+      setTimeout(() => {
+        setIsModalOpen(true);
+      }, 10);
+    };
+
+    // NEW: Event for editing deployed sites
+    const handleOpenCustomizeWithSite = (event) => {
+      console.log("Opening customize for deployed site:", event.detail);
+      const { templateId, isDeployedSite, siteData } = event.detail;
+
+      setSelectedTemplate(templateId);
+      setEditSiteData(siteData); // Store site data in state
+
+      setTimeout(() => {
+        setIsModalOpen(true);
+      }, 10);
+    };
+
+    // Register both event listeners
+    window.addEventListener(
+      "open-customize-with-draft",
+      handleOpenCustomizeWithDraft
+    );
+
+    window.addEventListener(
+      "open-customize-with-site",
+      handleOpenCustomizeWithSite
+    );
+
+    // Cleanup
+    return () => {
+      window.removeEventListener(
+        "open-customize-with-draft",
+        handleOpenCustomizeWithDraft
+      );
+      window.removeEventListener(
+        "open-customize-with-site",
+        handleOpenCustomizeWithSite
+      );
+    };
   }, []);
 
   const steps = [
@@ -48,56 +115,19 @@ function Home() {
 
   const handleTemplateSelect = (templateId) => {
     setSelectedTemplate(templateId);
-
     setTimeout(() => {
       setIsModalOpen(true);
     }, 10);
   };
 
+  // Update handleCloseModal to clear edit data
   const handleCloseModal = () => {
     setIsModalOpen(false);
-
+    setEditSiteData(null);
+    setEditDraftData(null);
     setTimeout(() => setSelectedTemplate(null), 400);
   };
-
-  useEffect(() => {
-    const handleOpenCustomizeWithDraft = (event) => {
-      const { templateId, draft } = event.detail;
-
-      setSelectedTemplate(templateId);
-
-      localStorage.setItem(
-        "editDraft",
-        JSON.stringify({
-          id: draft.id,
-          templateId: draft.template_id,
-          customization: draft.customization,
-          theme: draft.theme || "minimal",
-          colorMode: draft.color_mode || "auto",
-          draftName: draft.draft_name,
-        })
-      );
-
-      localStorage.setItem("isEditingDraft", "true");
-
-      setTimeout(() => {
-        setIsModalOpen(true);
-      }, 10);
-    };
-
-    window.addEventListener(
-      "open-customize-with-draft",
-      handleOpenCustomizeWithDraft
-    );
-
-    return () => {
-      window.removeEventListener(
-        "open-customize-with-draft",
-        handleOpenCustomizeWithDraft
-      );
-    };
-  }, []);
-
+  console.log("site andd raft: ", editSiteData, editDraftData);
   return (
     <div className="home">
       {/* Hero Section */}
@@ -189,12 +219,14 @@ function Home() {
         </div>
       </section>
 
-      {/* Customize Modal - FIX: Always render when template is selected */}
+      {/* Customize Modal */}
       {selectedTemplate && (
         <CustomizeModal
           templateId={selectedTemplate}
           isOpen={isModalOpen}
           onClose={handleCloseModal}
+          editSiteData={editSiteData} // Pass site data
+          editDraftData={editDraftData} // Pass draft data
         />
       )}
     </div>

@@ -180,6 +180,34 @@ function UserAccountModal({ isOpen, onClose }) {
     }
   };
 
+  const handleEditDeployedSite = (site) => {
+    console.log("Editing deployed site:", site.site_name);
+
+    // Close account modal
+    onClose();
+
+    // Dispatch event with ALL data
+    window.dispatchEvent(
+      new CustomEvent("open-customize-with-site", {
+        detail: {
+          templateId: site.template_id,
+          isDeployedSite: true,
+          siteData: {
+            // Pass all site data here
+            id: site.id,
+            templateId: site.template_id,
+            customization: site.customization,
+            theme: site.theme || "minimal",
+            colorMode: site.color_mode || "auto",
+            siteName: site.site_name,
+            vercelProjectId: site.vercel_project_id,
+            stripeSubscriptionId: site.stripe_subscription_id,
+          },
+        },
+      })
+    );
+  };
+
   const loadDrafts = async () => {
     try {
       const { data, error } = await supabase
@@ -871,7 +899,9 @@ function UserAccountModal({ isOpen, onClose }) {
               <div className="sites-list">
                 <div className="sites-header">
                   <h3>Your Deployed Sites</h3>
-                  <span className="sites-count">{sites.length} sites</span>
+                  <div className="sites-header-actions">
+                    <span className="sites-count">{sites.length} sites</span>
+                  </div>
                 </div>
 
                 {sites.length === 0 ? (
@@ -887,23 +917,27 @@ function UserAccountModal({ isOpen, onClose }) {
                         <div className="site-card__header">
                           <div>
                             <h4>{site.site_name}</h4>
-                            <span
-                              className={`status-badge status-badge--${site.status}`}
-                            >
-                              {site.status}
-                            </span>
+                            <div className="site-tags">
+                              <span
+                                className={`billing-status billing-status--${site.billing_status}`}
+                              >
+                                {site.billing_status}
+                              </span>
+                            </div>
                           </div>
-                          {site.deployment_url && (
-                            <a
-                              href={`https://${site.deployment_url}.vercel.app`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="btn-icon"
-                              title="View site"
-                            >
-                              <ExternalLink size={18} />
-                            </a>
-                          )}
+                          <div className="site-actions">
+                            {site.deployment_url && (
+                              <a
+                                href={`https://${site.site_name}.vercel.app`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="btn-icon"
+                                title="Visit site"
+                              >
+                                <ExternalLink size={18} />
+                              </a>
+                            )}
+                          </div>
                         </div>
 
                         <div className="site-card__info">
@@ -914,11 +948,10 @@ function UserAccountModal({ isOpen, onClose }) {
                             </span>
                           </div>
                           <div className="info-row">
-                            <span className="info-label">Status:</span>
-                            <span
-                              className={`billing-status billing-status--${site.billing_status}`}
-                            >
-                              {site.billing_status}
+                            <span className="info-label">Domain:</span>
+                            <span className="info-value">
+                              {site.custom_domain ||
+                                `${site.site_name}.vercel.app`}
                             </span>
                           </div>
                           <div className="info-row">
@@ -934,6 +967,14 @@ function UserAccountModal({ isOpen, onClose }) {
                               <span className="info-label">Renews:</span>
                               <span className="info-value">
                                 {formatDate(site.current_period_end)}
+                              </span>
+                            </div>
+                          )}
+                          {site.deployed_at && (
+                            <div className="info-row">
+                              <span className="info-label">Deployed:</span>
+                              <span className="info-value">
+                                {formatDate(site.deployed_at)}
                               </span>
                             </div>
                           )}
@@ -954,16 +995,31 @@ function UserAccountModal({ isOpen, onClose }) {
                           </div>
                         ) : (
                           site.billing_status === "active" && (
-                            <button
-                              className="btn btn-danger btn-small"
-                              onClick={() =>
-                                handleCancelSite(site.id, site.site_name)
-                              }
-                              disabled={isLoading}
-                            >
-                              <Trash2 size={16} />
-                              Cancel Subscription & Delete Site
-                            </button>
+                            <div className="site-card__actions">
+                              <button
+                                className="btn btn-secondary btn-small"
+                                onClick={() => handleEditDeployedSite(site)}
+                                disabled={
+                                  isLoading ||
+                                  site.deployment_status === "deploying"
+                                }
+                              >
+                                <Edit size={16} />
+                                <span className="btn-text">
+                                  Edit & Redeploy
+                                </span>
+                              </button>
+                              <button
+                                className="btn btn-danger btn-small"
+                                onClick={() =>
+                                  handleCancelSite(site.id, site.site_name)
+                                }
+                                disabled={isLoading}
+                              >
+                                <Trash2 size={16} />
+                                <span className="btn-text">Delete</span>
+                              </button>
+                            </div>
                           )
                         )}
                       </div>
