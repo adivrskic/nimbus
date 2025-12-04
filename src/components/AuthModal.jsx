@@ -185,7 +185,7 @@ function AuthModal({ isOpen, onClose, onAuthSuccess, onForgotPassword }) {
   return (
     <>
       <div
-        className={`modal-backdrop ${
+        className={`auth-modal-backdrop modal-backdrop ${
           isVisible ? "modal-backdrop--visible" : ""
         }`}
         onClick={handleClose}

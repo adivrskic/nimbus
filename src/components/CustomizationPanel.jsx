@@ -36,6 +36,7 @@ import {
 } from "lucide-react";
 import { getAllThemes } from "../styles/themes";
 import { useTheme } from "../contexts/ThemeContext";
+import ImageUploadField from "./ImageUploadField";
 import "./CustomizationPanel.scss";
 
 function CustomizationPanel({
@@ -43,6 +44,7 @@ function CustomizationPanel({
   customization,
   onChange,
   onImageUpload,
+  siteId,
 }) {
   const [visibleFields, setVisibleFields] = useState({});
   const [collapsedGroups, setCollapsedGroups] = useState({});
@@ -805,39 +807,18 @@ function CustomizationPanel({
 
       case "image":
         return (
-          <div className="field__image">
-            <input
-              type="file"
-              accept={field.accept || "image/*"}
-              className="field__image-input"
-              id={`image-${path}`}
-              onChange={(e) => handleFileUpload(path, e)}
-              disabled={field.disabled}
-            />
-            <label htmlFor={`image-${path}`} className="field__image-label">
-              <div className="field__image-preview">
-                {fieldValue ? (
-                  <img src={fieldValue} alt="Preview" />
-                ) : (
-                  <div className="field__image-placeholder">
-                    <ImageIcon size={32} />
-                    <span>Click to upload image</span>
-                  </div>
-                )}
-              </div>
-            </label>
-            {fieldValue && (
-              <button
-                type="button"
-                className="field__image-remove"
-                onClick={() => onFieldChange("")}
-                disabled={field.disabled}
-              >
-                <Trash2 size={16} />
-                Remove Image
-              </button>
-            )}
-          </div>
+          <ImageUploadField
+            value={fieldValue}
+            onChange={onFieldChange}
+            fieldPath={path}
+            siteId={siteId} // Pass this as a prop to CustomizationPanel
+            label={field.label}
+            hint={field.hint}
+            accept={field.accept}
+            multiple={field.multiple || false}
+            showUrlInput={true}
+            disabled={field.disabled}
+          />
         );
 
       case "date":
