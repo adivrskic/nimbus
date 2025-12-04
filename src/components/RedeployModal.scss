@@ -1,8 +1,13 @@
+@import "../styles/variables.scss";
+
+.redeploy-modal-backdrop {
+  z-index: 1001 !important;
+}
+
 .redeploy-modal {
   position: fixed;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);
   width: 90%;
   max-width: 500px;
   background: var(--color-background);
@@ -12,10 +17,17 @@
   z-index: 1002;
   display: flex;
   flex-direction: column;
-  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 
+  // Initial state
+  opacity: 0;
+  transform: translate(-50%, -45%);
+  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+
+  // Visible state
   &--visible {
     opacity: 1;
+    transform: translate(-50%, -50%);
   }
 
   &__header {
@@ -143,17 +155,6 @@
   }
 }
 
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translate(-50%, -45%);
-  }
-  to {
-    opacity: 1;
-    transform: translate(-50%, -50%);
-  }
-}
-
 .spinner {
   display: inline-block;
   width: 20px;
@@ -167,5 +168,12 @@
 @keyframes spin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+// Accessibility
+@media (prefers-reduced-motion: reduce) {
+  .redeploy-modal {
+    transition-duration: 0.01ms !important;
   }
 }

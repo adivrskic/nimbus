@@ -275,8 +275,8 @@
   }
 
   &:hover {
-    background: var(--color-background);
-    color: var(--color-text-primary);
+    background: var(--color-accent);
+    color: var(--color-background);
   }
 
   &.active {
@@ -297,7 +297,7 @@
 
     &:hover {
       background: var(--color-accent);
-      color: white;
+      // color: va;
       border-color: var(--color-accent);
 
       .filter-count {
@@ -347,6 +347,7 @@
   }
 
   .filter-tab:hover:not(.active) & {
+    color: var(--color-accent);
     background: var(--color-surface);
     border-color: var(--color-text-tertiary);
   }

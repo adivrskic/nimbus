@@ -6,7 +6,9 @@ import {
   Trash2,
   Loader,
   Save,
+  Edit,
 } from "lucide-react";
+import useModalAnimation from "../hooks/useModalAnimation";
 import "./ConfirmModal.scss";
 
 function ConfirmModal({
@@ -17,11 +19,12 @@ function ConfirmModal({
   message,
   confirmText = "Confirm",
   cancelText = "Cancel",
-  type = "danger", // 'danger' | 'warning' | 'info'
-  confirmButtonId, // Optional ID for the confirm button
-  confirmButtonClass = "", // Optional additional class for confirm button
-  inputProps = null, // Add this prop for form input
+  type = "danger", // 'danger' | 'warning' | 'info' | 'save' | 'edit'
+  confirmButtonId,
+  confirmButtonClass = "",
+  inputProps = null,
 }) {
+  const { shouldRender, isVisible } = useModalAnimation(isOpen, 300);
   const [isProcessing, setIsProcessing] = useState(false);
   const [inputValue, setInputValue] = useState("");
 
@@ -33,12 +36,11 @@ function ConfirmModal({
     }
   }, [isOpen, inputProps?.defaultValue]);
 
-  if (!isOpen) return null;
+  if (!shouldRender) return null;
 
   const handleConfirm = async () => {
     if (isProcessing) return;
 
-    // If there's an input, pass the value to onConfirm
     if (inputProps) {
       await onConfirm(inputValue.trim());
     } else {
@@ -53,19 +55,36 @@ function ConfirmModal({
     }
   };
 
+  const getIcon = () => {
+    switch (type) {
+      case "danger":
+        return <Trash2 size={32} />;
+      case "warning":
+        return <AlertCircle size={32} />;
+      case "info":
+        return <CheckCircle size={32} />;
+      case "save":
+        return <Save size={32} />;
+      case "edit":
+        return <Edit size={32} />;
+      default:
+        return <AlertCircle size={32} />;
+    }
+  };
+
   return (
     <>
       <div
-        className="modal-backdrop modal-backdrop--visible"
+        className={`confirm-modal-backdrop modal-backdrop ${
+          isVisible ? "modal-backdrop--visible" : ""
+        }`}
         onClick={isProcessing ? undefined : onClose}
       />
-      <div className="confirm-modal">
-        <div className="confirm-modal__icon">
-          {type === "danger" && <Trash2 size={32} />}
-          {type === "warning" && <AlertCircle size={32} />}
-          {type === "info" && <CheckCircle size={32} />}
-          {type === "save" && <Save size={32} />}
-          {type === "edit" && <Edit size={32} />}
+      <div
+        className={`confirm-modal ${isVisible ? "confirm-modal--visible" : ""}`}
+      >
+        <div className={`confirm-modal__icon confirm-modal__icon--${type}`}>
+          {getIcon()}
         </div>
 
         <h3 className="confirm-modal__title">{title}</h3>
@@ -74,7 +93,6 @@ function ConfirmModal({
           {typeof message === "string" ? <p>{message}</p> : message}
         </div>
 
-        {/* Input field for draft name */}
         {inputProps && (
           <div className="confirm-modal__input">
             <div className="form-group">
@@ -133,6 +151,8 @@ function ConfirmModal({
               <>
                 {inputProps?.isEditing ? (
                   <Edit size={18} />
+                ) : type === "danger" ? (
+                  <Trash2 size={18} />
                 ) : (
                   <Save size={18} />
                 )}

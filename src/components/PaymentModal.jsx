@@ -24,6 +24,7 @@ import {
   Copy,
   Eye,
   EyeOff,
+  Edit,
 } from "lucide-react";
 import { loadStripe } from "@stripe/stripe-js";
 import {
@@ -34,6 +35,7 @@ import {
 } from "@stripe/react-stripe-js";
 import { supabase } from "../lib/supabaseClient";
 import { useAuth } from "../contexts/AuthContext";
+import useModalAnimation from "../hooks/useModalAnimation";
 import "./PaymentModal.scss";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
@@ -780,6 +782,9 @@ const PaymentStep = ({
         useCustomDomain: useCustomDomain,
         deploymentId: deployData.deploymentId,
         dnsRecords: deployData.dnsRecords,
+        templateId: templateId,
+        customization: customization,
+        vercelProjectId: deployData.projectId,
       });
     } catch (err) {
       setError(err.message || "An error occurred during payment");
@@ -892,7 +897,7 @@ const PaymentStep = ({
 };
 
 // Step 4: Success
-const SuccessStep = ({ deployment, onClose }) => {
+const SuccessStep = ({ deployment, onClose, onEditSite }) => {
   const [copied, setCopied] = useState(false);
   const [showDnsDetails, setShowDnsDetails] = useState(false);
 
@@ -1048,6 +1053,10 @@ const SuccessStep = ({ deployment, onClose }) => {
           <button className="btn btn-secondary" onClick={onClose}>
             Build Another Site
           </button>
+          <button className="btn btn-outline" onClick={onEditSite}>
+            <Edit size={20} />
+            Edit Site
+          </button>
           <a
             href={`https://${deployment.siteName}.vercel.app`}
             target="_blank"
@@ -1087,6 +1096,7 @@ export default function PaymentModal({
   const [useCustomDomain, setUseCustomDomain] = useState(false);
   const [customDomain, setCustomDomain] = useState("");
   const [deployment, setDeployment] = useState(null);
+  const { shouldRender, isVisible } = useModalAnimation(isOpen, 400);
 
   useEffect(() => {
     if (isOpen) {
@@ -1112,6 +1122,29 @@ export default function PaymentModal({
     setCustomDomain("");
     setDeployment(null);
     onClose();
+  };
+
+  const handleEditSite = () => {
+    if (!deployment) return;
+
+    // Close the payment modal
+    handleClose();
+
+    // Dispatch event to open customize modal with site data (same as UserAccountModal)
+    window.dispatchEvent(
+      new CustomEvent("open-customize-with-site", {
+        detail: {
+          templateId: deployment.templateId,
+          isDeployedSite: true,
+          siteData: {
+            templateId: deployment.templateId,
+            customization: deployment.customization,
+            siteName: deployment.siteName,
+            vercelProjectId: deployment.vercelProjectId,
+          },
+        },
+      })
+    );
   };
 
   const renderStep = () => {
@@ -1154,7 +1187,11 @@ export default function PaymentModal({
       case 4:
         return (
           deployment && (
-            <SuccessStep deployment={deployment} onClose={handleClose} />
+            <SuccessStep
+              deployment={deployment}
+              onClose={handleClose}
+              onEditSite={handleEditSite}
+            />
           )
         );
       default:
@@ -1162,17 +1199,19 @@ export default function PaymentModal({
     }
   };
 
-  if (!isOpen) return null;
+  if (!shouldRender) return null;
 
   return (
     <>
       <div
-        className={`modal-backdrop ${isOpen ? "modal-backdrop--visible" : ""}`}
+        className={`modal-backdrop ${
+          isVisible ? "modal-backdrop--visible" : ""
+        }`}
         onClick={handleClose}
       />
       <div
         className={`payment-modal-overhaul ${
-          isOpen ? "payment-modal-overhaul--visible" : ""
+          isVisible ? "payment-modal-overhaul--visible" : ""
         }`}
       >
         <div className="modal-header">
