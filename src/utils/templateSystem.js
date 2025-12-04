@@ -8428,6 +8428,48 @@ export const templates = {
     image: "photography-masonry",
 
     fields: {
+      heroButtonText: {
+        type: "text",
+        default: "View Gallery",
+        label: "Hero Button Text",
+      },
+      heroButtonLink: {
+        type: "text",
+        default: "#gallery",
+        label: "Hero Button Link",
+      },
+      showServices: {
+        type: "checkbox",
+        label: "Show Services Section",
+        default: true,
+      },
+      servicesTitle: {
+        type: "text",
+        label: "Services Section Title",
+        default: "Services",
+      },
+      ctaTitle: {
+        type: "text",
+        label: "Contact Section Title",
+        default: "Let's Create Together",
+      },
+      ctaSubtitle: {
+        type: "text",
+        label: "Contact Section Subtitle",
+        default: "Available for commissions and collaborations worldwide",
+      },
+      ctaButtonText: {
+        type: "text",
+        label: "Contact Button Text",
+        default: "Get in Touch",
+      },
+
+      // Footer
+      footerText: {
+        type: "text",
+        label: "Footer Copyright Text",
+        default: "© 2024",
+      },
       photographerName: {
         type: "text",
         default: "Emma Wilson",
@@ -8473,10 +8515,11 @@ export const templates = {
             default: "",
           },
           imageUrl: {
-            type: "url",
-            label: "Image URL",
+            type: "image",
+            label: "Image",
             default:
               "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800",
+            accept: "image/jpeg,image/png,image/webp",
           },
         },
         default: [
@@ -8484,43 +8527,73 @@ export const templates = {
             title: "Golden Hour",
             category: "Landscapes",
             description: "Sunset over the mountains",
-            imageUrl:
-              "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800",
+            imageUrl: {
+              type: "image",
+              label: "Image",
+              default:
+                "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=600",
+              accept: "image/jpeg,image/png,image/webp",
+            },
           },
           {
             title: "Urban Life",
             category: "Street",
             description: "City streets at night",
-            imageUrl:
-              "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=600",
+            imageUrl: {
+              type: "image",
+              label: "Image",
+              default:
+                "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=600",
+              accept: "image/jpeg,image/png,image/webp",
+            },
           },
           {
             title: "Portrait Study",
             category: "Portraits",
             description: "Natural light portrait",
-            imageUrl:
-              "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=500",
+            imageUrl: {
+              type: "image",
+              label: "Image",
+              default:
+                "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=500",
+              accept: "image/jpeg,image/png,image/webp",
+            },
           },
           {
             title: "Architecture",
             category: "Editorial",
             description: "Modern design",
-            imageUrl:
-              "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=700",
+            imageUrl: {
+              type: "image",
+              label: "Image",
+              default:
+                "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=700",
+              accept: "image/jpeg,image/png,image/webp",
+            },
           },
           {
             title: "Nature",
             category: "Landscapes",
             description: "Forest path",
-            imageUrl:
-              "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=600",
+            imageUrl: {
+              type: "image",
+              label: "Image",
+              default:
+                "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=600",
+              accept: "image/jpeg,image/png,image/webp",
+            },
           },
           {
             title: "City Lights",
             category: "Street",
             description: "Urban exploration",
-            imageUrl:
-              "https://images.unsplash.com/photo-1514565131-fce0801e5785?w=800",
+            imageUrl: {
+              type: "image",
+              label: "Image",
+              default:
+                "https://images.unsplash.com/photo-1514565131-fce0801e5785?w=800",
+              accept: "image/jpeg,image/png,image/webp",
+            },
           },
         ],
       },
@@ -8530,6 +8603,11 @@ export const templates = {
         itemLabel: "Service",
         min: 0,
         max: 4,
+        price: {
+          type: "text",
+          label: "Price (optional)",
+          default: "",
+        },
         fields: {
           name: { type: "text", label: "Service Name", default: "" },
           description: { type: "textarea", label: "Description", default: "" },
@@ -9706,10 +9784,11 @@ export const templates = {
             default: "",
           },
           imageUrl: {
-            type: "url",
-            label: "Image URL",
+            type: "image",
+            label: "Image",
             default:
               "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800",
+            accept: "image/jpeg,image/png,image/webp",
           },
         },
         default: [

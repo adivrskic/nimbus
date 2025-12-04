@@ -671,6 +671,7 @@ function CustomizeModal({
               onChange={handleCustomizationChange}
               onImageUpload={handleImageUpload}
               themes={themes}
+              siteId={siteData?.siteId || `draft-${Date.now()}`}
             />
           </div>
 
