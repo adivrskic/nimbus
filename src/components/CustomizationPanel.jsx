@@ -835,6 +835,34 @@ function CustomizationPanel({
           />
         );
 
+      case "radio":
+        return (
+          <div className="field__radio-group">
+            {field.options.map((option) => {
+              const optionValue =
+                typeof option === "object" ? option.value : option;
+              const optionLabel =
+                typeof option === "object" ? option.label : option;
+
+              return (
+                <label key={optionValue} className="field__radio-label">
+                  <input
+                    type="radio"
+                    className="field__radio"
+                    name={path}
+                    value={optionValue}
+                    checked={fieldValue === optionValue}
+                    onChange={(e) => onFieldChange(e.target.value)}
+                    disabled={field.disabled}
+                  />
+                  <span className="field__radio-custom"></span>
+                  <span className="field__radio-text">{optionLabel}</span>
+                </label>
+              );
+            })}
+          </div>
+        );
+
       case "range":
         return (
           <div className="field__range-wrapper">
