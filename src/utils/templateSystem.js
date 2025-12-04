@@ -26616,7 +26616,7 @@ export const templates = {
     name: "Café & Bakery",
     description: "Elegant coffee shop and bakery with timeless design",
     category: "Restaurant",
-    image: "cafe-bakery",
+    image: "cafebakery",
     defaultTheme: "elegant", // Perfect for café aesthetic
     fields: {
       cafeName: {
