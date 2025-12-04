@@ -22,14 +22,40 @@ const Legal = lazy(() => import("./pages/Legal"));
 const PageLoader = () => (
   <div
     style={{
-      minHeight: "100vh",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      color: "var(--color-text-secondary)",
+      position: "fixed",
+      top: "var(--header-height, 64px)",
+      left: 0,
+      width: "100%",
+      height: "2px",
+      backgroundColor: "var(--color-accent)",
+      zIndex: 9999,
+      overflow: "hidden",
     }}
   >
-    <div>Loading...</div>
+    <div
+      style={{
+        height: "100%",
+        backgroundColor: "var(--color-primary, #6366f1)",
+        animation: "loadingBar 1.5s ease-in-out infinite",
+        transformOrigin: "left",
+      }}
+    />
+    <style>{`
+      @keyframes loadingBar {
+        0% {
+          width: 0%;
+          margin-left: 0%;
+        }
+        50% {
+          width: 70%;
+          margin-left: 0%;
+        }
+        100% {
+          width: 100%;
+          margin-left: 0%;
+        }
+      }
+    `}</style>
   </div>
 );
 
