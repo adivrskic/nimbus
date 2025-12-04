@@ -5543,6 +5543,12 @@ export const templates = {
           "Passionate about creating user-centered products that make a difference. 10+ years in tech.",
         label: "Short Bio",
       },
+      avatar: {
+        type: "image",
+        label: "Profile Photo",
+        default: "",
+        accept: "image/jpeg,image/png,image/webp",
+      },
 
       // NEW: QR Code URL Field
       qrUrl: {
@@ -5912,36 +5918,72 @@ export const templates = {
         <div style="position: relative; z-index: 1; margin-bottom: 2rem; padding-right: ${
           isBrutalist ? "110px" : "100px"
         };">
-          <!-- Avatar Placeholder with Theme Styling -->
-          <div style="width: ${
-            isBrutalist ? "130px" : isElegant ? "110px" : "120px"
-          }; height: ${
-        isBrutalist ? "130px" : isElegant ? "110px" : "120px"
-      }; margin: 0 auto 2rem; background: ${
-        isGradient
-          ? "linear-gradient(135deg, #667eea, #764ba2)"
-          : isRetro
-          ? "linear-gradient(135deg, var(--color-accent), #b537f2)"
-          : "var(--color-accent)"
-      }; ${
-        isBrutalist || isElegant || isRetro
-          ? "border-radius: 0;"
-          : "border-radius: 50%;"
-      } border: ${isBrutalist ? "4px" : "4px"} solid ${
-        isBrutalist ? "var(--color-accent)" : "var(--color-bg)"
-      }; opacity: 0.2; ${
-        isBrutalist
-          ? "transform: rotate(-5deg);"
-          : isRetro
-          ? "clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);"
-          : ""
-      } ${
-        isNeumorphism
-          ? getNeumorphismShadow(false)
-          : isGradient
-          ? "box-shadow: 0 10px 30px rgba(102,126,234,0.3);"
-          : ""
-      }"></div>
+        <!-- Avatar with Theme Styling -->
+        ${
+          data.avatar
+            ? `
+        <div style="width: ${
+          isBrutalist ? "130px" : isElegant ? "110px" : "120px"
+        }; height: ${
+                isBrutalist ? "130px" : isElegant ? "110px" : "120px"
+              }; margin: 0 auto 2rem; overflow: hidden; ${
+                isBrutalist || isElegant || isRetro
+                  ? "border-radius: 0;"
+                  : "border-radius: 50%;"
+              } border: ${isBrutalist ? "4px" : "4px"} solid ${
+                isBrutalist ? "var(--color-accent)" : "var(--color-bg)"
+              }; ${
+                isBrutalist
+                  ? "transform: rotate(-5deg);"
+                  : isRetro
+                  ? "clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);"
+                  : ""
+              } ${
+                isNeumorphism
+                  ? getNeumorphismShadow(false)
+                  : isGradient
+                  ? "box-shadow: 0 10px 30px rgba(102,126,234,0.3);"
+                  : "box-shadow: 0 4px 12px rgba(0,0,0,0.15);"
+              }">
+          <img src="${data.avatar}" alt="${
+                data.name || "Profile"
+              }" style="width: 100%; height: 100%; object-fit: cover;" />
+        </div>
+        `
+            : `
+        <div style="width: ${
+          isBrutalist ? "130px" : isElegant ? "110px" : "120px"
+        }; height: ${
+                isBrutalist ? "130px" : isElegant ? "110px" : "120px"
+              }; margin: 0 auto 2rem; display: flex; align-items: center; justify-content: center; background: ${
+                isGradient
+                  ? "linear-gradient(135deg, #667eea, #764ba2)"
+                  : isRetro
+                  ? "linear-gradient(135deg, var(--color-accent), #b537f2)"
+                  : "var(--color-surface)"
+              }; ${
+                isBrutalist || isElegant || isRetro
+                  ? "border-radius: 0;"
+                  : "border-radius: 50%;"
+              } border: ${isBrutalist ? "4px" : "4px"} solid ${
+                isBrutalist ? "var(--color-accent)" : "var(--color-border)"
+              }; ${
+                isBrutalist
+                  ? "transform: rotate(-5deg);"
+                  : isRetro
+                  ? "clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);"
+                  : ""
+              } ${
+                isNeumorphism
+                  ? getNeumorphismShadow(false)
+                  : isGradient
+                  ? "box-shadow: 0 10px 30px rgba(102,126,234,0.3);"
+                  : ""
+              }">
+          <span style="font-size: 3rem; opacity: 0.5;">👤</span>
+        </div>
+        `
+        }
           
           <h1 ${
             isRetro
@@ -8426,8 +8468,13 @@ export const templates = {
     description: "Dynamic masonry grid photography portfolio",
     category: "Portfolio",
     image: "photography-masonry",
-
     fields: {
+      photographerName: {
+        type: "text",
+        default: "Emma Wilson",
+        label: "Photographer Name",
+        required: true,
+      },
       heroButtonText: {
         type: "text",
         default: "View Gallery",
@@ -8469,12 +8516,6 @@ export const templates = {
         type: "text",
         label: "Footer Copyright Text",
         default: "© 2024",
-      },
-      photographerName: {
-        type: "text",
-        default: "Emma Wilson",
-        label: "Photographer Name",
-        required: true,
       },
       tagline: {
         type: "text",
@@ -11354,17 +11395,23 @@ export const templates = {
         default:
           "Serving our community with dedication and excellence for years.",
       },
+      heroImage: {
+        type: "image",
+        label: "Hero Image",
+        default: "",
+        accept: "image/jpeg,image/png,image/webp",
+      },
       address: {
         type: "text",
         label: "Street Address",
         required: false,
-        default: "",
+        default: "123 Main Street",
       },
       city: {
         type: "text",
         label: "City, State ZIP",
         required: false,
-        default: "",
+        default: "Anytown, ST 12345",
       },
       phone: {
         type: "tel",
@@ -11383,7 +11430,7 @@ export const templates = {
         label: "Business Hours",
         placeholder: "Mon-Fri: 9am-6pm\nSat: 10am-4pm\nSun: Closed",
         required: false,
-        default: "",
+        default: "Mon-Fri: 9am-6pm\nSat: 10am-4pm\nSun: Closed",
       },
       services: {
         type: "textarea",
@@ -11402,20 +11449,20 @@ export const templates = {
         type: "url",
         label: "Call-to-Action Link",
         required: false,
-        default: "",
+        default: "#contact",
       },
       facebook: {
         type: "url",
         label: "Facebook URL",
         required: false,
-        default: "",
+        default: "https://facebook.com",
       },
       instagram: {
         type: "text",
         label: "Instagram Handle",
         placeholder: "@yourbusiness",
         required: false,
-        default: "",
+        default: "@yourbusiness",
       },
       testimonials: {
         type: "group",
@@ -11484,6 +11531,10 @@ export const templates = {
         if (!isNeumorphism) return "";
         return "var(--neomorph-shadow-out)";
       };
+
+      // Section spacing helper
+      const sectionPadding = isBrutalist || isRetro ? "6rem 0" : "5rem 0";
+      const sectionGap = isBrutalist || isRetro ? "0" : "0";
 
       return `
       <!-- Top Bar with Quick Contact - Theme Aware -->
@@ -11883,26 +11934,30 @@ export const templates = {
                 }
               </div>
             </div>
-            <div class="hero-image" style="background: ${
-              isGradient
-                ? "linear-gradient(135deg, #667eea, #764ba2)"
-                : isBrutalist
-                ? "var(--color-accent)"
-                : isRetro
-                ? "linear-gradient(135deg, var(--color-accent), #b537f2)"
-                : "linear-gradient(135deg, var(--color-accent), var(--color-text))"
-            }; height: 100%; min-height: ${
+            <div class="hero-image" style="${
+              data.heroImage
+                ? `background-image: url('${data.heroImage}'); background-size: cover; background-position: center;`
+                : `background: ${
+                    isGradient
+                      ? "linear-gradient(135deg, #667eea, #764ba2)"
+                      : isBrutalist
+                      ? "var(--color-accent)"
+                      : isRetro
+                      ? "linear-gradient(135deg, var(--color-accent), #b537f2)"
+                      : "linear-gradient(135deg, var(--color-accent), var(--color-text))"
+                  };`
+            } height: 100%; min-height: ${
         isBrutalist || isRetro ? "550px" : "500px"
       }; display: flex; align-items: center; justify-content: center; color: white; font-size: ${
         isBrutalist ? "5rem" : "4rem"
-      }; opacity: ${isBrutalist ? "0.15" : "0.1"}; border-radius: ${
+      }; border-radius: ${
         isGradient
           ? "0 0 0 100px"
           : isBrutalist || isElegant || isRetro
           ? "0"
           : "0 0 0 80px"
       };">
-              🏪
+              ${!data.heroImage ? `<span style="opacity: 0.1;">🏪</span>` : ""}
             </div>
           </div>
         </div>
@@ -11910,7 +11965,7 @@ export const templates = {
 
       <!-- Quick Info Cards -->
       <section style="padding: ${
-        isBrutalist || isRetro ? "4rem 0" : "3rem 0"
+        isBrutalist || isRetro ? "4rem 0 2rem" : "3rem 0 1rem"
       }; margin-top: ${
         isBrutalist || isRetro ? "-4rem" : "-3rem"
       }; position: relative; z-index: 10;">
@@ -12153,12 +12208,12 @@ export const templates = {
       </section>
 
       <!-- Services Section -->
-      <section id="services" style="padding: ${
-        isBrutalist || isRetro ? "8rem 0" : "6rem 0"
-      }; background: ${isBrutalist ? "var(--color-text)" : "var(--color-bg)"};">
+      <section id="services" style="padding: ${sectionPadding}; background: ${
+        isBrutalist ? "var(--color-text)" : "var(--color-bg)"
+      };">
         <div class="container">
           <div style="text-align: center; margin-bottom: ${
-            isBrutalist ? "5rem" : "4rem"
+            isBrutalist ? "4rem" : "3rem"
           }; max-width: 700px; margin-left: auto; margin-right: auto;">
             <h2 style="font-family: ${
               isElegant
@@ -12304,9 +12359,7 @@ export const templates = {
         data.testimonials && data.testimonials.length > 0
           ? `
       <!-- Customer Reviews -->
-      <section id="reviews" style="padding: ${
-        isBrutalist || isRetro ? "8rem 0" : "6rem 0"
-      }; background: ${
+      <section id="reviews" style="padding: ${sectionPadding}; background: ${
               isBrutalist
                 ? "var(--color-accent)"
                 : isGradient
@@ -12321,7 +12374,7 @@ export const templates = {
             }">
         <div class="container">
           <div style="text-align: center; margin-bottom: ${
-            isBrutalist ? "5rem" : "4rem"
+            isBrutalist ? "4rem" : "3rem"
           }; max-width: 700px; margin-left: auto; margin-right: auto;">
             <h2 style="font-family: ${
               isElegant
@@ -12513,9 +12566,7 @@ export const templates = {
       }
 
       <!-- Contact CTA Section -->
-      <section id="contact" style="padding: ${
-        isBrutalist || isRetro ? "8rem 0" : "6rem 0"
-      }; background: ${
+      <section id="contact" style="padding: ${sectionPadding}; background: ${
         isBrutalist
           ? "var(--color-text)"
           : isGradient
@@ -12772,7 +12823,7 @@ export const templates = {
 
       <!-- Footer -->
       <footer style="padding: ${
-        isBrutalist ? "4rem 0" : "3rem 0"
+        isBrutalist ? "3rem 0" : "2rem 0"
       }; background: var(--color-bg); text-align: center; color: var(--color-text-secondary); font-size: ${
         isBrutalist || isRetro ? "1rem" : "0.875rem"
       }; border-top: ${isBrutalist ? "4px" : isRetro ? "3px" : "1px"} solid ${
@@ -12875,7 +12926,7 @@ export const templates = {
         
         @media (max-width: 640px) {
           section {
-            padding: 4rem 0 !important;
+            padding: 3rem 0 !important;
           }
           
           .container {
@@ -20849,37 +20900,37 @@ export const templates = {
         required: true,
       },
       showName: {
-        type: "text",
+        type: "checkbox",
         default: "true",
         label: "Show Name Field (true/false)",
         required: false,
       },
       showEmail: {
-        type: "text",
+        type: "checkbox",
         default: "true",
         label: "Show Email Field (true/false)",
         required: false,
       },
       showPhone: {
-        type: "text",
+        type: "checkbox",
         default: "false",
         label: "Show Phone Field (true/false)",
         required: false,
       },
       showCompany: {
-        type: "text",
+        type: "checkbox",
         default: "false",
         label: "Show Company Field (true/false)",
         required: false,
       },
       showSubject: {
-        type: "text",
+        type: "checkbox",
         default: "false",
         label: "Show Subject Field (true/false)",
         required: false,
       },
       showMessage: {
-        type: "text",
+        type: "checkbox",
         default: "true",
         label: "Show Message Field (true/false)",
         required: false,
