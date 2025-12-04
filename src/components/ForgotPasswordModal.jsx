@@ -2,10 +2,13 @@
 import { useState } from "react";
 import { X, Mail, Loader, CheckCircle } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
+import useModalAnimation from "../hooks/useModalAnimation";
 import "./AuthModal.scss";
 
 function ForgotPasswordModal({ isOpen, onClose }) {
   const { resetPassword } = useAuth();
+  const { shouldRender, isVisible } = useModalAnimation(isOpen, 300);
+
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -37,7 +40,6 @@ function ForgotPasswordModal({ isOpen, onClose }) {
       if (result.success) {
         setSuccessMessage(result.message);
         setEmail("");
-        // Close modal after 3 seconds
         setTimeout(() => {
           handleClose();
         }, 3000);
@@ -58,15 +60,17 @@ function ForgotPasswordModal({ isOpen, onClose }) {
     onClose();
   };
 
-  if (!isOpen) return null;
+  if (!shouldRender) return null;
 
   return (
     <>
       <div
-        className="modal-backdrop modal-backdrop--visible"
+        className={`modal-backdrop ${
+          isVisible ? "modal-backdrop--visible" : ""
+        }`}
         onClick={handleClose}
       />
-      <div className="auth-modal">
+      <div className={`auth-modal ${isVisible ? "auth-modal--visible" : ""}`}>
         <div className="auth-modal__content">
           <div className="auth-modal__header">
             <button className="auth-modal__close" onClick={handleClose}>

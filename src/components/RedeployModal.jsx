@@ -1,5 +1,6 @@
 import React from "react";
 import { X, Upload, AlertCircle, CheckCircle } from "lucide-react";
+import useModalAnimation from "../hooks/useModalAnimation";
 import "./RedeployModal.scss";
 
 function RedeployModal({
@@ -9,15 +10,23 @@ function RedeployModal({
   siteName,
   isRedeploying,
 }) {
-  if (!isOpen) return null;
+  const { shouldRender, isVisible } = useModalAnimation(isOpen, 300);
+
+  if (!shouldRender) return null;
 
   return (
     <>
       <div
-        className="modal-backdrop modal-backdrop--visible"
+        className={`redeploy-modal-backdrop modal-backdrop ${
+          isVisible ? "modal-backdrop--visible" : ""
+        }`}
         onClick={onClose}
       />
-      <div className="redeploy-modal redeploy-modal--visible">
+      <div
+        className={`redeploy-modal ${
+          isVisible ? "redeploy-modal--visible" : ""
+        }`}
+      >
         <div className="redeploy-modal__content">
           <div className="redeploy-icon">
             <Upload size={48} />

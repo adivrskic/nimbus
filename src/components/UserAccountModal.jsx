@@ -25,6 +25,7 @@ import { renderTemplate } from "../utils/templateSystem";
 import ConfirmModal from "./ConfirmModal";
 import NotificationModal from "./NotificationModal";
 import PaymentModal from "./PaymentModal";
+import useModalAnimation from "../hooks/useModalAnimation";
 import "./UserAccountModal.scss";
 
 function UserAccountModal({ isOpen, onClose }) {
@@ -37,6 +38,7 @@ function UserAccountModal({ isOpen, onClose }) {
     supabase,
     isAuthenticated,
   } = useAuth();
+  const { shouldRender, isVisible } = useModalAnimation(isOpen, 300);
   const [activeTab, setActiveTab] = useState("profile");
   const [isLoading, setIsLoading] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -792,17 +794,21 @@ function UserAccountModal({ isOpen, onClose }) {
     onClose();
   };
 
-  if (!isOpen || !isAuthenticated) return null;
+  if (!shouldRender || !isAuthenticated) return null;
 
   console.log("SITES: ", sites);
 
   return (
     <>
       <div
-        className="modal-backdrop modal-backdrop--visible"
+        className={`modal-backdrop ${
+          isVisible ? "modal-backdrop--visible" : ""
+        }`}
         onClick={handleClose}
       />
-      <div className="account-modal account-modal--visible">
+      <div
+        className={`account-modal ${isVisible ? "account-modal--visible" : ""}`}
+      >
         <div className="account-modal__header">
           <div className="account-modal__header-left">
             <button className="account-modal__close" onClick={handleClose}>

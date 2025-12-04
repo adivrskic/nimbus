@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { X, Mail, Lock, User, Eye, EyeOff, Loader } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
+import useModalAnimation from "../hooks/useModalAnimation";
 import "./AuthModal.scss";
 
 function AuthModal({ isOpen, onClose, onAuthSuccess, onForgotPassword }) {
@@ -14,6 +15,9 @@ function AuthModal({ isOpen, onClose, onAuthSuccess, onForgotPassword }) {
     signInWithApple,
     signInWithLinkedIn,
   } = useAuth();
+
+  // Use the animation hook for smooth enter/exit transitions
+  const { shouldRender, isVisible } = useModalAnimation(isOpen, 300);
 
   const [mode, setMode] = useState("login");
   const [formData, setFormData] = useState({
@@ -175,16 +179,19 @@ function AuthModal({ isOpen, onClose, onAuthSuccess, onForgotPassword }) {
     setSuccessMessage("");
   };
 
-  if (!isOpen) return null;
+  // Don't render if not needed
+  if (!shouldRender) return null;
 
   return (
     <>
       <div
-        className="modal-backdrop modal-backdrop--visible"
+        className={`modal-backdrop ${
+          isVisible ? "modal-backdrop--visible" : ""
+        }`}
         onClick={handleClose}
       />
 
-      <div className="auth-modal">
+      <div className={`auth-modal ${isVisible ? "auth-modal--visible" : ""}`}>
         <div className="auth-modal__content">
           <div className="auth-modal__header">
             <button className="auth-modal__close" onClick={handleClose}>
@@ -422,68 +429,6 @@ function AuthModal({ isOpen, onClose, onAuthSuccess, onForgotPassword }) {
                 />
               </svg>
             </button>
-
-            {/* Facebook */}
-            {/* <button
-              className="btn-social-icon"
-              onClick={handleFacebookSignIn}
-              disabled={isLoading}
-              title="Continue with Facebook"
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="#1877F2">
-                <path d="M22.675 0H1.325C.593 0 0 .593 0 
-                1.325v21.351C0 23.406.593 24 1.325 
-                24h11.494v-9.294H9.691V11.01h3.128V8.414c0-3.1 
-                1.894-4.788 4.659-4.788 1.325 
-                0 2.463.099 2.795.143v3.24l-1.918.001c-1.504 
-                0-1.796.715-1.796 1.763V11.01h3.587l-.467 
-                3.696h-3.12V24h6.116C23.407 24 24 
-                23.406 24 22.676V1.325C24 .593 23.407 
-                0 22.675 0z"/>
-              </svg>
-            </button> */}
-
-            {/* Apple */}
-            {/* <button
-              className="btn-social-icon"
-              onClick={handleAppleSignIn}
-              disabled={isLoading}
-              title="Continue with Apple"
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M16.365 1.43c0 1.14-.45 2.18-1.18 
-                2.97-.76.82-2.04 1.45-3.1 1.36-.15-1.1.32-2.27 
-                1.03-3.05.78-.94 2.16-1.62 3.25-1.64zM20.69 
-                17.47c-.54 1.28-.8 1.84-1.5 2.96-1 
-                1.62-2.4 3.63-4.17 3.66-1.55.03-1.96-.97-4.09-.97-2.14 
-                0-2.59.94-4.1.99-1.76.05-3.1-1.87-4.11-3.48-2.82-4.52-3.12-9.82-1.39-12.62 
-                1.22-2.02 3.16-3.2 4.98-3.2 1.85 
-                0 3.02 1.07 4.55 1.07 1.49 
-                0 2.4-1.07 4.54-1.07 1.67 0 3.45.91 
-                4.66 2.48-4.1 2.25-3.43 8.11.63 10.28z"/>
-              </svg>
-            </button> */}
-
-            {/* LinkedIn */}
-            {/* <button
-              className="btn-social-icon"
-              onClick={handleLinkedInSignIn}
-              disabled={isLoading}
-              title="Continue with LinkedIn"
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="#0A66C2">
-                <path d="M22.23 0H1.77C.79 0 0 .77 0 
-                1.72v20.56C0 23.23.79 24 1.77 
-                24h20.46c.98 0 1.77-.77 1.77-1.72V1.72C24 
-                .77 23.21 0 22.23 0zM7.12 20.45H3.56V9h3.56v11.45zM5.34 
-                7.59c-1.14 0-2.06-.92-2.06-2.06 0-1.13.92-2.06 
-                2.06-2.06 1.13 0 2.06.93 2.06 2.06 0 1.14-.93 
-                2.06-2.06 2.06zM20.45 20.45h-3.56v-5.58c0-1.33-.03-3.05-1.86-3.05-1.86 
-                0-2.14 1.45-2.14 2.95v5.68h-3.56V9h3.42v1.56h.05c.48-.89 
-                1.66-1.83 3.42-1.83 3.66 0 4.34 2.41 4.34 
-                5.54v6.18z"/>
-              </svg>
-            </button> */}
           </div>
 
           <div className="auth-modal__footer">

@@ -5543,6 +5543,44 @@ export const templates = {
           "Passionate about creating user-centered products that make a difference. 10+ years in tech.",
         label: "Short Bio",
       },
+
+      // NEW: QR Code URL Field
+      qrUrl: {
+        type: "url",
+        default: "https://alexmorgan.com",
+        label: "QR Code Destination (link to your website, LinkedIn, etc.)",
+        description: "The URL that the QR code will point to",
+      },
+
+      // NEW: vCard Customization Fields
+      vcardPrefix: {
+        type: "select",
+        label: "Name Prefix (optional)",
+        default: "",
+        options: [
+          { value: "", label: "None" },
+          { value: "Dr.", label: "Dr." },
+          { value: "Mr.", label: "Mr." },
+          { value: "Mrs.", label: "Mrs." },
+          { value: "Ms.", label: "Ms." },
+          { value: "Prof.", label: "Prof." },
+        ],
+      },
+      vcardSuffix: {
+        type: "select",
+        label: "Name Suffix (optional)",
+        default: "",
+        options: [
+          { value: "", label: "None" },
+          { value: "Jr.", label: "Jr." },
+          { value: "Sr.", label: "Sr." },
+          { value: "II", label: "II" },
+          { value: "III", label: "III" },
+          { value: "Ph.D.", label: "Ph.D." },
+          { value: "MBA", label: "MBA" },
+        ],
+      },
+
       socialLinks: {
         type: "group",
         label: "Social Links",
@@ -5550,8 +5588,28 @@ export const templates = {
         min: 0,
         max: 6,
         fields: {
-          platform: { type: "text", label: "Platform", default: "" },
-          username: { type: "text", label: "Username", default: "" },
+          platform: {
+            type: "select",
+            label: "Platform",
+            default: "LinkedIn",
+            options: [
+              { value: "LinkedIn", label: "LinkedIn" },
+              { value: "Twitter", label: "Twitter" },
+              { value: "GitHub", label: "GitHub" },
+              { value: "Instagram", label: "Instagram" },
+              { value: "Facebook", label: "Facebook" },
+              { value: "YouTube", label: "YouTube" },
+              { value: "Portfolio", label: "Portfolio" },
+              { value: "Other", label: "Other" },
+            ],
+          },
+          customPlatform: {
+            type: "text",
+            label: "Custom Platform Name (if Other selected)",
+            default: "",
+            condition: "socialLinks.platform == 'Other'",
+          },
+          username: { type: "text", label: "Username/Handle", default: "" },
           url: { type: "url", label: "URL", default: "" },
         },
         default: [
@@ -5582,7 +5640,7 @@ export const templates = {
           "Agile",
           "Data Analysis",
         ],
-        max: 6,
+        max: 8,
       },
     },
     structure: (data, theme, colorMode) => {
@@ -5594,6 +5652,9 @@ export const templates = {
       const isRetro = themeId === "retro";
       const isGlassmorphism = themeId === "glassmorphism";
       const isNeumorphism = themeId === "neumorphism";
+
+      // Determine if we're in dark mode
+      const isDark = colorMode === "dark";
 
       // Neumorphism box-shadow helpers
       const getNeumorphismShadow = (inset = false) => {
@@ -5613,49 +5674,117 @@ export const templates = {
         return "var(--neomorph-shadow-out)";
       };
 
-      return `
-      <!-- Minimal Header with Theme Toggle -->
-      <header style="padding: 1rem; position: fixed; top: 1rem; right: 1rem; z-index: 100;">
-        <label class="theme-toggle-switch-wrapper" style="cursor: pointer; ${
-          isNeumorphism
-            ? `padding: 0.5rem; border-radius: 12px; display: inline-block; background: var(--color-bg); ${getNeumorphismShadow(
-                false
-              )}`
-            : isGlassmorphism
-            ? "padding: 0.5rem; border-radius: 12px; background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2);"
-            : isBrutalist
-            ? "padding: 0.5rem; border: 3px solid var(--color-accent);"
-            : "padding: 0.5rem; background: var(--color-surface); border-radius: 12px; border: 1px solid var(--color-border);"
-        }">
-          <input type="checkbox" class="theme-toggle-switch" onclick="toggleTheme()" aria-label="Toggle theme">
-          <span class="theme-toggle-slider"></span>
-        </label>
-      </header>
+      // Function to generate QR code URL
+      const generateQRCodeURL = (url) => {
+        // Use a free QR code API
+        const encodedURL = encodeURIComponent(
+          url || data.website || window.location.href
+        );
+        // Create a QR code with appropriate colors for theme
+        const bgColor = isDark ? "2d3748" : "ffffff";
+        const fgColor = isDark ? "ffffff" : "000000";
+        return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodedURL}&bgcolor=${bgColor}&color=${fgColor}&qzone=1`;
+      };
 
-      <!-- Card Container with Theme-Specific Background -->
-      <div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem; background: ${
+      // Function to generate vCard content
+      const generateVCard = () => {
+        let vcard = `BEGIN:VCARD
+  VERSION:3.0`;
+
+        // Name components
+        const fullName = data.name || "";
+        const nameParts = fullName.split(" ");
+        const firstName = nameParts[0] || "";
+        const lastName = nameParts.slice(1).join(" ") || "";
+
+        vcard += `\nN:${lastName};${firstName};;${data.vcardPrefix || ""};${
+          data.vcardSuffix || ""
+        }`;
+        vcard += `\nFN:${
+          data.vcardPrefix ? data.vcardPrefix + " " : ""
+        }${fullName}${data.vcardSuffix ? " " + data.vcardSuffix : ""}`;
+
+        // Organization and title
+        if (data.company) vcard += `\nORG:${data.company}`;
+        if (data.title) vcard += `\nTITLE:${data.title}`;
+
+        // Contact info
+        if (data.email) vcard += `\nEMAIL;TYPE=WORK,INTERNET:${data.email}`;
+        if (data.phone) {
+          const cleanPhone = data.phone.replace(/[^\d+]/g, "");
+          vcard += `\nTEL;TYPE=WORK,VOICE:${cleanPhone}`;
+        }
+
+        // URLs
+        if (data.website) vcard += `\nURL;TYPE=WORK:${data.website}`;
+
+        // Add social media URLs
+        if (data.socialLinks && data.socialLinks.length > 0) {
+          data.socialLinks.forEach((link, index) => {
+            if (link.url) {
+              vcard += `\nURL;TYPE=${link.platform || "OTHER"}:${link.url}`;
+            }
+          });
+        }
+
+        // Location and notes
+        if (data.location) vcard += `\nADR;TYPE=WORK:;;;${data.location};;;;`;
+        if (data.bio)
+          vcard += `\nNOTE:${data.bio.replace(/\n/g, " ").substring(0, 200)}`;
+
+        // Timestamp
+        const now = new Date();
+        const formattedDate =
+          now.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+        vcard += `\nREV:${formattedDate}`;
+
+        vcard += `\nEND:VCARD`;
+        return vcard;
+      };
+
+      return `
+  <!-- Minimal Header with Theme Toggle -->
+  <header style="padding: 1rem; position: fixed; top: 1rem; right: 1rem; z-index: 100;">
+    <label class="theme-toggle-switch-wrapper" style="cursor: pointer; ${
+      isNeumorphism
+        ? `padding: 0.5rem; border-radius: 12px; display: inline-block; background: var(--color-bg); ${getNeumorphismShadow(
+            false
+          )}`
+        : isGlassmorphism
+        ? "padding: 0.5rem; border-radius: 12px; background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2);"
+        : isBrutalist
+        ? "padding: 0.5rem; border: 3px solid var(--color-accent);"
+        : "padding: 0.5rem; background: var(--color-surface); border-radius: 12px; border: 1px solid var(--color-border);"
+    }">
+      <input type="checkbox" class="theme-toggle-switch" onclick="toggleTheme()" aria-label="Toggle theme">
+      <span class="theme-toggle-slider"></span>
+    </label>
+  </header>
+  
+  <!-- Card Container with Theme-Specific Background -->
+  <div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem; background: ${
+    isBrutalist
+      ? "var(--color-text)"
+      : isGradient
+      ? "linear-gradient(135deg, rgba(102,126,234,0.08), rgba(240,147,251,0.08))"
+      : isRetro
+      ? "var(--color-bg)"
+      : "var(--color-bg)"
+  }; ${isRetro ? "position: relative;" : ""}">
+    <div style="max-width: ${
+      isBrutalist ? "550px" : isElegant ? "520px" : "500px"
+    }; width: 100%; position: relative;">
+      
+      <!-- Main Card with Theme-Specific Styling -->
+      <div class="business-card" style="padding: ${
         isBrutalist
-          ? "var(--color-text)"
-          : isGradient
-          ? "linear-gradient(135deg, rgba(102,126,234,0.08), rgba(240,147,251,0.08))"
-          : isRetro
-          ? "var(--color-bg)"
-          : "var(--color-bg)"
-      }; ${isRetro ? "position: relative;" : ""}">
-        <div style="max-width: ${
-          isBrutalist ? "550px" : isElegant ? "520px" : "500px"
-        }; width: 100%; position: relative;">
-          
-          <!-- Main Card with Theme-Specific Styling -->
-          <div class="business-card" style="padding: ${
-            isBrutalist
-              ? "3rem"
-              : isElegant
-              ? "3.5rem"
-              : isNeumorphism
-              ? "3rem"
-              : "3rem"
-          }; position: relative; overflow: visible; border-radius: ${
+          ? "3rem"
+          : isElegant
+          ? "3.5rem"
+          : isNeumorphism
+          ? "3rem"
+          : "3rem"
+      }; position: relative; overflow: visible; border-radius: ${
         isGradient
           ? "32px"
           : isBrutalist || isElegant
@@ -5696,77 +5825,97 @@ export const templates = {
           ? "box-shadow: 0 0 0 3px var(--color-bg), 0 0 0 6px var(--color-accent);"
           : "box-shadow: 0 10px 40px rgba(0,0,0,0.08);"
       }">
-            
-            <!-- QR Code in Corner (Top Right) -->
-            <div id="qr-corner" style="position: absolute; top: ${
-              isBrutalist ? "1.5rem" : isElegant ? "2rem" : "1.5rem"
-            }; right: ${
+        
+        <!-- QR Code in Corner with Clickable URL -->
+        <div id="qr-container" style="position: absolute; top: ${
+          isBrutalist ? "1.5rem" : isElegant ? "2rem" : "1.5rem"
+        }; right: ${
         isBrutalist ? "1.5rem" : isElegant ? "2rem" : "1.5rem"
       }; width: ${isBrutalist ? "90px" : "80px"}; height: ${
         isBrutalist ? "90px" : "80px"
-      }; background: var(--color-surface); border: ${
-        isBrutalist ? "3px" : isRetro ? "2px" : "2px"
-      } solid ${
+      }; border: ${isBrutalist ? "3px" : isRetro ? "2px" : "2px"} solid ${
         isBrutalist || isRetro ? "var(--color-accent)" : "var(--color-border)"
       }; border-radius: ${
         isGradient ? "16px" : isBrutalist || isElegant || isRetro ? "0" : "12px"
-      }; display: flex; align-items: center; justify-content: center; font-size: 0.625rem; color: var(--color-text-secondary); overflow: hidden; ${
+      }; overflow: hidden; ${
         isGlassmorphism
           ? "backdrop-filter: blur(10px); background: rgba(255,255,255,0.1);"
           : isNeumorphism
           ? getNeumorphismShadow(true)
           : ""
-      } ${isBrutalist ? "transform: rotate(3deg);" : ""}">
-              <span style="text-align: center; padding: 0.5rem;">QR</span>
+      } ${isBrutalist ? "transform: rotate(3deg);" : ""}; cursor: pointer;" 
+           onclick="scanQRCode()"
+           onmouseover="this.style.transform='${
+             isBrutalist ? "rotate(6deg) " : ""
+           }scale(1.05)'" 
+           onmouseout="this.style.transform='${
+             isBrutalist ? "rotate(3deg) " : ""
+           }scale(1)'">
+          <div id="qr-code" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+            <div style="text-align: center; padding: 0.5rem; color: var(--color-text-secondary); font-size: 0.625rem;">
+              <div style="font-size: 1.5rem; margin-bottom: 0.25rem;">📱</div>
+              QR Code
             </div>
-            
-            <!-- Decorative Background Elements -->
-            ${
-              isBrutalist
-                ? `
-            <div style="position: absolute; top: -10px; left: -10px; width: 100px; height: 100px; background: var(--color-accent); opacity: 0.1; z-index: 0; transform: rotate(45deg);"></div>
-            `
-                : ""
-            }
-            
-            ${
-              isGradient
-                ? `
-            <div style="position: absolute; top: 0; left: 0; right: 0; height: 150px; background: linear-gradient(135deg, rgba(102,126,234,0.08), rgba(240,147,251,0.08)); opacity: 0.6; z-index: 0; border-radius: ${
-              isGradient ? "32px 32px 0 0" : "0"
+          </div>
+          <div id="qr-tooltip" style="position: absolute; bottom: 100%; right: 0; margin-bottom: 0.5rem; padding: 0.5rem 0.75rem; background: ${
+            isDark ? "rgba(0,0,0,0.9)" : "rgba(255,255,255,0.95)"
+          }; border-radius: 6px; font-size: 0.75rem; color: ${
+        isDark ? "white" : "var(--color-text)"
+      }; box-shadow: 0 4px 12px rgba(0,0,0,0.15); opacity: 0; transform: translateY(10px); transition: all 0.3s; pointer-events: none; white-space: nowrap; z-index: 10; border: 1px solid var(--color-border);">
+            Click to visit: ${data.qrUrl || data.website || "No URL set"}
+            <div style="position: absolute; top: 100%; right: 10px; border: 5px solid transparent; border-top-color: ${
+              isDark ? "rgba(0,0,0,0.9)" : "rgba(255,255,255,0.95)"
             };"></div>
-            `
-                : ""
-            }
-            
-            ${
-              isRetro
-                ? `
-            <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, var(--color-accent), #00f5ff, var(--color-accent)); z-index: 0;"></div>
-            `
-                : ""
-            }
-            
-            ${
-              !isBrutalist && !isGradient && !isRetro
-                ? `
-            <div style="position: absolute; top: 0; left: 0; right: 0; height: 120px; background: var(--color-surface); opacity: ${
-              isElegant ? "0.3" : "0.5"
-            }; z-index: 0; ${
-                    isGlassmorphism ? "backdrop-filter: blur(10px);" : ""
-                  }"></div>
-            `
-                : ""
-            }
-            
-            <!-- Profile Section -->
-            <div style="position: relative; z-index: 1; margin-bottom: 2rem; padding-right: ${
-              isBrutalist ? "110px" : "100px"
-            };">
-              <!-- Avatar Placeholder with Theme Styling -->
-              <div style="width: ${
-                isBrutalist ? "130px" : isElegant ? "110px" : "120px"
-              }; height: ${
+          </div>
+        </div>
+        
+        <!-- Decorative Background Elements -->
+        ${
+          isBrutalist
+            ? `
+        <div style="position: absolute; top: -10px; left: -10px; width: 100px; height: 100px; background: var(--color-accent); opacity: 0.1; z-index: 0; transform: rotate(45deg);"></div>
+        `
+            : ""
+        }
+        
+        ${
+          isGradient
+            ? `
+        <div style="position: absolute; top: 0; left: 0; right: 0; height: 150px; background: linear-gradient(135deg, rgba(102,126,234,0.08), rgba(240,147,251,0.08)); opacity: 0.6; z-index: 0; border-radius: ${
+          isGradient ? "32px 32px 0 0" : "0"
+        };"></div>
+        `
+            : ""
+        }
+        
+        ${
+          isRetro
+            ? `
+        <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, var(--color-accent), #00f5ff, var(--color-accent)); z-index: 0;"></div>
+        `
+            : ""
+        }
+        
+        ${
+          !isBrutalist && !isGradient && !isRetro
+            ? `
+        <div style="position: absolute; top: 0; left: 0; right: 0; height: 120px; background: var(--color-surface); opacity: ${
+          isElegant ? "0.3" : "0.5"
+        }; z-index: 0; ${
+                isGlassmorphism ? "backdrop-filter: blur(10px);" : ""
+              }"></div>
+        `
+            : ""
+        }
+        
+        <!-- Profile Section -->
+        <div style="position: relative; z-index: 1; margin-bottom: 2rem; padding-right: ${
+          isBrutalist ? "110px" : "100px"
+        };">
+          <!-- Avatar Placeholder with Theme Styling -->
+          <div style="width: ${
+            isBrutalist ? "130px" : isElegant ? "110px" : "120px"
+          }; height: ${
         isBrutalist ? "130px" : isElegant ? "110px" : "120px"
       }; margin: 0 auto 2rem; background: ${
         isGradient
@@ -5793,14 +5942,12 @@ export const templates = {
           ? "box-shadow: 0 10px 30px rgba(102,126,234,0.3);"
           : ""
       }"></div>
-              
-              <h1 ${
-                isRetro
-                  ? `class="glitch-card" data-text="${
-                      data.name || "Your Name"
-                    }"`
-                  : ""
-              } style="font-family: ${
+          
+          <h1 ${
+            isRetro
+              ? `class="glitch-card" data-text="${data.name || "Your Name"}"`
+              : ""
+          } style="font-family: ${
         isElegant
           ? "Playfair Display, serif"
           : isRetro
@@ -5823,607 +5970,608 @@ export const templates = {
           ? "color: var(--color-accent);"
           : isRetro
           ? "position: relative; background: linear-gradient(90deg, var(--color-accent), #00f5ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"
-          : ""
-      }>
-                ${
+          : '"'
+      }">
+            ${
+              isBrutalist
+                ? `<span style="background: var(--color-accent); color: var(--color-bg); padding: 0 0.5rem; display: inline-block; transform: rotate(-2deg);">${
+                    (data.name || "Your Name").split(" ")[0]
+                  }</span> ${(data.name || "Your Name")
+                    .split(" ")
+                    .slice(1)
+                    .join(" ")}`
+                : ""
+            }
+            ${
+              isGradient
+                ? (data.name || "Your Name")
+                    .split(" ")
+                    .map((word, i) =>
+                      i === (data.name || "Your Name").split(" ").length - 1
+                        ? `<span style="background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">${word}</span>`
+                        : word
+                    )
+                    .join(" ")
+                : ""
+            }
+            ${!isBrutalist && !isGradient ? data.name || "Your Name" : ""}
+          </h1>
+          
+          ${
+            data.title
+              ? `
+          <p style="font-family: ${
+            isElegant
+              ? "Lato, sans-serif"
+              : isRetro
+              ? "Space Mono, monospace"
+              : "inherit"
+          }; font-size: ${
+                  isBrutalist || isRetro ? "1.25rem" : "1.125rem"
+                }; color: var(--color-accent); font-weight: ${
+                  isBrutalist ? "800" : "600"
+                }; margin-bottom: 0.25rem; ${
+                  isBrutalist || isRetro
+                    ? "text-transform: uppercase; letter-spacing: 1px;"
+                    : ""
+                }">
+            ${data.title}
+          </p>
+          `
+              : ""
+          }
+          
+          ${
+            data.company
+              ? `
+          <p style="font-family: ${
+            isElegant
+              ? "Lato, sans-serif"
+              : isRetro
+              ? "Space Mono, monospace"
+              : "inherit"
+          }; font-size: ${
+                  isBrutalist || isRetro ? "1.125rem" : "1rem"
+                }; color: var(--color-text-secondary); margin-bottom: ${
+                  data.tagline ? "1rem" : "0"
+                }; font-weight: ${isElegant ? "300" : "normal"};">
+            ${data.company}
+          </p>
+          `
+              : ""
+          }
+          
+          ${
+            data.tagline
+              ? `
+          <p style="font-family: ${
+            isElegant
+              ? "Lato, sans-serif"
+              : isRetro
+              ? "Space Mono, monospace"
+              : "inherit"
+          }; font-size: ${
+                  isBrutalist ? "1rem" : "0.9375rem"
+                }; color: var(--color-text-secondary); font-style: ${
+                  isElegant ? "italic" : "normal"
+                }; margin-bottom: 1.5rem; font-weight: ${
+                  isElegant ? "300" : "normal"
+                }; ${isBrutalist ? "font-weight: 700;" : ""}">
+            ${isBrutalist ? "" : '"'}${data.tagline}${isBrutalist ? "" : '"'}
+          </p>
+          `
+              : ""
+          }
+          
+          ${
+            data.location
+              ? `
+          <p style="font-family: ${
+            isRetro ? "Space Mono, monospace" : "inherit"
+          }; font-size: ${
+                  isBrutalist || isRetro ? "0.9375rem" : "0.875rem"
+                }; color: var(--color-text-secondary); display: flex; align-items: center; gap: 0.5rem; ${
                   isBrutalist
-                    ? `<span style="background: var(--color-accent); color: var(--color-bg); padding: 0 0.5rem; display: inline-block; transform: rotate(-2deg);">${
-                        (data.name || "Your Name").split(" ")[0]
-                      }</span> ${(data.name || "Your Name")
-                        .split(" ")
-                        .slice(1)
-                        .join(" ")}`
+                    ? "font-weight: 700; text-transform: uppercase;"
                     : ""
-                }
-                ${
-                  isGradient
-                    ? (data.name || "Your Name")
-                        .split(" ")
-                        .map((word, i) =>
-                          i === (data.name || "Your Name").split(" ").length - 1
-                            ? `<span style="background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">${word}</span>`
-                            : word
-                        )
-                        .join(" ")
+                }">
+            ${isBrutalist ? "📍" : "📍"} ${data.location}
+          </p>
+          `
+              : ""
+          }
+        </div>
+  
+        <!-- Bio with Theme-Specific Styling -->
+        ${
+          data.bio
+            ? `
+        <div style="padding: ${
+          isBrutalist ? "1.75rem" : "1.5rem"
+        } 0; border-top: ${
+                isBrutalist ? "3px" : isRetro ? "2px" : "1px"
+              } solid ${
+                isBrutalist || isRetro
+                  ? "var(--color-accent)"
+                  : "var(--color-border)"
+              }; border-bottom: ${
+                isBrutalist ? "3px" : isRetro ? "2px" : "1px"
+              } solid ${
+                isBrutalist || isRetro
+                  ? "var(--color-accent)"
+                  : "var(--color-border)"
+              }; margin-bottom: 1.5rem; ${
+                isGlassmorphism
+                  ? "background: rgba(255,255,255,0.03); backdrop-filter: blur(10px); padding-left: 1rem; padding-right: 1rem; border-radius: 12px;"
+                  : isNeumorphism
+                  ? `background: var(--color-surface); padding-left: 1.5rem; padding-right: 1.5rem; border-radius: 16px; ${getNeumorphismShadow(
+                      true
+                    )}`
+                  : ""
+              }">
+          <p style="font-family: ${
+            isElegant
+              ? "Lato, sans-serif"
+              : isRetro
+              ? "Space Mono, monospace"
+              : "inherit"
+          }; font-size: ${
+                isBrutalist || isRetro ? "1.0625rem" : "0.9375rem"
+              }; line-height: ${
+                isElegant ? "1.9" : "1.7"
+              }; color: var(--color-text-secondary); font-weight: ${
+                isElegant ? "300" : "normal"
+              };">
+            ${data.bio}
+          </p>
+        </div>
+        `
+            : ""
+        }
+  
+        <!-- Contact Info with Theme-Specific Cards -->
+        <div style="display: grid; gap: ${
+          isBrutalist ? "1rem" : "0.75rem"
+        }; margin-bottom: 2rem;">
+          ${
+            data.email
+              ? `
+          <a href="mailto:${
+            data.email
+          }" style="display: flex; align-items: center; gap: ${
+                  isBrutalist ? "1rem" : "0.75rem"
+                }; padding: ${
+                  isBrutalist ? "1.125rem" : isElegant ? "1rem" : "0.875rem"
+                }; background: ${
+                  isGlassmorphism
+                    ? "rgba(255,255,255,0.05)"
+                    : isNeumorphism
+                    ? "var(--color-bg)"
+                    : isRetro
+                    ? "rgba(255,47,181,0.03)"
+                    : "var(--color-surface)"
+                }; border: ${
+                  isBrutalist ? "3px" : isRetro ? "2px" : "1px"
+                } solid ${
+                  isBrutalist || isRetro
+                    ? "var(--color-accent)"
+                    : isGlassmorphism
+                    ? "rgba(255,255,255,0.1)"
+                    : "var(--color-border)"
+                }; border-radius: ${
+                  isGradient || isRetro
+                    ? "12px"
+                    : isBrutalist || isElegant
+                    ? "0"
+                    : isNeumorphism || isGlassmorphism
+                    ? "12px"
+                    : "8px"
+                }; text-decoration: none; color: var(--color-text); transition: all 0.2s; ${
+                  isGlassmorphism
+                    ? "backdrop-filter: blur(10px);"
+                    : isNeumorphism
+                    ? getNeumorphismShadow(false)
                     : ""
-                }
-                ${!isBrutalist && !isGradient ? data.name || "Your Name" : ""}
-              </h1>
-              
-              ${
-                data.title
-                  ? `
-              <p style="font-family: ${
-                isElegant
-                  ? "Lato, sans-serif"
-                  : isRetro
-                  ? "Space Mono, monospace"
-                  : "inherit"
-              }; font-size: ${
-                      isBrutalist || isRetro ? "1.25rem" : "1.125rem"
-                    }; color: var(--color-accent); font-weight: ${
-                      isBrutalist ? "800" : "600"
-                    }; margin-bottom: 0.25rem; ${
-                      isBrutalist || isRetro
-                        ? "text-transform: uppercase; letter-spacing: 1px;"
-                        : ""
-                    }">
-                ${data.title}
-              </p>
-              `
-                  : ""
-              }
-              
-              ${
-                data.company
-                  ? `
-              <p style="font-family: ${
-                isElegant
-                  ? "Lato, sans-serif"
-                  : isRetro
-                  ? "Space Mono, monospace"
-                  : "inherit"
-              }; font-size: ${
-                      isBrutalist || isRetro ? "1.125rem" : "1rem"
-                    }; color: var(--color-text-secondary); margin-bottom: ${
-                      data.tagline ? "1rem" : "0"
-                    }; font-weight: ${isElegant ? "300" : "normal"};">
-                ${data.company}
-              </p>
-              `
-                  : ""
-              }
-              
-              ${
-                data.tagline
-                  ? `
-              <p style="font-family: ${
-                isElegant
-                  ? "Lato, sans-serif"
-                  : isRetro
-                  ? "Space Mono, monospace"
-                  : "inherit"
-              }; font-size: ${
-                      isBrutalist ? "1rem" : "0.9375rem"
-                    }; color: var(--color-text-secondary); font-style: ${
-                      isElegant ? "italic" : "normal"
-                    }; margin-bottom: 1.5rem; font-weight: ${
-                      isElegant ? "300" : "normal"
-                    }; ${isBrutalist ? "font-weight: 700;" : ""}">
-                ${isBrutalist ? "" : '"'}${data.tagline}${
-                      isBrutalist ? "" : '"'
-                    }
-              </p>
-              `
-                  : ""
-              }
-              
-              ${
-                data.location
-                  ? `
-              <p style="font-family: ${
+                }" 
+            onmouseover="${
+              isBrutalist
+                ? `this.style.transform='translate(-3px, -3px)'; this.style.boxShadow='6px 6px 0 var(--color-accent)'`
+                : isRetro
+                ? `this.style.boxShadow='0 0 20px rgba(255,47,181,0.3)'`
+                : isGlassmorphism
+                ? `this.style.borderColor='var(--color-accent)'`
+                : isNeumorphism
+                ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
+                : `this.style.borderColor='var(--color-accent)'`
+            }" 
+            onmouseout="${
+              isBrutalist
+                ? `this.style.transform='translate(0, 0)'; this.style.boxShadow='none'`
+                : isRetro
+                ? `this.style.boxShadow='none'`
+                : isGlassmorphism
+                ? `this.style.borderColor='rgba(255,255,255,0.1)'`
+                : isNeumorphism
+                ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
+                : `this.style.borderColor='var(--color-border)'`
+            }">
+            <span style="font-size: ${
+              isBrutalist ? "1.5rem" : "1.25rem"
+            };">✉️</span>
+            <span style="font-family: ${
+              isRetro ? "Space Mono, monospace" : "inherit"
+            }; font-size: ${
+                  isBrutalist || isRetro ? "0.9375rem" : "0.875rem"
+                }; font-weight: ${
+                  isBrutalist ? "700" : isRetro ? "600" : "500"
+                }; ${isBrutalist ? "text-transform: uppercase;" : ""}">${
+                  data.email
+                }</span>
+          </a>
+          `
+              : ""
+          }
+          
+          ${
+            data.phone
+              ? `
+          <a href="tel:${data.phone.replace(
+            /\s/g,
+            ""
+          )}" style="display: flex; align-items: center; gap: ${
+                  isBrutalist ? "1rem" : "0.75rem"
+                }; padding: ${
+                  isBrutalist ? "1.125rem" : isElegant ? "1rem" : "0.875rem"
+                }; background: ${
+                  isGlassmorphism
+                    ? "rgba(255,255,255,0.05)"
+                    : isNeumorphism
+                    ? "var(--color-bg)"
+                    : isRetro
+                    ? "rgba(255,47,181,0.03)"
+                    : "var(--color-surface)"
+                }; border: ${
+                  isBrutalist ? "3px" : isRetro ? "2px" : "1px"
+                } solid ${
+                  isBrutalist || isRetro
+                    ? "var(--color-accent)"
+                    : isGlassmorphism
+                    ? "rgba(255,255,255,0.1)"
+                    : "var(--color-border)"
+                }; border-radius: ${
+                  isGradient || isRetro
+                    ? "12px"
+                    : isBrutalist || isElegant
+                    ? "0"
+                    : isNeumorphism || isGlassmorphism
+                    ? "12px"
+                    : "8px"
+                }; text-decoration: none; color: var(--color-text); transition: all 0.2s; ${
+                  isGlassmorphism
+                    ? "backdrop-filter: blur(10px);"
+                    : isNeumorphism
+                    ? getNeumorphismShadow(false)
+                    : ""
+                }" 
+            onmouseover="${
+              isBrutalist
+                ? `this.style.transform='translate(-3px, -3px)'; this.style.boxShadow='6px 6px 0 var(--color-accent)'`
+                : isRetro
+                ? `this.style.boxShadow='0 0 20px rgba(255,47,181,0.3)'`
+                : isGlassmorphism
+                ? `this.style.borderColor='var(--color-accent)'`
+                : isNeumorphism
+                ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
+                : `this.style.borderColor='var(--color-accent)'`
+            }" 
+            onmouseout="${
+              isBrutalist
+                ? `this.style.transform='translate(0, 0)'; this.style.boxShadow='none'`
+                : isRetro
+                ? `this.style.boxShadow='none'`
+                : isGlassmorphism
+                ? `this.style.borderColor='rgba(255,255,255,0.1)'`
+                : isNeumorphism
+                ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
+                : `this.style.borderColor='var(--color-border)'`
+            }">
+            <span style="font-size: ${
+              isBrutalist ? "1.5rem" : "1.25rem"
+            };">📞</span>
+            <span style="font-family: ${
+              isRetro ? "Space Mono, monospace" : "inherit"
+            }; font-size: ${
+                  isBrutalist || isRetro ? "0.9375rem" : "0.875rem"
+                }; font-weight: ${
+                  isBrutalist ? "700" : isRetro ? "600" : "500"
+                }; ${isBrutalist ? "text-transform: uppercase;" : ""}">${
+                  data.phone
+                }</span>
+          </a>
+          `
+              : ""
+          }
+          
+          ${
+            data.website
+              ? `
+          <a href="${
+            data.website
+          }" target="_blank" style="display: flex; align-items: center; gap: ${
+                  isBrutalist ? "1rem" : "0.75rem"
+                }; padding: ${
+                  isBrutalist ? "1.125rem" : isElegant ? "1rem" : "0.875rem"
+                }; background: ${
+                  isGlassmorphism
+                    ? "rgba(255,255,255,0.05)"
+                    : isNeumorphism
+                    ? "var(--color-bg)"
+                    : isRetro
+                    ? "rgba(255,47,181,0.03)"
+                    : "var(--color-surface)"
+                }; border: ${
+                  isBrutalist ? "3px" : isRetro ? "2px" : "1px"
+                } solid ${
+                  isBrutalist || isRetro
+                    ? "var(--color-accent)"
+                    : isGlassmorphism
+                    ? "rgba(255,255,255,0.1)"
+                    : "var(--color-border)"
+                }; border-radius: ${
+                  isGradient || isRetro
+                    ? "12px"
+                    : isBrutalist || isElegant
+                    ? "0"
+                    : isNeumorphism || isGlassmorphism
+                    ? "12px"
+                    : "8px"
+                }; text-decoration: none; color: var(--color-text); transition: all 0.2s; ${
+                  isGlassmorphism
+                    ? "backdrop-filter: blur(10px);"
+                    : isNeumorphism
+                    ? getNeumorphismShadow(false)
+                    : ""
+                }" 
+            onmouseover="${
+              isBrutalist
+                ? `this.style.transform='translate(-3px, -3px)'; this.style.boxShadow='6px 6px 0 var(--color-accent)'`
+                : isRetro
+                ? `this.style.boxShadow='0 0 20px rgba(255,47,181,0.3)'`
+                : isGlassmorphism
+                ? `this.style.borderColor='var(--color-accent)'`
+                : isNeumorphism
+                ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
+                : `this.style.borderColor='var(--color-accent)'`
+            }" 
+            onmouseout="${
+              isBrutalist
+                ? `this.style.transform='translate(0, 0)'; this.style.boxShadow='none'`
+                : isRetro
+                ? `this.style.boxShadow='none'`
+                : isGlassmorphism
+                ? `this.style.borderColor='rgba(255,255,255,0.1)'`
+                : isNeumorphism
+                ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
+                : `this.style.borderColor='var(--color-border)'`
+            }">
+            <span style="font-size: ${
+              isBrutalist ? "1.5rem" : "1.25rem"
+            };">🌐</span>
+            <span style="font-family: ${
+              isRetro ? "Space Mono, monospace" : "inherit"
+            }; font-size: ${
+                  isBrutalist || isRetro ? "0.9375rem" : "0.875rem"
+                }; font-weight: ${
+                  isBrutalist ? "700" : isRetro ? "600" : "500"
+                }; ${
+                  isBrutalist ? "text-transform: uppercase;" : ""
+                }">${data.website
+                  .replace("https://", "")
+                  .replace("http://", "")}</span>
+          </a>
+          `
+              : ""
+          }
+        </div>
+  
+        <!-- Skills with Theme-Specific Badges -->
+        ${
+          data.skills && data.skills.length > 0
+            ? `
+        <div style="margin-bottom: 2rem;">
+          <h3 style="font-family: ${
+            isElegant ? "Playfair Display, serif" : "inherit"
+          }; font-size: ${isBrutalist ? "0.875rem" : "0.75rem"}; font-weight: ${
+                isBrutalist ? "900" : "700"
+              }; text-transform: uppercase; letter-spacing: ${
+                isBrutalist || isRetro ? "2px" : "0.1em"
+              }; color: var(--color-text-secondary); margin-bottom: 1rem;">
+            ${isBrutalist ? "⚡ " : ""}Expertise
+          </h3>
+          <div style="display: flex; flex-wrap: wrap; gap: ${
+            isBrutalist ? "0.75rem" : "0.5rem"
+          };">
+            ${data.skills
+              .map(
+                (skill) => `
+              <span style="font-family: ${
                 isRetro ? "Space Mono, monospace" : "inherit"
-              }; font-size: ${
-                      isBrutalist || isRetro ? "0.9375rem" : "0.875rem"
-                    }; color: var(--color-text-secondary); display: flex; align-items: center; gap: 0.5rem; ${
-                      isBrutalist
-                        ? "font-weight: 700; text-transform: uppercase;"
-                        : ""
-                    }">
-                ${isBrutalist ? "📍" : "📍"} ${data.location}
-              </p>
-              `
-                  : ""
-              }
-            </div>
-
-            <!-- Bio with Theme-Specific Styling -->
-            ${
-              data.bio
-                ? `
-            <div style="padding: ${
-              isBrutalist ? "1.75rem" : "1.5rem"
-            } 0; border-top: ${
-                    isBrutalist ? "3px" : isRetro ? "2px" : "1px"
-                  } solid ${
-                    isBrutalist || isRetro
-                      ? "var(--color-accent)"
-                      : "var(--color-border)"
-                  }; border-bottom: ${
-                    isBrutalist ? "3px" : isRetro ? "2px" : "1px"
-                  } solid ${
-                    isBrutalist || isRetro
-                      ? "var(--color-accent)"
-                      : "var(--color-border)"
-                  }; margin-bottom: 1.5rem; ${
-                    isGlassmorphism
-                      ? "background: rgba(255,255,255,0.03); backdrop-filter: blur(10px); padding-left: 1rem; padding-right: 1rem; border-radius: 12px;"
-                      : isNeumorphism
-                      ? `background: var(--color-surface); padding-left: 1.5rem; padding-right: 1.5rem; border-radius: 16px; ${getNeumorphismShadow(
-                          true
-                        )}`
-                      : ""
-                  }">
-              <p style="font-family: ${
-                isElegant
-                  ? "Lato, sans-serif"
-                  : isRetro
-                  ? "Space Mono, monospace"
-                  : "inherit"
-              }; font-size: ${
-                    isBrutalist || isRetro ? "1.0625rem" : "0.9375rem"
-                  }; line-height: ${
-                    isElegant ? "1.9" : "1.7"
-                  }; color: var(--color-text-secondary); font-weight: ${
-                    isElegant ? "300" : "normal"
-                  };">
-                ${data.bio}
-              </p>
-            </div>
+              }; padding: ${
+                  isBrutalist ? "0.625rem 1.125rem" : "0.375rem 0.875rem"
+                }; background: ${
+                  isGradient
+                    ? "linear-gradient(135deg, rgba(102,126,234,0.1), rgba(118,75,162,0.1))"
+                    : isGlassmorphism
+                    ? "rgba(255,255,255,0.08)"
+                    : isNeumorphism
+                    ? "var(--color-bg)"
+                    : isRetro
+                    ? "rgba(255,47,181,0.05)"
+                    : "var(--color-surface)"
+                }; border: ${
+                  isBrutalist ? "2px" : isRetro ? "2px" : "1px"
+                } solid ${
+                  isBrutalist || isRetro
+                    ? "var(--color-accent)"
+                    : isGlassmorphism
+                    ? "rgba(255,255,255,0.15)"
+                    : "var(--color-border)"
+                }; border-radius: ${
+                  isGradient || isRetro
+                    ? "999px"
+                    : isBrutalist || isElegant
+                    ? "0"
+                    : isNeumorphism || isGlassmorphism
+                    ? "12px"
+                    : "999px"
+                }; font-size: ${
+                  isBrutalist || isRetro ? "0.875rem" : "0.8125rem"
+                }; font-weight: ${
+                  isBrutalist ? "900" : isRetro ? "700" : "600"
+                }; ${
+                  isBrutalist || isRetro
+                    ? "text-transform: uppercase; letter-spacing: 0.5px;"
+                    : ""
+                } ${
+                  isGlassmorphism
+                    ? "backdrop-filter: blur(10px);"
+                    : isNeumorphism
+                    ? getNeumorphismShadow(false)
+                    : ""
+                }">
+                ${skill}
+              </span>
             `
-                : ""
-            }
-
-            <!-- Contact Info with Theme-Specific Cards -->
-            <div style="display: grid; gap: ${
-              isBrutalist ? "1rem" : "0.75rem"
-            }; margin-bottom: 2rem;">
-              ${
-                data.email
-                  ? `
-              <a href="mailto:${
-                data.email
-              }" style="display: flex; align-items: center; gap: ${
-                      isBrutalist ? "1rem" : "0.75rem"
-                    }; padding: ${
-                      isBrutalist ? "1.125rem" : isElegant ? "1rem" : "0.875rem"
-                    }; background: ${
-                      isGlassmorphism
-                        ? "rgba(255,255,255,0.05)"
-                        : isNeumorphism
-                        ? "var(--color-bg)"
-                        : isRetro
-                        ? "rgba(255,47,181,0.03)"
-                        : "var(--color-surface)"
-                    }; border: ${
-                      isBrutalist ? "3px" : isRetro ? "2px" : "1px"
-                    } solid ${
-                      isBrutalist || isRetro
-                        ? "var(--color-accent)"
-                        : isGlassmorphism
-                        ? "rgba(255,255,255,0.1)"
-                        : "var(--color-border)"
-                    }; border-radius: ${
-                      isGradient || isRetro
-                        ? "12px"
-                        : isBrutalist || isElegant
-                        ? "0"
-                        : isNeumorphism || isGlassmorphism
-                        ? "12px"
-                        : "8px"
-                    }; text-decoration: none; color: var(--color-text); transition: all 0.2s; ${
-                      isGlassmorphism
-                        ? "backdrop-filter: blur(10px);"
-                        : isNeumorphism
-                        ? getNeumorphismShadow(false)
-                        : ""
-                    }" 
-                onmouseover="${
-                  isBrutalist
-                    ? `this.style.transform='translate(-3px, -3px)'; this.style.boxShadow='6px 6px 0 var(--color-accent)'`
-                    : isRetro
-                    ? `this.style.boxShadow='0 0 20px rgba(255,47,181,0.3)'`
-                    : isGlassmorphism
-                    ? `this.style.borderColor='var(--color-accent)'`
-                    : isNeumorphism
-                    ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
-                    : `this.style.borderColor='var(--color-accent)'`
-                }" 
-                onmouseout="${
-                  isBrutalist
-                    ? `this.style.transform='translate(0, 0)'; this.style.boxShadow='none'`
-                    : isRetro
-                    ? `this.style.boxShadow='none'`
-                    : isGlassmorphism
-                    ? `this.style.borderColor='rgba(255,255,255,0.1)'`
-                    : isNeumorphism
-                    ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
-                    : `this.style.borderColor='var(--color-border)'`
-                }">
-                <span style="font-size: ${
-                  isBrutalist ? "1.5rem" : "1.25rem"
-                };">✉️</span>
-                <span style="font-family: ${
-                  isRetro ? "Space Mono, monospace" : "inherit"
-                }; font-size: ${
-                      isBrutalist || isRetro ? "0.9375rem" : "0.875rem"
-                    }; font-weight: ${
-                      isBrutalist ? "700" : isRetro ? "600" : "500"
-                    }; ${isBrutalist ? "text-transform: uppercase;" : ""}">${
-                      data.email
-                    }</span>
-              </a>
-              `
-                  : ""
-              }
-              
-              ${
-                data.phone
-                  ? `
-              <a href="tel:${data.phone.replace(
-                /\s/g,
-                ""
-              )}" style="display: flex; align-items: center; gap: ${
-                      isBrutalist ? "1rem" : "0.75rem"
-                    }; padding: ${
-                      isBrutalist ? "1.125rem" : isElegant ? "1rem" : "0.875rem"
-                    }; background: ${
-                      isGlassmorphism
-                        ? "rgba(255,255,255,0.05)"
-                        : isNeumorphism
-                        ? "var(--color-bg)"
-                        : isRetro
-                        ? "rgba(255,47,181,0.03)"
-                        : "var(--color-surface)"
-                    }; border: ${
-                      isBrutalist ? "3px" : isRetro ? "2px" : "1px"
-                    } solid ${
-                      isBrutalist || isRetro
-                        ? "var(--color-accent)"
-                        : isGlassmorphism
-                        ? "rgba(255,255,255,0.1)"
-                        : "var(--color-border)"
-                    }; border-radius: ${
-                      isGradient || isRetro
-                        ? "12px"
-                        : isBrutalist || isElegant
-                        ? "0"
-                        : isNeumorphism || isGlassmorphism
-                        ? "12px"
-                        : "8px"
-                    }; text-decoration: none; color: var(--color-text); transition: all 0.2s; ${
-                      isGlassmorphism
-                        ? "backdrop-filter: blur(10px);"
-                        : isNeumorphism
-                        ? getNeumorphismShadow(false)
-                        : ""
-                    }" 
-                onmouseover="${
-                  isBrutalist
-                    ? `this.style.transform='translate(-3px, -3px)'; this.style.boxShadow='6px 6px 0 var(--color-accent)'`
-                    : isRetro
-                    ? `this.style.boxShadow='0 0 20px rgba(255,47,181,0.3)'`
-                    : isGlassmorphism
-                    ? `this.style.borderColor='var(--color-accent)'`
-                    : isNeumorphism
-                    ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
-                    : `this.style.borderColor='var(--color-accent)'`
-                }" 
-                onmouseout="${
-                  isBrutalist
-                    ? `this.style.transform='translate(0, 0)'; this.style.boxShadow='none'`
-                    : isRetro
-                    ? `this.style.boxShadow='none'`
-                    : isGlassmorphism
-                    ? `this.style.borderColor='rgba(255,255,255,0.1)'`
-                    : isNeumorphism
-                    ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
-                    : `this.style.borderColor='var(--color-border)'`
-                }">
-                <span style="font-size: ${
-                  isBrutalist ? "1.5rem" : "1.25rem"
-                };">📞</span>
-                <span style="font-family: ${
-                  isRetro ? "Space Mono, monospace" : "inherit"
-                }; font-size: ${
-                      isBrutalist || isRetro ? "0.9375rem" : "0.875rem"
-                    }; font-weight: ${
-                      isBrutalist ? "700" : isRetro ? "600" : "500"
-                    }; ${isBrutalist ? "text-transform: uppercase;" : ""}">${
-                      data.phone
-                    }</span>
-              </a>
-              `
-                  : ""
-              }
-              
-              ${
-                data.website
-                  ? `
-              <a href="${
-                data.website
-              }" target="_blank" style="display: flex; align-items: center; gap: ${
-                      isBrutalist ? "1rem" : "0.75rem"
-                    }; padding: ${
-                      isBrutalist ? "1.125rem" : isElegant ? "1rem" : "0.875rem"
-                    }; background: ${
-                      isGlassmorphism
-                        ? "rgba(255,255,255,0.05)"
-                        : isNeumorphism
-                        ? "var(--color-bg)"
-                        : isRetro
-                        ? "rgba(255,47,181,0.03)"
-                        : "var(--color-surface)"
-                    }; border: ${
-                      isBrutalist ? "3px" : isRetro ? "2px" : "1px"
-                    } solid ${
-                      isBrutalist || isRetro
-                        ? "var(--color-accent)"
-                        : isGlassmorphism
-                        ? "rgba(255,255,255,0.1)"
-                        : "var(--color-border)"
-                    }; border-radius: ${
-                      isGradient || isRetro
-                        ? "12px"
-                        : isBrutalist || isElegant
-                        ? "0"
-                        : isNeumorphism || isGlassmorphism
-                        ? "12px"
-                        : "8px"
-                    }; text-decoration: none; color: var(--color-text); transition: all 0.2s; ${
-                      isGlassmorphism
-                        ? "backdrop-filter: blur(10px);"
-                        : isNeumorphism
-                        ? getNeumorphismShadow(false)
-                        : ""
-                    }" 
-                onmouseover="${
-                  isBrutalist
-                    ? `this.style.transform='translate(-3px, -3px)'; this.style.boxShadow='6px 6px 0 var(--color-accent)'`
-                    : isRetro
-                    ? `this.style.boxShadow='0 0 20px rgba(255,47,181,0.3)'`
-                    : isGlassmorphism
-                    ? `this.style.borderColor='var(--color-accent)'`
-                    : isNeumorphism
-                    ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
-                    : `this.style.borderColor='var(--color-accent)'`
-                }" 
-                onmouseout="${
-                  isBrutalist
-                    ? `this.style.transform='translate(0, 0)'; this.style.boxShadow='none'`
-                    : isRetro
-                    ? `this.style.boxShadow='none'`
-                    : isGlassmorphism
-                    ? `this.style.borderColor='rgba(255,255,255,0.1)'`
-                    : isNeumorphism
-                    ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
-                    : `this.style.borderColor='var(--color-border)'`
-                }">
-                <span style="font-size: ${
-                  isBrutalist ? "1.5rem" : "1.25rem"
-                };">🌐</span>
-                <span style="font-family: ${
-                  isRetro ? "Space Mono, monospace" : "inherit"
-                }; font-size: ${
-                      isBrutalist || isRetro ? "0.9375rem" : "0.875rem"
-                    }; font-weight: ${
-                      isBrutalist ? "700" : isRetro ? "600" : "500"
-                    }; ${
-                      isBrutalist ? "text-transform: uppercase;" : ""
-                    }">${data.website
-                      .replace("https://", "")
-                      .replace("http://", "")}</span>
-              </a>
-              `
-                  : ""
-              }
-            </div>
-
-            <!-- Skills with Theme-Specific Badges -->
-            ${
-              data.skills && data.skills.length > 0
-                ? `
-            <div style="margin-bottom: 2rem;">
-              <h3 style="font-family: ${
-                isElegant ? "Playfair Display, serif" : "inherit"
-              }; font-size: ${
-                    isBrutalist ? "0.875rem" : "0.75rem"
-                  }; font-weight: ${
-                    isBrutalist ? "900" : "700"
-                  }; text-transform: uppercase; letter-spacing: ${
-                    isBrutalist || isRetro ? "2px" : "0.1em"
-                  }; color: var(--color-text-secondary); margin-bottom: 1rem;">
-                ${isBrutalist ? "⚡ " : ""}Expertise
-              </h3>
-              <div style="display: flex; flex-wrap: wrap; gap: ${
-                isBrutalist ? "0.75rem" : "0.5rem"
+              )
+              .join("")}
+          </div>
+        </div>
+        `
+            : ""
+        }
+  
+        <!-- Social Links with Theme-Specific Styling -->
+        ${
+          data.socialLinks && data.socialLinks.length > 0
+            ? `
+        <div style="padding-top: 2rem; border-top: ${
+          isBrutalist ? "3px" : isRetro ? "2px" : "1px"
+        } solid ${
+                isBrutalist || isRetro
+                  ? "var(--color-accent)"
+                  : "var(--color-border)"
               };">
-                ${data.skills
-                  .map(
-                    (skill) => `
-                  <span style="font-family: ${
-                    isRetro ? "Space Mono, monospace" : "inherit"
-                  }; padding: ${
-                      isBrutalist ? "0.625rem 1.125rem" : "0.375rem 0.875rem"
-                    }; background: ${
-                      isGradient
-                        ? "linear-gradient(135deg, rgba(102,126,234,0.1), rgba(118,75,162,0.1))"
-                        : isGlassmorphism
-                        ? "rgba(255,255,255,0.08)"
-                        : isNeumorphism
-                        ? "var(--color-bg)"
-                        : isRetro
-                        ? "rgba(255,47,181,0.05)"
-                        : "var(--color-surface)"
-                    }; border: ${
-                      isBrutalist ? "2px" : isRetro ? "2px" : "1px"
-                    } solid ${
-                      isBrutalist || isRetro
-                        ? "var(--color-accent)"
-                        : isGlassmorphism
-                        ? "rgba(255,255,255,0.15)"
-                        : "var(--color-border)"
-                    }; border-radius: ${
-                      isGradient || isRetro
-                        ? "999px"
-                        : isBrutalist || isElegant
-                        ? "0"
-                        : isNeumorphism || isGlassmorphism
-                        ? "12px"
-                        : "999px"
-                    }; font-size: ${
-                      isBrutalist || isRetro ? "0.875rem" : "0.8125rem"
-                    }; font-weight: ${
-                      isBrutalist ? "900" : isRetro ? "700" : "600"
-                    }; ${
-                      isBrutalist || isRetro
-                        ? "text-transform: uppercase; letter-spacing: 0.5px;"
-                        : ""
-                    } ${
-                      isGlassmorphism
-                        ? "backdrop-filter: blur(10px);"
-                        : isNeumorphism
-                        ? getNeumorphismShadow(false)
-                        : ""
-                    }">
-                    ${skill}
-                  </span>
-                `
-                  )
-                  .join("")}
-              </div>
-            </div>
-            `
-                : ""
-            }
-
-            <!-- Social Links with Theme-Specific Styling -->
-            ${
-              data.socialLinks && data.socialLinks.length > 0
-                ? `
-            <div style="padding-top: 2rem; border-top: ${
-              isBrutalist ? "3px" : isRetro ? "2px" : "1px"
-            } solid ${
-                    isBrutalist || isRetro
-                      ? "var(--color-accent)"
-                      : "var(--color-border)"
-                  };">
-              <h3 style="font-family: ${
-                isElegant ? "Playfair Display, serif" : "inherit"
-              }; font-size: ${
-                    isBrutalist ? "0.875rem" : "0.75rem"
-                  }; font-weight: ${
-                    isBrutalist ? "900" : "700"
-                  }; text-transform: uppercase; letter-spacing: ${
-                    isBrutalist || isRetro ? "2px" : "0.1em"
-                  }; color: var(--color-text-secondary); margin-bottom: 1rem;">
-                ${isBrutalist ? "🔗 " : ""}Connect
-              </h3>
-              <div style="display: flex; flex-wrap: wrap; gap: ${
-                isBrutalist ? "0.75rem" : "0.5rem"
-              };">
-                ${data.socialLinks
-                  .map(
-                    (link) => `
-                  <a href="${link.url}" target="_blank" style="font-family: ${
-                      isRetro ? "Space Mono, monospace" : "inherit"
-                    }; font-size: ${
-                      isBrutalist || isRetro ? "0.875rem" : "0.8125rem"
-                    }; padding: ${
-                      isBrutalist ? "0.75rem 1.25rem" : "0.625rem 1rem"
-                    }; display: flex; align-items: center; gap: 0.5rem; border-radius: ${
-                      isGradient || isRetro
-                        ? "12px"
-                        : isBrutalist || isElegant
-                        ? "0"
-                        : isNeumorphism || isGlassmorphism
-                        ? "12px"
-                        : "8px"
-                    }; text-decoration: none; border: ${
-                      isBrutalist ? "2px" : isRetro ? "2px" : "1px"
-                    } solid ${
-                      isBrutalist || isRetro
-                        ? "var(--color-accent)"
-                        : isGlassmorphism
-                        ? "rgba(255,255,255,0.1)"
-                        : "var(--color-border)"
-                    }; color: var(--color-text); transition: all 0.2s; background: ${
-                      isGlassmorphism
-                        ? "rgba(255,255,255,0.05)"
-                        : isNeumorphism
-                        ? "var(--color-bg)"
-                        : isRetro
-                        ? "rgba(255,47,181,0.03)"
-                        : "transparent"
-                    }; font-weight: ${
-                      isBrutalist ? "900" : isRetro ? "700" : "600"
-                    }; ${
-                      isBrutalist || isRetro
-                        ? "text-transform: uppercase; letter-spacing: 0.5px;"
-                        : ""
-                    } ${
-                      isGlassmorphism
-                        ? "backdrop-filter: blur(10px);"
-                        : isNeumorphism
-                        ? getNeumorphismShadow(false)
-                        : ""
-                    }" 
-                    onmouseover="${
-                      isBrutalist
-                        ? `this.style.background='var(--color-accent)'; this.style.color='var(--color-bg)'`
-                        : isRetro
-                        ? `this.style.background='rgba(255,47,181,0.1)'; this.style.boxShadow='0 0 15px rgba(255,47,181,0.2)'`
-                        : isGlassmorphism
-                        ? `this.style.background='rgba(255,255,255,0.1)'`
-                        : isNeumorphism
-                        ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
-                        : `this.style.background='var(--color-surface)'`
-                    }" 
-                    onmouseout="${
-                      isBrutalist
-                        ? `this.style.background='transparent'; this.style.color='var(--color-text)'`
-                        : isRetro
-                        ? `this.style.background='rgba(255,47,181,0.03)'; this.style.boxShadow='none'`
-                        : isGlassmorphism
-                        ? `this.style.background='rgba(255,255,255,0.05)'`
-                        : isNeumorphism
-                        ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
-                        : `this.style.background='transparent'`
-                    }">
-                    <span>${link.platform}</span>
-                    ${
-                      link.username
-                        ? `<span style="opacity: 0.6; font-size: ${
-                            isBrutalist ? "0.75rem" : "0.75rem"
-                          };">${link.username}</span>`
-                        : ""
-                    }
-                  </a>
-                `
-                  )
-                  .join("")}
-              </div>
-            </div>
-            `
-                : ""
-            }
-
-            <!-- Save Contact Button with Theme-Specific Styling -->
-            <div style="margin-top: 2rem;">
-              <button onclick="saveContact()" style="width: 100%; padding: ${
-                isBrutalist ? "1.25rem" : "1rem"
-              }; font-size: ${
-        isBrutalist || isRetro ? "1.125rem" : "1rem"
+          <h3 style="font-family: ${
+            isElegant ? "Playfair Display, serif" : "inherit"
+          }; font-size: ${isBrutalist ? "0.875rem" : "0.75rem"}; font-weight: ${
+                isBrutalist ? "900" : "700"
+              }; text-transform: uppercase; letter-spacing: ${
+                isBrutalist || isRetro ? "2px" : "0.1em"
+              }; color: var(--color-text-secondary); margin-bottom: 1rem;">
+            ${isBrutalist ? "🔗 " : ""}Connect
+          </h3>
+          <div style="display: flex; flex-wrap: wrap; gap: ${
+            isBrutalist ? "0.75rem" : "0.5rem"
+          };">
+            ${data.socialLinks
+              .map((link) => {
+                const platformName =
+                  link.platform === "Other" && link.customPlatform
+                    ? link.customPlatform
+                    : link.platform;
+                return `
+              <a href="${link.url}" target="_blank" style="font-family: ${
+                  isRetro ? "Space Mono, monospace" : "inherit"
+                }; font-size: ${
+                  isBrutalist || isRetro ? "0.875rem" : "0.8125rem"
+                }; padding: ${
+                  isBrutalist ? "0.75rem 1.25rem" : "0.625rem 1rem"
+                }; display: flex; align-items: center; gap: 0.5rem; border-radius: ${
+                  isGradient || isRetro
+                    ? "12px"
+                    : isBrutalist || isElegant
+                    ? "0"
+                    : isNeumorphism || isGlassmorphism
+                    ? "12px"
+                    : "8px"
+                }; text-decoration: none; border: ${
+                  isBrutalist ? "2px" : isRetro ? "2px" : "1px"
+                } solid ${
+                  isBrutalist || isRetro
+                    ? "var(--color-accent)"
+                    : isGlassmorphism
+                    ? "rgba(255,255,255,0.1)"
+                    : "var(--color-border)"
+                }; color: var(--color-text); transition: all 0.2s; background: ${
+                  isGlassmorphism
+                    ? "rgba(255,255,255,0.05)"
+                    : isNeumorphism
+                    ? "var(--color-bg)"
+                    : isRetro
+                    ? "rgba(255,47,181,0.03)"
+                    : "transparent"
+                }; font-weight: ${
+                  isBrutalist ? "900" : isRetro ? "700" : "600"
+                }; ${
+                  isBrutalist || isRetro
+                    ? "text-transform: uppercase; letter-spacing: 0.5px;"
+                    : ""
+                } ${
+                  isGlassmorphism
+                    ? "backdrop-filter: blur(10px);"
+                    : isNeumorphism
+                    ? getNeumorphismShadow(false)
+                    : ""
+                }" 
+                onmouseover="${
+                  isBrutalist
+                    ? `this.style.background='var(--color-accent)'; this.style.color='var(--color-bg)'`
+                    : isRetro
+                    ? `this.style.background='rgba(255,47,181,0.1)'; this.style.boxShadow='0 0 15px rgba(255,47,181,0.2)'`
+                    : isGlassmorphism
+                    ? `this.style.background='rgba(255,255,255,0.1)'`
+                    : isNeumorphism
+                    ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
+                    : `this.style.background='var(--color-surface)'`
+                }" 
+                onmouseout="${
+                  isBrutalist
+                    ? `this.style.background='transparent'; this.style.color='var(--color-text)'`
+                    : isRetro
+                    ? `this.style.background='rgba(255,47,181,0.03)'; this.style.boxShadow='none'`
+                    : isGlassmorphism
+                    ? `this.style.background='rgba(255,255,255,0.05)'`
+                    : isNeumorphism
+                    ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
+                    : `this.style.background='transparent'`
+                }">
+                <span>${platformName}</span>
+                ${
+                  link.username
+                    ? `<span style="opacity: 0.6; font-size: ${
+                        isBrutalist ? "0.75rem" : "0.75rem"
+                      };">${link.username}</span>`
+                    : ""
+                }
+              </a>
+              `;
+              })
+              .join("")}
+          </div>
+        </div>
+        `
+            : ""
+        }
+  
+        <!-- Contact Action Buttons -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: ${
+          isBrutalist ? "1rem" : "0.75rem"
+        }; margin-top: 2rem;">
+          <!-- Save Contact Button -->
+          <button onclick="saveContact()" style="padding: ${
+            isBrutalist ? "1rem" : "0.875rem"
+          }; font-size: ${
+        isBrutalist || isRetro ? "1rem" : "0.875rem"
       }; cursor: pointer; background: ${
         isGradient
           ? "linear-gradient(135deg, #667eea, #764ba2)"
@@ -6444,201 +6592,406 @@ export const templates = {
           : isBrutalist || isElegant
           ? "0"
           : isNeumorphism || isGlassmorphism
-          ? "16px"
+          ? "12px"
           : "8px"
       }; font-weight: ${
         isBrutalist ? "900" : isRetro ? "700" : "500"
-      }; transition: all 0.2s; ${
+      }; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 0.5rem; ${
         isBrutalist || isRetro
           ? "text-transform: uppercase; letter-spacing: 1px;"
           : ""
       } ${
         isGradient
-          ? "box-shadow: 0 10px 30px rgba(102,126,234,0.3);"
+          ? "box-shadow: 0 8px 20px rgba(102,126,234,0.3);"
           : isRetro
-          ? "box-shadow: 0 0 30px rgba(255,47,181,0.3);"
+          ? "box-shadow: 0 0 20px rgba(255,47,181,0.3);"
           : isNeumorphism
           ? getNeumorphismShadow(false)
           : ""
       }" 
-                onmouseover="${
-                  isBrutalist
-                    ? `this.style.background='var(--color-bg)'; this.style.color='var(--color-accent)'`
-                    : isGradient
-                    ? `this.style.transform='translateY(-2px)'; this.style.boxShadow='0 15px 40px rgba(102,126,234,0.4)'`
-                    : isRetro
-                    ? `this.style.transform='translateY(-2px)'; this.style.boxShadow='0 0 50px rgba(255,47,181,0.5)'`
-                    : isNeumorphism
-                    ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
-                    : `this.style.transform='translateY(-2px)'; this.style.opacity='0.9'`
-                }" 
-                onmouseout="${
-                  isBrutalist
-                    ? `this.style.background='var(--color-accent)'; this.style.color='white'`
-                    : isGradient
-                    ? `this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 30px rgba(102,126,234,0.3)'`
-                    : isRetro
-                    ? `this.style.transform='translateY(0)'; this.style.boxShadow='0 0 30px rgba(255,47,181,0.3)'`
-                    : isNeumorphism
-                    ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
-                    : `this.style.transform='translateY(0)'; this.style.opacity='1'`
-                }">
-                ${isBrutalist ? "💾 " : "💾 "}Save Contact
-              </button>
-            </div>
-          </div>
+            onmouseover="${
+              isBrutalist
+                ? `this.style.background='var(--color-bg)'; this.style.color='var(--color-accent)'`
+                : isGradient
+                ? `this.style.transform='translateY(-2px)'; this.style.boxShadow='0 12px 30px rgba(102,126,234,0.4)'`
+                : isRetro
+                ? `this.style.transform='translateY(-2px)'; this.style.boxShadow='0 0 30px rgba(255,47,181,0.5)'`
+                : isNeumorphism
+                ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
+                : `this.style.transform='translateY(-2px)'; this.style.opacity='0.9'`
+            }" 
+            onmouseout="${
+              isBrutalist
+                ? `this.style.background='var(--color-accent)'; this.style.color='white'`
+                : isGradient
+                ? `this.style.transform='translateY(0)'; this.style.boxShadow='0 8px 20px rgba(102,126,234,0.3)'`
+                : isRetro
+                ? `this.style.transform='translateY(0)'; this.style.boxShadow='0 0 20px rgba(255,47,181,0.3)'`
+                : isNeumorphism
+                ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
+                : `this.style.transform='translateY(0)'; this.style.opacity='1'`
+            }">
+            <span>💾</span>
+            Save Contact
+          </button>
+          
+          <!-- Copy vCard Button -->
+          <button onclick="copyVCard()" style="padding: ${
+            isBrutalist ? "1rem" : "0.875rem"
+          }; font-size: ${
+        isBrutalist || isRetro ? "1rem" : "0.875rem"
+      }; cursor: pointer; background: ${
+        isBrutalist
+          ? "var(--color-bg)"
+          : isGlassmorphism
+          ? "rgba(255,255,255,0.05)"
+          : isNeumorphism
+          ? "var(--color-bg)"
+          : "transparent"
+      }; color: ${
+        isBrutalist ? "var(--color-accent)" : "var(--color-text)"
+      }; border: ${isBrutalist ? "3px" : isRetro ? "2px" : "1px"} solid ${
+        isBrutalist || isRetro
+          ? "var(--color-accent)"
+          : isGlassmorphism
+          ? "rgba(255,255,255,0.1)"
+          : "var(--color-border)"
+      }; border-radius: ${
+        isGradient || isRetro
+          ? "999px"
+          : isBrutalist || isElegant
+          ? "0"
+          : isNeumorphism || isGlassmorphism
+          ? "12px"
+          : "8px"
+      }; font-weight: ${
+        isBrutalist ? "900" : isRetro ? "700" : "500"
+      }; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 0.5rem; ${
+        isBrutalist || isRetro
+          ? "text-transform: uppercase; letter-spacing: 1px;"
+          : ""
+      } ${
+        isGlassmorphism
+          ? "backdrop-filter: blur(10px);"
+          : isNeumorphism
+          ? getNeumorphismShadow(false)
+          : ""
+      }" 
+            onmouseover="${
+              isBrutalist
+                ? `this.style.background='var(--color-accent)'; this.style.color='var(--color-bg)'`
+                : isRetro
+                ? `this.style.background='var(--color-accent)'; this.style.color='var(--color-bg)'; this.style.boxShadow='0 0 20px rgba(255,47,181,0.3)'`
+                : isGlassmorphism
+                ? `this.style.background='rgba(255,255,255,0.1)'`
+                : isNeumorphism
+                ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
+                : `this.style.background='var(--color-surface)'`
+            }" 
+            onmouseout="${
+              isBrutalist
+                ? `this.style.background='var(--color-bg)'; this.style.color='var(--color-accent)'`
+                : isRetro
+                ? `this.style.background='transparent'; this.style.color='var(--color-text)'; this.style.boxShadow='none'`
+                : isGlassmorphism
+                ? `this.style.background='rgba(255,255,255,0.05)'`
+                : isNeumorphism
+                ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
+                : `this.style.background='transparent'`
+            }">
+            <span>📋</span>
+            Copy vCard
+          </button>
+        </div>
+        
+        <!-- Action Feedback Message -->
+        <div id="action-feedback" style="margin-top: 1rem; padding: 0.75rem; text-align: center; font-size: 0.875rem; color: var(--color-text-secondary); display: none; border-radius: 8px; background: var(--color-surface);">
+          <span id="feedback-text"></span>
         </div>
       </div>
-
-      <script>
-        function saveContact() {
-          const vcard = \`BEGIN:VCARD
-VERSION:3.0
-FN:${data.name || ""}
-TITLE:${data.title || ""}
-ORG:${data.company || ""}
-EMAIL:${data.email || ""}
-TEL:${data.phone || ""}
-URL:${data.website || ""}
-NOTE:${data.bio || ""}
-END:VCARD\`;
-          
-          const blob = new Blob([vcard], { type: 'text/vcard' });
-          const url = window.URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = '${(data.name || "contact").replace(/\s/g, "_")}.vcf';
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          window.URL.revokeObjectURL(url);
-        }
-
-        window.addEventListener('DOMContentLoaded', () => {
-          const qrData = encodeURIComponent(window.location.href);
-          const qrUrl = \`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=\${qrData}\`;
-          const qrCorner = document.getElementById('qr-corner');
-          if (qrCorner) {
-            qrCorner.innerHTML = \`<img src="\${qrUrl}" alt="QR Code" style="width: 100%; height: 100%; object-fit: cover;">\`;
+    </div>
+  </div>
+  
+  <script>
+    const cardData = ${JSON.stringify(data || {})};
+    const isDark = ${colorMode === "dark" ? "true" : "false"};
+    // Generate vCard content
+    function generateVCardContent() {
+      let vcard = \`BEGIN:VCARD
+  VERSION:3.0\`;
+  
+      // Name components
+      const fullName = cardData.name || "";
+      const nameParts = fullName.split(' ');
+      const firstName = nameParts[0] || '';
+      const lastName = nameParts.slice(1).join(' ') || '';
+      
+      vcard += \`\\nN:\${lastName};\${firstName};;\${cardData.vcardPrefix || ''};\${cardData.vcardSuffix || ''}\`;
+      vcard += \`\\nFN:\${cardData.vcardPrefix ? cardData.vcardPrefix + ' ' : ''}\${fullName}\${cardData.vcardSuffix ? ' ' + cardData.vcardSuffix : ''}\`;
+      
+      // Organization and title
+      if (cardData.company) vcard += \`\\nORG:\${cardData.company}\`;
+      if (cardData.title) vcard += \`\\nTITLE:\${cardData.title}\`;
+      
+      // Contact info
+      if (cardData.email) vcard += \`\\nEMAIL;TYPE=WORK,INTERNET:\${cardData.email}\`;
+      if (cardData.phone) {
+        const cleanPhone = cardData.phone.replace(/[^\\d+]/g, '');
+        vcard += \`\\nTEL;TYPE=WORK,VOICE:\${cleanPhone}\`;
+      }
+      
+      // URLs
+      if (cardData.website) vcard += \`\\nURL;TYPE=WORK:\${cardData.website}\`;
+      
+      // Add social media URLs
+      if (cardData.socialLinks && cardData.socialLinks.length > 0) {
+        cardData.socialLinks.forEach((link) => {
+          if (link.url) {
+            const platform = link.platform === 'Other' && link.customPlatform ? link.customPlatform : link.platform;
+            vcard += \`\\nURL;TYPE=\${platform}:\${link.url}\`;
           }
         });
-      </script>
-
-      <style>
-        ${
-          isNeumorphism
-            ? `
-        /* Neumorphism CSS Variables */
-        :root {
-          --neomorph-shadow-out: 20px 20px 60px #c5c9ce, -20px -20px 60px #ffffff;
-          --neomorph-shadow-in: inset 8px 8px 16px #c5c9ce, inset -8px -8px 16px #ffffff;
-        }
+      }
+      
+      // Location and notes
+      if (cardData.location) vcard += \`\\nADR;TYPE=WORK:;;;\${cardData.location};;;;\`;
+      if (cardData.bio) vcard += \`\\nNOTE:\${cardData.bio.replace(/\\n/g, ' ').substring(0, 200)}\`;
+      
+      // Timestamp
+      const now = new Date();
+      const formattedDate = now.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+      vcard += \`\\nREV:\${formattedDate}\`;
+      
+      vcard += \`\\nEND:VCARD\`;
+      return vcard;
+    }
+  
+    // Save contact as vCard file
+    function saveContact() {
+      const vcard = generateVCardContent();
+      const blob = new Blob([vcard], { type: 'text/vcard' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const fileName = \`\${(cardData.name || "contact").replace(/\\s/g, "_")}_contact.vcf\`;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+      
+      showFeedback('Contact saved as ' + fileName);
+    }
+  
+    // Copy vCard to clipboard
+    function copyVCard() {
+      const vcard = generateVCardContent();
+      navigator.clipboard.writeText(vcard).then(() => {
+        showFeedback('vCard copied to clipboard!');
+      }).catch(err => {
+        console.error('Failed to copy: ', err);
+        showFeedback('Failed to copy to clipboard', true);
+      });
+    }
+  
+    // Open QR code URL
+    function scanQRCode() {
+      const data = ${JSON.stringify(data)};
+      const qrUrl = data.qrUrl || data.website;
+      if (qrUrl) {
+        window.open(qrUrl, '_blank');
+      } else {
+        showFeedback('No URL set for QR code', true);
+      }
+    }
+  
+    // Show QR code tooltip on hover
+    function setupQRCodeTooltip() {
+      const qrContainer = document.getElementById('qr-container');
+      const tooltip = document.getElementById('qr-tooltip');
+      
+      if (qrContainer && tooltip) {
+        qrContainer.addEventListener('mouseenter', () => {
+          tooltip.style.opacity = '1';
+          tooltip.style.transform = 'translateY(0)';
+        });
         
-        [data-theme="dark"] {
-          --neomorph-shadow-out: 32px 32px 64px #2a2d34, -32px -32px 64px #383d46;
-          --neomorph-shadow-in: inset 16px 16px 32px #2a2d34, inset -16px -16px 32px #383d46;
-        }
-        `
-            : ""
-        }
+        qrContainer.addEventListener('mouseleave', () => {
+          tooltip.style.opacity = '0';
+          tooltip.style.transform = 'translateY(10px)';
+        });
+      }
+    }
+  
+    function generateQRCode() {
+      const qrUrl = cardData.qrUrl || cardData.website || window.location.href;
+      const encodedURL = encodeURIComponent(qrUrl);
+      const bgColor = isDark ? '2d3748' : 'ffffff';
+      const fgColor = isDark ? 'ffffff' : '000000';
+      
+      const qrCodeURL = \`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=\${encodedURL}&bgcolor=\${bgColor}&color=\${fgColor}&qzone=1\`;
+      
+      const qrContainer = document.getElementById('qr-code');
+      if (qrContainer) {
+        qrContainer.innerHTML = \`<img src="\${qrCodeURL}" alt="QR Code" style="width: 100%; height: 100%; object-fit: cover;">\`;
+      }
+    }
+  
+    // Show feedback message
+    function showFeedback(message, isError = false) {
+      const feedbackEl = document.getElementById('action-feedback');
+      const feedbackText = document.getElementById('feedback-text');
+      
+      if (feedbackEl && feedbackText) {
+        feedbackText.textContent = message;
+        feedbackEl.style.display = 'block';
+        feedbackEl.style.background = isError ? 'var(--color-error-bg, #fee)' : 'var(--color-success-bg, #efe)';
+        feedbackEl.style.color = isError ? 'var(--color-error, #c00)' : 'var(--color-success, #090)';
         
-        ${
-          isRetro
-            ? `
-        /* Retro grid background */
-        body::before {
-          content: '';
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background-image: 
-            linear-gradient(rgba(255,47,181,0.02) 2px, transparent 2px),
-            linear-gradient(90deg, rgba(255,47,181,0.02) 2px, transparent 2px);
-          background-size: 50px 50px;
-          pointer-events: none;
-          z-index: 0;
-        }
-        
-        /* Retro glitch effect for card */
-        .glitch-card::before,
-        .glitch-card::after {
-          content: attr(data-text);
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-        }
-        
-        .glitch-card::before {
-          animation: glitch-card1 3s infinite;
-          color: var(--color-accent);
-          z-index: -1;
-        }
-        
-        .glitch-card::after {
-          animation: glitch-card2 4s infinite;
-          color: #00f5ff;
-          z-index: -2;
-        }
-        
-        @keyframes glitch-card1 {
-          0%, 100% { transform: translate(0); }
-          25% { transform: translate(-1px, 1px); }
-          50% { transform: translate(-1px, -1px); }
-          75% { transform: translate(1px, 1px); }
-        }
-        
-        @keyframes glitch-card2 {
-          0%, 100% { transform: translate(0); }
-          25% { transform: translate(1px, -1px); }
-          50% { transform: translate(1px, 1px); }
-          75% { transform: translate(-1px, -1px); }
-        }
-        `
-            : ""
-        }
-        
-        /* Responsive Design */
-        @media (max-width: 768px) {
-          .business-card {
-            padding: 2.5rem 2rem !important;
-          }
-          
-          #qr-corner {
-            width: 70px !important;
-            height: 70px !important;
-            top: 1rem !important;
-            right: 1rem !important;
-          }
-          
-          .business-card > div:first-of-type {
-            padding-right: 85px !important;
-          }
-        }
-        
-        @media (max-width: 480px) {
-          .business-card {
-            padding: 2rem 1.5rem !important;
-          }
-          
-          #qr-corner {
-            width: 60px !important;
-            height: 60px !important;
-          }
-          
-          .business-card > div:first-of-type {
-            padding-right: 75px !important;
-          }
-          
-          h1 {
-            font-size: 1.75rem !important;
-          }
-        }
-      </style>
-    `;
+        setTimeout(() => {
+          feedbackEl.style.display = 'none';
+        }, 3000);
+      }
+    }
+  
+    // Initialize when page loads
+    window.addEventListener('DOMContentLoaded', () => {
+      generateQRCode();
+      setupQRCodeTooltip();
+      
+      // Regenerate QR code when theme changes
+      document.addEventListener('themeChanged', generateQRCode);
+    });
+  </script>
+  
+  <style>
+    ${
+      isNeumorphism
+        ? `
+    /* Neumorphism CSS Variables */
+    :root {
+      --neomorph-shadow-out: 20px 20px 60px #c5c9ce, -20px -20px 60px #ffffff;
+      --neomorph-shadow-in: inset 8px 8px 16px #c5c9ce, inset -8px -8px 16px #ffffff;
+    }
+    
+    [data-theme="dark"] {
+      --neomorph-shadow-out: 32px 32px 64px #2a2d34, -32px -32px 64px #383d46;
+      --neomorph-shadow-in: inset 16px 16px 32px #2a2d34, inset -16px -16px 32px #383d46;
+    }
+    `
+        : ""
+    }
+    
+    ${
+      isRetro
+        ? `
+    /* Retro grid background */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: 
+        linear-gradient(rgba(255,47,181,0.02) 2px, transparent 2px),
+        linear-gradient(90deg, rgba(255,47,181,0.02) 2px, transparent 2px);
+      background-size: 50px 50px;
+      pointer-events: none;
+      z-index: 0;
+    }
+    
+    /* Retro glitch effect for card */
+    .glitch-card::before,
+    .glitch-card::after {
+      content: attr(data-text);
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+    
+    .glitch-card::before {
+      animation: glitch-card1 3s infinite;
+      color: var(--color-accent);
+      z-index: -1;
+    }
+    
+    .glitch-card::after {
+      animation: glitch-card2 4s infinite;
+      color: #00f5ff;
+      z-index: -2;
+    }
+    
+    @keyframes glitch-card1 {
+      0%, 100% { transform: translate(0); }
+      25% { transform: translate(-1px, 1px); }
+      50% { transform: translate(-1px, -1px); }
+      75% { transform: translate(1px, 1px); }
+    }
+    
+    @keyframes glitch-card2 {
+      0%, 100% { transform: translate(0); }
+      25% { transform: translate(1px, -1px); }
+      50% { transform: translate(1px, 1px); }
+      75% { transform: translate(-1px, -1px); }
+    }
+    `
+        : ""
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .business-card {
+        padding: 2.5rem 2rem !important;
+      }
+      
+      #qr-container {
+        width: 70px !important;
+        height: 70px !important;
+        top: 1rem !important;
+        right: 1rem !important;
+      }
+      
+      .business-card > div:first-of-type {
+        padding-right: 85px !important;
+      }
+      
+      .contact-buttons {
+        grid-template-columns: 1fr !important;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .business-card {
+        padding: 2rem 1.5rem !important;
+      }
+      
+      #qr-container {
+        width: 60px !important;
+        height: 60px !important;
+      }
+      
+      .business-card > div:first-of-type {
+        padding-right: 75px !important;
+      }
+      
+      h1 {
+        font-size: 1.75rem !important;
+      }
+      
+      .social-links {
+        flex-direction: column !important;
+      }
+      
+      .social-links a {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  </style>
+  `;
     },
   }),
   // ============================================
@@ -28149,6 +28502,9442 @@ END:VCARD\`;
     </script>
   </body>
   </html>`;
+    },
+  }),
+  brewery: new Template("brewery", {
+    name: "Brewery",
+    description:
+      "Craft brewery website with taproom ambiance, beer portfolio, and event scheduling",
+    category: "Business",
+    defaultTheme: "brutalist", // Perfect for industrial brewery aesthetic
+    image: "brewery",
+    fields: {
+      // ============ BRAND & IDENTITY ============
+      breweryName: {
+        type: "text",
+        default: "IRONWORK BREWING CO.",
+        label: "Brewery Name",
+        required: true,
+        placeholder: "e.g., IRONWORK BREWING CO.",
+      },
+      tagline: {
+        type: "text",
+        default: "FORGED IN FIRE, FINISHED IN OAK",
+        label: "Tagline",
+        placeholder: "Short, impactful brewery motto",
+      },
+      foundingYear: {
+        type: "number",
+        default: 2012,
+        label: "Founding Year",
+        min: 1800,
+        max: 2024,
+      },
+
+      // ============ VISUAL IDENTITY ============
+      logoType: {
+        type: "select",
+        label: "Logo Style",
+        options: [
+          { value: "industrial", label: "Industrial (Metal/Concrete)" },
+          { value: "rustic", label: "Rustic (Wood/Grain)" },
+          { value: "modern", label: "Modern (Clean/Minimal)" },
+          { value: "vintage", label: "Vintage (Retro/Classic)" },
+        ],
+        default: "industrial",
+      },
+      primaryColor: {
+        type: "color",
+        label: "Primary Brand Color",
+        default: "#8B4513", // Saddle brown
+      },
+      secondaryColor: {
+        type: "color",
+        label: "Accent Color",
+        default: "#D4AF37", // Metallic gold
+      },
+
+      // ============ TAPROOM & LOCATION ============
+      address: {
+        type: "text",
+        default: "123 Hops Lane • Brew District",
+        label: "Address",
+        placeholder: "Street address with • separators",
+      },
+      taproomHours: {
+        type: "group",
+        label: "Taproom Hours",
+        itemLabel: "Day",
+        min: 7,
+        max: 7,
+        fields: {
+          day: {
+            type: "select",
+            label: "Day",
+            options: [
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday",
+              "Saturday",
+              "Sunday",
+            ],
+            default: "Monday",
+          },
+          hours: {
+            type: "text",
+            label: "Hours",
+            default: "4PM - 11PM",
+            placeholder: "e.g., 4PM - 11PM or Closed",
+          },
+          specialNote: {
+            type: "text",
+            label: "Special Note",
+            default: "",
+            placeholder: "e.g., Happy Hour 4-6PM",
+          },
+        },
+        default: [
+          { day: "Monday", hours: "4PM - 11PM", specialNote: "Industry Night" },
+          { day: "Tuesday", hours: "4PM - 11PM", specialNote: "Trivia Night" },
+          { day: "Wednesday", hours: "3PM - 11PM", specialNote: "" },
+          { day: "Thursday", hours: "3PM - 12AM", specialNote: "Live Music" },
+          { day: "Friday", hours: "3PM - 1AM", specialNote: "Food Trucks" },
+          {
+            day: "Saturday",
+            hours: "12PM - 1AM",
+            specialNote: "Brewery Tours",
+          },
+          { day: "Sunday", hours: "12PM - 9PM", specialNote: "Family Day" },
+        ],
+      },
+
+      // ============ BEER PORTFOLIO ============
+      coreBeers: {
+        type: "group",
+        label: "Core Beers (Always on Tap)",
+        itemLabel: "Beer",
+        min: 4,
+        max: 8,
+        fields: {
+          name: {
+            type: "text",
+            label: "Beer Name",
+            default: "",
+            placeholder: "e.g., IRON STOUT",
+          },
+          style: {
+            type: "select",
+            label: "Beer Style",
+            options: [
+              "Imperial Stout",
+              "West Coast IPA",
+              "New England IPA",
+              "Pilsner",
+              "Sour Ale",
+              "Barleywine",
+              "Porter",
+              "Belgian Tripel",
+              "Saison",
+              "Hefeweizen",
+              "Amber Ale",
+              "Brown Ale",
+              "Pale Ale",
+              "Lager",
+              "Double IPA",
+              "Session IPA",
+              "Gose",
+              "Berliner Weisse",
+            ],
+            default: "Imperial Stout",
+          },
+          abv: {
+            type: "text",
+            label: "ABV",
+            default: "8.5%",
+            placeholder: "e.g., 8.5%",
+          },
+          ibu: {
+            type: "number",
+            label: "IBU",
+            default: 65,
+            min: 0,
+            max: 120,
+          },
+          description: {
+            type: "textarea",
+            label: "Tasting Notes",
+            default: "",
+            placeholder:
+              "Rich chocolate notes with coffee undertones and a velvety mouthfeel",
+          },
+          awards: {
+            type: "text",
+            label: "Awards (Optional)",
+            default: "",
+            placeholder: "e.g., GABF Gold 2023",
+          },
+          availableFormat: {
+            type: "checkbox",
+            label: "Available in Crowlers?",
+            default: true,
+          },
+        },
+        default: [
+          {
+            name: "FORGE STOUT",
+            style: "Imperial Stout",
+            abv: "10.2%",
+            ibu: 85,
+            description:
+              "Aged in bourbon barrels for 12 months. Notes of dark chocolate, espresso, and vanilla with a warming finish.",
+            awards: "GABF Gold 2023",
+            availableFormat: true,
+          },
+          {
+            name: "CASCADE FURY IPA",
+            style: "West Coast IPA",
+            abv: "7.2%",
+            ibu: 75,
+            description:
+              "Dry-hopped with Cascade and Centennial. Pine-forward with citrus undertones and a crisp, clean finish.",
+            awards: "",
+            availableFormat: true,
+          },
+          {
+            name: "OAKTOWN PILSNER",
+            style: "Pilsner",
+            abv: "5.0%",
+            ibu: 35,
+            description:
+              "Crisp, clean, and brilliantly clear. Traditional Czech-style with noble hops and a dry finish.",
+            awards: "World Beer Cup Silver 2022",
+            availableFormat: true,
+          },
+          {
+            name: "BARREL SOUR",
+            style: "Sour Ale",
+            abv: "6.8%",
+            ibu: 15,
+            description:
+              "Barrel-aged for 18 months with local cherries. Tart, complex, with subtle oak character.",
+            awards: "",
+            availableFormat: false,
+          },
+        ],
+      },
+
+      // ============ ROTATING/SELECTION ============
+      rotatingTaps: {
+        type: "group",
+        label: "Rotating/Seasonal Taps",
+        itemLabel: "Seasonal",
+        min: 0,
+        max: 6,
+        fields: {
+          name: { type: "text", label: "Beer Name", default: "" },
+          style: { type: "text", label: "Style", default: "" },
+          abv: { type: "text", label: "ABV", default: "" },
+          availability: {
+            type: "select",
+            label: "Availability",
+            options: [
+              "Limited Release",
+              "Seasonal",
+              "One-Time Batch",
+              "Collaboration",
+            ],
+            default: "Seasonal",
+          },
+          description: { type: "textarea", label: "Description", default: "" },
+        },
+        default: [
+          {
+            name: "HOP HARVEST ALE",
+            style: "Fresh Hop IPA",
+            abv: "6.5%",
+            availability: "Seasonal",
+            description:
+              "Brewed within 24 hours of hop harvest. Vibrant, grassy hop character with floral notes.",
+          },
+        ],
+      },
+
+      // ============ BREWERY EXPERIENCE ============
+      taproomFeatures: {
+        type: "group",
+        label: "Taproom Features",
+        itemLabel: "Feature",
+        min: 3,
+        max: 6,
+        fields: {
+          title: { type: "text", label: "Feature Title", default: "" },
+          description: { type: "textarea", label: "Description", default: "" },
+          icon: {
+            type: "select",
+            label: "Feature Icon",
+            options: [
+              "🍺",
+              "🎵",
+              "🎯",
+              "🍕",
+              "👨‍👩‍👧‍👦",
+              "🐕",
+              "🎮",
+              "📚",
+              "🔥",
+              "🌿",
+            ],
+            default: "🍺",
+          },
+        },
+        default: [
+          {
+            title: "BREWERY TOURS",
+            description:
+              "Guided tours every Saturday at 2PM. See our 30-barrel system and learn about our brewing process.",
+            icon: "🍺",
+          },
+          {
+            title: "LIVE MUSIC",
+            description:
+              "Local bands every Thursday night. No cover charge, just great beer and great tunes.",
+            icon: "🎵",
+          },
+          {
+            title: "FOOD TRUCKS",
+            description:
+              "Rotating selection of gourmet food trucks Friday-Sunday. Check our calendar for weekly lineup.",
+            icon: "🍕",
+          },
+          {
+            title: "DOG FRIENDLY",
+            description:
+              "Well-behaved dogs welcome in our outdoor beer garden. Water bowls and treats provided.",
+            icon: "🐕",
+          },
+        ],
+      },
+
+      // ============ EVENTS ============
+      upcomingEvents: {
+        type: "group",
+        label: "Upcoming Events",
+        itemLabel: "Event",
+        min: 0,
+        max: 5,
+        fields: {
+          title: { type: "text", label: "Event Title", default: "" },
+          date: { type: "text", label: "Date & Time", default: "" },
+          description: {
+            type: "textarea",
+            label: "Event Details",
+            default: "",
+          },
+          featured: {
+            type: "checkbox",
+            label: "Featured Event?",
+            default: false,
+          },
+        },
+        default: [
+          {
+            title: "ANNUAL BARREL RELEASE",
+            date: "December 15, 2024 • 12PM",
+            description:
+              "Release of our limited edition 3-year barrel-aged stout. Only 200 bottles available.",
+            featured: true,
+          },
+          {
+            title: "BREWERS' DINNER",
+            date: "January 20, 2025 • 6PM",
+            description:
+              "5-course pairing dinner with our head brewer. $85 per person, reservations required.",
+            featured: false,
+          },
+        ],
+      },
+
+      // ============ BREWING PHILOSOPHY ============
+      philosophyTitle: {
+        type: "text",
+        default: "OUR APPROACH",
+        label: "Philosophy Section Title",
+      },
+      philosophyContent: {
+        type: "textarea",
+        default:
+          "We believe in the alchemy of traditional methods and modern innovation. Every batch starts with local ingredients, precise temperature control, and patience. Our 30-barrel brewhouse allows for consistency, while our pilot system gives us space for experimentation. We don't rush fermentation—our beers tell us when they're ready.",
+        label: "Brewing Philosophy",
+        rows: 4,
+      },
+
+      // ============ TEAM ============
+      teamMembers: {
+        type: "group",
+        label: "Brewery Team",
+        itemLabel: "Team Member",
+        min: 0,
+        max: 4,
+        fields: {
+          name: { type: "text", label: "Name", default: "" },
+          title: { type: "text", label: "Title", default: "" },
+          bio: { type: "textarea", label: "Bio", default: "" },
+          yearsAtBrewery: {
+            type: "number",
+            label: "Years at Brewery",
+            default: 3,
+            min: 0,
+            max: 50,
+          },
+        },
+        default: [
+          {
+            name: "ALEX MORGAN",
+            title: "HEAD BREWER",
+            bio: "Former chemical engineer turned master brewer. Alex's precision and creativity drive our most innovative recipes.",
+            yearsAtBrewery: 8,
+          },
+          {
+            name: "JAMIE RIVERA",
+            title: "CELLARMASTER",
+            bio: "Jamie oversees our barrel-aging program, ensuring each beer reaches its full potential during maturation.",
+            yearsAtBrewery: 5,
+          },
+        ],
+      },
+
+      // ============ CONTACT & SOCIAL ============
+      contactEmail: {
+        type: "email",
+        default: "info@ironworkbrewing.com",
+        label: "Contact Email",
+      },
+      contactPhone: {
+        type: "tel",
+        default: "(555) 123-4567",
+        label: "Contact Phone",
+      },
+      socialLinks: {
+        type: "group",
+        label: "Social Media",
+        itemLabel: "Platform",
+        min: 0,
+        max: 4,
+        fields: {
+          platform: {
+            type: "select",
+            label: "Platform",
+            options: ["Instagram", "Facebook", "Twitter", "Untappd"],
+            default: "Instagram",
+          },
+          handle: { type: "text", label: "Username", default: "" },
+        },
+        default: [
+          { platform: "Instagram", handle: "@ironworkbrewing" },
+          { platform: "Untappd", handle: "IronworkBrewing" },
+        ],
+      },
+
+      // ============ ADVANCED OPTIONS ============
+      enableOnlineStore: {
+        type: "checkbox",
+        label: "Enable Online Store (Merch)",
+        default: true,
+      },
+      enableBeerClub: {
+        type: "checkbox",
+        label: "Promote Beer Club/Membership",
+        default: true,
+      },
+      enableGrowlerFills: {
+        type: "checkbox",
+        label: "Show Growler Fill Information",
+        default: true,
+      },
+      showBeerAvailability: {
+        type: "checkbox",
+        label: "Show Real-time Beer Availability",
+        default: false,
+      },
+    },
+    structure: (data, theme) => {
+      const isBrutalist = theme.id === "brutalist";
+      const isMinimal = theme.id === "minimal";
+      const isGradient = theme.id === "gradient";
+      const isElegant = theme.id === "elegant";
+      const isRetro = theme.id === "retro";
+      const isGlassmorphism = theme.id === "glassmorphism";
+      const isNeumorphism = theme.id === "neumorphism";
+
+      // Brewery-specific theme adaptation
+      const getBreweryTheme = () => {
+        const primaryColor = data.primaryColor || "#8B4513";
+        const secondaryColor = data.secondaryColor || "#D4AF37";
+
+        if (isBrutalist) {
+          return {
+            bg: "#0a0a0a",
+            surface: "#1a1a1a",
+            text: "#f0f0f0",
+            accent: secondaryColor,
+            border: "#333",
+            highlight: primaryColor,
+            fontHeading: "'Arial Black', 'Arial Bold', sans-serif",
+            fontBody: "'Arial', sans-serif",
+          };
+        }
+        if (isMinimal) {
+          return {
+            bg: "#f8f5f0",
+            surface: "#ffffff",
+            text: "#2c2c2c",
+            accent: primaryColor,
+            border: "#e0d6c9",
+            highlight: secondaryColor,
+            fontHeading: "'Inter', -apple-system, sans-serif",
+            fontBody: "'Inter', -apple-system, sans-serif",
+          };
+        }
+        if (isGradient) {
+          return {
+            bg: `linear-gradient(135deg, ${primaryColor}20 0%, ${secondaryColor}10 100%)`,
+            surface: "rgba(255, 255, 255, 0.9)",
+            text: "#2c2c2c",
+            accent: primaryColor,
+            border: `1px solid ${primaryColor}30`,
+            highlight: secondaryColor,
+            fontHeading: "'Inter', sans-serif",
+            fontBody: "'Inter', sans-serif",
+          };
+        }
+        if (isElegant) {
+          return {
+            bg: "#1a1a1a",
+            surface: "#2a2a2a",
+            text: "#f0f0f0",
+            accent: secondaryColor,
+            border: "#444",
+            highlight: primaryColor,
+            fontHeading: "'Playfair Display', serif",
+            fontBody: "'Lato', sans-serif",
+          };
+        }
+        if (isRetro) {
+          return {
+            bg: "#0a0a0a",
+            surface: "#1a1a1a",
+            text: "#ffd700",
+            accent: "#ff6b6b",
+            border: "#00ffff",
+            highlight: secondaryColor,
+            fontHeading: "'Space Mono', monospace",
+            fontBody: "'Space Mono', monospace",
+          };
+        }
+        if (isGlassmorphism) {
+          return {
+            bg: "rgba(10, 10, 10, 0.8)",
+            surface: "rgba(255, 255, 255, 0.1)",
+            text: "#ffffff",
+            accent: secondaryColor,
+            border: "1px solid rgba(255, 255, 255, 0.2)",
+            highlight: primaryColor,
+            fontHeading: "'Inter', sans-serif",
+            fontBody: "'Inter', sans-serif",
+          };
+        }
+        if (isNeumorphism) {
+          return {
+            bg: "#f0e6d6",
+            surface: "#f8f5f0",
+            text: "#2c2c2c",
+            accent: primaryColor,
+            border: "transparent",
+            highlight: secondaryColor,
+            fontHeading: "'Inter', sans-serif",
+            fontBody: "'Inter', sans-serif",
+          };
+        }
+
+        // Default industrial
+        return {
+          bg: "#0a0a0a",
+          surface: "#1a1a1a",
+          text: "#f0f0f0",
+          accent: secondaryColor,
+          border: "#333",
+          highlight: primaryColor,
+          fontHeading: "'Arial Black', sans-serif",
+          fontBody: "'Arial', sans-serif",
+        };
+      };
+
+      const themeStyles = getBreweryTheme();
+      const logoStyle = data.logoType || "industrial";
+
+      // Generate beer style colors for visual indicators
+      const beerStyleColors = {
+        "Imperial Stout": "#2c1810",
+        "West Coast IPA": "#ffb347",
+        "New England IPA": "#f4d35e",
+        Pilsner: "#ffd166",
+        "Sour Ale": "#ff6b6b",
+        Barleywine: "#8b4513",
+        Porter: "#5d4037",
+        "Belgian Tripel": "#f9c74f",
+        Saison: "#f8961e",
+        Hefeweizen: "#ffd166",
+        "Amber Ale": "#d4a76a",
+        "Brown Ale": "#8b4513",
+        "Pale Ale": "#ffa62b",
+        Lager: "#ffd166",
+        "Double IPA": "#ff9e00",
+        "Session IPA": "#ffb74d",
+        Gose: "#f48fb1",
+        "Berliner Weisse": "#f8bbd0",
+      };
+
+      return `
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${data.breweryName || "Craft Brewery"}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;700&family=Space+Mono&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+      /* ============ BREWERY CORE STYLES ============ */
+      :root {
+        --brewery-primary: ${data.primaryColor || "#8B4513"};
+        --brewery-secondary: ${data.secondaryColor || "#D4AF37"};
+        --brewery-bg: ${themeStyles.bg};
+        --brewery-surface: ${themeStyles.surface};
+        --brewery-text: ${themeStyles.text};
+        --brewery-accent: ${themeStyles.accent};
+        --brewery-border: ${themeStyles.border};
+        --brewery-highlight: ${themeStyles.highlight};
+        --font-heading: ${themeStyles.fontHeading};
+        --font-body: ${themeStyles.fontBody};
+      }
+      
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+      
+      html {
+        scroll-behavior: smooth;
+        scroll-padding-top: 100px;
+      }
+      
+      body {
+        font-family: var(--font-body);
+        background: var(--brewery-bg);
+        color: var(--brewery-text);
+        line-height: 1.6;
+        overflow-x: hidden;
+        ${
+          isNeumorphism
+            ? `
+          background: linear-gradient(145deg, #f0e6d6, #d8cdbc);
+          min-height: 100vh;
+        `
+            : ""
+        }
+      }
+      
+      /* ============ TYPOGRAPHY SYSTEM ============ */
+      h1, h2, h3, h4, h5 {
+        font-family: var(--font-heading);
+        font-weight: ${isBrutalist ? "900" : isElegant ? "600" : "700"};
+        line-height: 1.2;
+        letter-spacing: ${isBrutalist || isRetro ? "0.02em" : "normal"};
+        ${isBrutalist || isRetro ? "text-transform: uppercase;" : ""}
+      }
+      
+      h1 {
+        font-size: clamp(2.5rem, 6vw, 4.5rem);
+        ${isBrutalist ? "letter-spacing: 0.1em;" : ""}
+      }
+      
+      h2 {
+        font-size: clamp(2rem, 4vw, 3rem);
+        position: relative;
+        display: inline-block;
+      }
+      
+      h3 {
+        font-size: clamp(1.5rem, 3vw, 2rem);
+      }
+      
+      .section-title {
+        position: relative;
+        margin-bottom: 3rem;
+      }
+      
+      .section-title::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 0;
+        width: 60px;
+        height: 3px;
+        background: var(--brewery-accent);
+        ${isBrutalist ? "width: 100px; height: 4px;" : ""}
+      }
+      
+      /* ============ LAYOUT COMPONENTS ============ */
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 2rem;
+      }
+      
+      .section {
+        padding: 6rem 0;
+        position: relative;
+      }
+      
+      .section--dark {
+        background: var(--brewery-surface);
+        ${
+          isGlassmorphism
+            ? `
+          background: rgba(0, 0, 0, 0.3);
+          backdrop-filter: blur(20px);
+        `
+            : ""
+        }
+        ${
+          isNeumorphism
+            ? `
+          background: linear-gradient(145deg, #e8decd, #f8f5f0);
+          box-shadow: inset 20px 20px 60px #d8cdbc, 
+                      inset -20px -20px 60px #ffffff;
+        `
+            : ""
+        }
+      }
+      
+      /* ============ HEADER & NAVIGATION ============ */
+      .brewery-header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        z-index: 1000;
+        padding: 1.5rem 0;
+        background: var(--brewery-bg);
+        ${
+          isGlassmorphism
+            ? `
+          background: rgba(10, 10, 10, 0.9);
+          backdrop-filter: blur(20px);
+          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        `
+            : ""
+        }
+        ${
+          isNeumorphism
+            ? `
+          background: transparent;
+          box-shadow: none;
+        `
+            : ""
+        }
+        transition: all 0.3s ease;
+      }
+      
+      .brewery-header.scrolled {
+        padding: 1rem 0;
+        ${
+          isNeumorphism
+            ? `
+          background: rgba(255, 255, 255, 0.9);
+          backdrop-filter: blur(10px);
+          box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        `
+            : ""
+        }
+      }
+      
+      .header-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 2rem;
+      }
+      
+      /* Logo Styles based on selection */
+      .brewery-logo {
+        font-family: var(--font-heading);
+        font-size: ${logoStyle === "industrial" ? "1.5rem" : "1.75rem"};
+        font-weight: 900;
+        color: var(--brewery-text);
+        text-decoration: none;
+        display: flex;
+        flex-direction: column;
+        line-height: 1;
+        ${
+          logoStyle === "rustic"
+            ? `
+          border: 2px solid var(--brewery-primary);
+          padding: 0.5rem 1rem;
+          letter-spacing: 0.1em;
+        `
+            : ""
+        }
+        ${
+          logoStyle === "vintage"
+            ? `
+          font-style: italic;
+          text-transform: uppercase;
+          letter-spacing: 0.2em;
+          border-bottom: 3px solid var(--brewery-accent);
+          padding-bottom: 0.25rem;
+        `
+            : ""
+        }
+      }
+      
+      .logo-tagline {
+        font-size: 0.6em;
+        font-weight: 400;
+        letter-spacing: 0.1em;
+        margin-top: 0.25rem;
+        opacity: 0.8;
+      }
+      
+      .nav-links {
+        display: flex;
+        gap: 3rem;
+        list-style: none;
+        align-items: center;
+      }
+      
+      .nav-link {
+        color: var(--brewery-text);
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 500;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        position: relative;
+        transition: color 0.3s;
+        opacity: 0.8;
+      }
+      
+      .nav-link:hover {
+        color: var(--brewery-accent);
+        opacity: 1;
+      }
+      
+      .nav-link::after {
+        content: '';
+        position: absolute;
+        bottom: -5px;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: var(--brewery-accent);
+        transition: width 0.3s;
+      }
+      
+      .nav-link:hover::after {
+        width: 100%;
+      }
+      
+      /* ============ HERO SECTION ============ */
+      .hero {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        position: relative;
+        overflow: hidden;
+        padding-top: 80px;
+        ${
+          isGradient
+            ? `
+          background: linear-gradient(135deg, 
+            ${data.primaryColor || "#8B4513"}30 0%, 
+            ${data.secondaryColor || "#D4AF37"}20 50%, 
+            transparent 100%);
+        `
+            : ""
+        }
+      }
+      
+      .hero-background {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: 
+          radial-gradient(circle at 20% 50%, ${
+            data.primaryColor || "#8B4513"
+          }10 0%, transparent 50%),
+          radial-gradient(circle at 80% 20%, ${
+            data.secondaryColor || "#D4AF37"
+          }10 0%, transparent 50%);
+        z-index: -1;
+        ${
+          isBrutalist
+            ? `
+          background-image: 
+            repeating-linear-gradient(45deg, transparent, transparent 10px, 
+              ${data.primaryColor || "#8B4513"}10 10px, ${
+                data.primaryColor || "#8B4513"
+              }10 20px),
+            repeating-linear-gradient(-45deg, transparent, transparent 10px, 
+              ${data.secondaryColor || "#D4AF37"}10 10px, ${
+                data.secondaryColor || "#D4AF37"
+              }10 20px);
+        `
+            : ""
+        }
+      }
+      
+      .hero-content {
+        max-width: 800px;
+        position: relative;
+        z-index: 1;
+      }
+      
+      .hero-badge {
+        display: inline-block;
+        padding: 0.5rem 1.5rem;
+        background: var(--brewery-accent);
+        color: ${isBrutalist || isElegant ? "#000" : "#fff"};
+        font-size: 0.9rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        margin-bottom: 2rem;
+        ${isBrutalist ? "border: 2px solid #000;" : ""}
+      }
+      
+      .hero-tagline {
+        font-size: 1.25rem;
+        margin: 2rem 0;
+        max-width: 600px;
+        opacity: 0.9;
+        line-height: 1.8;
+        ${isElegant ? "font-weight: 300;" : ""}
+      }
+      
+      .hero-cta {
+        display: flex;
+        gap: 1rem;
+        margin-top: 3rem;
+        flex-wrap: wrap;
+      }
+      
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 1rem 2rem;
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        ${
+          isBrutalist
+            ? `
+          border: 3px solid var(--brewery-text);
+          background: var(--brewery-text);
+          color: var(--brewery-bg);
+        `
+            : isNeumorphism
+            ? `
+          border-radius: 20px;
+          background: linear-gradient(145deg, #f8f5f0, #e8decd);
+          box-shadow: 10px 10px 20px #d8cdbc, 
+                     -10px -10px 20px #ffffff;
+          color: var(--brewery-primary);
+        `
+            : `
+          border-radius: 0;
+        `
+        }
+      }
+      
+      .btn--primary {
+        background: var(--brewery-accent);
+        color: ${isBrutalist || isElegant ? "#000" : "#fff"};
+        ${
+          isBrutalist
+            ? `
+          border: 3px solid var(--brewery-accent);
+          background: var(--brewery-accent);
+          color: #000;
+        `
+            : ""
+        }
+      }
+      
+      .btn--outline {
+        background: transparent;
+        color: var(--brewery-text);
+        border: 2px solid var(--brewery-border);
+      }
+      
+      .btn:hover {
+        transform: translateY(-2px);
+        ${
+          isBrutalist
+            ? `
+          box-shadow: 6px 6px 0 var(--brewery-text);
+        `
+            : isNeumorphism
+            ? `
+          box-shadow: 5px 5px 10px #d8cdbc, 
+                     -5px -5px 10px #ffffff;
+        `
+            : `
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        `
+        }
+      }
+      
+      /* ============ BEER GRID SYSTEM ============ */
+      .beer-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin-top: 3rem;
+      }
+      
+      .beer-card {
+        background: var(--brewery-surface);
+        border: 1px solid var(--brewery-border);
+        padding: 2rem;
+        position: relative;
+        transition: all 0.3s ease;
+        ${
+          isGlassmorphism
+            ? `
+          background: rgba(255, 255, 255, 0.05);
+          backdrop-filter: blur(10px);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+        `
+            : ""
+        }
+        ${
+          isNeumorphism
+            ? `
+          border-radius: 20px;
+          background: linear-gradient(145deg, #f8f5f0, #e8decd);
+          box-shadow: 10px 10px 20px #d8cdbc, 
+                     -10px -10px 20px #ffffff;
+          border: none;
+        `
+            : ""
+        }
+      }
+      
+      .beer-card:hover {
+        transform: translateY(-5px);
+        ${
+          isBrutalist
+            ? `
+          box-shadow: 8px 8px 0 var(--brewery-text);
+        `
+            : isNeumorphism
+            ? `
+          box-shadow: 15px 15px 30px #d8cdbc, 
+                     -15px -15px 30px #ffffff;
+        `
+            : `
+          box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+        `
+        }
+      }
+      
+      .beer-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid var(--brewery-border);
+      }
+      
+      .beer-name {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin: 0;
+      }
+      
+      .beer-style {
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: var(--brewery-accent);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+      }
+      
+      .beer-stats {
+        display: flex;
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+      }
+      
+      .beer-stat {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      .stat-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--brewery-accent);
+      }
+      
+      .stat-label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        opacity: 0.7;
+      }
+      
+      .beer-description {
+        margin-bottom: 1.5rem;
+        line-height: 1.7;
+      }
+      
+      .beer-awards {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.8rem;
+        color: var(--brewery-accent);
+        margin-bottom: 1rem;
+      }
+      
+      .beer-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 1rem;
+        border-top: 1px solid var(--brewery-border);
+        font-size: 0.85rem;
+      }
+      
+      .beer-available {
+        color: #4caf50;
+        font-weight: 600;
+      }
+      
+      /* ============ TAPROOM HOURS ============ */
+      .hours-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-top: 2rem;
+      }
+      
+      .hours-day {
+        background: var(--brewery-surface);
+        padding: 1.5rem;
+        border: 1px solid var(--brewery-border);
+        ${
+          isNeumorphism
+            ? `
+          border-radius: 15px;
+          background: linear-gradient(145deg, #f8f5f0, #e8decd);
+          box-shadow: 5px 5px 10px #d8cdbc, 
+                     -5px -5px 10px #ffffff;
+          border: none;
+        `
+            : ""
+        }
+      }
+      
+      .day-name {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: var(--brewery-accent);
+      }
+      
+      .day-hours {
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+      }
+      
+      .day-note {
+        font-size: 0.85rem;
+        opacity: 0.8;
+        font-style: italic;
+      }
+      
+      /* ============ FEATURES GRID ============ */
+      .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 2rem;
+        margin-top: 3rem;
+      }
+      
+      .feature-card {
+        text-align: center;
+        padding: 2rem;
+        background: var(--brewery-surface);
+        border: 1px solid var(--brewery-border);
+        ${
+          isNeumorphism
+            ? `
+          border-radius: 20px;
+          background: linear-gradient(145deg, #f8f5f0, #e8decd);
+          box-shadow: 8px 8px 16px #d8cdbc, 
+                     -8px -8px 16px #ffffff;
+          border: none;
+        `
+            : ""
+        }
+      }
+      
+      .feature-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+      }
+      
+      .feature-title {
+        font-size: 1.25rem;
+        margin-bottom: 1rem;
+        color: var(--brewery-accent);
+      }
+      
+      /* ============ EVENTS SECTION ============ */
+      .events-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin-top: 3rem;
+      }
+      
+      .event-card {
+        background: var(--brewery-surface);
+        border: 1px solid var(--brewery-border);
+        padding: 2rem;
+        position: relative;
+        ${
+          isNeumorphism
+            ? `
+          border-radius: 20px;
+          background: linear-gradient(145deg, #f8f5f0, #e8decd);
+          box-shadow: 8px 8px 16px #d8cdbc, 
+                     -8px -8px 16px #ffffff;
+          border: none;
+        `
+            : ""
+        }
+      }
+      
+      .event-card.featured {
+        border: 2px solid var(--brewery-accent);
+        ${
+          isNeumorphism
+            ? `
+          border: 2px solid var(--brewery-accent);
+          box-shadow: 0 0 20px ${data.secondaryColor || "#D4AF37"}40;
+        `
+            : ""
+        }
+      }
+      
+      .event-date {
+        font-size: 0.9rem;
+        color: var(--brewery-accent);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        margin-bottom: 0.5rem;
+      }
+      
+      .event-title {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+      }
+      
+      .event-featured-badge {
+        position: absolute;
+        top: -10px;
+        right: 20px;
+        background: var(--brewery-accent);
+        color: #000;
+        padding: 0.25rem 1rem;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+      }
+      
+      /* ============ TEAM SECTION ============ */
+      .team-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 2rem;
+        margin-top: 3rem;
+      }
+      
+      .team-card {
+        text-align: center;
+        padding: 2rem;
+        background: var(--brewery-surface);
+        border: 1px solid var(--brewery-border);
+        ${
+          isNeumorphism
+            ? `
+          border-radius: 20px;
+          background: linear-gradient(145deg, #f8f5f0, #e8decd);
+          box-shadow: 8px 8px 16px #d8cdbc, 
+                     -8px -8px 16px #ffffff;
+          border: none;
+        `
+            : ""
+        }
+      }
+      
+      .team-name {
+        font-size: 1.25rem;
+        margin: 1rem 0 0.5rem;
+        color: var(--brewery-accent);
+      }
+      
+      .team-title {
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        opacity: 0.8;
+        margin-bottom: 1rem;
+      }
+      
+      .team-bio {
+        font-size: 0.9rem;
+        line-height: 1.6;
+      }
+      
+      /* ============ CONTACT & FOOTER ============ */
+      .contact-info {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 3rem;
+        margin-top: 3rem;
+      }
+      
+      .contact-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+      
+      .contact-icon {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+        color: var(--brewery-accent);
+      }
+      
+      .contact-detail {
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+      }
+      
+      .contact-label {
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        opacity: 0.7;
+      }
+      
+      .social-links {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 2rem;
+      }
+      
+      .social-link {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--brewery-surface);
+        color: var(--brewery-text);
+        text-decoration: none;
+        border: 1px solid var(--brewery-border);
+        transition: all 0.3s;
+        ${
+          isNeumorphism
+            ? `
+          border-radius: 50%;
+          background: linear-gradient(145deg, #f8f5f0, #e8decd);
+          box-shadow: 5px 5px 10px #d8cdbc, 
+                     -5px -5px 10px #ffffff;
+          border: none;
+        `
+            : ""
+        }
+      }
+      
+      .social-link:hover {
+        background: var(--brewery-accent);
+        color: ${isBrutalist || isElegant ? "#000" : "#fff"};
+        transform: translateY(-2px);
+      }
+      
+      .brewery-footer {
+        background: var(--brewery-surface);
+        padding: 4rem 0 2rem;
+        margin-top: 4rem;
+        border-top: 1px solid var(--brewery-border);
+        ${
+          isNeumorphism
+            ? `
+          background: linear-gradient(145deg, #e8decd, #f8f5f0);
+          border-top: 1px solid rgba(0, 0, 0, 0.1);
+        `
+            : ""
+        }
+      }
+      
+      .footer-content {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 3rem;
+        margin-bottom: 3rem;
+      }
+      
+      .copyright {
+        text-align: center;
+        padding-top: 2rem;
+        border-top: 1px solid var(--brewery-border);
+        font-size: 0.9rem;
+        opacity: 0.7;
+      }
+      
+      /* ============ MOBILE RESPONSIVE ============ */
+      @media (max-width: 1024px) {
+        .container {
+          padding: 0 1.5rem;
+        }
+        
+        .section {
+          padding: 4rem 0;
+        }
+        
+        .nav-links {
+          gap: 2rem;
+        }
+      }
+      
+      @media (max-width: 768px) {
+        .header-container {
+          flex-direction: column;
+          gap: 1rem;
+        }
+        
+        .nav-links {
+          flex-wrap: wrap;
+          justify-content: center;
+          gap: 1.5rem;
+        }
+        
+        .hero-cta {
+          flex-direction: column;
+        }
+        
+        .btn {
+          width: 100%;
+          justify-content: center;
+        }
+        
+        .beer-grid,
+        .features-grid,
+        .events-grid,
+        .team-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+      
+      @media (max-width: 480px) {
+        .container {
+          padding: 0 1rem;
+        }
+        
+        .section {
+          padding: 3rem 0;
+        }
+        
+        .beer-card,
+        .event-card,
+        .team-card,
+        .feature-card {
+          padding: 1.5rem;
+        }
+        
+        .hero-tagline {
+          font-size: 1.1rem;
+        }
+      }
+      
+      /* ============ UTILITY CLASSES ============ */
+      .text-center {
+        text-align: center;
+      }
+      
+      .mb-1 { margin-bottom: 1rem; }
+      .mb-2 { margin-bottom: 2rem; }
+      .mb-3 { margin-bottom: 3rem; }
+      .mt-1 { margin-top: 1rem; }
+      .mt-2 { margin-top: 2rem; }
+      .mt-3 { margin-top: 3rem; }
+      
+      /* ============ ANIMATIONS ============ */
+      @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+      }
+      
+      .floating {
+        animation: float 3s ease-in-out infinite;
+      }
+      
+      /* ============ SPECIAL BREWERY EFFECTS ============ */
+      .beer-bubble {
+        position: absolute;
+        background: ${data.secondaryColor || "#D4AF37"}30;
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: -1;
+      }
+      
+      /* Generate random beer bubbles */
+      .bubble-1 { width: 100px; height: 100px; top: 20%; left: 10%; }
+      .bubble-2 { width: 150px; height: 150px; top: 60%; right: 15%; }
+      .bubble-3 { width: 80px; height: 80px; bottom: 20%; left: 20%; }
+      
+      /* Beer foam animation */
+      @keyframes foam-rise {
+        0% { transform: translateY(0) scale(1); opacity: 0; }
+        50% { opacity: 0.5; }
+        100% { transform: translateY(-100px) scale(0); opacity: 0; }
+      }
+      
+      .foam-bubble {
+        position: absolute;
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        animation: foam-rise 3s linear infinite;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Header -->
+    <header class="brewery-header" id="header">
+      <div class="header-container">
+        <a href="#" class="brewery-logo">
+          ${data.breweryName || "IRONWORK BREWING CO."}
+          ${
+            data.tagline
+              ? `<span class="logo-tagline">${data.tagline}</span>`
+              : ""
+          }
+        </a>
+        
+        <nav>
+          <ul class="nav-links">
+            <li><a href="#beers" class="nav-link">BEERS</a></li>
+            <li><a href="#taproom" class="nav-link">TAPROOM</a></li>
+            <li><a href="#events" class="nav-link">EVENTS</a></li>
+            <li><a href="#about" class="nav-link">OUR STORY</a></li>
+            <li><a href="#contact" class="nav-link">VISIT</a></li>
+            <li>
+              <label class="theme-toggle-switch-wrapper" style="cursor: pointer;">
+                <input type="checkbox" class="theme-toggle-switch" onclick="toggleTheme()" aria-label="Toggle theme">
+                <span class="theme-toggle-slider"></span>
+              </label>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+  
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="hero-background"></div>
+      <div class="container">
+        <div class="hero-content">
+          <div class="hero-badge">EST. ${data.foundingYear || "2012"}</div>
+          <h1>${data.breweryName || "IRONWORK BREWING CO."}</h1>
+          ${data.tagline ? `<p class="hero-tagline">${data.tagline}</p>` : ""}
+          
+          <div class="hero-cta">
+            <a href="#beers" class="btn btn--primary">VIEW OUR BEERS</a>
+            <a href="#taproom" class="btn btn--outline">VISIT TAPROOM</a>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Decorative beer bubbles -->
+      <div class="beer-bubble bubble-1 floating"></div>
+      <div class="beer-bubble bubble-2 floating" style="animation-delay: 1s"></div>
+      <div class="beer-bubble bubble-3 floating" style="animation-delay: 2s"></div>
+    </section>
+  
+    <!-- Core Beers Section -->
+    <section id="beers" class="section">
+      <div class="container">
+        <h2 class="section-title text-center">CORE LINEUP</h2>
+        ${
+          data.philosophyContent
+            ? `
+        <p class="text-center mb-3" style="max-width: 800px; margin: 0 auto;">
+          ${data.philosophyContent}
+        </p>
+        `
+            : ""
+        }
+        
+        <div class="beer-grid">
+          ${(data.coreBeers || [])
+            .map(
+              (beer) => `
+          <div class="beer-card">
+            <div class="beer-header">
+              <div>
+                <h3 class="beer-name">${beer.name || "BEER NAME"}</h3>
+                <div class="beer-style">${beer.style || "BEER STYLE"}</div>
+              </div>
+            </div>
+            
+            <div class="beer-stats">
+              <div class="beer-stat">
+                <div class="stat-value">${beer.abv || "ABV"}</div>
+                <div class="stat-label">ABV</div>
+              </div>
+              <div class="beer-stat">
+                <div class="stat-value">${beer.ibu || "IBU"}</div>
+                <div class="stat-label">IBU</div>
+              </div>
+            </div>
+            
+            <p class="beer-description">${
+              beer.description || "Tasting notes description."
+            }</p>
+            
+            ${
+              beer.awards
+                ? `
+            <div class="beer-awards">
+              <span>🏆</span>
+              <span>${beer.awards}</span>
+            </div>
+            `
+                : ""
+            }
+            
+            <div class="beer-meta">
+              ${
+                beer.availableFormat
+                  ? `
+              <span class="beer-available">✓ Available in Crowlers</span>
+              `
+                  : ""
+              }
+              <span style="opacity: 0.7;">Tap #${
+                Math.floor(Math.random() * 20) + 1
+              }</span>
+            </div>
+          </div>
+          `
+            )
+            .join("")}
+        </div>
+        
+        <!-- Rotating Taps -->
+        ${
+          data.rotatingTaps && data.rotatingTaps.length > 0
+            ? `
+        <div class="mt-3">
+          <h3 class="text-center mb-2">SEASONAL & ROTATING</h3>
+          <div class="beer-grid">
+            ${data.rotatingTaps
+              .map(
+                (beer) => `
+            <div class="beer-card">
+              <div class="beer-header">
+                <div>
+                  <h3 class="beer-name">${beer.name}</h3>
+                  <div class="beer-style">${beer.style} • ${beer.availability}</div>
+                </div>
+              </div>
+              <p class="beer-description">${beer.description}</p>
+              <div class="beer-meta">
+                <div class="stat-value">${beer.abv}</div>
+                <span style="opacity: 0.7; font-style: italic;">Limited Release</span>
+              </div>
+            </div>
+            `
+              )
+              .join("")}
+          </div>
+        </div>
+        `
+            : ""
+        }
+      </div>
+    </section>
+  
+    <!-- Taproom Section -->
+    <section id="taproom" class="section section--dark">
+      <div class="container">
+        <h2 class="section-title">TAPROOM & HOURS</h2>
+        
+        <div class="contact-info mb-3">
+          <div class="contact-item">
+            <div class="contact-icon">📍</div>
+            <div class="contact-detail">${data.address || "123 Hops Lane"}</div>
+            <div class="contact-label">LOCATION</div>
+          </div>
+          
+          ${
+            data.contactPhone
+              ? `
+          <div class="contact-item">
+            <div class="contact-icon">📞</div>
+            <div class="contact-detail">${data.contactPhone}</div>
+            <div class="contact-label">PHONE</div>
+          </div>
+          `
+              : ""
+          }
+          
+          ${
+            data.contactEmail
+              ? `
+          <div class="contact-item">
+            <div class="contact-icon">✉️</div>
+            <div class="contact-detail">${data.contactEmail}</div>
+            <div class="contact-label">EMAIL</div>
+          </div>
+          `
+              : ""
+          }
+        </div>
+        
+        <h3 class="mb-2">HOURS</h3>
+        <div class="hours-grid">
+          ${(data.taproomHours || [])
+            .map(
+              (day) => `
+          <div class="hours-day">
+            <div class="day-name">${day.day}</div>
+            <div class="day-hours">${day.hours}</div>
+            ${
+              day.specialNote
+                ? `<div class="day-note">${day.specialNote}</div>`
+                : ""
+            }
+          </div>
+          `
+            )
+            .join("")}
+        </div>
+        
+        <!-- Taproom Features -->
+        ${
+          data.taproomFeatures && data.taproomFeatures.length > 0
+            ? `
+        <div class="mt-3">
+          <h3 class="mb-2">TAPROOM FEATURES</h3>
+          <div class="features-grid">
+            ${data.taproomFeatures
+              .map(
+                (feature) => `
+            <div class="feature-card">
+              <div class="feature-icon">${feature.icon}</div>
+              <h4 class="feature-title">${feature.title}</h4>
+              <p>${feature.description}</p>
+            </div>
+            `
+              )
+              .join("")}
+          </div>
+        </div>
+        `
+            : ""
+        }
+      </div>
+    </section>
+  
+    <!-- Events Section -->
+    ${
+      data.upcomingEvents && data.upcomingEvents.length > 0
+        ? `
+    <section id="events" class="section">
+      <div class="container">
+        <h2 class="section-title">UPCOMING EVENTS</h2>
+        <div class="events-grid">
+          ${data.upcomingEvents
+            .map(
+              (event) => `
+          <div class="event-card ${event.featured ? "featured" : ""}">
+            ${
+              event.featured
+                ? '<div class="event-featured-badge">FEATURED</div>'
+                : ""
+            }
+            <div class="event-date">${event.date}</div>
+            <h3 class="event-title">${event.title}</h3>
+            <p>${event.description}</p>
+          </div>
+          `
+            )
+            .join("")}
+        </div>
+      </div>
+    </section>
+    `
+        : ""
+    }
+  
+    <!-- Team Section -->
+    ${
+      data.teamMembers && data.teamMembers.length > 0
+        ? `
+    <section id="about" class="section section--dark">
+      <div class="container">
+        <h2 class="section-title">MEET THE BREWERS</h2>
+        <div class="team-grid">
+          ${data.teamMembers
+            .map(
+              (member) => `
+          <div class="team-card">
+            <div class="team-name">${member.name}</div>
+            <div class="team-title">${member.title}</div>
+            <p class="team-bio">${member.bio}</p>
+            <div style="margin-top: 1rem; font-size: 0.85rem; opacity: 0.7;">
+              ${member.yearsAtBrewery} years at ${
+                data.breweryName?.split(" ")[0] || "the brewery"
+              }
+            </div>
+          </div>
+          `
+            )
+            .join("")}
+        </div>
+      </div>
+    </section>
+    `
+        : ""
+    }
+  
+    <!-- Contact & Footer -->
+    <section id="contact" class="section">
+      <div class="container">
+        <h2 class="section-title text-center">VISIT US</h2>
+        
+        <div class="contact-info">
+          <div class="contact-item">
+            <div class="contact-icon">🍺</div>
+            <div class="contact-detail">TAPROOM</div>
+            <div class="contact-label">${
+              data.address?.split("•")[0] || "123 Hops Lane"
+            }</div>
+          </div>
+          
+          <div class="contact-item">
+            <div class="contact-icon">⏰</div>
+            <div class="contact-detail">OPEN DAILY</div>
+            <div class="contact-label">Check hours above</div>
+          </div>
+          
+          <div class="contact-item">
+            <div class="contact-icon">🚗</div>
+            <div class="contact-detail">FREE PARKING</div>
+            <div class="contact-label">On-site lot available</div>
+          </div>
+        </div>
+        
+        ${
+          data.socialLinks && data.socialLinks.length > 0
+            ? `
+        <div class="text-center mt-3">
+          <h3 class="mb-2">FOLLOW OUR BREWING JOURNEY</h3>
+          <div class="social-links">
+            ${data.socialLinks
+              .map(
+                (social) => `
+            <a href="#" class="social-link" title="${social.platform}">
+              ${
+                social.platform === "Instagram"
+                  ? "📷"
+                  : social.platform === "Facebook"
+                  ? "👥"
+                  : social.platform === "Twitter"
+                  ? "🐦"
+                  : "🍺"
+              }
+            </a>
+            `
+              )
+              .join("")}
+          </div>
+        </div>
+        `
+            : ""
+        }
+      </div>
+    </section>
+  
+    <!-- Footer -->
+    <footer class="brewery-footer">
+      <div class="container">
+        <div class="footer-content">
+          <div>
+            <div class="brewery-logo" style="margin-bottom: 1rem;">
+              ${data.breweryName || "IRONWORK BREWING CO."}
+            </div>
+            <p style="opacity: 0.8; max-width: 300px;">
+              Crafting exceptional beers since ${data.foundingYear || "2012"}. 
+              Visit our taproom for the full experience.
+            </p>
+          </div>
+          
+          <div>
+            <h4 style="margin-bottom: 1rem;">QUICK LINKS</h4>
+            <ul style="list-style: none;">
+              <li style="margin-bottom: 0.5rem;"><a href="#beers" style="color: var(--brewery-text); text-decoration: none; opacity: 0.8;">Our Beers</a></li>
+              <li style="margin-bottom: 0.5rem;"><a href="#taproom" style="color: var(--brewery-text); text-decoration: none; opacity: 0.8;">Taproom</a></li>
+              <li style="margin-bottom: 0.5rem;"><a href="#events" style="color: var(--brewery-text); text-decoration: none; opacity: 0.8;">Events</a></li>
+              <li style="margin-bottom: 0.5rem;"><a href="#contact" style="color: var(--brewery-text); text-decoration: none; opacity: 0.8;">Visit</a></li>
+            </ul>
+          </div>
+          
+          <div>
+            <h4 style="margin-bottom: 1rem;">BREWERY INFO</h4>
+            <p style="opacity: 0.8; margin-bottom: 0.5rem;">
+              <strong>Location:</strong> ${data.address || "123 Hops Lane"}
+            </p>
+            ${
+              data.contactPhone
+                ? `
+            <p style="opacity: 0.8; margin-bottom: 0.5rem;">
+              <strong>Phone:</strong> ${data.contactPhone}
+            </p>
+            `
+                : ""
+            }
+            ${
+              data.contactEmail
+                ? `
+            <p style="opacity: 0.8;">
+              <strong>Email:</strong> ${data.contactEmail}
+            </p>
+            `
+                : ""
+            }
+          </div>
+        </div>
+        
+        <div class="copyright">
+          © ${new Date().getFullYear()} ${
+        data.breweryName || "Ironwork Brewing Co."
+      }. 
+          All rights reserved. Drink responsibly.
+          ${
+            data.enableBeerClub
+              ? '<br>Become a <a href="#" style="color: var(--brewery-accent);">Beer Club Member</a> for exclusive releases.'
+              : ""
+          }
+        </div>
+      </div>
+    </footer>
+  
+    <script>
+      // Header scroll effect
+      window.addEventListener('scroll', () => {
+        const header = document.getElementById('header');
+        if (window.scrollY > 50) {
+          header.classList.add('scrolled');
+        } else {
+          header.classList.remove('scrolled');
+        }
+      });
+      
+      // Smooth scrolling for anchor links
+      document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function(e) {
+          e.preventDefault();
+          const targetId = this.getAttribute('href');
+          if (targetId === '#') return;
+          
+          const targetElement = document.querySelector(targetId);
+          if (targetElement) {
+            window.scrollTo({
+              top: targetElement.offsetTop - 100,
+              behavior: 'smooth'
+            });
+          }
+        });
+      });
+      
+      // Generate beer bubbles
+      function createBubbles() {
+        const hero = document.querySelector('.hero');
+        for (let i = 0; i < 15; i++) {
+          const bubble = document.createElement('div');
+          bubble.className = 'foam-bubble';
+          bubble.style.left = Math.random() * 100 + '%';
+          bubble.style.width = Math.random() * 20 + 10 + 'px';
+          bubble.style.height = bubble.style.width;
+          bubble.style.animationDelay = Math.random() * 3 + 's';
+          bubble.style.opacity = Math.random() * 0.5 + 0.2;
+          hero.appendChild(bubble);
+        }
+      }
+      
+      // Initialize
+      document.addEventListener('DOMContentLoaded', () => {
+        createBubbles();
+        
+        // Beer availability indicators
+        document.querySelectorAll('.beer-card').forEach(card => {
+          const abv = card.querySelector('.stat-value').textContent;
+          const abvNum = parseFloat(abv);
+          if (abvNum > 8) {
+            card.style.borderLeft = '4px solid var(--brewery-accent)';
+          }
+        });
+      });
+      
+      // Interactive beer stats
+      document.querySelectorAll('.beer-stat').forEach(stat => {
+        stat.addEventListener('mouseenter', function() {
+          this.style.transform = 'scale(1.1)';
+        });
+        stat.addEventListener('mouseleave', function() {
+          this.style.transform = 'scale(1)';
+        });
+      });
+    </script>
+  </body>
+  </html>`;
+    },
+  }),
+  fundraiser: new Template("fundraiser", {
+    name: "Fundraiser Campaign",
+    description:
+      "Complete fundraising page with donation tiers, progress tracker, and supporter testimonials",
+    category: "Personal",
+    image: "fundraiser",
+    fields: {
+      campaignTitle: {
+        type: "text",
+        default: "Help Build a Community Garden",
+        label: "Campaign Title",
+        required: true,
+      },
+      campaignSubtitle: {
+        type: "text",
+        default: "Transforming vacant lots into green spaces for everyone",
+        label: "Campaign Subtitle",
+      },
+      campaignDescription: {
+        type: "textarea",
+        default:
+          "We're raising funds to convert a neglected urban space into a thriving community garden that will provide fresh produce, educational programs, and a gathering place for our neighborhood. Every dollar brings us closer to creating a sustainable green oasis.",
+        label: "Campaign Description",
+        required: true,
+      },
+      goalAmount: {
+        type: "number",
+        default: 25000,
+        label: "Goal Amount ($)",
+        required: true,
+      },
+      raisedAmount: {
+        type: "number",
+        default: 14250,
+        label: "Currently Raised ($)",
+        required: true,
+      },
+      daysRemaining: {
+        type: "number",
+        default: 32,
+        label: "Days Remaining",
+        required: true,
+      },
+      supportersCount: {
+        type: "number",
+        default: 234,
+        label: "Number of Supporters",
+      },
+      organizationName: {
+        type: "text",
+        default: "Green City Initiative",
+        label: "Organization Name",
+        required: true,
+      },
+      organizationDescription: {
+        type: "textarea",
+        default:
+          "A non-profit organization dedicated to urban sustainability and community development since 2015.",
+        label: "Organization Description",
+      },
+      donationTiers: {
+        type: "group",
+        label: "Donation Tiers",
+        itemLabel: "Tier",
+        min: 3,
+        max: 6,
+        fields: {
+          amount: { type: "number", label: "Amount ($)", default: 25 },
+          name: { type: "text", label: "Tier Name", default: "" },
+          description: { type: "textarea", label: "Description", default: "" },
+          includes: {
+            type: "repeatable",
+            label: "What's Included",
+            itemLabel: "Benefit",
+            default: [],
+          },
+        },
+        default: [
+          {
+            amount: 25,
+            name: "Seed Supporter",
+            description: "Help us get started",
+            includes: [
+              "Thank you card",
+              "Social media shoutout",
+              "Your name on our supporter wall",
+            ],
+          },
+          {
+            amount: 100,
+            name: "Garden Friend",
+            description: "Make a real impact",
+            includes: [
+              "All previous benefits",
+              "Personalized certificate",
+              "Invitation to groundbreaking ceremony",
+            ],
+          },
+          {
+            amount: 500,
+            name: "Community Builder",
+            description: "Help shape our garden",
+            includes: [
+              "All previous benefits",
+              "Name engraved on garden plaque",
+              "Private tour with garden designers",
+              "Seasonal produce box",
+            ],
+          },
+          {
+            amount: 1000,
+            name: "Sustainability Champion",
+            description: "Transform our community",
+            includes: [
+              "All previous benefits",
+              "VIP naming opportunity",
+              "Annual garden party invitation",
+              "Behind-the-scenes updates",
+            ],
+          },
+        ],
+      },
+      testimonials: {
+        type: "group",
+        label: "Supporter Testimonials",
+        itemLabel: "Testimonial",
+        min: 0,
+        max: 5,
+        fields: {
+          quote: { type: "textarea", label: "Quote", default: "" },
+          name: { type: "text", label: "Name", default: "" },
+          role: { type: "text", label: "Role/Relationship", default: "" },
+        },
+        default: [
+          {
+            quote:
+              "This initiative will transform our neighborhood. I've watched this space sit empty for years, and seeing it become a community asset is incredibly exciting.",
+            name: "Maria Rodriguez",
+            role: "Local Resident",
+          },
+          {
+            quote:
+              "As a teacher at the nearby elementary school, I'm thrilled about the educational opportunities this garden will provide for our students.",
+            name: "David Chen",
+            role: "Elementary School Teacher",
+          },
+          {
+            quote:
+              "Urban green spaces are essential for community wellbeing. This project perfectly aligns with our city's sustainability goals.",
+            name: "Sarah Johnson",
+            role: "City Council Member",
+          },
+        ],
+      },
+      faqs: {
+        type: "group",
+        label: "FAQs",
+        itemLabel: "FAQ",
+        min: 0,
+        max: 10,
+        fields: {
+          question: { type: "text", label: "Question", default: "" },
+          answer: { type: "textarea", label: "Answer", default: "" },
+        },
+        default: [
+          {
+            question: "How will the funds be used?",
+            answer:
+              "Funds will cover soil preparation, irrigation system, raised garden beds, fencing, tools, plants/seeds, and educational signage.",
+          },
+          {
+            question: "When will the garden be completed?",
+            answer:
+              "We aim to break ground within 60 days of reaching our funding goal, with completion expected 3-4 months later.",
+          },
+          {
+            question: "Can I volunteer instead of donating?",
+            answer:
+              "Yes! Once construction begins, we'll need many volunteers. Sign up for our newsletter to receive volunteer opportunities.",
+          },
+          {
+            question: "Is my donation tax-deductible?",
+            answer:
+              "Yes, Green City Initiative is a registered 501(c)(3) non-profit organization. All donations are tax-deductible to the extent permitted by law.",
+          },
+        ],
+      },
+      contactEmail: {
+        type: "email",
+        default: "contact@greencity.org",
+        label: "Contact Email",
+      },
+      socialLinks: {
+        type: "group",
+        label: "Social Media Links",
+        itemLabel: "Platform",
+        min: 0,
+        max: 4,
+        fields: {
+          platform: {
+            type: "select",
+            label: "Platform",
+            default: "facebook",
+            options: ["facebook", "twitter", "instagram", "linkedin"],
+          },
+          url: { type: "url", label: "URL", default: "" },
+        },
+        default: [
+          { platform: "facebook", url: "https://facebook.com/greencity" },
+          {
+            platform: "instagram",
+            url: "https://instagram.com/greencityinitiative",
+          },
+          { platform: "twitter", url: "https://twitter.com/greencity" },
+        ],
+      },
+    },
+    structure: (data, theme, colorMode) => {
+      // Detect theme style for dynamic elements
+      const themeId = theme?.id || "minimal";
+      const isBrutalist = themeId === "brutalist";
+      const isGradient = themeId === "gradient";
+      const isElegant = themeId === "elegant";
+      const isRetro = themeId === "retro";
+      const isGlassmorphism = themeId === "glassmorphism";
+      const isNeumorphism = themeId === "neumorphism";
+
+      // Determine if we're in dark mode
+      const isDark = colorMode === "dark";
+
+      // Calculate progress percentage
+      const progressPercentage = Math.min(
+        Math.round((data.raisedAmount / data.goalAmount) * 100),
+        100
+      );
+
+      // Calculate days left
+      const daysLeft = data.daysRemaining > 0 ? data.daysRemaining : 0;
+
+      // Neumorphism helpers
+      const getNeumorphismShadow = (inset = false) => {
+        if (!isNeumorphism) return "";
+        return inset
+          ? "box-shadow: var(--neomorph-shadow-in);"
+          : "box-shadow: var(--neomorph-shadow-out);";
+      };
+
+      const getNeumorphismHoverShadow = () => {
+        if (!isNeumorphism) return "";
+        return "var(--neomorph-shadow-in)";
+      };
+
+      const getNeumorphismNormalShadow = () => {
+        if (!isNeumorphism) return "";
+        return "var(--neomorph-shadow-out)";
+      };
+
+      return `
+      <!-- Sticky Header -->
+      <header style="padding: ${
+        isBrutalist ? "2rem 0" : "1.5rem 0"
+      }; border-bottom: ${
+        isBrutalist ? "4px" : isRetro ? "3px" : "1px"
+      } solid ${
+        isBrutalist || isRetro ? "var(--color-accent)" : "var(--color-border)"
+      }; position: sticky; top: 0; background: ${
+        isGlassmorphism ? "rgba(255,255,255,0.1)" : "var(--color-bg)"
+      }; z-index: 100; backdrop-filter: blur(${
+        isGlassmorphism ? "20px" : "10px"
+      });">
+        <div class="container">
+          <nav style="display: flex; justify-content: space-between; align-items: center;">
+            <div class="logo" style="font-family: ${
+              isElegant
+                ? "Playfair Display, serif"
+                : isRetro
+                ? "Space Mono, monospace"
+                : "inherit"
+            }; font-weight: ${isBrutalist ? "900" : "600"}; font-size: ${
+        isBrutalist ? "1.75rem" : isRetro ? "1.5rem" : "1.25rem"
+      }; letter-spacing: ${isBrutalist || isRetro ? "2px" : "-0.02em"}; ${
+        isBrutalist || isRetro ? "text-transform: uppercase;" : ""
+      } ${
+        isGradient
+          ? "background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"
+          : isRetro
+          ? "background: linear-gradient(90deg, var(--color-accent), #00f5ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"
+          : ""
+      }">
+              ${data.organizationName || "Fundraiser"}
+            </div>
+            
+            <!-- Desktop Navigation -->
+            <ul class="nav-links" style="display: flex; gap: ${
+              isBrutalist || isElegant ? "3rem" : "2rem"
+            }; list-style: none; align-items: center;">
+              <li><a href="#about" style="color: var(--color-text-secondary); text-decoration: none; font-size: ${
+                isBrutalist ? "1.125rem" : isRetro ? "0.9375rem" : "0.875rem"
+              }; transition: color 0.2s; font-weight: ${
+        isBrutalist ? "700" : isElegant ? "400" : "500"
+      }; ${
+        isBrutalist || isRetro ? "text-transform: uppercase;" : ""
+      }" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text-secondary)'">About</a></li>
+              <li><a href="#donate" style="color: var(--color-text-secondary); text-decoration: none; font-size: ${
+                isBrutalist ? "1.125rem" : isRetro ? "0.9375rem" : "0.875rem"
+              }; transition: color 0.2s; font-weight: ${
+        isBrutalist ? "700" : isElegant ? "400" : "500"
+      }; ${
+        isBrutalist || isRetro ? "text-transform: uppercase;" : ""
+      }" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text-secondary)'">Donate</a></li>
+              <li><a href="#faq" style="color: var(--color-text-secondary); text-decoration: none; font-size: ${
+                isBrutalist ? "1.125rem" : isRetro ? "0.9375rem" : "0.875rem"
+              }; transition: color 0.2s; font-weight: ${
+        isBrutalist ? "700" : isElegant ? "400" : "500"
+      }; ${
+        isBrutalist || isRetro ? "text-transform: uppercase;" : ""
+      }" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text-secondary)'">FAQ</a></li>
+              <li>
+                <label class="theme-toggle-switch-wrapper" style="cursor: pointer; ${
+                  isNeumorphism
+                    ? `padding: 0.5rem; border-radius: 12px; display: inline-block; background: var(--color-bg); ${getNeumorphismShadow(
+                        false
+                      )}`
+                    : ""
+                }">
+                  <input type="checkbox" class="theme-toggle-switch" onclick="toggleTheme()" aria-label="Toggle theme">
+                  <span class="theme-toggle-slider"></span>
+                </label>
+              </li>
+            </ul>
+            
+            <!-- Mobile Menu Button -->
+            <div class="mobile-controls" style="display: none; align-items: center; gap: 1rem;">
+              <button class="hamburger-btn" onclick="toggleMobileMenu()" aria-label="Menu" style="background: none; border: none; cursor: pointer; padding: 0.5rem; color: var(--color-text);">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                  <line x1="3" y1="12" x2="21" y2="12"></line>
+                  <line x1="3" y1="6" x2="21" y2="6"></line>
+                  <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+              </button>
+            </div>
+          </nav>
+          
+          <!-- Mobile Menu Dropdown -->
+          <div class="mobile-menu" style="display: none; padding: 2rem 0 1rem; ${
+            isNeumorphism || isGlassmorphism
+              ? ""
+              : "border-top: 1px solid var(--color-border);"
+          } margin-top: 1rem;">
+            <ul style="list-style: none; display: flex; flex-direction: column; gap: 1.5rem;">
+              <li><a href="#about" onclick="toggleMobileMenu()" style="color: var(--color-text); text-decoration: none; font-size: 1.125rem; font-weight: 500; display: block;">About</a></li>
+              <li><a href="#donate" onclick="toggleMobileMenu()" style="color: var(--color-text); text-decoration: none; font-size: 1.125rem; font-weight: 500; display: block;">Donate</a></li>
+              <li><a href="#faq" onclick="toggleMobileMenu()" style="color: var(--color-text); text-decoration: none; font-size: 1.125rem; font-weight: 500; display: block;">FAQ</a></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+
+      <main>
+        <!-- Hero Section -->
+        <section style="padding: ${
+          isBrutalist || isElegant ? "8rem 0 6rem" : "6rem 0 4rem"
+        }; text-align: center; background: ${
+        isGradient
+          ? "linear-gradient(135deg, rgba(102,126,234,0.05), rgba(240,147,251,0.05))"
+          : isBrutalist
+          ? "var(--color-text)"
+          : "var(--color-bg)"
+      }; position: relative;">
+          <div class="container" style="max-width: 900px;">
+            ${
+              isGradient
+                ? `
+              <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at 30% 20%, rgba(102,126,234,0.08), transparent 50%), radial-gradient(circle at 80% 80%, rgba(240,147,251,0.08), transparent 50%); pointer-events: none;"></div>
+            `
+                : ""
+            }
+            
+            <h1 style="font-family: ${
+              isElegant ? "Playfair Display, serif" : "inherit"
+            }; font-size: clamp(${
+        isBrutalist || isRetro ? "3rem" : "2.5rem"
+      }, ${isBrutalist || isRetro ? "10vw" : "7vw"}, ${
+        isBrutalist || isRetro ? "5rem" : "4rem"
+      }); font-weight: ${
+        isBrutalist || isNeumorphism
+          ? "800"
+          : isRetro
+          ? "700"
+          : isElegant
+          ? "600"
+          : "700"
+      }; line-height: 1.1; letter-spacing: ${
+        isRetro ? "2px" : "-0.03em"
+      }; margin-bottom: 1rem; ${
+        isBrutalist || isRetro ? "text-transform: uppercase;" : ""
+      } ${isBrutalist ? "color: var(--color-bg);" : ""}">
+              ${
+                isBrutalist
+                  ? data.campaignTitle.toUpperCase()
+                  : data.campaignTitle || "Fundraiser"
+              }
+            </h1>
+            
+            <p style="font-family: ${
+              isElegant
+                ? "Lato, sans-serif"
+                : isRetro
+                ? "Space Mono, monospace"
+                : "inherit"
+            }; font-size: ${
+        isBrutalist || isRetro ? "1.5rem" : "1.25rem"
+      }; color: ${
+        isBrutalist ? "var(--color-bg)" : "var(--color-text-secondary)"
+      }; max-width: 700px; margin: 0 auto 2rem; line-height: ${
+        isElegant ? "1.8" : "1.6"
+      }; font-weight: ${isElegant ? "300" : "normal"};">
+              ${data.campaignSubtitle || ""}
+            </p>
+          </div>
+        </section>
+
+        <!-- Progress Tracker Section -->
+        <section style="padding: ${
+          isBrutalist ? "4rem 0" : "3rem 0"
+        }; background: var(--color-surface); border-top: ${
+        isBrutalist ? "4px" : "1px"
+      } solid var(--color-border); border-bottom: ${
+        isBrutalist ? "4px" : "1px"
+      } solid var(--color-border);">
+          <div class="container" style="max-width: 900px;">
+            <div class="progress-stats" style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 2rem; margin-bottom: 2.5rem;">
+              <div class="stat">
+                <div style="font-size: ${
+                  isBrutalist ? "3.5rem" : "3rem"
+                }; font-weight: ${
+        isBrutalist ? "900" : "800"
+      }; color: var(--color-accent); margin-bottom: 0.5rem; ${
+        isBrutalist ? "text-transform: uppercase;" : ""
+      }">
+                  $${data.raisedAmount.toLocaleString()}
+                </div>
+                <div style="color: var(--color-text-secondary); font-size: ${
+                  isBrutalist ? "1.125rem" : "0.9375rem"
+                }; font-weight: ${isBrutalist ? "700" : "500"};">
+                  Raised of $${data.goalAmount.toLocaleString()} goal
+                </div>
+              </div>
+              
+              <div class="stat">
+                <div style="font-size: ${
+                  isBrutalist ? "3.5rem" : "3rem"
+                }; font-weight: ${
+        isBrutalist ? "900" : "800"
+      }; color: var(--color-accent); margin-bottom: 0.5rem; ${
+        isBrutalist ? "text-transform: uppercase;" : ""
+      }">
+                  ${progressPercentage}%
+                </div>
+                <div style="color: var(--color-text-secondary); font-size: ${
+                  isBrutalist ? "1.125rem" : "0.9375rem"
+                }; font-weight: ${isBrutalist ? "700" : "500"};">
+                  Goal Progress
+                </div>
+              </div>
+              
+              <div class="stat">
+                <div style="font-size: ${
+                  isBrutalist ? "3.5rem" : "3rem"
+                }; font-weight: ${
+        isBrutalist ? "900" : "800"
+      }; color: var(--color-accent); margin-bottom: 0.5rem; ${
+        isBrutalist ? "text-transform: uppercase;" : ""
+      }">
+                  ${data.supportersCount || 0}
+                </div>
+                <div style="color: var(--color-text-secondary); font-size: ${
+                  isBrutalist ? "1.125rem" : "0.9375rem"
+                }; font-weight: ${isBrutalist ? "700" : "500"};">
+                  Supporters
+                </div>
+              </div>
+              
+              <div class="stat">
+                <div style="font-size: ${
+                  isBrutalist ? "3.5rem" : "3rem"
+                }; font-weight: ${
+        isBrutalist ? "900" : "800"
+      }; color: var(--color-accent); margin-bottom: 0.5rem; ${
+        isBrutalist ? "text-transform: uppercase;" : ""
+      }">
+                  ${daysLeft}
+                </div>
+                <div style="color: var(--color-text-secondary); font-size: ${
+                  isBrutalist ? "1.125rem" : "0.9375rem"
+                }; font-weight: ${isBrutalist ? "700" : "500"};">
+                  Days Left
+                </div>
+              </div>
+            </div>
+            
+            <!-- Progress Bar -->
+            <div style="background: ${
+              isGlassmorphism ? "rgba(255,255,255,0.1)" : "var(--color-border)"
+            }; height: ${isBrutalist ? "24px" : "12px"}; border-radius: ${
+        isBrutalist || isElegant ? "0" : "999px"
+      }; overflow: hidden; backdrop-filter: blur(10px);">
+              <div style="width: ${progressPercentage}%; height: 100%; background: ${
+        isGradient
+          ? "linear-gradient(135deg, #667eea, #764ba2)"
+          : isRetro
+          ? "linear-gradient(90deg, var(--color-accent), #00f5ff)"
+          : "var(--color-accent)"
+      }; transition: width 1s ease-in-out; position: relative;">
+                ${
+                  isBrutalist
+                    ? `<div style="position: absolute; right: 0; top: 0; bottom: 0; width: 4px; background: var(--color-bg);"></div>`
+                    : ""
+                }
+              </div>
+            </div>
+            
+            <!-- Quick Donation Buttons -->
+            <div style="display: flex; justify-content: center; gap: 1rem; margin-top: 2.5rem; flex-wrap: wrap;">
+              ${[25, 50, 100, 250, 500]
+                .map(
+                  (amount) => `
+                <button onclick="showDonationModal(${amount})" style="padding: ${
+                    isBrutalist ? "1rem 1.5rem" : "0.75rem 1.25rem"
+                  }; border-radius: ${
+                    isGradient || isRetro
+                      ? "999px"
+                      : isBrutalist || isElegant
+                      ? "0"
+                      : "8px"
+                  }; border: ${
+                    isBrutalist ? "3px" : "2px"
+                  } solid var(--color-border); background: ${
+                    isGlassmorphism ? "rgba(255,255,255,0.05)" : "transparent"
+                  }; color: var(--color-text); font-weight: ${
+                    isBrutalist ? "700" : "600"
+                  }; cursor: pointer; transition: all 0.2s; font-size: ${
+                    isBrutalist ? "1.125rem" : "1rem"
+                  }; ${
+                    isBrutalist || isRetro ? "text-transform: uppercase;" : ""
+                  }" onmouseover="${
+                    isBrutalist
+                      ? "this.style.background='var(--color-accent)'; this.style.color='var(--color-bg)'; this.style.borderColor='var(--color-accent)'"
+                      : isRetro
+                      ? "this.style.background='var(--color-accent)'; this.style.color='white'"
+                      : "this.style.background='var(--color-surface)'; this.style.borderColor='var(--color-accent)'"
+                  }" onmouseout="${
+                    isBrutalist
+                      ? "this.style.background='transparent'; this.style.color='var(--color-text)'; this.style.borderColor='var(--color-border)'"
+                      : isRetro
+                      ? "this.style.background='transparent'; this.style.color='var(--color-text)'"
+                      : "this.style.background='transparent'; this.style.borderColor='var(--color-border)'"
+                  }">
+                  $${amount}
+                </button>
+              `
+                )
+                .join("")}
+            </div>
+          </div>
+        </section>
+
+        <!-- About & Campaign Details -->
+        <section id="about" style="padding: ${
+          isBrutalist || isRetro ? "6rem 0" : "4rem 0"
+        };">
+          <div class="container" style="max-width: 900px;">
+            <h2 style="font-family: ${
+              isElegant ? "Playfair Display, serif" : "inherit"
+            }; font-size: clamp(2rem, 5vw, 3rem); font-weight: ${
+        isBrutalist ? "900" : "700"
+      }; margin-bottom: 2rem; letter-spacing: ${isRetro ? "2px" : "-0.02em"}; ${
+        isBrutalist || isRetro ? "text-transform: uppercase;" : ""
+      }">
+              About This Campaign
+            </h2>
+            
+            <div style="font-family: ${
+              isElegant ? "Lato, sans-serif" : "inherit"
+            }; font-size: ${
+        isBrutalist ? "1.25rem" : "1.125rem"
+      }; line-height: ${
+        isElegant ? "1.9" : "1.7"
+      }; color: var(--color-text-secondary); margin-bottom: 3rem; font-weight: ${
+        isElegant ? "300" : "normal"
+      };">
+              ${data.campaignDescription || ""}
+            </div>
+            
+            ${
+              data.organizationDescription
+                ? `
+              <div style="padding: ${
+                isBrutalist ? "3rem" : "2.5rem"
+              }; background: ${
+                    isGlassmorphism
+                      ? "rgba(255,255,255,0.05)"
+                      : isNeumorphism
+                      ? "var(--color-bg)"
+                      : "var(--color-surface)"
+                  }; border-radius: ${
+                    isGradient
+                      ? "24px"
+                      : isBrutalist || isElegant || isRetro
+                      ? "0"
+                      : "16px"
+                  }; border: ${
+                    isBrutalist ? "4px" : isRetro ? "2px" : "1px"
+                  } solid ${
+                    isBrutalist || isRetro
+                      ? "var(--color-accent)"
+                      : isGlassmorphism
+                      ? "rgba(255,255,255,0.1)"
+                      : "var(--color-border)"
+                  }; ${
+                    isGlassmorphism
+                      ? "backdrop-filter: blur(20px);"
+                      : isNeumorphism
+                      ? getNeumorphismShadow(false)
+                      : ""
+                  }">
+                <h3 style="font-family: ${
+                  isElegant ? "Playfair Display, serif" : "inherit"
+                }; font-size: ${
+                    isBrutalist ? "1.75rem" : "1.5rem"
+                  }; font-weight: ${
+                    isBrutalist ? "900" : "600"
+                  }; margin-bottom: 1rem; ${
+                    isBrutalist ? "text-transform: uppercase;" : ""
+                  }">
+                  About ${data.organizationName || "Our Organization"}
+                </h3>
+                <p style="font-family: ${
+                  isElegant
+                    ? "Lato, sans-serif"
+                    : isRetro
+                    ? "Space Mono, monospace"
+                    : "inherit"
+                }; color: var(--color-text-secondary); line-height: ${
+                    isElegant ? "1.8" : "1.7"
+                  }; font-size: ${
+                    isBrutalist ? "1.125rem" : "1rem"
+                  }; font-weight: ${isElegant ? "300" : "normal"};">
+                  ${data.organizationDescription}
+                </p>
+              </div>
+            `
+                : ""
+            }
+          </div>
+        </section>
+
+        <!-- Donation Tiers -->
+        <section id="donate" style="padding: ${
+          isBrutalist || isRetro ? "6rem 0" : "4rem 0"
+        }; background: var(--color-surface);">
+          <div class="container">
+            <h2 style="font-family: ${
+              isElegant ? "Playfair Display, serif" : "inherit"
+            }; font-size: clamp(2rem, 5vw, 3rem); font-weight: ${
+        isBrutalist ? "900" : "700"
+      }; text-align: center; margin-bottom: 1rem; letter-spacing: ${
+        isRetro ? "2px" : "-0.02em"
+      }; ${isBrutalist || isRetro ? "text-transform: uppercase;" : ""}">
+              Support This Campaign
+            </h2>
+            <p style="text-align: center; color: var(--color-text-secondary); max-width: 600px; margin: 0 auto 4rem; font-size: ${
+              isBrutalist ? "1.25rem" : "1.125rem"
+            }; font-weight: ${isElegant ? "300" : "normal"};">
+              Choose a donation tier that works for you
+            </p>
+            
+            <div class="donation-tiers" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(${
+              isBrutalist || isElegant ? "300px" : "280px"
+            }, 1fr)); gap: ${isElegant ? "2.5rem" : "2rem"};">
+              ${
+                data.donationTiers && data.donationTiers.length > 0
+                  ? data.donationTiers
+                      .map(
+                        (tier, index) => `
+                  <div class="donation-tier" style="padding: ${
+                    isBrutalist ? "3rem" : "2.5rem"
+                  }; border-radius: ${
+                          isGradient
+                            ? "24px"
+                            : isBrutalist || isElegant || isRetro
+                            ? "0"
+                            : "20px"
+                        }; border: ${
+                          isBrutalist ? "4px" : isRetro ? "3px" : "2px"
+                        } solid ${
+                          index === 2
+                            ? "var(--color-accent)"
+                            : isBrutalist || isRetro
+                            ? "var(--color-accent)"
+                            : isGlassmorphism
+                            ? "rgba(255,255,255,0.1)"
+                            : "var(--color-border)"
+                        }; background: ${
+                          index === 2
+                            ? isGradient
+                              ? "linear-gradient(135deg, rgba(102,126,234,0.1), rgba(118,75,162,0.1))"
+                              : isRetro
+                              ? "rgba(255,47,181,0.05)"
+                              : isGlassmorphism
+                              ? "rgba(255,255,255,0.08)"
+                              : isNeumorphism
+                              ? "var(--color-bg)"
+                              : "var(--color-surface)"
+                            : isGlassmorphism
+                            ? "rgba(255,255,255,0.05)"
+                            : isNeumorphism
+                            ? "var(--color-bg)"
+                            : "var(--color-bg)"
+                        }; transition: all 0.3s; position: relative; ${
+                          isGlassmorphism
+                            ? "backdrop-filter: blur(20px);"
+                            : isNeumorphism
+                            ? getNeumorphismShadow(false)
+                            : ""
+                        } ${
+                          index === 2
+                            ? isBrutalist
+                              ? "transform: scale(1.05);"
+                              : isRetro
+                              ? "transform: translateY(-8px); box-shadow: 0 20px 40px rgba(255,47,181,0.2);"
+                              : ""
+                            : ""
+                        }" 
+                        onmouseover="${
+                          isBrutalist
+                            ? "this.style.transform='translate(-4px, -4px)'; this.style.boxShadow='8px 8px 0 var(--color-accent)'"
+                            : isRetro
+                            ? "this.style.transform='translateY(-8px)'; this.style.boxShadow='0 20px 40px rgba(255,47,181,0.2)'"
+                            : isGlassmorphism
+                            ? "this.style.transform='translateY(-8px)'; this.style.borderColor='var(--color-accent)'"
+                            : isNeumorphism
+                            ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
+                            : "this.style.transform='translateY(-8px)'; this.style.borderColor='var(--color-accent)'"
+                        }" 
+                        onmouseout="${
+                          isBrutalist
+                            ? `this.style.transform='${
+                                index === 2 ? "scale(1.05)" : "translate(0,0)"
+                              }'; this.style.boxShadow='none'`
+                            : isRetro
+                            ? `this.style.transform='${
+                                index === 2
+                                  ? "translateY(-8px)"
+                                  : "translateY(0)"
+                              }'; this.style.boxShadow='${
+                                index === 2
+                                  ? "0 20px 40px rgba(255,47,181,0.2)"
+                                  : "none"
+                              }'`
+                            : isGlassmorphism
+                            ? `this.style.transform='${
+                                index === 2
+                                  ? "translateY(-8px)"
+                                  : "translateY(0)"
+                              }'; this.style.borderColor='${
+                                index === 2
+                                  ? "var(--color-accent)"
+                                  : "rgba(255,255,255,0.1)"
+                              }'`
+                            : isNeumorphism
+                            ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
+                            : `this.style.transform='${
+                                index === 2
+                                  ? "translateY(-8px)"
+                                  : "translateY(0)"
+                              }'; this.style.borderColor='${
+                                index === 2
+                                  ? "var(--color-accent)"
+                                  : "var(--color-border)"
+                              }'`
+                        }">
+                        ${
+                          index === 2 && !isBrutalist
+                            ? `
+                          <div style="position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--color-accent); color: white; padding: 0.5rem 1.5rem; border-radius: 999px; font-weight: 700; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 1px;">
+                            Most Popular
+                          </div>
+                        `
+                            : ""
+                        }
+                        
+                        <h3 style="font-family: ${
+                          isElegant ? "Playfair Display, serif" : "inherit"
+                        }; font-size: ${
+                          isBrutalist ? "2rem" : "1.5rem"
+                        }; font-weight: ${
+                          isBrutalist ? "900" : "700"
+                        }; margin-bottom: 0.5rem; ${
+                          isBrutalist ? "text-transform: uppercase;" : ""
+                        }">
+                          $${tier.amount.toLocaleString()}
+                        </h3>
+                        
+                        <h4 style="font-family: ${
+                          isElegant ? "Playfair Display, serif" : "inherit"
+                        }; font-size: ${
+                          isBrutalist ? "1.5rem" : "1.25rem"
+                        }; font-weight: ${
+                          isBrutalist ? "700" : "600"
+                        }; margin-bottom: 1rem; color: var(--color-accent); ${
+                          isBrutalist ? "text-transform: uppercase;" : ""
+                        }">
+                          ${tier.name || ""}
+                        </h4>
+                        
+                        <p style="color: var(--color-text-secondary); margin-bottom: 2rem; line-height: 1.7; font-size: ${
+                          isBrutalist ? "1.125rem" : "1rem"
+                        }; font-weight: ${isElegant ? "300" : "normal"};">
+                          ${tier.description || ""}
+                        </p>
+                        
+                        ${
+                          tier.includes && tier.includes.length > 0
+                            ? `
+                          <ul style="list-style: none; margin-bottom: 2rem; padding-left: 0;">
+                            ${tier.includes
+                              .map(
+                                (item) => `
+                              <li style="display: flex; align-items: flex-start; gap: 0.75rem; margin-bottom: 0.75rem; color: var(--color-text-secondary);">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="${
+                                  isRetro
+                                    ? "var(--color-accent)"
+                                    : "var(--color-accent)"
+                                }" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;">
+                                  <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                                <span style="font-size: ${
+                                  isBrutalist ? "1.125rem" : "0.9375rem"
+                                };">${item}</span>
+                              </li>
+                            `
+                              )
+                              .join("")}
+                          </ul>
+                          `
+                            : ""
+                        }
+                        
+                        <button onclick="showDonationModal(${
+                          tier.amount
+                        })" style="width: 100%; padding: ${
+                          isBrutalist ? "1.25rem" : "1rem"
+                        }; background: ${
+                          isGradient
+                            ? "linear-gradient(135deg, #667eea, #764ba2)"
+                            : isRetro
+                            ? "linear-gradient(90deg, var(--color-accent), #b537f2)"
+                            : isGlassmorphism
+                            ? "rgba(255,255,255,0.15)"
+                            : isNeumorphism
+                            ? "var(--color-bg)"
+                            : "var(--color-accent)"
+                        }; color: ${
+                          isGradient || isRetro
+                            ? "white"
+                            : isGlassmorphism || isNeumorphism
+                            ? "var(--color-text)"
+                            : "white"
+                        }; border: ${
+                          isBrutalist ? "3px" : isRetro ? "2px" : "none"
+                        } solid ${
+                          isBrutalist
+                            ? "var(--color-bg)"
+                            : isRetro
+                            ? "var(--color-accent)"
+                            : "transparent"
+                        }; border-radius: ${
+                          isGradient || isRetro
+                            ? "999px"
+                            : isBrutalist || isElegant
+                            ? "0"
+                            : "8px"
+                        }; font-weight: ${
+                          isBrutalist ? "900" : "700"
+                        }; cursor: pointer; transition: all 0.2s; font-size: ${
+                          isBrutalist ? "1.125rem" : "1rem"
+                        }; ${
+                          isBrutalist || isRetro
+                            ? "text-transform: uppercase;"
+                            : ""
+                        } ${isNeumorphism ? getNeumorphismShadow(false) : ""}" 
+                          onmouseover="${
+                            isBrutalist
+                              ? "this.style.background='var(--color-bg)'; this.style.color='var(--color-accent)'; this.style.borderColor='var(--color-accent)'"
+                              : isGradient
+                              ? "this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 20px rgba(102,126,234,0.3)'"
+                              : isRetro
+                              ? "this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 20px rgba(255,47,181,0.3)'"
+                              : isGlassmorphism
+                              ? "this.style.transform='translateY(-2px)'; this.style.background='rgba(255,255,255,0.2)'"
+                              : isNeumorphism
+                              ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
+                              : "this.style.opacity='0.9'; this.style.transform='translateY(-2px)'"
+                          }" 
+                          onmouseout="${
+                            isBrutalist
+                              ? "this.style.background='var(--color-accent)'; this.style.color='var(--color-bg)'; this.style.borderColor='var(--color-bg)'"
+                              : isGradient
+                              ? "this.style.transform='translateY(0)'; this.style.boxShadow='none'"
+                              : isRetro
+                              ? "this.style.transform='translateY(0)'; this.style.boxShadow='none'"
+                              : isGlassmorphism
+                              ? "this.style.transform='translateY(0)'; this.style.background='rgba(255,255,255,0.15)'"
+                              : isNeumorphism
+                              ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
+                              : "this.style.opacity='1'; this.style.transform='translateY(0)'"
+                          }">
+                          Donate $${tier.amount}
+                        </button>
+                      </div>
+                    `
+                      )
+                      .join("")
+                  : ""
+              }
+            </div>
+            
+            <!-- Custom Amount Form -->
+            <div style="margin-top: 4rem; padding: ${
+              isBrutalist ? "3rem" : "2.5rem"
+            }; background: ${
+        isGlassmorphism
+          ? "rgba(255,255,255,0.05)"
+          : isNeumorphism
+          ? "var(--color-bg)"
+          : "var(--color-surface)"
+      }; border-radius: ${
+        isGradient ? "24px" : isBrutalist || isElegant || isRetro ? "0" : "20px"
+      }; border: ${isBrutalist ? "4px" : isRetro ? "2px" : "1px"} solid ${
+        isBrutalist || isRetro
+          ? "var(--color-accent)"
+          : isGlassmorphism
+          ? "rgba(255,255,255,0.1)"
+          : "var(--color-border)"
+      }; text-align: center; ${
+        isGlassmorphism
+          ? "backdrop-filter: blur(20px);"
+          : isNeumorphism
+          ? getNeumorphismShadow(false)
+          : ""
+      }">
+              <h3 style="font-family: ${
+                isElegant ? "Playfair Display, serif" : "inherit"
+              }; font-size: ${
+        isBrutalist ? "1.75rem" : "1.5rem"
+      }; font-weight: ${isBrutalist ? "900" : "700"}; margin-bottom: 1rem; ${
+        isBrutalist ? "text-transform: uppercase;" : ""
+      }">
+                Custom Donation Amount
+              </h3>
+              <p style="color: var(--color-text-secondary); margin-bottom: 2rem; font-size: ${
+                isBrutalist ? "1.125rem" : "1rem"
+              }; font-weight: ${isElegant ? "300" : "normal"};">
+                Every donation, no matter the size, makes a difference
+              </p>
+              <form onsubmit="event.preventDefault(); handleCustomDonation();" style="max-width: 500px; margin: 0 auto;">
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                  <div style="flex: 1; min-width: 200px;">
+                    <label style="display: block; color: var(--color-text-secondary); margin-bottom: 0.5rem; font-weight: 500;">Amount ($)</label>
+                    <input type="number" id="customAmount" min="1" step="1" placeholder="50" style="width: 100%; padding: ${
+                      isBrutalist ? "1rem" : "0.875rem 1rem"
+                    }; border: ${isBrutalist ? "3px" : "2px"} solid ${
+        isBrutalist || isRetro
+          ? "var(--color-accent)"
+          : isGlassmorphism
+          ? "rgba(255,255,255,0.1)"
+          : "var(--color-border)"
+      }; border-radius: ${
+        isGradient || isRetro ? "999px" : isBrutalist || isElegant ? "0" : "8px"
+      }; background: ${
+        isGlassmorphism
+          ? "rgba(255,255,255,0.05)"
+          : isNeumorphism
+          ? "var(--color-bg)"
+          : "var(--color-bg)"
+      }; color: var(--color-text); font-size: 1rem; outline: none; transition: border-color 0.2s; ${
+        isNeumorphism ? getNeumorphismShadow(true) : ""
+      }" onfocus="this.style.borderColor='var(--color-accent)'" onblur="this.style.borderColor='${
+        isBrutalist || isRetro
+          ? "var(--color-accent)"
+          : isGlassmorphism
+          ? "rgba(255,255,255,0.1)"
+          : "var(--color-border)"
+      }'">
+                  </div>
+                  <button type="submit" style="padding: ${
+                    isBrutalist ? "1rem 2rem" : "0.875rem 1.5rem"
+                  }; background: ${
+        isGradient
+          ? "linear-gradient(135deg, #667eea, #764ba2)"
+          : isRetro
+          ? "linear-gradient(90deg, var(--color-accent), #b537f2)"
+          : isGlassmorphism
+          ? "rgba(255,255,255,0.15)"
+          : isNeumorphism
+          ? "var(--color-bg)"
+          : "var(--color-accent)"
+      }; color: ${
+        isGradient || isRetro
+          ? "white"
+          : isGlassmorphism || isNeumorphism
+          ? "var(--color-text)"
+          : "white"
+      }; border: ${isBrutalist ? "3px" : isRetro ? "2px" : "none"} solid ${
+        isBrutalist
+          ? "var(--color-bg)"
+          : isRetro
+          ? "var(--color-accent)"
+          : "transparent"
+      }; border-radius: ${
+        isGradient || isRetro ? "999px" : isBrutalist || isElegant ? "0" : "8px"
+      }; font-weight: ${
+        isBrutalist ? "900" : "700"
+      }; cursor: pointer; transition: all 0.2s; font-size: 1rem; ${
+        isBrutalist || isRetro ? "text-transform: uppercase;" : ""
+      } ${isNeumorphism ? getNeumorphismShadow(false) : ""}" 
+                    onmouseover="${
+                      isBrutalist
+                        ? "this.style.background='var(--color-bg)'; this.style.color='var(--color-accent)'; this.style.borderColor='var(--color-accent)'"
+                        : isGradient
+                        ? "this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 20px rgba(102,126,234,0.3)'"
+                        : isRetro
+                        ? "this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 20px rgba(255,47,181,0.3)'"
+                        : isGlassmorphism
+                        ? "this.style.transform='translateY(-2px)'; this.style.background='rgba(255,255,255,0.2)'"
+                        : isNeumorphism
+                        ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
+                        : "this.style.opacity='0.9'; this.style.transform='translateY(-2px)'"
+                    }" 
+                    onmouseout="${
+                      isBrutalist
+                        ? "this.style.background='var(--color-accent)'; this.style.color='var(--color-bg)'; this.style.borderColor='var(--color-bg)'"
+                        : isGradient
+                        ? "this.style.transform='translateY(0)'; this.style.boxShadow='none'"
+                        : isRetro
+                        ? "this.style.transform='translateY(0)'; this.style.boxShadow='none'"
+                        : isGlassmorphism
+                        ? "this.style.transform='translateY(0)'; this.style.background='rgba(255,255,255,0.15)'"
+                        : isNeumorphism
+                        ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
+                        : "this.style.opacity='1'; this.style.transform='translateY(0)'"
+                    }">
+                    Donate Now
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </section>
+
+        <!-- Testimonials -->
+        ${
+          data.testimonials && data.testimonials.length > 0
+            ? `
+        <section style="padding: ${
+          isBrutalist || isRetro ? "6rem 0" : "4rem 0"
+        }; background: ${
+                isGradient
+                  ? "linear-gradient(135deg, rgba(102,126,234,0.05), rgba(240,147,251,0.05))"
+                  : isBrutalist
+                  ? "var(--color-accent)"
+                  : "var(--color-surface)"
+              };">
+          <div class="container" style="max-width: 900px;">
+            <h2 style="font-family: ${
+              isElegant ? "Playfair Display, serif" : "inherit"
+            }; font-size: clamp(2rem, 5vw, 3rem); font-weight: ${
+                isBrutalist ? "900" : "700"
+              }; text-align: center; margin-bottom: 1rem; letter-spacing: ${
+                isRetro ? "2px" : "-0.02em"
+              }; ${
+                isBrutalist || isRetro ? "text-transform: uppercase;" : ""
+              } ${isBrutalist ? "color: var(--color-bg);" : ""}">
+              What Supporters Say
+            </h2>
+            <p style="text-align: center; color: ${
+              isBrutalist ? "var(--color-bg)" : "var(--color-text-secondary)"
+            }; max-width: 600px; margin: 0 auto 4rem; font-size: ${
+                isBrutalist ? "1.25rem" : "1.125rem"
+              }; font-weight: ${isElegant ? "300" : "normal"};">
+              Hear from those who've already joined our cause
+            </p>
+            
+            <div class="testimonials-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(${
+              isBrutalist ? "320px" : "280px"
+            }, 1fr)); gap: ${isElegant ? "2.5rem" : "2rem"};">
+              ${data.testimonials
+                .map(
+                  (testimonial) => `
+                <div style="padding: ${
+                  isBrutalist ? "3rem" : "2.5rem"
+                }; background: ${
+                    isGlassmorphism
+                      ? "rgba(255,255,255,0.05)"
+                      : isNeumorphism
+                      ? "var(--color-bg)"
+                      : isBrutalist
+                      ? "var(--color-bg)"
+                      : "var(--color-bg)"
+                  }; border-radius: ${
+                    isGradient
+                      ? "24px"
+                      : isBrutalist || isElegant || isRetro
+                      ? "0"
+                      : "20px"
+                  }; border: ${
+                    isBrutalist ? "4px" : isRetro ? "2px" : "1px"
+                  } solid ${
+                    isBrutalist
+                      ? "var(--color-bg)"
+                      : isRetro
+                      ? "var(--color-accent)"
+                      : isGlassmorphism
+                      ? "rgba(255,255,255,0.1)"
+                      : "var(--color-border)"
+                  }; transition: all 0.3s; ${
+                    isGlassmorphism
+                      ? "backdrop-filter: blur(20px);"
+                      : isNeumorphism
+                      ? getNeumorphismShadow(false)
+                      : ""
+                  }" 
+                  onmouseover="${
+                    isBrutalist
+                      ? "this.style.transform='translate(-4px, -4px)'; this.style.boxShadow='8px 8px 0 var(--color-bg)'"
+                      : isRetro
+                      ? "this.style.transform='translateY(-4px)'; this.style.boxShadow='0 10px 20px rgba(255,47,181,0.2)'"
+                      : isGlassmorphism
+                      ? "this.style.transform='translateY(-4px)'; this.style.borderColor='var(--color-accent)'"
+                      : isNeumorphism
+                      ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
+                      : "this.style.transform='translateY(-4px)'; this.style.borderColor='var(--color-accent)'"
+                  }" 
+                  onmouseout="${
+                    isBrutalist
+                      ? "this.style.transform='translate(0,0)'; this.style.boxShadow='none'"
+                      : isRetro
+                      ? "this.style.transform='translateY(0)'; this.style.boxShadow='none'"
+                      : isGlassmorphism
+                      ? "this.style.transform='translateY(0)'; this.style.borderColor='rgba(255,255,255,0.1)'"
+                      : isNeumorphism
+                      ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
+                      : "this.style.transform='translateY(0)'; this.style.borderColor='var(--color-border)'"
+                  }">
+                  <div style="width: 48px; height: 48px; background: ${
+                    isRetro
+                      ? "linear-gradient(90deg, var(--color-accent), #00f5ff)"
+                      : "var(--color-accent)"
+                  }; opacity: 0.1; margin-bottom: 1.5rem; border-radius: ${
+                    isBrutalist || isElegant || isRetro ? "0" : "8px"
+                  };"></div>
+                  <p style="font-family: ${
+                    isElegant
+                      ? "Playfair Display, serif"
+                      : isRetro
+                      ? "Space Mono, monospace"
+                      : "inherit"
+                  }; font-style: italic; font-size: ${
+                    isBrutalist ? "1.25rem" : "1.125rem"
+                  }; line-height: 1.7; color: ${
+                    isBrutalist ? "var(--color-accent)" : "var(--color-text)"
+                  }; margin-bottom: 1.5rem; font-weight: ${
+                    isElegant ? "300" : "normal"
+                  };">
+                    "${testimonial.quote || ""}"
+                  </p>
+                  <div>
+                    <div style="font-weight: 700; color: ${
+                      isBrutalist ? "var(--color-accent)" : "var(--color-text)"
+                    }; margin-bottom: 0.25rem; font-size: ${
+                    isBrutalist ? "1.125rem" : "1rem"
+                  };">
+                      ${testimonial.name || ""}
+                    </div>
+                    <div style="color: ${
+                      isBrutalist
+                        ? "var(--color-accent)"
+                        : "var(--color-text-secondary)"
+                    }; font-size: ${isBrutalist ? "1rem" : "0.875rem"};">
+                      ${testimonial.role || ""}
+                    </div>
+                  </div>
+                </div>
+              `
+                )
+                .join("")}
+            </div>
+          </div>
+        </section>
+        `
+            : ""
+        }
+
+        <!-- FAQ Section -->
+        <section id="faq" style="padding: ${
+          isBrutalist || isRetro ? "6rem 0" : "4rem 0"
+        };">
+          <div class="container" style="max-width: 900px;">
+            <h2 style="font-family: ${
+              isElegant ? "Playfair Display, serif" : "inherit"
+            }; font-size: clamp(2rem, 5vw, 3rem); font-weight: ${
+        isBrutalist ? "900" : "700"
+      }; margin-bottom: 1rem; letter-spacing: ${isRetro ? "2px" : "-0.02em"}; ${
+        isBrutalist || isRetro ? "text-transform: uppercase;" : ""
+      }">
+              Frequently Asked Questions
+            </h2>
+            <p style="color: var(--color-text-secondary); margin-bottom: 3rem; font-size: ${
+              isBrutalist ? "1.25rem" : "1.125rem"
+            }; font-weight: ${isElegant ? "300" : "normal"};">
+              Have questions? We've got answers.
+            </p>
+            
+            <div class="faq-list" style="display: flex; flex-direction: column; gap: ${
+              isBrutalist ? "2rem" : "1.5rem"
+            };">
+              ${
+                data.faqs && data.faqs.length > 0
+                  ? data.faqs
+                      .map(
+                        (faq, index) => `
+                  <div class="faq-item" onclick="toggleFaq(${index})" style="border: ${
+                          isBrutalist ? "4px" : isRetro ? "2px" : "1px"
+                        } solid ${
+                          isBrutalist || isRetro
+                            ? "var(--color-accent)"
+                            : isGlassmorphism
+                            ? "rgba(255,255,255,0.1)"
+                            : "var(--color-border)"
+                        }; border-radius: ${
+                          isGradient
+                            ? "16px"
+                            : isBrutalist || isElegant || isRetro
+                            ? "0"
+                            : "12px"
+                        }; overflow: hidden; cursor: pointer; transition: all 0.3s; ${
+                          isGlassmorphism
+                            ? "backdrop-filter: blur(20px);"
+                            : isNeumorphism
+                            ? getNeumorphismShadow(false)
+                            : ""
+                        }" 
+                        onmouseover="${
+                          isBrutalist
+                            ? "this.style.borderColor='var(--color-text)'"
+                            : isRetro
+                            ? "this.style.boxShadow='0 0 20px rgba(255,47,181,0.2)'"
+                            : isGlassmorphism
+                            ? "this.style.borderColor='var(--color-accent)'"
+                            : isNeumorphism
+                            ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
+                            : "this.style.borderColor='var(--color-accent)'"
+                        }" 
+                        onmouseout="${
+                          isBrutalist
+                            ? "this.style.borderColor='var(--color-accent)'"
+                            : isRetro
+                            ? "this.style.boxShadow='none'"
+                            : isGlassmorphism
+                            ? "this.style.borderColor='rgba(255,255,255,0.1)'"
+                            : isNeumorphism
+                            ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
+                            : "this.style.borderColor='var(--color-border)'"
+                        }">
+                        <div class="faq-question" style="padding: ${
+                          isBrutalist ? "2rem" : "1.5rem"
+                        }; display: flex; justify-content: space-between; align-items: center; background: ${
+                          isGlassmorphism
+                            ? "rgba(255,255,255,0.05)"
+                            : isNeumorphism
+                            ? "var(--color-bg)"
+                            : "var(--color-surface)"
+                        };">
+                          <h3 style="font-family: ${
+                            isElegant ? "Playfair Display, serif" : "inherit"
+                          }; font-size: ${
+                          isBrutalist ? "1.25rem" : "1.125rem"
+                        }; font-weight: ${
+                          isBrutalist ? "700" : "600"
+                        }; color: var(--color-text); margin: 0;">
+                            ${faq.question || ""}
+                          </h3>
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--color-text)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="faq-icon" style="transition: transform 0.3s;">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                          </svg>
+                        </div>
+                        <div class="faq-answer" style="padding: 0 ${
+                          isBrutalist ? "2rem" : "1.5rem"
+                        }; max-height: 0; overflow: hidden; transition: all 0.3s;">
+                          <div style="padding: ${
+                            isBrutalist ? "2rem 0" : "1.5rem 0"
+                          }; border-top: ${
+                          isBrutalist ? "4px" : "1px"
+                        } solid var(--color-border); color: var(--color-text-secondary); line-height: 1.7; font-size: ${
+                          isBrutalist ? "1.125rem" : "1rem"
+                        }; font-weight: ${isElegant ? "300" : "normal"};">
+                            ${faq.answer || ""}
+                          </div>
+                        </div>
+                      </div>
+                    `
+                      )
+                      .join("")
+                  : ""
+              }
+            </div>
+          </div>
+        </section>
+
+        <!-- Contact & Final CTA -->
+        <section style="padding: ${
+          isBrutalist || isRetro ? "8rem 0" : "6rem 0"
+        }; text-align: center; background: ${
+        isGradient
+          ? "linear-gradient(135deg, #667eea, #764ba2)"
+          : isRetro
+          ? "linear-gradient(135deg, var(--color-accent), #b537f2)"
+          : "var(--color-surface)"
+      }; ${isBrutalist || isGradient || isRetro ? "color: white;" : ""}">
+          <div class="container" style="max-width: 700px;">
+            <h2 style="font-family: ${
+              isElegant ? "Playfair Display, serif" : "inherit"
+            }; font-size: clamp(${
+        isBrutalist || isRetro ? "2.5rem" : "2rem"
+      }, 5vw, ${isBrutalist || isRetro ? "4rem" : "3rem"}); font-weight: ${
+        isBrutalist ? "900" : "700"
+      }; margin-bottom: 1.5rem; letter-spacing: ${
+        isRetro ? "2px" : "-0.02em"
+      }; ${isBrutalist || isRetro ? "text-transform: uppercase;" : ""}">
+              ${isBrutalist ? "TIME IS RUNNING OUT" : "Time is Running Out"}
+            </h2>
+            <p style="font-size: ${
+              isBrutalist || isRetro ? "1.5rem" : "1.25rem"
+            }; margin-bottom: 2.5rem; opacity: 0.9; line-height: 1.6; font-weight: ${
+        isElegant ? "300" : "normal"
+      };">
+              Join ${
+                data.supportersCount || 0
+              }+ supporters and help us reach our goal of $${data.goalAmount.toLocaleString()}
+            </p>
+            <button onclick="showDonationModal(100)" style="padding: ${
+              isBrutalist ? "1.5rem 3rem" : "1rem 2.5rem"
+            }; background: ${
+        isBrutalist
+          ? "var(--color-bg)"
+          : isGradient || isRetro
+          ? "white"
+          : "var(--color-accent)"
+      }; color: ${
+        isBrutalist
+          ? "var(--color-text)"
+          : isGradient
+          ? "#667eea"
+          : isRetro
+          ? "var(--color-accent)"
+          : "white"
+      }; border: ${isBrutalist ? "3px" : isRetro ? "2px" : "none"} solid ${
+        isBrutalist ? "var(--color-bg)" : isRetro ? "white" : "transparent"
+      }; border-radius: ${
+        isGradient || isRetro ? "999px" : isBrutalist || isElegant ? "0" : "8px"
+      }; font-weight: ${
+        isBrutalist ? "900" : "700"
+      }; cursor: pointer; transition: all 0.2s; font-size: ${
+        isBrutalist ? "1.25rem" : "1.125rem"
+      }; ${
+        isBrutalist || isRetro ? "text-transform: uppercase;" : ""
+      }" onmouseover="${
+        isBrutalist
+          ? "this.style.background='var(--color-text)'; this.style.color='var(--color-bg)'"
+          : isGradient || isRetro
+          ? "this.style.transform='scale(1.05)'; this.style.boxShadow='0 10px 30px rgba(255,255,255,0.3)'"
+          : "this.style.transform='translateY(-2px)'; this.style.opacity='0.9'"
+      }" onmouseout="${
+        isBrutalist
+          ? "this.style.background='var(--color-bg)'; this.style.color='var(--color-text)'"
+          : isGradient || isRetro
+          ? "this.style.transform='scale(1)'; this.style.boxShadow='none'"
+          : "this.style.transform='translateY(0)'; this.style.opacity='1'"
+      }">
+              Donate Now
+            </button>
+            
+            <!-- Social Links -->
+            ${
+              data.socialLinks && data.socialLinks.length > 0
+                ? `
+            <div style="margin-top: 3rem; display: flex; justify-content: center; gap: 1.5rem;">
+              ${data.socialLinks
+                .map(
+                  (link) => `
+                <a href="${
+                  link.url
+                }" target="_blank" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; background: ${
+                    isBrutalist ? "var(--color-bg)" : "rgba(255,255,255,0.1)"
+                  }; border-radius: 50%; color: ${
+                    isBrutalist ? "var(--color-text)" : "white"
+                  }; text-decoration: none; transition: all 0.2s;" 
+                  onmouseover="${
+                    isBrutalist
+                      ? "this.style.background='var(--color-text)'; this.style.color='var(--color-bg)'"
+                      : "this.style.background='rgba(255,255,255,0.2)'; this.style.transform='translateY(-2px)'"
+                  }" 
+                  onmouseout="${
+                    isBrutalist
+                      ? "this.style.background='var(--color-bg)'; this.style.color='var(--color-text)'"
+                      : "this.style.background='rgba(255,255,255,0.1)'; this.style.transform='translateY(0)'"
+                  }">
+                  ${
+                    link.platform === "facebook"
+                      ? `<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>`
+                      : link.platform === "twitter"
+                      ? `<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg>`
+                      : link.platform === "instagram"
+                      ? `<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>`
+                      : `<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>`
+                  }
+                </a>
+              `
+                )
+                .join("")}
+            </div>
+            `
+                : ""
+            }
+            
+            <!-- Contact Email -->
+            ${
+              data.contactEmail
+                ? `
+            <div style="margin-top: 2rem; font-size: ${
+              isBrutalist ? "1.125rem" : "1rem"
+            }; opacity: 0.8;">
+              Questions? Email us at <a href="mailto:${
+                data.contactEmail
+              }" style="color: inherit; text-decoration: underline;">${
+                    data.contactEmail
+                  }</a>
+            </div>
+            `
+                : ""
+            }
+          </div>
+        </section>
+      </main>
+
+      <!-- Footer -->
+      <footer style="padding: ${
+        isBrutalist ? "4rem 0" : "3rem 0"
+      }; border-top: ${isBrutalist ? "4px" : isRetro ? "2px" : "1px"} solid ${
+        isBrutalist || isRetro ? "var(--color-accent)" : "var(--color-border)"
+      }; text-align: center; color: var(--color-text-secondary); font-size: ${
+        isBrutalist ? "1.125rem" : "0.875rem"
+      }; font-weight: ${isBrutalist ? "700" : "normal"}; ${
+        isBrutalist || isRetro ? "text-transform: uppercase;" : ""
+      }">
+        <div class="container">
+          <p>© ${new Date().getFullYear()} ${
+        data.organizationName || "Fundraiser"
+      }. ${isBrutalist ? "ALL RIGHTS RESERVED." : "All rights reserved."}</p>
+        </div>
+      </footer>
+
+      <!-- Donation Modal -->
+      <div id="donationModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 10000; align-items: center; justify-content: center; padding: 2rem;">
+        <div style="background: var(--color-bg); border-radius: ${
+          isGradient
+            ? "24px"
+            : isBrutalist || isElegant || isRetro
+            ? "0"
+            : "20px"
+        }; border: ${
+        isBrutalist ? "4px" : isRetro ? "3px" : "2px"
+      } solid var(--color-accent); max-width: 500px; width: 100%; padding: ${
+        isBrutalist ? "3rem" : "2.5rem"
+      }; position: relative;">
+          <button onclick="closeDonationModal()" style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: var(--color-text); font-size: 2rem; cursor: pointer; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: background 0.2s;" 
+            onmouseover="this.style.background='var(--color-surface)'" 
+            onmouseout="this.style.background='transparent'">
+            ×
+          </button>
+          
+          <h3 style="font-family: ${
+            isElegant ? "Playfair Display, serif" : "inherit"
+          }; font-size: ${isBrutalist ? "2rem" : "1.75rem"}; font-weight: ${
+        isBrutalist ? "900" : "700"
+      }; margin-bottom: 1.5rem; ${
+        isBrutalist ? "text-transform: uppercase;" : ""
+      }">
+            Complete Your Donation
+          </h3>
+          
+          <form id="donationForm" onsubmit="event.preventDefault(); processDonation();">
+            <div style="margin-bottom: 2rem;">
+              <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
+                <div style="font-size: 2.5rem; font-weight: 800; color: var(--color-accent);">
+                  $
+                </div>
+                <input type="text" id="donationAmount" style="flex: 1; font-size: 2.5rem; font-weight: 800; border: none; background: none; color: var(--color-text); outline: none; max-width: 200px;" value="100">
+              </div>
+              
+              <!-- Donation Amount Buttons -->
+              <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
+                ${[25, 50, 100, 250, 500]
+                  .map(
+                    (amount) => `
+                  <button type="button" onclick="updateDonationAmount(${amount})" style="padding: 0.5rem 1rem; border: 2px solid var(--color-border); background: transparent; color: var(--color-text); border-radius: 6px; cursor: pointer; transition: all 0.2s; font-weight: 600;" 
+                    onmouseover="this.style.borderColor='var(--color-accent)'; this.style.background='var(--color-surface)'" 
+                    onmouseout="this.style.borderColor='var(--color-border)'; this.style.background='transparent'">
+                    $${amount}
+                  </button>
+                `
+                  )
+                  .join("")}
+              </div>
+            </div>
+            
+            <div style="margin-bottom: 2rem;">
+              <label style="display: block; color: var(--color-text-secondary); margin-bottom: 0.5rem; font-weight: 500;">Your Information</label>
+              <input type="text" id="donorName" placeholder="Full Name" required style="width: 100%; padding: 0.875rem 1rem; border: 2px solid var(--color-border); border-radius: 8px; background: var(--color-bg); color: var(--color-text); font-size: 1rem; outline: none; margin-bottom: 1rem; transition: border-color 0.2s;" 
+                onfocus="this.style.borderColor='var(--color-accent)'" 
+                onblur="this.style.borderColor='var(--color-border)'">
+              <input type="email" id="donorEmail" placeholder="Email Address" required style="width: 100%; padding: 0.875rem 1rem; border: 2px solid var(--color-border); border-radius: 8px; background: var(--color-bg); color: var(--color-text); font-size: 1rem; outline: none; margin-bottom: 1rem; transition: border-color 0.2s;" 
+                onfocus="this.style.borderColor='var(--color-accent)'" 
+                onblur="this.style.borderColor='var(--color-border)'">
+            </div>
+            
+            <button type="submit" style="width: 100%; padding: 1rem; background: var(--color-accent); color: white; border: none; border-radius: ${
+              isBrutalist || isElegant ? "0" : "8px"
+            }; font-weight: 700; cursor: pointer; transition: all 0.2s; font-size: 1.125rem; ${
+        isBrutalist ? "text-transform: uppercase;" : ""
+      }" 
+              onmouseover="this.style.opacity='0.9'; this.style.transform='translateY(-2px)'" 
+              onmouseout="this.style.opacity='1'; this.style.transform='translateY(0)'">
+              Donate Now
+            </button>
+            
+            <p style="text-align: center; color: var(--color-text-secondary); margin-top: 1rem; font-size: 0.875rem;">
+              Secure payment processing powered by Stripe
+            </p>
+          </form>
+        </div>
+      </div>
+
+      <style>
+        ${
+          isNeumorphism
+            ? `
+        /* Neumorphism CSS Variables */
+        :root {
+          --neomorph-shadow-out: 20px 20px 60px #c5c9ce, -20px -20px 60px #ffffff;
+          --neomorph-shadow-in: inset 20px 20px 60px #c5c9ce, inset -20px -20px 60px #ffffff;
+        }
+        
+        [data-theme="dark"] {
+          --neomorph-shadow-out: 32px 32px 64px #2a2d34, -32px -32px 64px #383d46;
+          --neomorph-shadow-in: inset 32px 32px 64px #2a2d34, inset -32px -32px 64px #383d46;
+        }
+        `
+            : ""
+        }
+        
+        ${
+          isRetro
+            ? `
+        /* Retro grid background */
+        body::before {
+          content: '';
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background-image: 
+            linear-gradient(rgba(255,47,181,0.02) 2px, transparent 2px),
+            linear-gradient(90deg, rgba(255,47,181,0.02) 2px, transparent 2px);
+          background-size: 50px 50px;
+          pointer-events: none;
+          z-index: 0;
+        }
+        main { position: relative; z-index: 1; }
+        `
+            : ""
+        }
+        
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+          .container { padding: 0 1.5rem !important; }
+          .nav-links { display: none !important; }
+          .mobile-controls { display: flex !important; }
+          section { padding: 4rem 0 3rem !important; }
+          .progress-stats { flex-direction: column !important; gap: 1.5rem !important; align-items: center !important; }
+          .progress-stats .stat { text-align: center !important; }
+          .donation-tiers { grid-template-columns: 1fr !important; gap: 1.5rem !important; }
+          .testimonials-grid { grid-template-columns: 1fr !important; gap: 1.5rem !important; }
+          .mobile-menu.active { display: block !important; }
+          h1 { font-size: clamp(2rem, 8vw, 3rem) !important; }
+          h2 { font-size: clamp(1.75rem, 6vw, 2.5rem) !important; }
+          button, a { width: 100% !important; text-align: center !important; }
+        }
+        
+        @media (max-width: 640px) {
+          section { padding: 3rem 0 2rem !important; }
+          #donationModal > div { margin: 1rem !important; padding: 1.5rem !important; }
+        }
+        
+        /* FAQ Animation */
+        .faq-item.active .faq-answer {
+          max-height: 500px !important;
+        }
+        
+        .faq-item.active .faq-icon {
+          transform: rotate(180deg);
+        }
+        
+        /* Smooth Scrolling */
+        html {
+          scroll-behavior: smooth;
+        }
+        
+        /* Progress Bar Animation */
+        @keyframes progressAnimation {
+          0% { width: 0%; }
+          100% { width: ${progressPercentage}%; }
+        }
+      </style>
+
+      <script>
+        let currentFaqOpen = null;
+        
+        function toggleMobileMenu() {
+          const menu = document.querySelector('.mobile-menu');
+          menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+        }
+        
+        function showDonationModal(amount) {
+          const modal = document.getElementById('donationModal');
+          document.getElementById('donationAmount').value = amount;
+          modal.style.display = 'flex';
+          document.body.style.overflow = 'hidden';
+        }
+        
+        function closeDonationModal() {
+          const modal = document.getElementById('donationModal');
+          modal.style.display = 'none';
+          document.body.style.overflow = 'auto';
+        }
+        
+        function updateDonationAmount(amount) {
+          document.getElementById('donationAmount').value = amount;
+        }
+        
+        function handleCustomDonation() {
+          const amount = document.getElementById('customAmount').value;
+          if (amount && amount > 0) {
+            showDonationModal(amount);
+          }
+        }
+        
+        function processDonation() {
+          const amount = document.getElementById('donationAmount').value;
+          const name = document.getElementById('donorName').value;
+          const email = document.getElementById('donorEmail').value;
+          
+          if (!name || !email) {
+            alert('Please fill in all required fields.');
+            return;
+          }
+          
+          // In a real application, this would process the payment via Stripe/API
+          // For this demo, we'll show a success message
+          
+          const raisedAmount = ${data.raisedAmount};
+          const newAmount = raisedAmount + parseFloat(amount);
+          const supportersCount = ${data.supportersCount || 0} + 1;
+          
+          // Update progress stats (in a real app, this would be via API)
+          const progressBar = document.querySelector('.progress-stats');
+          if (progressBar) {
+            progressBar.innerHTML = \`
+              <div class="stat">
+                <div style="font-size: ${
+                  isBrutalist ? "3.5rem" : "3rem"
+                }; font-weight: ${
+        isBrutalist ? "900" : "800"
+      }; color: var(--color-accent); margin-bottom: 0.5rem; ${
+        isBrutalist ? "text-transform: uppercase;" : ""
+      }">
+                  $\${newAmount.toLocaleString()}
+                </div>
+                <div style="color: var(--color-text-secondary); font-size: ${
+                  isBrutalist ? "1.125rem" : "0.9375rem"
+                }; font-weight: ${isBrutalist ? "700" : "500"};">
+                  Raised of $${data.goalAmount.toLocaleString()} goal
+                </div>
+              </div>
+              
+              <div class="stat">
+                <div style="font-size: ${
+                  isBrutalist ? "3.5rem" : "3rem"
+                }; font-weight: ${
+        isBrutalist ? "900" : "800"
+      }; color: var(--color-accent); margin-bottom: 0.5rem; ${
+        isBrutalist ? "text-transform: uppercase;" : ""
+      }">
+                  \${Math.min(Math.round((newAmount / ${
+                    data.goalAmount
+                  }) * 100), 100)}%
+                </div>
+                <div style="color: var(--color-text-secondary); font-size: ${
+                  isBrutalist ? "1.125rem" : "0.9375rem"
+                }; font-weight: ${isBrutalist ? "700" : "500"};">
+                  Goal Progress
+                </div>
+              </div>
+              
+              <div class="stat">
+                <div style="font-size: ${
+                  isBrutalist ? "3.5rem" : "3rem"
+                }; font-weight: ${
+        isBrutalist ? "900" : "800"
+      }; color: var(--color-accent); margin-bottom: 0.5rem; ${
+        isBrutalist ? "text-transform: uppercase;" : ""
+      }">
+                  \${supportersCount}
+                </div>
+                <div style="color: var(--color-text-secondary); font-size: ${
+                  isBrutalist ? "1.125rem" : "0.9375rem"
+                }; font-weight: ${isBrutalist ? "700" : "500"};">
+                  Supporters
+                </div>
+              </div>
+              
+              <div class="stat">
+                <div style="font-size: ${
+                  isBrutalist ? "3.5rem" : "3rem"
+                }; font-weight: ${
+        isBrutalist ? "900" : "800"
+      }; color: var(--color-accent); margin-bottom: 0.5rem; ${
+        isBrutalist ? "text-transform: uppercase;" : ""
+      }">
+                  ${data.daysRemaining}
+                </div>
+                <div style="color: var(--color-text-secondary); font-size: ${
+                  isBrutalist ? "1.125rem" : "0.9375rem"
+                }; font-weight: ${isBrutalist ? "700" : "500"};">
+                  Days Left
+                </div>
+              </div>
+            \`;
+            
+            // Update progress bar
+            const progressBarElement = document.querySelector('.progress-stats').parentElement.querySelector('div[style*="background:"] > div');
+            if (progressBarElement) {
+              const newPercentage = Math.min((newAmount / ${
+                data.goalAmount
+              }) * 100, 100);
+              progressBarElement.style.width = newPercentage + '%';
+            }
+          }
+          
+          closeDonationModal();
+          
+          // Show success message
+          alert(\`Thank you, \${name}! Your donation of $\${amount} has been received. A confirmation email has been sent to \${email}.\`);
+          
+          // Reset form
+          document.getElementById('donationForm').reset();
+          document.getElementById('donationAmount').value = '100';
+        }
+        
+        function toggleFaq(index) {
+          const faqItem = document.querySelectorAll('.faq-item')[index];
+          const answer = faqItem.querySelector('.faq-answer');
+          const icon = faqItem.querySelector('.faq-icon');
+          
+          if (currentFaqOpen !== null && currentFaqOpen !== index) {
+            const prevFaq = document.querySelectorAll('.faq-item')[currentFaqOpen];
+            prevFaq.classList.remove('active');
+            prevFaq.querySelector('.faq-answer').style.maxHeight = '0';
+            prevFaq.querySelector('.faq-icon').style.transform = 'rotate(0deg)';
+          }
+          
+          if (answer.style.maxHeight === '0px' || !answer.style.maxHeight) {
+            faqItem.classList.add('active');
+            answer.style.maxHeight = answer.scrollHeight + 'px';
+            icon.style.transform = 'rotate(180deg)';
+            currentFaqOpen = index;
+          } else {
+            faqItem.classList.remove('active');
+            answer.style.maxHeight = '0';
+            icon.style.transform = 'rotate(0deg)';
+            currentFaqOpen = null;
+          }
+        }
+        
+        // Close modal on escape key
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') {
+            closeDonationModal();
+          }
+        });
+        
+        // Close modal when clicking outside
+        document.getElementById('donationModal').addEventListener('click', (e) => {
+          if (e.target.id === 'donationModal') {
+            closeDonationModal();
+          }
+        });
+      </script>
+    `;
+    },
+  }),
+  "application-form": new Template("application-form", {
+    name: "Application Form",
+    description: "Simple application form with clean layout and validation",
+    category: "Forms",
+    image: "application-form",
+    fields: {
+      formTitle: {
+        type: "text",
+        default: "Application Form",
+        label: "Form Title",
+        required: true,
+      },
+      formDescription: {
+        type: "textarea",
+        default:
+          "Please fill out this application form completely. All fields marked with * are required.",
+        label: "Form Description",
+      },
+      organizationName: {
+        type: "text",
+        default: "TechCorp Inc.",
+        label: "Organization Name",
+        required: true,
+      },
+      contactEmail: {
+        type: "email",
+        default: "hr@techcorp.com",
+        label: "Contact Email",
+      },
+      applicationDeadline: {
+        type: "date",
+        default: "2024-12-31",
+        label: "Application Deadline",
+      },
+      requiredFields: {
+        type: "group",
+        label: "Required Fields Configuration",
+        itemLabel: "Field",
+        fields: {
+          name: { type: "checkbox", label: "Full Name", default: true },
+          email: { type: "checkbox", label: "Email Address", default: true },
+          phone: { type: "checkbox", label: "Phone Number", default: true },
+          address: { type: "checkbox", label: "Address", default: true },
+          resume: { type: "checkbox", label: "Resume Upload", default: true },
+          coverLetter: {
+            type: "checkbox",
+            label: "Cover Letter",
+            default: false,
+          },
+          portfolio: {
+            type: "checkbox",
+            label: "Portfolio URL",
+            default: false,
+          },
+          references: { type: "checkbox", label: "References", default: false },
+          education: {
+            type: "checkbox",
+            label: "Education History",
+            default: true,
+          },
+          experience: {
+            type: "checkbox",
+            label: "Work Experience",
+            default: true,
+          },
+          availability: {
+            type: "checkbox",
+            label: "Availability",
+            default: true,
+          },
+          salary: {
+            type: "checkbox",
+            label: "Salary Expectations",
+            default: false,
+          },
+        },
+        default: [{}],
+      },
+      customFields: {
+        type: "group",
+        label: "Custom Questions",
+        itemLabel: "Question",
+        min: 0,
+        max: 5,
+        fields: {
+          question: { type: "text", label: "Question", default: "" },
+          type: {
+            type: "select",
+            label: "Field Type",
+            default: "textarea",
+            options: ["textarea", "text", "select", "checkbox"],
+          },
+          options: {
+            type: "repeatable",
+            label: "Options (for select/checkbox)",
+            itemLabel: "Option",
+            default: [],
+          },
+          required: { type: "checkbox", label: "Required", default: false },
+        },
+        default: [
+          {
+            question: "Why are you interested in this position?",
+            type: "textarea",
+            required: true,
+          },
+          {
+            question: "How did you hear about us?",
+            type: "select",
+            options: [
+              "LinkedIn",
+              "Company Website",
+              "Job Board",
+              "Referral",
+              "Other",
+            ],
+            required: false,
+          },
+        ],
+      },
+      successMessage: {
+        type: "textarea",
+        default:
+          "Thank you for your application! We'll review your submission and contact you within 5-7 business days.",
+        label: "Success Message",
+      },
+      privacyPolicy: {
+        type: "textarea",
+        default:
+          "By submitting this application, you agree to our privacy policy and consent to the processing of your personal data for recruitment purposes.",
+        label: "Privacy Policy Text",
+      },
+    },
+    structure: (data, theme, colorMode) => {
+      // Detect theme style
+      const themeId = theme?.id || "minimal";
+      const isBrutalist = themeId === "brutalist";
+      const isGradient = themeId === "gradient";
+      const isElegant = themeId === "elegant";
+      const isRetro = themeId === "retro";
+      const isGlassmorphism = themeId === "glassmorphism";
+      const isNeumorphism = themeId === "neumorphism";
+
+      // Neumorphism helpers
+      const getNeumorphismShadow = (inset = false) => {
+        if (!isNeumorphism) return "";
+        return inset
+          ? "box-shadow: var(--neomorph-shadow-in);"
+          : "box-shadow: var(--neomorph-shadow-out);";
+      };
+
+      const getNeumorphismHoverShadow = () => {
+        if (!isNeumorphism) return "";
+        return "var(--neomorph-shadow-in)";
+      };
+
+      const getNeumorphismNormalShadow = () => {
+        if (!isNeumorphism) return "";
+        return "var(--neomorph-shadow-out)";
+      };
+
+      // Extract required fields configuration
+      const requiredFields =
+        data.requiredFields && data.requiredFields[0]
+          ? data.requiredFields[0]
+          : {};
+
+      return `
+      <!-- Header -->
+      <header style="padding: ${
+        isBrutalist ? "2rem 0" : "1.5rem 0"
+      }; border-bottom: ${
+        isBrutalist ? "4px" : isRetro ? "3px" : "1px"
+      } solid ${
+        isBrutalist || isRetro ? "var(--color-accent)" : "var(--color-border)"
+      }; position: sticky; top: 0; background: ${
+        isGlassmorphism ? "rgba(255,255,255,0.1)" : "var(--color-bg)"
+      }; z-index: 100; backdrop-filter: blur(${
+        isGlassmorphism ? "20px" : "10px"
+      });">
+        <div class="container">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-family: ${
+              isElegant
+                ? "Playfair Display, serif"
+                : isRetro
+                ? "Space Mono, monospace"
+                : "inherit"
+            }; font-weight: ${isBrutalist ? "900" : "600"}; font-size: ${
+        isBrutalist ? "1.75rem" : isRetro ? "1.5rem" : "1.25rem"
+      }; letter-spacing: ${isBrutalist || isRetro ? "2px" : "-0.02em"}; ${
+        isBrutalist || isRetro ? "text-transform: uppercase;" : ""
+      } ${
+        isGradient
+          ? "background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"
+          : isRetro
+          ? "background: linear-gradient(90deg, var(--color-accent), #00f5ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"
+          : ""
+      }">
+              ${data.organizationName || "Application Form"}
+            </div>
+            
+            <!-- Theme Toggle -->
+            <label class="theme-toggle-switch-wrapper" style="cursor: pointer; ${
+              isNeumorphism
+                ? `padding: 0.5rem; border-radius: 12px; display: inline-block; background: var(--color-bg); ${getNeumorphismShadow(
+                    false
+                  )}`
+                : ""
+            }">
+              <input type="checkbox" class="theme-toggle-switch" onclick="toggleTheme()" aria-label="Toggle theme">
+              <span class="theme-toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+      </header>
+
+      <main>
+        <!-- Form Header -->
+        <section style="padding: ${
+          isBrutalist ? "4rem 0 3rem" : "3rem 0 2rem"
+        }; text-align: center;">
+          <div class="container" style="max-width: 800px;">
+            <h1 style="font-family: ${
+              isElegant ? "Playfair Display, serif" : "inherit"
+            }; font-size: clamp(${
+        isBrutalist || isRetro ? "2.5rem" : "2rem"
+      }, 6vw, ${isBrutalist || isRetro ? "3.5rem" : "3rem"}); font-weight: ${
+        isBrutalist ? "900" : "700"
+      }; margin-bottom: 1rem; letter-spacing: ${isRetro ? "2px" : "-0.02em"}; ${
+        isBrutalist || isRetro ? "text-transform: uppercase;" : ""
+      }">
+              ${data.formTitle || "Application Form"}
+            </h1>
+            
+            ${
+              data.formDescription
+                ? `
+            <p style="color: var(--color-text-secondary); font-size: ${
+              isBrutalist ? "1.25rem" : "1.125rem"
+            }; margin-bottom: 1.5rem; line-height: 1.7; font-weight: ${
+                    isElegant ? "300" : "normal"
+                  };">
+              ${data.formDescription}
+            </p>
+            `
+                : ""
+            }
+            
+            ${
+              data.applicationDeadline
+                ? `
+            <div style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1.5rem; background: ${
+              isGradient
+                ? "linear-gradient(135deg, rgba(102,126,234,0.1), rgba(118,75,162,0.1))"
+                : "var(--color-surface)"
+            }; border-radius: ${
+                    isBrutalist || isElegant || isRetro ? "0" : "8px"
+                  }; border: ${isBrutalist ? "3px" : "1px"} solid ${
+                    isBrutalist || isRetro
+                      ? "var(--color-accent)"
+                      : "var(--color-border)"
+                  }; margin-bottom: 1rem; ${
+                    isGlassmorphism
+                      ? "backdrop-filter: blur(10px);"
+                      : isNeumorphism
+                      ? getNeumorphismShadow(false)
+                      : ""
+                  }">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+              </svg>
+              <span style="font-weight: 600; color: var(--color-text);">Application Deadline:</span>
+              <span style="color: var(--color-text-secondary);">${new Date(
+                data.applicationDeadline
+              ).toLocaleDateString("en-US", {
+                month: "long",
+                day: "numeric",
+                year: "numeric",
+              })}</span>
+            </div>
+            `
+                : ""
+            }
+          </div>
+        </section>
+
+        <!-- Application Form -->
+        <section style="padding: ${
+          isBrutalist ? "0 0 4rem" : "0 0 3rem"
+        }; min-height: 60vh;">
+          <div class="container" style="max-width: 800px;">
+            <form id="applicationForm" onsubmit="event.preventDefault(); submitApplication();" style="display: flex; flex-direction: column; gap: ${
+              isBrutalist ? "2.5rem" : "2rem"
+            };">
+              
+              <!-- Personal Information Section -->
+              <div class="form-section">
+                <h2 style="font-family: ${
+                  isElegant ? "Playfair Display, serif" : "inherit"
+                }; font-size: ${
+        isBrutalist ? "1.75rem" : "1.5rem"
+      }; font-weight: ${
+        isBrutalist ? "900" : "600"
+      }; margin-bottom: 1.5rem; padding-bottom: 0.75rem; border-bottom: ${
+        isBrutalist ? "3px" : "2px"
+      } solid var(--color-border); ${
+        isBrutalist ? "text-transform: uppercase;" : ""
+      }">
+                  Personal Information
+                </h2>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: ${
+                  isBrutalist ? "1.5rem" : "1.25rem"
+                };">
+                  ${
+                    requiredFields.name !== false
+                      ? `
+                  <div class="form-group">
+                    <label for="fullName" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--color-text);">
+                      Full Name *
+                    </label>
+                    <input type="text" id="fullName" name="fullName" required style="width: 100%; padding: ${
+                      isBrutalist ? "1rem" : "0.875rem 1rem"
+                    }; border: ${isBrutalist ? "3px" : "2px"} solid ${
+                          isBrutalist || isRetro
+                            ? "var(--color-accent)"
+                            : isGlassmorphism
+                            ? "rgba(255,255,255,0.1)"
+                            : "var(--color-border)"
+                        }; border-radius: ${
+                          isBrutalist || isElegant || isRetro ? "0" : "8px"
+                        }; background: ${
+                          isGlassmorphism
+                            ? "rgba(255,255,255,0.05)"
+                            : isNeumorphism
+                            ? "var(--color-bg)"
+                            : "var(--color-bg)"
+                        }; color: var(--color-text); font-size: 1rem; outline: none; transition: all 0.2s; ${
+                          isNeumorphism ? getNeumorphismShadow(true) : ""
+                        }" 
+                      onfocus="this.style.borderColor='var(--color-accent)'; ${
+                        isNeumorphism
+                          ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
+                          : ""
+                      }" 
+                      onblur="this.style.borderColor='${
+                        isBrutalist || isRetro
+                          ? "var(--color-accent)"
+                          : isGlassmorphism
+                          ? "rgba(255,255,255,0.1)"
+                          : "var(--color-border)"
+                      }'; ${
+                          isNeumorphism
+                            ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
+                            : ""
+                        }">
+                  </div>
+                  `
+                      : ""
+                  }
+                  
+                  ${
+                    requiredFields.email !== false
+                      ? `
+                  <div class="form-group">
+                    <label for="email" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--color-text);">
+                      Email Address *
+                    </label>
+                    <input type="email" id="email" name="email" required style="width: 100%; padding: ${
+                      isBrutalist ? "1rem" : "0.875rem 1rem"
+                    }; border: ${isBrutalist ? "3px" : "2px"} solid ${
+                          isBrutalist || isRetro
+                            ? "var(--color-accent)"
+                            : isGlassmorphism
+                            ? "rgba(255,255,255,0.1)"
+                            : "var(--color-border)"
+                        }; border-radius: ${
+                          isBrutalist || isElegant || isRetro ? "0" : "8px"
+                        }; background: ${
+                          isGlassmorphism
+                            ? "rgba(255,255,255,0.05)"
+                            : isNeumorphism
+                            ? "var(--color-bg)"
+                            : "var(--color-bg)"
+                        }; color: var(--color-text); font-size: 1rem; outline: none; transition: all 0.2s; ${
+                          isNeumorphism ? getNeumorphismShadow(true) : ""
+                        }" 
+                      onfocus="this.style.borderColor='var(--color-accent)'; ${
+                        isNeumorphism
+                          ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
+                          : ""
+                      }" 
+                      onblur="this.style.borderColor='${
+                        isBrutalist || isRetro
+                          ? "var(--color-accent)"
+                          : isGlassmorphism
+                          ? "rgba(255,255,255,0.1)"
+                          : "var(--color-border)"
+                      }'; ${
+                          isNeumorphism
+                            ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
+                            : ""
+                        }">
+                  </div>
+                  `
+                      : ""
+                  }
+                  
+                  ${
+                    requiredFields.phone !== false
+                      ? `
+                  <div class="form-group">
+                    <label for="phone" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--color-text);">
+                      Phone Number ${requiredFields.phone ? "*" : ""}
+                    </label>
+                    <input type="tel" id="phone" name="phone" ${
+                      requiredFields.phone ? "required" : ""
+                    } style="width: 100%; padding: ${
+                          isBrutalist ? "1rem" : "0.875rem 1rem"
+                        }; border: ${isBrutalist ? "3px" : "2px"} solid ${
+                          isBrutalist || isRetro
+                            ? "var(--color-accent)"
+                            : isGlassmorphism
+                            ? "rgba(255,255,255,0.1)"
+                            : "var(--color-border)"
+                        }; border-radius: ${
+                          isBrutalist || isElegant || isRetro ? "0" : "8px"
+                        }; background: ${
+                          isGlassmorphism
+                            ? "rgba(255,255,255,0.05)"
+                            : isNeumorphism
+                            ? "var(--color-bg)"
+                            : "var(--color-bg)"
+                        }; color: var(--color-text); font-size: 1rem; outline: none; transition: all 0.2s; ${
+                          isNeumorphism ? getNeumorphismShadow(true) : ""
+                        }" 
+                      onfocus="this.style.borderColor='var(--color-accent)'; ${
+                        isNeumorphism
+                          ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
+                          : ""
+                      }" 
+                      onblur="this.style.borderColor='${
+                        isBrutalist || isRetro
+                          ? "var(--color-accent)"
+                          : isGlassmorphism
+                          ? "rgba(255,255,255,0.1)"
+                          : "var(--color-border)"
+                      }'; ${
+                          isNeumorphism
+                            ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
+                            : ""
+                        }">
+                  </div>
+                  `
+                      : ""
+                  }
+                  
+                  ${
+                    requiredFields.address !== false
+                      ? `
+                  <div class="form-group" style="grid-column: 1 / -1;">
+                    <label for="address" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--color-text);">
+                      Address ${requiredFields.address ? "*" : ""}
+                    </label>
+                    <textarea id="address" name="address" rows="3" ${
+                      requiredFields.address ? "required" : ""
+                    } style="width: 100%; padding: ${
+                          isBrutalist ? "1rem" : "0.875rem 1rem"
+                        }; border: ${isBrutalist ? "3px" : "2px"} solid ${
+                          isBrutalist || isRetro
+                            ? "var(--color-accent)"
+                            : isGlassmorphism
+                            ? "rgba(255,255,255,0.1)"
+                            : "var(--color-border)"
+                        }; border-radius: ${
+                          isBrutalist || isElegant || isRetro ? "0" : "8px"
+                        }; background: ${
+                          isGlassmorphism
+                            ? "rgba(255,255,255,0.05)"
+                            : isNeumorphism
+                            ? "var(--color-bg)"
+                            : "var(--color-bg)"
+                        }; color: var(--color-text); font-size: 1rem; outline: none; transition: all 0.2s; resize: vertical; ${
+                          isNeumorphism ? getNeumorphismShadow(true) : ""
+                        }" 
+                      onfocus="this.style.borderColor='var(--color-accent)'; ${
+                        isNeumorphism
+                          ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
+                          : ""
+                      }" 
+                      onblur="this.style.borderColor='${
+                        isBrutalist || isRetro
+                          ? "var(--color-accent)"
+                          : isGlassmorphism
+                          ? "rgba(255,255,255,0.1)"
+                          : "var(--color-border)"
+                      }'; ${
+                          isNeumorphism
+                            ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
+                            : ""
+                        }" placeholder="Street, City, State, ZIP Code"></textarea>
+                  </div>
+                  `
+                      : ""
+                  }
+                </div>
+              </div>
+
+              <!-- Education & Experience Section -->
+              ${
+                requiredFields.education !== false ||
+                requiredFields.experience !== false
+                  ? `
+              <div class="form-section">
+                <h2 style="font-family: ${
+                  isElegant ? "Playfair Display, serif" : "inherit"
+                }; font-size: ${
+                      isBrutalist ? "1.75rem" : "1.5rem"
+                    }; font-weight: ${
+                      isBrutalist ? "900" : "600"
+                    }; margin-bottom: 1.5rem; padding-bottom: 0.75rem; border-bottom: ${
+                      isBrutalist ? "3px" : "2px"
+                    } solid var(--color-border); ${
+                      isBrutalist ? "text-transform: uppercase;" : ""
+                    }">
+                  Background
+                </h2>
+                
+                <div style="display: flex; flex-direction: column; gap: ${
+                  isBrutalist ? "1.5rem" : "1.25rem"
+                };">
+                  ${
+                    requiredFields.education !== false
+                      ? `
+                  <div class="form-group">
+                    <label for="education" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--color-text);">
+                      Education History ${requiredFields.education ? "*" : ""}
+                    </label>
+                    <textarea id="education" name="education" rows="4" ${
+                      requiredFields.education ? "required" : ""
+                    } style="width: 100%; padding: ${
+                          isBrutalist ? "1rem" : "0.875rem 1rem"
+                        }; border: ${isBrutalist ? "3px" : "2px"} solid ${
+                          isBrutalist || isRetro
+                            ? "var(--color-accent)"
+                            : isGlassmorphism
+                            ? "rgba(255,255,255,0.1)"
+                            : "var(--color-border)"
+                        }; border-radius: ${
+                          isBrutalist || isElegant || isRetro ? "0" : "8px"
+                        }; background: ${
+                          isGlassmorphism
+                            ? "rgba(255,255,255,0.05)"
+                            : isNeumorphism
+                            ? "var(--color-bg)"
+                            : "var(--color-bg)"
+                        }; color: var(--color-text); font-size: 1rem; outline: none; transition: all 0.2s; resize: vertical; ${
+                          isNeumorphism ? getNeumorphismShadow(true) : ""
+                        }" 
+                      onfocus="this.style.borderColor='var(--color-accent)'; ${
+                        isNeumorphism
+                          ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
+                          : ""
+                      }" 
+                      onblur="this.style.borderColor='${
+                        isBrutalist || isRetro
+                          ? "var(--color-accent)"
+                          : isGlassmorphism
+                          ? "rgba(255,255,255,0.1)"
+                          : "var(--color-border)"
+                      }'; ${
+                          isNeumorphism
+                            ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
+                            : ""
+                        }" placeholder="List your educational background, degrees, and certifications"></textarea>
+                  </div>
+                  `
+                      : ""
+                  }
+                  
+                  ${
+                    requiredFields.experience !== false
+                      ? `
+                  <div class="form-group">
+                    <label for="experience" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--color-text);">
+                      Work Experience ${requiredFields.experience ? "*" : ""}
+                    </label>
+                    <textarea id="experience" name="experience" rows="4" ${
+                      requiredFields.experience ? "required" : ""
+                    } style="width: 100%; padding: ${
+                          isBrutalist ? "1rem" : "0.875rem 1rem"
+                        }; border: ${isBrutalist ? "3px" : "2px"} solid ${
+                          isBrutalist || isRetro
+                            ? "var(--color-accent)"
+                            : isGlassmorphism
+                            ? "rgba(255,255,255,0.1)"
+                            : "var(--color-border)"
+                        }; border-radius: ${
+                          isBrutalist || isElegant || isRetro ? "0" : "8px"
+                        }; background: ${
+                          isGlassmorphism
+                            ? "rgba(255,255,255,0.05)"
+                            : isNeumorphism
+                            ? "var(--color-bg)"
+                            : "var(--color-bg)"
+                        }; color: var(--color-text); font-size: 1rem; outline: none; transition: all 0.2s; resize: vertical; ${
+                          isNeumorphism ? getNeumorphismShadow(true) : ""
+                        }" 
+                      onfocus="this.style.borderColor='var(--color-accent)'; ${
+                        isNeumorphism
+                          ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
+                          : ""
+                      }" 
+                      onblur="this.style.borderColor='${
+                        isBrutalist || isRetro
+                          ? "var(--color-accent)"
+                          : isGlassmorphism
+                          ? "rgba(255,255,255,0.1)"
+                          : "var(--color-border)"
+                      }'; ${
+                          isNeumorphism
+                            ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
+                            : ""
+                        }" placeholder="Describe your relevant work experience"></textarea>
+                  </div>
+                  `
+                      : ""
+                  }
+                </div>
+              </div>
+              `
+                  : ""
+              }
+
+              <!-- Additional Information -->
+              ${
+                requiredFields.availability !== false ||
+                requiredFields.salary !== false ||
+                requiredFields.portfolio !== false ||
+                requiredFields.coverLetter !== false ||
+                requiredFields.references !== false
+                  ? `
+              <div class="form-section">
+                <h2 style="font-family: ${
+                  isElegant ? "Playfair Display, serif" : "inherit"
+                }; font-size: ${
+                      isBrutalist ? "1.75rem" : "1.5rem"
+                    }; font-weight: ${
+                      isBrutalist ? "900" : "600"
+                    }; margin-bottom: 1.5rem; padding-bottom: 0.75rem; border-bottom: ${
+                      isBrutalist ? "3px" : "2px"
+                    } solid var(--color-border); ${
+                      isBrutalist ? "text-transform: uppercase;" : ""
+                    }">
+                  Additional Information
+                </h2>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: ${
+                  isBrutalist ? "1.5rem" : "1.25rem"
+                };">
+                  ${
+                    requiredFields.availability !== false
+                      ? `
+                  <div class="form-group">
+                    <label for="availability" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--color-text);">
+                      Availability ${requiredFields.availability ? "*" : ""}
+                    </label>
+                    <select id="availability" name="availability" ${
+                      requiredFields.availability ? "required" : ""
+                    } style="width: 100%; padding: ${
+                          isBrutalist ? "1rem" : "0.875rem 1rem"
+                        }; border: ${isBrutalist ? "3px" : "2px"} solid ${
+                          isBrutalist || isRetro
+                            ? "var(--color-accent)"
+                            : isGlassmorphism
+                            ? "rgba(255,255,255,0.1)"
+                            : "var(--color-border)"
+                        }; border-radius: ${
+                          isBrutalist || isElegant || isRetro ? "0" : "8px"
+                        }; background: ${
+                          isGlassmorphism
+                            ? "rgba(255,255,255,0.05)"
+                            : isNeumorphism
+                            ? "var(--color-bg)"
+                            : "var(--color-bg)"
+                        }; color: var(--color-text); font-size: 1rem; outline: none; transition: all 0.2s; cursor: pointer; ${
+                          isNeumorphism ? getNeumorphismShadow(true) : ""
+                        }" 
+                      onfocus="this.style.borderColor='var(--color-accent)'; ${
+                        isNeumorphism
+                          ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
+                          : ""
+                      }" 
+                      onblur="this.style.borderColor='${
+                        isBrutalist || isRetro
+                          ? "var(--color-accent)"
+                          : isGlassmorphism
+                          ? "rgba(255,255,255,0.1)"
+                          : "var(--color-border)"
+                      }'; ${
+                          isNeumorphism
+                            ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
+                            : ""
+                        }">
+                      <option value="">Select availability</option>
+                      <option value="immediate">Immediately</option>
+                      <option value="2weeks">Within 2 weeks</option>
+                      <option value="1month">Within 1 month</option>
+                      <option value="negotiable">Negotiable</option>
+                    </select>
+                  </div>
+                  `
+                      : ""
+                  }
+                  
+                  ${
+                    requiredFields.salary !== false
+                      ? `
+                  <div class="form-group">
+                    <label for="salary" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--color-text);">
+                      Salary Expectations ${requiredFields.salary ? "*" : ""}
+                    </label>
+                    <input type="text" id="salary" name="salary" ${
+                      requiredFields.salary ? "required" : ""
+                    } style="width: 100%; padding: ${
+                          isBrutalist ? "1rem" : "0.875rem 1rem"
+                        }; border: ${isBrutalist ? "3px" : "2px"} solid ${
+                          isBrutalist || isRetro
+                            ? "var(--color-accent)"
+                            : isGlassmorphism
+                            ? "rgba(255,255,255,0.1)"
+                            : "var(--color-border)"
+                        }; border-radius: ${
+                          isBrutalist || isElegant || isRetro ? "0" : "8px"
+                        }; background: ${
+                          isGlassmorphism
+                            ? "rgba(255,255,255,0.05)"
+                            : isNeumorphism
+                            ? "var(--color-bg)"
+                            : "var(--color-bg)"
+                        }; color: var(--color-text); font-size: 1rem; outline: none; transition: all 0.2s; ${
+                          isNeumorphism ? getNeumorphismShadow(true) : ""
+                        }" 
+                      onfocus="this.style.borderColor='var(--color-accent)'; ${
+                        isNeumorphism
+                          ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
+                          : ""
+                      }" 
+                      onblur="this.style.borderColor='${
+                        isBrutalist || isRetro
+                          ? "var(--color-accent)"
+                          : isGlassmorphism
+                          ? "rgba(255,255,255,0.1)"
+                          : "var(--color-border)"
+                      }'; ${
+                          isNeumorphism
+                            ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
+                            : ""
+                        }" placeholder="e.g., $60,000 - $75,000">
+                  </div>
+                  `
+                      : ""
+                  }
+                  
+                  ${
+                    requiredFields.portfolio !== false
+                      ? `
+                  <div class="form-group">
+                    <label for="portfolio" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--color-text);">
+                      Portfolio/Website URL ${
+                        requiredFields.portfolio ? "*" : ""
+                      }
+                    </label>
+                    <input type="url" id="portfolio" name="portfolio" ${
+                      requiredFields.portfolio ? "required" : ""
+                    } style="width: 100%; padding: ${
+                          isBrutalist ? "1rem" : "0.875rem 1rem"
+                        }; border: ${isBrutalist ? "3px" : "2px"} solid ${
+                          isBrutalist || isRetro
+                            ? "var(--color-accent)"
+                            : isGlassmorphism
+                            ? "rgba(255,255,255,0.1)"
+                            : "var(--color-border)"
+                        }; border-radius: ${
+                          isBrutalist || isElegant || isRetro ? "0" : "8px"
+                        }; background: ${
+                          isGlassmorphism
+                            ? "rgba(255,255,255,0.05)"
+                            : isNeumorphism
+                            ? "var(--color-bg)"
+                            : "var(--color-bg)"
+                        }; color: var(--color-text); font-size: 1rem; outline: none; transition: all 0.2s; ${
+                          isNeumorphism ? getNeumorphismShadow(true) : ""
+                        }" 
+                      onfocus="this.style.borderColor='var(--color-accent)'; ${
+                        isNeumorphism
+                          ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
+                          : ""
+                      }" 
+                      onblur="this.style.borderColor='${
+                        isBrutalist || isRetro
+                          ? "var(--color-accent)"
+                          : isGlassmorphism
+                          ? "rgba(255,255,255,0.1)"
+                          : "var(--color-border)"
+                      }'; ${
+                          isNeumorphism
+                            ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
+                            : ""
+                        }" placeholder="https://yourportfolio.com">
+                  </div>
+                  `
+                      : ""
+                  }
+                  
+                  ${
+                    requiredFields.coverLetter !== false
+                      ? `
+                  <div class="form-group" style="grid-column: 1 / -1;">
+                    <label for="coverLetter" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--color-text);">
+                      Cover Letter ${requiredFields.coverLetter ? "*" : ""}
+                    </label>
+                    <textarea id="coverLetter" name="coverLetter" rows="5" ${
+                      requiredFields.coverLetter ? "required" : ""
+                    } style="width: 100%; padding: ${
+                          isBrutalist ? "1rem" : "0.875rem 1rem"
+                        }; border: ${isBrutalist ? "3px" : "2px"} solid ${
+                          isBrutalist || isRetro
+                            ? "var(--color-accent)"
+                            : isGlassmorphism
+                            ? "rgba(255,255,255,0.1)"
+                            : "var(--color-border)"
+                        }; border-radius: ${
+                          isBrutalist || isElegant || isRetro ? "0" : "8px"
+                        }; background: ${
+                          isGlassmorphism
+                            ? "rgba(255,255,255,0.05)"
+                            : isNeumorphism
+                            ? "var(--color-bg)"
+                            : "var(--color-bg)"
+                        }; color: var(--color-text); font-size: 1rem; outline: none; transition: all 0.2s; resize: vertical; ${
+                          isNeumorphism ? getNeumorphismShadow(true) : ""
+                        }" 
+                      onfocus="this.style.borderColor='var(--color-accent)'; ${
+                        isNeumorphism
+                          ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
+                          : ""
+                      }" 
+                      onblur="this.style.borderColor='${
+                        isBrutalist || isRetro
+                          ? "var(--color-accent)"
+                          : isGlassmorphism
+                          ? "rgba(255,255,255,0.1)"
+                          : "var(--color-border)"
+                      }'; ${
+                          isNeumorphism
+                            ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
+                            : ""
+                        }" placeholder="Write your cover letter here..."></textarea>
+                  </div>
+                  `
+                      : ""
+                  }
+                  
+                  ${
+                    requiredFields.references !== false
+                      ? `
+                  <div class="form-group" style="grid-column: 1 / -1;">
+                    <label for="references" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--color-text);">
+                      References ${requiredFields.references ? "*" : ""}
+                    </label>
+                    <textarea id="references" name="references" rows="4" ${
+                      requiredFields.references ? "required" : ""
+                    } style="width: 100%; padding: ${
+                          isBrutalist ? "1rem" : "0.875rem 1rem"
+                        }; border: ${isBrutalist ? "3px" : "2px"} solid ${
+                          isBrutalist || isRetro
+                            ? "var(--color-accent)"
+                            : isGlassmorphism
+                            ? "rgba(255,255,255,0.1)"
+                            : "var(--color-border)"
+                        }; border-radius: ${
+                          isBrutalist || isElegant || isRetro ? "0" : "8px"
+                        }; background: ${
+                          isGlassmorphism
+                            ? "rgba(255,255,255,0.05)"
+                            : isNeumorphism
+                            ? "var(--color-bg)"
+                            : "var(--color-bg)"
+                        }; color: var(--color-text); font-size: 1rem; outline: none; transition: all 0.2s; resize: vertical; ${
+                          isNeumorphism ? getNeumorphismShadow(true) : ""
+                        }" 
+                      onfocus="this.style.borderColor='var(--color-accent)'; ${
+                        isNeumorphism
+                          ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
+                          : ""
+                      }" 
+                      onblur="this.style.borderColor='${
+                        isBrutalist || isRetro
+                          ? "var(--color-accent)"
+                          : isGlassmorphism
+                          ? "rgba(255,255,255,0.1)"
+                          : "var(--color-border)"
+                      }'; ${
+                          isNeumorphism
+                            ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
+                            : ""
+                        }" placeholder="Name, Position, Company, Email, Phone"></textarea>
+                  </div>
+                  `
+                      : ""
+                  }
+                </div>
+              </div>
+              `
+                  : ""
+              }
+
+              <!-- File Uploads -->
+              ${
+                requiredFields.resume !== false
+                  ? `
+              <div class="form-section">
+                <h2 style="font-family: ${
+                  isElegant ? "Playfair Display, serif" : "inherit"
+                }; font-size: ${
+                      isBrutalist ? "1.75rem" : "1.5rem"
+                    }; font-weight: ${
+                      isBrutalist ? "900" : "600"
+                    }; margin-bottom: 1.5rem; padding-bottom: 0.75rem; border-bottom: ${
+                      isBrutalist ? "3px" : "2px"
+                    } solid var(--color-border); ${
+                      isBrutalist ? "text-transform: uppercase;" : ""
+                    }">
+                  Documents
+                </h2>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: ${
+                  isBrutalist ? "1.5rem" : "1.25rem"
+                };">
+                  ${
+                    requiredFields.resume !== false
+                      ? `
+                  <div class="form-group">
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--color-text);">
+                      Resume ${requiredFields.resume ? "*" : ""}
+                    </label>
+                    <div style="padding: ${
+                      isBrutalist ? "1rem" : "0.875rem 1rem"
+                    }; border: 2px dashed ${
+                          isBrutalist || isRetro
+                            ? "var(--color-accent)"
+                            : isGlassmorphism
+                            ? "rgba(255,255,255,0.1)"
+                            : "var(--color-border)"
+                        }; border-radius: ${
+                          isBrutalist || isElegant || isRetro ? "0" : "8px"
+                        }; background: ${
+                          isGlassmorphism
+                            ? "rgba(255,255,255,0.05)"
+                            : isNeumorphism
+                            ? "var(--color-bg)"
+                            : "var(--color-surface)"
+                        }; text-align: center; cursor: pointer; transition: all 0.2s; ${
+                          isNeumorphism ? getNeumorphismShadow(false) : ""
+                        }" 
+                      onclick="document.getElementById('resume').click()" 
+                      onmouseover="this.style.borderColor='var(--color-accent)'; ${
+                        isNeumorphism
+                          ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
+                          : ""
+                      }" 
+                      onmouseout="this.style.borderColor='${
+                        isBrutalist || isRetro
+                          ? "var(--color-accent)"
+                          : isGlassmorphism
+                          ? "rgba(255,255,255,0.1)"
+                          : "var(--color-border)"
+                      }'; ${
+                          isNeumorphism
+                            ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
+                            : ""
+                        }" 
+                      ondragover="event.preventDefault(); this.style.borderColor='var(--color-accent)';" 
+                      ondragleave="this.style.borderColor='${
+                        isBrutalist || isRetro
+                          ? "var(--color-accent)"
+                          : isGlassmorphism
+                          ? "rgba(255,255,255,0.1)"
+                          : "var(--color-border)"
+                      }';" 
+                      ondrop="event.preventDefault(); this.style.borderColor='${
+                        isBrutalist || isRetro
+                          ? "var(--color-accent)"
+                          : isGlassmorphism
+                          ? "rgba(255,255,255,0.1)"
+                          : "var(--color-border)"
+                      }'; handleFileDrop(event, 'resume')">
+                      <input type="file" id="resume" name="resume" accept=".pdf,.doc,.docx" style="display: none;" ${
+                        requiredFields.resume ? "required" : ""
+                      } onchange="handleFileSelect(this)">
+                      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-secondary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 0.5rem;">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                      </svg>
+                      <div style="color: var(--color-text-secondary); font-size: 0.875rem;">
+                        <span style="color: var(--color-accent); font-weight: 600;">Click to upload</span> or drag and drop
+                      </div>
+                      <div style="color: var(--color-text-secondary); font-size: 0.75rem; margin-top: 0.25rem;">
+                        PDF, DOC, DOCX up to 10MB
+                      </div>
+                      <div id="resumeFileName" style="margin-top: 0.5rem; font-size: 0.875rem; color: var(--color-accent); display: none;"></div>
+                    </div>
+                  </div>
+                  `
+                      : ""
+                  }
+                  
+                  ${
+                    requiredFields.coverLetter !== false
+                      ? `
+                  <div class="form-group">
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--color-text);">
+                      Cover Letter ${requiredFields.coverLetter ? "*" : ""}
+                    </label>
+                    <div style="padding: ${
+                      isBrutalist ? "1rem" : "0.875rem 1rem"
+                    }; border: 2px dashed ${
+                          isBrutalist || isRetro
+                            ? "var(--color-accent)"
+                            : isGlassmorphism
+                            ? "rgba(255,255,255,0.1)"
+                            : "var(--color-border)"
+                        }; border-radius: ${
+                          isBrutalist || isElegant || isRetro ? "0" : "8px"
+                        }; background: ${
+                          isGlassmorphism
+                            ? "rgba(255,255,255,0.05)"
+                            : isNeumorphism
+                            ? "var(--color-bg)"
+                            : "var(--color-surface)"
+                        }; text-align: center; cursor: pointer; transition: all 0.2s; ${
+                          isNeumorphism ? getNeumorphismShadow(false) : ""
+                        }" 
+                      onclick="document.getElementById('coverLetterFile').click()" 
+                      onmouseover="this.style.borderColor='var(--color-accent)'; ${
+                        isNeumorphism
+                          ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
+                          : ""
+                      }" 
+                      onmouseout="this.style.borderColor='${
+                        isBrutalist || isRetro
+                          ? "var(--color-accent)"
+                          : isGlassmorphism
+                          ? "rgba(255,255,255,0.1)"
+                          : "var(--color-border)"
+                      }'; ${
+                          isNeumorphism
+                            ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
+                            : ""
+                        }" 
+                      ondragover="event.preventDefault(); this.style.borderColor='var(--color-accent)';" 
+                      ondragleave="this.style.borderColor='${
+                        isBrutalist || isRetro
+                          ? "var(--color-accent)"
+                          : isGlassmorphism
+                          ? "rgba(255,255,255,0.1)"
+                          : "var(--color-border)"
+                      }';" 
+                      ondrop="event.preventDefault(); this.style.borderColor='${
+                        isBrutalist || isRetro
+                          ? "var(--color-accent)"
+                          : isGlassmorphism
+                          ? "rgba(255,255,255,0.1)"
+                          : "var(--color-border)"
+                      }'; handleFileDrop(event, 'coverLetterFile')">
+                      <input type="file" id="coverLetterFile" name="coverLetterFile" accept=".pdf,.doc,.docx" style="display: none;" ${
+                        requiredFields.coverLetter ? "required" : ""
+                      } onchange="handleFileSelect(this)">
+                      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-secondary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 0.5rem;">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
+                      </svg>
+                      <div style="color: var(--color-text-secondary); font-size: 0.875rem;">
+                        <span style="color: var(--color-accent); font-weight: 600;">Click to upload</span> or drag and drop
+                      </div>
+                      <div style="color: var(--color-text-secondary); font-size: 0.75rem; margin-top: 0.25rem;">
+                        PDF, DOC, DOCX up to 5MB
+                      </div>
+                      <div id="coverLetterFileName" style="margin-top: 0.5rem; font-size: 0.875rem; color: var(--color-accent); display: none;"></div>
+                    </div>
+                  </div>
+                  `
+                      : ""
+                  }
+                </div>
+              </div>
+              `
+                  : ""
+              }
+
+              <!-- Custom Questions -->
+              ${
+                data.customFields && data.customFields.length > 0
+                  ? `
+              <div class="form-section">
+                <h2 style="font-family: ${
+                  isElegant ? "Playfair Display, serif" : "inherit"
+                }; font-size: ${
+                      isBrutalist ? "1.75rem" : "1.5rem"
+                    }; font-weight: ${
+                      isBrutalist ? "900" : "600"
+                    }; margin-bottom: 1.5rem; padding-bottom: 0.75rem; border-bottom: ${
+                      isBrutalist ? "3px" : "2px"
+                    } solid var(--color-border); ${
+                      isBrutalist ? "text-transform: uppercase;" : ""
+                    }">
+                  Additional Questions
+                </h2>
+                
+                <div style="display: flex; flex-direction: column; gap: ${
+                  isBrutalist ? "1.5rem" : "1.25rem"
+                };">
+                  ${data.customFields
+                    .map((field, index) => {
+                      const fieldId = `custom_${index}`;
+                      const isRequired = field.required;
+
+                      if (field.type === "textarea") {
+                        return `
+                          <div class="form-group">
+                            <label for="${fieldId}" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--color-text);">
+                              ${field.question} ${isRequired ? "*" : ""}
+                            </label>
+                            <textarea id="${fieldId}" name="${fieldId}" rows="4" ${
+                          isRequired ? "required" : ""
+                        } style="width: 100%; padding: ${
+                          isBrutalist ? "1rem" : "0.875rem 1rem"
+                        }; border: ${isBrutalist ? "3px" : "2px"} solid ${
+                          isBrutalist || isRetro
+                            ? "var(--color-accent)"
+                            : isGlassmorphism
+                            ? "rgba(255,255,255,0.1)"
+                            : "var(--color-border)"
+                        }; border-radius: ${
+                          isBrutalist || isElegant || isRetro ? "0" : "8px"
+                        }; background: ${
+                          isGlassmorphism
+                            ? "rgba(255,255,255,0.05)"
+                            : isNeumorphism
+                            ? "var(--color-bg)"
+                            : "var(--color-bg)"
+                        }; color: var(--color-text); font-size: 1rem; outline: none; transition: all 0.2s; resize: vertical; ${
+                          isNeumorphism ? getNeumorphismShadow(true) : ""
+                        }" 
+                              onfocus="this.style.borderColor='var(--color-accent)'; ${
+                                isNeumorphism
+                                  ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
+                                  : ""
+                              }" 
+                              onblur="this.style.borderColor='${
+                                isBrutalist || isRetro
+                                  ? "var(--color-accent)"
+                                  : isGlassmorphism
+                                  ? "rgba(255,255,255,0.1)"
+                                  : "var(--color-border)"
+                              }'; ${
+                          isNeumorphism
+                            ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
+                            : ""
+                        }"></textarea>
+                          </div>
+                        `;
+                      } else if (field.type === "select") {
+                        return `
+                          <div class="form-group">
+                            <label for="${fieldId}" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--color-text);">
+                              ${field.question} ${isRequired ? "*" : ""}
+                            </label>
+                            <select id="${fieldId}" name="${fieldId}" ${
+                          isRequired ? "required" : ""
+                        } style="width: 100%; padding: ${
+                          isBrutalist ? "1rem" : "0.875rem 1rem"
+                        }; border: ${isBrutalist ? "3px" : "2px"} solid ${
+                          isBrutalist || isRetro
+                            ? "var(--color-accent)"
+                            : isGlassmorphism
+                            ? "rgba(255,255,255,0.1)"
+                            : "var(--color-border)"
+                        }; border-radius: ${
+                          isBrutalist || isElegant || isRetro ? "0" : "8px"
+                        }; background: ${
+                          isGlassmorphism
+                            ? "rgba(255,255,255,0.05)"
+                            : isNeumorphism
+                            ? "var(--color-bg)"
+                            : "var(--color-bg)"
+                        }; color: var(--color-text); font-size: 1rem; outline: none; transition: all 0.2s; cursor: pointer; ${
+                          isNeumorphism ? getNeumorphismShadow(true) : ""
+                        }" 
+                              onfocus="this.style.borderColor='var(--color-accent)'; ${
+                                isNeumorphism
+                                  ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
+                                  : ""
+                              }" 
+                              onblur="this.style.borderColor='${
+                                isBrutalist || isRetro
+                                  ? "var(--color-accent)"
+                                  : isGlassmorphism
+                                  ? "rgba(255,255,255,0.1)"
+                                  : "var(--color-border)"
+                              }'; ${
+                          isNeumorphism
+                            ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
+                            : ""
+                        }">
+                              <option value="">Select an option</option>
+                              ${
+                                field.options && field.options.length > 0
+                                  ? field.options
+                                      .map(
+                                        (option) =>
+                                          `<option value="${option}">${option}</option>`
+                                      )
+                                      .join("")
+                                  : ""
+                              }
+                            </select>
+                          </div>
+                        `;
+                      } else if (field.type === "checkbox") {
+                        return `
+                          <div class="form-group">
+                            <div style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--color-text);">
+                              ${field.question} ${isRequired ? "*" : ""}
+                            </div>
+                            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                              ${
+                                field.options && field.options.length > 0
+                                  ? field.options
+                                      .map(
+                                        (option, optIndex) => `
+                                        <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer;">
+                                          <input type="checkbox" name="${fieldId}[]" value="${option}" ${
+                                          isRequired ? "required" : ""
+                                        } style="width: 18px; height: 18px; accent-color: var(--color-accent);">
+                                          <span style="color: var(--color-text);">${option}</span>
+                                        </label>
+                                      `
+                                      )
+                                      .join("")
+                                  : `
+                                  <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer;">
+                                    <input type="checkbox" name="${fieldId}" value="yes" ${
+                                      isRequired ? "required" : ""
+                                    } style="width: 18px; height: 18px; accent-color: var(--color-accent);">
+                                    <span style="color: var(--color-text);">Yes</span>
+                                  </label>
+                                `
+                              }
+                            </div>
+                          </div>
+                        `;
+                      } else {
+                        // Default to text input
+                        return `
+                          <div class="form-group">
+                            <label for="${fieldId}" style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: var(--color-text);">
+                              ${field.question} ${isRequired ? "*" : ""}
+                            </label>
+                            <input type="text" id="${fieldId}" name="${fieldId}" ${
+                          isRequired ? "required" : ""
+                        } style="width: 100%; padding: ${
+                          isBrutalist ? "1rem" : "0.875rem 1rem"
+                        }; border: ${isBrutalist ? "3px" : "2px"} solid ${
+                          isBrutalist || isRetro
+                            ? "var(--color-accent)"
+                            : isGlassmorphism
+                            ? "rgba(255,255,255,0.1)"
+                            : "var(--color-border)"
+                        }; border-radius: ${
+                          isBrutalist || isElegant || isRetro ? "0" : "8px"
+                        }; background: ${
+                          isGlassmorphism
+                            ? "rgba(255,255,255,0.05)"
+                            : isNeumorphism
+                            ? "var(--color-bg)"
+                            : "var(--color-bg)"
+                        }; color: var(--color-text); font-size: 1rem; outline: none; transition: all 0.2s; ${
+                          isNeumorphism ? getNeumorphismShadow(true) : ""
+                        }" 
+                              onfocus="this.style.borderColor='var(--color-accent)'; ${
+                                isNeumorphism
+                                  ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
+                                  : ""
+                              }" 
+                              onblur="this.style.borderColor='${
+                                isBrutalist || isRetro
+                                  ? "var(--color-accent)"
+                                  : isGlassmorphism
+                                  ? "rgba(255,255,255,0.1)"
+                                  : "var(--color-border)"
+                              }'; ${
+                          isNeumorphism
+                            ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
+                            : ""
+                        }">
+                          </div>
+                        `;
+                      }
+                    })
+                    .join("")}
+                </div>
+              </div>
+              `
+                  : ""
+              }
+
+              <!-- Privacy Policy and Submit -->
+              <div class="form-section">
+                ${
+                  data.privacyPolicy
+                    ? `
+                <div style="margin-bottom: 2rem; padding: ${
+                  isBrutalist ? "1.5rem" : "1.25rem"
+                }; background: ${
+                        isGlassmorphism
+                          ? "rgba(255,255,255,0.05)"
+                          : "var(--color-surface)"
+                      }; border-radius: ${
+                        isBrutalist || isElegant || isRetro ? "0" : "8px"
+                      }; border: ${isBrutalist ? "3px" : "1px"} solid ${
+                        isBrutalist || isRetro
+                          ? "var(--color-accent)"
+                          : "var(--color-border)"
+                      }; ${
+                        isGlassmorphism
+                          ? "backdrop-filter: blur(10px);"
+                          : isNeumorphism
+                          ? getNeumorphismShadow(false)
+                          : ""
+                      }">
+                  <div style="display: flex; align-items: flex-start; gap: 0.75rem;">
+                    <input type="checkbox" id="privacyPolicy" name="privacyPolicy" required style="width: 20px; height: 20px; accent-color: var(--color-accent); margin-top: 0.25rem; flex-shrink: 0;">
+                    <label for="privacyPolicy" style="color: var(--color-text); line-height: 1.6; cursor: pointer;">
+                      ${data.privacyPolicy}
+                    </label>
+                  </div>
+                </div>
+                `
+                    : ""
+                }
+                
+                <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+                  <button type="submit" style="padding: ${
+                    isBrutalist ? "1.25rem 3rem" : "1rem 2.5rem"
+                  }; background: ${
+        isGradient
+          ? "linear-gradient(135deg, #667eea, #764ba2)"
+          : isRetro
+          ? "linear-gradient(90deg, var(--color-accent), #b537f2)"
+          : isGlassmorphism
+          ? "rgba(255,255,255,0.15)"
+          : isNeumorphism
+          ? "var(--color-bg)"
+          : "var(--color-accent)"
+      }; color: ${
+        isGradient || isRetro
+          ? "white"
+          : isGlassmorphism || isNeumorphism
+          ? "var(--color-text)"
+          : "white"
+      }; border: ${isBrutalist ? "3px" : isRetro ? "2px" : "none"} solid ${
+        isBrutalist
+          ? "var(--color-bg)"
+          : isRetro
+          ? "var(--color-accent)"
+          : "transparent"
+      }; border-radius: ${
+        isGradient || isRetro ? "999px" : isBrutalist || isElegant ? "0" : "8px"
+      }; font-weight: ${
+        isBrutalist ? "900" : "700"
+      }; cursor: pointer; transition: all 0.2s; font-size: 1.125rem; ${
+        isBrutalist || isRetro ? "text-transform: uppercase;" : ""
+      } ${isNeumorphism ? getNeumorphismShadow(false) : ""} ${
+        isGradient ? "box-shadow: 0 10px 30px rgba(102,126,234,0.3);" : ""
+      }" 
+                    onmouseover="${
+                      isBrutalist
+                        ? "this.style.background='var(--color-bg)'; this.style.color='var(--color-accent)'; this.style.borderColor='var(--color-accent)'"
+                        : isGradient
+                        ? "this.style.transform='translateY(-2px)'; this.style.boxShadow='0 15px 40px rgba(102,126,234,0.4)'"
+                        : isRetro
+                        ? "this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 20px rgba(255,47,181,0.3)'"
+                        : isGlassmorphism
+                        ? "this.style.transform='translateY(-2px)'; this.style.background='rgba(255,255,255,0.2)'"
+                        : isNeumorphism
+                        ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
+                        : "this.style.opacity='0.9'; this.style.transform='translateY(-2px)'"
+                    }" 
+                    onmouseout="${
+                      isBrutalist
+                        ? "this.style.background='var(--color-accent)'; this.style.color='var(--color-bg)'; this.style.borderColor='var(--color-bg)'"
+                        : isGradient
+                        ? "this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 30px rgba(102,126,234,0.3)'"
+                        : isRetro
+                        ? "this.style.transform='translateY(0)'; this.style.boxShadow='none'"
+                        : isGlassmorphism
+                        ? "this.style.transform='translateY(0)'; this.style.background='rgba(255,255,255,0.15)'"
+                        : isNeumorphism
+                        ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
+                        : "this.style.opacity='1'; this.style.transform='translateY(0)'"
+                    }">
+                    Submit Application
+                  </button>
+                  
+                  <button type="reset" style="padding: ${
+                    isBrutalist ? "1.25rem 3rem" : "1rem 2.5rem"
+                  }; background: transparent; color: var(--color-text-secondary); border: ${
+        isBrutalist ? "3px" : isRetro ? "2px" : "1px"
+      } solid ${
+        isBrutalist || isRetro
+          ? "var(--color-accent)"
+          : isGlassmorphism
+          ? "rgba(255,255,255,0.1)"
+          : "var(--color-border)"
+      }; border-radius: ${
+        isGradient || isRetro ? "999px" : isBrutalist || isElegant ? "0" : "8px"
+      }; font-weight: ${
+        isBrutalist ? "900" : "600"
+      }; cursor: pointer; transition: all 0.2s; font-size: 1.125rem; ${
+        isBrutalist || isRetro ? "text-transform: uppercase;" : ""
+      } ${isNeumorphism ? getNeumorphismShadow(false) : ""}" 
+                    onmouseover="${
+                      isBrutalist
+                        ? "this.style.background='var(--color-accent)'; this.style.color='var(--color-bg)'"
+                        : isRetro
+                        ? "this.style.background='var(--color-accent)'; this.style.color='white'"
+                        : "this.style.background='var(--color-surface)'; this.style.borderColor='var(--color-accent)'"
+                    }" 
+                    onmouseout="${
+                      isBrutalist
+                        ? "this.style.background='transparent'; this.style.color='var(--color-text-secondary)'"
+                        : isRetro
+                        ? "this.style.background='transparent'; this.style.color='var(--color-text-secondary)'"
+                        : "this.style.background='transparent'; this.style.borderColor='var(--color-border)'"
+                    }">
+                    Reset Form
+                  </button>
+                  
+                  ${
+                    data.contactEmail
+                      ? `
+                  <div style="margin-left: auto; font-size: 0.875rem; color: var(--color-text-secondary);">
+                    Questions? <a href="mailto:${data.contactEmail}" style="color: var(--color-accent); text-decoration: none; font-weight: 600;">Contact us</a>
+                  </div>
+                  `
+                      : ""
+                  }
+                </div>
+              </div>
+            </form>
+
+            <!-- Success Message (Hidden by default) -->
+            <div id="successMessage" style="display: none; padding: ${
+              isBrutalist ? "3rem" : "2.5rem"
+            }; text-align: center; background: ${
+        isGlassmorphism ? "rgba(255,255,255,0.05)" : "var(--color-surface)"
+      }; border-radius: ${
+        isGradient ? "24px" : isBrutalist || isElegant || isRetro ? "0" : "20px"
+      }; border: ${
+        isBrutalist ? "4px" : isRetro ? "2px" : "2px"
+      } solid var(--color-accent); margin-top: 2rem; ${
+        isGlassmorphism
+          ? "backdrop-filter: blur(20px);"
+          : isNeumorphism
+          ? getNeumorphismShadow(false)
+          : ""
+      }">
+              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 1.5rem;">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+              </svg>
+              <h3 style="font-family: ${
+                isElegant ? "Playfair Display, serif" : "inherit"
+              }; font-size: ${
+        isBrutalist ? "1.75rem" : "1.5rem"
+      }; font-weight: ${isBrutalist ? "900" : "700"}; margin-bottom: 1rem; ${
+        isBrutalist ? "text-transform: uppercase;" : ""
+      }">
+                Application Submitted!
+              </h3>
+              <p style="color: var(--color-text-secondary); line-height: 1.7; font-size: ${
+                isBrutalist ? "1.125rem" : "1rem"
+              }; max-width: 600px; margin: 0 auto; font-weight: ${
+        isElegant ? "300" : "normal"
+      };">
+                ${data.successMessage || "Thank you for your application!"}
+              </p>
+              <button onclick="location.reload()" style="margin-top: 2rem; padding: ${
+                isBrutalist ? "1rem 2rem" : "0.75rem 1.5rem"
+              }; background: transparent; color: var(--color-accent); border: ${
+        isBrutalist ? "3px" : "2px"
+      } solid var(--color-accent); border-radius: ${
+        isBrutalist || isElegant || isRetro ? "0" : "8px"
+      }; font-weight: 600; cursor: pointer; transition: all 0.2s; font-size: 1rem;" 
+                onmouseover="this.style.background='var(--color-accent)'; this.style.color='white'" 
+                onmouseout="this.style.background='transparent'; this.style.color='var(--color-accent)'">
+                Submit Another Application
+              </button>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <!-- Footer -->
+      <footer style="padding: ${
+        isBrutalist ? "3rem 0" : "2rem 0"
+      }; border-top: ${isBrutalist ? "4px" : isRetro ? "2px" : "1px"} solid ${
+        isBrutalist || isRetro ? "var(--color-accent)" : "var(--color-border)"
+      }; text-align: center; color: var(--color-text-secondary); font-size: ${
+        isBrutalist ? "1rem" : "0.875rem"
+      }; font-weight: ${isBrutalist ? "700" : "normal"}; ${
+        isBrutalist || isRetro ? "text-transform: uppercase;" : ""
+      }">
+        <div class="container">
+          <p>© ${new Date().getFullYear()} ${
+        data.organizationName || "Application Form"
+      }. ${isBrutalist ? "ALL RIGHTS RESERVED." : "All rights reserved."}</p>
+        </div>
+      </footer>
+
+      <style>
+        ${
+          isNeumorphism
+            ? `
+        /* Neumorphism CSS Variables */
+        :root {
+          --neomorph-shadow-out: 20px 20px 60px #c5c9ce, -20px -20px 60px #ffffff;
+          --neomorph-shadow-in: inset 20px 20px 60px #c5c9ce, inset -20px -20px 60px #ffffff;
+        }
+        
+        [data-theme="dark"] {
+          --neomorph-shadow-out: 32px 32px 64px #2a2d34, -32px -32px 64px #383d46;
+          --neomorph-shadow-in: inset 32px 32px 64px #2a2d34, inset -32px -32px 64px #383d46;
+        }
+        `
+            : ""
+        }
+        
+        ${
+          isRetro
+            ? `
+        /* Retro grid background */
+        body::before {
+          content: '';
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background-image: 
+            linear-gradient(rgba(255,47,181,0.02) 2px, transparent 2px),
+            linear-gradient(90deg, rgba(255,47,181,0.02) 2px, transparent 2px);
+          background-size: 50px 50px;
+          pointer-events: none;
+          z-index: 0;
+        }
+        main { position: relative; z-index: 1; }
+        `
+            : ""
+        }
+        
+        /* Form Validation Styles */
+        input:invalid, textarea:invalid, select:invalid {
+          border-color: #ff6b6b !important;
+        }
+        
+        input:focus:invalid, textarea:focus:invalid, select:focus:invalid {
+          border-color: #ff6b6b !important;
+          box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.1) !important;
+        }
+        
+        /* Required Field Indicator */
+        label[style*="*"]::after {
+          color: #ff6b6b;
+          content: " *";
+        }
+        
+        /* File Upload Hover */
+        .form-group div[style*="border: 2px dashed"]:hover {
+          border-color: var(--color-accent) !important;
+          background: ${
+            isGlassmorphism ? "rgba(255,255,255,0.08)" : "var(--color-surface)"
+          } !important;
+        }
+        
+        /* Checkbox and Radio Custom Styling */
+        input[type="checkbox"], input[type="radio"] {
+          cursor: pointer;
+        }
+        
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+          .container { padding: 0 1rem !important; }
+          section { padding: 2rem 0 !important; }
+          .form-section { gap: 1.5rem !important; }
+          h1 { font-size: clamp(1.75rem, 6vw, 2.5rem) !important; }
+          h2 { font-size: 1.25rem !important; }
+          button, input, select, textarea { font-size: 16px !important; }
+          .form-section > div[style*="grid-template-columns"] {
+            grid-template-columns: 1fr !important;
+          }
+        }
+        
+        @media (max-width: 640px) {
+          button[type="submit"], button[type="reset"] {
+            width: 100% !important;
+          }
+          .form-section > div[style*="flex-wrap"] {
+            flex-direction: column !important;
+            align-items: stretch !important;
+          }
+        }
+        
+        /* Print Styles */
+        @media print {
+          header, footer, button { display: none !important; }
+          .container { max-width: 100% !important; }
+          input, textarea, select {
+            border: 1px solid #000 !important;
+            background: white !important;
+            color: black !important;
+          }
+        }
+      </style>
+
+      <script>
+        let uploadedFiles = {};
+        
+        function handleFileSelect(input) {
+          if (input.files && input.files[0]) {
+            const fileName = input.files[0].name;
+            const fileSize = (input.files[0].size / (1024 * 1024)).toFixed(2);
+            
+            // Validate file size
+            const maxSize = input.id === 'resume' ? 10 : 5;
+            if (parseFloat(fileSize) > maxSize) {
+              alert(\`File size (\${fileSize}MB) exceeds maximum allowed size (\${maxSize}MB)\`);
+              input.value = '';
+              return;
+            }
+            
+            // Validate file type
+            const allowedExtensions = ['.pdf', '.doc', '.docx'];
+            const fileExtension = fileName.substring(fileName.lastIndexOf('.')).toLowerCase();
+            if (!allowedExtensions.includes(fileExtension)) {
+              alert('Please upload only PDF, DOC, or DOCX files');
+              input.value = '';
+              return;
+            }
+            
+            // Store file
+            uploadedFiles[input.id] = input.files[0];
+            
+            // Update UI
+            const fileNameElement = document.getElementById(input.id + 'FileName');
+            fileNameElement.textContent = \`\${fileName} (\${fileSize}MB)\`;
+            fileNameElement.style.display = 'block';
+            
+            // Update drop zone appearance
+            const dropZone = input.parentElement;
+            dropZone.style.borderColor = 'var(--color-accent)';
+            dropZone.style.background = '${
+              isGlassmorphism
+                ? "rgba(255,255,255,0.08)"
+                : "var(--color-surface)"
+            }';
+          }
+        }
+        
+        function handleFileDrop(event, inputId) {
+          event.preventDefault();
+          const input = document.getElementById(inputId);
+          const file = event.dataTransfer.files[0];
+          
+          if (file) {
+            // Create a DataTransfer object to set the file
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+            input.files = dataTransfer.files;
+            
+            // Trigger the change event
+            const event = new Event('change', { bubbles: true });
+            input.dispatchEvent(event);
+          }
+        }
+        
+        function validateForm() {
+          const form = document.getElementById('applicationForm');
+          const inputs = form.querySelectorAll('input[required], select[required], textarea[required]');
+          let isValid = true;
+          
+          inputs.forEach(input => {
+            if (!input.value.trim()) {
+              input.style.borderColor = '#ff6b6b';
+              input.style.boxShadow = '0 0 0 3px rgba(255, 107, 107, 0.1)';
+              isValid = false;
+            } else {
+              input.style.borderColor = '${
+                isBrutalist || isRetro
+                  ? "var(--color-accent)"
+                  : isGlassmorphism
+                  ? "rgba(255,255,255,0.1)"
+                  : "var(--color-border)"
+              }';
+              input.style.boxShadow = 'none';
+            }
+          });
+          
+          // Validate email format
+          const emailInput = document.getElementById('email');
+          if (emailInput && emailInput.value) {
+            const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
+            if (!emailRegex.test(emailInput.value)) {
+              emailInput.style.borderColor = '#ff6b6b';
+              emailInput.style.boxShadow = '0 0 0 3px rgba(255, 107, 107, 0.1)';
+              isValid = false;
+            }
+          }
+          
+          return isValid;
+        }
+        
+        function submitApplication() {
+          if (!validateForm()) {
+            alert('Please fill in all required fields correctly.');
+            return;
+          }
+          
+          // Collect form data
+          const formData = new FormData(document.getElementById('applicationForm'));
+          
+          // Add uploaded files
+          Object.keys(uploadedFiles).forEach(key => {
+            formData.append(key, uploadedFiles[key]);
+          });
+          
+          // In a real application, you would send this data to a server
+          // For this demo, we'll simulate submission
+          
+          // Show loading state
+          const submitBtn = document.querySelector('button[type="submit"]');
+          const originalText = submitBtn.textContent;
+          submitBtn.textContent = 'Submitting...';
+          submitBtn.disabled = true;
+          
+          // Simulate API call
+          setTimeout(() => {
+            // Hide form and show success message
+            document.getElementById('applicationForm').style.display = 'none';
+            document.getElementById('successMessage').style.display = 'block';
+            
+            // Scroll to success message
+            document.getElementById('successMessage').scrollIntoView({ 
+              behavior: 'smooth',
+              block: 'center'
+            });
+            
+            // Reset button
+            submitBtn.textContent = originalText;
+            submitBtn.disabled = false;
+            
+            // In a real app, you would send the data:
+            // fetch('/api/submit-application', {
+            //   method: 'POST',
+            //   body: formData
+            // })
+            // .then(response => response.json())
+            // .then(data => {
+            //   // Handle success
+            // })
+            // .catch(error => {
+            //   // Handle error
+            // });
+            
+            console.log('Application data:', Object.fromEntries(formData));
+          }, 1500);
+        }
+        
+        // Form reset handler
+        document.getElementById('applicationForm').addEventListener('reset', function() {
+          // Clear uploaded files
+          uploadedFiles = {};
+          
+          // Hide file names
+          document.getElementById('resumeFileName').style.display = 'none';
+          document.getElementById('coverLetterFileName').style.display = 'none';
+          
+          // Reset drop zones
+          const dropZones = document.querySelectorAll('.form-group div[style*="border: 2px dashed"]');
+          dropZones.forEach(zone => {
+            zone.style.borderColor = '${
+              isBrutalist || isRetro
+                ? "var(--color-accent)"
+                : isGlassmorphism
+                ? "rgba(255,255,255,0.1)"
+                : "var(--color-border)"
+            }';
+            zone.style.background = '${
+              isGlassmorphism
+                ? "rgba(255,255,255,0.05)"
+                : isNeumorphism
+                ? "var(--color-bg)"
+                : "var(--color-surface)"
+            }';
+          });
+          
+          // Reset validation styles
+          const inputs = this.querySelectorAll('input, select, textarea');
+          inputs.forEach(input => {
+            input.style.borderColor = '${
+              isBrutalist || isRetro
+                ? "var(--color-accent)"
+                : isGlassmorphism
+                ? "rgba(255,255,255,0.1)"
+                : "var(--color-border)"
+            }';
+            input.style.boxShadow = 'none';
+          });
+        });
+        
+        // Real-time validation
+        document.getElementById('applicationForm').addEventListener('input', function(event) {
+          if (event.target.hasAttribute('required')) {
+            if (event.target.value.trim()) {
+              event.target.style.borderColor = '${
+                isBrutalist || isRetro
+                  ? "var(--color-accent)"
+                  : isGlassmorphism
+                  ? "rgba(255,255,255,0.1)"
+                  : "var(--color-border)"
+              }';
+              event.target.style.boxShadow = 'none';
+            }
+          }
+          
+          // Email validation
+          if (event.target.type === 'email' && event.target.value) {
+            const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
+            if (emailRegex.test(event.target.value)) {
+              event.target.style.borderColor = 'var(--color-accent)';
+            } else {
+              event.target.style.borderColor = '#ff6b6b';
+            }
+          }
+        });
+        
+        // Auto-save draft (simulated)
+        let autoSaveTimeout;
+        document.getElementById('applicationForm').addEventListener('input', function() {
+          clearTimeout(autoSaveTimeout);
+          autoSaveTimeout = setTimeout(() => {
+            // In a real app, save to localStorage or send to server
+            const formData = new FormData(this);
+            const formObject = {};
+            formData.forEach((value, key) => {
+              if (typeof value === 'string') {
+                formObject[key] = value;
+              }
+            });
+            
+            try {
+              localStorage.setItem('applicationDraft', JSON.stringify(formObject));
+              console.log('Draft auto-saved');
+            } catch (e) {
+              console.log('Could not save draft');
+            }
+          }, 2000);
+        });
+        
+        // Load draft on page load
+        document.addEventListener('DOMContentLoaded', function() {
+          try {
+            const draft = localStorage.getItem('applicationDraft');
+            if (draft) {
+              const formObject = JSON.parse(draft);
+              Object.keys(formObject).forEach(key => {
+                const element = document.getElementById(key) || document.querySelector(\`[name="\${key}"]\`);
+                if (element && element.type !== 'file') {
+                  element.value = formObject[key];
+                }
+              });
+              
+              // Show restore notification
+              const notification = document.createElement('div');
+              notification.style.position = 'fixed';
+              notification.style.top = '20px';
+              notification.style.right = '20px';
+              notification.style.padding = '1rem';
+              notification.style.background = 'var(--color-surface)';
+              notification.style.border = '1px solid var(--color-accent)';
+              notification.style.borderRadius = '8px';
+              notification.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
+              notification.style.zIndex = '1000';
+              notification.innerHTML = \`
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="2">
+                    <path d="M20 6L9 17l-5-5"/>
+                  </svg>
+                  <span style="color: var(--color-text);">Draft restored</span>
+                </div>
+              \`;
+              document.body.appendChild(notification);
+              
+              setTimeout(() => {
+                notification.remove();
+              }, 3000);
+            }
+          } catch (e) {
+            console.log('Could not load draft');
+          }
+        });
+        
+        // Clear draft on successful submission
+        function clearDraft() {
+          localStorage.removeItem('applicationDraft');
+        }
+        
+        // Update submitApplication to clear draft
+        const originalSubmit = submitApplication;
+        submitApplication = function() {
+          clearDraft();
+          originalSubmit();
+        };
+      </script>
+    `;
+    },
+  }),
+  podcast: new Template("podcast", {
+    name: "Podcast Website",
+    description:
+      "Modern podcast website with episodes, player, and subscription options",
+    category: "Business",
+    image: "podcast",
+    fields: {
+      podcastName: {
+        type: "text",
+        default: "The Future Forward",
+        label: "Podcast Name",
+        required: true,
+      },
+      podcastTagline: {
+        type: "text",
+        default: "Exploring tomorrow's technology, today",
+        label: "Tagline",
+      },
+      podcastDescription: {
+        type: "textarea",
+        default:
+          "Join us weekly as we dive deep into emerging technologies, interview industry leaders, and explore how innovation is shaping our world. New episodes every Monday.",
+        label: "Description",
+        required: true,
+      },
+      hostName: {
+        type: "text",
+        default: "Alex Morgan",
+        label: "Host Name",
+        required: true,
+      },
+      hostBio: {
+        type: "textarea",
+        default:
+          "Tech journalist and futurist with 15 years of experience covering emerging technologies and their impact on society.",
+        label: "Host Bio",
+      },
+      category: {
+        type: "select",
+        default: "Technology",
+        label: "Category",
+        options: [
+          "Technology",
+          "Business",
+          "Education",
+          "Entertainment",
+          "News",
+          "Health",
+          "Science",
+          "Arts",
+          "Sports",
+          "Other",
+        ],
+      },
+      frequency: {
+        type: "select",
+        default: "Weekly",
+        label: "Episode Frequency",
+        options: ["Daily", "Weekly", "Bi-weekly", "Monthly", "Seasonal"],
+      },
+      episodes: {
+        type: "group",
+        label: "Episodes",
+        itemLabel: "Episode",
+        min: 3,
+        max: 50,
+        fields: {
+          title: { type: "text", label: "Title", default: "", required: true },
+          episodeNumber: {
+            type: "number",
+            label: "Episode Number",
+            default: 1,
+          },
+          description: { type: "textarea", label: "Description", default: "" },
+          publishDate: { type: "date", label: "Publish Date", default: "" },
+          duration: {
+            type: "text",
+            label: "Duration (e.g., 45:22)",
+            default: "",
+          },
+          audioUrl: {
+            type: "url",
+            label: "Audio URL",
+            default: "https://example.com/episode.mp3",
+            placeholder: "https://example.com/episode.mp3",
+          },
+          guestName: {
+            type: "text",
+            label: "Guest Name (optional)",
+            default: "",
+          },
+          guestTitle: {
+            type: "text",
+            label: "Guest Title (optional)",
+            default: "",
+          },
+        },
+        default: [
+          {
+            title: "The AI Revolution: What's Next?",
+            episodeNumber: 42,
+            description:
+              "Exploring the latest breakthroughs in artificial intelligence and what they mean for the future of work.",
+            publishDate: "2024-03-15",
+            duration: "58:32",
+            audioUrl: "https://example.com/episode42.mp3",
+            guestName: "Dr. Sarah Chen",
+            guestTitle: "AI Researcher at TechCorp",
+          },
+          {
+            title: "Web3 and the Future of the Internet",
+            episodeNumber: 41,
+            description:
+              "Breaking down blockchain, NFTs, and decentralized applications. Are we heading toward a new internet?",
+            publishDate: "2024-03-08",
+            duration: "52:18",
+            audioUrl: "https://example.com/episode41.mp3",
+            guestName: "Marcus Rodriguez",
+            guestTitle: "Blockchain Developer",
+          },
+          {
+            title: "Quantum Computing Explained",
+            episodeNumber: 40,
+            description:
+              "Demystifying quantum computing and its potential impact on cryptography, medicine, and more.",
+            publishDate: "2024-03-01",
+            duration: "61:05",
+            audioUrl: "https://example.com/episode40.mp3",
+            guestName: "Professor James Wilson",
+            guestTitle: "Quantum Physicist",
+          },
+        ],
+      },
+      latestEpisode: {
+        type: "object",
+        label: "Latest Episode Highlight",
+        fields: {
+          title: { type: "text", label: "Title", default: "" },
+          description: { type: "textarea", label: "Description", default: "" },
+          audioUrl: { type: "url", label: "Audio URL", default: "" },
+        },
+        default: {},
+      },
+      subscriptionLinks: {
+        type: "group",
+        label: "Subscription Links",
+        itemLabel: "Platform",
+        min: 1,
+        max: 10,
+        fields: {
+          platform: {
+            type: "select",
+            label: "Platform",
+            default: "spotify",
+            options: [
+              "spotify",
+              "apple",
+              "google",
+              "youtube",
+              "amazon",
+              "rss",
+              "stitcher",
+              "overcast",
+              "castbox",
+              "pocketcasts",
+            ],
+          },
+          url: { type: "url", label: "URL", default: "" },
+        },
+        default: [
+          { platform: "spotify", url: "https://open.spotify.com/show/example" },
+          {
+            platform: "apple",
+            url: "https://podcasts.apple.com/us/podcast/example",
+          },
+          {
+            platform: "google",
+            url: "https://podcasts.google.com/feed/example",
+          },
+          { platform: "youtube", url: "https://youtube.com/example" },
+        ],
+      },
+      socialLinks: {
+        type: "group",
+        label: "Social Media Links",
+        itemLabel: "Platform",
+        min: 0,
+        max: 5,
+        fields: {
+          platform: {
+            type: "select",
+            label: "Platform",
+            default: "twitter",
+            options: ["twitter", "instagram", "facebook", "linkedin", "tiktok"],
+          },
+          url: { type: "url", label: "URL", default: "" },
+        },
+        default: [
+          { platform: "twitter", url: "https://twitter.com/example" },
+          { platform: "instagram", url: "https://instagram.com/example" },
+        ],
+      },
+      contactEmail: {
+        type: "email",
+        default: "hello@futureforwardpodcast.com",
+        label: "Contact Email",
+      },
+      newsletterSignup: {
+        type: "textarea",
+        default:
+          "Get episode updates, show notes, and exclusive content delivered to your inbox.",
+        label: "Newsletter Signup Text",
+      },
+      sponsors: {
+        type: "group",
+        label: "Sponsors/Partners",
+        itemLabel: "Sponsor",
+        min: 0,
+        max: 5,
+        fields: {
+          name: { type: "text", label: "Name", default: "" },
+          url: { type: "url", label: "Website", default: "" },
+          logoUrl: { type: "url", label: "Logo URL (optional)", default: "" },
+        },
+        default: [
+          { name: "TechCorp", url: "https://techcorp.com", logoUrl: "" },
+          {
+            name: "Innovate Labs",
+            url: "https://innovatelabs.com",
+            logoUrl: "",
+          },
+        ],
+      },
+    },
+    structure: (data, theme, colorMode) => {
+      // Detect theme style
+      const themeId = theme?.id || "minimal";
+      const isBrutalist = themeId === "brutalist";
+      const isGradient = themeId === "gradient";
+      const isElegant = themeId === "elegant";
+      const isRetro = themeId === "retro";
+      const isGlassmorphism = themeId === "glassmorphism";
+      const isNeumorphism = themeId === "neumorphism";
+
+      // Determine if we're in dark mode
+      const isDark = colorMode === "dark";
+
+      // Neumorphism helpers
+      const getNeumorphismShadow = (inset = false) => {
+        if (!isNeumorphism) return "";
+        return inset
+          ? "box-shadow: var(--neomorph-shadow-in);"
+          : "box-shadow: var(--neomorph-shadow-out);";
+      };
+
+      const getNeumorphismHoverShadow = () => {
+        if (!isNeumorphism) return "";
+        return "var(--neomorph-shadow-in)";
+      };
+
+      const getNeumorphismNormalShadow = () => {
+        if (!isNeumorphism) return "";
+        return "var(--neomorph-shadow-out)";
+      };
+
+      // Get latest episode
+      const latestEpisode =
+        data.latestEpisode && data.latestEpisode.title
+          ? data.latestEpisode
+          : data.episodes && data.episodes.length > 0
+          ? data.episodes[0]
+          : null;
+
+      return `
+      <!-- Header -->
+      <header style="padding: ${
+        isBrutalist ? "2rem 0" : "1.5rem 0"
+      }; border-bottom: ${
+        isBrutalist ? "4px" : isRetro ? "3px" : "1px"
+      } solid ${
+        isBrutalist || isRetro ? "var(--color-accent)" : "var(--color-border)"
+      }; position: sticky; top: 0; background: ${
+        isGlassmorphism ? "rgba(255,255,255,0.1)" : "var(--color-bg)"
+      }; z-index: 100; backdrop-filter: blur(${
+        isGlassmorphism ? "20px" : "10px"
+      });">
+        <div class="container">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 1rem;">
+              <!-- Podcast Logo/Icon -->
+              <div style="width: 48px; height: 48px; background: ${
+                isGradient
+                  ? "linear-gradient(135deg, #667eea, #764ba2)"
+                  : isRetro
+                  ? "linear-gradient(90deg, var(--color-accent), #00f5ff)"
+                  : "var(--color-accent)"
+              }; border-radius: ${
+        isBrutalist || isElegant ? "0" : "12px"
+      }; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 1.25rem; ${
+        isRetro ? "box-shadow: 0 0 20px var(--color-accent);" : ""
+      }">
+                ${data.podcastName ? data.podcastName.charAt(0) : "P"}
+              </div>
+              <div>
+                <div style="font-family: ${
+                  isElegant
+                    ? "Playfair Display, serif"
+                    : isRetro
+                    ? "Space Mono, monospace"
+                    : "inherit"
+                }; font-weight: ${isBrutalist ? "900" : "700"}; font-size: ${
+        isBrutalist ? "1.5rem" : "1.25rem"
+      }; letter-spacing: ${isBrutalist || isRetro ? "1px" : "-0.02em"}; ${
+        isBrutalist || isRetro ? "text-transform: uppercase;" : ""
+      } ${
+        isGradient
+          ? "background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"
+          : isRetro
+          ? "background: linear-gradient(90deg, var(--color-accent), #00f5ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"
+          : ""
+      }">
+                  ${data.podcastName || "Podcast"}
+                </div>
+                <div style="color: var(--color-text-secondary); font-size: 0.875rem; font-weight: 500;">
+                  ${data.category || "Technology"} • ${
+        data.frequency || "Weekly"
+      }
+                </div>
+              </div>
+            </div>
+            
+            <!-- Navigation -->
+            <div style="display: flex; align-items: center; gap: ${
+              isBrutalist ? "2rem" : "1.5rem"
+            };">
+              <a href="#episodes" style="color: var(--color-text-secondary); text-decoration: none; font-weight: 500; font-size: ${
+                isBrutalist ? "1.125rem" : "0.9375rem"
+              }; transition: color 0.2s;" 
+                onmouseover="this.style.color='var(--color-accent)'" 
+                onmouseout="this.style.color='var(--color-text-secondary)'">
+                Episodes
+              </a>
+              <a href="#subscribe" style="color: var(--color-text-secondary); text-decoration: none; font-weight: 500; font-size: ${
+                isBrutalist ? "1.125rem" : "0.9375rem"
+              }; transition: color 0.2s;" 
+                onmouseover="this.style.color='var(--color-accent)'" 
+                onmouseout="this.style.color='var(--color-text-secondary)'">
+                Subscribe
+              </a>
+              <label class="theme-toggle-switch-wrapper" style="cursor: pointer; ${
+                isNeumorphism
+                  ? `padding: 0.5rem; border-radius: 12px; display: inline-block; background: var(--color-bg); ${getNeumorphismShadow(
+                      false
+                    )}`
+                  : ""
+              }">
+                <input type="checkbox" class="theme-toggle-switch" onclick="toggleTheme()" aria-label="Toggle theme">
+                <span class="theme-toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main>
+        <!-- Hero Section -->
+        <section style="padding: ${
+          isBrutalist || isElegant ? "6rem 0 4rem" : "5rem 0 3rem"
+        }; text-align: center; position: relative; overflow: hidden;">
+          ${
+            isGradient
+              ? `
+            <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at 20% 50%, rgba(102,126,234,0.1), transparent 50%), radial-gradient(circle at 80% 20%, rgba(240,147,251,0.1), transparent 50%); pointer-events: none;"></div>
+          `
+              : ""
+          }
+          
+          <div class="container" style="max-width: 800px; position: relative; z-index: 1;">
+            <!-- Category Badge -->
+            <div style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1.25rem; background: ${
+              isGradient
+                ? "linear-gradient(135deg, rgba(102,126,234,0.1), rgba(118,75,162,0.1))"
+                : isRetro
+                ? "rgba(255,47,181,0.1)"
+                : "var(--color-surface)"
+            }; border-radius: ${
+        isBrutalist || isElegant || isRetro ? "0" : "999px"
+      }; border: ${isBrutalist ? "3px" : "1px"} solid ${
+        isBrutalist || isRetro
+          ? "var(--color-accent)"
+          : isGlassmorphism
+          ? "rgba(255,255,255,0.1)"
+          : "var(--color-border)"
+      }; margin-bottom: 1.5rem; ${
+        isGlassmorphism
+          ? "backdrop-filter: blur(10px);"
+          : isNeumorphism
+          ? getNeumorphismShadow(false)
+          : ""
+      }">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="23 7 16 12 23 17 23 7"></polygon>
+                <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+              </svg>
+              <span style="font-weight: 600; color: var(--color-accent);">${
+                data.category || "Technology"
+              } Podcast</span>
+            </div>
+            
+            <h1 style="font-family: ${
+              isElegant ? "Playfair Display, serif" : "inherit"
+            }; font-size: clamp(${
+        isBrutalist || isRetro ? "3rem" : "2.5rem"
+      }, 7vw, ${isBrutalist || isRetro ? "5rem" : "4rem"}); font-weight: ${
+        isBrutalist ? "900" : "800"
+      }; line-height: 1.1; letter-spacing: ${
+        isRetro ? "2px" : "-0.03em"
+      }; margin-bottom: 1rem; ${
+        isBrutalist || isRetro ? "text-transform: uppercase;" : ""
+      }">
+              ${
+                isBrutalist
+                  ? data.podcastName.toUpperCase()
+                  : data.podcastName || "The Podcast"
+              }
+            </h1>
+            
+            <p style="font-family: ${
+              isElegant
+                ? "Lato, sans-serif"
+                : isRetro
+                ? "Space Mono, monospace"
+                : "inherit"
+            }; font-size: ${
+        isBrutalist || isRetro ? "1.5rem" : "1.25rem"
+      }; color: ${
+        isBrutalist ? "var(--color-text)" : "var(--color-text-secondary)"
+      }; max-width: 600px; margin: 0 auto 1.5rem; line-height: ${
+        isElegant ? "1.8" : "1.6"
+      }; font-weight: ${isElegant ? "300" : "normal"};">
+              ${data.podcastTagline || ""}
+            </p>
+            
+            <p style="font-family: ${
+              isElegant
+                ? "Lato, sans-serif"
+                : isRetro
+                ? "Space Mono, monospace"
+                : "inherit"
+            }; color: var(--color-text-secondary); max-width: 600px; margin: 0 auto 2.5rem; line-height: ${
+        isElegant ? "1.8" : "1.7"
+      }; font-size: ${isBrutalist ? "1.125rem" : "1rem"}; font-weight: ${
+        isElegant ? "300" : "normal"
+      };">
+              ${data.podcastDescription || ""}
+            </p>
+            
+            <!-- Host Info -->
+            <div style="display: inline-flex; align-items: center; gap: 1rem; padding: 1rem 1.5rem; background: ${
+              isGlassmorphism
+                ? "rgba(255,255,255,0.05)"
+                : isNeumorphism
+                ? "var(--color-bg)"
+                : "var(--color-surface)"
+            }; border-radius: ${
+        isBrutalist || isElegant || isRetro ? "0" : "12px"
+      }; border: ${isBrutalist ? "3px" : "1px"} solid ${
+        isBrutalist || isRetro
+          ? "var(--color-accent)"
+          : isGlassmorphism
+          ? "rgba(255,255,255,0.1)"
+          : "var(--color-border)"
+      }; margin-bottom: 2rem; ${
+        isGlassmorphism
+          ? "backdrop-filter: blur(10px);"
+          : isNeumorphism
+          ? getNeumorphismShadow(false)
+          : ""
+      }">
+              <div style="width: 48px; height: 48px; background: ${
+                isRetro
+                  ? "linear-gradient(90deg, var(--color-accent), #00f5ff)"
+                  : "var(--color-accent)"
+              }; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 1.125rem;">
+                ${data.hostName ? data.hostName.charAt(0) : "H"}
+              </div>
+              <div>
+                <div style="font-weight: 700; color: var(--color-text); margin-bottom: 0.25rem;">
+                  Hosted by ${data.hostName || "Alex Morgan"}
+                </div>
+                <div style="color: var(--color-text-secondary); font-size: 0.875rem;">
+                  ${data.frequency || "Weekly"} episodes
+                </div>
+              </div>
+            </div>
+            
+            <!-- Quick Subscribe Buttons -->
+            ${
+              data.subscriptionLinks && data.subscriptionLinks.length > 0
+                ? `
+            <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-top: 2rem;">
+              ${data.subscriptionLinks
+                .slice(0, 3)
+                .map((link) => {
+                  const platformIcons = {
+                    spotify: `<svg width="20" height="20" viewBox="0 0 24 24" fill="#1DB954"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>`,
+                    apple: `<svg width="20" height="20" viewBox="0 0 24 24" fill="#000"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.31-2.33 1.05-3.11z"/></svg>`,
+                    google: `<svg width="20" height="20" viewBox="0 0 24 24" fill="#FF5722"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>`,
+                    youtube: `<svg width="20" height="20" viewBox="0 0 24 24" fill="#FF0000"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>`,
+                    amazon: `<svg width="20" height="20" viewBox="0 0 24 24" fill="#FF9900"><path d="M10.205 2.6c-1.154-.423-2.038-.634-3.191-.634-2.884 0-5.014 1.154-5.014 4.423 0 2.5 1.731 3.846 4.423 4.423.576.096 1.154.192 1.731.192.962 0 1.538.481 1.538 1.346 0 .673-.481 1.154-1.154 1.154-.77 0-1.347-.192-2.5-.577-1.442-.481-3.077-1.154-4.135-2.5v8.75c0 3.75 1.923 5.673 5.673 5.673 2.5 0 4.423-.577 6.538-2.115.288-.192.385-.577.385-.961 0-.577-.385-.962-.962-.962-.288 0-.577.096-.77.288-1.827 1.442-3.462 2.019-5.385 2.019-2.5 0-3.846-1.154-3.846-3.462v-.673c1.442 1.154 3.365 1.827 5.385 1.827 4.135 0 6.346-2.019 6.346-6.154 0-3.75-2.115-5.577-6.154-5.577-1.154 0-2.019.192-3.077.577.288-1.154 1.154-2.5 3.365-2.5 1.154 0 2.019.288 2.5.577.385.192.577.577.577.961 0 .577-.481.962-1.059.962h-.096zm6.635 6.25c0-3.365 2.5-6.25 5.865-6.25 3.365 0 5.865 2.885 5.865 6.25 0 3.365-2.5 6.25-5.865 6.25-3.365 0-5.865-2.885-5.865-6.25zm3.269 0c0 1.731 1.154 3.077 2.596 3.077 1.442 0 2.596-1.346 2.596-3.077 0-1.731-1.154-3.077-2.596-3.077-1.442 0-2.596 1.346-2.596 3.077z"/></svg>`,
+                    rss: `<svg width="20" height="20" viewBox="0 0 24 24" fill="#FF6600"><path d="M19.199 24C19.199 13.467 10.533 4.8 0 4.8V0c13.165 0 24 10.835 24 24h-4.801zM3.291 17.415c1.814 0 3.293 1.479 3.293 3.295 0 1.813-1.485 3.29-3.301 3.29C1.47 24 0 22.526 0 20.71s1.475-3.294 3.291-3.295zM15.909 24h-4.665c0-6.169-5.075-11.245-11.244-11.245V8.09c8.727 0 15.909 7.184 15.909 15.91z"/></svg>`,
+                  };
+
+                  const icon =
+                    platformIcons[link.platform] ||
+                    `<svg width="20" height="20" viewBox="0 0 24 24" fill="var(--color-text)"><circle cx="12" cy="12" r="10"></circle></svg>`;
+
+                  return `
+                    <a href="${link.url}" target="_blank" style="padding: ${
+                    isBrutalist ? "1rem 1.5rem" : "0.75rem 1.25rem"
+                  }; background: ${
+                    isGlassmorphism
+                      ? "rgba(255,255,255,0.1)"
+                      : isNeumorphism
+                      ? "var(--color-bg)"
+                      : "var(--color-surface)"
+                  }; border-radius: ${
+                    isBrutalist || isElegant || isRetro ? "0" : "8px"
+                  }; border: ${isBrutalist ? "3px" : "1px"} solid ${
+                    isBrutalist || isRetro
+                      ? "var(--color-accent)"
+                      : isGlassmorphism
+                      ? "rgba(255,255,255,0.2)"
+                      : "var(--color-border)"
+                  }; color: var(--color-text); text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 0.75rem; transition: all 0.2s; ${
+                    isGlassmorphism
+                      ? "backdrop-filter: blur(10px);"
+                      : isNeumorphism
+                      ? getNeumorphismShadow(false)
+                      : ""
+                  }" 
+                      onmouseover="${
+                        isBrutalist
+                          ? "this.style.background='var(--color-accent)'; this.style.color='var(--color-bg)'"
+                          : isRetro
+                          ? "this.style.background='var(--color-accent)'; this.style.color='white'; this.style.boxShadow='0 0 20px rgba(255,47,181,0.3)'"
+                          : "this.style.background='var(--color-accent)'; this.style.color='white'; this.style.borderColor='var(--color-accent)'"
+                      }" 
+                      onmouseout="${
+                        isBrutalist
+                          ? "this.style.background='var(--color-surface)'; this.style.color='var(--color-text)'"
+                          : isRetro
+                          ? "this.style.background='var(--color-surface)'; this.style.color='var(--color-text)'; this.style.boxShadow='none'"
+                          : "this.style.background='var(--color-surface)'; this.style.color='var(--color-text)'; this.style.borderColor='var(--color-border)'"
+                      }">
+                      ${icon}
+                      <span style="text-transform: capitalize;">${
+                        link.platform
+                      }</span>
+                    </a>
+                  `;
+                })
+                .join("")}
+            </div>
+            `
+                : ""
+            }
+          </div>
+        </section>
+
+        <!-- Latest Episode Player -->
+        ${
+          latestEpisode
+            ? `
+        <section style="padding: ${
+          isBrutalist ? "4rem 0" : "3rem 0"
+        }; background: var(--color-surface); border-top: ${
+                isBrutalist ? "4px" : "1px"
+              } solid var(--color-border); border-bottom: ${
+                isBrutalist ? "4px" : "1px"
+              } solid var(--color-border);">
+          <div class="container" style="max-width: 800px;">
+            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
+              <div style="width: 8px; height: 32px; background: var(--color-accent); ${
+                isBrutalist || isElegant || isRetro
+                  ? "border-radius: 0;"
+                  : "border-radius: 4px;"
+              }"></div>
+              <h2 style="font-family: ${
+                isElegant ? "Playfair Display, serif" : "inherit"
+              }; font-size: ${
+                isBrutalist ? "1.75rem" : "1.5rem"
+              }; font-weight: ${isBrutalist ? "900" : "700"}; ${
+                isBrutalist ? "text-transform: uppercase;" : ""
+              }">
+                Latest Episode
+              </h2>
+            </div>
+            
+            <div style="padding: ${
+              isBrutalist ? "2.5rem" : "2rem"
+            }; background: ${
+                isGlassmorphism
+                  ? "rgba(255,255,255,0.05)"
+                  : isNeumorphism
+                  ? "var(--color-bg)"
+                  : "var(--color-bg)"
+              }; border-radius: ${
+                isGradient
+                  ? "20px"
+                  : isBrutalist || isElegant || isRetro
+                  ? "0"
+                  : "16px"
+              }; border: ${
+                isBrutalist ? "4px" : isRetro ? "3px" : "2px"
+              } solid ${
+                isBrutalist || isRetro
+                  ? "var(--color-accent)"
+                  : isGlassmorphism
+                  ? "rgba(255,255,255,0.1)"
+                  : "var(--color-border)"
+              }; ${
+                isGlassmorphism
+                  ? "backdrop-filter: blur(20px);"
+                  : isNeumorphism
+                  ? getNeumorphismShadow(false)
+                  : ""
+              }">
+              <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 2rem; margin-bottom: 1.5rem;">
+                <div>
+                  <div style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.25rem 0.75rem; background: ${
+                    isRetro ? "rgba(255,47,181,0.1)" : "var(--color-surface)"
+                  }; border-radius: ${
+                isBrutalist || isElegant || isRetro ? "0" : "999px"
+              }; margin-bottom: 0.75rem; font-size: 0.875rem; font-weight: 600; color: var(--color-accent);">
+                    <span>Episode ${latestEpisode.episodeNumber || 1}</span>
+                    ${
+                      latestEpisode.duration
+                        ? `<span style="opacity: 0.5;">•</span><span>${latestEpisode.duration}</span>`
+                        : ""
+                    }
+                  </div>
+                  <h3 style="font-family: ${
+                    isElegant ? "Playfair Display, serif" : "inherit"
+                  }; font-size: ${
+                isBrutalist ? "1.75rem" : "1.5rem"
+              }; font-weight: ${
+                isBrutalist ? "900" : "700"
+              }; margin-bottom: 1rem; line-height: 1.3; ${
+                isBrutalist ? "text-transform: uppercase;" : ""
+              }">
+                    ${latestEpisode.title || "Latest Episode"}
+                  </h3>
+                  <p style="color: var(--color-text-secondary); line-height: 1.7; margin-bottom: 1.5rem; font-size: ${
+                    isBrutalist ? "1.125rem" : "1rem"
+                  }; font-weight: ${isElegant ? "300" : "normal"};">
+                    ${latestEpisode.description || ""}
+                  </p>
+                  
+                  ${
+                    latestEpisode.guestName
+                      ? `
+                    <div style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: ${
+                      isGlassmorphism
+                        ? "rgba(255,255,255,0.03)"
+                        : "var(--color-surface)"
+                    }; border-radius: ${
+                          isBrutalist || isElegant || isRetro ? "0" : "8px"
+                        }; border-left: 4px solid var(--color-accent);">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                      </svg>
+                      <div>
+                        <div style="font-weight: 600; color: var(--color-text);">
+                          ${latestEpisode.guestName}
+                        </div>
+                        ${
+                          latestEpisode.guestTitle
+                            ? `<div style="color: var(--color-text-secondary); font-size: 0.875rem;">${latestEpisode.guestTitle}</div>`
+                            : ""
+                        }
+                      </div>
+                    </div>
+                    `
+                      : ""
+                  }
+                </div>
+                
+                <!-- Play Button -->
+                <button onclick="playEpisode('${latestEpisode.audioUrl}', '${
+                latestEpisode.title
+              }')" style="width: 64px; height: 64px; background: ${
+                isGradient
+                  ? "linear-gradient(135deg, #667eea, #764ba2)"
+                  : isRetro
+                  ? "linear-gradient(90deg, var(--color-accent), #b537f2)"
+                  : "var(--color-accent)"
+              }; border: none; border-radius: 50%; color: white; cursor: pointer; transition: all 0.2s; flex-shrink: 0; display: flex; align-items: center; justify-content: center; ${
+                isRetro ? "box-shadow: 0 0 30px rgba(255,47,181,0.3);" : ""
+              }" 
+                  onmouseover="${
+                    isBrutalist
+                      ? "this.style.transform='scale(1.1)'; this.style.boxShadow='0 0 0 4px var(--color-accent)'"
+                      : "this.style.transform='scale(1.1)'; this.style.opacity='0.9'"
+                  }" 
+                  onmouseout="${
+                    isBrutalist
+                      ? "this.style.transform='scale(1)'; this.style.boxShadow='none'"
+                      : "this.style.transform='scale(1)'; this.style.opacity='1'"
+                  }">
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="white" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                  </svg>
+                </button>
+              </div>
+              
+              <!-- Audio Player -->
+              <div id="audioPlayer" style="display: none; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--color-border);">
+                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                  <button id="playPauseBtn" onclick="togglePlayPause()" style="width: 40px; height: 40px; background: var(--color-accent); border: none; border-radius: 50%; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                    <svg id="playIcon" width="20" height="20" viewBox="0 0 24 24" fill="white">
+                      <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                    </svg>
+                    <svg id="pauseIcon" width="20" height="20" viewBox="0 0 24 24" fill="white" style="display: none;">
+                      <rect x="6" y="4" width="4" height="16"></rect>
+                      <rect x="14" y="4" width="4" height="16"></rect>
+                    </svg>
+                  </button>
+                  <div style="flex: 1;">
+                    <div id="nowPlaying" style="font-weight: 600; color: var(--color-text); margin-bottom: 0.25rem;"></div>
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                      <span id="currentTime" style="font-size: 0.875rem; color: var(--color-text-secondary);">0:00</span>
+                      <div style="flex: 1; height: 6px; background: var(--color-border); border-radius: 3px; overflow: hidden; cursor: pointer;" onclick="seekAudio(event)">
+                        <div id="progressBar" style="width: 0%; height: 100%; background: var(--color-accent); transition: width 0.1s;"></div>
+                      </div>
+                      <span id="duration" style="font-size: 0.875rem; color: var(--color-text-secondary);">0:00</span>
+                    </div>
+                  </div>
+                  <button onclick="toggleMute()" style="background: none; border: none; color: var(--color-text-secondary); cursor: pointer; padding: 0.5rem;">
+                    <svg id="volumeIcon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                      <path id="volumeWave" d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        `
+            : ""
+        }
+
+        <!-- Episodes List -->
+        <section id="episodes" style="padding: ${
+          isBrutalist ? "6rem 0" : "4rem 0"
+        };">
+          <div class="container">
+            <div style="text-align: center; margin-bottom: 3rem;">
+              <h2 style="font-family: ${
+                isElegant ? "Playfair Display, serif" : "inherit"
+              }; font-size: clamp(${
+        isBrutalist || isRetro ? "2.5rem" : "2rem"
+      }, 5vw, ${isBrutalist || isRetro ? "3.5rem" : "3rem"}); font-weight: ${
+        isBrutalist ? "900" : "800"
+      }; margin-bottom: 1rem; letter-spacing: ${isRetro ? "2px" : "-0.02em"}; ${
+        isBrutalist || isRetro ? "text-transform: uppercase;" : ""
+      }">
+                All Episodes
+              </h2>
+              <p style="color: var(--color-text-secondary); max-width: 600px; margin: 0 auto; font-size: ${
+                isBrutalist ? "1.25rem" : "1.125rem"
+              }; font-weight: ${isElegant ? "300" : "normal"};">
+                Browse our complete episode archive
+              </p>
+            </div>
+            
+            <div class="episodes-list" style="display: flex; flex-direction: column; gap: ${
+              isBrutalist ? "2rem" : "1.5rem"
+            }; max-width: 800px; margin: 0 auto;">
+              ${
+                data.episodes && data.episodes.length > 0
+                  ? data.episodes
+                      .map(
+                        (episode, index) => `
+                      <div class="episode-card" style="padding: ${
+                        isBrutalist ? "2.5rem" : "2rem"
+                      }; background: ${
+                          isGlassmorphism
+                            ? "rgba(255,255,255,0.05)"
+                            : isNeumorphism
+                            ? "var(--color-bg)"
+                            : "var(--color-bg)"
+                        }; border-radius: ${
+                          isGradient
+                            ? "16px"
+                            : isBrutalist || isElegant || isRetro
+                            ? "0"
+                            : "12px"
+                        }; border: ${
+                          isBrutalist ? "4px" : isRetro ? "2px" : "1px"
+                        } solid ${
+                          isBrutalist || isRetro
+                            ? "var(--color-accent)"
+                            : isGlassmorphism
+                            ? "rgba(255,255,255,0.1)"
+                            : "var(--color-border)"
+                        }; transition: all 0.3s; ${
+                          isGlassmorphism
+                            ? "backdrop-filter: blur(20px);"
+                            : isNeumorphism
+                            ? getNeumorphismShadow(false)
+                            : ""
+                        }" 
+                        onmouseover="${
+                          isBrutalist
+                            ? "this.style.transform='translate(-4px, -4px)'; this.style.boxShadow='8px 8px 0 var(--color-accent)'"
+                            : isRetro
+                            ? "this.style.transform='translateY(-4px)'; this.style.boxShadow='0 10px 30px rgba(255,47,181,0.1)'"
+                            : isGlassmorphism
+                            ? "this.style.transform='translateY(-4px)'; this.style.borderColor='var(--color-accent)'"
+                            : isNeumorphism
+                            ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
+                            : "this.style.transform='translateY(-4px)'; this.style.borderColor='var(--color-accent)'"
+                        }" 
+                        onmouseout="${
+                          isBrutalist
+                            ? "this.style.transform='translate(0,0)'; this.style.boxShadow='none'"
+                            : isRetro
+                            ? "this.style.transform='translateY(0)'; this.style.boxShadow='none'"
+                            : isGlassmorphism
+                            ? "this.style.transform='translateY(0)'; this.style.borderColor='rgba(255,255,255,0.1)'"
+                            : isNeumorphism
+                            ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
+                            : "this.style.transform='translateY(0)'; this.style.borderColor='var(--color-border)'"
+                        }">
+                        <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 2rem; margin-bottom: 1rem;">
+                          <div>
+                            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.75rem; flex-wrap: wrap;">
+                              <span style="padding: 0.25rem 0.75rem; background: ${
+                                isRetro
+                                  ? "rgba(255,47,181,0.1)"
+                                  : "var(--color-surface)"
+                              }; border-radius: ${
+                          isBrutalist || isElegant || isRetro ? "0" : "999px"
+                        }; font-size: 0.875rem; font-weight: 600; color: var(--color-accent);">
+                                Episode ${episode.episodeNumber || index + 1}
+                              </span>
+                              ${
+                                episode.publishDate
+                                  ? `<span style="color: var(--color-text-secondary); font-size: 0.875rem;">${new Date(
+                                      episode.publishDate
+                                    ).toLocaleDateString("en-US", {
+                                      month: "short",
+                                      day: "numeric",
+                                      year: "numeric",
+                                    })}</span>`
+                                  : ""
+                              }
+                              ${
+                                episode.duration
+                                  ? `<span style="color: var(--color-text-secondary); font-size: 0.875rem;">${episode.duration}</span>`
+                                  : ""
+                              }
+                            </div>
+                            <h3 style="font-family: ${
+                              isElegant ? "Playfair Display, serif" : "inherit"
+                            }; font-size: ${
+                          isBrutalist ? "1.5rem" : "1.25rem"
+                        }; font-weight: ${
+                          isBrutalist ? "900" : "700"
+                        }; margin-bottom: 0.75rem; line-height: 1.4; ${
+                          isBrutalist ? "text-transform: uppercase;" : ""
+                        }">
+                              ${episode.title || "Episode Title"}
+                            </h3>
+                            <p style="color: var(--color-text-secondary); line-height: 1.7; margin-bottom: 1rem; font-size: ${
+                              isBrutalist ? "1.125rem" : "1rem"
+                            }; font-weight: ${isElegant ? "300" : "normal"};">
+                              ${episode.description || ""}
+                            </p>
+                          </div>
+                          
+                          <button onclick="playEpisode('${
+                            episode.audioUrl
+                          }', '${
+                          episode.title
+                        }')" style="width: 48px; height: 48px; background: ${
+                          isGradient
+                            ? "linear-gradient(135deg, #667eea, #764ba2)"
+                            : isRetro
+                            ? "linear-gradient(90deg, var(--color-accent), #b537f2)"
+                            : "var(--color-accent)"
+                        }; border: none; border-radius: 50%; color: white; cursor: pointer; transition: all 0.2s; flex-shrink: 0; display: flex; align-items: center; justify-content: center; ${
+                          isRetro
+                            ? "box-shadow: 0 0 20px rgba(255,47,181,0.2);"
+                            : ""
+                        }" 
+                            onmouseover="${
+                              isBrutalist
+                                ? "this.style.transform='scale(1.1)'; this.style.boxShadow='0 0 0 4px var(--color-accent)'"
+                                : "this.style.transform='scale(1.1)'; this.style.opacity='0.9'"
+                            }" 
+                            onmouseout="${
+                              isBrutalist
+                                ? "this.style.transform='scale(1)'; this.style.boxShadow='none'"
+                                : "this.style.transform='scale(1)'; this.style.opacity='1'"
+                            }">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="white" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                            </svg>
+                          </button>
+                        </div>
+                        
+                        ${
+                          episode.guestName
+                            ? `
+                          <div style="display: flex; align-items: center; gap: 0.75rem; padding-top: 1rem; border-top: 1px solid var(--color-border);">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                              <circle cx="12" cy="7" r="4"></circle>
+                            </svg>
+                            <div style="font-size: 0.875rem;">
+                              <span style="font-weight: 600; color: var(--color-text);">Guest:</span>
+                              <span style="color: var(--color-text-secondary); margin-left: 0.5rem;">${
+                                episode.guestName
+                              }${
+                                episode.guestTitle
+                                  ? `, ${episode.guestTitle}`
+                                  : ""
+                              }</span>
+                            </div>
+                          </div>
+                          `
+                            : ""
+                        }
+                      </div>
+                    `
+                      )
+                      .join("")
+                  : `<div style="text-align: center; padding: 3rem; color: var(--color-text-secondary);">No episodes available yet.</div>`
+              }
+            </div>
+          </div>
+        </section>
+
+        <!-- Subscribe Section -->
+        <section id="subscribe" style="padding: ${
+          isBrutalist ? "6rem 0" : "4rem 0"
+        }; background: var(--color-surface); border-top: ${
+        isBrutalist ? "4px" : "1px"
+      } solid var(--color-border); border-bottom: ${
+        isBrutalist ? "4px" : "1px"
+      } solid var(--color-border);">
+          <div class="container" style="max-width: 800px;">
+            <div style="text-align: center; margin-bottom: 3rem;">
+              <h2 style="font-family: ${
+                isElegant ? "Playfair Display, serif" : "inherit"
+              }; font-size: clamp(${
+        isBrutalist || isRetro ? "2.5rem" : "2rem"
+      }, 5vw, ${isBrutalist || isRetro ? "3.5rem" : "3rem"}); font-weight: ${
+        isBrutalist ? "900" : "800"
+      }; margin-bottom: 1rem; letter-spacing: ${isRetro ? "2px" : "-0.02em"}; ${
+        isBrutalist || isRetro ? "text-transform: uppercase;" : ""
+      }">
+                Subscribe & Follow
+              </h2>
+              <p style="color: var(--color-text-secondary); max-width: 600px; margin: 0 auto 2rem; font-size: ${
+                isBrutalist ? "1.25rem" : "1.125rem"
+              }; font-weight: ${isElegant ? "300" : "normal"};">
+                Never miss an episode. Subscribe on your favorite platform.
+              </p>
+            </div>
+            
+            <!-- Subscription Platforms -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(${
+              isBrutalist ? "200px" : "180px"
+            }, 1fr)); gap: ${
+        isBrutalist ? "1.5rem" : "1rem"
+      }; margin-bottom: 3rem;">
+              ${
+                data.subscriptionLinks && data.subscriptionLinks.length > 0
+                  ? data.subscriptionLinks
+                      .map((link) => {
+                        const platformNames = {
+                          spotify: "Spotify",
+                          apple: "Apple Podcasts",
+                          google: "Google Podcasts",
+                          youtube: "YouTube",
+                          amazon: "Amazon Music",
+                          rss: "RSS Feed",
+                          stitcher: "Stitcher",
+                          overcast: "Overcast",
+                          castbox: "Castbox",
+                          pocketcasts: "Pocket Casts",
+                        };
+
+                        const platformIcons = {
+                          spotify: `<svg width="32" height="32" viewBox="0 0 24 24" fill="#1DB954"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>`,
+                          apple: `<svg width="32" height="32" viewBox="0 0 24 24" fill="#000"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.31-2.33 1.05-3.11z"/></svg>`,
+                          google: `<svg width="32" height="32" viewBox="0 0 24 24" fill="#FF5722"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>`,
+                          youtube: `<svg width="32" height="32" viewBox="0 0 24 24" fill="#FF0000"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>`,
+                          amazon: `<svg width="32" height="32" viewBox="0 0 24 24" fill="#FF9900"><path d="M10.205 2.6c-1.154-.423-2.038-.634-3.191-.634-2.884 0-5.014 1.154-5.014 4.423 0 2.5 1.731 3.846 4.423 4.423.576.096 1.154.192 1.731.192.962 0 1.538.481 1.538 1.346 0 .673-.481 1.154-1.154 1.154-.77 0-1.347-.192-2.5-.577-1.442-.481-3.077-1.154-4.135-2.5v8.75c0 3.75 1.923 5.673 5.673 5.673 2.5 0 4.423-.577 6.538-2.115.288-.192.385-.577.385-.961 0-.577-.385-.962-.962-.962-.288 0-.577.096-.77.288-1.827 1.442-3.462 2.019-5.385 2.019-2.5 0-3.846-1.154-3.846-3.462v-.673c1.442 1.154 3.365 1.827 5.385 1.827 4.135 0 6.346-2.019 6.346-6.154 0-3.75-2.115-5.577-6.154-5.577-1.154 0-2.019.192-3.077.577.288-1.154 1.154-2.5 3.365-2.5 1.154 0 2.019.288 2.5.577.385.192.577.577.577.961 0 .577-.481.962-1.059.962h-.096zm6.635 6.25c0-3.365 2.5-6.25 5.865-6.25 3.365 0 5.865 2.885 5.865 6.25 0 3.365-2.5 6.25-5.865 6.25-3.365 0-5.865-2.885-5.865-6.25zm3.269 0c0 1.731 1.154 3.077 2.596 3.077 1.442 0 2.596-1.346 2.596-3.077 0-1.731-1.154-3.077-2.596-3.077-1.442 0-2.596 1.346-2.596 3.077z"/></svg>`,
+                          rss: `<svg width="32" height="32" viewBox="0 0 24 24" fill="#FF6600"><path d="M19.199 24C19.199 13.467 10.533 4.8 0 4.8V0c13.165 0 24 10.835 24 24h-4.801zM3.291 17.415c1.814 0 3.293 1.479 3.293 3.295 0 1.813-1.485 3.29-3.301 3.29C1.47 24 0 22.526 0 20.71s1.475-3.294 3.291-3.295zM15.909 24h-4.665c0-6.169-5.075-11.245-11.244-11.245V8.09c8.727 0 15.909 7.184 15.909 15.91z"/></svg>`,
+                          stitcher: `<svg width="32" height="32" viewBox="0 0 24 24" fill="#00B4B3"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>`,
+                          overcast: `<svg width="32" height="32" viewBox="0 0 24 24" fill="#FC7E0F"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>`,
+                          castbox: `<svg width="32" height="32" viewBox="0 0 24 24" fill="#F75C2E"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>`,
+                          pocketcasts: `<svg width="32" height="32" viewBox="0 0 24 24" fill="#F43E37"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>`,
+                        };
+
+                        return `
+                          <a href="${
+                            link.url
+                          }" target="_blank" style="padding: ${
+                          isBrutalist ? "1.5rem" : "1.25rem"
+                        }; background: ${
+                          isGlassmorphism
+                            ? "rgba(255,255,255,0.05)"
+                            : isNeumorphism
+                            ? "var(--color-bg)"
+                            : "var(--color-bg)"
+                        }; border-radius: ${
+                          isBrutalist || isElegant || isRetro ? "0" : "12px"
+                        }; border: ${
+                          isBrutalist ? "3px" : isRetro ? "2px" : "1px"
+                        } solid ${
+                          isBrutalist || isRetro
+                            ? "var(--color-accent)"
+                            : isGlassmorphism
+                            ? "rgba(255,255,255,0.1)"
+                            : "var(--color-border)"
+                        }; text-decoration: none; transition: all 0.3s; display: flex; flex-direction: column; align-items: center; gap: 0.75rem; ${
+                          isGlassmorphism
+                            ? "backdrop-filter: blur(10px);"
+                            : isNeumorphism
+                            ? getNeumorphismShadow(false)
+                            : ""
+                        }" 
+                            onmouseover="${
+                              isBrutalist
+                                ? "this.style.transform='translate(-4px, -4px)'; this.style.boxShadow='8px 8px 0 var(--color-accent)'"
+                                : isRetro
+                                ? "this.style.transform='translateY(-4px)'; this.style.boxShadow='0 10px 20px rgba(255,47,181,0.1)'"
+                                : isGlassmorphism
+                                ? "this.style.transform='translateY(-4px)'; this.style.borderColor='var(--color-accent)'"
+                                : isNeumorphism
+                                ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
+                                : "this.style.transform='translateY(-4px)'; this.style.borderColor='var(--color-accent)'"
+                            }" 
+                            onmouseout="${
+                              isBrutalist
+                                ? "this.style.transform='translate(0,0)'; this.style.boxShadow='none'"
+                                : isRetro
+                                ? "this.style.transform='translateY(0)'; this.style.boxShadow='none'"
+                                : isGlassmorphism
+                                ? "this.style.transform='translateY(0)'; this.style.borderColor='rgba(255,255,255,0.1)'"
+                                : isNeumorphism
+                                ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
+                                : "this.style.transform='translateY(0)'; this.style.borderColor='var(--color-border)'"
+                            }">
+                            <div>
+                              ${platformIcons[link.platform] || ""}
+                            </div>
+                            <div style="font-weight: 600; color: var(--color-text); text-align: center;">
+                              ${platformNames[link.platform] || link.platform}
+                            </div>
+                          </a>
+                        `;
+                      })
+                      .join("")
+                  : ""
+              }
+            </div>
+            
+            <!-- Newsletter Signup -->
+            ${
+              data.newsletterSignup
+                ? `
+            <div style="padding: ${
+              isBrutalist ? "2.5rem" : "2rem"
+            }; background: ${
+                    isGradient
+                      ? "linear-gradient(135deg, rgba(102,126,234,0.1), rgba(118,75,162,0.1))"
+                      : isRetro
+                      ? "rgba(255,47,181,0.05)"
+                      : isGlassmorphism
+                      ? "rgba(255,255,255,0.05)"
+                      : "var(--color-bg)"
+                  }; border-radius: ${
+                    isGradient
+                      ? "20px"
+                      : isBrutalist || isElegant || isRetro
+                      ? "0"
+                      : "16px"
+                  }; border: ${
+                    isBrutalist ? "4px" : isRetro ? "2px" : "2px"
+                  } solid ${
+                    isBrutalist || isRetro
+                      ? "var(--color-accent)"
+                      : isGlassmorphism
+                      ? "rgba(255,255,255,0.1)"
+                      : "var(--color-border)"
+                  }; text-align: center; ${
+                    isGlassmorphism
+                      ? "backdrop-filter: blur(20px);"
+                      : isNeumorphism
+                      ? getNeumorphismShadow(false)
+                      : ""
+                  }">
+                <h3 style="font-family: ${
+                  isElegant ? "Playfair Display, serif" : "inherit"
+                }; font-size: ${
+                    isBrutalist ? "1.75rem" : "1.5rem"
+                  }; font-weight: ${
+                    isBrutalist ? "900" : "700"
+                  }; margin-bottom: 1rem; ${
+                    isBrutalist ? "text-transform: uppercase;" : ""
+                  }">
+                  Get Updates
+                </h3>
+                <p style="color: var(--color-text-secondary); margin-bottom: 1.5rem; line-height: 1.7; font-size: ${
+                  isBrutalist ? "1.125rem" : "1rem"
+                }; font-weight: ${isElegant ? "300" : "normal"};">
+                  ${data.newsletterSignup}
+                </p>
+                <form onsubmit="event.preventDefault(); subscribeNewsletter();" style="max-width: 400px; margin: 0 auto; display: flex; gap: 0.5rem;">
+                  <input type="email" id="newsletterEmail" placeholder="Your email address" required style="flex: 1; padding: ${
+                    isBrutalist ? "1rem" : "0.875rem 1rem"
+                  }; border: ${isBrutalist ? "3px" : "2px"} solid ${
+                    isBrutalist || isRetro
+                      ? "var(--color-accent)"
+                      : isGlassmorphism
+                      ? "rgba(255,255,255,0.1)"
+                      : "var(--color-border)"
+                  }; border-radius: ${
+                    isBrutalist || isElegant || isRetro ? "0" : "8px"
+                  }; background: ${
+                    isGlassmorphism
+                      ? "rgba(255,255,255,0.05)"
+                      : isNeumorphism
+                      ? "var(--color-bg)"
+                      : "var(--color-bg)"
+                  }; color: var(--color-text); font-size: 1rem; outline: none; transition: border-color 0.2s;" 
+                    onfocus="this.style.borderColor='var(--color-accent)'" 
+                    onblur="this.style.borderColor='${
+                      isBrutalist || isRetro
+                        ? "var(--color-accent)"
+                        : isGlassmorphism
+                        ? "rgba(255,255,255,0.1)"
+                        : "var(--color-border)"
+                    }'">
+                  <button type="submit" style="padding: ${
+                    isBrutalist ? "1rem 1.5rem" : "0.875rem 1.25rem"
+                  }; background: var(--color-accent); color: white; border: none; border-radius: ${
+                    isBrutalist || isElegant || isRetro ? "0" : "8px"
+                  }; font-weight: 600; cursor: pointer; transition: opacity 0.2s;" 
+                    onmouseover="this.style.opacity='0.9'" 
+                    onmouseout="this.style.opacity='1'">
+                    Subscribe
+                  </button>
+                </form>
+              </div>
+            `
+                : ""
+            }
+          </div>
+        </section>
+
+        <!-- Host & About -->
+        <section style="padding: ${isBrutalist ? "6rem 0" : "4rem 0"};">
+          <div class="container" style="max-width: 800px;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(${
+              isBrutalist ? "300px" : "280px"
+            }, 1fr)); gap: ${isBrutalist ? "3rem" : "2rem"};">
+              <!-- Host Card -->
+              <div style="padding: ${
+                isBrutalist ? "2.5rem" : "2rem"
+              }; background: ${
+        isGlassmorphism
+          ? "rgba(255,255,255,0.05)"
+          : isNeumorphism
+          ? "var(--color-bg)"
+          : "var(--color-bg)"
+      }; border-radius: ${
+        isGradient ? "20px" : isBrutalist || isElegant || isRetro ? "0" : "16px"
+      }; border: ${isBrutalist ? "4px" : isRetro ? "2px" : "2px"} solid ${
+        isBrutalist || isRetro
+          ? "var(--color-accent)"
+          : isGlassmorphism
+          ? "rgba(255,255,255,0.1)"
+          : "var(--color-border)"
+      }; text-align: center; ${
+        isGlassmorphism
+          ? "backdrop-filter: blur(20px);"
+          : isNeumorphism
+          ? getNeumorphismShadow(false)
+          : ""
+      }">
+                <div style="width: 96px; height: 96px; background: ${
+                  isGradient
+                    ? "linear-gradient(135deg, #667eea, #764ba2)"
+                    : isRetro
+                    ? "linear-gradient(90deg, var(--color-accent), #00f5ff)"
+                    : "var(--color-accent)"
+                }; border-radius: 50%; margin: 0 auto 1.5rem; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 2rem; ${
+        isRetro ? "box-shadow: 0 0 30px rgba(255,47,181,0.3);" : ""
+      }">
+                  ${data.hostName ? data.hostName.charAt(0) : "H"}
+                </div>
+                <h3 style="font-family: ${
+                  isElegant ? "Playfair Display, serif" : "inherit"
+                }; font-size: ${
+        isBrutalist ? "1.75rem" : "1.5rem"
+      }; font-weight: ${isBrutalist ? "900" : "700"}; margin-bottom: 0.5rem; ${
+        isBrutalist ? "text-transform: uppercase;" : ""
+      }">
+                  ${data.hostName || "Alex Morgan"}
+                </h3>
+                <div style="color: var(--color-accent); font-weight: 600; margin-bottom: 1.5rem;">
+                  Host
+                </div>
+                <p style="color: var(--color-text-secondary); line-height: 1.7; font-size: ${
+                  isBrutalist ? "1.125rem" : "1rem"
+                }; font-weight: ${isElegant ? "300" : "normal"};">
+                  ${data.hostBio || ""}
+                </p>
+                
+                <!-- Social Links -->
+                ${
+                  data.socialLinks && data.socialLinks.length > 0
+                    ? `
+                <div style="display: flex; justify-content: center; gap: 1rem; margin-top: 1.5rem;">
+                  ${data.socialLinks
+                    .map(
+                      (link) => `
+                    <a href="${
+                      link.url
+                    }" target="_blank" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: ${
+                        isGlassmorphism
+                          ? "rgba(255,255,255,0.1)"
+                          : "var(--color-surface)"
+                      }; border-radius: 50%; color: var(--color-text); text-decoration: none; transition: all 0.2s;" 
+                      onmouseover="this.style.background='var(--color-accent)'; this.style.color='white'" 
+                      onmouseout="this.style.background='${
+                        isGlassmorphism
+                          ? "rgba(255,255,255,0.1)"
+                          : "var(--color-surface)"
+                      }'; this.style.color='var(--color-text)'">
+                      ${
+                        link.platform === "twitter"
+                          ? `<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg>`
+                          : link.platform === "instagram"
+                          ? `<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>`
+                          : link.platform === "facebook"
+                          ? `<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>`
+                          : link.platform === "linkedin"
+                          ? `<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>`
+                          : `<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"></circle></svg>`
+                      }
+                    </a>
+                  `
+                    )
+                    .join("")}
+                </div>
+                `
+                    : ""
+                }
+              </div>
+              
+              <!-- Sponsors/Partners -->
+              ${
+                data.sponsors && data.sponsors.length > 0
+                  ? `
+              <div>
+                <h3 style="font-family: ${
+                  isElegant ? "Playfair Display, serif" : "inherit"
+                }; font-size: ${
+                      isBrutalist ? "1.75rem" : "1.5rem"
+                    }; font-weight: ${
+                      isBrutalist ? "900" : "700"
+                    }; margin-bottom: 1.5rem; ${
+                      isBrutalist ? "text-transform: uppercase;" : ""
+                    }">
+                  Supported By
+                </h3>
+                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                  ${data.sponsors
+                    .map(
+                      (sponsor) => `
+                    <a href="${sponsor.url}" target="_blank" style="padding: ${
+                        isBrutalist ? "1.5rem" : "1.25rem"
+                      }; background: ${
+                        isGlassmorphism
+                          ? "rgba(255,255,255,0.05)"
+                          : isNeumorphism
+                          ? "var(--color-bg)"
+                          : "var(--color-surface)"
+                      }; border-radius: ${
+                        isBrutalist || isElegant || isRetro ? "0" : "12px"
+                      }; border: ${
+                        isBrutalist ? "3px" : isRetro ? "2px" : "1px"
+                      } solid ${
+                        isBrutalist || isRetro
+                          ? "var(--color-accent)"
+                          : isGlassmorphism
+                          ? "rgba(255,255,255,0.1)"
+                          : "var(--color-border)"
+                      }; text-decoration: none; transition: all 0.2s; display: flex; align-items: center; justify-content: center; ${
+                        isGlassmorphism
+                          ? "backdrop-filter: blur(10px);"
+                          : isNeumorphism
+                          ? getNeumorphismShadow(false)
+                          : ""
+                      }" 
+                        onmouseover="${
+                          isBrutalist
+                            ? "this.style.transform='translate(-4px, -4px)'; this.style.boxShadow='8px 8px 0 var(--color-accent)'"
+                            : isRetro
+                            ? "this.style.transform='translateY(-4px)'; this.style.boxShadow='0 10px 20px rgba(255,47,181,0.1)'"
+                            : isGlassmorphism
+                            ? "this.style.transform='translateY(-4px)'; this.style.borderColor='var(--color-accent)'"
+                            : isNeumorphism
+                            ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
+                            : "this.style.transform='translateY(-4px)'; this.style.borderColor='var(--color-accent)'"
+                        }" 
+                        onmouseout="${
+                          isBrutalist
+                            ? "this.style.transform='translate(0,0)'; this.style.boxShadow='none'"
+                            : isRetro
+                            ? "this.style.transform='translateY(0)'; this.style.boxShadow='none'"
+                            : isGlassmorphism
+                            ? "this.style.transform='translateY(0)'; this.style.borderColor='rgba(255,255,255,0.1)'"
+                            : isNeumorphism
+                            ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
+                            : "this.style.transform='translateY(0)'; this.style.borderColor='var(--color-border)'"
+                        }">
+                        <div style="font-weight: 600; color: var(--color-text); text-align: center;">
+                          ${sponsor.name}
+                        </div>
+                      </a>
+                    `
+                    )
+                    .join("")}
+                </div>
+              </div>
+              `
+                  : ""
+              }
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <!-- Footer -->
+      <footer style="padding: ${
+        isBrutalist ? "3rem 0" : "2rem 0"
+      }; border-top: ${isBrutalist ? "4px" : isRetro ? "2px" : "1px"} solid ${
+        isBrutalist || isRetro ? "var(--color-accent)" : "var(--color-border)"
+      }; text-align: center; background: var(--color-surface);">
+        <div class="container" style="max-width: 800px;">
+          <div style="margin-bottom: 2rem;">
+            <div style="display: flex; align-items: center; justify-content: center; gap: 1rem; margin-bottom: 1.5rem;">
+              <div style="width: 40px; height: 40px; background: ${
+                isGradient
+                  ? "linear-gradient(135deg, #667eea, #764ba2)"
+                  : isRetro
+                  ? "linear-gradient(90deg, var(--color-accent), #00f5ff)"
+                  : "var(--color-accent)"
+              }; border-radius: ${
+        isBrutalist || isElegant ? "0" : "8px"
+      }; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 1.125rem;">
+                ${data.podcastName ? data.podcastName.charAt(0) : "P"}
+              </div>
+              <div>
+                <div style="font-weight: 700; color: var(--color-text); font-size: 1.25rem;">
+                  ${data.podcastName || "The Podcast"}
+                </div>
+                <div style="color: var(--color-text-secondary); font-size: 0.875rem;">
+                  ${data.category || "Technology"} • ${
+        data.frequency || "Weekly"
+      }
+                </div>
+              </div>
+            </div>
+            
+            <!-- Footer Links -->
+            <div style="display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap; margin-bottom: 2rem;">
+              <a href="#episodes" style="color: var(--color-text-secondary); text-decoration: none; font-weight: 500; font-size: 0.9375rem; transition: color 0.2s;" 
+                onmouseover="this.style.color='var(--color-accent)'" 
+                onmouseout="this.style.color='var(--color-text-secondary)'">
+                Episodes
+              </a>
+              <a href="#subscribe" style="color: var(--color-text-secondary); text-decoration: none; font-weight: 500; font-size: 0.9375rem; transition: color 0.2s;" 
+                onmouseover="this.style.color='var(--color-accent)'" 
+                onmouseout="this.style.color='var(--color-text-secondary)'">
+                Subscribe
+              </a>
+              ${
+                data.contactEmail
+                  ? `
+              <a href="mailto:${data.contactEmail}" style="color: var(--color-text-secondary); text-decoration: none; font-weight: 500; font-size: 0.9375rem; transition: color 0.2s;" 
+                onmouseover="this.style.color='var(--color-accent)'" 
+                onmouseout="this.style.color='var(--color-text-secondary)'">
+                Contact
+              </a>
+              `
+                  : ""
+              }
+            </div>
+          </div>
+          
+          <div style="color: var(--color-text-secondary); font-size: 0.875rem; font-weight: ${
+            isBrutalist ? "700" : "normal"
+          }; ${isBrutalist ? "text-transform: uppercase;" : ""}">
+            © ${new Date().getFullYear()} ${
+        data.podcastName || "The Podcast"
+      }. ${isBrutalist ? "ALL RIGHTS RESERVED." : "All rights reserved."}
+          </div>
+        </div>
+      </footer>
+
+      <!-- Global Audio Player -->
+      <div id="globalPlayer" style="position: fixed; bottom: 0; left: 0; right: 0; background: ${
+        isGlassmorphism ? "rgba(255,255,255,0.1)" : "var(--color-bg)"
+      }; border-top: ${isBrutalist ? "4px" : "1px"} solid ${
+        isBrutalist || isRetro ? "var(--color-accent)" : "var(--color-border)"
+      }; padding: 1rem; backdrop-filter: blur(${
+        isGlassmorphism ? "20px" : "10px"
+      }); z-index: 1000; display: none;">
+        <div class="container" style="max-width: 1200px;">
+          <div style="display: flex; align-items: center; gap: 1rem;">
+            <button onclick="toggleGlobalPlayPause()" style="width: 40px; height: 40px; background: var(--color-accent); border: none; border-radius: 50%; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+              <svg id="globalPlayIcon" width="20" height="20" viewBox="0 0 24 24" fill="white">
+                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+              </svg>
+              <svg id="globalPauseIcon" width="20" height="20" viewBox="0 0 24 24" fill="white" style="display: none;">
+                <rect x="6" y="4" width="4" height="16"></rect>
+                <rect x="14" y="4" width="4" height="16"></rect>
+              </svg>
+            </button>
+            
+            <div style="flex: 1;">
+              <div id="globalNowPlaying" style="font-weight: 600; color: var(--color-text); margin-bottom: 0.25rem;"></div>
+              <div style="display: flex; align-items: center; gap: 1rem;">
+                <span id="globalCurrentTime" style="font-size: 0.875rem; color: var(--color-text-secondary);">0:00</span>
+                <div style="flex: 1; height: 4px; background: var(--color-border); border-radius: 2px; overflow: hidden; cursor: pointer;" onclick="seekGlobalAudio(event)">
+                  <div id="globalProgressBar" style="width: 0%; height: 100%; background: var(--color-accent); transition: width 0.1s;"></div>
+                </div>
+                <span id="globalDuration" style="font-size: 0.875rem; color: var(--color-text-secondary);">0:00</span>
+              </div>
+            </div>
+            
+            <button onclick="toggleGlobalMute()" style="background: none; border: none; color: var(--color-text-secondary); cursor: pointer; padding: 0.5rem;">
+              <svg id="globalVolumeIcon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                <path id="globalVolumeWave" d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+              </svg>
+            </button>
+            
+            <button onclick="closeGlobalPlayer()" style="background: none; border: none; color: var(--color-text-secondary); cursor: pointer; padding: 0.5rem;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <style>
+        ${
+          isNeumorphism
+            ? `
+        /* Neumorphism CSS Variables */
+        :root {
+          --neomorph-shadow-out: 20px 20px 60px #c5c9ce, -20px -20px 60px #ffffff;
+          --neomorph-shadow-in: inset 20px 20px 60px #c5c9ce, inset -20px -20px 60px #ffffff;
+        }
+        
+        [data-theme="dark"] {
+          --neomorph-shadow-out: 32px 32px 64px #2a2d34, -32px -32px 64px #383d46;
+          --neomorph-shadow-in: inset 32px 32px 64px #2a2d34, inset -32px -32px 64px #383d46;
+        }
+        `
+            : ""
+        }
+        
+        ${
+          isRetro
+            ? `
+        /* Retro grid background */
+        body::before {
+          content: '';
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background-image: 
+            linear-gradient(rgba(255,47,181,0.02) 2px, transparent 2px),
+            linear-gradient(90deg, rgba(255,47,181,0.02) 2px, transparent 2px);
+          background-size: 50px 50px;
+          pointer-events: none;
+          z-index: 0;
+        }
+        main { position: relative; z-index: 1; }
+        `
+            : ""
+        }
+        
+        /* Audio Player Wave Animation */
+        @keyframes wave {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.5; }
+        }
+        
+        #volumeWave, #globalVolumeWave {
+          animation: wave 2s ease-in-out infinite;
+        }
+        
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+          .container { padding: 0 1rem !important; }
+          section { padding: 3rem 0 2rem !important; }
+          header > div { flex-direction: column !important; gap: 1rem !important; }
+          .episode-card > div { flex-direction: column !important; gap: 1rem !important; }
+          .episode-card button { align-self: flex-start; }
+          h1 { font-size: clamp(2rem, 6vw, 3rem) !important; }
+          h2 { font-size: clamp(1.5rem, 5vw, 2.5rem) !important; }
+          #globalPlayer { padding: 0.75rem !important; }
+          #globalPlayer > div > div { flex-wrap: wrap !important; }
+        }
+        
+        @media (max-width: 640px) {
+          .episodes-list { gap: 1rem !important; }
+          .episode-card { padding: 1.5rem !important; }
+          .subscribe-grid { grid-template-columns: repeat(2, 1fr) !important; }
+          #latestEpisode > div { flex-direction: column !important; }
+          #latestEpisode button { align-self: center; }
+        }
+        
+        /* Smooth Scrolling */
+        html {
+          scroll-behavior: smooth;
+        }
+        
+        /* Podcast Waveform Effect */
+        .waveform {
+          background: linear-gradient(90deg, 
+            var(--color-accent) 0%, 
+            var(--color-accent) 20%, 
+            transparent 20%, 
+            transparent 40%, 
+            var(--color-accent) 40%, 
+            var(--color-accent) 60%, 
+            transparent 60%, 
+            transparent 80%, 
+            var(--color-accent) 80%, 
+            var(--color-accent) 100%
+          );
+          background-size: 20px 100%;
+          opacity: 0.1;
+          height: 40px;
+          width: 100%;
+          margin: 1rem 0;
+        }
+      </style>
+
+      <script>
+        let currentAudio = null;
+        let isPlaying = false;
+        let currentEpisodeTitle = '';
+        
+        function playEpisode(audioUrl, title) {
+          if (currentAudio && currentAudio.src === audioUrl) {
+            togglePlayPause();
+            return;
+          }
+          
+          // Stop current audio
+          if (currentAudio) {
+            currentAudio.pause();
+            currentAudio.currentTime = 0;
+          }
+          
+          // Create new audio element
+          currentAudio = new Audio(audioUrl);
+          currentEpisodeTitle = title;
+          
+          // Set up audio events
+          currentAudio.addEventListener('loadedmetadata', function() {
+            updateDuration(this.duration);
+          });
+          
+          currentAudio.addEventListener('timeupdate', function() {
+            updateProgress(this.currentTime, this.duration);
+            updateGlobalProgress(this.currentTime, this.duration);
+          });
+          
+          currentAudio.addEventListener('ended', function() {
+            resetPlayer();
+            resetGlobalPlayer();
+          });
+          
+          // Show player
+          document.getElementById('audioPlayer').style.display = 'block';
+          document.getElementById('nowPlaying').textContent = title;
+          
+          // Show global player
+          document.getElementById('globalPlayer').style.display = 'block';
+          document.getElementById('globalNowPlaying').textContent = title;
+          
+          // Play audio
+          currentAudio.play();
+          isPlaying = true;
+          updatePlayButtons();
+        }
+        
+        function togglePlayPause() {
+          if (!currentAudio) return;
+          
+          if (isPlaying) {
+            currentAudio.pause();
+          } else {
+            currentAudio.play();
+          }
+          isPlaying = !isPlaying;
+          updatePlayButtons();
+        }
+        
+        function toggleGlobalPlayPause() {
+          togglePlayPause();
+        }
+        
+        function updatePlayButtons() {
+          const playIcon = document.getElementById('playIcon');
+          const pauseIcon = document.getElementById('pauseIcon');
+          const globalPlayIcon = document.getElementById('globalPlayIcon');
+          const globalPauseIcon = document.getElementById('globalPauseIcon');
+          
+          if (isPlaying) {
+            playIcon.style.display = 'none';
+            pauseIcon.style.display = 'block';
+            globalPlayIcon.style.display = 'none';
+            globalPauseIcon.style.display = 'block';
+          } else {
+            playIcon.style.display = 'block';
+            pauseIcon.style.display = 'none';
+            globalPlayIcon.style.display = 'block';
+            globalPauseIcon.style.display = 'none';
+          }
+        }
+        
+        function updateDuration(duration) {
+          const durationElement = document.getElementById('duration');
+          const globalDurationElement = document.getElementById('globalDuration');
+          const formattedDuration = formatTime(duration);
+          
+          durationElement.textContent = formattedDuration;
+          globalDurationElement.textContent = formattedDuration;
+        }
+        
+        function updateProgress(currentTime, duration) {
+          const progressBar = document.getElementById('progressBar');
+          const currentTimeElement = document.getElementById('currentTime');
+          const percentage = (currentTime / duration) * 100;
+          
+          progressBar.style.width = percentage + '%';
+          currentTimeElement.textContent = formatTime(currentTime);
+        }
+        
+        function updateGlobalProgress(currentTime, duration) {
+          const progressBar = document.getElementById('globalProgressBar');
+          const currentTimeElement = document.getElementById('globalCurrentTime');
+          const percentage = (currentTime / duration) * 100;
+          
+          progressBar.style.width = percentage + '%';
+          currentTimeElement.textContent = formatTime(currentTime);
+        }
+        
+        function seekAudio(event) {
+          if (!currentAudio) return;
+          
+          const progressBar = event.currentTarget;
+          const clickPosition = event.offsetX;
+          const progressBarWidth = progressBar.offsetWidth;
+          const percentage = (clickPosition / progressBarWidth) * 100;
+          const newTime = (percentage / 100) * currentAudio.duration;
+          
+          currentAudio.currentTime = newTime;
+        }
+        
+        function seekGlobalAudio(event) {
+          seekAudio(event);
+        }
+        
+        let isMuted = false;
+        
+        function toggleMute() {
+          if (!currentAudio) return;
+          
+          isMuted = !isMuted;
+          currentAudio.muted = isMuted;
+          
+          const volumeWave = document.getElementById('volumeWave');
+          if (isMuted) {
+            volumeWave.style.display = 'none';
+          } else {
+            volumeWave.style.display = 'block';
+          }
+        }
+        
+        function toggleGlobalMute() {
+          toggleMute();
+          
+          const globalVolumeWave = document.getElementById('globalVolumeWave');
+          if (isMuted) {
+            globalVolumeWave.style.display = 'none';
+          } else {
+            globalVolumeWave.style.display = 'block';
+          }
+        }
+        
+        function resetPlayer() {
+          isPlaying = false;
+          updatePlayButtons();
+          
+          const progressBar = document.getElementById('progressBar');
+          const currentTimeElement = document.getElementById('currentTime');
+          
+          progressBar.style.width = '0%';
+          currentTimeElement.textContent = '0:00';
+        }
+        
+        function resetGlobalPlayer() {
+          const progressBar = document.getElementById('globalProgressBar');
+          const currentTimeElement = document.getElementById('globalCurrentTime');
+          
+          progressBar.style.width = '0%';
+          currentTimeElement.textContent = '0:00';
+        }
+        
+        function closeGlobalPlayer() {
+          if (currentAudio) {
+            currentAudio.pause();
+            currentAudio.currentTime = 0;
+          }
+          
+          resetPlayer();
+          resetGlobalPlayer();
+          document.getElementById('globalPlayer').style.display = 'none';
+          document.getElementById('audioPlayer').style.display = 'none';
+        }
+        
+        function formatTime(seconds) {
+          const mins = Math.floor(seconds / 60);
+          const secs = Math.floor(seconds % 60);
+          return \`\${mins}:\${secs < 10 ? '0' : ''}\${secs}\`;
+        }
+        
+        function subscribeNewsletter() {
+          const email = document.getElementById('newsletterEmail').value;
+          const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
+          
+          if (!emailRegex.test(email)) {
+            alert('Please enter a valid email address');
+            return;
+          }
+          
+          // In a real app, send to your newsletter service
+          alert(\`Thanks for subscribing! You'll receive updates at \${email}\`);
+          document.getElementById('newsletterEmail').value = '';
+        }
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(event) {
+          if (event.code === 'Space' && document.activeElement.tagName !== 'INPUT') {
+            event.preventDefault();
+            togglePlayPause();
+          }
+          
+          if (event.code === 'ArrowLeft' && currentAudio) {
+            event.preventDefault();
+            currentAudio.currentTime = Math.max(0, currentAudio.currentTime - 10);
+          }
+          
+          if (event.code === 'ArrowRight' && currentAudio) {
+            event.preventDefault();
+            currentAudio.currentTime = Math.min(currentAudio.duration, currentAudio.currentTime + 10);
+          }
+          
+          if (event.code === 'KeyM') {
+            event.preventDefault();
+            toggleMute();
+          }
+          
+          if (event.code === 'Escape') {
+            closeGlobalPlayer();
+          }
+        });
+        
+        // Auto-play next episode when current ends
+        currentAudio?.addEventListener('ended', function() {
+          // Find current episode index and play next
+          const episodes = ${JSON.stringify(data.episodes || [])};
+          const currentIndex = episodes.findIndex(ep => ep.title === currentEpisodeTitle);
+          
+          if (currentIndex !== -1 && currentIndex < episodes.length - 1) {
+            const nextEpisode = episodes[currentIndex + 1];
+            setTimeout(() => {
+              playEpisode(nextEpisode.audioUrl, nextEpisode.title);
+            }, 2000); // 2 second delay
+          }
+        });
+      </script>
+    `;
+    },
+  }),
+  "pet-services": new Template("pet-services", {
+    name: "Pet Care Services",
+    description:
+      "Complete pet care website with services, booking, and testimonials",
+    category: "Business",
+    image: "pet-services",
+    fields: {
+      businessName: {
+        type: "text",
+        default: "Pawfect Care",
+        label: "Business Name",
+        required: true,
+      },
+      tagline: {
+        type: "text",
+        default: "Professional Pet Care Services",
+        label: "Tagline",
+      },
+      heroDescription: {
+        type: "textarea",
+        default:
+          "We provide loving, professional care for your furry family members. From grooming to boarding, we treat every pet like our own.",
+        label: "Hero Description",
+      },
+      phoneNumber: {
+        type: "text",
+        default: "(555) 123-4567",
+        label: "Phone Number",
+      },
+      email: {
+        type: "email",
+        default: "hello@pawfectcare.com",
+        label: "Email",
+      },
+      address: {
+        type: "text",
+        default: "123 Pet Street, Animal City, AC 12345",
+        label: "Address",
+      },
+
+      // Services Section
+      servicesTitle: {
+        type: "text",
+        default: "Our Services",
+        label: "Services Section Title",
+      },
+      servicesDescription: {
+        type: "textarea",
+        default: "Comprehensive care for all your pet's needs",
+        label: "Services Description",
+      },
+      services: {
+        type: "group",
+        label: "Services",
+        itemLabel: "Service",
+        min: 3,
+        max: 6,
+        fields: {
+          name: { type: "text", label: "Service Name", default: "" },
+          description: { type: "textarea", label: "Description", default: "" },
+          icon: {
+            type: "select",
+            label: "Icon",
+            default: "🐕",
+            options: [
+              { value: "🐕", label: "Dog" },
+              { value: "🐈", label: "Cat" },
+              { value: "🐕‍🦺", label: "Service Dog" },
+              { value: "🛁", label: "Grooming" },
+              { value: "🏠", label: "Boarding" },
+              { value: "🚶", label: "Walking" },
+              { value: "💊", label: "Medicine" },
+              { value: "🏥", label: "Vet Care" },
+            ],
+          },
+          price: { type: "text", label: "Starting Price", default: "" },
+        },
+        default: [
+          {
+            name: "Pet Grooming",
+            description:
+              "Professional bathing, haircuts, nail trimming, and ear cleaning for all breeds",
+            icon: "🛁",
+            price: "$45",
+          },
+          {
+            name: "Dog Walking",
+            description:
+              "Daily walks tailored to your dog's energy level and needs",
+            icon: "🚶",
+            price: "$25/walk",
+          },
+          {
+            name: "Pet Boarding",
+            description:
+              "Safe, comfortable overnight stays with 24/7 supervision",
+            icon: "🏠",
+            price: "$65/night",
+          },
+          {
+            name: "Pet Sitting",
+            description:
+              "In-home care including feeding, playtime, and medication administration",
+            icon: "🐕",
+            price: "$35/visit",
+          },
+        ],
+      },
+
+      // About Section
+      aboutTitle: {
+        type: "text",
+        default: "Why Choose Us",
+        label: "About Section Title",
+      },
+      aboutPoints: {
+        type: "group",
+        label: "About Points",
+        itemLabel: "Point",
+        min: 3,
+        max: 4,
+        fields: {
+          title: { type: "text", label: "Title", default: "" },
+          description: { type: "textarea", label: "Description", default: "" },
+        },
+        default: [
+          {
+            title: "Certified Professionals",
+            description:
+              "All our staff are certified in pet first aid and animal behavior",
+          },
+          {
+            title: "24/7 Availability",
+            description:
+              "Emergency services available around the clock for your peace of mind",
+          },
+          {
+            title: "Insured & Bonded",
+            description:
+              "Full insurance coverage for complete protection of your pets",
+          },
+          {
+            title: "Personalized Care",
+            description:
+              "Customized care plans based on your pet's unique personality and needs",
+          },
+        ],
+      },
+
+      // Testimonials
+      testimonialsTitle: {
+        type: "text",
+        default: "Happy Pet Parents",
+        label: "Testimonials Title",
+      },
+      testimonials: {
+        type: "group",
+        label: "Testimonials",
+        itemLabel: "Testimonial",
+        min: 2,
+        max: 4,
+        fields: {
+          quote: { type: "textarea", label: "Quote", default: "" },
+          author: { type: "text", label: "Author", default: "" },
+          pet: { type: "text", label: "Pet Name", default: "" },
+        },
+        default: [
+          {
+            quote:
+              "Pawfect Care has been amazing with our anxious rescue dog. They're patient, loving, and truly professional.",
+            author: "Sarah M.",
+            pet: "Owner of Max (Golden Retriever)",
+          },
+          {
+            quote:
+              "I travel frequently for work and knowing my cat is in good hands gives me such peace of mind.",
+            author: "James T.",
+            pet: "Owner of Whiskers (Persian Cat)",
+          },
+        ],
+      },
+
+      // Team Members
+      teamTitle: {
+        type: "text",
+        default: "Meet Our Team",
+        label: "Team Section Title",
+      },
+      teamMembers: {
+        type: "group",
+        label: "Team Members",
+        itemLabel: "Member",
+        min: 2,
+        max: 4,
+        fields: {
+          name: { type: "text", label: "Name", default: "" },
+          role: { type: "text", label: "Role", default: "" },
+          certification: { type: "text", label: "Certification", default: "" },
+          bio: { type: "textarea", label: "Bio", default: "" },
+        },
+        default: [
+          {
+            name: "Emma Johnson",
+            role: "Lead Pet Care Specialist",
+            certification: "Certified Professional Dog Trainer",
+            bio: "10+ years experience with all breeds, specializes in senior pet care",
+          },
+          {
+            name: "Michael Chen",
+            role: "Head Groomer",
+            certification: "Master Groomer Certified",
+            bio: "Specializes in breed-specific cuts and gentle handling techniques",
+          },
+        ],
+      },
+
+      // FAQ Section
+      faqTitle: {
+        type: "text",
+        default: "Frequently Asked Questions",
+        label: "FAQ Title",
+      },
+      faqs: {
+        type: "group",
+        label: "FAQs",
+        itemLabel: "FAQ",
+        min: 3,
+        max: 6,
+        fields: {
+          question: { type: "text", label: "Question", default: "" },
+          answer: { type: "textarea", label: "Answer", default: "" },
+        },
+        default: [
+          {
+            question: "What are your vaccination requirements?",
+            answer:
+              "We require all pets to be current on rabies, distemper, and bordetella vaccines. Documentation must be provided before service.",
+          },
+          {
+            question: "Do you accept emergency appointments?",
+            answer:
+              "Yes! We have a 24/7 emergency line and can usually accommodate same-day appointments for urgent situations.",
+          },
+          {
+            question: "What if my pet has special needs?",
+            answer:
+              "We're experienced with medical needs including diabetes, arthritis, and post-surgical care. Just let us know about any requirements.",
+          },
+        ],
+      },
+
+      // Emergency Contact
+      emergencyTitle: {
+        type: "text",
+        default: "24/7 Emergency Service",
+        label: "Emergency Section Title",
+      },
+      emergencyNumber: {
+        type: "text",
+        default: "(555) 911-PAWS",
+        label: "Emergency Phone Number",
+      },
+    },
+    structure: (data, theme, colorMode) => {
+      // Detect theme style
+      const themeId = theme?.id || "minimal";
+      const isBrutalist = themeId === "brutalist";
+      const isGradient = themeId === "gradient";
+      const isElegant = themeId === "elegant";
+      const isRetro = themeId === "retro";
+      const isGlassmorphism = themeId === "glassmorphism";
+      const isNeumorphism = themeId === "neumorphism";
+
+      // Pet-themed color accents
+      const petColors = {
+        light: {
+          primary: "#4A90E2", // Dog blue
+          secondary: "#7ED321", // Healthy green
+          accent: "#FF6B6B", // Playful red
+          warm: "#FFA726", // Golden
+        },
+        dark: {
+          primary: "#64B5F6",
+          secondary: "#9CCC65",
+          accent: "#FF8A80",
+          warm: "#FFB74D",
+        },
+      };
+
+      const colors = colorMode === "dark" ? petColors.dark : petColors.light;
+
+      // Neumorphism helpers
+      const getNeumorphismShadow = (inset = false) => {
+        if (!isNeumorphism) return "";
+        return inset
+          ? "box-shadow: var(--neomorph-shadow-in);"
+          : "box-shadow: var(--neomorph-shadow-out);";
+      };
+
+      const getNeumorphismHoverShadow = () => {
+        if (!isNeumorphism) return "";
+        return "var(--neomorph-shadow-in)";
+      };
+
+      const getNeumorphismNormalShadow = () => {
+        if (!isNeumorphism) return "";
+        return "var(--neomorph-shadow-out)";
+      };
+
+      return `
+  <!-- Mobile Navigation Button (Hidden on Desktop) -->
+  <button class="mobile-menu-btn" onclick="toggleMobileMenu()" style="display: none; position: fixed; top: 1rem; right: 1rem; z-index: 1001; background: ${
+    isGlassmorphism ? "rgba(255,255,255,0.1)" : "var(--color-bg)"
+  }; border: ${isBrutalist ? "3px" : isRetro ? "2px" : "1px"} solid ${
+        isBrutalist || isRetro ? colors.primary : "var(--color-border)"
+      }; padding: 0.75rem; border-radius: ${
+        isBrutalist ? "0" : "8px"
+      }; cursor: pointer; backdrop-filter: blur(10px);">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </button>
+  
+  <!-- Header with Navigation -->
+  <header style="padding: ${
+    isBrutalist ? "1.5rem 0" : isElegant ? "1rem 0" : "1rem 0"
+  }; background: ${
+        isGlassmorphism
+          ? "rgba(255, 255, 255, 0.1)"
+          : isNeumorphism
+          ? "transparent"
+          : "var(--color-bg)"
+      }; position: sticky; top: 0; z-index: 1000; backdrop-filter: blur(${
+        isGlassmorphism ? "20px" : isNeumorphism ? "0" : "10px"
+      }); ${
+        isGlassmorphism ? "box-shadow: 0 8px 32px rgba(31, 38, 135, 0.1);" : ""
+      } border-bottom: ${isBrutalist ? "4px" : isRetro ? "3px" : "1px"} solid ${
+        isBrutalist || isRetro
+          ? colors.primary
+          : isNeumorphism || isGlassmorphism
+          ? "transparent"
+          : "var(--color-border)"
+      };">
+    <div class="container">
+      <nav style="display: flex; justify-content: space-between; align-items: center; ${
+        isNeumorphism
+          ? `padding: 1rem 1.5rem; border-radius: 16px; ${getNeumorphismShadow(
+              false
+            )}`
+          : ""
+      }">
+        <!-- Logo -->
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+          <div style="font-size: ${
+            isBrutalist ? "2rem" : "1.5rem"
+          }; line-height: 1;">🐾</div>
+          <div style="font-weight: ${
+            isBrutalist ? "900" : isElegant ? "700" : "600"
+          }; font-size: ${
+        isBrutalist ? "1.5rem" : isElegant ? "1.25rem" : "1.125rem"
+      }; letter-spacing: ${isBrutalist || isRetro ? "1px" : "-0.01em"}; ${
+        isBrutalist || isRetro ? "text-transform: uppercase;" : ""
+      } ${
+        isGradient
+          ? "background: linear-gradient(135deg, #4A90E2, #7ED321); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"
+          : isRetro
+          ? `background: linear-gradient(90deg, ${colors.primary}, ${colors.secondary}); -webkit-background-clip: text; -webkit-text-fill-color: transparent;`
+          : isElegant
+          ? "font-family: Playfair Display, serif;"
+          : `color: ${colors.primary};`
+      }">
+            ${data.businessName || "Pawfect Care"}
+          </div>
+        </div>
+        
+        <!-- Desktop Navigation -->
+        <div class="desktop-nav" style="display: flex; align-items: center; gap: ${
+          isBrutalist ? "2rem" : isElegant ? "3rem" : "2rem"
+        };">
+          <a href="#services" style="color: var(--color-text-secondary); text-decoration: none; font-weight: ${
+            isBrutalist ? "700" : "500"
+          }; transition: color 0.2s; font-size: ${
+        isBrutalist ? "1.125rem" : "0.9375rem"
+      };" onmouseover="this.style.color='${
+        colors.primary
+      }'" onmouseout="this.style.color='var(--color-text-secondary)'">Services</a>
+          <a href="#about" style="color: var(--color-text-secondary); text-decoration: none; font-weight: ${
+            isBrutalist ? "700" : "500"
+          }; transition: color 0.2s; font-size: ${
+        isBrutalist ? "1.125rem" : "0.9375rem"
+      };" onmouseover="this.style.color='${
+        colors.primary
+      }'" onmouseout="this.style.color='var(--color-text-secondary)'">About</a>
+          <a href="#contact" style="color: var(--color-text-secondary); text-decoration: none; font-weight: ${
+            isBrutalist ? "700" : "500"
+          }; transition: color 0.2s; font-size: ${
+        isBrutalist ? "1.125rem" : "0.9375rem"
+      };" onmouseover="this.style.color='${
+        colors.primary
+      }'" onmouseout="this.style.color='var(--color-text-secondary)'">Contact</a>
+          
+          <!-- Phone Number (Desktop) -->
+          <a href="tel:${
+            data.phoneNumber || "(555) 123-4567"
+          }" style="display: flex; align-items: center; gap: 0.5rem; padding: ${
+        isBrutalist ? "1rem 2rem" : "0.75rem 1.5rem"
+      }; background: ${
+        isGradient
+          ? "linear-gradient(135deg, #4A90E2, #7ED321)"
+          : isGlassmorphism
+          ? "rgba(255,255,255,0.1)"
+          : isNeumorphism
+          ? "var(--color-bg)"
+          : colors.primary
+      }; color: ${
+        isGradient || isGlassmorphism || isNeumorphism
+          ? "var(--color-text)"
+          : "white"
+      }; text-decoration: none; border-radius: ${
+        isGradient || isRetro
+          ? "999px"
+          : isBrutalist
+          ? "0"
+          : isNeumorphism || isGlassmorphism
+          ? "12px"
+          : "8px"
+      }; font-weight: ${isBrutalist ? "700" : "600"}; font-size: ${
+        isBrutalist ? "1rem" : "0.875rem"
+      }; transition: all 0.2s; ${
+        isGlassmorphism
+          ? "backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2);"
+          : isNeumorphism
+          ? getNeumorphismShadow(false)
+          : ""
+      }" onmouseover="${
+        isBrutalist
+          ? `this.style.background='${colors.secondary}'; this.style.transform='translateY(-2px)'`
+          : isGradient
+          ? "this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 20px rgba(74,144,226,0.3)'"
+          : isNeumorphism
+          ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
+          : `this.style.background='${colors.secondary}'; this.style.transform='translateY(-2px)'`
+      }" onmouseout="${
+        isBrutalist
+          ? `this.style.background='${
+              isGradient
+                ? "linear-gradient(135deg, #4A90E2, #7ED321)"
+                : colors.primary
+            }'; this.style.transform='translateY(0)'`
+          : isGradient
+          ? "this.style.transform='translateY(0)'; this.style.boxShadow='none'"
+          : isNeumorphism
+          ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
+          : `this.style.background='${colors.primary}'; this.style.transform='translateY(0)'`
+      }">
+            <span style="font-size: 1.125rem;">📞</span>
+            ${data.phoneNumber || "(555) 123-4567"}
+          </a>
+          
+          <!-- Theme Toggle -->
+          <label class="theme-toggle-switch-wrapper" style="cursor: pointer; ${
+            isNeumorphism
+              ? `padding: 0.5rem; border-radius: 12px; display: inline-block; box-shadow: var(--neomorph-shadow-out);`
+              : ""
+          }">
+            <input type="checkbox" class="theme-toggle-switch" onclick="toggleTheme()" aria-label="Toggle theme">
+            <span class="theme-toggle-slider"></span>
+          </label>
+        </div>
+      </nav>
+      
+      <!-- Mobile Navigation Menu -->
+      <div class="mobile-menu" style="display: none; padding: 2rem 0 1rem; ${
+        isNeumorphism || isGlassmorphism
+          ? ""
+          : "border-top: 1px solid var(--color-border);"
+      } margin-top: 1rem;">
+        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+          <a href="#services" onclick="toggleMobileMenu()" style="color: var(--color-text); text-decoration: none; font-size: 1.125rem; font-weight: 500; padding: 0.5rem 0;">Services</a>
+          <a href="#about" onclick="toggleMobileMenu()" style="color: var(--color-text); text-decoration: none; font-size: 1.125rem; font-weight: 500; padding: 0.5rem 0;">About</a>
+          <a href="#contact" onclick="toggleMobileMenu()" style="color: var(--color-text); text-decoration: none; font-size: 1.125rem; font-weight: 500; padding: 0.5rem 0;">Contact</a>
+          <a href="tel:${data.phoneNumber || "(555) 123-4567"}" style="color: ${
+        colors.primary
+      }; text-decoration: none; font-size: 1.125rem; font-weight: 600; padding: 0.5rem 0;">📞 ${
+        data.phoneNumber || "(555) 123-4567"
+      }</a>
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <span style="color: var(--color-text-secondary);">Theme:</span>
+            <label class="theme-toggle-switch-wrapper" style="cursor: pointer;">
+              <input type="checkbox" class="theme-toggle-switch" onclick="toggleTheme()" aria-label="Toggle theme">
+              <span class="theme-toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+  
+  <!-- Hero Section -->
+  <section class="hero" style="padding: ${
+    isBrutalist || isRetro ? "6rem 0" : "5rem 0"
+  }; background: ${
+        isBrutalist
+          ? colors.primary
+          : isGradient
+          ? "linear-gradient(135deg, rgba(74,144,226,0.1), rgba(126,211,33,0.1))"
+          : isRetro
+          ? `linear-gradient(135deg, ${colors.primary}20, ${colors.accent}20)`
+          : isElegant
+          ? "var(--color-surface)"
+          : "var(--color-bg)"
+      }; position: relative; overflow: hidden;">
+    <div class="container">
+      <div style="max-width: ${
+        isElegant ? "800px" : "900px"
+      }; margin: 0 auto; text-align: center; position: relative; z-index: 2;">
+        <!-- Pet Icons Decoration -->
+        <div style="display: flex; justify-content: center; gap: 1.5rem; margin-bottom: 2rem; font-size: 3rem; opacity: 0.2;">
+          <span>🐕</span>
+          <span>🐈</span>
+          <span>🐕‍🦺</span>
+          <span>🐇</span>
+          <span>🐦</span>
+        </div>
+        
+        <h1 style="font-family: ${
+          isElegant ? "Playfair Display, serif" : "inherit"
+        }; font-size: clamp(${
+        isBrutalist || isRetro ? "2.5rem" : "2.5rem"
+      }, 6vw, ${isBrutalist || isRetro ? "5rem" : "4rem"}); font-weight: ${
+        isBrutalist || isNeumorphism ? "900" : isElegant ? "600" : "800"
+      }; margin-bottom: 1.5rem; line-height: 1.1; color: ${
+        isBrutalist ? "white" : "var(--color-text)"
+      }; letter-spacing: ${isRetro ? "2px" : "-0.02em"}; ${
+        isBrutalist || isRetro ? "text-transform: uppercase;" : ""
+      }">
+          ${data.tagline || "Professional Pet Care Services"}
+        </h1>
+        
+        <p style="font-size: ${
+          isBrutalist || isRetro ? "1.25rem" : "1.125rem"
+        }; color: ${
+        isBrutalist ? "rgba(255,255,255,0.9)" : "var(--color-text-secondary)"
+      }; margin-bottom: 3rem; line-height: 1.8; max-width: 700px; margin-left: auto; margin-right: auto;">
+          ${
+            data.heroDescription ||
+            "We provide loving, professional care for your furry family members."
+          }
+        </p>
+        
+        <div style="display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap;">
+          <!-- Book Now Button -->
+          <a href="#contact" style="padding: ${
+            isBrutalist ? "1.5rem 3rem" : "1.25rem 2.5rem"
+          }; background: ${
+        isBrutalist
+          ? "white"
+          : isGradient
+          ? "linear-gradient(135deg, #4A90E2, #7ED321)"
+          : isRetro
+          ? `linear-gradient(90deg, ${colors.primary}, ${colors.accent})`
+          : colors.primary
+      }; color: ${
+        isBrutalist ? colors.primary : isGradient || isRetro ? "white" : "white"
+      }; text-decoration: none; border-radius: ${
+        isGradient || isRetro ? "999px" : isBrutalist ? "0" : "12px"
+      }; font-weight: ${isBrutalist ? "900" : "600"}; font-size: ${
+        isBrutalist ? "1.125rem" : "1rem"
+      }; transition: all 0.3s; border: ${
+        isBrutalist ? "4px" : isRetro ? "2px" : "2px"
+      } solid ${
+        isBrutalist ? "white" : colors.primary
+      }; display: inline-flex; align-items: center; gap: 0.75rem; ${
+        isBrutalist || isRetro
+          ? "text-transform: uppercase; letter-spacing: 1px;"
+          : ""
+      } ${isGradient ? "box-shadow: 0 10px 30px rgba(74,144,226,0.3);" : ""}" 
+            onmouseover="${
+              isBrutalist
+                ? `this.style.background='transparent'; this.style.color='white'`
+                : isGradient
+                ? `this.style.transform='translateY(-4px)'; this.style.boxShadow='0 15px 40px rgba(74,144,226,0.4)'`
+                : isRetro
+                ? `this.style.transform='translateY(-4px)'; this.style.boxShadow='0 0 40px ${colors.primary}60'`
+                : `this.style.background='${colors.secondary}'; this.style.transform='translateY(-4px)'`
+            }" 
+            onmouseout="${
+              isBrutalist
+                ? `this.style.background='white'; this.style.color='${colors.primary}'`
+                : isGradient
+                ? `this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 30px rgba(74,144,226,0.3)'`
+                : isRetro
+                ? `this.style.transform='translateY(0)'; this.style.boxShadow='none'`
+                : `this.style.background='${colors.primary}'; this.style.transform='translateY(0)'`
+            }">
+            <span style="font-size: 1.25rem;">📅</span>
+            Book Now
+          </a>
+          
+          <!-- Emergency Button -->
+          <a href="tel:${
+            data.emergencyNumber || "(555) 911-PAWS"
+          }" style="padding: ${
+        isBrutalist ? "1.5rem 3rem" : "1.25rem 2.5rem"
+      }; background: ${isBrutalist ? colors.accent : "transparent"}; color: ${
+        isBrutalist ? "white" : colors.accent
+      }; text-decoration: none; border-radius: ${
+        isGradient || isRetro ? "999px" : isBrutalist ? "0" : "12px"
+      }; font-weight: ${isBrutalist ? "900" : "600"}; font-size: ${
+        isBrutalist ? "1.125rem" : "1rem"
+      }; transition: all 0.3s; border: ${
+        isBrutalist ? "4px" : isRetro ? "2px" : "2px"
+      } solid ${
+        isBrutalist ? colors.accent : colors.accent
+      }; display: inline-flex; align-items: center; gap: 0.75rem; ${
+        isBrutalist || isRetro
+          ? "text-transform: uppercase; letter-spacing: 1px;"
+          : ""
+      }" 
+            onmouseover="${
+              isBrutalist
+                ? `this.style.background='white'; this.style.color='${colors.accent}'`
+                : `this.style.background='${colors.accent}'; this.style.color='white'; this.style.transform='translateY(-4px)'`
+            }" 
+            onmouseout="${
+              isBrutalist
+                ? `this.style.background='${colors.accent}'; this.style.color='white'`
+                : `this.style.background='transparent'; this.style.color='${colors.accent}'; this.style.transform='translateY(0)'`
+            }">
+            <span style="font-size: 1.25rem;">🚨</span>
+            Emergency
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Services Section -->
+  <section id="services" style="padding: ${
+    isBrutalist || isRetro ? "6rem 0" : "5rem 0"
+  }; background: var(--color-bg);">
+    <div class="container">
+      <div style="text-align: center; margin-bottom: 4rem;">
+        <h2 style="font-family: ${
+          isElegant ? "Playfair Display, serif" : "inherit"
+        }; font-size: clamp(${
+        isBrutalist || isRetro ? "2.5rem" : "2rem"
+      }, 5vw, ${isBrutalist || isRetro ? "4rem" : "3rem"}); font-weight: ${
+        isBrutalist ? "900" : isRetro ? "700" : isElegant ? "600" : "700"
+      }; margin-bottom: 1rem; color: ${
+        isBrutalist
+          ? colors.primary
+          : isGradient
+          ? "linear-gradient(135deg, #4A90E2, #7ED321)"
+          : isRetro
+          ? `linear-gradient(90deg, ${colors.primary}, ${colors.secondary})`
+          : colors.primary
+      }; ${
+        isBrutalist
+          ? ""
+          : isGradient || isRetro
+          ? "-webkit-background-clip: text; -webkit-text-fill-color: transparent;"
+          : ""
+      } ${isBrutalist || isRetro ? "text-transform: uppercase;" : ""}">
+          ${data.servicesTitle || "Our Services"}
+        </h2>
+        <p style="color: var(--color-text-secondary); font-size: ${
+          isBrutalist || isRetro ? "1.25rem" : "1.125rem"
+        }; max-width: 600px; margin: 0 auto;">
+          ${
+            data.servicesDescription ||
+            "Comprehensive care for all your pet's needs"
+          }
+        </p>
+      </div>
+      
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: ${
+        isElegant ? "3rem" : "2rem"
+      };">
+        ${
+          data.services && data.services.length > 0
+            ? data.services
+                .map(
+                  (service) => `
+          <div class="service-card" style="padding: ${
+            isBrutalist || isElegant ? "2.5rem" : "2rem"
+          }; border-radius: ${
+                    isGradient
+                      ? "24px"
+                      : isBrutalist || isElegant || isRetro
+                      ? "0"
+                      : isNeumorphism || isGlassmorphism
+                      ? "20px"
+                      : "16px"
+                  }; border: ${
+                    isBrutalist ? "4px" : isRetro ? "2px" : "1px"
+                  } solid ${
+                    isBrutalist || isRetro
+                      ? colors.primary
+                      : isGlassmorphism
+                      ? "rgba(255,255,255,0.1)"
+                      : "var(--color-border)"
+                  }; transition: all ${
+                    isBrutalist || isRetro ? "0.2s" : "0.3s"
+                  }; background: ${
+                    isGradient
+                      ? "linear-gradient(135deg, rgba(74,144,226,0.03), rgba(126,211,33,0.03))"
+                      : isGlassmorphism
+                      ? "rgba(255,255,255,0.05)"
+                      : isNeumorphism
+                      ? "var(--color-bg)"
+                      : "var(--color-bg)"
+                  }; text-align: center; ${
+                    isGlassmorphism
+                      ? "backdrop-filter: blur(20px);"
+                      : isNeumorphism
+                      ? getNeumorphismShadow(false)
+                      : ""
+                  }" 
+            onmouseover="${
+              isBrutalist
+                ? `this.style.transform='translate(-4px, -4px)'; this.style.boxShadow='8px 8px 0 ${colors.primary}'`
+                : isGradient
+                ? `this.style.transform='translateY(-8px)'; this.style.boxShadow='0 20px 40px rgba(74,144,226,0.1)'`
+                : isRetro
+                ? `this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 30px ${colors.primary}30'`
+                : isGlassmorphism
+                ? `this.style.transform='translateY(-8px)'`
+                : isNeumorphism
+                ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
+                : `this.style.borderColor='${colors.primary}'; this.style.transform='translateY(-4px)'`
+            }" 
+            onmouseout="${
+              isBrutalist
+                ? `this.style.transform='translate(0, 0)'; this.style.boxShadow='none'`
+                : isGradient
+                ? `this.style.transform='translateY(0)'; this.style.boxShadow='none'`
+                : isRetro
+                ? `this.style.transform='translateY(0)'; this.style.boxShadow='none'`
+                : isGlassmorphism
+                ? `this.style.transform='translateY(0)'`
+                : isNeumorphism
+                ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
+                : `this.style.borderColor='var(--color-border)'; this.style.transform='translateY(0)'`
+            }">
+            <div style="font-size: 3rem; margin-bottom: 1.5rem; display: block;">
+              ${service.icon || "🐕"}
+            </div>
+            <h3 style="font-size: ${
+              isBrutalist || isElegant ? "1.75rem" : "1.5rem"
+            }; font-weight: ${
+                    isBrutalist ? "900" : isRetro ? "700" : "700"
+                  }; margin-bottom: 1rem; color: var(--color-text); ${
+                    isBrutalist || isRetro ? "text-transform: uppercase;" : ""
+                  }">
+              ${service.name || "Service"}
+            </h3>
+            <p style="color: var(--color-text-secondary); line-height: 1.7; margin-bottom: 1.5rem; font-size: ${
+              isBrutalist || isRetro ? "1.125rem" : "1rem"
+            };">
+              ${service.description || ""}
+            </p>
+            ${
+              service.price
+                ? `<div style="font-size: ${
+                    isBrutalist ? "1.5rem" : "1.25rem"
+                  }; font-weight: ${isBrutalist ? "900" : "700"}; color: ${
+                    colors.primary
+                  }; margin-top: 1rem;">
+                From ${service.price}
+              </div>`
+                : ""
+            }
+          </div>
+          `
+                )
+                .join("")
+            : ""
+        }
+      </div>
+    </div>
+  </section>
+  
+  <!-- About/Why Choose Us Section -->
+  <section id="about" style="padding: ${
+    isBrutalist || isRetro ? "6rem 0" : "5rem 0"
+  }; background: ${
+        isBrutalist
+          ? colors.primary
+          : isGradient
+          ? "linear-gradient(135deg, rgba(74,144,226,0.05), rgba(126,211,33,0.05))"
+          : isRetro
+          ? `linear-gradient(135deg, ${colors.primary}10, ${colors.accent}10)`
+          : "var(--color-surface)"
+      };">
+    <div class="container">
+      <div style="max-width: 1000px; margin: 0 auto;">
+        <div style="text-align: center; margin-bottom: 4rem;">
+          <h2 style="font-family: ${
+            isElegant ? "Playfair Display, serif" : "inherit"
+          }; font-size: clamp(${
+        isBrutalist || isRetro ? "2.5rem" : "2rem"
+      }, 5vw, ${isBrutalist || isRetro ? "4rem" : "3rem"}); font-weight: ${
+        isBrutalist ? "900" : isRetro ? "700" : isElegant ? "600" : "700"
+      }; margin-bottom: 1rem; color: ${
+        isBrutalist
+          ? "white"
+          : isGradient
+          ? "linear-gradient(135deg, #4A90E2, #7ED321)"
+          : isRetro
+          ? `linear-gradient(90deg, ${colors.primary}, ${colors.secondary})`
+          : colors.primary
+      }; ${
+        isBrutalist
+          ? ""
+          : isGradient || isRetro
+          ? "-webkit-background-clip: text; -webkit-text-fill-color: transparent;"
+          : ""
+      } ${isBrutalist || isRetro ? "text-transform: uppercase;" : ""}">
+            ${data.aboutTitle || "Why Choose Us"}
+          </h2>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: ${
+          isElegant ? "3rem" : "2rem"
+        };">
+          ${
+            data.aboutPoints && data.aboutPoints.length > 0
+              ? data.aboutPoints
+                  .map(
+                    (point) => `
+            <div style="text-align: center;">
+              <div style="width: 72px; height: 72px; background: ${
+                isBrutalist
+                  ? "white"
+                  : isGradient
+                  ? "linear-gradient(135deg, #4A90E2, #7ED321)"
+                  : isRetro
+                  ? `linear-gradient(135deg, ${colors.primary}, ${colors.accent})`
+                  : colors.primary
+              }; color: ${
+                      isBrutalist ? colors.primary : "white"
+                    }; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; margin: 0 auto 1.5rem; ${
+                      isBrutalist
+                        ? "border: 4px solid white;"
+                        : isRetro
+                        ? "border: 3px solid white;"
+                        : ""
+                    }">
+                ✓
+              </div>
+              <h3 style="font-size: ${
+                isBrutalist || isElegant ? "1.5rem" : "1.25rem"
+              }; font-weight: ${
+                      isBrutalist ? "900" : "700"
+                    }; margin-bottom: 0.75rem; color: ${
+                      isBrutalist ? "white" : "var(--color-text)"
+                    }; ${isBrutalist ? "text-transform: uppercase;" : ""}">
+                ${point.title || ""}
+              </h3>
+              <p style="color: ${
+                isBrutalist
+                  ? "rgba(255,255,255,0.9)"
+                  : "var(--color-text-secondary)"
+              }; line-height: 1.7; font-size: ${
+                      isBrutalist || isRetro ? "1.125rem" : "1rem"
+                    };">
+                ${point.description || ""}
+              </p>
+            </div>
+            `
+                  )
+                  .join("")
+              : ""
+          }
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Team Section -->
+  ${
+    data.teamMembers && data.teamMembers.length > 0
+      ? `
+  <section style="padding: ${
+    isBrutalist || isRetro ? "6rem 0" : "5rem 0"
+  }; background: var(--color-bg);">
+    <div class="container">
+      <div style="text-align: center; margin-bottom: 4rem;">
+        <h2 style="font-family: ${
+          isElegant ? "Playfair Display, serif" : "inherit"
+        }; font-size: clamp(${
+          isBrutalist || isRetro ? "2.5rem" : "2rem"
+        }, 5vw, ${isBrutalist || isRetro ? "4rem" : "3rem"}); font-weight: ${
+          isBrutalist ? "900" : isRetro ? "700" : isElegant ? "600" : "700"
+        }; margin-bottom: 1rem; color: ${
+          isBrutalist
+            ? colors.primary
+            : isGradient
+            ? "linear-gradient(135deg, #4A90E2, #7ED321)"
+            : isRetro
+            ? `linear-gradient(90deg, ${colors.primary}, ${colors.secondary})`
+            : colors.primary
+        }; ${
+          isBrutalist
+            ? ""
+            : isGradient || isRetro
+            ? "-webkit-background-clip: text; -webkit-text-fill-color: transparent;"
+            : ""
+        } ${isBrutalist || isRetro ? "text-transform: uppercase;" : ""}">
+          ${data.teamTitle || "Meet Our Team"}
+        </h2>
+      </div>
+      
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: ${
+        isElegant ? "3rem" : "2rem"
+      };">
+        ${data.teamMembers
+          .map(
+            (member) => `
+        <div style="text-align: center; padding: ${
+          isBrutalist || isElegant ? "2.5rem" : "2rem"
+        }; border-radius: ${
+              isGradient
+                ? "24px"
+                : isBrutalist || isElegant || isRetro
+                ? "0"
+                : isNeumorphism || isGlassmorphism
+                ? "20px"
+                : "16px"
+            }; border: ${isBrutalist ? "4px" : isRetro ? "2px" : "1px"} solid ${
+              isBrutalist || isRetro
+                ? colors.primary
+                : isGlassmorphism
+                ? "rgba(255,255,255,0.1)"
+                : "var(--color-border)"
+            }; transition: all ${
+              isBrutalist || isRetro ? "0.2s" : "0.3s"
+            }; background: ${
+              isGradient
+                ? "linear-gradient(135deg, rgba(74,144,226,0.03), rgba(126,211,33,0.03))"
+                : isGlassmorphism
+                ? "rgba(255,255,255,0.05)"
+                : isNeumorphism
+                ? "var(--color-bg)"
+                : "var(--color-bg)"
+            }; ${
+              isGlassmorphism
+                ? "backdrop-filter: blur(20px);"
+                : isNeumorphism
+                ? getNeumorphismShadow(false)
+                : ""
+            }" 
+          onmouseover="${
+            isBrutalist
+              ? `this.style.transform='translate(-4px, -4px)'; this.style.boxShadow='8px 8px 0 ${colors.primary}'`
+              : isGradient
+              ? `this.style.transform='translateY(-4px)'; this.style.boxShadow='0 15px 40px rgba(74,144,226,0.1)'`
+              : isRetro
+              ? `this.style.transform='translateY(-4px)'; this.style.boxShadow='0 10px 30px ${colors.primary}30'`
+              : isGlassmorphism
+              ? `this.style.transform='translateY(-4px)'`
+              : isNeumorphism
+              ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
+              : `this.style.borderColor='${colors.primary}'; this.style.transform='translateY(-4px)'`
+          }" 
+          onmouseout="${
+            isBrutalist
+              ? `this.style.transform='translate(0, 0)'; this.style.boxShadow='none'`
+              : isGradient
+              ? `this.style.transform='translateY(0)'; this.style.boxShadow='none'`
+              : isRetro
+              ? `this.style.transform='translateY(0)'; this.style.boxShadow='none'`
+              : isGlassmorphism
+              ? `this.style.transform='translateY(0)'`
+              : isNeumorphism
+              ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
+              : `this.style.borderColor='var(--color-border)'; this.style.transform='translateY(0)'`
+          }">
+          <div style="width: 120px; height: 120px; background: ${
+            isBrutalist
+              ? "white"
+              : isGradient
+              ? "linear-gradient(135deg, #4A90E2, #7ED321)"
+              : isRetro
+              ? `linear-gradient(135deg, ${colors.primary}, ${colors.accent})`
+              : colors.primary
+          }; border-radius: 50%; margin: 0 auto 1.5rem; display: flex; align-items: center; justify-content: center; font-size: 3rem; color: ${
+              isBrutalist ? colors.primary : "white"
+            }; ${
+              isBrutalist
+                ? "border: 4px solid white;"
+                : isRetro
+                ? "border: 3px solid white;"
+                : ""
+            }">
+            👤
+          </div>
+          <h3 style="font-size: ${
+            isBrutalist || isElegant ? "1.75rem" : "1.5rem"
+          }; font-weight: ${
+              isBrutalist ? "900" : "700"
+            }; margin-bottom: 0.5rem; color: var(--color-text); ${
+              isBrutalist || isRetro ? "text-transform: uppercase;" : ""
+            }">
+            ${member.name || ""}
+          </h3>
+          <p style="color: ${
+            colors.primary
+          }; font-weight: 600; margin-bottom: 0.5rem; font-size: ${
+              isBrutalist || isRetro ? "1.125rem" : "1rem"
+            };">
+            ${member.role || ""}
+          </p>
+          <p style="color: var(--color-text-secondary); font-size: ${
+            isBrutalist || isRetro ? "1rem" : "0.875rem"
+          }; margin-bottom: 1rem; font-weight: 500;">
+            ${member.certification || ""}
+          </p>
+          <p style="color: var(--color-text-secondary); line-height: 1.7; font-size: ${
+            isBrutalist || isRetro ? "1.125rem" : "1rem"
+          };">
+            ${member.bio || ""}
+          </p>
+        </div>
+        `
+          )
+          .join("")}
+      </div>
+    </div>
+  </section>
+  `
+      : ""
+  }
+  
+  <!-- Testimonials Section -->
+  ${
+    data.testimonials && data.testimonials.length > 0
+      ? `
+  <section style="padding: ${
+    isBrutalist || isRetro ? "6rem 0" : "5rem 0"
+  }; background: ${
+          isBrutalist
+            ? colors.primary
+            : isGradient
+            ? "linear-gradient(135deg, rgba(74,144,226,0.05), rgba(126,211,33,0.05))"
+            : isRetro
+            ? `linear-gradient(135deg, ${colors.primary}10, ${colors.accent}10)`
+            : "var(--color-surface)"
+        };">
+    <div class="container">
+      <div style="text-align: center; margin-bottom: 4rem;">
+        <h2 style="font-family: ${
+          isElegant ? "Playfair Display, serif" : "inherit"
+        }; font-size: clamp(${
+          isBrutalist || isRetro ? "2.5rem" : "2rem"
+        }, 5vw, ${isBrutalist || isRetro ? "4rem" : "3rem"}); font-weight: ${
+          isBrutalist ? "900" : isRetro ? "700" : isElegant ? "600" : "700"
+        }; margin-bottom: 1rem; color: ${
+          isBrutalist
+            ? "white"
+            : isGradient
+            ? "linear-gradient(135deg, #4A90E2, #7ED321)"
+            : isRetro
+            ? `linear-gradient(90deg, ${colors.primary}, ${colors.secondary})`
+            : colors.primary
+        }; ${
+          isBrutalist
+            ? ""
+            : isGradient || isRetro
+            ? "-webkit-background-clip: text; -webkit-text-fill-color: transparent;"
+            : ""
+        } ${isBrutalist || isRetro ? "text-transform: uppercase;" : ""}">
+          ${data.testimonialsTitle || "Happy Pet Parents"}
+        </h2>
+      </div>
+      
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: ${
+        isElegant ? "3rem" : "2rem"
+      };">
+        ${data.testimonials
+          .map(
+            (testimonial) => `
+        <div style="padding: ${
+          isBrutalist || isElegant ? "2.5rem" : "2rem"
+        }; border-radius: ${
+              isGradient
+                ? "24px"
+                : isBrutalist || isElegant || isRetro
+                ? "0"
+                : isNeumorphism || isGlassmorphism
+                ? "20px"
+                : "16px"
+            }; border: ${isBrutalist ? "4px" : isRetro ? "2px" : "1px"} solid ${
+              isBrutalist
+                ? "white"
+                : isRetro
+                ? colors.primary
+                : isGlassmorphism
+                ? "rgba(255,255,255,0.1)"
+                : "var(--color-border)"
+            }; background: ${
+              isBrutalist
+                ? "rgba(255,255,255,0.1)"
+                : isGlassmorphism
+                ? "rgba(255,255,255,0.05)"
+                : isNeumorphism
+                ? "var(--color-bg)"
+                : "var(--color-bg)"
+            }; ${
+              isBrutalist || isGlassmorphism
+                ? "backdrop-filter: blur(10px);"
+                : isNeumorphism
+                ? getNeumorphismShadow(false)
+                : ""
+            }">
+          <div style="font-size: 3rem; margin-bottom: 1.5rem; color: ${
+            isBrutalist ? "white" : colors.primary
+          }; opacity: 0.7;">🐾</div>
+          <p style="color: ${
+            isBrutalist
+              ? "rgba(255,255,255,0.9)"
+              : "var(--color-text-secondary)"
+          }; line-height: 1.8; margin-bottom: 1.5rem; font-size: ${
+              isBrutalist || isRetro ? "1.25rem" : "1.125rem"
+            }; font-style: italic;">
+            "${testimonial.quote || ""}"
+          </p>
+          <div style="display: flex; align-items: center; gap: 1rem; padding-top: 1.5rem; border-top: ${
+            isBrutalist ? "3px" : isRetro ? "2px" : "1px"
+          } solid ${
+              isBrutalist ? "rgba(255,255,255,0.2)" : "var(--color-border)"
+            };">
+            <div style="width: 48px; height: 48px; background: ${
+              isBrutalist
+                ? "white"
+                : isGradient
+                ? "linear-gradient(135deg, #4A90E2, #7ED321)"
+                : isRetro
+                ? `linear-gradient(135deg, ${colors.primary}, ${colors.accent})`
+                : colors.primary
+            }; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: ${
+              isBrutalist ? colors.primary : "white"
+            }">
+              👤
+            </div>
+            <div>
+              <h4 style="font-weight: 600; margin-bottom: 0.25rem; color: ${
+                isBrutalist ? "white" : "var(--color-text)"
+              }; font-size: ${isBrutalist || isRetro ? "1.125rem" : "1rem"}">
+                ${testimonial.author || ""}
+              </h4>
+              <p style="color: ${
+                isBrutalist
+                  ? "rgba(255,255,255,0.8)"
+                  : "var(--color-text-secondary)"
+              }; font-size: ${isBrutalist || isRetro ? "1rem" : "0.875rem"}">
+                ${testimonial.pet || ""}
+              </p>
+            </div>
+          </div>
+        </div>
+        `
+          )
+          .join("")}
+      </div>
+    </div>
+  </section>
+  `
+      : ""
+  }
+  
+  <!-- FAQ Section -->
+  ${
+    data.faqs && data.faqs.length > 0
+      ? `
+  <section style="padding: ${
+    isBrutalist || isRetro ? "6rem 0" : "5rem 0"
+  }; background: var(--color-bg);">
+    <div class="container">
+      <div style="text-align: center; margin-bottom: 4rem;">
+        <h2 style="font-family: ${
+          isElegant ? "Playfair Display, serif" : "inherit"
+        }; font-size: clamp(${
+          isBrutalist || isRetro ? "2.5rem" : "2rem"
+        }, 5vw, ${isBrutalist || isRetro ? "4rem" : "3rem"}); font-weight: ${
+          isBrutalist ? "900" : isRetro ? "700" : isElegant ? "600" : "700"
+        }; margin-bottom: 1rem; color: ${
+          isBrutalist
+            ? colors.primary
+            : isGradient
+            ? "linear-gradient(135deg, #4A90E2, #7ED321)"
+            : isRetro
+            ? `linear-gradient(90deg, ${colors.primary}, ${colors.secondary})`
+            : colors.primary
+        }; ${
+          isBrutalist
+            ? ""
+            : isGradient || isRetro
+            ? "-webkit-background-clip: text; -webkit-text-fill-color: transparent;"
+            : ""
+        } ${isBrutalist || isRetro ? "text-transform: uppercase;" : ""}">
+          ${data.faqTitle || "Frequently Asked Questions"}
+        </h2>
+      </div>
+      
+      <div style="max-width: 800px; margin: 0 auto;">
+        ${data.faqs
+          .map(
+            (faq, index) => `
+        <div class="faq-item" style="margin-bottom: ${
+          isBrutalist ? "2rem" : "1.5rem"
+        }; border: ${isBrutalist ? "3px" : isRetro ? "2px" : "1px"} solid ${
+              isBrutalist || isRetro
+                ? colors.primary
+                : isGlassmorphism
+                ? "rgba(255,255,255,0.1)"
+                : "var(--color-border)"
+            }; border-radius: ${
+              isGradient
+                ? "16px"
+                : isBrutalist || isElegant || isRetro
+                ? "0"
+                : isNeumorphism || isGlassmorphism
+                ? "12px"
+                : "8px"
+            }; overflow: hidden; transition: all 0.3s; ${
+              isGlassmorphism
+                ? "backdrop-filter: blur(20px);"
+                : isNeumorphism
+                ? getNeumorphismShadow(false)
+                : ""
+            }" 
+          onmouseover="${
+            isBrutalist
+              ? `this.style.boxShadow='8px 8px 0 ${colors.primary}'`
+              : isGradient
+              ? `this.style.borderColor='${colors.primary}'; this.style.transform='translateY(-2px)'`
+              : isNeumorphism
+              ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
+              : `this.style.borderColor='${colors.primary}'`
+          }" 
+          onmouseout="${
+            isBrutalist
+              ? `this.style.boxShadow='none'`
+              : isGradient
+              ? `this.style.borderColor='var(--color-border)'; this.style.transform='translateY(0)'`
+              : isNeumorphism
+              ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
+              : `this.style.borderColor='var(--color-border)'`
+          }">
+          <button class="faq-question" onclick="toggleFaq(${index})" style="width: 100%; padding: ${
+              isBrutalist ? "1.5rem 2rem" : "1.25rem 2rem"
+            }; background: ${
+              isBrutalist
+                ? colors.primary
+                : isGradient
+                ? "linear-gradient(135deg, rgba(74,144,226,0.05), rgba(126,211,33,0.05))"
+                : isGlassmorphism
+                ? "rgba(255,255,255,0.05)"
+                : isNeumorphism
+                ? "var(--color-bg)"
+                : "transparent"
+            }; border: none; text-align: left; font-family: inherit; font-size: ${
+              isBrutalist || isRetro ? "1.125rem" : "1rem"
+            }; font-weight: ${isBrutalist ? "900" : "600"}; color: ${
+              isBrutalist ? "white" : "var(--color-text)"
+            }; cursor: pointer; display: flex; justify-content: space-between; align-items: center; ${
+              isBrutalist || isRetro ? "text-transform: uppercase;" : ""
+            }">
+            <span>${faq.question || ""}</span>
+            <span style="font-size: 1.5rem; transition: transform 0.3s;">+</span>
+          </button>
+          <div class="faq-answer" style="padding: 0 2rem; max-height: 0; overflow: hidden; transition: all 0.3s;">
+            <div style="padding: ${
+              isBrutalist ? "1.5rem 0" : "1.25rem 0"
+            }; color: var(--color-text-secondary); line-height: 1.7; font-size: ${
+              isBrutalist || isRetro ? "1.125rem" : "1rem"
+            }; border-top: ${
+              isBrutalist ? "3px" : isRetro ? "2px" : "1px"
+            } solid ${
+              isBrutalist
+                ? "rgba(255,255,255,0.2)"
+                : isNeumorphism || isGlassmorphism
+                ? "transparent"
+                : "var(--color-border)"
+            };">
+              ${faq.answer || ""}
+            </div>
+          </div>
+        </div>
+        `
+          )
+          .join("")}
+      </div>
+    </div>
+  </section>
+  `
+      : ""
+  }
+  
+  <!-- Contact Section -->
+  <section id="contact" style="padding: ${
+    isBrutalist || isRetro ? "8rem 0" : "6rem 0"
+  }; background: ${
+        isBrutalist
+          ? colors.primary
+          : isGradient
+          ? "linear-gradient(135deg, #4A90E2, #7ED321)"
+          : isRetro
+          ? `linear-gradient(135deg, ${colors.primary}, ${colors.accent})`
+          : isElegant
+          ? "var(--color-surface)"
+          : "var(--color-surface)"
+      }; color: ${
+        isBrutalist || isGradient || isRetro ? "white" : "inherit"
+      }; ${
+        isRetro
+          ? "border-top: 3px solid white; border-bottom: 3px solid white;"
+          : ""
+      }">
+    <div class="container">
+      <div style="max-width: ${
+        isElegant ? "1000px" : "1200px"
+      }; margin: 0 auto; ${
+        isGlassmorphism
+          ? "padding: 4rem; border-radius: 32px; background: rgba(255,255,255,0.05); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1);"
+          : isNeumorphism
+          ? `padding: 4rem; border-radius: 32px; ${getNeumorphismShadow(false)}`
+          : ""
+      }">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: ${
+          isElegant ? "4rem" : "3rem"
+        };">
+          <!-- Contact Info -->
+          <div>
+            <h2 style="font-family: ${
+              isElegant ? "Playfair Display, serif" : "inherit"
+            }; font-size: clamp(${
+        isBrutalist || isRetro ? "2.5rem" : "2rem"
+      }, 5vw, ${isBrutalist || isRetro ? "4rem" : "3rem"}); font-weight: ${
+        isBrutalist ? "900" : isRetro ? "700" : isElegant ? "600" : "700"
+      }; margin-bottom: 2rem; letter-spacing: ${isRetro ? "2px" : "-0.02em"}; ${
+        isBrutalist || isRetro ? "text-transform: uppercase;" : ""
+      }">
+              Get in Touch
+            </h2>
+            
+            <div style="display: flex; flex-direction: column; gap: 2rem;">
+              <!-- Phone -->
+              ${
+                data.phoneNumber
+                  ? `
+              <div style="display: flex; align-items: flex-start; gap: 1rem;">
+                <div style="width: 56px; height: 56px; background: ${
+                  isBrutalist ? "white" : "rgba(255,255,255,0.1)"
+                }; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: ${
+                      isBrutalist ? colors.primary : "white"
+                    }; flex-shrink: 0;">
+                  📞
+                </div>
+                <div>
+                  <h3 style="font-weight: 600; margin-bottom: 0.5rem; font-size: ${
+                    isBrutalist || isRetro ? "1.25rem" : "1.125rem"
+                  };">Phone</h3>
+                  <a href="tel:${
+                    data.phoneNumber
+                  }" style="color: inherit; text-decoration: none; font-size: ${
+                      isBrutalist || isRetro ? "1.125rem" : "1rem"
+                    };">${data.phoneNumber}</a>
+                </div>
+              </div>
+              `
+                  : ""
+              }
+              
+              <!-- Email -->
+              ${
+                data.email
+                  ? `
+              <div style="display: flex; align-items: flex-start; gap: 1rem;">
+                <div style="width: 56px; height: 56px; background: ${
+                  isBrutalist ? "white" : "rgba(255,255,255,0.1)"
+                }; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: ${
+                      isBrutalist ? colors.primary : "white"
+                    }; flex-shrink: 0;">
+                  ✉️
+                </div>
+                <div>
+                  <h3 style="font-weight: 600; margin-bottom: 0.5rem; font-size: ${
+                    isBrutalist || isRetro ? "1.25rem" : "1.125rem"
+                  };">Email</h3>
+                  <a href="mailto:${
+                    data.email
+                  }" style="color: inherit; text-decoration: none; font-size: ${
+                      isBrutalist || isRetro ? "1.125rem" : "1rem"
+                    };">${data.email}</a>
+                </div>
+              </div>
+              `
+                  : ""
+              }
+              
+              <!-- Address -->
+              ${
+                data.address
+                  ? `
+              <div style="display: flex; align-items: flex-start; gap: 1rem;">
+                <div style="width: 56px; height: 56px; background: ${
+                  isBrutalist ? "white" : "rgba(255,255,255,0.1)"
+                }; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: ${
+                      isBrutalist ? colors.primary : "white"
+                    }; flex-shrink: 0;">
+                  📍
+                </div>
+                <div>
+                  <h3 style="font-weight: 600; margin-bottom: 0.5rem; font-size: ${
+                    isBrutalist || isRetro ? "1.25rem" : "1.125rem"
+                  };">Location</h3>
+                  <p style="margin: 0; font-size: ${
+                    isBrutalist || isRetro ? "1.125rem" : "1rem"
+                  };">${data.address}</p>
+                </div>
+              </div>
+              `
+                  : ""
+              }
+              
+              <!-- Emergency -->
+              ${
+                data.emergencyTitle && data.emergencyNumber
+                  ? `
+              <div style="padding: ${
+                isBrutalist ? "2rem" : "1.5rem"
+              }; background: rgba(255,255,255,0.1); border-radius: ${
+                      isBrutalist ? "0" : "16px"
+                    }; border: ${
+                      isBrutalist ? "3px" : "2px"
+                    } solid white; margin-top: 1rem;">
+                <h3 style="font-weight: 700; margin-bottom: 0.5rem; font-size: ${
+                  isBrutalist || isRetro ? "1.5rem" : "1.25rem"
+                }; ${
+                      isBrutalist || isRetro ? "text-transform: uppercase;" : ""
+                    }">
+                  ${data.emergencyTitle}
+                </h3>
+                <a href="tel:${
+                  data.emergencyNumber
+                }" style="color: white; text-decoration: none; font-weight: 700; font-size: ${
+                      isBrutalist ? "1.5rem" : "1.25rem"
+                    };">${data.emergencyNumber}</a>
+              </div>
+              `
+                  : ""
+              }
+            </div>
+          </div>
+          
+          <!-- Hours & Quick Info -->
+          <div>
+            <h3 style="font-size: ${
+              isBrutalist || isElegant ? "1.75rem" : "1.5rem"
+            }; font-weight: ${
+        isBrutalist ? "900" : "700"
+      }; margin-bottom: 1.5rem; ${
+        isBrutalist ? "text-transform: uppercase;" : ""
+      }">
+              Business Hours
+            </h3>
+            
+            <div style="margin-bottom: 2rem;">
+              <div style="display: flex; justify-content: space-between; padding: 0.75rem 0; border-bottom: ${
+                isBrutalist ? "3px" : "1px"
+              } solid rgba(255,255,255,0.2);">
+                <span>Monday - Friday</span>
+                <span style="font-weight: 600;">7:00 AM - 8:00 PM</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; padding: 0.75rem 0; border-bottom: ${
+                isBrutalist ? "3px" : "1px"
+              } solid rgba(255,255,255,0.2);">
+                <span>Saturday</span>
+                <span style="font-weight: 600;">8:00 AM - 6:00 PM</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; padding: 0.75rem 0; border-bottom: ${
+                isBrutalist ? "3px" : "1px"
+              } solid rgba(255,255,255,0.2);">
+                <span>Sunday</span>
+                <span style="font-weight: 600;">9:00 AM - 5:00 PM</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; padding: 0.75rem 0;">
+                <span>Emergency Service</span>
+                <span style="font-weight: 600;">24/7</span>
+              </div>
+            </div>
+            
+            <!-- Service Areas -->
+            <div style="margin-top: 2rem;">
+              <h3 style="font-size: ${
+                isBrutalist || isElegant ? "1.75rem" : "1.5rem"
+              }; font-weight: ${
+        isBrutalist ? "900" : "700"
+      }; margin-bottom: 1rem; ${
+        isBrutalist ? "text-transform: uppercase;" : ""
+      }">
+                Service Areas
+              </h3>
+              <p style="margin-bottom: 1rem; font-size: ${
+                isBrutalist || isRetro ? "1.125rem" : "1rem"
+              };">
+                Serving the entire metro area and surrounding communities
+              </p>
+              <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                <span style="padding: 0.5rem 1rem; background: rgba(255,255,255,0.1); border-radius: ${
+                  isBrutalist ? "0" : "50px"
+                }; font-size: ${
+        isBrutalist || isRetro ? "1rem" : "0.875rem"
+      };">Downtown</span>
+                <span style="padding: 0.5rem 1rem; background: rgba(255,255,255,0.1); border-radius: ${
+                  isBrutalist ? "0" : "50px"
+                }; font-size: ${
+        isBrutalist || isRetro ? "1rem" : "0.875rem"
+      };">Northside</span>
+                <span style="padding: 0.5rem 1rem; background: rgba(255,255,255,0.1); border-radius: ${
+                  isBrutalist ? "0" : "50px"
+                }; font-size: ${
+        isBrutalist || isRetro ? "1rem" : "0.875rem"
+      };">East End</span>
+                <span style="padding: 0.5rem 1rem; background: rgba(255,255,255,0.1); border-radius: ${
+                  isBrutalist ? "0" : "50px"
+                }; font-size: ${
+        isBrutalist || isRetro ? "1rem" : "0.875rem"
+      };">West Hills</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- CTA Button -->
+        <div style="text-align: center; margin-top: 4rem;">
+          <a href="tel:${
+            data.phoneNumber || "(555) 123-4567"
+          }" style="padding: ${
+        isBrutalist ? "1.5rem 3rem" : "1.25rem 2.5rem"
+      }; background: white; color: ${
+        colors.primary
+      }; text-decoration: none; border-radius: ${
+        isGradient || isRetro ? "999px" : isBrutalist ? "0" : "12px"
+      }; font-weight: ${isBrutalist ? "900" : "700"}; font-size: ${
+        isBrutalist ? "1.25rem" : "1.125rem"
+      }; transition: all 0.3s; display: inline-flex; align-items: center; gap: 0.75rem; ${
+        isBrutalist || isRetro
+          ? "text-transform: uppercase; letter-spacing: 1px;"
+          : ""
+      }" 
+            onmouseover="${
+              isBrutalist
+                ? `this.style.background='${colors.secondary}'; this.style.color='white'; this.style.transform='translateY(-4px)'`
+                : `this.style.background='${colors.secondary}'; this.style.color='white'; this.style.transform='translateY(-4px)'`
+            }" 
+            onmouseout="${
+              isBrutalist
+                ? `this.style.background='white'; this.style.color='${colors.primary}'; this.style.transform='translateY(0)'`
+                : `this.style.background='white'; this.style.color='${colors.primary}'; this.style.transform='translateY(0)'`
+            }">
+            <span style="font-size: 1.25rem;">📞</span>
+            Call Now to Schedule
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Footer -->
+  <footer style="padding: ${
+    isBrutalist ? "3rem 0" : "2rem 0"
+  }; text-align: center; color: var(--color-text-secondary); font-size: ${
+        isBrutalist || isRetro ? "1rem" : "0.875rem"
+      }; border-top: ${isBrutalist ? "4px" : isRetro ? "3px" : "1px"} solid ${
+        isBrutalist || isRetro ? colors.primary : "var(--color-border)"
+      }; font-weight: ${isBrutalist ? "900" : "500"}; ${
+        isBrutalist || isRetro
+          ? "text-transform: uppercase; letter-spacing: 1px;"
+          : ""
+      }">
+    <div class="container">
+      <div style="display: flex; flex-direction: column; align-items: center; gap: 1.5rem;">
+        <!-- Logo -->
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <span style="font-size: 1.5rem;">🐾</span>
+          <div style="font-weight: ${
+            isBrutalist ? "900" : "700"
+          }; font-size: 1.25rem; color: var(--color-text);">
+            ${data.businessName || "Pawfect Care"}
+          </div>
+        </div>
+        
+        <!-- Copyright -->
+        <p>© ${new Date().getFullYear()} ${
+        data.businessName || "Pawfect Care"
+      }. All rights reserved.</p>
+        
+        <!-- Pet Icons -->
+        <div style="display: flex; gap: 1rem; font-size: 1.5rem; opacity: 0.6;">
+          <span>🐕</span>
+          <span>🐈</span>
+          <span>🐇</span>
+          <span>🐦</span>
+          <span>🐠</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+  
+  <style>
+    /* Pet-themed color variables */
+    :root {
+      --pet-primary: ${colors.primary};
+      --pet-secondary: ${colors.secondary};
+      --pet-accent: ${colors.accent};
+    }
+    
+    ${
+      isNeumorphism
+        ? `
+    /* Neumorphism CSS Variables */
+    :root {
+      --neomorph-shadow-out: 20px 20px 60px #c5c9ce, -20px -20px 60px #ffffff;
+      --neomorph-shadow-in: inset 20px 20px 60px #c5c9ce, inset -20px -20px 60px #ffffff;
+    }
+    
+    [data-theme="dark"] {
+      --neomorph-shadow-out: 32px 32px 64px #2a2d34, -32px -32px 64px #383d46;
+      --neomorph-shadow-in: inset 32px 32px 64px #2a2d34, inset -32px -32px 64px #383d46;
+    }
+    `
+        : ""
+    }
+    
+    /* Mobile Responsiveness */
+    @media (max-width: 768px) {
+      .desktop-nav { display: none !important; }
+      .mobile-menu-btn { display: block !important; }
+      
+      .container { padding: 0 1.5rem !important; }
+      
+      header nav {
+        flex-direction: column !important;
+        gap: 1rem !important;
+        align-items: stretch !important;
+      }
+      
+      .hero h1 {
+        font-size: clamp(2rem, 8vw, 3rem) !important;
+      }
+      
+      .hero p {
+        font-size: 1rem !important;
+      }
+      
+      section[style*="padding: 5rem"] {
+        padding: 3rem 0 !important;
+      }
+      
+      section[style*="padding: 6rem"] {
+        padding: 4rem 0 !important;
+      }
+      
+      section[style*="padding: 8rem"] {
+        padding: 5rem 0 !important;
+      }
+      
+      .contact > .container > div {
+        padding: 2rem !important;
+      }
+    }
+    
+    @media (max-width: 640px) {
+      .hero .cta-group {
+        flex-direction: column !important;
+        gap: 1rem !important;
+      }
+      
+      .hero .cta-group a {
+        width: 100%;
+        text-align: center;
+      }
+      
+      .service-card, .team-card, .testimonial-card {
+        padding: 1.5rem !important;
+      }
+      
+      .faq-question {
+        padding: 1rem !important;
+        font-size: 1rem !important;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .mobile-menu-btn {
+        top: 0.5rem !important;
+        right: 0.5rem !important;
+      }
+      
+      header {
+        padding: 1rem 0 !important;
+      }
+    }
+    
+    /* FAQ Animation */
+    .faq-item.active .faq-answer {
+      max-height: 500px !important;
+    }
+    
+    .faq-item.active .faq-question span:last-child {
+      transform: rotate(45deg);
+    }
+    
+    /* Pet-themed animations */
+    @keyframes petBounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    
+    .pet-icon {
+      animation: petBounce 2s infinite;
+    }
+    
+    /* Mobile Menu Animation */
+    .mobile-menu.active {
+      display: block !important;
+      animation: slideDown 0.3s ease;
+    }
+    
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+  
+  <script>
+    // Mobile Menu Toggle
+    function toggleMobileMenu() {
+      const menu = document.querySelector('.mobile-menu');
+      const btn = document.querySelector('.mobile-menu-btn');
+      menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+      btn.innerHTML = menu.style.display === 'block' ? 
+        '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>' :
+        '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>';
+    }
+    
+    // FAQ Toggle
+    function toggleFaq(index) {
+      const faqItem = document.querySelectorAll('.faq-item')[index];
+      const answer = faqItem.querySelector('.faq-answer');
+      const button = faqItem.querySelector('.faq-question');
+      
+      if (faqItem.classList.contains('active')) {
+        answer.style.maxHeight = '0';
+        faqItem.classList.remove('active');
+      } else {
+        // Close other open FAQs
+        document.querySelectorAll('.faq-item.active').forEach(item => {
+          if (item !== faqItem) {
+            item.querySelector('.faq-answer').style.maxHeight = '0';
+            item.classList.remove('active');
+          }
+        });
+        
+        answer.style.maxHeight = answer.scrollHeight + 'px';
+        faqItem.classList.add('active');
+      }
+    }
+    
+    // Smooth scrolling for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const targetId = this.getAttribute('href');
+        if (targetId === '#') return;
+        
+        const targetElement = document.querySelector(targetId);
+        if (targetElement) {
+          window.scrollTo({
+            top: targetElement.offsetTop - 80,
+            behavior: 'smooth'
+          });
+          
+          // Close mobile menu if open
+          if (window.innerWidth <= 768) {
+            toggleMobileMenu();
+          }
+        }
+      });
+    });
+    
+    // Initialize all FAQs as closed
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.faq-answer').forEach(answer => {
+        answer.style.maxHeight = '0';
+      });
+    });
+  </script>
+  `;
     },
   }),
 };

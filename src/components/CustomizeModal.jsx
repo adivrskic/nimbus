@@ -18,9 +18,10 @@ import { renderTemplate, getTemplate } from "../utils/templateSystem";
 import { getAllThemes } from "../styles/themes";
 import PaymentModal from "./PaymentModal";
 import NotificationModal from "./NotificationModal";
-import RedeployModal from "./RedeployModal"; // We'll create this
+import RedeployModal from "./RedeployModal";
 import ConfirmModal from "./ConfirmModal";
 import AuthModal from "./AuthModal";
+import useModalAnimation from "../hooks/useModalAnimation";
 import "./CustomizeModal.scss";
 
 const defaultTheme = "minimal";
@@ -68,6 +69,9 @@ function CustomizeModal({
   const { theme: globalTheme, selectedStyleTheme, setStyleTheme } = useTheme();
   const { user, isAuthenticated, supabase } = useAuth();
 
+  // Use the animation hook for smooth enter/exit transitions
+  const { shouldRender, isVisible } = useModalAnimation(isOpen, 400);
+
   const [editingDraftId, setEditingDraftId] = useState(null);
   const [editingSiteId, setEditingSiteId] = useState(null);
   const [isEditingDraft, setIsEditingDraft] = useState(false);
@@ -86,6 +90,7 @@ function CustomizeModal({
   const [isRedeployModalOpen, setIsRedeployModalOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [siteData, setSiteData] = useState(null);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
 
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [initialCustomization, setInitialCustomization] = useState({});
@@ -132,13 +137,12 @@ function CustomizeModal({
     return defaults;
   });
 
-  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [uploadedImages, setUploadedImages] = useState({});
 
   useEffect(() => {
     if (!isOpen) return;
 
-    console.log("ðŸ” CustomizeModal props:", { editSiteData, editDraftData });
+    console.log("🔍 CustomizeModal props:", { editSiteData, editDraftData });
 
     // Check if we're editing a deployed site
     if (editSiteData) {
@@ -155,8 +159,8 @@ function CustomizeModal({
       };
 
       setCustomization(newCustomization);
-      setInitialCustomization(newCustomization); // Save initial state
-      setHasUnsavedChanges(false); // Reset changes flag
+      setInitialCustomization(newCustomization);
+      setHasUnsavedChanges(false);
     }
 
     // Check if we're editing a draft
@@ -173,8 +177,8 @@ function CustomizeModal({
       };
 
       setCustomization(newCustomization);
-      setInitialCustomization(newCustomization); // Save initial state
-      setHasUnsavedChanges(false); // Reset changes flag
+      setInitialCustomization(newCustomization);
+      setHasUnsavedChanges(false);
     }
   }, [isOpen, editSiteData, editDraftData]);
 
@@ -184,42 +188,6 @@ function CustomizeModal({
       setHasUnsavedChanges(false);
     }
   }, [isOpen, editSiteData, editDraftData]);
-
-  // Check if editing a draft
-  // useEffect(() => {
-  //   const editDraftData = localStorage.getItem("editDraft");
-  //   const isEditing = localStorage.getItem("isEditingDraft");
-
-  //   if (isOpen && isEditing && editDraftData && !isEditingDeployedSite) {
-  //     try {
-  //       const draft = JSON.parse(editDraftData);
-  //       console.log("Loading draft for editing:", draft);
-
-  //       setCustomization({
-  //         ...customization,
-  //         ...draft.customization,
-  //         theme: draft.theme || selectedStyleTheme,
-  //         colorMode: draft.colorMode || "Auto",
-  //       });
-
-  //       setEditingDraftId(draft.id);
-  //       setIsEditingDraft(true);
-
-  //       localStorage.removeItem("editDraft");
-  //       localStorage.removeItem("isEditingDraft");
-
-  //       setNotification({
-  //         isOpen: true,
-  //         message: `Loaded draft: "${draft.draftName || draft.templateId}"`,
-  //         type: "success",
-  //       });
-  //     } catch (error) {
-  //       console.error("Error loading draft data:", error);
-  //       localStorage.removeItem("editDraft");
-  //       localStorage.removeItem("isEditingDraft");
-  //     }
-  //   }
-  // }, [isOpen]);
 
   useEffect(() => {
     if (
@@ -356,7 +324,6 @@ function CustomizeModal({
     }
   };
 
-  // Update handleSaveDraft function:
   const handleSaveDraft = async () => {
     if (!isAuthenticated) {
       setNotification({
@@ -367,7 +334,6 @@ function CustomizeModal({
       return;
     }
 
-    // Set default draft name
     setDraftName(
       isEditingDraft
         ? localStorage.getItem("editDraftName") || template?.name
@@ -376,7 +342,6 @@ function CustomizeModal({
     setShowSaveDraftConfirm(true);
   };
 
-  // Update handleSaveDraftConfirm function:
   const handleSaveDraftConfirm = async (name) => {
     if (!name?.trim()) {
       setNotification({
@@ -452,7 +417,6 @@ function CustomizeModal({
     }
   };
 
-  // NEW: Handle redeploying an existing site
   const handleRedeploySite = async () => {
     if (!isAuthenticated || !siteData) return;
 
@@ -470,7 +434,6 @@ function CustomizeModal({
         effectiveColorMode
       );
 
-      // Clean HTML content
       const cleanHtmlContent = htmlContent
         .replace(/[\0-\x1F\x7F]/g, "")
         .replace(/\r\n/g, "\n")
@@ -487,7 +450,7 @@ function CustomizeModal({
         stripeCustomerId: siteData.stripeCustomerId,
         customDomain: siteData.customDomain || null,
       });
-      // Call redeploy function
+
       const { data, error } = await supabase.functions.invoke(
         "redeploy-to-vercel",
         {
@@ -507,7 +470,6 @@ function CustomizeModal({
 
       if (error) throw error;
 
-      // Update site record in database
       const { error: updateError } = await supabase
         .from("sites")
         .update({
@@ -524,7 +486,6 @@ function CustomizeModal({
 
       if (updateError) {
         console.warn("Database update warning:", updateError);
-        // Continue anyway since Vercel deployment succeeded
       }
 
       setNotification({
@@ -533,10 +494,8 @@ function CustomizeModal({
         type: "success",
       });
 
-      // Close modal after successful redeployment
       setTimeout(() => {
         onClose();
-        // Trigger refresh in parent component
         window.dispatchEvent(new CustomEvent("site-redeployed"));
       }, 1500);
     } catch (error) {
@@ -553,10 +512,8 @@ function CustomizeModal({
 
   const handleDeploy = () => {
     if (isEditingDeployedSite) {
-      // For deployed sites, open redeploy confirmation
       setIsRedeployModalOpen(true);
     } else {
-      // For new sites, open payment modal
       setIsPaymentModalOpen(true);
     }
   };
@@ -566,15 +523,22 @@ function CustomizeModal({
     handleRedeploySite();
   };
 
-  if (!isOpen || !templateConfig) return null;
+  // Don't render if not needed or no template config
+  if (!shouldRender || !templateConfig) return null;
 
   return (
     <>
       <div
-        className="modal-backdrop modal-backdrop--visible"
+        className={`modal-backdrop ${
+          isVisible ? "modal-backdrop--visible" : ""
+        }`}
         onClick={onClose}
       />
-      <div className="customize-modal customize-modal--visible">
+      <div
+        className={`customize-modal ${
+          isVisible ? "customize-modal--visible" : ""
+        }`}
+      >
         <div className="customize-modal__header">
           <div className="customize-modal__header-left">
             <button className="customize-modal__close" onClick={onClose}>
@@ -794,26 +758,12 @@ function CustomizeModal({
         isProcessing={isSavingDraft}
       />
 
-      {/* <SaveDraftModal
-        isOpen={isSaveDraftModalOpen}
-        onClose={() => setIsSaveDraftModalOpen(false)}
-        onSave={handleSaveDraftConfirm}
-        defaultName={
-          isEditingDraft
-            ? localStorage.getItem("editDraftName") || template?.name
-            : template?.name
-        }
-        isSaving={isSavingDraft}
-        isEditing={isEditingDraft}
-      /> */}
-
       {/* Auth Modal for unauthenticated users */}
       <AuthModal
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
         onAuthSuccess={() => {
           setIsAuthModalOpen(false);
-          // After successful auth, open the deploy flow
           handleDeploy();
         }}
       />

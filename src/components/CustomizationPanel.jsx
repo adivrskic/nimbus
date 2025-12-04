@@ -500,6 +500,8 @@ function CustomizationPanel({
                                   ? item[fieldKey]
                                   : fieldConfig.default !== undefined
                                   ? fieldConfig.default
+                                  : fieldConfig.type === "repeatable"
+                                  ? []
                                   : "";
 
                               return (
@@ -550,10 +552,14 @@ function CustomizationPanel({
                     const newItem = {};
                     Object.entries(field.fields).forEach(
                       ([fieldKey, fieldConfig]) => {
-                        newItem[fieldKey] =
-                          fieldConfig.default !== undefined
-                            ? fieldConfig.default
-                            : "";
+                        if (fieldConfig.type === "repeatable") {
+                          newItem[fieldKey] = fieldConfig.default || [];
+                        } else {
+                          newItem[fieldKey] =
+                            fieldConfig.default !== undefined
+                              ? fieldConfig.default
+                              : "";
+                        }
                       }
                     );
                     onChange(path, [...groupValue, newItem]);
@@ -863,6 +869,63 @@ function CustomizationPanel({
               disabled={field.disabled}
             />
             <span className="field__range-value">{fieldValue}</span>
+          </div>
+        );
+
+      case "repeatable":
+        // Handle repeatable fields (e.g., skills within a category, achievements within a job)
+        const repeatableItems = Array.isArray(fieldValue)
+          ? fieldValue
+          : field.default || [];
+        // Ensure at least one empty item for new repeatables
+        const itemsToRender =
+          repeatableItems.length > 0 ? repeatableItems : [""];
+
+        return (
+          <div className="field__repeatable">
+            {itemsToRender.map((item, index) => (
+              <div key={index} className="field__repeatable-item">
+                <input
+                  type="text"
+                  className="field__input"
+                  value={item || ""}
+                  onChange={(e) => {
+                    const newValue = [...itemsToRender];
+                    newValue[index] = e.target.value;
+                    onFieldChange(newValue);
+                  }}
+                  placeholder={
+                    field.placeholder ||
+                    `${field.itemLabel || "Item"} ${index + 1}`
+                  }
+                />
+                {itemsToRender.length > 1 && (
+                  <button
+                    type="button"
+                    className="field__repeatable-remove"
+                    onClick={() => {
+                      const newValue = [...itemsToRender];
+                      newValue.splice(index, 1);
+                      onFieldChange(newValue);
+                    }}
+                  >
+                    <X size={16} />
+                  </button>
+                )}
+              </div>
+            ))}
+            {(!field.max || itemsToRender.length < field.max) && (
+              <button
+                type="button"
+                className="field__repeatable-add"
+                onClick={() => {
+                  onFieldChange([...itemsToRender, ""]);
+                }}
+              >
+                <Plus size={16} />
+                Add {field.itemLabel || field.label || "Item"}
+              </button>
+            )}
           </div>
         );
 

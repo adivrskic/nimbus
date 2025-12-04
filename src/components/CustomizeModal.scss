@@ -29,15 +29,24 @@
   max-width: 2000px;
   margin: auto;
 
-  /* FIX: Start completely off-screen below viewport */
-  transform: translateY(calc(100% + 2.5svh + 20px));
+  // Initial state - start below viewport
+  opacity: 0;
+  transform: translateY(100%);
 
-  /* Smooth slide-up animation */
-  transition: transform 400ms cubic-bezier(0.16, 1, 0.3, 1);
+  // Smooth transition
+  transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 
-  /* Add GPU acceleration for smooth animation */
-  will-change: transform;
-  backface-visibility: hidden;
+  // Visible state - slide up to final position
+  &--visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @media (max-width: $breakpoint-md) {
+    inset: 0;
+    border-radius: 0;
+  }
 
   &__content {
     display: grid;
@@ -46,7 +55,6 @@
 
     @media (max-width: 1024px) {
       display: block;
-      // height: calc(100dvh - 140px); // header + toggle bar
     }
 
     .customize-modal__panel {
@@ -71,24 +79,6 @@
       &.mobile-view-preview .customize-modal__preview {
         display: block;
       }
-    }
-  }
-
-  /* FIX: Slide to final position */
-  &--visible {
-    transform: translateY(0);
-    will-change: auto; /* Remove will-change after animation */
-  }
-
-  @media (max-width: $breakpoint-md) {
-    inset: 0;
-    border-radius: 0;
-
-    /* Mobile: simpler calculation since there's no inset */
-    transform: translateY(100%);
-
-    &--visible {
-      transform: translateY(0);
     }
   }
 
@@ -131,7 +121,6 @@
     transition: all var(--transition-fast);
 
     &:hover {
-      // background: var(--color-surface);
       color: var(--color-text-primary);
       box-shadow: var(--shadow-md-pressed);
     }
@@ -176,21 +165,6 @@
     @media (max-width: 1024px) {
       grid-template-columns: 1fr;
       height: 100%;
-      position: relative;
-    }
-  }
-}
-
-.customize-modal {
-  &__content {
-    display: grid;
-    grid-template-columns: 400px 1fr;
-    height: calc(100svh - 80px);
-    overflow: hidden;
-
-    @media (max-width: 1024px) {
-      grid-template-columns: 1fr;
-      grid-template-rows: 1fr;
       position: relative;
     }
   }
@@ -311,15 +285,36 @@
       padding: 0 16px;
 
       .btn-text {
-        display: inline; // Only deploy shows text
+        display: inline;
       }
     }
   }
 }
 
-/* Accessibility - respect reduced motion preferences */
+// Spinner for redeploying state
+.spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Accessibility - respect reduced motion preferences
 @media (prefers-reduced-motion: reduce) {
   .customize-modal {
+    transition-duration: 0.01ms !important;
+  }
+
+  .modal-backdrop {
     transition-duration: 0.01ms !important;
   }
 }

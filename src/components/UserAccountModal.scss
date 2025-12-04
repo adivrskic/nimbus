@@ -5,7 +5,6 @@
   position: fixed;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);
   width: 90%;
   max-width: 900px;
   height: 700px;
@@ -17,15 +16,22 @@
   z-index: 1001;
   display: flex;
   flex-direction: column;
-  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+
+  // Initial state
+  opacity: 0;
+  transform: translate(-50%, -45%);
+  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+
+  // Visible state
+  &--visible {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
 
   @media (max-width: $breakpoint-md) {
     width: 95%;
     max-width: none;
-  }
-
-  &--visible {
-    opacity: 1;
   }
 
   &__close {
@@ -45,13 +51,11 @@
     box-shadow: var(--shadow-md);
 
     &:hover {
-      // background: var(--color-surface);
       color: var(--color-text-primary);
       box-shadow: var(--shadow-md-pressed);
     }
   }
 
-  // New header structure matching CustomizeModal
   &__header {
     display: flex;
     align-items: center;
@@ -60,7 +64,6 @@
     padding: calc(var(--spacing-unit) * 3);
     background: var(--color-surface);
     flex-shrink: 0;
-    // box-shadow: 0 1px 0 rgba(0, 0, 0, 0.05);
     border-top-left-radius: var(--radius-xl);
     border-top-right-radius: var(--radius-xl);
 
@@ -160,9 +163,37 @@
   padding-bottom: calc(var(--spacing-unit) * 4);
 }
 
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+// Accessibility
+@media (prefers-reduced-motion: reduce) {
+  .account-modal {
+    transition-duration: 0.01ms !important;
+  }
+
+  .account-tab-content {
+    animation-duration: 0.01ms !important;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .account-modal {
+    height: 100%;
+    max-height: calc(100% - 24px);
+  }
+}
+
 .account-form {
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
   gap: calc(var(--spacing-unit) * 4);
   max-width: 600px;
 }
@@ -183,6 +214,7 @@
 
 .form-section {
   flex-direction: column;
+  width: 100%;
 }
 
 .form-field {

@@ -2,10 +2,13 @@
 import { useState } from "react";
 import { X, Lock, Eye, EyeOff, Loader, CheckCircle } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
+import useModalAnimation from "../hooks/useModalAnimation";
 import "./AuthModal.scss";
 
 function ResetPasswordModal({ isOpen, onClose, onSuccess }) {
   const { updatePassword } = useAuth();
+  const { shouldRender, isVisible } = useModalAnimation(isOpen, 300);
+
   const [formData, setFormData] = useState({
     password: "",
     confirmPassword: "",
@@ -50,7 +53,6 @@ function ResetPasswordModal({ isOpen, onClose, onSuccess }) {
         setSuccessMessage("Password updated successfully!");
         setFormData({ password: "", confirmPassword: "" });
 
-        // Close modal and notify parent after 2 seconds
         setTimeout(() => {
           if (onSuccess) {
             onSuccess();
@@ -85,22 +87,23 @@ function ResetPasswordModal({ isOpen, onClose, onSuccess }) {
     }
   };
 
-  if (!isOpen) return null;
+  if (!shouldRender) return null;
 
   return (
     <>
       <div
-        className="modal-backdrop modal-backdrop--visible"
+        className={`modal-backdrop ${
+          isVisible ? "modal-backdrop--visible" : ""
+        }`}
         onClick={handleClose}
       />
-      <div className="auth-modal">
+      <div className={`auth-modal ${isVisible ? "auth-modal--visible" : ""}`}>
         <div className="auth-modal__content">
           <div className="auth-modal__header">
             <button className="auth-modal__close" onClick={handleClose}>
               <X size={20} />
             </button>
             <div>
-              {" "}
               <h2>Reset Your Password</h2>
               <p>
                 {successMessage
@@ -130,7 +133,7 @@ function ResetPasswordModal({ isOpen, onClose, onSuccess }) {
                     onChange={(e) =>
                       handleInputChange("password", e.target.value)
                     }
-                    placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
+                    placeholder="••••••••"
                     disabled={isLoading}
                     className={errors.password ? "error" : ""}
                     autoComplete="new-password"
@@ -163,7 +166,7 @@ function ResetPasswordModal({ isOpen, onClose, onSuccess }) {
                     onChange={(e) =>
                       handleInputChange("confirmPassword", e.target.value)
                     }
-                    placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
+                    placeholder="••••••••"
                     disabled={isLoading}
                     className={errors.confirmPassword ? "error" : ""}
                     autoComplete="new-password"
