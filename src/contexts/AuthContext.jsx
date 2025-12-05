@@ -643,6 +643,19 @@ export function AuthProvider({ children }) {
     }
   };
 
+  const signInWithGitHub = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "github",
+        options: { redirectTo: window.location.origin },
+      });
+      if (error) throw error;
+      return { success: true };
+    } catch (e) {
+      return { success: false, error: e.message };
+    }
+  };
+
   // **Helper to set session from URL hash**
   const setSessionFromHash = async (hash) => {
     const params = Object.fromEntries(
@@ -690,6 +703,8 @@ export function AuthProvider({ children }) {
     lastAuthCheck,
     // Expose safe loading setter for components
     setLoadingSafe,
+    signInWithGitHub,
+    signInWithGoogle,
   };
 
   console.log("Auth context state:", {

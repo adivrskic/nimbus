@@ -19,6 +19,7 @@ import {
   AlertTriangle,
   Info,
   Copy,
+  Settings,
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { renderTemplate } from "../utils/templateSystem";
@@ -26,6 +27,7 @@ import ConfirmModal from "./ConfirmModal";
 import NotificationModal from "./NotificationModal";
 import PaymentModal from "./PaymentModal";
 import useModalAnimation from "../hooks/useModalAnimation";
+import CustomDomainRegistrationModal from "./CustomDomainRegistrationModal";
 import "./UserAccountModal.scss";
 
 function UserAccountModal({ isOpen, onClose }) {
@@ -37,6 +39,7 @@ function UserAccountModal({ isOpen, onClose }) {
     updatePassword,
     supabase,
     isAuthenticated,
+    refreshProfile,
   } = useAuth();
   const { shouldRender, isVisible } = useModalAnimation(isOpen, 300);
   const [activeTab, setActiveTab] = useState("profile");
@@ -49,6 +52,10 @@ function UserAccountModal({ isOpen, onClose }) {
   const [billingSummary, setBillingSummary] = useState(null);
   const [subscriptions, setSubscriptions] = useState([]);
   const [revealedDeploymentIds, setRevealedDeploymentIds] = useState({});
+  const [domainModal, setDomainModal] = useState({
+    isOpen: false,
+    site: null,
+  });
 
   // Modal states
   const [confirmModal, setConfirmModal] = useState({
@@ -127,10 +134,17 @@ function UserAccountModal({ isOpen, onClose }) {
   // Listen for deployment success from PaymentModal
   useEffect(() => {
     const handleDeploymentSuccess = async () => {
-      console.log("📡 Deployment success detected, refreshing sites...");
+      console.log("📡 Deployment success detected, refreshing data...");
       if (isOpen && user) {
         await loadSites();
         await loadStripeSubscriptions();
+
+        // Refresh the user profile to get updated stripe_customer_id
+        if (refreshProfile) {
+          console.log("Refreshing user profile...");
+          await refreshProfile();
+        }
+
         // Switch to sites tab to show the new site
         setActiveTab("sites");
 
@@ -150,7 +164,14 @@ function UserAccountModal({ isOpen, onClose }) {
     return () => {
       window.removeEventListener("deployment-success", handleDeploymentSuccess);
     };
-  }, [isOpen, user]);
+  }, [isOpen, user, refreshProfile]);
+
+  const handleConfigureDomain = (site) => {
+    setDomainModal({
+      isOpen: true,
+      site: site,
+    });
+  };
 
   const loadUserData = async () => {
     if (!user) return;
@@ -1096,6 +1117,20 @@ function UserAccountModal({ isOpen, onClose }) {
                         ) : (
                           site.billing_status === "active" && (
                             <div className="site-card__actions">
+                              {site.custom_domain &&
+                                site.domain_status !== "active" && (
+                                  <button
+                                    className="btn btn-warning btn-small"
+                                    onClick={() => handleConfigureDomain(site)}
+                                    disabled={isLoading}
+                                    title="Fix Domain Configuration"
+                                  >
+                                    <Settings size={16} />
+                                    <span className="btn-text">
+                                      Domain Settings
+                                    </span>
+                                  </button>
+                                )}
                               <button
                                 className="btn btn-secondary btn-small"
                                 onClick={() => handleEditDeployedSite(site)}
@@ -1480,6 +1515,12 @@ function UserAccountModal({ isOpen, onClose }) {
           )}
         />
       )}
+
+      <CustomDomainRegistrationModal
+        isOpen={domainModal.isOpen}
+        onClose={() => setDomainModal({ isOpen: false, site: null })}
+        site={domainModal.site}
+      />
     </>
   );
 }

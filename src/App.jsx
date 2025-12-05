@@ -19,45 +19,74 @@ const Roadmap = lazy(() => import("./pages/Roadmap"));
 const Support = lazy(() => import("./pages/Support"));
 const Legal = lazy(() => import("./pages/Legal"));
 
-const PageLoader = () => (
-  <div
-    style={{
-      position: "fixed",
-      top: "var(--header-height, 64px)",
-      left: 0,
-      width: "100%",
-      height: "2px",
-      backgroundColor: "var(--color-accent)",
-      zIndex: 9999,
-      overflow: "hidden",
-    }}
-  >
+const PageLoader = () => {
+  const { isAuthenticated } = useAuth();
+
+  // Calculate top position based on authentication status
+  const topPosition = isAuthenticated ? "var(--header-height, 64px)" : "53px";
+
+  return (
     <div
       style={{
-        height: "100%",
-        backgroundColor: "var(--color-primary, #6366f1)",
-        animation: "loadingBar 1.5s ease-in-out infinite",
-        transformOrigin: "left",
+        position: "fixed",
+        top: 0,
+        left: 0,
+        width: "100%",
+        height: "100vh",
+        zIndex: 9999,
+        backgroundColor: "transparent",
+        pointerEvents: "none", // Allow clicks to pass through
       }}
-    />
-    <style>{`
-      @keyframes loadingBar {
-        0% {
-          width: 0%;
-          margin-left: 0%;
+    >
+      {/* Loading bar stays at calculated position */}
+      <div
+        style={{
+          position: "absolute",
+          top: topPosition,
+          left: 0,
+          width: "100%",
+          height: "2px",
+          backgroundColor: "var(--color-accent)",
+          overflow: "hidden",
+        }}
+      >
+        <div
+          style={{
+            height: "100%",
+            backgroundColor: "var(--color-accent)",
+            animation: "loadingBar 1.5s ease-in-out infinite",
+            transformOrigin: "left",
+          }}
+        />
+      </div>
+
+      {/* Rest of container takes up full viewport */}
+      <div
+        style={{
+          height: "100vh",
+          width: "100%",
+          backgroundColor: "transparent",
+        }}
+      />
+      <style>{`
+        @keyframes loadingBar {
+          0% {
+            width: 0%;
+            margin-left: 0%;
+          }
+          50% {
+            width: 70%;
+            margin-left: 0%;
+          }
+          100% {
+            width: 100%;
+            margin-left: 0%;
+          }
         }
-        50% {
-          width: 70%;
-          margin-left: 0%;
-        }
-        100% {
-          width: 100%;
-          margin-left: 0%;
-        }
-      }
-    `}</style>
-  </div>
-);
+      `}</style>
+    </div>
+  );
+};
 
 function AppContent() {
   const location = useLocation();

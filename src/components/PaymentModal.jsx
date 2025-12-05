@@ -19,12 +19,13 @@ import {
   Upload,
   Users,
   BarChart,
-  HelpCircle,
   Link,
   Copy,
   Eye,
   EyeOff,
   Edit,
+  Settings,
+  Key,
 } from "lucide-react";
 import { loadStripe } from "@stripe/stripe-js";
 import {
@@ -896,25 +897,125 @@ const PaymentStep = ({
   );
 };
 
-// Step 4: Success
+// Step 4: Success - Updated with better DNS instructions
 const SuccessStep = ({ deployment, onClose, onEditSite }) => {
   const [copied, setCopied] = useState(false);
   const [showDnsDetails, setShowDnsDetails] = useState(false);
+  const [copyStatus, setCopyStatus] = useState({});
+  const [domainError, setDomainError] = useState(
+    deployment.domainError || null
+  );
+  const [isRetryingDomain, setIsRetryingDomain] = useState(false);
 
-  const copyUrl = (url) => {
-    navigator.clipboard.writeText(url);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  // Function to retry domain configuration
+  const retryDomainConfiguration = async () => {
+    if (!deployment.customDomain || !deployment.deploymentId) return;
+
+    setIsRetryingDomain(true);
+    try {
+      const { data, error } = await supabase.functions.invoke(
+        "configure-domain",
+        {
+          body: {
+            domain: deployment.customDomain,
+            deploymentId: deployment.deploymentId,
+            siteName: deployment.siteName,
+            retry: true,
+          },
+        }
+      );
+
+      if (error) throw error;
+
+      if (data.success) {
+        setDomainError(null);
+        // Update deployment data
+        deployment.domainConfigured = data.domainConfigured;
+        deployment.domainVerified = data.domainVerified;
+        deployment.dnsRecords = data.dnsRecords;
+        deployment.verificationRecord = data.verificationRecord;
+
+        setNotification({
+          isOpen: true,
+          message: "Domain configuration retried successfully!",
+          type: "success",
+        });
+      } else {
+        setDomainError(data.error || "Domain configuration failed");
+      }
+    } catch (err) {
+      setDomainError(err.message || "Failed to retry domain configuration");
+    } finally {
+      setIsRetryingDomain(false);
+    }
   };
+
+  const copyToClipboard = (text, type) => {
+    navigator.clipboard.writeText(text);
+    setCopyStatus({ ...copyStatus, [type]: true });
+    setTimeout(() => {
+      setCopyStatus({ ...copyStatus, [type]: false });
+    }, 2000);
+  };
+
+  const copyAllRecords = () => {
+    const records = deployment.dnsRecords
+      ?.map((r) => `${r.host} ${r.ttl} IN ${r.type} ${r.value}`)
+      .join("\n");
+    if (records) {
+      navigator.clipboard.writeText(records);
+      setCopyStatus({ ...copyStatus, all: true });
+      setTimeout(() => setCopyStatus({ ...copyStatus, all: false }), 2000);
+    }
+  };
+
+  // Default DNS records if not provided by backend
+  const getDefaultDnsRecords = (domain, siteName) => {
+    return [
+      {
+        type: "A",
+        host: "@",
+        value: "76.76.21.21", // Generic Vercel IP - should be dynamic based on deployment
+        ttl: "3600",
+        priority: null,
+        description: "Root domain pointing to Vercel",
+      },
+      {
+        type: "A",
+        host: "@",
+        value: "76.76.21.22", // Secondary IP
+        ttl: "3600",
+        priority: null,
+        description: "Secondary root domain record",
+      },
+      {
+        type: "CNAME",
+        host: "www",
+        value: "cname.vercel-dns.com",
+        ttl: "3600",
+        priority: null,
+        description: "WWW subdomain",
+      },
+    ];
+  };
+
+  const dnsRecords =
+    deployment.dnsRecords ||
+    getDefaultDnsRecords(deployment.customDomain, deployment.siteName);
 
   return (
     <div className="success-container">
       <div className="success-content">
-        <h2>Your Website is Live!</h2>
-        <p className="success-subtitle">
-          Your website has been successfully deployed and is now accessible
-          online
-        </p>
+        <div className="success-header">
+          <div className="success-icon">
+            <CheckCircle size={48} className="text-success" />
+          </div>
+          <h2>Your Website is Live! 🎉</h2>
+          <p className="success-subtitle">
+            Your website has been successfully deployed and is now accessible
+            online
+          </p>
+        </div>
 
         <div className="url-grid">
           <div className="url-card">
@@ -933,17 +1034,98 @@ const SuccessStep = ({ deployment, onClose, onEditSite }) => {
               </a>
               <button
                 onClick={() =>
-                  copyUrl(`https://${deployment.siteName}.vercel.app`)
+                  copyToClipboard(
+                    `https://${deployment.siteName}.vercel.app`,
+                    "vercel"
+                  )
                 }
                 className="btn btn-secondary copy-btn"
               >
-                <Copy size={16} />
+                {copyStatus.vercel ? <Check size={16} /> : <Copy size={16} />}
               </button>
             </div>
           </div>
+          // Add error display section
+          {domainError && (
+            <div className="domain-error-card">
+              <div className="error-header">
+                <AlertTriangle size={20} className="error-icon" />
+                <h4>Domain Configuration Issue</h4>
+              </div>
+              <div className="error-content">
+                <p className="error-message">{domainError}</p>
 
+                {domainError.includes("already in use") && (
+                  <div className="error-solution">
+                    <p>
+                      <strong>Solution:</strong>
+                    </p>
+                    <ul>
+                      <li>
+                        This domain is already connected to another Vercel
+                        project
+                      </li>
+                      <li>
+                        Go to{" "}
+                        <a
+                          href="https://vercel.com/dashboard/domains"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          Vercel Domains
+                        </a>{" "}
+                        to manage your domains
+                      </li>
+                      <li>Remove the domain from the other project first</li>
+                      <li>Then retry configuration</li>
+                    </ul>
+                  </div>
+                )}
+
+                {domainError.includes("verification") && (
+                  <div className="error-solution">
+                    <p>
+                      <strong>Solution:</strong>
+                    </p>
+                    <ul>
+                      <li>Add the verification TXT record shown below</li>
+                      <li>Wait 5-10 minutes for DNS propagation</li>
+                      <li>Click "Retry Domain Setup"</li>
+                    </ul>
+                  </div>
+                )}
+
+                <div className="error-actions">
+                  <button
+                    className="btn btn-secondary"
+                    onClick={() => setShowDnsDetails(true)}
+                  >
+                    <Eye size={16} />
+                    Show Setup Instructions
+                  </button>
+                  <button
+                    className="btn btn-primary"
+                    onClick={retryDomainConfiguration}
+                    disabled={isRetryingDomain}
+                  >
+                    {isRetryingDomain ? (
+                      <>
+                        <Loader size={16} className="spinning" />
+                        Retrying...
+                      </>
+                    ) : (
+                      <>
+                        <RefreshCw size={16} />
+                        Retry Domain Setup
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
           {deployment.customDomain && (
-            <div className="url-card">
+            <div className="url-card domain-card">
               <div className="url-header">
                 <Globe size={20} />
                 <span>Custom Domain</span>
@@ -952,7 +1134,7 @@ const SuccessStep = ({ deployment, onClose, onEditSite }) => {
                     showDnsDetails ? "warning" : "pending"
                   }`}
                 >
-                  {showDnsDetails ? "DNS Setup Needed" : "Pending"}
+                  {showDnsDetails ? "DNS Setup Needed" : "Setup Required"}
                 </span>
               </div>
               <div className="url-display">
@@ -961,14 +1143,31 @@ const SuccessStep = ({ deployment, onClose, onEditSite }) => {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="site-url"
+                  onClick={(e) => {
+                    // Prevent navigation until DNS is configured
+                    if (!deployment.domainConfigured) {
+                      e.preventDefault();
+                      setShowDnsDetails(true);
+                    }
+                  }}
+                  style={{
+                    opacity: deployment.domainConfigured ? 1 : 0.7,
+                    cursor: deployment.domainConfigured ? "pointer" : "default",
+                  }}
                 >
                   https://{deployment.customDomain}
+                  {!deployment.domainConfigured && " (Pending DNS)"}
                 </a>
                 <button
-                  onClick={() => copyUrl(`https://${deployment.customDomain}`)}
+                  onClick={() =>
+                    copyToClipboard(
+                      `https://${deployment.customDomain}`,
+                      "custom"
+                    )
+                  }
                   className="btn btn-secondary copy-btn"
                 >
-                  <Copy size={16} />
+                  {copyStatus.custom ? <Check size={16} /> : <Copy size={16} />}
                 </button>
               </div>
 
@@ -985,77 +1184,207 @@ const SuccessStep = ({ deployment, onClose, onEditSite }) => {
                   ) : (
                     <>
                       <Eye size={16} />
-                      Show DNS Setup
+                      Show DNS Setup Instructions
                     </>
                   )}
                 </button>
 
-                {showDnsDetails && deployment.dnsRecords && (
-                  <div className="dns-setup-instructions">
-                    <h4>DNS Configuration Required</h4>
-                    <p>
-                      Add these records at your domain registrar to activate
-                      your custom domain:
-                    </p>
+                <div className="dns-setup-instructions">
+                  <h4>🚀 DNS Configuration Required</h4>
+                  <p className="instruction-intro">
+                    To activate <strong>{deployment.customDomain}</strong>, add
+                    these DNS records at your domain registrar:
+                  </p>
 
-                    <div className="dns-records-grid">
-                      {deployment.dnsRecords.map((record, index) => (
-                        <div key={index} className="dns-record-card">
-                          <div className="record-header">
-                            <span className="record-type">{record.type}</span>
-                            <span className="record-host">{record.host}</span>
-                          </div>
-                          <div className="record-value">
-                            <code>{record.value}</code>
-                            <button onClick={() => copyUrl(record.value)}>
-                              <Copy size={14} />
-                            </button>
-                          </div>
-                          <div className="record-ttl">TTL: {record.ttl}</div>
+                  <div className="dns-records-header">
+                    <h5>Required DNS Records</h5>
+                    <button
+                      className="btn btn-secondary btn-sm"
+                      onClick={copyAllRecords}
+                    >
+                      {copyStatus.all ? (
+                        <Check size={14} />
+                      ) : (
+                        <Copy size={14} />
+                      )}
+                      Copy All Records
+                    </button>
+                  </div>
+
+                  <div className="dns-records-grid">
+                    // When rendering DNS instructions
+                    {dnsRecords.map((record, index) => (
+                      <div key={index} className="dns-record-card">
+                        <div className="record-header">
+                          <span className="record-type">{record.type}</span>
+                          <span className="record-host">
+                            {record.host === "@"
+                              ? deployment.customDomain
+                              : `${record.host}.${deployment.customDomain}`}
+                          </span>
+                          {record.description && (
+                            <span className="record-description">
+                              {record.description}
+                            </span>
+                          )}
                         </div>
-                      ))}
-                    </div>
-
-                    <div className="dns-guide">
-                      <AlertCircle size={16} />
-                      <div>
-                        <strong>Need help?</strong>
-                        <p>
-                          DNS changes can take up to 48 hours to propagate
-                          globally. Your site will remain accessible at the
-                          Vercel URL.
-                        </p>
+                        <div className="record-value">
+                          <code>{record.value}</code>
+                        </div>
+                        <div className="record-footer">
+                          <span>TTL: {record.ttl}</span>
+                          {record.required && (
+                            <span className="required-badge">Required</span>
+                          )}
+                        </div>
                       </div>
+                    ))}
+                    // Add registrar-specific guidance
+                    {deployment.registrarInfo && (
+                      <div className="registrar-guide">
+                        <h5>For {deployment.registrarInfo.registrar}:</h5>
+                        <p>{deployment.registrarInfo.instructions}</p>
+                        <a
+                          href={deployment.registrarInfo.helpUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          Official {deployment.registrarInfo.registrar} guide
+                        </a>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="registrar-guides">
+                    <h5>📝 Popular Registrar Guides</h5>
+                    <div className="registrar-links">
+                      <a
+                        href="https://support.google.com/domains/answer/3251147"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="registrar-link"
+                      >
+                        Google Domains
+                      </a>
+                      <a
+                        href="https://www.godaddy.com/help/add-an-a-record-19238"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="registrar-link"
+                      >
+                        GoDaddy
+                      </a>
+                      <a
+                        href="https://www.namecheap.com/support/knowledgebase/article.aspx/319/2237/how-do-i-add-a-record-for-my-domain/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="registrar-link"
+                      >
+                        Namecheap
+                      </a>
+                      <a
+                        href="https://help.cloudflare.com/hc/en-us/articles/360019093151-Managing-DNS-records-in-Cloudflare"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="registrar-link"
+                      >
+                        Cloudflare
+                      </a>
                     </div>
                   </div>
-                )}
+
+                  <div className="dns-guide">
+                    <div className="guide-icon">
+                      <AlertCircle size={24} />
+                    </div>
+                    <div className="guide-content">
+                      <strong>💡 Important Notes:</strong>
+                      <ul>
+                        <li>
+                          DNS changes can take <strong>up to 48 hours</strong>{" "}
+                          to propagate globally
+                        </li>
+                        <li>
+                          Your site remains accessible at the Vercel URL during
+                          setup
+                        </li>
+                        <li>
+                          SSL certificate will be auto-provisioned once DNS is
+                          configured
+                        </li>
+                        <li>
+                          You may need to clear your browser cache after DNS
+                          updates
+                        </li>
+                        <li>
+                          If using Cloudflare, disable the proxy (orange cloud)
+                          during initial setup
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  <div className="verification-section">
+                    <h5>✅ Verify DNS Configuration</h5>
+                    <p>
+                      After adding the DNS records, you can check propagation:
+                    </p>
+                    <div className="verification-tools">
+                      <a
+                        href={`https://dnschecker.org/#A/${deployment.customDomain}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="btn btn-outline"
+                      >
+                        Check DNS Propagation
+                      </a>
+                      <a
+                        href={`https://www.ssllabs.com/ssltest/analyze.html?d=${deployment.customDomain}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="btn btn-outline"
+                      >
+                        Test SSL Certificate
+                      </a>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           )}
         </div>
 
         <div className="deployment-details">
-          <div className="detail-item">
-            <span className="detail-label">Deployment ID</span>
-            <span className="detail-value code">{deployment.deploymentId}</span>
-          </div>
-          <div className="detail-item">
-            <span className="detail-label">Status</span>
-            <span className="detail-value status active">Active</span>
-          </div>
-          <div className="detail-item">
-            <span className="detail-label">Billing</span>
-            <span className="detail-value">$5/month</span>
+          <div className="detail-grid">
+            <div className="detail-item">
+              <span className="detail-label">Deployment ID</span>
+              <code className="detail-value">{deployment.deploymentId}</code>
+            </div>
+            <div className="detail-item">
+              <span className="detail-label">Status</span>
+              <span className="detail-value status active">✓ Active</span>
+            </div>
+            <div className="detail-item">
+              <span className="detail-label">Billing</span>
+              <span className="detail-value">$5/month</span>
+            </div>
+            <div className="detail-item">
+              <span className="detail-label">Template</span>
+              <span className="detail-value">
+                {deployment.templateId || "Standard"}
+              </span>
+            </div>
           </div>
         </div>
 
         <div className="success-actions">
           <button className="btn btn-secondary" onClick={onClose}>
+            <ChevronLeft size={20} />
             Build Another Site
           </button>
           <button className="btn btn-outline" onClick={onEditSite}>
             <Edit size={20} />
-            Edit Site
+            Edit This Site
           </button>
           <a
             href={`https://${deployment.siteName}.vercel.app`}
@@ -1068,15 +1397,51 @@ const SuccessStep = ({ deployment, onClose, onEditSite }) => {
           </a>
           {deployment.customDomain && (
             <a
-              href={`https://vercel.com/dashboard`}
+              href={`https://vercel.com/dashboard/domains`}
               target="_blank"
               rel="noopener noreferrer"
               className="btn btn-outline"
             >
-              <ExternalLink size={20} />
-              Manage Domain
+              <Settings size={20} />
+              Domain Settings
             </a>
           )}
+        </div>
+
+        <div className="next-steps">
+          <h4>📋 Next Steps</h4>
+          <div className="steps-grid">
+            <div className="step-item">
+              <div className="step-number">1</div>
+              <div className="step-content">
+                <strong>Configure DNS</strong>
+                <p>
+                  Add the DNS records at your registrar (if using custom domain)
+                </p>
+              </div>
+            </div>
+            <div className="step-item">
+              <div className="step-number">2</div>
+              <div className="step-content">
+                <strong>Wait for Propagation</strong>
+                <p>DNS changes take 1-48 hours to propagate worldwide</p>
+              </div>
+            </div>
+            <div className="step-item">
+              <div className="step-number">3</div>
+              <div className="step-content">
+                <strong>Verify SSL</strong>
+                <p>SSL certificate will auto-provision once DNS resolves</p>
+              </div>
+            </div>
+            <div className="step-item">
+              <div className="step-number">4</div>
+              <div className="step-content">
+                <strong>Edit Content</strong>
+                <p>Update your site content anytime from the dashboard</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
