@@ -330,7 +330,7 @@
   gap: calc(var(--spacing-unit) * 3);
 
   @media (min-width: $breakpoint-md) {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -1012,6 +1012,7 @@
 
 .site-card__actions {
   display: flex;
+  flex-wrap: wrap;
   gap: calc(var(--spacing-unit) * 2);
   margin-top: calc(var(--spacing-unit) * 2);
 
