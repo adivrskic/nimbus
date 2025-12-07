@@ -131,6 +131,7 @@ function TemplateGallery({ onTemplateSelect }) {
   const [rightArrowOpacity, setRightArrowOpacity] = useState(1);
   const scrollContainerRef = useRef(null);
   const searchInputRef = useRef(null);
+  const searchContainerRef = useRef(null);
   const gridRef = useRef(null);
   const isDraggingRef = useRef(false);
   const startXRef = useRef(0);
@@ -155,6 +156,9 @@ function TemplateGallery({ onTemplateSelect }) {
   const handleFilterClick = (categoryName) => {
     setActiveFilter(categoryName);
     setVisibleCount(12); // Reset visible count when changing filters
+    // Clear search when filter is clicked
+    setSearchQuery("");
+    setIsSearchExpanded(false);
     // Small delay to allow state update before scrolling
     setTimeout(() => {
       scrollTemplatesToTop();
@@ -221,15 +225,31 @@ function TemplateGallery({ onTemplateSelect }) {
     }
   };
 
-  // Close search when clicking outside
+  // Close search when clicking outside (but NOT on template cards or grid)
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (
-        isSearchExpanded &&
-        searchInputRef.current &&
-        !searchInputRef.current.contains(event.target) &&
-        !event.target.closest(".search-toggle")
-      ) {
+      if (!isSearchExpanded) return;
+
+      // Check if click is inside search area
+      const isInsideSearch =
+        searchContainerRef.current?.contains(event.target) ||
+        searchInputRef.current?.contains(event.target) ||
+        event.target.closest(".search-toggle") ||
+        event.target.closest(".search-container");
+
+      // Check if click is on a template card or the grid
+      const isOnTemplateCard =
+        event.target.closest(".template-card") ||
+        event.target.closest(".template-gallery__grid");
+
+      // Check if click is on filter buttons
+      const isOnFilter =
+        event.target.closest(".filter-tab") ||
+        event.target.closest(".mobile-filter-button");
+
+      // Only close search if clicking outside search AND not on templates
+      // Filter clicks are handled separately in handleFilterClick
+      if (!isInsideSearch && !isOnTemplateCard && !isOnFilter) {
         setIsSearchExpanded(false);
         setSearchQuery("");
       }
@@ -310,6 +330,7 @@ function TemplateGallery({ onTemplateSelect }) {
 
         {/* Search Input - Expands when active */}
         <div
+          ref={searchContainerRef}
           className={`search-container ${isSearchExpanded ? "expanded" : ""}`}
         >
           <div className="search-input-wrapper">
@@ -373,7 +394,7 @@ function TemplateGallery({ onTemplateSelect }) {
                 }`}
                 onClick={() => handleFilterClick(category.name)}
               >
-                <span>{category.name}</span>
+                <p>{category.name}</p>
                 <span className="filter-count">{category.count}</span>
               </button>
             ))}

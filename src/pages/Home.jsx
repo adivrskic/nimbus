@@ -94,22 +94,29 @@ function Home() {
 
   const steps = [
     {
-      icon: <Palette size={40} />,
+      icon: <Palette size={28} />,
       number: "01",
-      title: "Choose Style",
-      description: "Pick from 7 unique design styles that match your aesthetic",
+      title: "Choose Your Style",
+      description: "Browse our curated collection of 7 design aesthetics",
+      details: ["Minimal & clean", "Bold & expressive", "Elegant & refined"],
     },
     {
-      icon: <Layout size={40} />,
+      icon: <Layout size={28} />,
       number: "02",
-      title: "Select Template",
-      description: "Choose a layout that fits your content and purpose",
+      title: "Select a Template",
+      description: "Pick a layout that matches your content needs",
+      details: [
+        "Portfolio & creative",
+        "Business & landing",
+        "Blog & editorial",
+      ],
     },
     {
-      icon: <Rocket size={40} />,
+      icon: <Rocket size={28} />,
       number: "03",
-      title: "Customize & Deploy",
-      description: "Add your content and launch your site instantly",
+      title: "Customize & Launch",
+      description: "Add your content and go live in minutes",
+      details: ["Real-time preview", "One-click deploy", "Custom domain ready"],
     },
   ];
 

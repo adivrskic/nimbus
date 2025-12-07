@@ -118,6 +118,7 @@
   top: 0;
   left: 0;
   background: var(--color-background);
+  z-index: 99;
 
   @media (max-width: $breakpoint-sm) {
     gap: 0;
@@ -335,6 +336,7 @@
 }
 
 .site-card {
+  position: relative;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -343,13 +345,19 @@
   border-radius: var(--radius-lg);
   transition: all var(--transition-fast);
   box-shadow: var(--shadow-md);
+  overflow: hidden;
 
   &:hover {
     box-shadow: var(--shadow-md-pressed);
-    // transform: translateY(-2px);
+
+    .site-preview-thumbnail {
+      opacity: 0.25;
+    }
   }
 
   &__header {
+    position: relative;
+    z-index: 2;
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
@@ -385,10 +393,80 @@
   }
 
   &__info {
+    position: relative;
+    z-index: 2;
     display: flex;
     flex-direction: column;
     gap: calc(var(--spacing-unit) * 1.5);
     margin-bottom: calc(var(--spacing-unit) * 2);
+  }
+
+  &__actions {
+    position: relative;
+    z-index: 2;
+  }
+}
+
+// Site Preview Thumbnail Styles
+.site-preview-thumbnail {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  width: 75%;
+  height: 180px;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 1;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  transition: opacity 0.3s ease;
+
+  // Gradient mask for soft edges
+  mask-image: linear-gradient(
+    135deg,
+    transparent 0%,
+    rgba(0, 0, 0, 0.3) 20%,
+    rgba(0, 0, 0, 0.6) 50%,
+    rgba(0, 0, 0, 0.8) 80%,
+    black 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    135deg,
+    transparent 0%,
+    rgba(0, 0, 0, 0.3) 20%,
+    rgba(0, 0, 0, 0.6) 50%,
+    rgba(0, 0, 0, 0.8) 80%,
+    black 100%
+  );
+
+  &--loaded {
+    opacity: 0.08;
+  }
+
+  &__iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1200px;
+    height: 800px;
+    border: none;
+    pointer-events: none;
+    transform-origin: top left;
+    transform: scale(0.33);
+    background: transparent;
+  }
+
+  @media (max-width: $breakpoint-md) {
+    width: 140px;
+    height: 90px;
+
+    &__iframe {
+      // transform: scale(0.117);
+    }
+  }
+
+  @media (max-width: $breakpoint-sm) {
+    display: none;
   }
 }
 
@@ -541,6 +619,8 @@
 }
 
 .cancellation-notice {
+  position: relative;
+  z-index: 2;
   padding: calc(var(--spacing-unit) * 1.5);
   background: rgba(239, 68, 68, 0.05);
   border-radius: var(--radius-md);

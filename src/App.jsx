@@ -28,9 +28,6 @@ const PageLoader = () => {
   return (
     <div
       style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
         width: "100%",
         height: "100vh",
         zIndex: 9999,
@@ -41,7 +38,7 @@ const PageLoader = () => {
       {/* Loading bar stays at calculated position */}
       <div
         style={{
-          position: "absolute",
+          position: "fixed",
           top: topPosition,
           left: 0,
           width: "100%",

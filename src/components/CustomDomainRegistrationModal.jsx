@@ -47,11 +47,35 @@ export default function CustomDomainRegistrationModal({
   const [copied, setCopied] = useState({});
   const [showAdvanced, setShowAdvanced] = useState(false);
 
+  // Reset state when modal opens
   useEffect(() => {
-    if (isOpen && site?.custom_domain) {
-      setDomain(site.custom_domain);
-      // If site already has a domain, skip to setup
-      setStep(2);
+    if (isOpen) {
+      // Reset all state when modal opens
+      setStep(1);
+      setDomain("");
+      setValidation({
+        loading: false,
+        available: null,
+        error: null,
+        details: null,
+      });
+      setConfiguration({
+        loading: false,
+        success: false,
+        error: null,
+        dnsRecords: [],
+        verificationRecord: null,
+        domainConfigured: false,
+        domainVerified: false,
+      });
+      setShowAdvanced(false);
+      setCopied({});
+
+      // If site already has a custom domain, pre-fill and go to step 2
+      if (site?.custom_domain) {
+        setDomain(site.custom_domain);
+        setStep(2);
+      }
     }
   }, [isOpen, site]);
 
@@ -183,23 +207,6 @@ export default function CustomDomainRegistrationModal({
   };
 
   const handleClose = () => {
-    setStep(1);
-    setDomain("");
-    setValidation({
-      loading: false,
-      available: null,
-      error: null,
-      details: null,
-    });
-    setConfiguration({
-      loading: false,
-      success: false,
-      error: null,
-      dnsRecords: [],
-      verificationRecord: null,
-      domainConfigured: false,
-      domainVerified: false,
-    });
     onClose();
   };
 
@@ -211,7 +218,9 @@ export default function CustomDomainRegistrationModal({
         return (
           <div className="domain-input-step">
             <div className="step-header">
-              <Globe size={32} />
+              <div className="step-icon">
+                <Globe size={24} />
+              </div>
               <div>
                 <h3>Add Custom Domain</h3>
                 <p>Connect your own domain to {site?.site_name}.vercel.app</p>
@@ -316,7 +325,7 @@ export default function CustomDomainRegistrationModal({
                 disabled={!validation.available}
               >
                 Continue
-                <ChevronRight size={20} />
+                <ChevronRight size={18} />
               </button>
             </div>
           </div>
@@ -326,7 +335,9 @@ export default function CustomDomainRegistrationModal({
         return (
           <div className="dns-setup-step">
             <div className="step-header">
-              <Settings size={32} />
+              <div className="step-icon">
+                <Settings size={24} />
+              </div>
               <div>
                 <h3>Configure DNS Records</h3>
                 <p>Add these records at your domain registrar</p>
@@ -521,7 +532,7 @@ export default function CustomDomainRegistrationModal({
                 onClick={() => setStep(1)}
                 disabled={configuration.loading}
               >
-                <ChevronLeft size={20} />
+                <ChevronLeft size={18} />
                 Back
               </button>
               <button
@@ -549,7 +560,7 @@ export default function CustomDomainRegistrationModal({
         return (
           <div className="success-step">
             <div className="success-icon">
-              <Check size={48} />
+              <Check size={32} />
             </div>
             <h3>Domain Configuration Started!</h3>
             <p className="success-message">
@@ -560,11 +571,11 @@ export default function CustomDomainRegistrationModal({
 
             <div className="domain-status">
               <div className="status-item">
-                <span className="status-label">Domain:</span>
+                <span className="status-label">Domain</span>
                 <span className="status-value">{domain}</span>
               </div>
               <div className="status-item">
-                <span className="status-label">Status:</span>
+                <span className="status-label">Status</span>
                 <span
                   className={`status-badge ${
                     configuration.domainVerified ? "verified" : "pending"
@@ -574,21 +585,22 @@ export default function CustomDomainRegistrationModal({
                 </span>
               </div>
               <div className="status-item">
-                <span className="status-label">Site URL:</span>
+                <span className="status-label">Site URL</span>
                 <a
                   href={`https://${site?.site_name}.vercel.app`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="status-value link"
+                  className="status-link"
                 >
                   {site?.site_name}.vercel.app
+                  <ExternalLink size={14} />
                 </a>
               </div>
             </div>
 
             {!configuration.domainVerified && (
               <div className="next-steps">
-                <h5>Next Steps:</h5>
+                <h5>Next Steps</h5>
                 <ol>
                   <li>DNS records have been added to Vercel</li>
                   <li>Add the same records at your domain registrar</li>
@@ -616,7 +628,7 @@ export default function CustomDomainRegistrationModal({
                 Visit Site
               </a>
               {!configuration.domainVerified && (
-                <button className="btn btn-outline" onClick={() => setStep(2)}>
+                <button className="btn btn-ghost" onClick={() => setStep(2)}>
                   <Settings size={16} />
                   View DNS Setup
                 </button>
@@ -633,7 +645,7 @@ export default function CustomDomainRegistrationModal({
   return (
     <>
       <div
-        className={`customize-modal-backdrop modal-backdrop ${
+        className={`cdrm-modal-backdrop modal-backdrop ${
           isVisible ? "modal-backdrop--visible" : ""
         }`}
         onClick={handleClose}
@@ -646,12 +658,31 @@ export default function CustomDomainRegistrationModal({
         <div className="modal-header">
           <div className="header-content">
             <button className="modal-close" onClick={handleClose}>
-              <X size={24} />
+              <X size={20} />
             </button>
             <div className="header-text">
               <h2>Custom Domain Setup</h2>
               <p>Connect your own domain to your site</p>
             </div>
+          </div>
+          <div className="step-indicator">
+            <div
+              className={`step-dot ${step >= 1 ? "active" : ""} ${
+                step > 1 ? "completed" : ""
+              }`}
+            >
+              {step > 1 ? <Check size={12} /> : "1"}
+            </div>
+            <div className="step-line" />
+            <div
+              className={`step-dot ${step >= 2 ? "active" : ""} ${
+                step > 2 ? "completed" : ""
+              }`}
+            >
+              {step > 2 ? <Check size={12} /> : "2"}
+            </div>
+            <div className="step-line" />
+            <div className={`step-dot ${step >= 3 ? "active" : ""}`}>3</div>
           </div>
         </div>
 
