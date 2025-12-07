@@ -124,18 +124,18 @@
     justify-content: center;
     width: 34px;
     height: 34px;
-    background: var(--color-surface);
+    background: none;
     border: none;
     border-radius: var(--radius-md);
     color: var(--color-text-secondary);
     cursor: pointer;
     transition: all var(--transition-fast);
-    box-shadow: var(--shadow-md);
+    // box-shadow: var(--shadow-md);
 
     &:hover {
-      background: var(--color-surface-alt);
+      // background: var(--color-surface-alt);
       color: var(--color-text-primary);
-      border-color: var(--color-border-hover);
+      // border-color: var(--color-border-hover);
     }
   }
 

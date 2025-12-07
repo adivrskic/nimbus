@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import {
   X,
   User,
@@ -22,6 +22,7 @@ import {
   Settings,
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
+import { useTheme } from "../contexts/ThemeContext";
 import { renderTemplate } from "../utils/templateSystem";
 import ConfirmModal from "./ConfirmModal";
 import NotificationModal from "./NotificationModal";
@@ -29,6 +30,60 @@ import PaymentModal from "./PaymentModal";
 import useModalAnimation from "../hooks/useModalAnimation";
 import CustomDomainRegistrationModal from "./CustomDomainRegistrationModal";
 import "./UserAccountModal.scss";
+
+// Site Preview Thumbnail Component
+function SitePreviewThumbnail({ site }) {
+  const { theme: globalTheme } = useTheme();
+  const iframeRef = useRef(null);
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  useEffect(() => {
+    if (!site?.template_id || !site?.customization) return;
+    const iframe = iframeRef.current;
+    if (!iframe) return;
+
+    const colorMode = site.color_mode?.toLowerCase() || "auto";
+    const effectiveColorMode = colorMode === "auto" ? globalTheme : colorMode;
+
+    try {
+      const html = renderTemplate(
+        site.template_id,
+        site.customization,
+        site.theme || "minimal",
+        effectiveColorMode
+      );
+
+      const doc = iframe.contentDocument || iframe.contentWindow?.document;
+      if (doc) {
+        doc.open();
+        doc.write(html);
+        doc.close();
+        setIsLoaded(true);
+      }
+    } catch (error) {
+      console.error("Error rendering site preview:", error);
+    }
+  }, [site, globalTheme]);
+
+  if (!site?.template_id || !site?.customization) {
+    return null;
+  }
+
+  return (
+    <div
+      className={`site-preview-thumbnail ${
+        isLoaded ? "site-preview-thumbnail--loaded" : ""
+      }`}
+    >
+      <iframe
+        ref={iframeRef}
+        className="site-preview-thumbnail__iframe"
+        title={`Preview of ${site.site_name}`}
+        tabIndex={-1}
+      />
+    </div>
+  );
+}
 
 function UserAccountModal({ isOpen, onClose }) {
   const {
@@ -986,6 +1041,9 @@ function UserAccountModal({ isOpen, onClose }) {
                   <div className="sites-grid">
                     {sites.map((site) => (
                       <div key={site.id} className="site-card">
+                        {/* Site Preview Thumbnail */}
+                        <SitePreviewThumbnail site={site} />
+
                         <div className="site-card__header">
                           <div>
                             <h4>{site.site_name}</h4>

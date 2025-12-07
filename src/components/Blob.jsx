@@ -349,8 +349,8 @@ const Blob = ({ color = "#efeff0", wireframe = false }) => {
         filter: isLoaded ? `blur(${dynamicBlur.toFixed(1)}px)` : "blur(64px)",
         pointerEvents: "none",
         transition:
-          "opacity 1.5s ease-out, transform 1.5s ease-out, filter 0.5s ease-out",
-        backdropFilter: "blur(33px)",
+          "opacity 1.6s ease-out, transform 1.7s ease-out, filter 0.7s ease-out",
+        backdropFilter: "blur(34px)",
       }}
     />
   );
