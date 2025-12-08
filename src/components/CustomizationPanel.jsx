@@ -811,13 +811,16 @@ function CustomizationPanel({
             value={fieldValue}
             onChange={onFieldChange}
             fieldPath={path}
-            siteId={siteId} // Pass this as a prop to CustomizationPanel
+            siteId={siteId}
             label={field.label}
             hint={field.hint}
             accept={field.accept}
             multiple={field.multiple || false}
             showUrlInput={true}
             disabled={field.disabled}
+            privateBucket={true} // Add this for private bucket
+            bucket="site-images" // Optional, defaults to "site-images"
+            expiresIn={3600} // Optional, defaults to 1 hour
           />
         );
 

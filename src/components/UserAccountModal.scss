@@ -410,16 +410,17 @@
 // Site Preview Thumbnail Styles
 .site-preview-thumbnail {
   position: absolute;
-  top: -10px;
-  right: -10px;
-  width: 75%;
-  height: 180px;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 50%;
   opacity: 0;
   pointer-events: none;
   z-index: 1;
   border-radius: var(--radius-md);
   overflow: hidden;
   transition: opacity 0.3s ease;
+  filter: blur(3px);
 
   // Gradient mask for soft edges
   mask-image: linear-gradient(
@@ -1091,8 +1092,8 @@
 }
 
 .site-card__actions {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: calc(var(--spacing-unit) * 2);
   margin-top: calc(var(--spacing-unit) * 2);
 
@@ -1208,6 +1209,104 @@
     &:disabled {
       opacity: 0.5;
       cursor: not-allowed;
+    }
+  }
+}
+// Add to your existing UserAccountModal.scss
+
+// Drafts Tab with Thumbnail Support
+.drafts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: calc(var(--spacing-unit) * 2);
+
+  @media (max-width: $breakpoint-md) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.draft-card {
+  position: relative;
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  padding: calc(var(--spacing-unit) * 2.5);
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--spacing-unit) * 2);
+  transition: all var(--transition-base);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+
+  &:hover {
+    box-shadow: var(--shadow-md-pressed);
+
+    // Show thumbnail on hover like site cards
+    .site-preview-thumbnail {
+      opacity: 0.25;
+    }
+  }
+
+  // Make content appear above thumbnail
+  & > *:not(.site-preview-thumbnail) {
+    position: relative;
+    z-index: 2;
+  }
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: calc(var(--spacing-unit) * 2);
+
+    h4 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin-bottom: calc(var(--spacing-unit) * 0.5);
+    }
+
+    .draft-template {
+      font-size: 0.75rem;
+      color: var(--color-text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 300;
+    }
+  }
+
+  &__info {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--spacing-unit) * 1);
+  }
+
+  &__actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: calc(var(--spacing-unit) * 1);
+    margin-top: auto;
+
+    @media (min-width: 400px) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    button {
+      .btn-text {
+        display: none;
+
+        @media (min-width: 500px) {
+          display: inline;
+        }
+      }
+    }
+
+    // Delete button spans 2 columns on mobile
+    button:last-child {
+      grid-column: span 2;
+
+      @media (min-width: 400px) {
+        grid-column: span 1;
+      }
     }
   }
 }

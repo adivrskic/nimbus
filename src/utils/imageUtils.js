@@ -122,6 +122,69 @@ export function validateImageFile(file) {
 }
 
 /**
+ * Get a signed URL for a private image
+ * @param {string} path - Storage path
+ * @param {number} expiresIn - Seconds until URL expires (default 1 hour)
+ * @param {string} bucket - Bucket name
+ */
+export async function getSignedImageUrl(
+  path,
+  expiresIn = 60 * 60,
+  bucket = "site-images"
+) {
+  try {
+    const { data, error } = await supabase.storage
+      .from(bucket)
+      .createSignedUrl(path, expiresIn);
+
+    if (error) throw error;
+    return {
+      signedUrl: data.signedUrl,
+      expiresAt: Date.now() + expiresIn * 1000,
+      path,
+    };
+  } catch (error) {
+    console.error("Failed to create signed URL:", error);
+    throw error;
+  }
+}
+
+/**
+ * Get multiple signed URLs (batch request)
+ */
+export async function getMultipleSignedUrls(
+  paths,
+  expiresIn = 60 * 60,
+  bucket = "site-images"
+) {
+  try {
+    const results = [];
+
+    for (const path of paths) {
+      const { data, error } = await supabase.storage
+        .from(bucket)
+        .createSignedUrl(path, expiresIn);
+
+      if (error) {
+        console.error(`Failed to get signed URL for ${path}:`, error);
+        results.push({ path, error: error.message });
+      } else {
+        results.push({
+          path,
+          signedUrl: data.signedUrl,
+          expiresAt: Date.now() + expiresIn * 1000,
+        });
+      }
+    }
+
+    return results;
+  } catch (error) {
+    console.error("Failed to get signed URLs:", error);
+    throw error;
+  }
+}
+
+/**
  * Upload an image to Supabase Storage
  * @param {File|Blob} file - The image file to upload
  * @param {string} siteId - The site ID for organizing images
@@ -134,6 +197,7 @@ export async function uploadImage(file, siteId, fieldPath, options = {}) {
     compress = true,
     generateThumb = true,
     bucket = "site-images",
+    privateBucket = true, // NEW: flag for private buckets
   } = options;
 
   // Generate unique filename
@@ -150,7 +214,6 @@ export async function uploadImage(file, siteId, fieldPath, options = {}) {
     // Compress image if needed
     let imageToUpload = file;
     if (compress && file.size > 100 * 1024) {
-      // Only compress if > 100KB
       imageToUpload = await compressImage(file);
     }
 
@@ -165,18 +228,32 @@ export async function uploadImage(file, siteId, fieldPath, options = {}) {
 
     if (error) throw error;
 
-    // Get public URL
-    const {
-      data: { publicUrl },
-    } = supabase.storage.from(bucket).getPublicUrl(storagePath);
-
     const result = {
-      url: publicUrl,
       path: storagePath,
       originalName: file.name || filename,
       size: imageToUpload.size,
       fieldPath: fieldPath,
+      bucket: bucket,
     };
+
+    // For private buckets, we'll create signed URLs
+    if (privateBucket) {
+      // Create signed URL that expires in 1 hour
+      const { data: signedData, error: signedError } = await supabase.storage
+        .from(bucket)
+        .createSignedUrl(storagePath, 60 * 60); // 1 hour in seconds
+
+      if (!signedError && signedData) {
+        result.signedUrl = signedData.signedUrl;
+        result.signedExpiresAt = Date.now() + 60 * 60 * 1000; // 1 hour from now
+      }
+    } else {
+      // For public buckets, use public URL
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from(bucket).getPublicUrl(storagePath);
+      result.url = publicUrl;
+    }
 
     // Generate and upload thumbnail if requested
     if (generateThumb) {
@@ -190,11 +267,22 @@ export async function uploadImage(file, siteId, fieldPath, options = {}) {
           upsert: false,
         });
 
-        const {
-          data: { publicUrl: thumbUrl },
-        } = supabase.storage.from(bucket).getPublicUrl(thumbPath);
+        // Get thumbnail URL based on bucket type
+        if (privateBucket) {
+          const { data: thumbSignedData } = await supabase.storage
+            .from(bucket)
+            .createSignedUrl(thumbPath, 60 * 60);
 
-        result.thumbnail = thumbUrl;
+          if (thumbSignedData) {
+            result.thumbnail = thumbSignedData.signedUrl;
+          }
+        } else {
+          const {
+            data: { publicUrl: thumbUrl },
+          } = supabase.storage.from(bucket).getPublicUrl(thumbPath);
+          result.thumbnail = thumbUrl;
+        }
+
         result.thumbnailPath = thumbPath;
       } catch (thumbError) {
         console.warn("Failed to generate thumbnail:", thumbError);

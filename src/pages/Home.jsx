@@ -94,29 +94,25 @@ function Home() {
 
   const steps = [
     {
-      icon: <Palette size={28} />,
-      number: "01",
-      title: "Choose Your Style",
-      description: "Browse our curated collection of 7 design aesthetics",
-      details: ["Minimal & clean", "Bold & expressive", "Elegant & refined"],
+      number: 1,
+      icon: <Palette />,
+      title: "Choose Your Template",
+      description:
+        "Select from our professionally designed templates. Preview each one live to see how your content would look.",
     },
     {
-      icon: <Layout size={28} />,
-      number: "02",
-      title: "Select a Template",
-      description: "Pick a layout that matches your content needs",
-      details: [
-        "Portfolio & creative",
-        "Business & landing",
-        "Blog & editorial",
-      ],
+      number: 2,
+      icon: <Layout />,
+      title: "Customize Everything",
+      description:
+        "Use our visual editor to customize every detail. See changes instantly across all device sizes.",
     },
     {
-      icon: <Rocket size={28} />,
-      number: "03",
-      title: "Customize & Launch",
-      description: "Add your content and go live in minutes",
-      details: ["Real-time preview", "One-click deploy", "Custom domain ready"],
+      number: 3,
+      icon: <Rocket />,
+      title: "Publish Instantly",
+      description:
+        "Go live with one click. Your site comes with free SSL, SEO optimization, and high-speed hosting.",
     },
   ];
 
