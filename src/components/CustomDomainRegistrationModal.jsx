@@ -12,8 +12,6 @@ import {
   Info,
   Key,
   Settings,
-  Eye,
-  EyeOff,
   ChevronRight,
   ChevronLeft,
 } from "lucide-react";
@@ -24,10 +22,10 @@ import "./CustomDomainRegistrationModal.scss";
 export default function CustomDomainRegistrationModal({
   isOpen,
   onClose,
-  site, // The site object to configure domain for
+  site,
 }) {
   const { shouldRender, isVisible } = useModalAnimation(isOpen, 300);
-  const [step, setStep] = useState(1); // 1: Domain Input, 2: DNS Setup, 3: Success
+  const [step, setStep] = useState(1);
   const [domain, setDomain] = useState("");
   const [validation, setValidation] = useState({
     loading: false,
@@ -43,16 +41,20 @@ export default function CustomDomainRegistrationModal({
     verificationRecord: null,
     domainConfigured: false,
     domainVerified: false,
+    autoConfigureAttempted: false,
+    autoConfigureStatus: null, // 'pending', 'success', 'failed'
   });
   const [copied, setCopied] = useState({});
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [isCheckingAutoConfigure, setIsCheckingAutoConfigure] = useState(false);
+  const [registrarDetected, setRegistrarDetected] = useState(null);
+  const [autoConfigSupported, setAutoConfigSupported] = useState(false);
 
   // Reset state when modal opens
   useEffect(() => {
     if (isOpen) {
-      // Reset all state when modal opens
       setStep(1);
-      setDomain("");
+      setDomain(site?.custom_domain || "");
       setValidation({
         loading: false,
         available: null,
@@ -67,17 +69,49 @@ export default function CustomDomainRegistrationModal({
         verificationRecord: null,
         domainConfigured: false,
         domainVerified: false,
+        autoConfigureAttempted: false,
+        autoConfigureStatus: null,
       });
       setShowAdvanced(false);
       setCopied({});
+      setRegistrarDetected(null);
+      setAutoConfigSupported(false);
 
-      // If site already has a custom domain, pre-fill and go to step 2
       if (site?.custom_domain) {
         setDomain(site.custom_domain);
+        // Check if we can auto-configure
+        detectRegistrar(site.custom_domain);
         setStep(2);
       }
     }
   }, [isOpen, site]);
+
+  // Function to detect registrar for potential auto-configuration
+  const detectRegistrar = async (domain) => {
+    try {
+      const { data } = await supabase.functions.invoke("detect-registrar", {
+        body: { domain },
+      });
+
+      if (data?.registrar) {
+        setRegistrarDetected(data.registrar);
+        // Check if this registrar supports auto-configuration
+        const supportedRegistrars = [
+          "cloudflare",
+          "vercel",
+          "go daddy",
+          "namecheap",
+          "google domains",
+        ];
+        const isSupported = supportedRegistrars.some((r) =>
+          data.registrar.toLowerCase().includes(r)
+        );
+        setAutoConfigSupported(isSupported);
+      }
+    } catch (err) {
+      console.log("Registrar detection failed, proceeding manually");
+    }
+  };
 
   const validateDomain = async () => {
     if (!domain) return;
@@ -107,6 +141,8 @@ export default function CustomDomainRegistrationModal({
       });
 
       if (data.available) {
+        // Try to detect registrar for auto-configuration
+        detectRegistrar(domain);
         setStep(2);
       }
     } catch (err) {
@@ -119,83 +155,169 @@ export default function CustomDomainRegistrationModal({
     }
   };
 
-  const configureDomain = async () => {
+  // Automated domain configuration with auto-DNS setup
+  const configureDomainAutomated = async () => {
     if (!domain || !site) return;
 
-    setConfiguration({
+    setConfiguration((prev) => ({
+      ...prev,
       loading: true,
-      success: false,
-      error: null,
-      dnsRecords: [],
-      verificationRecord: null,
-      domainConfigured: false,
-      domainVerified: false,
-    });
+      autoConfigureAttempted: true,
+      autoConfigureStatus: "pending",
+    }));
 
     try {
-      const { data, error } = await supabase.functions.invoke(
-        "configure-domain",
-        {
-          body: {
-            domain: domain,
-            deploymentId: site.vercel_deployment_id,
-            siteName: site.site_name,
-            projectId: site.vercel_project_id,
-            retry: false,
-          },
+      // First, try auto-configuration if supported
+      if (autoConfigSupported && registrarDetected) {
+        const { data: autoData, error: autoError } =
+          await supabase.functions.invoke("configure-domain-automated", {
+            body: {
+              domain: domain,
+              deploymentId: site.vercel_deployment_id,
+              siteName: site.site_name,
+              projectId: site.vercel_project_id,
+              registrar: registrarDetected,
+              attemptAutoDns: true,
+            },
+          });
+
+        if (autoError) {
+          console.log(
+            "Auto-configuration failed, falling back to manual:",
+            autoError
+          );
+          // Fall back to manual configuration
+          await configureDomainManual();
+        } else if (autoData.success) {
+          // Auto-configuration succeeded!
+          handleAutoConfigSuccess(autoData);
+          return;
         }
-      );
-
-      if (error) throw error;
-
-      if (data.success) {
-        setConfiguration({
-          loading: false,
-          success: true,
-          error: null,
-          dnsRecords: data.dnsRecords || [],
-          verificationRecord: data.verificationRecord || null,
-          domainConfigured: data.domainConfigured,
-          domainVerified: data.domainVerified,
-        });
-
-        // Update site in database
-        const { error: updateError } = await supabase
-          .from("sites")
-          .update({
-            custom_domain: domain,
-            domain_status: data.domainVerified ? "active" : "pending_setup",
-            updated_at: new Date().toISOString(),
-          })
-          .eq("id", site.id);
-
-        if (updateError) {
-          console.error("Failed to update site:", updateError);
-        }
-
-        setStep(3);
       } else {
-        setConfiguration({
-          loading: false,
-          success: false,
-          error: data.error || "Configuration failed",
-          dnsRecords: data.dnsRecords || [],
-          verificationRecord: data.verificationRecord || null,
-          domainConfigured: false,
-          domainVerified: false,
-        });
+        // Proceed with manual configuration
+        await configureDomainManual();
       }
     } catch (err) {
+      setConfiguration((prev) => ({
+        ...prev,
+        loading: false,
+        error: err.message || "Configuration failed",
+        autoConfigureStatus: "failed",
+      }));
+    }
+  };
+
+  const configureDomainManual = async () => {
+    const { data, error } = await supabase.functions.invoke(
+      "configure-domain",
+      {
+        body: {
+          domain: domain,
+          deploymentId: site.vercel_deployment_id,
+          siteName: site.site_name,
+          projectId: site.vercel_project_id,
+        },
+      }
+    );
+
+    if (error) throw error;
+
+    if (data.success) {
       setConfiguration({
         loading: false,
-        success: false,
-        error: err.message || "Configuration failed",
-        dnsRecords: [],
-        verificationRecord: null,
-        domainConfigured: false,
-        domainVerified: false,
+        success: true,
+        error: null,
+        dnsRecords: data.dnsRecords || [],
+        verificationRecord: data.verificationRecord || null,
+        domainConfigured: data.domainConfigured,
+        domainVerified: data.domainVerified,
+        autoConfigureAttempted: true,
+        autoConfigureStatus: data.domainConfigured ? "partial" : "manual",
       });
+
+      // Update site in database
+      await updateSiteDomainStatus(data.domainVerified);
+
+      // Start polling for DNS verification
+      if (!data.domainVerified) {
+        startDnsVerificationPolling();
+      } else {
+        setStep(3);
+      }
+    } else {
+      throw new Error(data.error || "Configuration failed");
     }
+  };
+
+  const handleAutoConfigSuccess = async (data) => {
+    setConfiguration({
+      loading: false,
+      success: true,
+      error: null,
+      dnsRecords: data.dnsRecords || [],
+      verificationRecord: data.verificationRecord || null,
+      domainConfigured: data.domainConfigured,
+      domainVerified: data.domainVerified,
+      autoConfigureAttempted: true,
+      autoConfigureStatus: data.fullyAutomated ? "success" : "partial",
+    });
+
+    await updateSiteDomainStatus(data.domainVerified);
+
+    if (data.domainVerified) {
+      setStep(3);
+    } else if (data.domainConfigured) {
+      // Start polling for auto-configured domains
+      startDnsVerificationPolling();
+      setStep(3); // Go to success step with polling
+    }
+  };
+
+  const updateSiteDomainStatus = async (isVerified) => {
+    const { error: updateError } = await supabase
+      .from("sites")
+      .update({
+        custom_domain: domain,
+        domain_status: isVerified ? "active" : "pending_setup",
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", site.id);
+
+    if (updateError) {
+      console.error("Failed to update site:", updateError);
+    }
+  };
+
+  const startDnsVerificationPolling = () => {
+    const pollInterval = setInterval(async () => {
+      try {
+        const { data, error } = await supabase.functions.invoke(
+          "check-domain-verification",
+          {
+            body: { domain, deploymentId: site.vercel_deployment_id },
+          }
+        );
+
+        if (!error && data?.verified) {
+          clearInterval(pollInterval);
+          setConfiguration((prev) => ({
+            ...prev,
+            domainVerified: true,
+          }));
+          await updateSiteDomainStatus(true);
+
+          // Update UI to show success
+          setTimeout(() => {
+            setStep(3);
+          }, 1000);
+        }
+      } catch (err) {
+        console.log("Polling error:", err);
+      }
+    }, 15000); // Check every 15 seconds
+
+    // Clear after 10 minutes
+    setTimeout(() => clearInterval(pollInterval), 600000);
   };
 
   const copyToClipboard = (text, key) => {
@@ -208,6 +330,27 @@ export default function CustomDomainRegistrationModal({
 
   const handleClose = () => {
     onClose();
+  };
+
+  const attemptAutoDnsSetup = async () => {
+    setIsCheckingAutoConfigure(true);
+    try {
+      const { data } = await supabase.functions.invoke("check-dns-status", {
+        body: { domain },
+      });
+
+      if (data?.canAutoSetup) {
+        // Show option to auto-setup
+        setConfiguration((prev) => ({
+          ...prev,
+          autoConfigureAvailable: true,
+        }));
+      }
+    } catch (err) {
+      console.log("Auto DNS check failed");
+    } finally {
+      setIsCheckingAutoConfigure(false);
+    }
   };
 
   if (!shouldRender) return null;
@@ -235,9 +378,13 @@ export default function CustomDomainRegistrationModal({
                     id="domain"
                     type="text"
                     value={domain}
-                    onChange={(e) =>
-                      setDomain(e.target.value.toLowerCase().trim())
-                    }
+                    onChange={(e) => {
+                      const value = e.target.value.toLowerCase().trim();
+                      setDomain(value);
+                      if (value.includes(".")) {
+                        detectRegistrar(value);
+                      }
+                    }}
                     placeholder="example.com"
                     className="domain-input"
                     disabled={validation.loading}
@@ -259,6 +406,16 @@ export default function CustomDomainRegistrationModal({
                   </button>
                 </div>
 
+                {registrarDetected && (
+                  <div className="registrar-detected">
+                    <Info size={16} />
+                    <span>
+                      Detected: <strong>{registrarDetected}</strong>
+                      {autoConfigSupported && " • Auto-configuration available"}
+                    </span>
+                  </div>
+                )}
+
                 {validation.loading && (
                   <div className="validation-message loading">
                     <Loader size={16} className="spinning" />
@@ -270,6 +427,12 @@ export default function CustomDomainRegistrationModal({
                   <div className="validation-message success">
                     <Check size={16} />
                     <span>Domain is available for use!</span>
+                    {autoConfigSupported && (
+                      <span className="auto-config-badge">
+                        <Zap size={12} />
+                        Auto-configuration available
+                      </span>
+                    )}
                   </div>
                 )}
 
@@ -278,22 +441,7 @@ export default function CustomDomainRegistrationModal({
                     <AlertCircle size={16} />
                     <div className="error-details">
                       <span>{validation.error}</span>
-                      {validation.details && (
-                        <button
-                          type="button"
-                          className="btn-text"
-                          onClick={() => setShowAdvanced(!showAdvanced)}
-                        >
-                          {showAdvanced ? "Hide details" : "Show details"}
-                        </button>
-                      )}
                     </div>
-                  </div>
-                )}
-
-                {validation.details && showAdvanced && (
-                  <div className="advanced-error-details">
-                    <pre>{JSON.stringify(validation.details, null, 2)}</pre>
                   </div>
                 )}
               </div>
@@ -302,13 +450,12 @@ export default function CustomDomainRegistrationModal({
                 <div className="tip">
                   <Info size={16} />
                   <div>
-                    <strong>Requirements:</strong>
+                    <strong>Automated Setup Available For:</strong>
                     <ul>
-                      <li>You must own the domain at a registrar</li>
-                      <li>
-                        Domain must not be in use by another Vercel project
-                      </li>
-                      <li>SSL certificate will be automatically provisioned</li>
+                      <li>Cloudflare (API token required)</li>
+                      <li>Vercel Domains</li>
+                      <li>GoDaddy (API key required)</li>
+                      <li>Namecheap (API key required)</li>
                     </ul>
                   </div>
                 </div>
@@ -340,219 +487,150 @@ export default function CustomDomainRegistrationModal({
               </div>
               <div>
                 <h3>Configure DNS Records</h3>
-                <p>Add these records at your domain registrar</p>
+                <p>
+                  {autoConfigSupported
+                    ? "We'll attempt to automatically configure your domain"
+                    : "Add these records at your domain registrar"}
+                </p>
               </div>
             </div>
 
-            {configuration.error && (
-              <div className="configuration-error">
-                <AlertTriangle size={20} />
-                <div>
-                  <h4>Configuration Error</h4>
-                  <p>{configuration.error}</p>
-                  {configuration.error.includes("already in use") && (
-                    <div className="error-solution">
-                      <p>
-                        <strong>To fix this:</strong>
-                      </p>
-                      <ol>
-                        <li>
-                          Go to{" "}
-                          <a
-                            href="https://vercel.com/dashboard/domains"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            Vercel Domains
-                          </a>
-                        </li>
-                        <li>Remove the domain from any existing projects</li>
-                        <li>Click "Retry Configuration" below</li>
-                      </ol>
-                    </div>
-                  )}
+            {autoConfigSupported && (
+              <div className="auto-config-card">
+                <div className="auto-config-header">
+                  <Zap size={20} />
+                  <div>
+                    <h4>Auto-Configuration Available</h4>
+                    <p>
+                      We can automatically configure DNS for {registrarDetected}
+                    </p>
+                  </div>
+                </div>
+                <div className="auto-config-options">
+                  <button
+                    className="btn btn-primary"
+                    onClick={configureDomainAutomated}
+                    disabled={configuration.loading}
+                  >
+                    {configuration.loading ? (
+                      <>
+                        <Loader size={16} className="spinning" />
+                        Configuring Automatically...
+                      </>
+                    ) : (
+                      <>
+                        <Check size={16} />
+                        Auto-Configure Domain
+                      </>
+                    )}
+                  </button>
+                  <button
+                    className="btn btn-outline"
+                    onClick={() => {
+                      // Show manual configuration
+                      setAutoConfigSupported(false);
+                    }}
+                  >
+                    Configure Manually Instead
+                  </button>
                 </div>
               </div>
             )}
 
-            <div className="dns-records-section">
-              <h4>Required DNS Records</h4>
-              <p className="section-description">
-                Add these records at your domain registrar to connect{" "}
-                <strong>{domain}</strong> to your site.
-              </p>
+            {!autoConfigSupported && (
+              <>
+                <div className="dns-records-section">
+                  <h4>Required DNS Records</h4>
+                  <p className="section-description">
+                    Add these records at your domain registrar to connect{" "}
+                    <strong>{domain}</strong> to your site.
+                  </p>
 
-              <div className="dns-records-grid">
-                {configuration.dnsRecords.length > 0 ? (
-                  configuration.dnsRecords.map((record, index) => (
-                    <div key={index} className="dns-record-card">
-                      <div className="record-header">
-                        <span className="record-type-badge">{record.type}</span>
-                        <span className="record-host">
-                          {record.host === "@"
-                            ? domain
-                            : `${record.host}.${domain}`}
-                        </span>
-                        {record.required && (
-                          <span className="required-badge">Required</span>
-                        )}
+                  <div className="dns-records-grid">
+                    {configuration.dnsRecords.length > 0 ? (
+                      configuration.dnsRecords.map((record, index) => (
+                        <div key={index} className="dns-record-card">
+                          <div className="record-header">
+                            <span className="record-type-badge">
+                              {record.type}
+                            </span>
+                            <span className="record-host">
+                              {record.host === "@"
+                                ? domain
+                                : `${record.host}.${domain}`}
+                            </span>
+                          </div>
+                          <div className="record-value">
+                            <code>{record.value}</code>
+                            <button
+                              onClick={() =>
+                                copyToClipboard(record.value, `record-${index}`)
+                              }
+                              className="copy-btn"
+                            >
+                              {copied[`record-${index}`] ? (
+                                <Check size={14} />
+                              ) : (
+                                <Copy size={14} />
+                              )}
+                            </button>
+                          </div>
+                          <div className="record-footer">
+                            <span className="record-ttl">
+                              TTL: {record.ttl}
+                            </span>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="default-records">
+                        <p>Add these records at your registrar:</p>
+                        <div className="default-record">
+                          <strong>A Record</strong>
+                          <div>Host: @</div>
+                          <div>Value: 76.76.21.21</div>
+                          <div>TTL: 3600</div>
+                        </div>
+                        <div className="default-record">
+                          <strong>CNAME Record</strong>
+                          <div>Host: www</div>
+                          <div>Value: cname.vercel-dns.com</div>
+                          <div>TTL: 3600</div>
+                        </div>
                       </div>
-                      <div className="record-value">
-                        <code>{record.value}</code>
-                        <button
-                          onClick={() =>
-                            copyToClipboard(record.value, `record-${index}`)
-                          }
-                          className="copy-btn"
-                        >
-                          {copied[`record-${index}`] ? (
-                            <Check size={14} />
-                          ) : (
-                            <Copy size={14} />
-                          )}
-                        </button>
-                      </div>
-                      <div className="record-footer">
-                        <span className="record-ttl">TTL: {record.ttl}</span>
-                        {record.description && (
-                          <span className="record-description">
-                            {record.description}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="default-records">
-                    <p>Add these records at your registrar:</p>
-                    <div className="default-record">
-                      <strong>A Record</strong>
-                      <div>Host: @</div>
-                      <div>Value: 76.76.21.21</div>
-                      <div>TTL: 3600</div>
-                    </div>
-                    <div className="default-record">
-                      <strong>CNAME Record</strong>
-                      <div>Host: www</div>
-                      <div>Value: cname.vercel-dns.com</div>
-                      <div>TTL: 3600</div>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {configuration.verificationRecord && (
-                <div className="verification-record">
-                  <h5>
-                    <Key size={16} />
-                    Verification TXT Record (Required)
-                  </h5>
-                  <div className="verification-card">
-                    <div className="verification-details">
-                      <div className="detail">
-                        <span className="label">Type:</span>
-                        <span className="value">
-                          {configuration.verificationRecord.type}
-                        </span>
-                      </div>
-                      <div className="detail">
-                        <span className="label">Host:</span>
-                        <span className="value">
-                          {configuration.verificationRecord.host}
-                        </span>
-                      </div>
-                      <div className="detail">
-                        <span className="label">Value:</span>
-                        <code className="value">
-                          {configuration.verificationRecord.value}
-                        </code>
-                        <button
-                          onClick={() =>
-                            copyToClipboard(
-                              configuration.verificationRecord.value,
-                              "verification"
-                            )
-                          }
-                          className="copy-btn"
-                        >
-                          {copied.verification ? (
-                            <Check size={14} />
-                          ) : (
-                            <Copy size={14} />
-                          )}
-                        </button>
-                      </div>
-                    </div>
-                    <p className="verification-note">
-                      Add this TXT record to verify domain ownership. Wait 5-10
-                      minutes after adding before proceeding.
-                    </p>
+                    )}
                   </div>
                 </div>
-              )}
-            </div>
 
-            <div className="registrar-guides">
-              <h5>Registrar Guides</h5>
-              <div className="guide-links">
-                <a
-                  href="https://www.godaddy.com/help/add-an-a-record-19238"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  GoDaddy
-                </a>
-                <a
-                  href="https://www.namecheap.com/support/knowledgebase/article.aspx/319/2237/how-do-i-add-a-record-for-my-domain/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Namecheap
-                </a>
-                <a
-                  href="https://support.google.com/domains/answer/3251147"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Google Domains
-                </a>
-                <a
-                  href="https://developers.cloudflare.com/dns/manage-dns-records/how-to/create-dns-records/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Cloudflare
-                </a>
-              </div>
-            </div>
-
-            <div className="step-actions">
-              <button
-                className="btn btn-secondary"
-                onClick={() => setStep(1)}
-                disabled={configuration.loading}
-              >
-                <ChevronLeft size={18} />
-                Back
-              </button>
-              <button
-                className="btn btn-primary"
-                onClick={configureDomain}
-                disabled={configuration.loading}
-              >
-                {configuration.loading ? (
-                  <>
-                    <Loader size={16} className="spinning" />
-                    Configuring Domain...
-                  </>
-                ) : (
-                  <>
-                    <Check size={16} />
-                    Configure Domain
-                  </>
-                )}
-              </button>
-            </div>
+                <div className="step-actions">
+                  <button
+                    className="btn btn-secondary"
+                    onClick={() => setStep(1)}
+                    disabled={configuration.loading}
+                  >
+                    <ChevronLeft size={18} />
+                    Back
+                  </button>
+                  <button
+                    className="btn btn-primary"
+                    onClick={configureDomainAutomated}
+                    disabled={configuration.loading}
+                  >
+                    {configuration.loading ? (
+                      <>
+                        <Loader size={16} className="spinning" />
+                        Configuring Domain...
+                      </>
+                    ) : (
+                      <>
+                        <Check size={16} />
+                        Configure Domain
+                      </>
+                    )}
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         );
 
@@ -562,12 +640,11 @@ export default function CustomDomainRegistrationModal({
             <div className="success-icon">
               <Check size={32} />
             </div>
-            <h3>Domain Configuration Started!</h3>
-            <p className="success-message">
+            <h3>
               {configuration.domainVerified
-                ? `Your domain ${domain} has been successfully configured and is now active!`
-                : `Domain ${domain} has been added to your site. DNS changes may take up to 48 hours to propagate.`}
-            </p>
+                ? "Domain Successfully Configured!"
+                : "Domain Configuration Started!"}
+            </h3>
 
             <div className="domain-status">
               <div className="status-item">
@@ -581,35 +658,35 @@ export default function CustomDomainRegistrationModal({
                     configuration.domainVerified ? "verified" : "pending"
                   }`}
                 >
-                  {configuration.domainVerified ? "Verified" : "Pending DNS"}
+                  {configuration.domainVerified ? "Active" : "Configuring..."}
                 </span>
               </div>
-              <div className="status-item">
-                <span className="status-label">Site URL</span>
-                <a
-                  href={`https://${site?.site_name}.vercel.app`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="status-link"
-                >
-                  {site?.site_name}.vercel.app
-                  <ExternalLink size={14} />
-                </a>
-              </div>
+              {configuration.autoConfigureStatus && (
+                <div className="status-item">
+                  <span className="status-label">Setup Mode</span>
+                  <span className="status-value">
+                    {configuration.autoConfigureStatus === "success"
+                      ? "Fully Automated"
+                      : configuration.autoConfigureStatus === "partial"
+                      ? "Semi-Automated"
+                      : "Manual"}
+                  </span>
+                </div>
+              )}
             </div>
 
             {!configuration.domainVerified && (
-              <div className="next-steps">
-                <h5>Next Steps</h5>
-                <ol>
-                  <li>DNS records have been added to Vercel</li>
-                  <li>Add the same records at your domain registrar</li>
-                  <li>Wait for DNS propagation (1-48 hours)</li>
-                  <li>SSL certificate will auto-provision</li>
-                </ol>
-                <p className="note">
-                  Your site remains accessible at{" "}
-                  <strong>{site?.site_name}.vercel.app</strong> during setup.
+              <div className="verification-progress">
+                <div className="progress-header">
+                  <Loader size={16} className="spinning" />
+                  <span>Waiting for DNS propagation...</span>
+                </div>
+                <div className="progress-bar">
+                  <div className="progress-fill" />
+                </div>
+                <p className="progress-note">
+                  This usually takes 1-5 minutes. We'll update automatically
+                  when complete.
                 </p>
               </div>
             )}
@@ -619,7 +696,9 @@ export default function CustomDomainRegistrationModal({
                 Close
               </button>
               <a
-                href={`https://${site?.site_name}.vercel.app`}
+                href={`https://${
+                  configuration.domainVerified ? domain : site?.site_name
+                }.vercel.app`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn btn-primary"
@@ -628,12 +707,29 @@ export default function CustomDomainRegistrationModal({
                 Visit Site
               </a>
               {!configuration.domainVerified && (
-                <button className="btn btn-ghost" onClick={() => setStep(2)}>
-                  <Settings size={16} />
-                  View DNS Setup
+                <button
+                  className="btn btn-outline"
+                  onClick={startDnsVerificationPolling}
+                >
+                  <RefreshCw size={16} />
+                  Check Now
                 </button>
               )}
             </div>
+
+            {configuration.domainVerified && (
+              <div className="setup-complete">
+                <div className="complete-card">
+                  <Check size={20} />
+                  <div>
+                    <h5>Setup Complete</h5>
+                    <p>
+                      Your domain is now live with automatic SSL and global CDN.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         );
 
@@ -662,7 +758,11 @@ export default function CustomDomainRegistrationModal({
             </button>
             <div className="header-text">
               <h2>Custom Domain Setup</h2>
-              <p>Connect your own domain to your site</p>
+              <p>
+                {autoConfigSupported
+                  ? "Automated domain configuration"
+                  : "Connect your own domain to your site"}
+              </p>
             </div>
           </div>
           <div className="step-indicator">

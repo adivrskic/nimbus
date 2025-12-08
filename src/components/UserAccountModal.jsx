@@ -78,7 +78,7 @@ function SitePreviewThumbnail({ site }) {
       <iframe
         ref={iframeRef}
         className="site-preview-thumbnail__iframe"
-        title={`Preview of ${site.site_name}`}
+        title={`Preview of ${site.site_name || site.draft_name}`}
         tabIndex={-1}
       />
     </div>
@@ -1175,20 +1175,17 @@ function UserAccountModal({ isOpen, onClose }) {
                         ) : (
                           site.billing_status === "active" && (
                             <div className="site-card__actions">
-                              {site.custom_domain &&
-                                site.domain_status !== "active" && (
-                                  <button
-                                    className="btn btn-warning btn-small"
-                                    onClick={() => handleConfigureDomain(site)}
-                                    disabled={isLoading}
-                                    title="Fix Domain Configuration"
-                                  >
-                                    <Settings size={16} />
-                                    <span className="btn-text">
-                                      Domain Settings
-                                    </span>
-                                  </button>
-                                )}
+                              {site.domain_status !== "active" && (
+                                <button
+                                  className="btn btn-warning btn-small"
+                                  onClick={() => handleConfigureDomain(site)}
+                                  disabled={isLoading}
+                                  title="Fix Domain Configuration"
+                                >
+                                  <Settings size={16} />
+                                  <span className="btn-text">Settings</span>
+                                </button>
+                              )}
                               <button
                                 className="btn btn-secondary btn-small"
                                 onClick={() => handleEditDeployedSite(site)}
@@ -1198,9 +1195,7 @@ function UserAccountModal({ isOpen, onClose }) {
                                 }
                               >
                                 <Edit size={16} />
-                                <span className="btn-text">
-                                  Edit & Redeploy
-                                </span>
+                                <span className="btn-text">Edit</span>
                               </button>
                               <button
                                 className="btn btn-danger btn-small"
@@ -1243,6 +1238,9 @@ function UserAccountModal({ isOpen, onClose }) {
                   <div className="drafts-grid">
                     {drafts.map((draft) => (
                       <div key={draft.id} className="draft-card">
+                        {/* Site Preview Thumbnail for Draft */}
+                        <SitePreviewThumbnail site={draft} />
+
                         <div className="draft-card__header">
                           <div>
                             <h4>{draft.draft_name}</h4>
