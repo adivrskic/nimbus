@@ -192,6 +192,7 @@ const SiteDetailsStep = ({ siteName, setSiteName, onNext }) => {
 };
 
 // Step 2: Domain Setup with Automated Configuration
+// Step 2: Enhanced Domain Setup with Better Flow
 const DomainSetupStep = ({
   onNext,
   onBack,
@@ -215,6 +216,8 @@ const DomainSetupStep = ({
   });
   const [showCredentialForm, setShowCredentialForm] = useState(false);
   const [autoConfigPossible, setAutoConfigPossible] = useState(false);
+  const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
+  const [emailForDNS, setEmailForDNS] = useState("");
 
   // Detect registrar when domain changes
   useEffect(() => {
@@ -227,28 +230,33 @@ const DomainSetupStep = ({
 
   const detectRegistrar = async (domain) => {
     try {
-      const { data } = await supabase.functions.invoke("detect-registrar", {
-        body: { domain },
-      });
+      // This is a simulated detection - in real implementation, you might use WHOIS lookup
+      const commonRegistrars = {
+        "godaddy.com": "GoDaddy",
+        "namecheap.com": "Namecheap",
+        "cloudflare.com": "Cloudflare",
+        "google.com": "Google Domains",
+        "vercel.app": "Vercel Domains",
+      };
 
-      if (data?.registrar) {
-        setRegistrarDetected(data.registrar);
-        // Check if this registrar supports auto-configuration
-        const supportedRegistrars = [
-          "cloudflare",
-          "vercel",
-          "go daddy",
-          "namecheap",
-          "google domains",
-        ];
-        const isSupported = supportedRegistrars.some((r) =>
-          data.registrar.toLowerCase().includes(r)
-        );
-        setAutoConfigPossible(isSupported);
+      const domainTLD = domain.split(".").slice(-2).join(".");
+      const registrar = commonRegistrars[domainTLD] || "Your Domain Provider";
+      setRegistrarDetected(registrar);
 
-        if (isSupported) {
-          setShowCredentialForm(true);
-        }
+      // Check if this registrar supports auto-configuration
+      const supportedRegistrars = [
+        "cloudflare",
+        "godaddy",
+        "namecheap",
+        "vercel",
+      ];
+      const isSupported = supportedRegistrars.some((r) =>
+        registrar.toLowerCase().includes(r)
+      );
+      setAutoConfigPossible(isSupported);
+
+      if (isSupported) {
+        setShowCredentialForm(true);
       }
     } catch (err) {
       console.log("Registrar detection failed");
@@ -295,11 +303,11 @@ const DomainSetupStep = ({
   };
 
   const saveCredentials = () => {
-    // Store credentials for use during deployment
     setDomainCredentials({
       registrar: registrarDetected,
       credentials:
         apiCredentials[registrarDetected.toLowerCase().replace(/ /g, "")],
+      email: emailForDNS || null,
     });
     setShowCredentialForm(false);
   };
@@ -316,46 +324,61 @@ const DomainSetupStep = ({
     <div className="step-container">
       <div className="step-header">
         <div className="step-icon-wrapper">
-          <Link size={32} />
+          <Globe size={32} />
         </div>
         <div className="step-header-content">
-          <h3>Domain Configuration</h3>
-          <p>Set up your custom domain for automated deployment</p>
+          <h3>Connect Your Domain</h3>
+          <p>Choose how you want your site to be accessed</p>
         </div>
       </div>
 
       <div className="step-content">
-        <div className="config-section">
-          <div className="section-header">
-            <h4>Custom Domain</h4>
-            <label className="toggle-switch">
-              <input
-                type="checkbox"
-                checked={useCustomDomain}
-                onChange={(e) => {
-                  const checked = e.target.checked;
-                  setUseCustomDomain(checked);
-                  if (!checked) {
-                    setCustomDomain("");
-                    setDomainValidation({
-                      loading: false,
-                      available: null,
-                      error: null,
-                    });
-                    setRegistrarDetected(null);
-                    setAutoConfigPossible(false);
-                    setShowCredentialForm(false);
-                  }
-                }}
-              />
-              <span className="toggle-slider"></span>
-            </label>
+        {/* Option Selection */}
+        <div className="option-selector">
+          <div
+            className="option-card"
+            onClick={() => setUseCustomDomain(false)}
+          >
+            <div
+              className={`option-toggle ${!useCustomDomain ? "active" : ""}`}
+            >
+              {!useCustomDomain && <Check size={16} />}
+            </div>
+            <div className="option-content">
+              <div className="option-header">
+                <h4>Use Free Vercel Domain</h4>
+                <span className="option-badge">Quickest Setup</span>
+              </div>
+              <p>Your site will be available at:</p>
+              <div className="option-preview">
+                <code>https://{siteName}.vercel.app</code>
+              </div>
+              <ul className="option-features">
+                <li>
+                  <Check size={12} /> Automatic SSL certificate
+                </li>
+                <li>
+                  <Check size={12} /> Global CDN included
+                </li>
+                <li>
+                  <Check size={12} /> Zero configuration needed
+                </li>
+              </ul>
+            </div>
           </div>
 
-          {useCustomDomain ? (
-            <div className="custom-domain-section">
-              <div className="domain-input-group">
-                <div className="input-with-validation">
+          <div className="option-card" onClick={() => setUseCustomDomain(true)}>
+            <div className={`option-toggle ${useCustomDomain ? "active" : ""}`}>
+              {useCustomDomain && <Check size={16} />}
+            </div>
+            <div className="option-content">
+              <div className="option-header">
+                <h4>Use Custom Domain</h4>
+                <span className="option-badge">Professional</span>
+              </div>
+              <p>Use your own domain name (like yourbusiness.com)</p>
+              {useCustomDomain && (
+                <div className="domain-input-container">
                   <input
                     type="text"
                     value={customDomain}
@@ -366,226 +389,295 @@ const DomainSetupStep = ({
                     placeholder="yourdomain.com"
                     className="domain-input"
                   />
-                  {domainValidation.loading && (
-                    <div className="validation-indicator loading">
-                      <Loader size={16} />
-                    </div>
-                  )}
-                  {domainValidation.available && (
-                    <div className="validation-indicator success">
-                      <Check size={16} /> Available
-                    </div>
-                  )}
-                  {domainValidation.error && (
-                    <div className="validation-indicator error">
-                      <AlertCircle size={16} /> {domainValidation.error}
-                    </div>
-                  )}
-                </div>
-
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={() => validateDomain(customDomain)}
-                  disabled={domainValidation.loading}
-                >
-                  <RefreshCw size={16} />
-                  Check Availability
-                </button>
-              </div>
-
-              {registrarDetected && (
-                <div className="registrar-detected-card">
-                  <div className="detected-header">
-                    <Globe size={18} />
-                    <div>
-                      <strong>Detected Registrar:</strong> {registrarDetected}
-                    </div>
-                    {autoConfigPossible && (
-                      <span className="auto-config-badge">
-                        <Zap size={14} />
-                        Auto-configuration available
-                      </span>
-                    )}
+                  <div className="domain-input-hint">
+                    Enter without http:// or www
                   </div>
-
-                  {autoConfigPossible && showCredentialForm && (
-                    <div className="credentials-form">
-                      <h5>API Credentials for {registrarDetected}</h5>
-                      <p className="form-description">
-                        Provide your API credentials to enable automatic DNS
-                        configuration. We'll securely store these for future
-                        use.
-                      </p>
-
-                      {registrarDetected
-                        .toLowerCase()
-                        .includes("cloudflare") && (
-                        <div className="credential-fields">
-                          <div className="form-group">
-                            <label>Email</label>
-                            <input
-                              type="email"
-                              value={apiCredentials.cloudflare.email}
-                              onChange={(e) =>
-                                handleCredentialsChange(
-                                  "cloudflare",
-                                  "email",
-                                  e.target.value
-                                )
-                              }
-                              placeholder="your@email.com"
-                            />
-                          </div>
-                          <div className="form-group">
-                            <label>API Token</label>
-                            <input
-                              type="password"
-                              value={apiCredentials.cloudflare.apiToken}
-                              onChange={(e) =>
-                                handleCredentialsChange(
-                                  "cloudflare",
-                                  "apiToken",
-                                  e.target.value
-                                )
-                              }
-                              placeholder="API Token with DNS Edit permissions"
-                            />
-                          </div>
-                        </div>
-                      )}
-
-                      {registrarDetected.toLowerCase().includes("godaddy") && (
-                        <div className="credential-fields">
-                          <div className="form-group">
-                            <label>API Key</label>
-                            <input
-                              type="text"
-                              value={apiCredentials.godaddy.apiKey}
-                              onChange={(e) =>
-                                handleCredentialsChange(
-                                  "godaddy",
-                                  "apiKey",
-                                  e.target.value
-                                )
-                              }
-                              placeholder="GoDaddy API Key"
-                            />
-                          </div>
-                          <div className="form-group">
-                            <label>API Secret</label>
-                            <input
-                              type="password"
-                              value={apiCredentials.godaddy.apiSecret}
-                              onChange={(e) =>
-                                handleCredentialsChange(
-                                  "godaddy",
-                                  "apiSecret",
-                                  e.target.value
-                                )
-                              }
-                              placeholder="GoDaddy API Secret"
-                            />
-                          </div>
-                        </div>
-                      )}
-
-                      <div className="credentials-actions">
-                        <button
-                          className="btn btn-primary"
-                          onClick={saveCredentials}
-                        >
-                          <Check size={16} />
-                          Save Credentials
-                        </button>
-                        <button
-                          className="btn btn-outline"
-                          onClick={() => setShowCredentialForm(false)}
-                        >
-                          Skip for now
-                        </button>
-                      </div>
-                    </div>
-                  )}
                 </div>
               )}
-
-              <div className="domain-note">
-                <AlertCircle size={16} />
-                <div>
-                  <p>
-                    <strong>Automated Deployment:</strong>
-                  </p>
-                  <ul>
-                    <li>We'll automatically configure DNS during deployment</li>
-                    <li>SSL certificate will be auto-provisioned</li>
-                    <li>Your site will be live immediately after payment</li>
-                  </ul>
-                  {autoConfigPossible && (
-                    <p className="auto-config-note">
-                      <Zap size={14} />
-                      <strong>Auto-configuration enabled:</strong> We'll handle
-                      all DNS setup automatically
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="no-domain-note">
-              <p>
-                You can always add a custom domain later from your dashboard.
-                Your site will initially use{" "}
-                <strong>{siteName}.vercel.app</strong>
-              </p>
-            </div>
-          )}
-        </div>
-
-        <div className="hosting-summary">
-          <div className="summary-card">
-            <div className="summary-header">
-              <Cloud size={24} />
-              <div>
-                <h4>Automatic Deployment Process</h4>
-                <p>What happens after payment:</p>
-              </div>
-            </div>
-
-            <div className="deployment-steps">
-              <div className="deployment-step">
-                <div className="step-number">1</div>
-                <div className="step-content">
-                  <strong>Instant Deployment</strong>
-                  <p>Site deploys to Vercel's global network</p>
-                </div>
-              </div>
-              {useCustomDomain && (
-                <>
-                  <div className="deployment-step">
-                    <div className="step-number">2</div>
-                    <div className="step-content">
-                      <strong>Domain Configuration</strong>
-                      <p>
-                        {autoConfigPossible
-                          ? "DNS automatically configured via API"
-                          : "Manual DNS instructions provided"}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="deployment-step">
-                    <div className="step-number">3</div>
-                    <div className="step-content">
-                      <strong>SSL Provisioning</strong>
-                      <p>Automatic HTTPS certificate setup</p>
-                    </div>
-                  </div>
-                </>
-              )}
+              <ul className="option-features">
+                <li>
+                  <Check size={12} /> Branded web address
+                </li>
+                <li>
+                  <Check size={12} /> Automatic SSL certificate
+                </li>
+                <li>
+                  <Check size={12} /> Email forwarding support
+                </li>
+              </ul>
             </div>
           </div>
         </div>
 
+        {/* Custom Domain Details */}
+        {useCustomDomain && (
+          <div className="custom-domain-details">
+            {customDomain && (
+              <>
+                {/* Domain Status */}
+                <div className="status-card">
+                  <div className="status-header">
+                    <h4>Domain Status</h4>
+                    {domainValidation.loading && (
+                      <div className="status-badge loading">
+                        <Loader size={12} /> Checking...
+                      </div>
+                    )}
+                    {domainValidation.available && (
+                      <div className="status-badge success">
+                        <Check size={12} /> Available
+                      </div>
+                    )}
+                    {domainValidation.error && (
+                      <div className="status-badge error">
+                        <AlertCircle size={12} /> {domainValidation.error}
+                      </div>
+                    )}
+                  </div>
+                  <div className="status-actions">
+                    <button
+                      type="button"
+                      className="btn btn-secondary btn-sm"
+                      onClick={() => validateDomain(customDomain)}
+                      disabled={domainValidation.loading}
+                    >
+                      <RefreshCw size={14} />
+                      Check Availability
+                    </button>
+                  </div>
+                </div>
+
+                {/* Registrar Detection */}
+                {registrarDetected && (
+                  <div className="registrar-info">
+                    <h4>Your Domain Provider</h4>
+                    <div className="registrar-card">
+                      <div className="registrar-icon">
+                        <Globe size={20} />
+                      </div>
+                      <div className="registrar-details">
+                        <strong>{registrarDetected}</strong>
+                        {autoConfigPossible ? (
+                          <p className="text-success">
+                            <Zap size={12} /> Auto-configuration available
+                          </p>
+                        ) : (
+                          <p>Manual setup required</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Configuration Method */}
+                <div className="config-method">
+                  <h4>How would you like to configure DNS?</h4>
+                  <div className="method-options">
+                    <div
+                      className={`method-option ${
+                        autoConfigPossible ? "selected" : ""
+                      }`}
+                      onClick={() => setShowCredentialForm(autoConfigPossible)}
+                    >
+                      <div className="method-icon">
+                        <Zap size={24} />
+                      </div>
+                      <div className="method-content">
+                        <h5>Automatic Setup</h5>
+                        <p>
+                          We'll configure DNS records automatically using your
+                          domain provider's API
+                        </p>
+                        {!autoConfigPossible && (
+                          <span className="method-note">
+                            Not available for this provider
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div
+                      className={`method-option ${
+                        !showCredentialForm ? "selected" : ""
+                      }`}
+                      onClick={() => setShowCredentialForm(false)}
+                    >
+                      <div className="method-icon">
+                        <Settings size={24} />
+                      </div>
+                      <div className="method-content">
+                        <h5>Manual Setup</h5>
+                        <p>
+                          We'll provide DNS records for you to add manually in
+                          your domain provider's control panel
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* API Credentials Form */}
+                {showCredentialForm && autoConfigPossible && (
+                  <div className="api-credentials-form">
+                    <h4>Connect to {registrarDetected}</h4>
+                    <div className="form-description">
+                      <p>
+                        We need your API credentials to configure DNS
+                        automatically. These are stored securely and only used
+                        for DNS management.
+                      </p>
+                      <div className="credentials-info">
+                        <ExternalLink size={12} />
+                        <a
+                          href={`https://docs.nimbus.com/${registrarDetected
+                            .toLowerCase()
+                            .replace(/ /g, "-")}-setup`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          View {registrarDetected} setup guide
+                        </a>
+                      </div>
+                    </div>
+
+                    {/* Form fields based on registrar */}
+                    {registrarDetected.toLowerCase().includes("cloudflare") && (
+                      <div className="form-fields">
+                        <div className="form-group">
+                          <label>Cloudflare Email</label>
+                          <input
+                            type="email"
+                            value={apiCredentials.cloudflare.email}
+                            onChange={(e) =>
+                              handleCredentialsChange(
+                                "cloudflare",
+                                "email",
+                                e.target.value
+                              )
+                            }
+                            placeholder="you@example.com"
+                          />
+                          <div className="form-hint">
+                            Email for your Cloudflare account
+                          </div>
+                        </div>
+                        <div className="form-group">
+                          <label>API Token</label>
+                          <input
+                            type="password"
+                            value={apiCredentials.cloudflare.apiToken}
+                            onChange={(e) =>
+                              handleCredentialsChange(
+                                "cloudflare",
+                                "apiToken",
+                                e.target.value
+                              )
+                            }
+                            placeholder="••••••••••••••••"
+                          />
+                          <div className="form-hint">
+                            Create a token with <code>Zone:DNS:Edit</code>{" "}
+                            permission
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Advanced Options */}
+                    <div className="advanced-options">
+                      <button
+                        type="button"
+                        className="advanced-toggle"
+                        onClick={() =>
+                          setShowAdvancedOptions(!showAdvancedOptions)
+                        }
+                      >
+                        {showAdvancedOptions ? "Hide" : "Show"} Advanced Options
+                        <ChevronRight
+                          size={16}
+                          className={showAdvancedOptions ? "rotated" : ""}
+                        />
+                      </button>
+
+                      {showAdvancedOptions && (
+                        <div className="advanced-content">
+                          <div className="form-group">
+                            <label>Notification Email</label>
+                            <input
+                              type="email"
+                              value={emailForDNS}
+                              onChange={(e) => setEmailForDNS(e.target.value)}
+                              placeholder="Optional - for DNS change notifications"
+                            />
+                            <div className="form-hint">
+                              We'll email you when DNS changes are made
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="form-actions">
+                      <button
+                        className="btn btn-primary"
+                        onClick={saveCredentials}
+                        disabled={
+                          !apiCredentials[
+                            registrarDetected.toLowerCase().replace(/ /g, "")
+                          ]?.email
+                        }
+                      >
+                        <Check size={16} />
+                        Save & Continue
+                      </button>
+                      <button
+                        className="btn btn-outline"
+                        onClick={() => setShowCredentialForm(false)}
+                      >
+                        Skip to Manual Setup
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Setup Summary */}
+                {!showCredentialForm && (
+                  <div className="setup-summary">
+                    <h4>What to Expect</h4>
+                    <div className="setup-steps">
+                      <div className="setup-step">
+                        <div className="step-number">1</div>
+                        <div className="step-content">
+                          <strong>DNS Configuration</strong>
+                          <p>You'll add DNS records at your domain provider</p>
+                        </div>
+                      </div>
+                      <div className="setup-step">
+                        <div className="step-number">2</div>
+                        <div className="step-content">
+                          <strong>Propagation</strong>
+                          <p>
+                            DNS changes take 5-60 minutes to propagate worldwide
+                          </p>
+                        </div>
+                      </div>
+                      <div className="setup-step">
+                        <div className="step-number">3</div>
+                        <div className="step-content">
+                          <strong>Auto SSL</strong>
+                          <p>
+                            SSL certificate issues automatically once DNS is set
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        )}
+
+        {/* Navigation */}
         <div className="step-actions">
           <button className="btn btn-secondary" onClick={onBack}>
             <ChevronLeft size={20} />
@@ -594,7 +686,9 @@ const DomainSetupStep = ({
           <button
             className="btn btn-primary"
             onClick={onNext}
-            disabled={!isCustomDomainValid}
+            disabled={
+              useCustomDomain && (!isCustomDomainValid || !customDomain)
+            }
           >
             Continue to Payment
             <ChevronRight size={20} />
