@@ -648,6 +648,8 @@ function UserAccountModal({ isOpen, onClose }) {
           });
         } finally {
           setIsLoading(false);
+          // Close the confirm modal after operation is complete
+          setConfirmModal((prev) => ({ ...prev, isOpen: false }));
         }
       },
       confirmButtonId: "confirmDeleteBtn", // Add ID to confirm button
@@ -687,6 +689,8 @@ function UserAccountModal({ isOpen, onClose }) {
           });
         } finally {
           setIsLoading(false);
+          // Close the confirm modal after operation is complete
+          setConfirmModal((prev) => ({ ...prev, isOpen: false }));
         }
       },
     });
