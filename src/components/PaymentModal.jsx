@@ -26,6 +26,9 @@ import {
   Edit,
   Settings,
   Key,
+  FileText,
+  Mail,
+  Info,
 } from "lucide-react";
 import { loadStripe } from "@stripe/stripe-js";
 import {
@@ -37,6 +40,8 @@ import {
 import { supabase } from "../lib/supabaseClient";
 import { useAuth } from "../contexts/AuthContext";
 import useModalAnimation from "../hooks/useModalAnimation";
+import CustomizeModal from "./CustomizeModal";
+import CustomDomainRegistrationModal from "./CustomDomainRegistrationModal";
 import "./PaymentModal.scss";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
@@ -206,67 +211,35 @@ const DomainSetupStep = ({
   const [domainValidation, setDomainValidation] = useState({
     loading: false,
     available: null,
+    canUse: null,
     error: null,
+    warning: null,
+    userConfirmedOwnership: false,
   });
   const [registrarDetected, setRegistrarDetected] = useState(null);
   const [apiCredentials, setApiCredentials] = useState({
     cloudflare: { apiToken: "", email: "" },
+    vercel: { apiToken: "" },
     godaddy: { apiKey: "", apiSecret: "" },
     namecheap: { apiUser: "", apiKey: "", username: "" },
+    googledomains: { username: "", password: "" },
   });
   const [showCredentialForm, setShowCredentialForm] = useState(false);
   const [autoConfigPossible, setAutoConfigPossible] = useState(false);
   const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
   const [emailForDNS, setEmailForDNS] = useState("");
 
-  // Detect registrar when domain changes
-  useEffect(() => {
-    if (useCustomDomain && customDomain && customDomain.includes(".")) {
-      detectRegistrar(customDomain);
-      const timer = setTimeout(() => validateDomain(customDomain), 500);
-      return () => clearTimeout(timer);
-    }
-  }, [customDomain, useCustomDomain]);
-
-  const detectRegistrar = async (domain) => {
-    try {
-      // This is a simulated detection - in real implementation, you might use WHOIS lookup
-      const commonRegistrars = {
-        "godaddy.com": "GoDaddy",
-        "namecheap.com": "Namecheap",
-        "cloudflare.com": "Cloudflare",
-        "google.com": "Google Domains",
-        "vercel.app": "Vercel Domains",
-      };
-
-      const domainTLD = domain.split(".").slice(-2).join(".");
-      const registrar = commonRegistrars[domainTLD] || "Your Domain Provider";
-      setRegistrarDetected(registrar);
-
-      // Check if this registrar supports auto-configuration
-      const supportedRegistrars = [
-        "cloudflare",
-        "godaddy",
-        "namecheap",
-        "vercel",
-      ];
-      const isSupported = supportedRegistrars.some((r) =>
-        registrar.toLowerCase().includes(r)
-      );
-      setAutoConfigPossible(isSupported);
-
-      if (isSupported) {
-        setShowCredentialForm(true);
-      }
-    } catch (err) {
-      console.log("Registrar detection failed");
-    }
-  };
-
   const validateDomain = async (domain) => {
     if (!domain) return;
 
-    setDomainValidation({ loading: true, available: null, error: null });
+    setDomainValidation({
+      loading: true,
+      available: null,
+      canUse: null,
+      error: null,
+      warning: null,
+      userConfirmedOwnership: false,
+    });
 
     try {
       const { data, error } = await supabase.functions.invoke(
@@ -281,13 +254,45 @@ const DomainSetupStep = ({
       setDomainValidation({
         loading: false,
         available: data.available,
-        error: data.available ? null : "Domain is already in use or invalid",
+        canUse: data.canUse,
+        error: data.error || null,
+        warning: data.warning || null,
+        validationStatus: data.validationStatus,
+        userConfirmedOwnership: false,
       });
+
+      // If provider was detected, set it and auto-select automatic setup
+      if (data.detectedProvider) {
+        setRegistrarDetected(data.detectedProvider);
+        // Squarespace doesn't have a public DNS API, so default to manual
+        const providersWithAutoConfig = [
+          "Cloudflare",
+          "Vercel",
+          "GoDaddy",
+          "Namecheap",
+          "Google Domains",
+        ];
+        if (providersWithAutoConfig.includes(data.detectedProvider)) {
+          setAutoConfigPossible(true);
+          setShowCredentialForm(true); // Auto-select automatic setup
+        } else {
+          // Provider detected but no auto-config (e.g., Squarespace)
+          setAutoConfigPossible(false);
+          setShowCredentialForm(false); // Default to manual setup
+        }
+      } else {
+        setRegistrarDetected("Your Domain Provider");
+        setAutoConfigPossible(true);
+        setShowCredentialForm(false); // Default to manual setup if no provider detected
+      }
     } catch (err) {
       setDomainValidation({
         loading: false,
         available: false,
+        canUse: false,
         error: err.message,
+        warning: null,
+        userConfirmedOwnership: false,
       });
     }
   };
@@ -312,13 +317,17 @@ const DomainSetupStep = ({
     setShowCredentialForm(false);
   };
 
+  // Domain is valid if:
+  // 1. Not using custom domain, OR
+  // 2. Using custom domain AND domain format is valid AND (domain is available OR user confirmed ownership)
   const isCustomDomainValid =
     !useCustomDomain ||
     (customDomain &&
       /^[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?)+$/.test(
         customDomain
       ) &&
-      !domainValidation.error);
+      (domainValidation.available === true ||
+        domainValidation.userConfirmedOwnership === true));
 
   return (
     <div className="step-container">
@@ -379,19 +388,97 @@ const DomainSetupStep = ({
               <p>Use your own domain name (like yourbusiness.com)</p>
               {useCustomDomain && (
                 <div className="domain-input-container">
-                  <input
-                    type="text"
-                    value={customDomain}
-                    onChange={(e) => {
-                      const value = e.target.value.toLowerCase();
-                      setCustomDomain(value);
-                    }}
-                    placeholder="yourdomain.com"
-                    className="domain-input"
-                  />
+                  <div className="domain-input-with-check">
+                    <input
+                      type="text"
+                      value={customDomain}
+                      onChange={(e) => {
+                        const value = e.target.value.toLowerCase();
+                        setCustomDomain(value);
+                        // Reset validation when input changes
+                        setDomainValidation({
+                          loading: false,
+                          available: null,
+                          error: null,
+                          canUse: null,
+                          warning: null,
+                        });
+                      }}
+                      placeholder="yourdomain.com"
+                      className="domain-input"
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                    <button
+                      type="button"
+                      className="btn btn-primary btn-check-availability"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        validateDomain(customDomain);
+                      }}
+                      disabled={!customDomain || domainValidation.loading}
+                    >
+                      {domainValidation.loading ? (
+                        <>
+                          <Loader size={14} className="spinning" />
+                          Checking...
+                        </>
+                      ) : (
+                        "Check"
+                      )}
+                    </button>
+                  </div>
                   <div className="domain-input-hint">
                     Enter without http:// or www
                   </div>
+                  {/* Inline validation feedback */}
+                  {domainValidation.available === true &&
+                    !domainValidation.warning && (
+                      <div className="validation-feedback success">
+                        <Check size={14} />
+                        <span>Domain is available for use!</span>
+                      </div>
+                    )}
+                  {domainValidation.canUse === true &&
+                    domainValidation.warning && (
+                      <div className="validation-feedback warning">
+                        <AlertCircle size={14} />
+                        <span>{domainValidation.warning}</span>
+                      </div>
+                    )}
+                  {domainValidation.available === false &&
+                    domainValidation.canUse === false && (
+                      <div className="validation-feedback error">
+                        <AlertCircle size={14} />
+                        <span>{domainValidation.error}</span>
+                      </div>
+                    )}
+                  {domainValidation.available === false &&
+                    domainValidation.canUse === true && (
+                      <div className="validation-feedback warning">
+                        <AlertCircle size={14} />
+                        <div className="warning-content">
+                          <span>{domainValidation.error}</span>
+                          <button
+                            type="button"
+                            className="btn btn-link btn-sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              // User confirms they own it
+                              setDomainValidation({
+                                loading: false,
+                                available: true,
+                                canUse: true,
+                                error: null,
+                                warning: null,
+                                userConfirmedOwnership: true,
+                              });
+                            }}
+                          >
+                            I own this domain - continue anyway
+                          </button>
+                        </div>
+                      </div>
+                    )}
                 </div>
               )}
               <ul className="option-features">
@@ -412,268 +499,761 @@ const DomainSetupStep = ({
         {/* Custom Domain Details */}
         {useCustomDomain && (
           <div className="custom-domain-details">
-            {customDomain && (
-              <>
-                {/* Domain Status */}
-                <div className="status-card">
-                  <div className="status-header">
-                    <h4>Domain Status</h4>
-                    {domainValidation.loading && (
-                      <div className="status-badge loading">
-                        <Loader size={12} /> Checking...
-                      </div>
-                    )}
-                    {domainValidation.available && (
-                      <div className="status-badge success">
-                        <Check size={12} /> Available
-                      </div>
-                    )}
-                    {domainValidation.error && (
-                      <div className="status-badge error">
-                        <AlertCircle size={12} /> {domainValidation.error}
-                      </div>
-                    )}
-                  </div>
-                  <div className="status-actions">
-                    <button
-                      type="button"
-                      className="btn btn-secondary btn-sm"
-                      onClick={() => validateDomain(customDomain)}
-                      disabled={domainValidation.loading}
-                    >
-                      <RefreshCw size={14} />
-                      Check Availability
-                    </button>
-                  </div>
-                </div>
-
-                {/* Registrar Detection */}
-                {registrarDetected && (
-                  <div className="registrar-info">
-                    <h4>Your Domain Provider</h4>
-                    <div className="registrar-card">
-                      <div className="registrar-icon">
-                        <Globe size={20} />
-                      </div>
-                      <div className="registrar-details">
-                        <strong>{registrarDetected}</strong>
-                        {autoConfigPossible ? (
-                          <p className="text-success">
-                            <Zap size={12} /> Auto-configuration available
-                          </p>
-                        ) : (
-                          <p>Manual setup required</p>
-                        )}
+            {customDomain &&
+              (domainValidation.available ||
+                domainValidation.userConfirmedOwnership) && (
+                <>
+                  {/* Registrar Detection */}
+                  {registrarDetected && (
+                    <div className="registrar-info">
+                      <h4>Your Domain Provider</h4>
+                      <div className="registrar-card">
+                        <div className="registrar-icon">
+                          <Globe size={20} />
+                        </div>
+                        <div className="registrar-details">
+                          <strong>{registrarDetected}</strong>
+                          {autoConfigPossible ? (
+                            <p className="text-success">
+                              <Zap size={12} /> Auto-configuration available
+                            </p>
+                          ) : (
+                            <p>Manual setup required</p>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {/* Configuration Method */}
-                <div className="config-method">
-                  <h4>How would you like to configure DNS?</h4>
-                  <div className="method-options">
-                    <div
-                      className={`method-option ${
-                        autoConfigPossible ? "selected" : ""
-                      }`}
-                      onClick={() => setShowCredentialForm(autoConfigPossible)}
-                    >
-                      <div className="method-icon">
-                        <Zap size={24} />
+                  {/* Configuration Method */}
+                  <div className="config-method">
+                    <h4>How would you like to configure DNS?</h4>
+
+                    {/* Show detected provider - with auto-config */}
+                    {[
+                      "Cloudflare",
+                      "Vercel",
+                      "GoDaddy",
+                      "Namecheap",
+                      "Google Domains",
+                    ].includes(registrarDetected) && (
+                      <div className="detected-provider">
+                        <CheckCircle size={16} />
+                        <span>
+                          Detected: <strong>{registrarDetected}</strong>
+                        </span>
                       </div>
-                      <div className="method-content">
-                        <h5>Automatic Setup</h5>
-                        <p>
-                          We'll configure DNS records automatically using your
-                          domain provider's API
-                        </p>
-                        {!autoConfigPossible && (
-                          <span className="method-note">
-                            Not available for this provider
+                    )}
+
+                    {/* Show detected provider - without auto-config (e.g., Squarespace) */}
+                    {registrarDetected &&
+                      ![
+                        "Cloudflare",
+                        "Vercel",
+                        "GoDaddy",
+                        "Namecheap",
+                        "Google Domains",
+                        "Your Domain Provider",
+                      ].includes(registrarDetected) && (
+                        <div className="detected-provider detected-provider--manual">
+                          <Info size={16} />
+                          <span>
+                            Detected: <strong>{registrarDetected}</strong> —
+                            Manual setup required (no API available)
                           </span>
-                        )}
-                      </div>
-                    </div>
-                    <div
-                      className={`method-option ${
-                        !showCredentialForm ? "selected" : ""
-                      }`}
-                      onClick={() => setShowCredentialForm(false)}
-                    >
-                      <div className="method-icon">
-                        <Settings size={24} />
-                      </div>
-                      <div className="method-content">
-                        <h5>Manual Setup</h5>
-                        <p>
-                          We'll provide DNS records for you to add manually in
-                          your domain provider's control panel
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* API Credentials Form */}
-                {showCredentialForm && autoConfigPossible && (
-                  <div className="api-credentials-form">
-                    <h4>Connect to {registrarDetected}</h4>
-                    <div className="form-description">
-                      <p>
-                        We need your API credentials to configure DNS
-                        automatically. These are stored securely and only used
-                        for DNS management.
-                      </p>
-                      <div className="credentials-info">
-                        <ExternalLink size={12} />
-                        <a
-                          href={`https://docs.nimbus.com/${registrarDetected
-                            .toLowerCase()
-                            .replace(/ /g, "-")}-setup`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          View {registrarDetected} setup guide
-                        </a>
-                      </div>
-                    </div>
-
-                    {/* Form fields based on registrar */}
-                    {registrarDetected.toLowerCase().includes("cloudflare") && (
-                      <div className="form-fields">
-                        <div className="form-group">
-                          <label>Cloudflare Email</label>
-                          <input
-                            type="email"
-                            value={apiCredentials.cloudflare.email}
-                            onChange={(e) =>
-                              handleCredentialsChange(
-                                "cloudflare",
-                                "email",
-                                e.target.value
-                              )
-                            }
-                            placeholder="you@example.com"
-                          />
-                          <div className="form-hint">
-                            Email for your Cloudflare account
-                          </div>
                         </div>
-                        <div className="form-group">
-                          <label>API Token</label>
-                          <input
-                            type="password"
-                            value={apiCredentials.cloudflare.apiToken}
-                            onChange={(e) =>
-                              handleCredentialsChange(
-                                "cloudflare",
-                                "apiToken",
-                                e.target.value
-                              )
-                            }
-                            placeholder="••••••••••••••••"
-                          />
-                          <div className="form-hint">
-                            Create a token with <code>Zone:DNS:Edit</code>{" "}
-                            permission
-                          </div>
-                        </div>
-                      </div>
-                    )}
+                      )}
 
-                    {/* Advanced Options */}
-                    <div className="advanced-options">
-                      <button
-                        type="button"
-                        className="advanced-toggle"
+                    <div className="method-options">
+                      <div
+                        className={`method-option ${
+                          showCredentialForm && autoConfigPossible
+                            ? "selected"
+                            : ""
+                        }`}
                         onClick={() =>
-                          setShowAdvancedOptions(!showAdvancedOptions)
+                          autoConfigPossible && setShowCredentialForm(true)
                         }
                       >
-                        {showAdvancedOptions ? "Hide" : "Show"} Advanced Options
-                        <ChevronRight
-                          size={16}
-                          className={showAdvancedOptions ? "rotated" : ""}
-                        />
-                      </button>
+                        <div className="method-icon">
+                          <Zap size={24} />
+                        </div>
+                        <div className="method-content">
+                          <h5>Automatic Setup</h5>
+                          <p>
+                            We'll configure DNS records automatically using your
+                            domain provider's API
+                          </p>
+                          {!autoConfigPossible && (
+                            <span className="method-note">
+                              Not available for this provider
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <div
+                        className={`method-option ${
+                          !showCredentialForm ? "selected" : ""
+                        }`}
+                        onClick={() => setShowCredentialForm(false)}
+                      >
+                        <div className="method-icon">
+                          <Settings size={24} />
+                        </div>
+                        <div className="method-content">
+                          <h5>Manual Setup</h5>
+                          <p>
+                            We'll provide DNS records for you to add manually in
+                            your domain provider's control panel
+                          </p>
+                        </div>
+                      </div>
+                    </div>
 
-                      {showAdvancedOptions && (
-                        <div className="advanced-content">
-                          <div className="form-group">
-                            <label>Notification Email</label>
-                            <input
-                              type="email"
-                              value={emailForDNS}
-                              onChange={(e) => setEmailForDNS(e.target.value)}
-                              placeholder="Optional - for DNS change notifications"
-                            />
-                            <div className="form-hint">
-                              We'll email you when DNS changes are made
+                    {/* Disclaimer */}
+                    <div className="config-disclaimer">
+                      <Info size={14} />
+                      <span>
+                        You can skip DNS configuration for now and set it up
+                        later from your account settings. Your site will be
+                        deployed immediately after payment.
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* API Credentials Form */}
+                  {showCredentialForm && autoConfigPossible && (
+                    <div className="api-credentials-form">
+                      <h4>Automatic DNS Configuration</h4>
+                      <div className="form-description">
+                        <p>
+                          Select your domain provider and enter your API
+                          credentials. We'll configure DNS records
+                          automatically.
+                        </p>
+                      </div>
+
+                      {/* Security Disclaimer */}
+                      <div className="security-disclaimer">
+                        <Shield size={16} />
+                        <div>
+                          <strong>Your credentials are secure</strong>
+                          <p>
+                            Your API token is used once to configure DNS records
+                            and is immediately discarded. We never store your
+                            credentials.
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Provider Selector */}
+                      <div className="provider-selector">
+                        <label>Select your domain provider:</label>
+                        <div className="provider-options">
+                          <button
+                            type="button"
+                            className={`provider-option ${
+                              registrarDetected === "Cloudflare"
+                                ? "selected"
+                                : ""
+                            }`}
+                            onClick={() => setRegistrarDetected("Cloudflare")}
+                          >
+                            <span className="provider-name">Cloudflare</span>
+                          </button>
+                          <button
+                            type="button"
+                            className={`provider-option ${
+                              registrarDetected === "Vercel" ? "selected" : ""
+                            }`}
+                            onClick={() => setRegistrarDetected("Vercel")}
+                          >
+                            <span className="provider-name">Vercel</span>
+                          </button>
+                          <button
+                            type="button"
+                            className={`provider-option ${
+                              registrarDetected === "GoDaddy" ? "selected" : ""
+                            }`}
+                            onClick={() => setRegistrarDetected("GoDaddy")}
+                          >
+                            <span className="provider-name">GoDaddy</span>
+                          </button>
+                          <button
+                            type="button"
+                            className={`provider-option ${
+                              registrarDetected === "Namecheap"
+                                ? "selected"
+                                : ""
+                            }`}
+                            onClick={() => setRegistrarDetected("Namecheap")}
+                          >
+                            <span className="provider-name">Namecheap</span>
+                          </button>
+                          <button
+                            type="button"
+                            className={`provider-option ${
+                              registrarDetected === "Google Domains"
+                                ? "selected"
+                                : ""
+                            }`}
+                            onClick={() =>
+                              setRegistrarDetected("Google Domains")
+                            }
+                          >
+                            <span className="provider-name">
+                              Google Domains
+                            </span>
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Show message if no supported provider selected */}
+                      {![
+                        "Cloudflare",
+                        "Vercel",
+                        "GoDaddy",
+                        "Namecheap",
+                        "Google Domains",
+                      ].includes(registrarDetected) && (
+                        <div className="provider-select-prompt">
+                          <p>
+                            Select your domain provider above to see setup
+                            instructions and enter your API credentials.
+                          </p>
+                          <p className="provider-note">
+                            Don't see your provider? Choose{" "}
+                            <strong>Manual Setup</strong> instead to configure
+                            DNS records yourself.
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Inline Setup Guide for Cloudflare */}
+                      {registrarDetected === "Cloudflare" && (
+                        <>
+                          <div className="setup-guide">
+                            <h5>How to get your Cloudflare API Token:</h5>
+                            <ol className="guide-steps">
+                              <li>
+                                Log in to your{" "}
+                                <a
+                                  href="https://dash.cloudflare.com"
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  Cloudflare Dashboard
+                                </a>
+                              </li>
+                              <li>
+                                Click on your profile icon (top right) →{" "}
+                                <strong>My Profile</strong>
+                              </li>
+                              <li>
+                                Go to <strong>API Tokens</strong> tab
+                              </li>
+                              <li>
+                                Click <strong>Create Token</strong>
+                              </li>
+                              <li>
+                                Use the <strong>Edit zone DNS</strong> template
+                              </li>
+                              <li>Under Zone Resources, select your domain</li>
+                              <li>
+                                Click <strong>Continue to summary</strong> →{" "}
+                                <strong>Create Token</strong>
+                              </li>
+                              <li>
+                                Copy the token (you won't be able to see it
+                                again!)
+                              </li>
+                            </ol>
+                          </div>
+                          <div className="form-fields">
+                            <div className="form-group">
+                              <label>Cloudflare Email</label>
+                              <input
+                                type="email"
+                                value={apiCredentials.cloudflare.email}
+                                onChange={(e) =>
+                                  handleCredentialsChange(
+                                    "cloudflare",
+                                    "email",
+                                    e.target.value
+                                  )
+                                }
+                                placeholder="you@example.com"
+                              />
+                              <div className="form-hint">
+                                Email for your Cloudflare account
+                              </div>
+                            </div>
+                            <div className="form-group">
+                              <label>API Token</label>
+                              <input
+                                type="password"
+                                value={apiCredentials.cloudflare.apiToken}
+                                onChange={(e) =>
+                                  handleCredentialsChange(
+                                    "cloudflare",
+                                    "apiToken",
+                                    e.target.value
+                                  )
+                                }
+                                placeholder="••••••••••••••••"
+                              />
+                              <div className="form-hint">
+                                Paste your API token with{" "}
+                                <code>Zone:DNS:Edit</code> permission
+                              </div>
                             </div>
                           </div>
+                        </>
+                      )}
+
+                      {/* Inline Setup Guide for GoDaddy */}
+                      {registrarDetected === "GoDaddy" && (
+                        <>
+                          <div className="setup-guide">
+                            <h5>How to get your GoDaddy API Key:</h5>
+                            <ol className="guide-steps">
+                              <li>
+                                Go to{" "}
+                                <a
+                                  href="https://developer.godaddy.com/keys"
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  GoDaddy Developer Portal
+                                </a>
+                              </li>
+                              <li>Sign in with your GoDaddy account</li>
+                              <li>
+                                Click <strong>Create New API Key</strong>
+                              </li>
+                              <li>
+                                Set Environment to <strong>Production</strong>
+                              </li>
+                              <li>
+                                Copy both the <strong>Key</strong> and{" "}
+                                <strong>Secret</strong>
+                              </li>
+                            </ol>
+                          </div>
+                          <div className="form-fields">
+                            <div className="form-group">
+                              <label>API Key</label>
+                              <input
+                                type="text"
+                                value={apiCredentials.godaddy?.apiKey || ""}
+                                onChange={(e) =>
+                                  handleCredentialsChange(
+                                    "godaddy",
+                                    "apiKey",
+                                    e.target.value
+                                  )
+                                }
+                                placeholder="Your GoDaddy API Key"
+                              />
+                            </div>
+                            <div className="form-group">
+                              <label>API Secret</label>
+                              <input
+                                type="password"
+                                value={apiCredentials.godaddy?.apiSecret || ""}
+                                onChange={(e) =>
+                                  handleCredentialsChange(
+                                    "godaddy",
+                                    "apiSecret",
+                                    e.target.value
+                                  )
+                                }
+                                placeholder="••••••••••••••••"
+                              />
+                            </div>
+                          </div>
+                        </>
+                      )}
+
+                      {/* Inline Setup Guide for Namecheap */}
+                      {registrarDetected === "Namecheap" && (
+                        <>
+                          <div className="setup-guide">
+                            <h5>How to get your Namecheap API Key:</h5>
+                            <ol className="guide-steps">
+                              <li>
+                                Log in to{" "}
+                                <a
+                                  href="https://www.namecheap.com"
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  Namecheap
+                                </a>
+                              </li>
+                              <li>
+                                Go to <strong>Profile</strong> →{" "}
+                                <strong>Tools</strong>
+                              </li>
+                              <li>
+                                Scroll to <strong>Namecheap API Access</strong>
+                              </li>
+                              <li>
+                                Click <strong>Manage</strong> (API access must
+                                be enabled on your account)
+                              </li>
+                              <li>Copy your API Key</li>
+                              <li>
+                                Add your current IP address to the whitelist
+                              </li>
+                            </ol>
+                            <div className="guide-note">
+                              <AlertCircle size={14} />
+                              <span>
+                                Note: Namecheap requires a minimum account
+                                balance or purchase history to enable API
+                                access.
+                              </span>
+                            </div>
+                          </div>
+                          <div className="form-fields">
+                            <div className="form-group">
+                              <label>API Username</label>
+                              <input
+                                type="text"
+                                value={apiCredentials.namecheap?.apiUser || ""}
+                                onChange={(e) =>
+                                  handleCredentialsChange(
+                                    "namecheap",
+                                    "apiUser",
+                                    e.target.value
+                                  )
+                                }
+                                placeholder="Your Namecheap username"
+                              />
+                            </div>
+                            <div className="form-group">
+                              <label>API Key</label>
+                              <input
+                                type="password"
+                                value={apiCredentials.namecheap?.apiKey || ""}
+                                onChange={(e) =>
+                                  handleCredentialsChange(
+                                    "namecheap",
+                                    "apiKey",
+                                    e.target.value
+                                  )
+                                }
+                                placeholder="••••••••••••••••"
+                              />
+                            </div>
+                          </div>
+                        </>
+                      )}
+
+                      {/* Inline Setup Guide for Vercel */}
+                      {registrarDetected === "Vercel" && (
+                        <>
+                          <div className="setup-guide">
+                            <h5>How to get your Vercel API Token:</h5>
+                            <ol className="guide-steps">
+                              <li>
+                                Go to your{" "}
+                                <a
+                                  href="https://vercel.com/account/tokens"
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  Vercel Account Settings
+                                </a>
+                              </li>
+                              <li>
+                                Scroll to <strong>Tokens</strong> section
+                              </li>
+                              <li>
+                                Click <strong>Create</strong>
+                              </li>
+                              <li>Give it a name (e.g., "DNS Management")</li>
+                              <li>
+                                Set scope to <strong>Full Account</strong>
+                              </li>
+                              <li>Copy the token (you won't see it again!)</li>
+                            </ol>
+                          </div>
+                          <div className="form-fields">
+                            <div className="form-group">
+                              <label>Vercel API Token</label>
+                              <input
+                                type="password"
+                                value={apiCredentials.vercel?.apiToken || ""}
+                                onChange={(e) =>
+                                  handleCredentialsChange(
+                                    "vercel",
+                                    "apiToken",
+                                    e.target.value
+                                  )
+                                }
+                                placeholder="••••••••••••••••"
+                              />
+                              <div className="form-hint">
+                                Your Vercel API token with full account access
+                              </div>
+                            </div>
+                          </div>
+                        </>
+                      )}
+
+                      {/* Inline Setup Guide for Google Domains */}
+                      {registrarDetected === "Google Domains" && (
+                        <>
+                          <div className="setup-guide">
+                            <h5>How to get your Google Domains API access:</h5>
+                            <ol className="guide-steps">
+                              <li>
+                                Go to{" "}
+                                <a
+                                  href="https://domains.google.com"
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  Google Domains
+                                </a>
+                              </li>
+                              <li>Select your domain</li>
+                              <li>
+                                Go to <strong>DNS</strong> →{" "}
+                                <strong>Show advanced settings</strong>
+                              </li>
+                              <li>
+                                Under <strong>Dynamic DNS</strong>, create
+                                credentials
+                              </li>
+                              <li>
+                                Copy the <strong>Username</strong> and{" "}
+                                <strong>Password</strong>
+                              </li>
+                            </ol>
+                            <div className="guide-note">
+                              <AlertCircle size={14} />
+                              <span>
+                                Note: Google Domains was acquired by
+                                Squarespace. If your domain was migrated, use
+                                Manual Setup instead.
+                              </span>
+                            </div>
+                          </div>
+                          <div className="form-fields">
+                            <div className="form-group">
+                              <label>API Username</label>
+                              <input
+                                type="text"
+                                value={
+                                  apiCredentials.googledomains?.username || ""
+                                }
+                                onChange={(e) =>
+                                  handleCredentialsChange(
+                                    "googledomains",
+                                    "username",
+                                    e.target.value
+                                  )
+                                }
+                                placeholder="Your Google Domains username"
+                              />
+                            </div>
+                            <div className="form-group">
+                              <label>API Password</label>
+                              <input
+                                type="password"
+                                value={
+                                  apiCredentials.googledomains?.password || ""
+                                }
+                                onChange={(e) =>
+                                  handleCredentialsChange(
+                                    "googledomains",
+                                    "password",
+                                    e.target.value
+                                  )
+                                }
+                                placeholder="••••••••••••••••"
+                              />
+                            </div>
+                          </div>
+                        </>
+                      )}
+
+                      {/* Show Save button only when a provider is selected and has form fields */}
+                      {[
+                        "Cloudflare",
+                        "Vercel",
+                        "GoDaddy",
+                        "Namecheap",
+                        "Google Domains",
+                      ].includes(registrarDetected) && (
+                        <div className="form-actions">
+                          <button
+                            className="btn btn-primary"
+                            onClick={saveCredentials}
+                            disabled={
+                              (registrarDetected === "Cloudflare" &&
+                                (!apiCredentials.cloudflare?.email ||
+                                  !apiCredentials.cloudflare?.apiToken)) ||
+                              (registrarDetected === "Vercel" &&
+                                !apiCredentials.vercel?.apiToken) ||
+                              (registrarDetected === "GoDaddy" &&
+                                (!apiCredentials.godaddy?.apiKey ||
+                                  !apiCredentials.godaddy?.apiSecret)) ||
+                              (registrarDetected === "Namecheap" &&
+                                (!apiCredentials.namecheap?.apiUser ||
+                                  !apiCredentials.namecheap?.apiKey)) ||
+                              (registrarDetected === "Google Domains" &&
+                                (!apiCredentials.googledomains?.username ||
+                                  !apiCredentials.googledomains?.password))
+                            }
+                          >
+                            <Check size={16} />
+                            Save & Continue
+                          </button>
                         </div>
                       )}
                     </div>
+                  )}
 
-                    <div className="form-actions">
-                      <button
-                        className="btn btn-primary"
-                        onClick={saveCredentials}
-                        disabled={
-                          !apiCredentials[
-                            registrarDetected.toLowerCase().replace(/ /g, "")
-                          ]?.email
-                        }
-                      >
-                        <Check size={16} />
-                        Save & Continue
-                      </button>
-                      <button
-                        className="btn btn-outline"
-                        onClick={() => setShowCredentialForm(false)}
-                      >
-                        Skip to Manual Setup
-                      </button>
-                    </div>
-                  </div>
-                )}
+                  {/* Manual Setup Guide */}
+                  {!showCredentialForm && (
+                    <div className="manual-setup-guide">
+                      <h4>Manual DNS Configuration</h4>
+                      <p className="guide-intro">
+                        After deployment, you'll need to add these DNS records
+                        at your domain provider. Here's exactly what you'll need
+                        to do:
+                      </p>
 
-                {/* Setup Summary */}
-                {!showCredentialForm && (
-                  <div className="setup-summary">
-                    <h4>What to Expect</h4>
-                    <div className="setup-steps">
-                      <div className="setup-step">
-                        <div className="step-number">1</div>
-                        <div className="step-content">
-                          <strong>DNS Configuration</strong>
-                          <p>You'll add DNS records at your domain provider</p>
+                      <div className="dns-records-preview">
+                        <h5>DNS Records to Add</h5>
+                        <div className="dns-record-item">
+                          <div className="record-badge">A Record</div>
+                          <div className="record-details">
+                            <div className="record-row">
+                              <span className="record-label">Host/Name:</span>
+                              <code className="record-value-code">@</code>
+                              <span className="record-hint">
+                                (or leave blank)
+                              </span>
+                            </div>
+                            <div className="record-row">
+                              <span className="record-label">
+                                Value/Points to:
+                              </span>
+                              <code className="record-value-code">
+                                76.76.21.21
+                              </code>
+                              <button
+                                type="button"
+                                className="btn-copy-inline"
+                                onClick={() => {
+                                  navigator.clipboard.writeText("76.76.21.21");
+                                }}
+                              >
+                                <Copy size={12} />
+                              </button>
+                            </div>
+                            <div className="record-row">
+                              <span className="record-label">TTL:</span>
+                              <code className="record-value-code">3600</code>
+                              <span className="record-hint">(or Auto)</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="dns-record-item">
+                          <div className="record-badge">CNAME Record</div>
+                          <div className="record-details">
+                            <div className="record-row">
+                              <span className="record-label">Host/Name:</span>
+                              <code className="record-value-code">www</code>
+                            </div>
+                            <div className="record-row">
+                              <span className="record-label">
+                                Value/Points to:
+                              </span>
+                              <code className="record-value-code">
+                                cname.vercel-dns.com
+                              </code>
+                              <button
+                                type="button"
+                                className="btn-copy-inline"
+                                onClick={() => {
+                                  navigator.clipboard.writeText(
+                                    "cname.vercel-dns.com"
+                                  );
+                                }}
+                              >
+                                <Copy size={12} />
+                              </button>
+                            </div>
+                            <div className="record-row">
+                              <span className="record-label">TTL:</span>
+                              <code className="record-value-code">3600</code>
+                              <span className="record-hint">(or Auto)</span>
+                            </div>
+                          </div>
                         </div>
                       </div>
-                      <div className="setup-step">
-                        <div className="step-number">2</div>
-                        <div className="step-content">
-                          <strong>Propagation</strong>
-                          <p>
-                            DNS changes take 5-60 minutes to propagate worldwide
-                          </p>
-                        </div>
-                      </div>
-                      <div className="setup-step">
-                        <div className="step-number">3</div>
-                        <div className="step-content">
-                          <strong>Auto SSL</strong>
-                          <p>
-                            SSL certificate issues automatically once DNS is set
-                          </p>
+
+                      <div className="setup-timeline">
+                        <h5>What Happens Next</h5>
+                        <div className="timeline-steps">
+                          <div className="timeline-step">
+                            <div className="timeline-icon">
+                              <CreditCard size={16} />
+                            </div>
+                            <div className="timeline-content">
+                              <strong>Complete Payment</strong>
+                              <p>Your site will be deployed immediately</p>
+                            </div>
+                          </div>
+                          <div className="timeline-step">
+                            <div className="timeline-icon">
+                              <Settings size={16} />
+                            </div>
+                            <div className="timeline-content">
+                              <strong>Add DNS Records</strong>
+                              <p>
+                                Log into your domain provider and add the
+                                records above
+                              </p>
+                            </div>
+                          </div>
+                          <div className="timeline-step">
+                            <div className="timeline-icon">
+                              <RefreshCw size={16} />
+                            </div>
+                            <div className="timeline-content">
+                              <strong>Wait for Propagation</strong>
+                              <p>
+                                DNS changes take 5-60 minutes to propagate
+                                worldwide
+                              </p>
+                            </div>
+                          </div>
+                          <div className="timeline-step">
+                            <div className="timeline-icon">
+                              <Shield size={16} />
+                            </div>
+                            <div className="timeline-content">
+                              <strong>SSL Auto-Provisioned</strong>
+                              <p>
+                                HTTPS certificate is issued automatically once
+                                DNS is verified
+                              </p>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                )}
-              </>
-            )}
+                  )}
+                </>
+              )}
           </div>
         )}
 
@@ -700,6 +1280,7 @@ const DomainSetupStep = ({
 };
 
 // Step 3: Payment - Updated with Automated Domain Configuration
+// Step 3: Enhanced Payment Step
 const PaymentStep = ({
   siteName,
   useCustomDomain,
@@ -721,11 +1302,44 @@ const PaymentStep = ({
     step: "initial",
     message: "Ready to deploy",
   });
+  const [showPaymentDetails, setShowPaymentDetails] = useState(false);
 
+  // Update progress
   const updateProgress = (step, message) => {
     setDeploymentProgress({ step, message });
   };
 
+  // Poll for domain verification status
+  const startDomainVerificationPolling = (domain, deploymentId, siteName) => {
+    const pollInterval = setInterval(async () => {
+      try {
+        const { data } = await supabase.functions.invoke(
+          "check-domain-verification",
+          {
+            body: { domain, deploymentId, siteName },
+          }
+        );
+
+        if (data?.verified) {
+          clearInterval(pollInterval);
+          // Update site record with verified status
+          await supabase
+            .from("sites")
+            .update({ domain_status: "active" })
+            .eq("site_name", siteName);
+        }
+      } catch (err) {
+        console.log("Domain verification polling error:", err);
+      }
+    }, 30000); // Poll every 30 seconds
+
+    // Stop polling after 10 minutes
+    setTimeout(() => {
+      clearInterval(pollInterval);
+    }, 600000);
+  };
+
+  // Handle submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!stripe || !elements) return;
@@ -795,7 +1409,7 @@ const PaymentStep = ({
       };
 
       const { data: deployData, error: deployError } =
-        await supabase.functions.invoke("deploy-to-vercel-automated", {
+        await supabase.functions.invoke("deploy-to-vercel", {
           body: deploymentBody,
         });
 
@@ -827,7 +1441,7 @@ const PaymentStep = ({
           : "none",
         vercel_deployment_id: deployData.deploymentId,
         vercel_project_id: deployData.projectId,
-        domain_credentials: useCustomDomain ? domainCredentials : null,
+        // Note: domain_credentials intentionally NOT stored for security
       });
 
       if (dbError) console.error("Database error:", dbError);
@@ -867,34 +1481,6 @@ const PaymentStep = ({
     }
   };
 
-  const startDomainVerificationPolling = (domain, deploymentId, siteName) => {
-    // This will run in the background
-    const pollInterval = setInterval(async () => {
-      try {
-        const { data } = await supabase.functions.invoke(
-          "check-domain-verification",
-          {
-            body: { domain, deploymentId },
-          }
-        );
-
-        if (data?.verified) {
-          clearInterval(pollInterval);
-          // Update database
-          await supabase
-            .from("sites")
-            .update({ domain_status: "active" })
-            .eq("site_name", siteName);
-        }
-      } catch (err) {
-        console.log("Polling error:", err);
-      }
-    }, 30000); // Check every 30 seconds
-
-    // Stop after 24 hours
-    setTimeout(() => clearInterval(pollInterval), 24 * 60 * 60 * 1000);
-  };
-
   return (
     <div className="step-container">
       <div className="step-header">
@@ -902,101 +1488,202 @@ const PaymentStep = ({
           <CreditCard size={32} />
         </div>
         <div className="step-header-content">
-          <h3>Payment & Deployment</h3>
-          <p>Complete payment to deploy your site instantly</p>
+          <h3>Review & Payment</h3>
+          <p>Complete your purchase to deploy your website</p>
         </div>
       </div>
 
       <div className="step-content">
-        {/* Deployment Progress */}
-        {processing && (
-          <div className="deployment-progress">
-            <div className="progress-header">
-              <Loader size={16} className="spinning" />
-              <span>{deploymentProgress.message}</span>
-            </div>
-            <div className="progress-steps">
-              {[
-                { key: "payment", label: "Payment" },
-                { key: "subscription", label: "Subscription" },
-                { key: "deployment", label: "Deployment" },
-                { key: "domain", label: "Domain Setup" },
-                { key: "complete", label: "Complete" },
-              ].map((step) => (
-                <div
-                  key={step.key}
-                  className={`progress-step ${
-                    deploymentProgress.step === step.key ? "active" : ""
-                  } ${
-                    ["complete", "error"].includes(deploymentProgress.step)
-                      ? "complete"
-                      : ""
-                  }`}
-                >
-                  <div className="step-dot" />
-                  <span className="step-label">{step.label}</span>
+        {/* Deployment Preview */}
+        <div className="deployment-preview">
+          <h4>Deployment Summary</h4>
+          <div className="preview-card">
+            <div className="preview-header">
+              <Server size={20} />
+              <div>
+                <strong>{siteName}</strong>
+                <div className="preview-url">
+                  {useCustomDomain ? customDomain : `${siteName}.vercel.app`}
                 </div>
-              ))}
+              </div>
             </div>
-          </div>
-        )}
-
-        <div className="order-summary-card">
-          <h4>Order Summary</h4>
-          <div className="summary-items">
-            <div className="summary-item">
-              <span>Vercel Hosting</span>
-              <span>$5/month</span>
-            </div>
-            <div className="summary-item">
-              <span>Site Name</span>
-              <span>{siteName}.vercel.app</span>
-            </div>
-            {useCustomDomain && customDomain && (
-              <>
-                <div className="summary-item">
-                  <span>Custom Domain</span>
-                  <span>{customDomain}</span>
-                </div>
-                <div className="summary-item">
-                  <span>Automated DNS Setup</span>
-                  <span>Included</span>
-                </div>
-                <div className="summary-item">
-                  <span>SSL Certificate</span>
-                  <span>Included</span>
-                </div>
-              </>
-            )}
-            <div className="summary-total">
-              <span>Monthly Total</span>
-              <span className="total-price">$5.00</span>
+            <div className="preview-details">
+              <div className="detail-row">
+                <span>Hosting Provider</span>
+                <span>Vercel</span>
+              </div>
+              <div className="detail-row">
+                <span>Configuration</span>
+                <span>
+                  {useCustomDomain ? "Custom Domain" : "Vercel Domain"}
+                </span>
+              </div>
+              <div className="detail-row">
+                <span>SSL Certificate</span>
+                <span className="status-success">Auto-provisioned</span>
+              </div>
+              <div className="detail-row">
+                <span>CDN</span>
+                <span className="status-success">Global Network</span>
+              </div>
             </div>
           </div>
         </div>
 
+        {/* Cost Breakdown */}
+        <div className="cost-breakdown">
+          <h4>Monthly Subscription</h4>
+          <div className="cost-items">
+            <div className="cost-item">
+              <div className="cost-description">
+                <strong>Vercel Hosting</strong>
+                <p>Includes 100GB bandwidth, SSL, CDN</p>
+              </div>
+              <div className="cost-amount">$5.00</div>
+            </div>
+            {useCustomDomain && (
+              <div className="cost-item">
+                <div className="cost-description">
+                  <strong>Custom Domain Support</strong>
+                  <p>DNS management & auto-SSL</p>
+                </div>
+                <div className="cost-amount">$0.00</div>
+              </div>
+            )}
+            <div className="cost-item total">
+              <div className="cost-description">
+                <strong>Total per month</strong>
+                <p>Billed monthly, cancel anytime</p>
+              </div>
+              <div className="cost-amount total-amount">$5.00</div>
+            </div>
+          </div>
+        </div>
+
+        {/* What Happens Next */}
+        <div className="process-info">
+          <h4>What Happens After Payment</h4>
+          <div className="process-steps">
+            <div className="process-step">
+              <div className="step-icon">
+                <Cloud size={20} />
+              </div>
+              <div className="step-content">
+                <strong>Instant Deployment</strong>
+                <p>Your site deploys to Vercel's global network in seconds</p>
+              </div>
+            </div>
+            {useCustomDomain && (
+              <div className="process-step">
+                <div className="step-icon">
+                  <Globe size={20} />
+                </div>
+                <div className="step-content">
+                  <strong>Domain Configuration</strong>
+                  {domainCredentials ? (
+                    <p>
+                      DNS automatically configured via{" "}
+                      {domainCredentials.registrar} API
+                    </p>
+                  ) : (
+                    <p>
+                      You'll receive DNS records to add at your domain provider
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+            <div className="process-step">
+              <div className="step-icon">
+                <Shield size={20} />
+              </div>
+              <div className="step-content">
+                <strong>SSL Provisioning</strong>
+                <p>HTTPS certificate automatically issued and configured</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Payment Form */}
         <form onSubmit={handleSubmit} className="payment-form">
           <div className="payment-section">
-            <label className="payment-label">Card Details</label>
-            <div className="card-element-container">
-              <CardElement
-                options={{
-                  style: {
-                    base: {
-                      fontSize: "16px",
-                      color: "var(--color-text-primary)",
-                      "::placeholder": { color: "var(--color-text-tertiary)" },
+            <div className="section-header">
+              <h4>Payment Method</h4>
+              <button
+                type="button"
+                className="btn-link"
+                onClick={() => setShowPaymentDetails(!showPaymentDetails)}
+              >
+                {showPaymentDetails ? "Hide" : "Show"} Details
+              </button>
+            </div>
+
+            {showPaymentDetails && (
+              <div className="payment-details">
+                <div className="detail-card">
+                  <div className="detail">
+                    <span>Billing Cycle</span>
+                    <span>Monthly</span>
+                  </div>
+                  <div className="detail">
+                    <span>Next Billing Date</span>
+                    <span>30 days from now</span>
+                  </div>
+                  <div className="detail">
+                    <span>Cancel Anytime</span>
+                    <span className="status-success">Yes</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="card-input-section">
+              <label>Card Information</label>
+              <div className="card-element-wrapper">
+                <CardElement
+                  options={{
+                    style: {
+                      base: {
+                        fontSize: "16px",
+                        color: "var(--color-text-primary)",
+                        "::placeholder": {
+                          color: "var(--color-text-tertiary)",
+                        },
+                      },
                     },
-                  },
-                }}
-                onChange={(e) => setCardComplete(e.complete)}
-              />
+                    hidePostalCode: true,
+                  }}
+                  onChange={(e) => setCardComplete(e.complete)}
+                />
+              </div>
+              <div className="card-hint">
+                <Lock size={12} />
+                <span>Your payment is secure and encrypted</span>
+              </div>
             </div>
           </div>
 
-          <div className="payment-security">
-            <Lock size={16} />
-            <span>Your payment is secure and encrypted</span>
+          {/* Guarantee & Support */}
+          <div className="assurance-section">
+            <div className="assurance-card">
+              <div className="assurance-icon">
+                <Shield size={24} />
+              </div>
+              <div className="assurance-content">
+                <h5>30-Day Money-Back Guarantee</h5>
+                <p>If you're not satisfied, we'll refund your first month.</p>
+              </div>
+            </div>
+            <div className="assurance-card">
+              <div className="assurance-icon">
+                <Users size={24} />
+              </div>
+              <div className="assurance-content">
+                <h5>24/7 Support</h5>
+                <p>Get help anytime via chat or email.</p>
+              </div>
+            </div>
           </div>
 
           {error && (
@@ -1006,59 +1693,66 @@ const PaymentStep = ({
             </div>
           )}
 
-          <div className="guarantee-card">
-            <CheckCircle size={20} />
-            <div>
-              <strong>30-Day Money-Back Guarantee</strong>
-              <p>If you're not satisfied, we'll refund your first month.</p>
-            </div>
+          {/* Navigation */}
+          <div className="step-actions">
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={onBack}
+              disabled={processing}
+            >
+              <ChevronLeft size={20} />
+              Back
+            </button>
+            <button
+              type="submit"
+              className="btn btn-primary btn-large"
+              disabled={!stripe || processing || !cardComplete}
+            >
+              {processing ? (
+                <>
+                  <Loader className="spinning" size={20} />
+                  <span>Processing...</span>
+                </>
+              ) : (
+                <>
+                  <Check size={20} />
+                  <span>Deploy My Website - $5/month</span>
+                </>
+              )}
+            </button>
+          </div>
+
+          <div className="payment-note">
+            <p>
+              By clicking "Deploy My Website", you agree to our{" "}
+              <a href="/terms">Terms of Service</a> and authorize monthly
+              charges of $5 until canceled.
+            </p>
           </div>
         </form>
-
-        <div className="step-actions">
-          <button
-            type="button"
-            className="btn btn-secondary"
-            onClick={onBack}
-            disabled={processing}
-          >
-            <ChevronLeft size={20} />
-            Back
-          </button>
-          <button
-            type="submit"
-            className="btn btn-primary"
-            disabled={!stripe || processing || !cardComplete}
-            onClick={handleSubmit}
-          >
-            {processing ? (
-              <>
-                <Loader className="spinning" size={20} />
-                <span>Processing...</span>
-              </>
-            ) : (
-              <>
-                <Check size={20} />
-                <span>Deploy My Website Now</span>
-              </>
-            )}
-          </button>
-        </div>
       </div>
     </div>
   );
 };
 
 // Step 4: Success - Updated for Automated Domain Configuration
-const SuccessStep = ({ deployment, onClose, onEditSite }) => {
+// Step 4: Enhanced Success Step
+const SuccessStep = ({
+  deployment,
+  onClose,
+  onEditSite,
+  onOpenDomainSettings,
+}) => {
   const [copied, setCopied] = useState(false);
   const [showDnsDetails, setShowDnsDetails] = useState(false);
   const [copyStatus, setCopyStatus] = useState({});
   const [domainStatus, setDomainStatus] = useState(
     deployment.domainVerified ? "active" : "pending"
   );
+  const [countdown, setCountdown] = useState(30);
 
-  // Start polling for domain verification if not already verified
+  // Start polling for domain verification
   useEffect(() => {
     if (deployment.useCustomDomain && !deployment.domainVerified) {
       const pollInterval = setInterval(async () => {
@@ -1082,7 +1776,15 @@ const SuccessStep = ({ deployment, onClose, onEditSite }) => {
         }
       }, 30000);
 
-      return () => clearInterval(pollInterval);
+      // Countdown timer
+      const countdownInterval = setInterval(() => {
+        setCountdown((prev) => (prev > 0 ? prev - 1 : 30));
+      }, 1000);
+
+      return () => {
+        clearInterval(pollInterval);
+        clearInterval(countdownInterval);
+      };
     }
   }, [deployment]);
 
@@ -1094,51 +1796,36 @@ const SuccessStep = ({ deployment, onClose, onEditSite }) => {
     }, 2000);
   };
 
-  const copyAllRecords = () => {
-    const records = deployment.dnsRecords
-      ?.map((r) => `${r.host} ${r.ttl} IN ${r.type} ${r.value}`)
-      .join("\n");
-    if (records) {
-      navigator.clipboard.writeText(records);
-      setCopyStatus({ ...copyStatus, all: true });
-      setTimeout(() => setCopyStatus({ ...copyStatus, all: false }), 2000);
-    }
-  };
-
   return (
     <div className="success-container">
       <div className="success-content">
         <div className="success-header">
-          <div className="success-icon">
-            <CheckCircle size={48} className="text-success" />
-          </div>
-          <h2>
-            {domainStatus === "active"
-              ? "Your Website is Live! 🎉"
-              : "Deployment Complete!"}
-          </h2>
+          <h2>Website Deployed Successfully!</h2>
           <p className="success-subtitle">
-            {domainStatus === "active"
-              ? "Your website has been successfully deployed and is now accessible online"
-              : "Your site is deployed. Domain setup is in progress."}
+            Your website is now live and accessible online
           </p>
         </div>
 
-        <div className="url-grid">
-          <div className="url-card">
+        {/* URLs */}
+        <div className="url-section">
+          <div className="url-card primary">
             <div className="url-header">
-              <Cloud size={20} />
-              <span>Vercel URL</span>
-            </div>
-            <div className="url-display">
+              <div className="url-badge">
+                <Cloud size={16} />
+                <span>Primary URL</span>
+              </div>
               <a
                 href={`https://${deployment.siteName}.vercel.app`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="site-url"
+                className="btn btn-outline btn-sm"
               >
-                https://{deployment.siteName}.vercel.app
+                <ExternalLink size={14} />
+                Visit
               </a>
+            </div>
+            <div className="url-value">
+              <code>https://{deployment.siteName}.vercel.app</code>
               <button
                 onClick={() =>
                   copyToClipboard(
@@ -1146,47 +1833,30 @@ const SuccessStep = ({ deployment, onClose, onEditSite }) => {
                     "vercel"
                   )
                 }
-                className="btn btn-secondary copy-btn"
+                className="btn btn-icon"
               >
                 {copyStatus.vercel ? <Check size={16} /> : <Copy size={16} />}
               </button>
             </div>
+            <div className="url-status active">
+              <CheckCircle size={12} />
+              <span>Active & accessible</span>
+            </div>
           </div>
 
           {deployment.useCustomDomain && deployment.customDomain && (
-            <div className="url-card domain-card">
+            <div className="url-card custom">
               <div className="url-header">
-                <Globe size={20} />
-                <span>Custom Domain</span>
-                <span
-                  className={`status-badge ${
-                    domainStatus === "active"
-                      ? "active"
-                      : deployment.autoConfigured
-                      ? "configuring"
-                      : "pending"
-                  }`}
-                >
-                  {domainStatus === "active"
-                    ? "Active"
-                    : deployment.autoConfigured
-                    ? "Auto-configuring..."
-                    : "Setup Required"}
+                <div className="url-badge">
+                  <Globe size={16} />
+                  <span>Custom Domain</span>
+                </div>
+                <span className={`status-badge ${domainStatus}`}>
+                  {domainStatus === "active" ? "Active" : "Setting Up..."}
                 </span>
               </div>
-              <div className="url-display">
-                <a
-                  href={`https://${deployment.customDomain}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="site-url"
-                  style={{
-                    opacity: domainStatus === "active" ? 1 : 0.7,
-                    cursor: domainStatus === "active" ? "pointer" : "default",
-                  }}
-                >
-                  https://{deployment.customDomain}
-                </a>
+              <div className="url-value">
+                <code>https://{deployment.customDomain}</code>
                 <button
                   onClick={() =>
                     copyToClipboard(
@@ -1194,223 +1864,212 @@ const SuccessStep = ({ deployment, onClose, onEditSite }) => {
                       "custom"
                     )
                   }
-                  className="btn btn-secondary copy-btn"
+                  className="btn btn-icon"
                 >
                   {copyStatus.custom ? <Check size={16} /> : <Copy size={16} />}
                 </button>
               </div>
 
-              {domainStatus !== "active" && !deployment.autoConfigured && (
-                <div className="domain-setup-section">
-                  <button
-                    className="btn btn-outline setup-toggle"
-                    onClick={() => setShowDnsDetails(!showDnsDetails)}
-                  >
-                    {showDnsDetails ? (
-                      <>
-                        <EyeOff size={16} />
-                        Hide DNS Instructions
-                      </>
-                    ) : (
-                      <>
-                        <Eye size={16} />
-                        Show DNS Instructions
-                      </>
-                    )}
-                  </button>
+              {domainStatus !== "active" && (
+                <div className="domain-setup">
+                  <div className="setup-progress">
+                    <div className="progress-bar">
+                      <div
+                        className="progress-fill"
+                        style={{ width: "60%" }}
+                      ></div>
+                    </div>
+                    <div className="progress-text">
+                      {deployment.autoConfigured ? (
+                        <>
+                          <Zap size={12} />
+                          <span>Auto-configuring DNS... ({countdown}s)</span>
+                        </>
+                      ) : (
+                        <>
+                          <Settings size={12} />
+                          <span>Manual setup required</span>
+                        </>
+                      )}
+                    </div>
+                  </div>
 
-                  {showDnsDetails && (
-                    <div className="dns-setup-instructions">
-                      <h4>DNS Configuration Required</h4>
-                      <p>
-                        Add these DNS records at your domain registrar to
-                        activate your domain:
-                      </p>
+                  {!deployment.autoConfigured && (
+                    <div className="setup-instructions">
+                      <button
+                        className="btn btn-outline btn-block"
+                        onClick={() => setShowDnsDetails(!showDnsDetails)}
+                      >
+                        {showDnsDetails ? (
+                          <>
+                            <EyeOff size={16} />
+                            Hide DNS Instructions
+                          </>
+                        ) : (
+                          <>
+                            <Eye size={16} />
+                            Show DNS Instructions
+                          </>
+                        )}
+                      </button>
 
-                      <div className="dns-records-header">
-                        <h5>Required DNS Records</h5>
-                        <button
-                          className="btn btn-secondary btn-sm"
-                          onClick={copyAllRecords}
-                        >
-                          {copyStatus.all ? (
-                            <Check size={14} />
-                          ) : (
-                            <Copy size={14} />
-                          )}
-                          Copy All Records
-                        </button>
-                      </div>
-
-                      <div className="dns-records-grid">
-                        {deployment.dnsRecords?.map((record, index) => (
-                          <div key={index} className="dns-record-card">
-                            <div className="record-header">
-                              <span className="record-type-badge">
-                                {record.type}
-                              </span>
-                              <span className="record-host">
-                                {record.host === "@"
-                                  ? deployment.customDomain
-                                  : `${record.host}.${deployment.customDomain}`}
-                              </span>
+                      {showDnsDetails && (
+                        <div className="dns-instructions">
+                          <h4>How to Configure Your Domain</h4>
+                          <div className="instruction-steps">
+                            <div className="instruction-step">
+                              <div className="step-number">1</div>
+                              <div className="step-content">
+                                <strong>Log into your domain provider</strong>
+                                <p>
+                                  Go to{" "}
+                                  {deployment.registrar ||
+                                    "your domain provider"}
+                                  's DNS management
+                                </p>
+                              </div>
                             </div>
-                            <div className="record-value">
-                              <code>{record.value}</code>
-                              <button
-                                onClick={() =>
-                                  copyToClipboard(
-                                    record.value,
-                                    `record-${index}`
-                                  )
-                                }
-                                className="copy-btn"
-                              >
-                                {copyStatus[`record-${index}`] ? (
-                                  <Check size={14} />
-                                ) : (
-                                  <Copy size={14} />
-                                )}
-                              </button>
+                            <div className="instruction-step">
+                              <div className="step-number">2</div>
+                              <div className="step-content">
+                                <strong>Add DNS records</strong>
+                                <p>Add the following records:</p>
+                                <div className="dns-records">
+                                  {deployment.dnsRecords?.map(
+                                    (record, index) => (
+                                      <div key={index} className="dns-record">
+                                        <div className="record-info">
+                                          <span className="record-type">
+                                            {record.type}
+                                          </span>
+                                          <span className="record-host">
+                                            {record.host}
+                                          </span>
+                                          <span className="record-value">
+                                            {record.value}
+                                          </span>
+                                        </div>
+                                        <button
+                                          onClick={() =>
+                                            copyToClipboard(
+                                              record.value,
+                                              `record-${index}`
+                                            )
+                                          }
+                                          className="btn btn-icon btn-sm"
+                                        >
+                                          {copyStatus[`record-${index}`] ? (
+                                            <Check size={12} />
+                                          ) : (
+                                            <Copy size={12} />
+                                          )}
+                                        </button>
+                                      </div>
+                                    )
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                            <div className="instruction-step">
+                              <div className="step-number">3</div>
+                              <div className="step-content">
+                                <strong>Wait for propagation</strong>
+                                <p>
+                                  DNS changes take 5-60 minutes to propagate
+                                  worldwide
+                                </p>
+                              </div>
                             </div>
                           </div>
-                        ))}
-                      </div>
+                        </div>
+                      )}
                     </div>
                   )}
-                </div>
-              )}
-
-              {deployment.autoConfigured && domainStatus !== "active" && (
-                <div className="auto-config-progress">
-                  <div className="progress-message">
-                    <Loader size={16} className="spinning" />
-                    <span>
-                      Automatically configuring DNS with {deployment.registrar}
-                      ... This may take a few minutes.
-                    </span>
-                  </div>
                 </div>
               )}
             </div>
           )}
         </div>
 
-        <div className="deployment-details">
-          <div className="detail-grid">
-            <div className="detail-item">
-              <span className="detail-label">Deployment ID</span>
-              <code className="detail-value">{deployment.deploymentId}</code>
+        {/* Next Steps */}
+        <div className="next-steps-section">
+          <h3>What's Next?</h3>
+          <div className="next-steps-grid">
+            <div className="next-step-card">
+              <div className="step-icon">
+                <Edit size={24} />
+              </div>
+              <div className="step-content">
+                <h4>Edit Your Site</h4>
+                <p>Customize content, colors, and layout</p>
+                <button onClick={onEditSite} className="btn btn-outline">
+                  Open Editor
+                </button>
+              </div>
             </div>
-            <div className="detail-item">
-              <span className="detail-label">Status</span>
-              <span className="detail-value status active">
-                ✓ {deployment.deploymentStatus}
-              </span>
-            </div>
-            <div className="detail-item">
-              <span className="detail-label">Domain Setup</span>
-              <span className="detail-value">
-                {deployment.autoConfigured
-                  ? "Automated"
-                  : deployment.useCustomDomain
-                  ? "Manual"
-                  : "Not Required"}
-              </span>
-            </div>
-            <div className="detail-item">
-              <span className="detail-label">Template</span>
-              <span className="detail-value">
-                {deployment.templateId || "Standard"}
-              </span>
+            <div className="next-step-card">
+              <div className="step-icon">
+                <Settings size={24} />
+              </div>
+              <div className="step-content">
+                <h4>Site Settings</h4>
+                <p>Manage domain, SEO, and integrations</p>
+                <button
+                  onClick={onOpenDomainSettings}
+                  className="btn btn-outline"
+                >
+                  Go to Settings
+                </button>
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="success-actions">
+        {/* Support Section */}
+        <div className="support-section">
+          <h3>Need Help?</h3>
+          <div className="support-options">
+            <a href="/docs/getting-started" className="support-option">
+              <div className="option-icon">
+                <FileText size={20} />
+              </div>
+              <div className="option-content">
+                <strong>Read Documentation</strong>
+                <p>Step-by-step guides and tutorials</p>
+              </div>
+            </a>
+            <a href="mailto:support@nimbus.com" className="support-option">
+              <div className="option-icon">
+                <Mail size={20} />
+              </div>
+              <div className="option-content">
+                <strong>Email Support</strong>
+                <p>Get help from our team</p>
+              </div>
+            </a>
+          </div>
+        </div>
+
+        {/* Actions */}
+        {/* <div className="success-actions">
           <button className="btn btn-secondary" onClick={onClose}>
             <ChevronLeft size={20} />
-            Build Another Site
+            Back to Dashboard
           </button>
-          <button className="btn btn-outline" onClick={onEditSite}>
+          <button className="btn btn-primary" onClick={onEditSite}>
             <Edit size={20} />
-            Edit This Site
+            Customize Site
           </button>
           <a
             href={`https://${deployment.siteName}.vercel.app`}
             target="_blank"
             rel="noopener noreferrer"
-            className="btn btn-primary"
+            className="btn btn-success"
           >
             <ExternalLink size={20} />
-            Visit Your Site
+            Visit Live Site
           </a>
-          {deployment.useCustomDomain && domainStatus !== "active" && (
-            <a href="/dashboard/settings/domains" className="btn btn-outline">
-              <Settings size={20} />
-              Domain Settings
-            </a>
-          )}
-        </div>
-
-        <div className="next-steps">
-          <h4>Next Steps</h4>
-          <div className="steps-grid">
-            {deployment.useCustomDomain && domainStatus !== "active" ? (
-              <>
-                <div className="step-item">
-                  <div className="step-number">1</div>
-                  <div className="step-content">
-                    <strong>Wait for DNS</strong>
-                    <p>
-                      {deployment.autoConfigured
-                        ? "DNS is being automatically configured"
-                        : "Add the DNS records at your registrar"}
-                    </p>
-                  </div>
-                </div>
-                <div className="step-item">
-                  <div className="step-number">2</div>
-                  <div className="step-content">
-                    <strong>SSL Provisioning</strong>
-                    <p>SSL certificate will auto-provision once DNS resolves</p>
-                  </div>
-                </div>
-                <div className="step-item">
-                  <div className="step-number">3</div>
-                  <div className="step-content">
-                    <strong>Access Your Site</strong>
-                    <p>Your site will be available at your custom domain</p>
-                  </div>
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="step-item">
-                  <div className="step-number">1</div>
-                  <div className="step-content">
-                    <strong>Edit Content</strong>
-                    <p>Update your site content anytime from the dashboard</p>
-                  </div>
-                </div>
-                <div className="step-item">
-                  <div className="step-number">2</div>
-                  <div className="step-content">
-                    <strong>Add Features</strong>
-                    <p>Upgrade your plan for additional features</p>
-                  </div>
-                </div>
-                <div className="step-item">
-                  <div className="step-number">3</div>
-                  <div className="step-content">
-                    <strong>Share Your Site</strong>
-                    <p>Share your new website with your audience</p>
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );
@@ -1431,6 +2090,10 @@ export default function PaymentModal({
   const [domainCredentials, setDomainCredentials] = useState(null);
   const [deployment, setDeployment] = useState(null);
   const { shouldRender, isVisible } = useModalAnimation(isOpen, 400);
+  // Add these new state variables
+  const [isCustomizeModalOpen, setIsCustomizeModalOpen] = useState(false);
+  const [isDomainModalOpen, setIsDomainModalOpen] = useState(false);
+  const [activeSiteForEditing, setActiveSiteForEditing] = useState(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -1461,21 +2124,32 @@ export default function PaymentModal({
 
   const handleEditSite = () => {
     if (!deployment) return;
-    handleClose();
-    window.dispatchEvent(
-      new CustomEvent("open-customize-with-site", {
-        detail: {
-          templateId: deployment.templateId,
-          isDeployedSite: true,
-          siteData: {
-            templateId: deployment.templateId,
-            customization: deployment.customization,
-            siteName: deployment.siteName,
-            vercelProjectId: deployment.vercelProjectId,
-          },
-        },
-      })
-    );
+
+    setActiveSiteForEditing({
+      id: deployment.deploymentId, // or any unique identifier
+      site_name: deployment.siteName,
+      custom_domain: deployment.customDomain,
+      vercel_project_id: deployment.vercelProjectId,
+      vercel_deployment_id: deployment.deploymentId,
+      // Add any other site data you need
+    });
+
+    setIsCustomizeModalOpen(true);
+  };
+
+  const handleOpenDomainModal = () => {
+    if (!deployment) return;
+
+    setActiveSiteForEditing({
+      id: deployment.deploymentId,
+      site_name: deployment.siteName,
+      custom_domain: deployment.customDomain,
+      vercel_project_id: deployment.vercelProjectId,
+      vercel_deployment_id: deployment.deploymentId,
+      domain_status: deployment.domainVerified ? "active" : "pending_setup",
+    });
+
+    setIsDomainModalOpen(true);
   };
 
   const renderStep = () => {
@@ -1524,6 +2198,7 @@ export default function PaymentModal({
               deployment={deployment}
               onClose={handleClose}
               onEditSite={handleEditSite}
+              onOpenDomainSettings={handleOpenDomainModal} // Add this prop
             />
           )
         );
@@ -1642,6 +2317,20 @@ export default function PaymentModal({
           </div>
         </div>
       </div>
+      <CustomizeModal
+        isOpen={isCustomizeModalOpen}
+        onClose={() => setIsCustomizeModalOpen(false)}
+        templateId={deployment?.templateId}
+        customization={deployment?.customization}
+        isDeployedSite={true}
+        siteData={activeSiteForEditing}
+      />
+
+      <CustomDomainRegistrationModal
+        isOpen={isDomainModalOpen}
+        onClose={() => setIsDomainModalOpen(false)}
+        site={activeSiteForEditing}
+      />
     </>
   );
 }
