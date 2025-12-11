@@ -37,6 +37,29 @@ class Template {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${customization.title || this.name}</title>
   ${this.getFontImports(theme)}
+  <script>
+    function getStoredTheme() {
+      return localStorage.getItem('theme') || 'light';
+    }
+    
+    function setTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      localStorage.setItem('theme', theme);
+      
+      const switches = document.querySelectorAll('.theme-toggle-switch');
+      switches.forEach(switchEl => {
+        switchEl.checked = theme === 'dark';
+      });
+    }
+    
+    function toggleTheme() {
+      const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      setTheme(newTheme);
+    }
+    
+    setTheme(getStoredTheme());
+  </script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     
@@ -133,32 +156,6 @@ class Template {
     
     ${this.getThemeSpecificCSS(theme)}
   </style>
-  <script>
-  // Theme management
-  function getStoredTheme() {
-    return localStorage.getItem('theme') || 'light';
-  }
-  
-  function setTheme(theme) {
-    document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('theme', theme);
-    
-    // Update all theme toggle switches
-    const switches = document.querySelectorAll('.theme-toggle-switch');
-    switches.forEach(switchEl => {
-      switchEl.checked = theme === 'dark';
-    });
-  }
-  
-  function toggleTheme() {
-    const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
-    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-    setTheme(newTheme);
-  }
-  
-  // Initialize theme immediately (not waiting for DOMContentLoaded)
-  setTheme(getStoredTheme());
-</script>
 </head>
 <body>
   ${html}
@@ -12316,8 +12313,6 @@ export const templates = {
       <!-- Quick Info Cards -->
       <section style="padding: ${
         isBrutalist || isRetro ? "4rem 0 2rem" : "3rem 0 1rem"
-      }; margin-top: ${
-        isBrutalist || isRetro ? "-4rem" : "-3rem"
       }; position: relative; z-index: 10;">
         <div class="container">
           <div class="info-cards" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: ${
@@ -12622,7 +12617,7 @@ export const templates = {
                   ? "var(--color-bg)"
                   : "var(--color-surface)"
               }; padding: ${
-                  isBrutalist || isElegant ? "2.5rem" : "2rem"
+                  isBrutalist || isElegant ? "2.5rem 0" : "2rem"
                 }; border-radius: ${
                   isGradient
                     ? "20px"
