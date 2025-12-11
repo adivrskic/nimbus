@@ -189,7 +189,7 @@ function UserAccountModal({ isOpen, onClose }) {
   // Listen for deployment success from PaymentModal
   useEffect(() => {
     const handleDeploymentSuccess = async () => {
-      console.log("📡 Deployment success detected, refreshing data...");
+      console.log("ðŸ“¡ Deployment success detected, refreshing data...");
       if (isOpen && user) {
         await loadSites();
         await loadStripeSubscriptions();
@@ -1179,17 +1179,28 @@ function UserAccountModal({ isOpen, onClose }) {
                         ) : (
                           site.billing_status === "active" && (
                             <div className="site-card__actions">
-                              {site.domain_status !== "active" && (
-                                <button
-                                  className="btn btn-warning btn-small"
-                                  onClick={() => handleConfigureDomain(site)}
-                                  disabled={isLoading}
-                                  title="Fix Domain Configuration"
-                                >
-                                  <Settings size={16} />
-                                  <span className="btn-text">Settings</span>
-                                </button>
-                              )}
+                              <button
+                                className={`btn btn-small ${
+                                  site.domain_status !== "active" &&
+                                  site.custom_domain
+                                    ? "btn-warning"
+                                    : "btn-outline"
+                                }`}
+                                onClick={() => handleConfigureDomain(site)}
+                                disabled={isLoading}
+                                title={
+                                  site.domain_status !== "active" &&
+                                  site.custom_domain
+                                    ? "Complete Domain Setup"
+                                    : "Domain Settings"
+                                }
+                              >
+                                <Settings size={16} />
+                                <span className="btn-text">
+                                  {site.domain_status !== "active" &&
+                                    "Settings"}
+                                </span>
+                              </button>
                               <button
                                 className="btn btn-secondary btn-small"
                                 onClick={() => handleEditDeployedSite(site)}
@@ -1459,7 +1470,7 @@ function UserAccountModal({ isOpen, onClose }) {
                           currentPassword: e.target.value,
                         })
                       }
-                      placeholder="••••••••"
+                      placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
                       autoComplete="current-password"
                       required
                       disabled={isLoading}
@@ -1481,7 +1492,7 @@ function UserAccountModal({ isOpen, onClose }) {
                           newPassword: e.target.value,
                         })
                       }
-                      placeholder="••••••••"
+                      placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
                       autoComplete="new-password"
                       required
                       disabled={isLoading}
@@ -1505,7 +1516,7 @@ function UserAccountModal({ isOpen, onClose }) {
                           confirmPassword: e.target.value,
                         })
                       }
-                      placeholder="••••••••"
+                      placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
                       autoComplete="new-password"
                       required
                       disabled={isLoading}

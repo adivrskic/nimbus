@@ -452,7 +452,7 @@ function CustomizeModal({
       });
 
       const { data, error } = await supabase.functions.invoke(
-        "redeploy-to-vercel",
+        "deploy-to-vercel",
         {
           body: {
             siteId: siteData.id,
