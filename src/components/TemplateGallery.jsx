@@ -138,11 +138,17 @@ function TemplateGallery({ onTemplateSelect }) {
   const scrollLeftRef = useRef(0);
 
   const scrollTemplatesToTop = () => {
-    // Use the grid ref for more reliable targeting
     const grid =
       gridRef.current || document.querySelector(".template-gallery__grid");
     if (grid) {
-      const offset = 170; // Account for sticky header/filters
+      const isMobile = window.innerWidth < 768;
+
+      let offset = 170;
+
+      if (isMobile) {
+        offset = 200;
+      }
+
       const elementPosition = grid.getBoundingClientRect().top;
       const offsetPosition = elementPosition + window.pageYOffset - offset;
 
@@ -352,7 +358,7 @@ function TemplateGallery({ onTemplateSelect }) {
         </div>
 
         {/* Sticky filters on the left (All Templates & Featured) */}
-        <div className="template-filters-sticky">
+        {/* <div className="template-filters-sticky">
           {categories.slice(0, 2).map((category) => (
             <button
               key={category.name}
@@ -362,11 +368,11 @@ function TemplateGallery({ onTemplateSelect }) {
               onClick={() => handleFilterClick(category.name)}
             >
               {category.name === "Featured" && <Star size={16} />}
-              <span>{category.name}</span>
+              <p>{category.name}</p>
               <span className="filter-count">{category.count}</span>
             </button>
           ))}
-        </div>
+        </div> */}
 
         {/* Scrollable filters container */}
         <div className="template-filters-scroll-container">
@@ -386,6 +392,19 @@ function TemplateGallery({ onTemplateSelect }) {
             onMouseUp={handleMouseUpOrLeave}
             onMouseLeave={handleMouseUpOrLeave}
           >
+            {categories.slice(0, 2).map((category) => (
+              <button
+                key={category.name}
+                className={`filter-tab ${
+                  activeFilter === category.name ? "active" : ""
+                }`}
+                onClick={() => handleFilterClick(category.name)}
+              >
+                {category.name === "Featured" && <Star size={16} />}
+                <p>{category.name}</p>
+                <span className="filter-count">{category.count}</span>
+              </button>
+            ))}
             {categories.slice(2).map((category) => (
               <button
                 key={category.name}

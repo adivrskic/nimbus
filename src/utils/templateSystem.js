@@ -59,6 +59,21 @@ class Template {
     }
     
     setTheme(getStoredTheme());
+
+    function toggleMobileMenu() {
+      const mobileMenu = document.querySelector('.mobile-menu');
+      const hamburgerBtn = document.querySelector('.hamburger-btn');
+      if (mobileMenu && hamburgerBtn) {
+        const isOpen = mobileMenu.style.display === 'block';
+        mobileMenu.style.display = isOpen ? 'none' : 'block';
+        // Update hamburger icon to X when open
+        if (isOpen) {
+          hamburgerBtn.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>';
+        } else {
+          hamburgerBtn.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>';
+        }
+      }
+    }
   </script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -549,6 +564,16 @@ export const templates = {
     category: "Landing Page",
     image: "landing-page",
     fields: {
+      showHeader: {
+        type: "boolean",
+        default: true,
+        label: "Show Header",
+      },
+      showThemeToggle: {
+        type: "boolean",
+        default: true,
+        label: "Show Theme Toggle",
+      },
       companyName: {
         type: "text",
         default: "MINIMAL",
@@ -572,10 +597,20 @@ export const templates = {
         default: "Get Started",
         label: "Primary CTA",
       },
+      ctaPrimaryLink: {
+        type: "text",
+        default: "#",
+        label: "Primary CTA Link",
+      },
       ctaSecondary: {
         type: "text",
         default: "Learn More",
         label: "Secondary CTA",
+      },
+      ctaSecondaryLink: {
+        type: "text",
+        default: "#features",
+        label: "Secondary CTA Link",
       },
       stats: {
         type: "group",
@@ -661,6 +696,10 @@ export const templates = {
       // Determine if we're in dark mode
       const isDark = colorMode === "dark";
 
+      // Get show/hide options with defaults
+      const showHeader = data.showHeader !== false;
+      const showThemeToggle = data.showThemeToggle !== false;
+
       // Neumorphism box-shadow helpers - use CSS custom properties
       const getNeumorphismShadow = (inset = false) => {
         if (!isNeumorphism) return "";
@@ -679,7 +718,56 @@ export const templates = {
         return "var(--neomorph-shadow-out)";
       };
 
-      return `
+      // Get CTA links with fallbacks
+      const primaryLink = data.ctaPrimaryLink || "#";
+      const secondaryLink = data.ctaSecondaryLink || "#features";
+
+      // Theme toggle HTML helper
+      const getThemeToggleDesktop = () => {
+        if (!showThemeToggle) return "";
+        return `
+              <li>
+                <label class="theme-toggle-switch-wrapper" style="cursor: pointer; ${
+                  isNeumorphism
+                    ? `padding: 0.5rem; border-radius: 12px; display: inline-block; box-shadow: var(--neomorph-shadow-out);`
+                    : ""
+                }">
+                  <input type="checkbox" class="theme-toggle-switch" onclick="toggleTheme()" aria-label="Toggle theme">
+                  <span class="theme-toggle-slider"></span>
+                </label>
+              </li>
+        `;
+      };
+
+      const getThemeToggleMobileControls = () => {
+        if (!showThemeToggle) return "";
+        return `
+              <button class="theme-toggle-btn mobile-theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+                <span class="theme-icon"></span>
+              </button>
+        `;
+      };
+
+      const getThemeToggleMobileMenu = () => {
+        if (!showThemeToggle) return "";
+        return `
+              <li>
+                <label class="theme-toggle-switch-wrapper" style="cursor: pointer; ${
+                  isNeumorphism
+                    ? `padding: 0.5rem; border-radius: 12px; display: inline-block; box-shadow: var(--neomorph-shadow-out);`
+                    : ""
+                }">
+                  <input type="checkbox" class="theme-toggle-switch" onclick="toggleTheme()" aria-label="Toggle theme">
+                  <span class="theme-toggle-slider"></span>
+                </label>
+              </li>
+        `;
+      };
+
+      // Header HTML
+      const getHeaderHTML = () => {
+        if (!showHeader) return "";
+        return `
       <!-- Sticky Header with Theme-Specific Styling -->
       <header style="padding: ${
         isBrutalist
@@ -690,57 +778,59 @@ export const templates = {
           ? "2rem 0"
           : "1.5rem 0"
       }; ${
-        isBrutalist
-          ? "border-bottom: 4px solid var(--color-accent);"
-          : isRetro
-          ? "border-bottom: 3px solid var(--color-accent);"
-          : isNeumorphism
-          ? ""
-          : isGlassmorphism
-          ? ""
-          : "border-bottom: 1px solid var(--color-border);"
-      } position: sticky; top: 0; ${
-        isGlassmorphism
-          ? "background: rgba(255, 255, 255, 0.1);"
-          : "background: var(--color-bg);"
-      } z-index: 100; backdrop-filter: blur(${
-        isGlassmorphism ? "20px" : "10px"
-      }); ${
-        isGlassmorphism ? "box-shadow: 0 8px 32px rgba(31, 38, 135, 0.1);" : ""
-      } ${isNeumorphism && "background: none"}">
+          isBrutalist
+            ? "border-bottom: 4px solid var(--color-accent);"
+            : isRetro
+            ? "border-bottom: 3px solid var(--color-accent);"
+            : isNeumorphism
+            ? ""
+            : isGlassmorphism
+            ? ""
+            : "border-bottom: 1px solid var(--color-border);"
+        } position: sticky; top: 0; ${
+          isGlassmorphism
+            ? "background: rgba(255, 255, 255, 0.1);"
+            : "background: var(--color-bg);"
+        } z-index: 100; backdrop-filter: blur(${
+          isGlassmorphism ? "20px" : "0px"
+        }); ${
+          isGlassmorphism
+            ? "box-shadow: 0 8px 32px rgba(31, 38, 135, 0.1);"
+            : ""
+        } ${isNeumorphism && "background: none"}">
         <div class="container">
           <nav style="${
             isNeumorphism
-              ? `display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 2rem; border-radius: 20px; ${getNeumorphismShadow(
+              ? `background: var(--color-bg); display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 2rem; border-radius: 20px; ${getNeumorphismShadow(
                   false
                 )}`
               : "display: flex; justify-content: space-between; align-items: center;"
           }">
-            <div class="logo" style="font-weight: ${
+            <div class="logo" style= "font-weight: ${
               isBrutalist ? "900" : isNeumorphism || isElegant ? "700" : "600"
             }; font-size: ${
-        isBrutalist
-          ? "2rem"
-          : isRetro
-          ? "1.5rem"
-          : isElegant
-          ? "1.5rem"
-          : isNeumorphism
-          ? "1.25rem"
-          : "1.125rem"
-      }; letter-spacing: ${
-        isBrutalist ? "2px" : isRetro ? "0" : isElegant ? "0" : "-0.02em"
-      }; ${isBrutalist || isRetro ? "text-transform: uppercase;" : ""} ${
-        isGradient
-          ? "background: linear-gradient(135deg, #667eea, #764ba2, #f093fb); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"
-          : isRetro
-          ? "background: linear-gradient(90deg, var(--color-accent), #00f5ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"
-          : isElegant
-          ? "font-family: Playfair Display, serif; color: var(--color-accent);"
-          : isNeumorphism || isGlassmorphism
-          ? "color: var(--color-accent);"
-          : ""
-      }">${data.companyName || "MINIMAL"}</div>
+          isBrutalist
+            ? "2rem"
+            : isRetro
+            ? "1.5rem"
+            : isElegant
+            ? "1.5rem"
+            : isNeumorphism
+            ? "1.25rem"
+            : "1.125rem"
+        }; letter-spacing: ${
+          isBrutalist ? "2px" : isRetro ? "0" : isElegant ? "0" : "-0.02em"
+        }; ${isBrutalist || isRetro ? "text-transform: uppercase;" : ""} ${
+          isGradient
+            ? "background: linear-gradient(135deg, #667eea, #764ba2, #f093fb); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"
+            : isRetro
+            ? "background: linear-gradient(90deg, var(--color-accent), #00f5ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"
+            : isElegant
+            ? "font-family: Playfair Display, serif; color: var(--color-accent);"
+            : isNeumorphism || isGlassmorphism
+            ? "color: var(--color-accent);"
+            : ""
+        }">${data.companyName || "MINIMAL"}</div>
             
             <!-- Desktop Navigation -->
             <ul class="nav-links" style="display: flex; gap: ${
@@ -757,86 +847,48 @@ export const templates = {
                   ? "var(--color-text-secondary)"
                   : "var(--color-text-secondary)"
               }; text-decoration: none; font-size: ${
-        isBrutalist
-          ? "1.125rem"
-          : isRetro
-          ? "0.875rem"
-          : isNeumorphism
-          ? "0.9375rem"
-          : "0.875rem"
-      }; transition: ${isBrutalist ? "all 0.1s" : "color 0.2s"}; font-weight: ${
-        isBrutalist ? "700" : isElegant ? "400" : isNeumorphism ? "500" : "500"
-      }; ${isBrutalist || isRetro ? "text-transform: uppercase;" : ""} ${
-        isRetro
-          ? "letter-spacing: 1px;"
-          : isElegant
-          ? "letter-spacing: 0.5px;"
-          : ""
-      }" ${
-        isBrutalist
-          ? `onmouseover="this.style.background='var(--color-text)'; this.style.color='var(--color-bg)'; this.style.padding='0.25rem 0.5rem'" onmouseout="this.style.background='transparent'; this.style.color='var(--color-text-secondary)'; this.style.padding='0'"`
-          : isRetro
-          ? `onmouseover="this.style.color='var(--color-accent)'; this.style.textShadow='0 0 10px var(--color-accent)'" onmouseout="this.style.color='var(--color-text-secondary)'; this.style.textShadow='none'"`
-          : isElegant
-          ? `onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text-secondary)'"`
-          : isGlassmorphism
-          ? `onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'"`
-          : isNeumorphism
-          ? `onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text-secondary)'"`
-          : `onmouseover="this.style.color='var(--color-text)'" onmouseout="this.style.color='var(--color-text-secondary)'"`
-      }>Features</a></li>
-              <li><a href="#testimonial" style="color: ${
-                isGlassmorphism
-                  ? "var(--color-text)"
-                  : isNeumorphism
-                  ? "var(--color-text-secondary)"
-                  : "var(--color-text-secondary)"
-              }; text-decoration: none; font-size: ${
-        isBrutalist
-          ? "1.125rem"
-          : isRetro
-          ? "0.875rem"
-          : isNeumorphism
-          ? "0.9375rem"
-          : "0.875rem"
-      }; transition: ${isBrutalist ? "all 0.1s" : "color 0.2s"}; font-weight: ${
-        isBrutalist ? "700" : isElegant ? "400" : isNeumorphism ? "500" : "500"
-      }; ${isBrutalist || isRetro ? "text-transform: uppercase;" : ""} ${
-        isRetro
-          ? "letter-spacing: 1px;"
-          : isElegant
-          ? "letter-spacing: 0.5px;"
-          : ""
-      }" ${
-        isBrutalist
-          ? `onmouseover="this.style.background='var(--color-text)'; this.style.color='var(--color-bg)'; this.style.padding='0.25rem 0.5rem'" onmouseout="this.style.background='transparent'; this.style.color='var(--color-text-secondary)'; this.style.padding='0'"`
-          : isRetro
-          ? `onmouseover="this.style.color='var(--color-accent)'; this.style.textShadow='0 0 10px var(--color-accent)'" onmouseout="this.style.color='var(--color-text-secondary)'; this.style.textShadow='none'"`
-          : isElegant
-          ? `onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text-secondary)'"`
-          : isGlassmorphism
-          ? `onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'"`
-          : isNeumorphism
-          ? `onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text-secondary)'"`
-          : `onmouseover="this.style.color='var(--color-text)'" onmouseout="this.style.color='var(--color-text-secondary)'"`
-      }>Reviews</a></li>
-              <li>
-                <label class="theme-toggle-switch-wrapper" style="cursor: pointer; ${
-                  isNeumorphism
-                    ? `padding: 0.5rem; border-radius: 12px; display: inline-block; box-shadow: var(--neomorph-shadow-out);`
-                    : ""
-                }">
-                  <input type="checkbox" class="theme-toggle-switch" onclick="toggleTheme()" aria-label="Toggle theme">
-                  <span class="theme-toggle-slider"></span>
-                </label>
-              </li>
+          isBrutalist
+            ? "1.125rem"
+            : isRetro
+            ? "0.875rem"
+            : isNeumorphism
+            ? "0.9375rem"
+            : "0.875rem"
+        }; transition: ${
+          isBrutalist ? "all 0.1s" : "color 0.2s"
+        }; font-weight: ${
+          isBrutalist
+            ? "700"
+            : isElegant
+            ? "400"
+            : isNeumorphism
+            ? "500"
+            : "500"
+        }; ${isBrutalist || isRetro ? "text-transform: uppercase;" : ""} ${
+          isRetro
+            ? "letter-spacing: 1px;"
+            : isElegant
+            ? "letter-spacing: 0.5px;"
+            : ""
+        }" ${
+          isBrutalist
+            ? `onmouseover="this.style.background='var(--color-text)'; this.style.color='var(--color-bg)'; this.style.padding='0.25rem 0.5rem'" onmouseout="this.style.background='transparent'; this.style.color='var(--color-text-secondary)'; this.style.padding='0'"`
+            : isRetro
+            ? `onmouseover="this.style.color='var(--color-accent)'; this.style.textShadow='0 0 10px var(--color-accent)'" onmouseout="this.style.color='var(--color-text-secondary)'; this.style.textShadow='none'"`
+            : isElegant
+            ? `onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text-secondary)'"`
+            : isGlassmorphism
+            ? `onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text)'"`
+            : isNeumorphism
+            ? `onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text-secondary)'"`
+            : `onmouseover="this.style.color='var(--color-text)'" onmouseout="this.style.color='var(--color-text-secondary)'"`
+        }>Features</a></li>
+              ${getThemeToggleDesktop()}
             </ul>
             
             <!-- Mobile Menu Button & Theme Toggle -->
             <div class="mobile-controls" style="display: none; align-items: center; gap: 1rem;">
-              <button class="theme-toggle-btn mobile-theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
-                <span class="theme-icon"></span>
-              </button>
+              ${getThemeToggleMobileControls()}
               <button class="hamburger-btn" onclick="toggleMobileMenu()" aria-label="Menu" style="background: none; border: none; cursor: pointer; padding: 0.5rem; color: var(--color-text);">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
                   <line x1="3" y1="12" x2="21" y2="12"></line>
@@ -855,21 +907,16 @@ export const templates = {
           } margin-top: 1rem;">
             <ul style="list-style: none; display: flex; flex-direction: column; gap: 1.5rem;">
               <li><a href="#features" onclick="toggleMobileMenu()" style="color: var(--color-text); text-decoration: none; font-size: 1.125rem; font-weight: 500; display: block;">Features</a></li>
-              <li><a href="#testimonial" onclick="toggleMobileMenu()" style="color: var(--color-text); text-decoration: none; font-size: 1.125rem; font-weight: 500; display: block;">Reviews</a></li>
-              <li>
-                <label class="theme-toggle-switch-wrapper" style="cursor: pointer; ${
-                  isNeumorphism
-                    ? `padding: 0.5rem; border-radius: 12px; display: inline-block; box-shadow: var(--neomorph-shadow-out);`
-                    : ""
-                }">
-                  <input type="checkbox" class="theme-toggle-switch" onclick="toggleTheme()" aria-label="Toggle theme">
-                  <span class="theme-toggle-slider"></span>
-                </label>
-              </li>
-              </ul>
+              ${getThemeToggleMobileMenu()}
+            </ul>
           </div>
         </div>
       </header>
+        `;
+      };
+
+      return `
+      ${getHeaderHTML()}
 
       <main>
         <!-- Hero Section with Theme-Specific Styling -->
@@ -995,17 +1042,17 @@ export const templates = {
               ${
                 data.ctaPrimary
                   ? `
-              <a href="#" style="padding: ${
-                isBrutalist
-                  ? "1.5rem 3rem"
-                  : isGradient || isNeumorphism
-                  ? "1.125rem 2.5rem"
-                  : isElegant
-                  ? "1rem 2.5rem"
-                  : isRetro
-                  ? "1rem 2.5rem"
-                  : "1rem 2rem"
-              }; border-radius: ${
+              <a href="${primaryLink}" style="padding: ${
+                      isBrutalist
+                        ? "1.5rem 3rem"
+                        : isGradient || isNeumorphism
+                        ? "1.125rem 2.5rem"
+                        : isElegant
+                        ? "1rem 2.5rem"
+                        : isRetro
+                        ? "1rem 2.5rem"
+                        : "1rem 2rem"
+                    }; border-radius: ${
                       isGradient || isRetro
                         ? "999px"
                         : isBrutalist
@@ -1098,17 +1145,17 @@ export const templates = {
               ${
                 data.ctaSecondary
                   ? `
-              <a href="#" style="padding: ${
-                isBrutalist
-                  ? "1.5rem 3rem"
-                  : isGradient || isNeumorphism
-                  ? "1.125rem 2.5rem"
-                  : isElegant
-                  ? "1rem 2.5rem"
-                  : isRetro
-                  ? "1rem 2.5rem"
-                  : "1rem 2rem"
-              }; border-radius: ${
+              <a href="${secondaryLink}" style="padding: ${
+                      isBrutalist
+                        ? "1.5rem 3rem"
+                        : isGradient || isNeumorphism
+                        ? "1.125rem 2.5rem"
+                        : isElegant
+                        ? "1rem 2.5rem"
+                        : isRetro
+                        ? "1rem 2.5rem"
+                        : "1rem 2rem"
+                    }; border-radius: ${
                       isGradient || isRetro
                         ? "999px"
                         : isBrutalist
@@ -1626,7 +1673,7 @@ export const templates = {
             <p style="font-size: 1.5rem; margin-bottom: 3rem; color: var(--color-bg);">
               ${data.testimonialQuote.replace(/"/g, "")}
             </p>
-            <a href="#" style="display: inline-block; padding: 1.5rem 3rem; background: var(--color-bg); color: var(--color-accent); text-decoration: none; text-transform: uppercase; font-size: 1.125rem; border: 4px solid var(--color-bg); transition: all 0.1s; font-weight: 900;" onmouseover="this.style.background='transparent'; this.style.color='var(--color-bg)'" onmouseout="this.style.background='var(--color-bg)'; this.style.color='var(--color-accent)'">
+            <a href="${primaryLink}" style="display: inline-block; padding: 1.5rem 3rem; background: var(--color-bg); color: var(--color-accent); text-decoration: none; text-transform: uppercase; font-size: 1.125rem; border: 4px solid var(--color-bg); transition: all 0.1s; font-weight: 900;" onmouseover="this.style.background='transparent'; this.style.color='var(--color-bg)'" onmouseout="this.style.background='var(--color-bg)'; this.style.color='var(--color-accent)'">
               GET STARTED
             </a>
             `
@@ -1651,7 +1698,7 @@ export const templates = {
             <p style="font-size: 1.25rem; margin-bottom: 2.5rem;">
               Step into the future of design
             </p>
-            <a href="#" style="display: inline-block; padding: 1rem 2.5rem; background: white; color: var(--color-accent); text-decoration: none; font-weight: 700; font-size: 1rem; border-radius: 999px; transition: all 0.3s; text-transform: uppercase; letter-spacing: 1px; border: 2px solid white;" onmouseover="this.style.background='transparent'; this.style.color='white'; this.style.borderColor='white'" onmouseout="this.style.background='white'; this.style.color='var(--color-accent)'">
+            <a href="${primaryLink}" style="display: inline-block; padding: 1rem 2.5rem; background: white; color: var(--color-accent); text-decoration: none; font-weight: 700; font-size: 1rem; border-radius: 999px; transition: all 0.3s; text-transform: uppercase; letter-spacing: 1px; border: 2px solid white;" onmouseover="this.style.background='transparent'; this.style.color='white'; this.style.borderColor='white'" onmouseout="this.style.background='white'; this.style.color='var(--color-accent)'">
               Get Started Now
             </a>
             `
@@ -1693,7 +1740,7 @@ export const templates = {
             ${
               isGradient
                 ? `
-            <a href="#" style="display: inline-block; padding: 1.125rem 2.5rem; background: white; color: #667eea; text-decoration: none; font-weight: 600; font-size: 1rem; border-radius: 999px; transition: all 0.3s; margin-top: 2rem;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+            <a href="${primaryLink}" style="display: inline-block; padding: 1.125rem 2.5rem; background: white; color: #667eea; text-decoration: none; font-weight: 600; font-size: 1rem; border-radius: 999px; transition: all 0.3s; margin-top: 2rem;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
               Start Free Trial
             </a>
             `
@@ -1702,9 +1749,11 @@ export const templates = {
             ${
               isGlassmorphism || isNeumorphism
                 ? `
-            <a href="#" style="display: inline-block; padding: 1.125rem 2.5rem; background: ${
-              isGlassmorphism ? "rgba(255,255,255,0.15)" : "var(--color-bg)"
-            }; color: var(--color-text); text-decoration: none; font-weight: 600; font-size: 1rem; border-radius: 16px; transition: all 0.3s; margin-top: 2rem; ${
+            <a href="${primaryLink}" style="display: inline-block; padding: 1.125rem 2.5rem; background: ${
+                    isGlassmorphism
+                      ? "rgba(255,255,255,0.15)"
+                      : "var(--color-bg)"
+                  }; color: var(--color-text); text-decoration: none; font-weight: 600; font-size: 1rem; border-radius: 16px; transition: all 0.3s; margin-top: 2rem; ${
                     isGlassmorphism
                       ? "backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 8px 20px rgba(0,0,0,0.3);"
                       : getNeumorphismShadow(false)
@@ -1918,6 +1967,16 @@ export const templates = {
     image: "personal-profile",
     category: "Personal",
     fields: {
+      showHeader: {
+        type: "boolean",
+        default: true,
+        label: "Show Header",
+      },
+      showThemeToggle: {
+        type: "boolean",
+        default: true,
+        label: "Show Theme Toggle",
+      },
       name: {
         type: "text",
         default: "Jordan Rivers",
@@ -2069,7 +2128,7 @@ export const templates = {
           url: { type: "url", label: "URL", default: "" },
         },
         default: [
-          { platform: "Twitter", url: "https://twitter.com" },
+          { platform: "Twitter", test: "test", url: "https://twitter.com" },
           { platform: "LinkedIn", url: "https://linkedin.com" },
           { platform: "Dribbble", url: "https://dribbble.com" },
         ],
@@ -2087,6 +2146,10 @@ export const templates = {
 
       // Determine if we're in dark mode
       const isDark = colorMode === "dark";
+
+      // Get show/hide options with defaults
+      const showHeader = data.showHeader !== false;
+      const showThemeToggle = data.showThemeToggle !== false;
 
       // Neumorphism box-shadow helpers
       const getNeumorphismShadow = (inset = false) => {
@@ -2106,70 +2169,17 @@ export const templates = {
         return "var(--neomorph-shadow-out)";
       };
 
-      return `
-<!-- Header with Theme Toggle and Theme-Specific Styling -->
-      <header style="padding: ${
-        isBrutalist
-          ? "2rem 0"
-          : isElegant
-          ? "1.5rem 0"
-          : isNeumorphism
-          ? "2rem 0"
-          : "1.5rem 0"
-      }; position: ${
-        isBrutalist ? "relative" : "fixed"
-      }; top: 0; left: 0; right: 0; background: ${
-        isGlassmorphism
-          ? "rgba(255, 255, 255, 0.1)"
-          : isNeumorphism
-          ? "none"
-          : "var(--color-bg)"
-      }; border-bottom: ${
-        isBrutalist ? "4px" : isRetro ? "3px" : "1px"
-      } solid ${
-        isBrutalist || isRetro
-          ? "var(--color-accent)"
-          : isNeumorphism || isGlassmorphism
-          ? "transparent"
-          : "var(--color-border)"
-      }; z-index: 1000; backdrop-filter: blur(${
-        isGlassmorphism ? "20px" : isNeumorphism ? "0px" : "10px"
-      }); ${
-        isGlassmorphism ? "box-shadow: 0 8px 32px rgba(31, 38, 135, 0.1);" : ""
-      }">
-        <div class="container">
-          <div style="${
-            isNeumorphism
-              ? `background: var(--color-bg); display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; border-radius: 16px; ${getNeumorphismShadow(
-                  false
-                )}`
-              : "display: flex; justify-content: space-between; align-items: center;"
-          }">
-            <div style="font-weight: ${
-              isBrutalist ? "900" : isNeumorphism || isElegant ? "700" : "600"
-            }; font-size: ${
-        isBrutalist
-          ? "1.75rem"
-          : isRetro
-          ? "1.5rem"
-          : isElegant
-          ? "1.25rem"
-          : "1.125rem"
-      }; letter-spacing: ${isBrutalist || isRetro ? "2px" : "-0.02em"}; ${
-        isBrutalist || isRetro ? "text-transform: uppercase;" : ""
-      } ${
-        isGradient
-          ? "background: linear-gradient(135deg, #667eea, #764ba2, #f093fb); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"
-          : isRetro
-          ? "background: linear-gradient(90deg, var(--color-accent), #00f5ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"
-          : isElegant
-          ? "font-family: Playfair Display, serif; color: var(--color-accent);"
-          : isNeumorphism || isGlassmorphism
-          ? "color: var(--color-accent);"
-          : ""
-      }">
-              ${data.name || "Portfolio"}
-            </div>
+      // Filter valid social links (must have both platform and url)
+      const validSocialLinks = (data.socialLinks || []).filter(
+        (link) => link && link.platform && link.url
+      );
+
+      console.log("valid social links: ", validSocialLinks);
+
+      // Theme toggle HTML helper
+      const getThemeToggle = () => {
+        if (!showThemeToggle) return "";
+        return `
             <label class="theme-toggle-switch-wrapper" style="cursor: pointer; ${
               isNeumorphism
                 ? `padding: 0.5rem; border-radius: 12px; display: inline-block; box-shadow: var(--neomorph-shadow-out);`
@@ -2178,77 +2188,155 @@ export const templates = {
               <input type="checkbox" class="theme-toggle-switch" onclick="toggleTheme()" aria-label="Toggle theme">
               <span class="theme-toggle-slider"></span>
             </label>
-          </div>
-        </div>
-      </header>
+        `;
+      };
 
-      <!-- Hero Section with Theme-Specific Styling -->
-      <section class="hero" style="min-height: 100vh; display: flex; align-items: center; padding: ${
-        isBrutalist ? "10rem 0 6rem" : "8rem 0 6rem"
+      // Header HTML helper
+      const getHeaderHTML = () => {
+        if (!showHeader) return "";
+        return `
+<!-- Header with Theme Toggle and Theme-Specific Styling -->
+<header style="padding: ${
+          isBrutalist
+            ? "2rem 0"
+            : isElegant
+            ? "1.5rem 0"
+            : isNeumorphism
+            ? "2rem 0"
+            : "1.5rem 0"
+        }; position: ${
+          isBrutalist ? "relative" : "fixed"
+        }; top: 0; left: 0; right: 0; background: ${
+          isGlassmorphism
+            ? "rgba(255, 255, 255, 0.1)"
+            : isNeumorphism
+            ? "none"
+            : "var(--color-bg)"
+        }; border-bottom: ${
+          isBrutalist ? "4px" : isRetro ? "3px" : "1px"
+        } solid ${
+          isBrutalist || isRetro
+            ? "var(--color-accent)"
+            : isNeumorphism || isGlassmorphism
+            ? "transparent"
+            : "var(--color-border)"
+        }; z-index: 1000; backdrop-filter: blur(${
+          isGlassmorphism ? "20px" : isNeumorphism ? "0px" : "10px"
+        }); ${
+          isGlassmorphism
+            ? "box-shadow: 0 8px 32px rgba(31, 38, 135, 0.1);"
+            : ""
+        }">
+  <div class="container">
+    <div style="${
+      isNeumorphism
+        ? `background: var(--color-bg); display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; border-radius: 16px; ${getNeumorphismShadow(
+            false
+          )}`
+        : "display: flex; justify-content: space-between; align-items: center;"
+    }">
+      <div style="font-weight: ${
+        isBrutalist ? "900" : isNeumorphism || isElegant ? "700" : "600"
+      }; font-size: ${
+          isBrutalist
+            ? "1.75rem"
+            : isRetro
+            ? "1.5rem"
+            : isElegant
+            ? "1.25rem"
+            : "1.125rem"
+        }; letter-spacing: ${isBrutalist || isRetro ? "2px" : "-0.02em"}; ${
+          isBrutalist || isRetro ? "text-transform: uppercase;" : ""
+        } ${
+          isGradient
+            ? "background: linear-gradient(135deg, #667eea, #764ba2, #f093fb); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"
+            : isRetro
+            ? "background: linear-gradient(90deg, var(--color-accent), #00f5ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"
+            : isElegant
+            ? "font-family: Playfair Display, serif; color: var(--color-accent);"
+            : isNeumorphism || isGlassmorphism
+            ? "color: var(--color-accent);"
+            : ""
+        }">
+        ${data.name || "Portfolio"}
+      </div>
+      ${getThemeToggle()}
+    </div>
+  </div>
+</header>
+        `;
+      };
+
+      return `
+${getHeaderHTML()}
+
+<!-- Hero Section with Theme-Specific Styling -->
+<section class="hero" style="min-height: 100vh; display: flex; align-items: center; padding: ${
+        isBrutalist ? "10rem 0 6rem" : showHeader ? "8rem 0 6rem" : "6rem 0"
       }; position: relative;">
-        <div class="container" style="max-width: 1000px;">
-          ${
-            isNeumorphism
-              ? `<div class="hero-content" style="padding: 4rem 3rem; border-radius: 32px; ${getNeumorphismShadow(
-                  false
-                )} max-width: 1000px; margin: 0 auto;">`
-              : ""
-          }
-          
-          <!-- Availability Badge -->
-          ${
-            data.availability
-              ? `
-          <div style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; background: ${
-            isGradient
-              ? "linear-gradient(135deg, rgba(102,126,234,0.1), rgba(118,75,162,0.1))"
+  <div class="container" style="max-width: 1000px;">
+    ${
+      isNeumorphism
+        ? `<div class="hero-content" style="padding: 4rem 3rem; border-radius: 32px; ${getNeumorphismShadow(
+            false
+          )} max-width: 1000px; margin: 0 auto;">`
+        : ""
+    }
+    
+    <!-- Availability Badge -->
+    ${
+      data.availability
+        ? `
+    <div style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; background: ${
+      isGradient
+        ? "linear-gradient(135deg, rgba(102,126,234,0.1), rgba(118,75,162,0.1))"
+        : isGlassmorphism
+        ? "rgba(255,255,255,0.1)"
+        : isNeumorphism
+        ? "var(--color-bg)"
+        : isBrutalist
+        ? "var(--color-bg)"
+        : "var(--color-surface)"
+    }; border: ${isBrutalist ? "3px" : isRetro ? "2px" : "1px"} solid ${
+            isBrutalist || isRetro
+              ? "var(--color-accent)"
               : isGlassmorphism
-              ? "rgba(255,255,255,0.1)"
+              ? "rgba(255,255,255,0.2)"
               : isNeumorphism
-              ? "var(--color-bg)"
+              ? "transparent"
+              : "var(--color-border)"
+          }; border-radius: ${
+            isGradient || isRetro
+              ? "999px"
               : isBrutalist
-              ? "var(--color-bg)"
-              : "var(--color-surface)"
-          }; border: ${isBrutalist ? "3px" : isRetro ? "2px" : "1px"} solid ${
-                  isBrutalist || isRetro
-                    ? "var(--color-accent)"
-                    : isGlassmorphism
-                    ? "rgba(255,255,255,0.2)"
-                    : isNeumorphism
-                    ? "transparent"
-                    : "var(--color-border)"
-                }; border-radius: ${
-                  isGradient || isRetro
-                    ? "999px"
-                    : isBrutalist
-                    ? "0"
-                    : isNeumorphism || isGlassmorphism
-                    ? "16px"
-                    : "9999px"
-                }; margin-bottom: 2rem; font-size: ${
-                  isBrutalist || isRetro ? "1rem" : "0.875rem"
-                }; font-weight: ${isBrutalist ? "700" : "500"}; ${
-                  isBrutalist || isRetro
-                    ? "text-transform: uppercase; letter-spacing: 1px;"
-                    : ""
-                } ${
-                  isGlassmorphism
-                    ? "backdrop-filter: blur(10px);"
-                    : isNeumorphism
-                    ? getNeumorphismShadow(false)
-                    : ""
-                }">
-            <span style="width: 8px; height: 8px; background: #10b981; border-radius: 50%; display: inline-block;"></span>
-            ${data.availability}
-          </div>
-          `
+              ? "0"
+              : isNeumorphism || isGlassmorphism
+              ? "16px"
+              : "9999px"
+          }; margin-bottom: 2rem; font-size: ${
+            isBrutalist || isRetro ? "1rem" : "0.875rem"
+          }; font-weight: ${isBrutalist ? "700" : "500"}; ${
+            isBrutalist || isRetro
+              ? "text-transform: uppercase; letter-spacing: 1px;"
               : ""
-          }
-          
-          <div style="margin-bottom: 3rem;">
-            <h1 ${
-              isRetro ? `class="glitch" data-text="${data.name}"` : ""
-            } style="font-family: ${
+          } ${
+            isGlassmorphism
+              ? "backdrop-filter: blur(10px);"
+              : isNeumorphism
+              ? getNeumorphismShadow(false)
+              : ""
+          }">
+      <span style="width: 8px; height: 8px; background: #10b981; border-radius: 50%; display: inline-block;"></span>
+      ${data.availability}
+    </div>
+    `
+        : ""
+    }
+    
+    <div style="margin-bottom: 3rem;">
+      <h1 ${
+        isRetro ? `class="glitch" data-text="${data.name}"` : ""
+      } style="font-family: ${
         isElegant ? "Playfair Display, serif" : "inherit"
       }; font-size: clamp(${isBrutalist || isRetro ? "3rem" : "3rem"}, 8vw, ${
         isBrutalist || isRetro ? "8rem" : isGlassmorphism ? "6rem" : "5.5rem"
@@ -2265,1332 +2353,1263 @@ export const templates = {
       }; line-height: 1; ${
         isBrutalist || isRetro ? "text-transform: uppercase;" : ""
       } ${isRetro ? "position: relative;" : ""}">
-              ${
-                isBrutalist
-                  ? (data.name || "Your Name")
-                      .split(" ")
-                      .map((word, i) =>
-                        i === 0
-                          ? `<span style="background: var(--color-accent); color: var(--color-bg); padding: 0 0.5rem; display: inline-block; transform: rotate(-1deg);">${word}</span>`
-                          : word
-                      )
-                      .join(" ")
-                  : ""
-              }
-              ${
-                isGradient
-                  ? (data.name || "Your Name")
-                      .split(" ")
-                      .map((word, i) =>
-                        i === (data.name || "Your Name").split(" ").length - 1
-                          ? `<span style="background: linear-gradient(135deg, #667eea, #764ba2, #f093fb); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">${word}</span>`
-                          : word
-                      )
-                      .join(" ")
-                  : ""
-              }
-              ${
-                isRetro
-                  ? `<span class="gradient-text" style="background: linear-gradient(90deg, var(--color-accent), #00f5ff, var(--color-accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: glow 2s ease-in-out infinite alternate;">${
-                      data.name || "Your Name"
-                    }</span>`
-                  : ""
-              }
-              ${
-                !isBrutalist && !isGradient && !isRetro
-                  ? data.name || "Your Name"
-                  : ""
-              }
-            </h1>
-            
-            ${
-              data.tagline
-                ? `
-            <p style="font-family: ${
-              isElegant
-                ? "Lato, sans-serif"
-                : isRetro
-                ? "Space Mono, monospace"
-                : "inherit"
-            }; font-size: clamp(${
-                    isBrutalist || isRetro ? "1.5rem" : "1.5rem"
-                  }, 4vw, ${
-                    isBrutalist || isRetro ? "2.5rem" : "2.25rem"
-                  }); color: var(--color-text-secondary); margin-bottom: 1rem; font-weight: ${
-                    isElegant ? "300" : isBrutalist ? "700" : "500"
-                  }; ${
-                    isBrutalist || isRetro ? "text-transform: uppercase;" : ""
-                  }">
-              ${data.tagline}
-            </p>
-            `
-                : ""
-            }
-            
-            ${
-              data.location
-                ? `
-            <p style="font-family: ${
-              isRetro ? "Space Mono, monospace" : "inherit"
-            }; font-size: ${
-                    isBrutalist || isRetro ? "1.125rem" : "1rem"
-                  }; color: var(--color-text-secondary); margin-bottom: 2rem; display: flex; align-items: center; gap: 0.5rem; ${
-                    isBrutalist || isRetro
-                      ? "text-transform: uppercase; letter-spacing: 1px;"
-                      : ""
-                  }">
-              ${data.location}
-            </p>
-            `
-                : ""
-            }
-            
-            ${
-              data.bio
-                ? `
-            <p style="font-family: ${
-              isElegant
-                ? "Lato, sans-serif"
-                : isRetro
-                ? "Space Mono, monospace"
-                : "inherit"
-            }; font-size: ${
-                    isBrutalist || isRetro ? "1.375rem" : "1.25rem"
-                  }; line-height: ${
-                    isElegant ? "1.9" : "1.8"
-                  }; color: var(--color-text-secondary); max-width: 700px; margin-bottom: 3rem; font-weight: ${
-                    isElegant ? "300" : "normal"
-                  };">
-              ${data.bio}
-            </p>
-            `
-                : ""
-            }
-
-            <!-- CTA Buttons with Theme-Specific Styling -->
-            <div class="cta-group" style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 3rem;">
-              ${
-                data.contactEmail
-                  ? `
-              <a href="mailto:${
-                data.contactEmail
-              }" class="btn btn-primary" style="padding: ${
-                      isBrutalist
-                        ? "1.5rem 3rem"
-                        : isGradient || isNeumorphism
-                        ? "1.125rem 2rem"
-                        : isElegant
-                        ? "1rem 2rem"
-                        : isRetro
-                        ? "1rem 2rem"
-                        : "1rem 2rem"
-                    }; border-radius: ${
-                      isGradient || isRetro
-                        ? "999px"
-                        : isBrutalist
-                        ? "0"
-                        : isGlassmorphism || isNeumorphism
-                        ? "16px"
-                        : isElegant
-                        ? "0"
-                        : "8px"
-                    }; text-decoration: none; font-weight: ${
-                      isBrutalist || isRetro
-                        ? "700"
-                        : isNeumorphism
-                        ? "600"
-                        : "500"
-                    }; transition: all ${
-                      isBrutalist || isRetro ? "0.1s" : "0.2s"
-                    }; display: inline-block; background: ${
-                      isGradient
-                        ? "linear-gradient(135deg, #667eea, #764ba2)"
-                        : isGlassmorphism
-                        ? "rgba(255,255,255,0.15)"
-                        : isNeumorphism
-                        ? "var(--color-bg)"
-                        : isRetro
-                        ? "linear-gradient(90deg, var(--color-accent), #b537f2)"
-                        : isElegant
-                        ? "var(--color-accent)"
-                        : "var(--color-accent)"
-                    }; color: ${
-                      isElegant
-                        ? "white"
-                        : isGlassmorphism
-                        ? "var(--color-text)"
-                        : isNeumorphism
-                        ? "var(--color-text)"
-                        : "white"
-                    }; ${
-                      isBrutalist
-                        ? "text-transform: uppercase; border: 4px solid var(--color-text); background: var(--color-text); color: var(--color-bg); font-size: 1.125rem;"
-                        : isRetro
-                        ? "text-transform: uppercase; letter-spacing: 1px; font-size: 0.9375rem; box-shadow: 0 0 30px var(--color-accent); border: 2px solid var(--color-accent);"
-                        : isElegant
-                        ? "font-size: 0.9375rem; letter-spacing: 0.5px; border: 1px solid var(--color-accent);"
-                        : isGlassmorphism
-                        ? "backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 8px 20px rgba(0,0,0,0.3);"
-                        : isNeumorphism
-                        ? getNeumorphismShadow(false)
-                        : ""
-                    } ${
-                      isGradient
-                        ? "box-shadow: 0 10px 30px rgba(102,126,234,0.3);"
-                        : ""
-                    }" 
-                onmouseover="this.style.transform='translateY(-2px)'; ${
-                  isBrutalist
-                    ? `this.style.background='var(--color-bg)'; this.style.color='var(--color-text)'`
-                    : isGradient
-                    ? `this.style.boxShadow='0 15px 40px rgba(102,126,234,0.4)'`
-                    : isRetro
-                    ? `this.style.transform='translateY(-3px)'; this.style.boxShadow='0 0 50px var(--color-accent)'`
-                    : isElegant
-                    ? `this.style.background='transparent'; this.style.color='var(--color-accent)'`
-                    : isGlassmorphism
-                    ? `this.style.transform='translateY(-3px)'; this.style.boxShadow='0 12px 30px rgba(0,0,0,0.4)'`
-                    : isNeumorphism
-                    ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
-                    : `this.style.opacity='0.9'`
-                }" 
-                onmouseout="this.style.transform='translateY(0)'; ${
-                  isBrutalist
-                    ? `this.style.background='var(--color-text)'; this.style.color='var(--color-bg)'`
-                    : isGradient
-                    ? `this.style.boxShadow='0 10px 30px rgba(102,126,234,0.3)'`
-                    : isRetro
-                    ? `this.style.boxShadow='0 0 30px var(--color-accent)'`
-                    : isElegant
-                    ? `this.style.background='var(--color-accent)'; this.style.color='white'`
-                    : isGlassmorphism
-                    ? `this.style.boxShadow='0 8px 20px rgba(0,0,0,0.3)'`
-                    : isNeumorphism
-                    ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
-                    : `this.style.opacity='1'`
-                }">
-                Get in Touch
-              </a>
-              `
-                  : ""
-              }
-              
-              ${
-                data.socialLinks && data.socialLinks.length > 0
-                  ? data.socialLinks
-                      .slice(0, 1)
-                      .map(
-                        (link) => `
-                <a href="${
-                  link.url
-                }" target="_blank" class="btn btn-secondary" style="padding: ${
-                          isBrutalist
-                            ? "1.5rem 3rem"
-                            : isGradient || isNeumorphism
-                            ? "1.125rem 2rem"
-                            : isElegant
-                            ? "1rem 2rem"
-                            : isRetro
-                            ? "1rem 2rem"
-                            : "1rem 2rem"
-                        }; border-radius: ${
-                          isGradient || isRetro
-                            ? "999px"
-                            : isBrutalist
-                            ? "0"
-                            : isGlassmorphism || isNeumorphism
-                            ? "16px"
-                            : isElegant
-                            ? "0"
-                            : "8px"
-                        }; text-decoration: none; font-weight: ${
-                          isBrutalist || isRetro
-                            ? "700"
-                            : isNeumorphism
-                            ? "600"
-                            : "500"
-                        }; transition: all 0.2s; display: inline-block; border: ${
-                          isBrutalist
-                            ? "4px"
-                            : isRetro
-                            ? "2px"
-                            : isElegant
-                            ? "1px"
-                            : isGlassmorphism
-                            ? "1px"
-                            : "1px"
-                        } solid ${
-                          isBrutalist
-                            ? "var(--color-text)"
-                            : isRetro
-                            ? "#00f5ff"
-                            : isElegant
-                            ? "var(--color-border)"
-                            : isGlassmorphism
-                            ? "rgba(255,255,255,0.1)"
-                            : "var(--color-border)"
-                        }; color: var(--color-text); background: ${
-                          isBrutalist
-                            ? "var(--color-bg)"
-                            : isGlassmorphism
-                            ? "rgba(255,255,255,0.05)"
-                            : isNeumorphism
-                            ? "var(--color-bg)"
-                            : "transparent"
-                        }; ${
-                          isBrutalist || isRetro
-                            ? "text-transform: uppercase; font-size: 1.125rem;"
-                            : isElegant
-                            ? "font-size: 0.9375rem; letter-spacing: 0.5px;"
-                            : isRetro
-                            ? "font-size: 0.9375rem; letter-spacing: 1px; box-shadow: 0 0 20px #00f5ff;"
-                            : isGlassmorphism
-                            ? "backdrop-filter: blur(10px);"
-                            : isNeumorphism
-                            ? getNeumorphismShadow(false)
-                            : ""
-                        }" 
-                  onmouseover="${
-                    isBrutalist
-                      ? `this.style.background='var(--color-text)'; this.style.color='var(--color-bg)'`
-                      : isRetro
-                      ? `this.style.background='#00f5ff'; this.style.color='#0d001a'; this.style.boxShadow='0 0 40px #00f5ff'`
-                      : isElegant
-                      ? `this.style.background='var(--color-surface)'; this.style.borderColor='var(--color-accent)'`
-                      : isGlassmorphism
-                      ? `this.style.background='rgba(255,255,255,0.1)'`
-                      : isNeumorphism
-                      ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
-                      : `this.style.background='var(--color-surface)'`
-                  }" 
-                  onmouseout="${
-                    isBrutalist
-                      ? `this.style.background='var(--color-bg)'; this.style.color='var(--color-text)'`
-                      : isRetro
-                      ? `this.style.background='transparent'; this.style.color='var(--color-text)'; this.style.boxShadow='0 0 20px #00f5ff'`
-                      : isElegant
-                      ? `this.style.background='transparent'; this.style.borderColor='var(--color-border)'`
-                      : isGlassmorphism
-                      ? `this.style.background='rgba(255,255,255,0.05)'`
-                      : isNeumorphism
-                      ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
-                      : `this.style.background='transparent'`
-                  }">
-                  View ${link.platform}
-                </a>
-              `
-                      )
-                      .join("")
-                  : ""
-              }
-            </div>
-
-            <!-- Social Links with Theme-Specific Styling -->
-            ${
-              data.socialLinks && data.socialLinks.length > 0
-                ? `
-            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-              ${data.socialLinks
-                .map(
-                  (link) => `
-                <a href="${link.url}" target="_blank" style="padding: ${
-                    isBrutalist
-                      ? "1rem 1.5rem"
-                      : isNeumorphism
-                      ? "0.75rem 1.25rem"
-                      : "0.5rem 1rem"
-                  }; background: ${
-                    isGradient
-                      ? "linear-gradient(135deg, rgba(102,126,234,0.05), rgba(118,75,162,0.05))"
-                      : isGlassmorphism
-                      ? "rgba(255,255,255,0.05)"
-                      : isNeumorphism
-                      ? "var(--color-bg)"
-                      : isRetro
-                      ? "rgba(255,47,181,0.05)"
-                      : isBrutalist
-                      ? "var(--color-bg)"
-                      : "var(--color-surface)"
-                  }; border: ${
-                    isBrutalist ? "3px" : isRetro ? "2px" : "1px"
-                  } solid ${
-                    isBrutalist || isRetro
-                      ? "var(--color-accent)"
-                      : isGlassmorphism
-                      ? "rgba(255,255,255,0.1)"
-                      : "var(--color-border)"
-                  }; border-radius: ${
-                    isGradient || isRetro
-                      ? "999px"
-                      : isBrutalist
-                      ? "0"
-                      : isNeumorphism || isGlassmorphism
-                      ? "12px"
-                      : "8px"
-                  }; color: var(--color-text-secondary); text-decoration: none; font-size: ${
-                    isBrutalist || isRetro ? "1rem" : "0.875rem"
-                  }; transition: all 0.2s; font-weight: ${
-                    isBrutalist ? "700" : "500"
-                  }; ${
-                    isBrutalist || isRetro
-                      ? "text-transform: uppercase; letter-spacing: 1px;"
-                      : ""
-                  } ${
-                    isGlassmorphism
-                      ? "backdrop-filter: blur(10px);"
-                      : isNeumorphism
-                      ? getNeumorphismShadow(false)
-                      : ""
-                  }" 
-                  onmouseover="${
-                    isBrutalist
-                      ? `this.style.background='var(--color-text)'; this.style.color='var(--color-bg)'`
-                      : isRetro
-                      ? `this.style.borderColor='var(--color-accent)'; this.style.color='var(--color-accent)'; this.style.boxShadow='0 0 20px var(--color-accent)'`
-                      : isGlassmorphism
-                      ? `this.style.borderColor='var(--color-accent)'; this.style.color='var(--color-text)'`
-                      : isNeumorphism
-                      ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'; this.style.color='var(--color-accent)'`
-                      : `this.style.borderColor='var(--color-accent)'; this.style.color='var(--color-text)'`
-                  }" 
-                  onmouseout="${
-                    isBrutalist
-                      ? `this.style.background='var(--color-bg)'; this.style.color='var(--color-text-secondary)'`
-                      : isRetro
-                      ? `this.style.borderColor='var(--color-accent)'; this.style.color='var(--color-text-secondary)'; this.style.boxShadow='none'`
-                      : isGlassmorphism
-                      ? `this.style.borderColor='rgba(255,255,255,0.1)'; this.style.color='var(--color-text-secondary)'`
-                      : isNeumorphism
-                      ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'; this.style.color='var(--color-text-secondary)'`
-                      : `this.style.borderColor='var(--color-border)'; this.style.color='var(--color-text-secondary)'`
-                  }">
-                  ${link.platform}
-                </a>
-              `
+        ${
+          isBrutalist
+            ? (data.name || "Your Name")
+                .split(" ")
+                .map((word, i) =>
+                  i === 0
+                    ? `<span style="background: var(--color-accent); color: var(--color-bg); padding: 0 0.5rem; display: inline-block; transform: rotate(-1deg);">${word}</span>`
+                    : word
                 )
-                .join("")}
-            </div>
-            `
-                : ""
-            }
-          </div>
-
-          <!-- Stats with Theme-Specific Styling -->
-          ${
-            data.stats && data.stats.length > 0
-              ? `
-          <div class="stats-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; padding-top: 3rem; border-top: ${
-            isBrutalist ? "4px" : isRetro ? "3px" : "1px"
-          } solid ${
-                  isBrutalist || isRetro
-                    ? "var(--color-accent)"
-                    : isNeumorphism || isGlassmorphism
-                    ? "transparent"
-                    : "var(--color-border)"
-                };">
-            ${data.stats
-              .map(
-                (stat, index) => `
-              <div style="text-align: center; ${
-                isNeumorphism
-                  ? `padding: 2rem 1.5rem; border-radius: 20px; ${getNeumorphismShadow(
-                      false
-                    )}`
-                  : isGlassmorphism
-                  ? "padding: 2rem 1.5rem; border-radius: 20px; background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1);"
-                  : isRetro
-                  ? "padding: 2rem 1.5rem; border: 2px solid var(--color-accent); background: rgba(255,47,181,0.05);"
-                  : ""
-              } ${isNeumorphism ? "transition: all 0.3s;" : ""}" ${
-                  isNeumorphism
-                    ? `onmouseover="this.style.boxShadow='${getNeumorphismHoverShadow()}'" onmouseout="this.style.boxShadow='${getNeumorphismNormalShadow()}'"`
-                    : isRetro
-                    ? `onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 0 30px var(--color-accent)'" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none'"`
-                    : ""
-                }>
-                <div style="font-size: ${
-                  isBrutalist
-                    ? "3rem"
-                    : isRetro
-                    ? "3rem"
-                    : isNeumorphism || isGlassmorphism
-                    ? "2.75rem"
-                    : "2.5rem"
-                }; font-weight: ${
-                  isBrutalist
-                    ? "900"
-                    : isRetro || isNeumorphism || isGlassmorphism
-                    ? "800"
-                    : "800"
-                }; margin-bottom: 0.5rem; ${
-                  isGradient
-                    ? "background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"
-                    : isRetro
-                    ? "background: linear-gradient(90deg, var(--color-accent), #00f5ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"
-                    : "color: var(--color-accent);"
-                } ${isBrutalist ? "text-transform: uppercase;" : ""}">
-                  ${stat.number}
-                </div>
-                <div style="font-size: ${
-                  isBrutalist || isRetro ? "1rem" : "0.875rem"
-                }; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.05em; ${
-                  isBrutalist || isRetro ? "font-weight: 700;" : ""
-                }">
-                  ${stat.label}
-                </div>
-              </div>
-            `
-              )
-              .join("")}
-          </div>
-          `
-              : ""
-          }
-          
-          ${isNeumorphism ? `</div>` : ""}
-        </div>
-      </section>
-
-      <!-- Experience Timeline with Theme-Specific Styling -->
+                .join(" ")
+            : ""
+        }
+        ${
+          isGradient
+            ? (data.name || "Your Name")
+                .split(" ")
+                .map((word, i) =>
+                  i === (data.name || "Your Name").split(" ").length - 1
+                    ? `<span style="background: linear-gradient(135deg, #667eea, #764ba2, #f093fb); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">${word}</span>`
+                    : word
+                )
+                .join(" ")
+            : ""
+        }
+        ${
+          isRetro
+            ? `<span class="gradient-text" style="background: linear-gradient(90deg, var(--color-accent), #00f5ff, var(--color-accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: glow 2s ease-in-out infinite alternate;">${
+                data.name || "Your Name"
+              }</span>`
+            : ""
+        }
+        ${
+          !isBrutalist && !isGradient && !isRetro
+            ? data.name || "Your Name"
+            : ""
+        }
+      </h1>
+      
       ${
-        data.experience && data.experience.length > 0
+        data.tagline
           ? `
-      <section class="experience" style="padding: ${
-        isRetro || isElegant ? "8rem 0" : "6rem 0"
-      }; background: ${
-              isBrutalist
-                ? "var(--color-text)"
-                : isGradient
-                ? "linear-gradient(135deg, rgba(102,126,234,0.05), rgba(240,147,251,0.05))"
-                : isRetro
-                ? "var(--color-surface)"
-                : isElegant
-                ? "var(--color-surface)"
-                : isGlassmorphism
-                ? "rgba(255,255,255,0.02)"
-                : "var(--color-surface)"
-            }; ${
-              isRetro
-                ? "border-top: 3px solid var(--color-accent); border-bottom: 3px solid #00f5ff;"
-                : isGlassmorphism
-                ? "backdrop-filter: blur(20px);"
+      <p style="font-family: ${
+        isElegant
+          ? "Lato, sans-serif"
+          : isRetro
+          ? "Space Mono, monospace"
+          : "inherit"
+      }; font-size: clamp(${
+              isBrutalist || isRetro ? "1.5rem" : "1.5rem"
+            }, 4vw, ${
+              isBrutalist || isRetro ? "2.5rem" : "2.25rem"
+            }); color: var(--color-text-secondary); margin-bottom: 1rem; font-weight: ${
+              isElegant ? "300" : isBrutalist ? "700" : "500"
+            }; ${isBrutalist || isRetro ? "text-transform: uppercase;" : ""}">
+        ${data.tagline}
+      </p>
+      `
+          : ""
+      }
+      
+      ${
+        data.location
+          ? `
+      <p style="font-family: ${
+        isRetro ? "Space Mono, monospace" : "inherit"
+      }; font-size: ${
+              isBrutalist || isRetro ? "1.125rem" : "1rem"
+            }; color: var(--color-text-secondary); margin-bottom: 2rem; display: flex; align-items: center; gap: 0.5rem; ${
+              isBrutalist || isRetro
+                ? "text-transform: uppercase; letter-spacing: 1px;"
                 : ""
             }">
-        <div class="container" style="max-width: 900px;">
-          <h2 style="font-family: ${
-            isElegant ? "Playfair Display, serif" : "inherit"
-          }; font-size: clamp(${
-              isBrutalist || isRetro ? "2.5rem" : "2rem"
-            }, 5vw, ${
-              isBrutalist || isRetro ? "4rem" : "3rem"
-            }); font-weight: ${
-              isBrutalist ? "900" : isRetro ? "700" : isElegant ? "600" : "700"
-            }; margin-bottom: 3rem; letter-spacing: ${
-              isRetro ? "3px" : "-0.02em"
-            }; ${isBrutalist || isRetro ? "text-transform: uppercase;" : ""} ${
+        ${data.location}
+      </p>
+      `
+          : ""
+      }
+      
+      ${
+        data.bio
+          ? `
+      <p style="font-family: ${
+        isElegant
+          ? "Lato, sans-serif"
+          : isRetro
+          ? "Space Mono, monospace"
+          : "inherit"
+      }; font-size: ${
+              isBrutalist || isRetro ? "1.375rem" : "1.25rem"
+            }; line-height: ${
+              isElegant ? "1.9" : "1.8"
+            }; color: var(--color-text-secondary); max-width: 700px; margin-bottom: 3rem; font-weight: ${
+              isElegant ? "300" : "normal"
+            };">
+        ${data.bio}
+      </p>
+      `
+          : ""
+      }
+
+      <!-- CTA Buttons with Theme-Specific Styling -->
+      <div class="cta-group" style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 3rem;">
+        ${
+          data.contactEmail
+            ? `
+        <a href="mailto:${
+          data.contactEmail
+        }" class="btn btn-primary" style="padding: ${
+                isBrutalist
+                  ? "1.5rem 3rem"
+                  : isGradient || isNeumorphism
+                  ? "1.125rem 2rem"
+                  : isElegant
+                  ? "1rem 2rem"
+                  : isRetro
+                  ? "1rem 2rem"
+                  : "1rem 2rem"
+              }; border-radius: ${
+                isGradient || isRetro
+                  ? "999px"
+                  : isBrutalist
+                  ? "0"
+                  : isGlassmorphism || isNeumorphism
+                  ? "16px"
+                  : isElegant
+                  ? "0"
+                  : "8px"
+              }; text-decoration: none; font-weight: ${
+                isBrutalist || isRetro ? "700" : isNeumorphism ? "600" : "500"
+              }; transition: all ${
+                isBrutalist || isRetro ? "0.1s" : "0.2s"
+              }; display: inline-block; background: ${
+                isGradient
+                  ? "linear-gradient(135deg, #667eea, #764ba2)"
+                  : isGlassmorphism
+                  ? "rgba(255,255,255,0.15)"
+                  : isNeumorphism
+                  ? "var(--color-bg)"
+                  : isRetro
+                  ? "linear-gradient(90deg, var(--color-accent), #b537f2)"
+                  : isElegant
+                  ? "var(--color-accent)"
+                  : "var(--color-accent)"
+              }; color: ${
+                isElegant
+                  ? "white"
+                  : isGlassmorphism
+                  ? "var(--color-text)"
+                  : isNeumorphism
+                  ? "var(--color-text)"
+                  : "white"
+              }; ${
+                isBrutalist
+                  ? "text-transform: uppercase; border: 4px solid var(--color-text); background: var(--color-text); color: var(--color-bg); font-size: 1.125rem;"
+                  : isRetro
+                  ? "text-transform: uppercase; letter-spacing: 1px; font-size: 0.9375rem; box-shadow: 0 0 30px var(--color-accent); border: 2px solid var(--color-accent);"
+                  : isElegant
+                  ? "font-size: 0.9375rem; letter-spacing: 0.5px; border: 1px solid var(--color-accent);"
+                  : isGlassmorphism
+                  ? "backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 8px 20px rgba(0,0,0,0.3);"
+                  : isNeumorphism
+                  ? getNeumorphismShadow(false)
+                  : ""
+              } ${
+                isGradient
+                  ? "box-shadow: 0 10px 30px rgba(102,126,234,0.3);"
+                  : ""
+              }" 
+          onmouseover="this.style.transform='translateY(-2px)'; ${
+            isBrutalist
+              ? `this.style.background='var(--color-bg)'; this.style.color='var(--color-text)'`
+              : isGradient
+              ? `this.style.boxShadow='0 15px 40px rgba(102,126,234,0.4)'`
+              : isRetro
+              ? `this.style.transform='translateY(-3px)'; this.style.boxShadow='0 0 50px var(--color-accent)'`
+              : isElegant
+              ? `this.style.background='transparent'; this.style.color='var(--color-accent)'`
+              : isGlassmorphism
+              ? `this.style.transform='translateY(-3px)'; this.style.boxShadow='0 12px 30px rgba(0,0,0,0.4)'`
+              : isNeumorphism
+              ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
+              : `this.style.opacity='0.9'`
+          }" 
+          onmouseout="this.style.transform='translateY(0)'; ${
+            isBrutalist
+              ? `this.style.background='var(--color-text)'; this.style.color='var(--color-bg)'`
+              : isGradient
+              ? `this.style.boxShadow='0 10px 30px rgba(102,126,234,0.3)'`
+              : isRetro
+              ? `this.style.boxShadow='0 0 30px var(--color-accent)'`
+              : isElegant
+              ? `this.style.background='var(--color-accent)'; this.style.color='white'`
+              : isGlassmorphism
+              ? `this.style.boxShadow='0 8px 20px rgba(0,0,0,0.3)'`
+              : isNeumorphism
+              ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
+              : `this.style.opacity='1'`
+          }">
+          Get in Touch
+        </a>
+        `
+            : ""
+        }
+        
+        ${
+          validSocialLinks.length > 0
+            ? `
+        <a href="${
+          validSocialLinks[0].url
+        }" target="_blank" class="btn btn-secondary" style="padding: ${
+                isBrutalist
+                  ? "1.5rem 3rem"
+                  : isGradient || isNeumorphism
+                  ? "1.125rem 2rem"
+                  : isElegant
+                  ? "1rem 2rem"
+                  : isRetro
+                  ? "1rem 2rem"
+                  : "1rem 2rem"
+              }; border-radius: ${
+                isGradient || isRetro
+                  ? "999px"
+                  : isBrutalist
+                  ? "0"
+                  : isGlassmorphism || isNeumorphism
+                  ? "16px"
+                  : isElegant
+                  ? "0"
+                  : "8px"
+              }; text-decoration: none; font-weight: ${
+                isBrutalist || isRetro ? "700" : isNeumorphism ? "600" : "500"
+              }; transition: all 0.2s; display: inline-block; border: ${
+                isBrutalist
+                  ? "4px"
+                  : isRetro
+                  ? "2px"
+                  : isElegant
+                  ? "1px"
+                  : isGlassmorphism
+                  ? "1px"
+                  : "1px"
+              } solid ${
+                isBrutalist
+                  ? "var(--color-text)"
+                  : isRetro
+                  ? "#00f5ff"
+                  : isElegant
+                  ? "var(--color-border)"
+                  : isGlassmorphism
+                  ? "rgba(255,255,255,0.1)"
+                  : "var(--color-border)"
+              }; color: var(--color-text); background: ${
+                isBrutalist
+                  ? "var(--color-bg)"
+                  : isGlassmorphism
+                  ? "rgba(255,255,255,0.05)"
+                  : isNeumorphism
+                  ? "var(--color-bg)"
+                  : "transparent"
+              }; ${
+                isBrutalist || isRetro
+                  ? "text-transform: uppercase; font-size: 1.125rem;"
+                  : isElegant
+                  ? "font-size: 0.9375rem; letter-spacing: 0.5px;"
+                  : isRetro
+                  ? "font-size: 0.9375rem; letter-spacing: 1px; box-shadow: 0 0 20px #00f5ff;"
+                  : isGlassmorphism
+                  ? "backdrop-filter: blur(10px);"
+                  : isNeumorphism
+                  ? getNeumorphismShadow(false)
+                  : ""
+              }" 
+          onmouseover="${
+            isBrutalist
+              ? `this.style.background='var(--color-text)'; this.style.color='var(--color-bg)'`
+              : isRetro
+              ? `this.style.background='#00f5ff'; this.style.color='#0d001a'; this.style.boxShadow='0 0 40px #00f5ff'`
+              : isElegant
+              ? `this.style.background='var(--color-surface)'; this.style.borderColor='var(--color-accent)'`
+              : isGlassmorphism
+              ? `this.style.background='rgba(255,255,255,0.1)'`
+              : isNeumorphism
+              ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
+              : `this.style.background='var(--color-surface)'`
+          }" 
+          onmouseout="${
+            isBrutalist
+              ? `this.style.background='var(--color-bg)'; this.style.color='var(--color-text)'`
+              : isRetro
+              ? `this.style.background='transparent'; this.style.color='var(--color-text)'; this.style.boxShadow='0 0 20px #00f5ff'`
+              : isElegant
+              ? `this.style.background='transparent'; this.style.borderColor='var(--color-border)'`
+              : isGlassmorphism
+              ? `this.style.background='rgba(255,255,255,0.05)'`
+              : isNeumorphism
+              ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
+              : `this.style.background='transparent'`
+          }">
+          View ${validSocialLinks[0].platform}
+        </a>
+        `
+            : ""
+        }
+      </div>
+
+      <!-- Social Links with Theme-Specific Styling -->
+      ${
+        validSocialLinks.length > 0
+          ? `
+      <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+        ${validSocialLinks
+          .map(
+            (link) => `
+        <a href="${link.url}" target="_blank" style="padding: ${
               isBrutalist
-                ? "color: var(--color-bg);"
-                : isGradient
-                ? "background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"
-                : isRetro
-                ? "background: linear-gradient(90deg, var(--color-accent), #00f5ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"
-                : ""
-            }">
-            Experience
-          </h2>
-          <div class="timeline" style="display: flex; flex-direction: column; gap: 3rem; position: relative; padding-left: 2rem;">
-            <!-- Timeline Line -->
-            <div class="timeline-line" style="position: absolute; left: 0; top: 0; bottom: 0; width: ${
-              isBrutalist ? "4px" : isRetro ? "3px" : "2px"
+                ? "1rem 1.5rem"
+                : isNeumorphism
+                ? "0.75rem 1.25rem"
+                : "0.5rem 1rem"
             }; background: ${
+              isGradient
+                ? "linear-gradient(135deg, rgba(102,126,234,0.05), rgba(118,75,162,0.05))"
+                : isGlassmorphism
+                ? "rgba(255,255,255,0.05)"
+                : isNeumorphism
+                ? "var(--color-bg)"
+                : isRetro
+                ? "rgba(255,47,181,0.05)"
+                : isBrutalist
+                ? "var(--color-bg)"
+                : "var(--color-surface)"
+            }; border: ${isBrutalist ? "3px" : isRetro ? "2px" : "1px"} solid ${
               isBrutalist || isRetro
                 ? "var(--color-accent)"
-                : isNeumorphism || isGlassmorphism
-                ? "transparent"
+                : isGlassmorphism
+                ? "rgba(255,255,255,0.1)"
                 : "var(--color-border)"
-            };"></div>
-            
-            ${data.experience
-              .map(
-                (job, index) => `
-              <div style="position: relative;">
-                <!-- Timeline Dot -->
-                <div style="position: absolute; left: ${
-                  isBrutalist ? "-2.5rem" : "-2.375rem"
-                }; top: 0.25rem; width: ${
-                  isBrutalist ? "18px" : "14px"
-                }; height: ${
-                  isBrutalist ? "18px" : "14px"
-                }; background: var(--color-accent); border: ${
-                  isBrutalist ? "4px" : "3px"
-                } solid ${
-                  isBrutalist ? "var(--color-text)" : "var(--color-bg)"
-                }; ${
-                  isBrutalist ? "" : "border-radius: 50%;"
-                } z-index: 1;"></div>
-                
-                <div class="card" style="padding: ${
-                  isBrutalist || isElegant
-                    ? "2.5rem"
-                    : isNeumorphism
-                    ? "2.5rem"
-                    : "2rem"
-                }; border-radius: ${
-                  isGradient
-                    ? "20px"
-                    : isBrutalist || isElegant
-                    ? "0"
-                    : isRetro
-                    ? "0"
-                    : isNeumorphism || isGlassmorphism
-                    ? "20px"
-                    : "12px"
-                }; border: ${
-                  isBrutalist ? "3px" : isRetro ? "2px" : "1px"
-                } solid ${
-                  isBrutalist
-                    ? "var(--color-bg)"
-                    : isRetro
-                    ? "var(--color-accent)"
-                    : isGlassmorphism
-                    ? "rgba(255,255,255,0.1)"
-                    : "var(--color-border)"
-                }; background: ${
-                  isBrutalist
-                    ? "var(--color-bg)"
-                    : isGradient
-                    ? "linear-gradient(135deg, rgba(102,126,234,0.02), rgba(118,75,162,0.02))"
-                    : isGlassmorphism
-                    ? "rgba(255,255,255,0.05)"
-                    : isNeumorphism
-                    ? "var(--color-bg)"
-                    : isRetro
-                    ? "rgba(255,47,181,0.03)"
-                    : "var(--color-bg)"
-                }; transition: all ${
-                  isBrutalist || isRetro ? "0.2s" : "0.3s"
-                }; ${
-                  isGlassmorphism
-                    ? "backdrop-filter: blur(20px);"
-                    : isNeumorphism
-                    ? getNeumorphismShadow(false)
-                    : ""
-                }" 
-                  onmouseover="${
-                    isBrutalist
-                      ? `this.style.transform='translate(-4px, -4px)'; this.style.boxShadow='8px 8px 0 var(--color-bg)'`
-                      : isGradient
-                      ? `this.style.borderColor='var(--color-accent)'; this.style.transform='translateY(-4px)'; this.style.boxShadow='0 15px 40px rgba(102,126,234,0.1)'`
-                      : isRetro
-                      ? `this.style.transform='translateY(-4px)'; this.style.boxShadow='0 10px 30px rgba(255,47,181,0.2)'`
-                      : isGlassmorphism
-                      ? `this.style.borderColor='var(--color-accent)'; this.style.transform='translateY(-4px)'`
-                      : isNeumorphism
-                      ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
-                      : `this.style.borderColor='var(--color-accent)'; this.style.transform='translateY(-4px)'`
-                  }" 
-                  onmouseout="${
-                    isBrutalist
-                      ? `this.style.transform='translate(0, 0)'; this.style.boxShadow='none'`
-                      : isGradient
-                      ? `this.style.borderColor='var(--color-border)'; this.style.transform='translateY(0)'; this.style.boxShadow='none'`
-                      : isRetro
-                      ? `this.style.transform='translateY(0)'; this.style.boxShadow='none'`
-                      : isGlassmorphism
-                      ? `this.style.borderColor='rgba(255,255,255,0.1)'; this.style.transform='translateY(0)'`
-                      : isNeumorphism
-                      ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
-                      : `this.style.borderColor='var(--color-border)'; this.style.transform='translateY(0)'`
-                  }">
-                  <div style="display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: 1rem; margin-bottom: 0.75rem;">
-                    <div>
-                      <h3 style="font-family: ${
-                        isElegant ? "Playfair Display, serif" : "inherit"
-                      }; font-size: ${
-                  isBrutalist || isElegant
-                    ? "1.625rem"
-                    : isRetro
-                    ? "1.375rem"
-                    : "1.375rem"
-                }; font-weight: ${
-                  isBrutalist
-                    ? "900"
-                    : isRetro
-                    ? "700"
-                    : isElegant
-                    ? "600"
-                    : "600"
-                }; margin-bottom: 0.25rem; ${
-                  isBrutalist || isRetro ? "text-transform: uppercase;" : ""
-                }">
-                        ${job.role || "Position"}
-                      </h3>
-                      <p style="font-size: ${
-                        isBrutalist || isRetro ? "1.125rem" : "1rem"
-                      }; color: var(--color-accent); font-weight: ${
-                  isBrutalist ? "700" : "500"
-                }; ${
-                  isBrutalist || isRetro
-                    ? "text-transform: uppercase; letter-spacing: 1px;"
-                    : ""
-                }">
-                        ${job.company || "Company"}
-                      </p>
-                    </div>
-                    <span style="font-size: ${
-                      isBrutalist || isRetro ? "1rem" : "0.875rem"
-                    }; color: var(--color-text-secondary); font-weight: ${
-                  isBrutalist ? "700" : "500"
-                }; white-space: nowrap; ${
-                  isBrutalist || isRetro
-                    ? "text-transform: uppercase; letter-spacing: 1px;"
-                    : ""
-                }">
-                      ${job.period || ""}
-                    </span>
-                  </div>
-                  ${
-                    job.description
-                      ? `
-                  <p style="font-family: ${
-                    isElegant
-                      ? "Lato, sans-serif"
-                      : isRetro
-                      ? "Space Mono, monospace"
-                      : "inherit"
-                  }; color: ${
-                          isBrutalist
-                            ? "var(--color-text)"
-                            : "var(--color-text-secondary)"
-                        }; line-height: ${
-                          isElegant ? "1.9" : "1.7"
-                        }; font-size: ${
-                          isBrutalist || isRetro
-                            ? "1.125rem"
-                            : isElegant
-                            ? "1rem"
-                            : "0.9375rem"
-                        }; font-weight: ${isElegant ? "300" : "normal"};">
-                    ${job.description}
-                  </p>
-                  `
-                      : ""
-                  }
-                </div>
-              </div>
-            `
-              )
-              .join("")}
-          </div>
-        </div>
-      </section>
-      `
-          : ""
-      }
-
-      <!-- Skills with Theme-Specific Styling -->
-      ${
-        data.skills && data.skills.length > 0
-          ? `
-      <section class="skills" style="padding: ${
-        isRetro || isElegant ? "8rem 0" : "6rem 0"
-      };">
-        <div class="container" style="max-width: 900px;">
-          <h2 style="font-family: ${
-            isElegant ? "Playfair Display, serif" : "inherit"
-          }; font-size: clamp(${
-              isBrutalist || isRetro ? "2.5rem" : "2rem"
-            }, 5vw, ${
-              isBrutalist || isRetro ? "4rem" : "3rem"
-            }); font-weight: ${
-              isBrutalist ? "900" : isRetro ? "700" : isElegant ? "600" : "700"
-            }; margin-bottom: 3rem; letter-spacing: ${
-              isRetro ? "3px" : "-0.02em"
-            }; ${isBrutalist || isRetro ? "text-transform: uppercase;" : ""} ${
-              isGradient
-                ? "background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"
-                : isRetro
-                ? "background: linear-gradient(90deg, var(--color-accent), #00f5ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"
+            }; border-radius: ${
+              isGradient || isRetro
+                ? "999px"
+                : isBrutalist
+                ? "0"
+                : isNeumorphism || isGlassmorphism
+                ? "12px"
+                : "8px"
+            }; color: var(--color-text-secondary); text-decoration: none; font-size: ${
+              isBrutalist || isRetro ? "1rem" : "0.875rem"
+            }; transition: all 0.2s; font-weight: ${
+              isBrutalist ? "700" : "500"
+            }; ${
+              isBrutalist || isRetro
+                ? "text-transform: uppercase; letter-spacing: 1px;"
                 : ""
-            }">
-            Skills & Expertise
-          </h2>
-          <div style="display: flex; flex-wrap: wrap; gap: 0.75rem;">
-            ${data.skills
-              .map(
-                (skill) => `
-              <span style="padding: ${
-                isBrutalist
-                  ? "1.25rem 2rem"
-                  : isNeumorphism
-                  ? "1rem 1.5rem"
-                  : "0.75rem 1.25rem"
-              }; background: ${
-                  isGradient
-                    ? "linear-gradient(135deg, rgba(102,126,234,0.08), rgba(118,75,162,0.08))"
-                    : isGlassmorphism
-                    ? "rgba(255,255,255,0.05)"
-                    : isNeumorphism
-                    ? "var(--color-bg)"
-                    : isRetro
-                    ? "rgba(255,47,181,0.05)"
-                    : isBrutalist
-                    ? "var(--color-bg)"
-                    : "var(--color-surface)"
-                }; border: ${
-                  isBrutalist ? "3px" : isRetro ? "2px" : "2px"
-                } solid ${
-                  isBrutalist || isRetro
-                    ? "var(--color-accent)"
-                    : isGlassmorphism
-                    ? "rgba(255,255,255,0.1)"
-                    : "var(--color-border)"
-                }; border-radius: ${
-                  isGradient || isRetro
-                    ? "999px"
-                    : isBrutalist
-                    ? "0"
-                    : isNeumorphism || isGlassmorphism
-                    ? "16px"
-                    : "8px"
-                }; font-weight: ${
-                  isBrutalist ? "900" : isRetro ? "700" : "600"
-                }; font-size: ${
-                  isBrutalist || isRetro ? "1.125rem" : "0.9375rem"
-                }; transition: all ${
-                  isBrutalist || isRetro ? "0.1s" : "0.2s"
-                }; ${
-                  isBrutalist || isRetro
-                    ? "text-transform: uppercase; letter-spacing: 1px;"
-                    : ""
-                } ${
-                  isGlassmorphism
-                    ? "backdrop-filter: blur(10px);"
-                    : isNeumorphism
-                    ? getNeumorphismShadow(false)
-                    : ""
-                }" 
-                onmouseover="${
-                  isBrutalist
-                    ? `this.style.background='var(--color-accent)'; this.style.color='var(--color-bg)'`
-                    : isGradient
-                    ? `this.style.borderColor='var(--color-accent)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 20px rgba(102,126,234,0.15)'`
-                    : isRetro
-                    ? `this.style.borderColor='var(--color-accent)'; this.style.transform='translateY(-3px)'; this.style.boxShadow='0 0 20px var(--color-accent)'`
-                    : isGlassmorphism
-                    ? `this.style.borderColor='var(--color-accent)'; this.style.transform='translateY(-2px)'`
-                    : isNeumorphism
-                    ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'; this.style.transform='translateY(-2px)'`
-                    : `this.style.borderColor='var(--color-accent)'; this.style.transform='translateY(-2px)'`
-                }" 
-                onmouseout="${
-                  isBrutalist
-                    ? `this.style.background='var(--color-bg)'; this.style.color='var(--color-text)'`
-                    : isGradient
-                    ? `this.style.borderColor='var(--color-border)'; this.style.transform='translateY(0)'; this.style.boxShadow='none'`
-                    : isRetro
-                    ? `this.style.borderColor='var(--color-accent)'; this.style.transform='translateY(0)'; this.style.boxShadow='none'`
-                    : isGlassmorphism
-                    ? `this.style.borderColor='rgba(255,255,255,0.1)'; this.style.transform='translateY(0)'`
-                    : isNeumorphism
-                    ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'; this.style.transform='translateY(0)'`
-                    : `this.style.borderColor='var(--color-border)'; this.style.transform='translateY(0)'`
-                }">
-                ${skill}
-              </span>
-            `
-              )
-              .join("")}
-          </div>
-        </div>
-      </section>
+            } ${
+              isGlassmorphism
+                ? "backdrop-filter: blur(10px);"
+                : isNeumorphism
+                ? getNeumorphismShadow(false)
+                : ""
+            }" 
+          onmouseover="${
+            isBrutalist
+              ? `this.style.background='var(--color-text)'; this.style.color='var(--color-bg)'`
+              : isRetro
+              ? `this.style.borderColor='var(--color-accent)'; this.style.color='var(--color-accent)'; this.style.boxShadow='0 0 20px var(--color-accent)'`
+              : isGlassmorphism
+              ? `this.style.borderColor='var(--color-accent)'; this.style.color='var(--color-text)'`
+              : isNeumorphism
+              ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'; this.style.color='var(--color-accent)'`
+              : `this.style.borderColor='var(--color-accent)'; this.style.color='var(--color-text)'`
+          }" 
+          onmouseout="${
+            isBrutalist
+              ? `this.style.background='var(--color-bg)'; this.style.color='var(--color-text-secondary)'`
+              : isRetro
+              ? `this.style.borderColor='var(--color-accent)'; this.style.color='var(--color-text-secondary)'; this.style.boxShadow='none'`
+              : isGlassmorphism
+              ? `this.style.borderColor='rgba(255,255,255,0.1)'; this.style.color='var(--color-text-secondary)'`
+              : isNeumorphism
+              ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'; this.style.color='var(--color-text-secondary)'`
+              : `this.style.borderColor='var(--color-border)'; this.style.color='var(--color-text-secondary)'`
+          }">
+          ${link.platform}
+        </a>
+        `
+          )
+          .join("")}
+      </div>
       `
           : ""
       }
+    </div>
 
-      <!-- Projects with Theme-Specific Styling -->
-      ${
-        data.projects && data.projects.length > 0
-          ? `
-      <section class="projects" style="padding: ${
+    <!-- Stats with Theme-Specific Styling -->
+    ${
+      data.stats && data.stats.length > 0
+        ? `
+    <div class="stats-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; padding-top: 3rem; border-top: ${
+      isBrutalist ? "4px" : isRetro ? "3px" : "1px"
+    } solid ${
+            isBrutalist || isRetro
+              ? "var(--color-accent)"
+              : isNeumorphism || isGlassmorphism
+              ? "transparent"
+              : "var(--color-border)"
+          };">
+      ${data.stats
+        .map(
+          (stat) => `
+      <div style="text-align: center; ${
+        isNeumorphism
+          ? `padding: 2rem 1.5rem; border-radius: 20px; ${getNeumorphismShadow(
+              false
+            )}`
+          : isGlassmorphism
+          ? "padding: 2rem 1.5rem; border-radius: 20px; background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1);"
+          : isRetro
+          ? "padding: 2rem 1.5rem; border: 2px solid var(--color-accent); background: rgba(255,47,181,0.05);"
+          : ""
+      } ${isNeumorphism ? "transition: all 0.3s;" : ""}" ${
+            isNeumorphism
+              ? `onmouseover="this.style.boxShadow='${getNeumorphismHoverShadow()}'" onmouseout="this.style.boxShadow='${getNeumorphismNormalShadow()}'"`
+              : isRetro
+              ? `onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 0 30px var(--color-accent)'" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none'"`
+              : ""
+          }>
+        <div style="font-size: ${
+          isBrutalist
+            ? "3rem"
+            : isRetro
+            ? "3rem"
+            : isNeumorphism || isGlassmorphism
+            ? "2.75rem"
+            : "2.5rem"
+        }; font-weight: ${
+            isBrutalist
+              ? "900"
+              : isRetro || isNeumorphism || isGlassmorphism
+              ? "800"
+              : "800"
+          }; margin-bottom: 0.5rem; ${
+            isGradient
+              ? "background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"
+              : isRetro
+              ? "background: linear-gradient(90deg, var(--color-accent), #00f5ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"
+              : "color: var(--color-accent);"
+          } ${isBrutalist ? "text-transform: uppercase;" : ""}">
+          ${stat.number}
+        </div>
+        <div style="font-size: ${
+          isBrutalist || isRetro ? "1rem" : "0.875rem"
+        }; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.05em; ${
+            isBrutalist || isRetro ? "font-weight: 700;" : ""
+          }">
+          ${stat.label}
+        </div>
+      </div>
+      `
+        )
+        .join("")}
+    </div>
+    `
+        : ""
+    }
+    
+    ${isNeumorphism ? `</div>` : ""}
+  </div>
+</section>
+
+<!-- Experience Timeline with Theme-Specific Styling -->
+${
+  data.experience && data.experience.length > 0
+    ? `
+<section class="experience" style="padding: ${
         isRetro || isElegant ? "8rem 0" : "6rem 0"
       }; background: ${
-              isBrutalist
-                ? "var(--color-text)"
-                : isGradient
-                ? "linear-gradient(135deg, rgba(102,126,234,0.05), rgba(240,147,251,0.05))"
-                : isRetro
-                ? "var(--color-surface)"
-                : isElegant
-                ? "var(--color-surface)"
-                : isGlassmorphism
-                ? "rgba(255,255,255,0.02)"
-                : "var(--color-surface)"
-            }; ${
-              isRetro
-                ? "border-top: 3px solid var(--color-accent); border-bottom: 3px solid #00f5ff;"
-                : isGlassmorphism
-                ? "backdrop-filter: blur(20px);"
-                : ""
-            }">
-        <div class="container" style="max-width: 1100px;">
-          <h2 style="font-family: ${
-            isElegant ? "Playfair Display, serif" : "inherit"
-          }; font-size: clamp(${
-              isBrutalist || isRetro ? "2.5rem" : "2rem"
-            }, 5vw, ${
-              isBrutalist || isRetro ? "4rem" : "3rem"
-            }); font-weight: ${
-              isBrutalist ? "900" : isRetro ? "700" : isElegant ? "600" : "700"
-            }; margin-bottom: 3rem; letter-spacing: ${
-              isRetro ? "3px" : "-0.02em"
-            }; ${isBrutalist || isRetro ? "text-transform: uppercase;" : ""} ${
-              isBrutalist
-                ? "color: var(--color-bg);"
-                : isGradient
-                ? "background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"
-                : isRetro
-                ? "background: linear-gradient(90deg, var(--color-accent), #00f5ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"
-                : ""
-            }">
-            Featured Work
-          </h2>
-          <div class="projects-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(${
-            isBrutalist || isElegant ? "320px" : "300px"
-          }, 1fr)); gap: ${isElegant ? "3rem" : "2rem"};">
-            ${data.projects
-              .map(
-                (project) => `
-              <div class="card" style="padding: ${
-                isBrutalist || isElegant ? "2.5rem" : "2rem"
-              }; display: flex; flex-direction: column; height: 100%; border-radius: ${
-                  isGradient
-                    ? "20px"
-                    : isBrutalist || isElegant
-                    ? "0"
-                    : isRetro
-                    ? "0"
-                    : isNeumorphism || isGlassmorphism
-                    ? "20px"
-                    : "12px"
-                }; border: ${
-                  isBrutalist ? "3px" : isRetro ? "2px" : "1px"
-                } solid ${
-                  isBrutalist
-                    ? "var(--color-bg)"
-                    : isRetro
-                    ? "var(--color-accent)"
-                    : isGlassmorphism
-                    ? "rgba(255,255,255,0.1)"
-                    : "var(--color-border)"
-                }; transition: all ${
-                  isBrutalist || isRetro ? "0.2s" : "0.3s"
-                }; background: ${
-                  isBrutalist
-                    ? "var(--color-bg)"
-                    : isGradient
-                    ? "linear-gradient(135deg, rgba(102,126,234,0.02), rgba(118,75,162,0.02))"
-                    : isGlassmorphism
-                    ? "rgba(255,255,255,0.05)"
-                    : isNeumorphism
-                    ? "var(--color-bg)"
-                    : isRetro
-                    ? "rgba(255,47,181,0.03)"
-                    : "var(--color-bg)"
-                }; ${
-                  isGlassmorphism
-                    ? "backdrop-filter: blur(20px);"
-                    : isNeumorphism
-                    ? getNeumorphismShadow(false)
-                    : ""
-                }" 
-                onmouseover="${
-                  isBrutalist
-                    ? `this.style.transform='translate(-4px, -4px)'; this.style.boxShadow='8px 8px 0 var(--color-bg)'`
-                    : isGradient
-                    ? `this.style.borderColor='var(--color-accent)'; this.style.transform='translateY(-4px)'; this.style.boxShadow='0 15px 40px rgba(102,126,234,0.1)'`
-                    : isRetro
-                    ? `this.style.transform='translateY(-4px)'; this.style.boxShadow='0 10px 30px rgba(255,47,181,0.2)'`
-                    : isGlassmorphism
-                    ? `this.style.borderColor='var(--color-accent)'; this.style.transform='translateY(-4px)'`
-                    : isNeumorphism
-                    ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
-                    : `this.style.borderColor='var(--color-accent)'; this.style.transform='translateY(-4px)'`
-                }" 
-                onmouseout="${
-                  isBrutalist
-                    ? `this.style.transform='translate(0, 0)'; this.style.boxShadow='none'`
-                    : isGradient
-                    ? `this.style.borderColor='var(--color-border)'; this.style.transform='translateY(0)'; this.style.boxShadow='none'`
-                    : isRetro
-                    ? `this.style.transform='translateY(0)'; this.style.boxShadow='none'`
-                    : isGlassmorphism
-                    ? `this.style.borderColor='rgba(255,255,255,0.1)'; this.style.transform='translateY(0)'`
-                    : isNeumorphism
-                    ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
-                    : `this.style.borderColor='var(--color-border)'; this.style.transform='translateY(0)'`
-                }">
-                <h3 style="font-family: ${
-                  isElegant ? "Playfair Display, serif" : "inherit"
-                }; font-size: ${
-                  isBrutalist || isElegant
-                    ? "1.875rem"
-                    : isRetro
-                    ? "1.5rem"
-                    : "1.625rem"
-                }; font-weight: ${
-                  isBrutalist
-                    ? "900"
-                    : isRetro
-                    ? "700"
-                    : isElegant
-                    ? "600"
-                    : "700"
-                }; margin-bottom: 1rem; letter-spacing: ${
-                  isRetro ? "1px" : "-0.01em"
-                }; ${
-                  isBrutalist || isRetro ? "text-transform: uppercase;" : ""
-                } ${isBrutalist ? "color: var(--color-text);" : ""}">
-                  ${project.title || "Project"}
-                </h3>
-                <p style="font-family: ${
-                  isElegant
-                    ? "Lato, sans-serif"
-                    : isRetro
-                    ? "Space Mono, monospace"
-                    : "inherit"
-                }; color: ${
+        isBrutalist
+          ? "var(--color-text)"
+          : isGradient
+          ? "linear-gradient(135deg, rgba(102,126,234,0.05), rgba(240,147,251,0.05))"
+          : isRetro
+          ? "var(--color-surface)"
+          : isElegant
+          ? "var(--color-surface)"
+          : isGlassmorphism
+          ? "rgba(255,255,255,0.02)"
+          : "var(--color-surface)"
+      }; ${
+        isRetro
+          ? "border-top: 3px solid var(--color-accent); border-bottom: 3px solid #00f5ff;"
+          : isGlassmorphism
+          ? "backdrop-filter: blur(20px);"
+          : ""
+      }">
+  <div class="container" style="max-width: 900px;">
+    <h2 style="font-family: ${
+      isElegant ? "Playfair Display, serif" : "inherit"
+    }; font-size: clamp(${isBrutalist || isRetro ? "2.5rem" : "2rem"}, 5vw, ${
+        isBrutalist || isRetro ? "4rem" : "3rem"
+      }); font-weight: ${
+        isBrutalist ? "900" : isRetro ? "700" : isElegant ? "600" : "700"
+      }; margin-bottom: 3rem; letter-spacing: ${isRetro ? "3px" : "-0.02em"}; ${
+        isBrutalist || isRetro ? "text-transform: uppercase;" : ""
+      } ${
+        isBrutalist
+          ? "color: var(--color-bg);"
+          : isGradient
+          ? "background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"
+          : isRetro
+          ? "background: linear-gradient(90deg, var(--color-accent), #00f5ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"
+          : ""
+      }">
+      Experience
+    </h2>
+    <div class="timeline" style="display: flex; flex-direction: column; gap: 3rem; position: relative; padding-left: 2rem;">
+      <!-- Timeline Line -->
+      <div class="timeline-line" style="position: absolute; left: 0; top: 0; bottom: 0; width: ${
+        isBrutalist ? "4px" : isRetro ? "3px" : "2px"
+      }; background: ${
+        isBrutalist || isRetro
+          ? "var(--color-accent)"
+          : isNeumorphism || isGlassmorphism
+          ? "transparent"
+          : "var(--color-border)"
+      };"></div>
+      
+      ${data.experience
+        .map(
+          (job) => `
+      <div style="position: relative;">
+        <!-- Timeline Dot -->
+        <div style="position: absolute; left: ${
+          isBrutalist ? "-2.5rem" : "-2.375rem"
+        }; top: 0.25rem; width: ${isBrutalist ? "18px" : "14px"}; height: ${
+            isBrutalist ? "18px" : "14px"
+          }; background: var(--color-accent); border: ${
+            isBrutalist ? "4px" : "3px"
+          } solid ${isBrutalist ? "var(--color-text)" : "var(--color-bg)"}; ${
+            isBrutalist ? "" : "border-radius: 50%;"
+          } z-index: 1;"></div>
+        
+        <div class="card" style="padding: ${
+          isBrutalist || isElegant
+            ? "2.5rem"
+            : isNeumorphism
+            ? "2.5rem"
+            : "2rem"
+        }; border-radius: ${
+            isGradient
+              ? "20px"
+              : isBrutalist || isElegant
+              ? "0"
+              : isRetro
+              ? "0"
+              : isNeumorphism || isGlassmorphism
+              ? "20px"
+              : "12px"
+          }; border: ${isBrutalist ? "3px" : isRetro ? "2px" : "1px"} solid ${
+            isBrutalist
+              ? "var(--color-bg)"
+              : isRetro
+              ? "var(--color-accent)"
+              : isGlassmorphism
+              ? "rgba(255,255,255,0.1)"
+              : "var(--color-border)"
+          }; background: ${
+            isBrutalist
+              ? "var(--color-bg)"
+              : isGradient
+              ? "linear-gradient(135deg, rgba(102,126,234,0.02), rgba(118,75,162,0.02))"
+              : isGlassmorphism
+              ? "rgba(255,255,255,0.05)"
+              : isNeumorphism
+              ? "var(--color-bg)"
+              : isRetro
+              ? "rgba(255,47,181,0.03)"
+              : "var(--color-bg)"
+          }; transition: all ${isBrutalist || isRetro ? "0.2s" : "0.3s"}; ${
+            isGlassmorphism
+              ? "backdrop-filter: blur(20px);"
+              : isNeumorphism
+              ? getNeumorphismShadow(false)
+              : ""
+          }" 
+          onmouseover="${
+            isBrutalist
+              ? `this.style.transform='translate(-4px, -4px)'; this.style.boxShadow='8px 8px 0 var(--color-bg)'`
+              : isGradient
+              ? `this.style.borderColor='var(--color-accent)'; this.style.transform='translateY(-4px)'; this.style.boxShadow='0 15px 40px rgba(102,126,234,0.1)'`
+              : isRetro
+              ? `this.style.transform='translateY(-4px)'; this.style.boxShadow='0 10px 30px rgba(255,47,181,0.2)'`
+              : isGlassmorphism
+              ? `this.style.borderColor='var(--color-accent)'; this.style.transform='translateY(-4px)'`
+              : isNeumorphism
+              ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
+              : `this.style.borderColor='var(--color-accent)'; this.style.transform='translateY(-4px)'`
+          }" 
+          onmouseout="${
+            isBrutalist
+              ? `this.style.transform='translate(0, 0)'; this.style.boxShadow='none'`
+              : isGradient
+              ? `this.style.borderColor='var(--color-border)'; this.style.transform='translateY(0)'; this.style.boxShadow='none'`
+              : isRetro
+              ? `this.style.transform='translateY(0)'; this.style.boxShadow='none'`
+              : isGlassmorphism
+              ? `this.style.borderColor='rgba(255,255,255,0.1)'; this.style.transform='translateY(0)'`
+              : isNeumorphism
+              ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
+              : `this.style.borderColor='var(--color-border)'; this.style.transform='translateY(0)'`
+          }">
+          <div style="display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: 1rem; margin-bottom: 0.75rem;">
+            <div>
+              <h3 style="font-family: ${
+                isElegant ? "Playfair Display, serif" : "inherit"
+              }; font-size: ${
+            isBrutalist || isElegant
+              ? "1.625rem"
+              : isRetro
+              ? "1.375rem"
+              : "1.375rem"
+          }; font-weight: ${
+            isBrutalist ? "900" : isRetro ? "700" : isElegant ? "600" : "600"
+          }; margin-bottom: 0.25rem; ${
+            isBrutalist || isRetro ? "text-transform: uppercase;" : ""
+          }">
+                ${job.role || "Position"}
+              </h3>
+              <p style="font-size: ${
+                isBrutalist || isRetro ? "1.125rem" : "1rem"
+              }; color: var(--color-accent); font-weight: ${
+            isBrutalist ? "700" : "500"
+          }; ${
+            isBrutalist || isRetro
+              ? "text-transform: uppercase; letter-spacing: 1px;"
+              : ""
+          }">
+                ${job.company || "Company"}
+              </p>
+            </div>
+            <span style="font-size: ${
+              isBrutalist || isRetro ? "1rem" : "0.875rem"
+            }; color: var(--color-text-secondary); font-weight: ${
+            isBrutalist ? "700" : "500"
+          }; white-space: nowrap; ${
+            isBrutalist || isRetro
+              ? "text-transform: uppercase; letter-spacing: 1px;"
+              : ""
+          }">
+              ${job.period || ""}
+            </span>
+          </div>
+          ${
+            job.description
+              ? `
+          <p style="font-family: ${
+            isElegant
+              ? "Lato, sans-serif"
+              : isRetro
+              ? "Space Mono, monospace"
+              : "inherit"
+          }; color: ${
                   isBrutalist
                     ? "var(--color-text)"
                     : "var(--color-text-secondary)"
-                }; line-height: ${
-                  isElegant ? "1.9" : "1.8"
-                }; margin-bottom: 1.5rem; font-size: ${
+                }; line-height: ${isElegant ? "1.9" : "1.7"}; font-size: ${
                   isBrutalist || isRetro
                     ? "1.125rem"
                     : isElegant
                     ? "1rem"
-                    : "1rem"
-                }; flex-grow: 1; font-weight: ${isElegant ? "300" : "normal"};">
-                  ${project.description || ""}
-                </p>
-                ${
-                  project.tags
-                    ? `
-                <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.5rem;">
-                  ${project.tags
-                    .split(",")
-                    .map(
-                      (tag) => `
-                    <span style="padding: ${
-                      isBrutalist ? "0.5rem 0.75rem" : "0.375rem 0.75rem"
-                    }; background: ${
-                        isBrutalist
-                          ? "var(--color-text)"
-                          : isGradient
-                          ? "linear-gradient(135deg, rgba(102,126,234,0.1), rgba(118,75,162,0.1))"
-                          : isGlassmorphism
-                          ? "rgba(255,255,255,0.05)"
-                          : isNeumorphism
-                          ? "var(--color-surface)"
-                          : isRetro
-                          ? "rgba(255,47,181,0.05)"
-                          : "var(--color-bg)"
-                      }; border: 1px solid ${
-                        isBrutalist
-                          ? "var(--color-text)"
-                          : isRetro
-                          ? "var(--color-accent)"
-                          : isGlassmorphism
-                          ? "rgba(255,255,255,0.1)"
-                          : "var(--color-border)"
-                      }; border-radius: ${
-                        isGradient || isRetro
-                          ? "999px"
-                          : isBrutalist
-                          ? "0"
-                          : isNeumorphism || isGlassmorphism
-                          ? "8px"
-                          : "6px"
-                      }; font-size: ${
-                        isBrutalist || isRetro ? "0.875rem" : "0.75rem"
-                      }; color: ${
-                        isBrutalist
-                          ? "var(--color-bg)"
-                          : "var(--color-text-secondary)"
-                      }; font-weight: ${
-                        isBrutalist ? "900" : isRetro ? "700" : "600"
-                      }; ${
-                        isBrutalist || isRetro
-                          ? "text-transform: uppercase; letter-spacing: 1px;"
-                          : ""
-                      } ${
-                        isGlassmorphism ? "backdrop-filter: blur(10px);" : ""
-                      }">
-                      ${tag.trim()}
-                    </span>
-                  `
-                    )
-                    .join("")}
-                </div>
-                `
-                    : ""
-                }
-                ${
-                  project.link
-                    ? `
-                <a href="${
-                  project.link
-                }" target="_blank" style="align-self: flex-start; padding: ${
-                        isBrutalist ? "1rem 1.5rem" : "0.75rem 1.5rem"
-                      }; border-radius: ${
-                        isGradient || isRetro
-                          ? "999px"
-                          : isBrutalist
-                          ? "0"
-                          : isNeumorphism || isGlassmorphism
-                          ? "12px"
-                          : "8px"
-                      }; text-decoration: none; font-weight: ${
-                        isBrutalist || isRetro ? "700" : "500"
-                      }; transition: all 0.2s; border: ${
-                        isBrutalist ? "3px" : isRetro ? "2px" : "1px"
-                      } solid ${
-                        isBrutalist
-                          ? "var(--color-text)"
-                          : isRetro
-                          ? "var(--color-accent)"
-                          : isGlassmorphism
-                          ? "rgba(255,255,255,0.1)"
-                          : "var(--color-border)"
-                      }; color: ${
-                        isBrutalist ? "var(--color-bg)" : "var(--color-text)"
-                      }; font-size: ${
-                        isBrutalist || isRetro ? "1rem" : "0.875rem"
-                      }; background: ${
-                        isBrutalist
-                          ? "var(--color-text)"
-                          : isGlassmorphism
-                          ? "rgba(255,255,255,0.05)"
-                          : isNeumorphism
-                          ? "var(--color-bg)"
-                          : "transparent"
-                      }; ${
-                        isBrutalist || isRetro
-                          ? "text-transform: uppercase; letter-spacing: 1px;"
-                          : ""
-                      } ${
-                        isGlassmorphism
-                          ? "backdrop-filter: blur(10px);"
-                          : isNeumorphism
-                          ? getNeumorphismShadow(false)
-                          : ""
-                      }" 
-                  onmouseover="${
-                    isBrutalist
-                      ? `this.style.background='var(--color-bg)'; this.style.color='var(--color-text)'`
-                      : isRetro
-                      ? `this.style.background='var(--color-accent)'; this.style.color='var(--color-bg)'; this.style.boxShadow='0 0 20px var(--color-accent)'`
-                      : isGlassmorphism
-                      ? `this.style.background='rgba(255,255,255,0.1)'`
-                      : isNeumorphism
-                      ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
-                      : `this.style.background='var(--color-surface)'`
-                  }" 
-                  onmouseout="${
-                    isBrutalist
-                      ? `this.style.background='var(--color-text)'; this.style.color='var(--color-bg)'`
-                      : isRetro
-                      ? `this.style.background='transparent'; this.style.color='var(--color-text)'; this.style.boxShadow='none'`
-                      : isGlassmorphism
-                      ? `this.style.background='rgba(255,255,255,0.05)'`
-                      : isNeumorphism
-                      ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
-                      : `this.style.background='transparent'`
-                  }">
-                  View Project →
-                </a>
-                `
-                    : ""
-                }
-              </div>
-            `
-              )
-              .join("")}
-          </div>
+                    : "0.9375rem"
+                }; font-weight: ${isElegant ? "300" : "normal"};">
+            ${job.description}
+          </p>
+          `
+              : ""
+          }
         </div>
-      </section>
+      </div>
       `
-          : ""
-      }
+        )
+        .join("")}
+    </div>
+  </div>
+</section>
+`
+    : ""
+}
 
-      <!-- Testimonials with Theme-Specific Styling -->
-      ${
-        data.testimonials && data.testimonials.length > 0
-          ? `
-      <section class="testimonials" style="padding: ${
+<!-- Skills with Theme-Specific Styling -->
+${
+  data.skills && data.skills.length > 0
+    ? `
+<section class="skills" style="padding: ${
         isRetro || isElegant ? "8rem 0" : "6rem 0"
       };">
-        <div class="container" style="max-width: 1100px;">
-          <h2 style="font-family: ${
-            isElegant ? "Playfair Display, serif" : "inherit"
-          }; font-size: clamp(${
-              isBrutalist || isRetro ? "2.5rem" : "2rem"
-            }, 5vw, ${
-              isBrutalist || isRetro ? "4rem" : "3rem"
-            }); font-weight: ${
-              isBrutalist ? "900" : isRetro ? "700" : isElegant ? "600" : "700"
-            }; margin-bottom: 3rem; letter-spacing: ${
-              isRetro ? "3px" : "-0.02em"
-            }; text-align: center; ${
-              isBrutalist || isRetro ? "text-transform: uppercase;" : ""
-            } ${
-              isGradient
-                ? "background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"
-                : isRetro
-                ? "background: linear-gradient(90deg, var(--color-accent), #00f5ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"
-                : ""
-            }">
-            What People Say
-          </h2>
-          <div class="testimonials-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(${
-            isBrutalist || isElegant ? "320px" : "300px"
-          }, 1fr)); gap: ${isElegant ? "3rem" : "2rem"};">
-            ${data.testimonials
-              .map(
-                (testimonial) => `
-              <div class="card" style="padding: ${
-                isBrutalist || isElegant ? "2.5rem" : "2rem"
+  <div class="container" style="max-width: 900px;">
+    <h2 style="font-family: ${
+      isElegant ? "Playfair Display, serif" : "inherit"
+    }; font-size: clamp(${isBrutalist || isRetro ? "2.5rem" : "2rem"}, 5vw, ${
+        isBrutalist || isRetro ? "4rem" : "3rem"
+      }); font-weight: ${
+        isBrutalist ? "900" : isRetro ? "700" : isElegant ? "600" : "700"
+      }; margin-bottom: 3rem; letter-spacing: ${isRetro ? "3px" : "-0.02em"}; ${
+        isBrutalist || isRetro ? "text-transform: uppercase;" : ""
+      } ${
+        isGradient
+          ? "background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"
+          : isRetro
+          ? "background: linear-gradient(90deg, var(--color-accent), #00f5ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"
+          : ""
+      }">
+      Skills & Expertise
+    </h2>
+    <div style="display: flex; flex-wrap: wrap; gap: 0.75rem;">
+      ${data.skills
+        .filter((skill) => skill && skill.trim())
+        .map(
+          (skill) => `
+      <span style="padding: ${
+        isBrutalist
+          ? "1.25rem 2rem"
+          : isNeumorphism
+          ? "1rem 1.5rem"
+          : "0.75rem 1.25rem"
+      }; background: ${
+            isGradient
+              ? "linear-gradient(135deg, rgba(102,126,234,0.08), rgba(118,75,162,0.08))"
+              : isGlassmorphism
+              ? "rgba(255,255,255,0.05)"
+              : isNeumorphism
+              ? "var(--color-bg)"
+              : isRetro
+              ? "rgba(255,47,181,0.05)"
+              : isBrutalist
+              ? "var(--color-bg)"
+              : "var(--color-surface)"
+          }; border: ${isBrutalist ? "3px" : isRetro ? "2px" : "2px"} solid ${
+            isBrutalist || isRetro
+              ? "var(--color-accent)"
+              : isGlassmorphism
+              ? "rgba(255,255,255,0.1)"
+              : "var(--color-border)"
+          }; border-radius: ${
+            isGradient || isRetro
+              ? "999px"
+              : isBrutalist
+              ? "0"
+              : isNeumorphism || isGlassmorphism
+              ? "16px"
+              : "8px"
+          }; font-weight: ${
+            isBrutalist ? "900" : isRetro ? "700" : "600"
+          }; font-size: ${
+            isBrutalist || isRetro ? "1.125rem" : "0.9375rem"
+          }; transition: all ${isBrutalist || isRetro ? "0.1s" : "0.2s"}; ${
+            isBrutalist || isRetro
+              ? "text-transform: uppercase; letter-spacing: 1px;"
+              : ""
+          } ${
+            isGlassmorphism
+              ? "backdrop-filter: blur(10px);"
+              : isNeumorphism
+              ? getNeumorphismShadow(false)
+              : ""
+          }" 
+        onmouseover="${
+          isBrutalist
+            ? `this.style.background='var(--color-accent)'; this.style.color='var(--color-bg)'`
+            : isGradient
+            ? `this.style.borderColor='var(--color-accent)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 20px rgba(102,126,234,0.15)'`
+            : isRetro
+            ? `this.style.borderColor='var(--color-accent)'; this.style.transform='translateY(-3px)'; this.style.boxShadow='0 0 20px var(--color-accent)'`
+            : isGlassmorphism
+            ? `this.style.borderColor='var(--color-accent)'; this.style.transform='translateY(-2px)'`
+            : isNeumorphism
+            ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'; this.style.transform='translateY(-2px)'`
+            : `this.style.borderColor='var(--color-accent)'; this.style.transform='translateY(-2px)'`
+        }" 
+        onmouseout="${
+          isBrutalist
+            ? `this.style.background='var(--color-bg)'; this.style.color='var(--color-text)'`
+            : isGradient
+            ? `this.style.borderColor='var(--color-border)'; this.style.transform='translateY(0)'; this.style.boxShadow='none'`
+            : isRetro
+            ? `this.style.borderColor='var(--color-accent)'; this.style.transform='translateY(0)'; this.style.boxShadow='none'`
+            : isGlassmorphism
+            ? `this.style.borderColor='rgba(255,255,255,0.1)'; this.style.transform='translateY(0)'`
+            : isNeumorphism
+            ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'; this.style.transform='translateY(0)'`
+            : `this.style.borderColor='var(--color-border)'; this.style.transform='translateY(0)'`
+        }">
+        ${skill}
+      </span>
+      `
+        )
+        .join("")}
+    </div>
+  </div>
+</section>
+`
+    : ""
+}
+
+<!-- Projects with Theme-Specific Styling -->
+${
+  data.projects && data.projects.length > 0
+    ? `
+<section class="projects" style="padding: ${
+        isRetro || isElegant ? "8rem 0" : "6rem 0"
+      }; background: ${
+        isBrutalist
+          ? "var(--color-text)"
+          : isGradient
+          ? "linear-gradient(135deg, rgba(102,126,234,0.05), rgba(240,147,251,0.05))"
+          : isRetro
+          ? "var(--color-surface)"
+          : isElegant
+          ? "var(--color-surface)"
+          : isGlassmorphism
+          ? "rgba(255,255,255,0.02)"
+          : "var(--color-surface)"
+      }; ${
+        isRetro
+          ? "border-top: 3px solid var(--color-accent); border-bottom: 3px solid #00f5ff;"
+          : isGlassmorphism
+          ? "backdrop-filter: blur(20px);"
+          : ""
+      }">
+  <div class="container" style="max-width: 1100px;">
+    <h2 style="font-family: ${
+      isElegant ? "Playfair Display, serif" : "inherit"
+    }; font-size: clamp(${isBrutalist || isRetro ? "2.5rem" : "2rem"}, 5vw, ${
+        isBrutalist || isRetro ? "4rem" : "3rem"
+      }); font-weight: ${
+        isBrutalist ? "900" : isRetro ? "700" : isElegant ? "600" : "700"
+      }; margin-bottom: 3rem; letter-spacing: ${isRetro ? "3px" : "-0.02em"}; ${
+        isBrutalist || isRetro ? "text-transform: uppercase;" : ""
+      } ${
+        isBrutalist
+          ? "color: var(--color-bg);"
+          : isGradient
+          ? "background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"
+          : isRetro
+          ? "background: linear-gradient(90deg, var(--color-accent), #00f5ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"
+          : ""
+      }">
+      Featured Work
+    </h2>
+    <div class="projects-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(${
+      isBrutalist || isElegant ? "320px" : "300px"
+    }, 1fr)); gap: ${isElegant ? "3rem" : "2rem"};">
+      ${data.projects
+        .map(
+          (project) => `
+      <div class="card" style="padding: ${
+        isBrutalist || isElegant ? "2.5rem" : "2rem"
+      }; display: flex; flex-direction: column; height: 100%; border-radius: ${
+            isGradient
+              ? "20px"
+              : isBrutalist || isElegant
+              ? "0"
+              : isRetro
+              ? "0"
+              : isNeumorphism || isGlassmorphism
+              ? "20px"
+              : "12px"
+          }; border: ${isBrutalist ? "3px" : isRetro ? "2px" : "1px"} solid ${
+            isBrutalist
+              ? "var(--color-bg)"
+              : isRetro
+              ? "var(--color-accent)"
+              : isGlassmorphism
+              ? "rgba(255,255,255,0.1)"
+              : "var(--color-border)"
+          }; transition: all ${
+            isBrutalist || isRetro ? "0.2s" : "0.3s"
+          }; background: ${
+            isBrutalist
+              ? "var(--color-bg)"
+              : isGradient
+              ? "linear-gradient(135deg, rgba(102,126,234,0.02), rgba(118,75,162,0.02))"
+              : isGlassmorphism
+              ? "rgba(255,255,255,0.05)"
+              : isNeumorphism
+              ? "var(--color-bg)"
+              : isRetro
+              ? "rgba(255,47,181,0.03)"
+              : "var(--color-bg)"
+          }; ${
+            isGlassmorphism
+              ? "backdrop-filter: blur(20px);"
+              : isNeumorphism
+              ? getNeumorphismShadow(false)
+              : ""
+          }" 
+        onmouseover="${
+          isBrutalist
+            ? `this.style.transform='translate(-4px, -4px)'; this.style.boxShadow='8px 8px 0 var(--color-bg)'`
+            : isGradient
+            ? `this.style.borderColor='var(--color-accent)'; this.style.transform='translateY(-4px)'; this.style.boxShadow='0 15px 40px rgba(102,126,234,0.1)'`
+            : isRetro
+            ? `this.style.transform='translateY(-4px)'; this.style.boxShadow='0 10px 30px rgba(255,47,181,0.2)'`
+            : isGlassmorphism
+            ? `this.style.borderColor='var(--color-accent)'; this.style.transform='translateY(-4px)'`
+            : isNeumorphism
+            ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
+            : `this.style.borderColor='var(--color-accent)'; this.style.transform='translateY(-4px)'`
+        }" 
+        onmouseout="${
+          isBrutalist
+            ? `this.style.transform='translate(0, 0)'; this.style.boxShadow='none'`
+            : isGradient
+            ? `this.style.borderColor='var(--color-border)'; this.style.transform='translateY(0)'; this.style.boxShadow='none'`
+            : isRetro
+            ? `this.style.transform='translateY(0)'; this.style.boxShadow='none'`
+            : isGlassmorphism
+            ? `this.style.borderColor='rgba(255,255,255,0.1)'; this.style.transform='translateY(0)'`
+            : isNeumorphism
+            ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
+            : `this.style.borderColor='var(--color-border)'; this.style.transform='translateY(0)'`
+        }">
+        <h3 style="font-family: ${
+          isElegant ? "Playfair Display, serif" : "inherit"
+        }; font-size: ${
+            isBrutalist || isElegant
+              ? "1.875rem"
+              : isRetro
+              ? "1.5rem"
+              : "1.625rem"
+          }; font-weight: ${
+            isBrutalist ? "900" : isRetro ? "700" : isElegant ? "600" : "700"
+          }; margin-bottom: 1rem; letter-spacing: ${
+            isRetro ? "1px" : "-0.01em"
+          }; ${isBrutalist || isRetro ? "text-transform: uppercase;" : ""} ${
+            isBrutalist ? "color: var(--color-text);" : ""
+          }">
+          ${project.title || "Project"}
+        </h3>
+        <p style="font-family: ${
+          isElegant
+            ? "Lato, sans-serif"
+            : isRetro
+            ? "Space Mono, monospace"
+            : "inherit"
+        }; color: ${
+            isBrutalist ? "var(--color-text)" : "var(--color-text-secondary)"
+          }; line-height: ${
+            isElegant ? "1.9" : "1.8"
+          }; margin-bottom: 1.5rem; font-size: ${
+            isBrutalist || isRetro ? "1.125rem" : isElegant ? "1rem" : "1rem"
+          }; flex-grow: 1; font-weight: ${isElegant ? "300" : "normal"};">
+          ${project.description || ""}
+        </p>
+        ${
+          project.tags
+            ? `
+        <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.5rem;">
+          ${project.tags
+            .split(",")
+            .map(
+              (tag) => `
+          <span style="padding: ${
+            isBrutalist ? "0.5rem 0.75rem" : "0.375rem 0.75rem"
+          }; background: ${
+                isBrutalist
+                  ? "var(--color-text)"
+                  : isGradient
+                  ? "linear-gradient(135deg, rgba(102,126,234,0.1), rgba(118,75,162,0.1))"
+                  : isGlassmorphism
+                  ? "rgba(255,255,255,0.05)"
+                  : isNeumorphism
+                  ? "var(--color-surface)"
+                  : isRetro
+                  ? "rgba(255,47,181,0.05)"
+                  : "var(--color-bg)"
+              }; border: 1px solid ${
+                isBrutalist
+                  ? "var(--color-text)"
+                  : isRetro
+                  ? "var(--color-accent)"
+                  : isGlassmorphism
+                  ? "rgba(255,255,255,0.1)"
+                  : "var(--color-border)"
               }; border-radius: ${
-                  isGradient
-                    ? "20px"
-                    : isBrutalist || isElegant
-                    ? "0"
-                    : isRetro
-                    ? "0"
-                    : isNeumorphism || isGlassmorphism
-                    ? "20px"
-                    : "12px"
-                }; border: ${
-                  isBrutalist ? "3px" : isRetro ? "2px" : "1px"
-                } solid ${
-                  isBrutalist || isRetro
-                    ? "var(--color-accent)"
-                    : isGlassmorphism
-                    ? "rgba(255,255,255,0.1)"
-                    : "var(--color-border)"
-                }; transition: all ${
-                  isBrutalist || isRetro ? "0.2s" : "0.3s"
-                }; background: ${
-                  isGradient
-                    ? "linear-gradient(135deg, rgba(102,126,234,0.02), rgba(118,75,162,0.02))"
-                    : isGlassmorphism
-                    ? "rgba(255,255,255,0.05)"
-                    : isNeumorphism
-                    ? "var(--color-bg)"
-                    : isRetro
-                    ? "rgba(255,47,181,0.03)"
-                    : "var(--color-bg)"
-                }; ${
-                  isGlassmorphism
-                    ? "backdrop-filter: blur(20px);"
-                    : isNeumorphism
-                    ? getNeumorphismShadow(false)
-                    : ""
-                }" 
-                onmouseover="${
-                  isBrutalist
-                    ? `this.style.transform='translate(-4px, -4px)'; this.style.boxShadow='8px 8px 0 var(--color-accent)'`
-                    : isGradient
-                    ? `this.style.borderColor='var(--color-accent)'; this.style.transform='translateY(-4px)'; this.style.boxShadow='0 15px 40px rgba(102,126,234,0.1)'`
-                    : isRetro
-                    ? `this.style.transform='translateY(-4px)'; this.style.boxShadow='0 10px 30px rgba(255,47,181,0.2)'`
-                    : isGlassmorphism
-                    ? `this.style.borderColor='var(--color-accent)'; this.style.transform='translateY(-4px)'`
-                    : isNeumorphism
-                    ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
-                    : `this.style.borderColor='var(--color-accent)'; this.style.transform='translateY(-4px)'`
-                }" 
-                onmouseout="${
-                  isBrutalist
-                    ? `this.style.transform='translate(0, 0)'; this.style.boxShadow='none'`
-                    : isGradient
-                    ? `this.style.borderColor='var(--color-border)'; this.style.transform='translateY(0)'; this.style.boxShadow='none'`
-                    : isRetro
-                    ? `this.style.transform='translateY(0)'; this.style.boxShadow='none'`
-                    : isGlassmorphism
-                    ? `this.style.borderColor='rgba(255,255,255,0.1)'; this.style.transform='translateY(0)'`
-                    : isNeumorphism
-                    ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
-                    : `this.style.borderColor='var(--color-border)'; this.style.transform='translateY(0)'`
-                }">
-                <p style="font-family: ${
-                  isElegant
-                    ? "Playfair Display, serif"
-                    : isRetro
-                    ? "Space Mono, monospace"
-                    : "inherit"
-                }; font-size: ${
-                  isBrutalist || isRetro
-                    ? "1.375rem"
-                    : isElegant
-                    ? "1.25rem"
-                    : "1.125rem"
-                }; line-height: ${
-                  isElegant ? "1.9" : "1.8"
-                }; margin-bottom: 2rem; font-style: ${
-                  isElegant ? "italic" : "normal"
-                }; color: var(--color-text); font-weight: ${
-                  isBrutalist ? "700" : "normal"
-                };">
-                  "${testimonial.quote || ""}"
-                </p>
-                <div style="display: flex; align-items: center; gap: 1rem; padding-top: 1.5rem; border-top: ${
-                  isBrutalist ? "3px" : isRetro ? "2px" : "1px"
-                } solid ${
-                  isBrutalist || isRetro
-                    ? "var(--color-accent)"
-                    : isNeumorphism || isGlassmorphism
-                    ? "transparent"
-                    : "var(--color-border)"
-                };">
-                  <div style="width: 48px; height: 48px; ${
-                    isBrutalist ? "" : "border-radius: 50%;"
-                  } background: var(--color-accent); opacity: 0.2;"></div>
-                  <div>
-                    <h4 style="font-weight: ${
-                      isBrutalist ? "900" : isRetro ? "700" : "600"
-                    }; margin-bottom: 0.25rem; font-size: ${
-                  isBrutalist || isRetro ? "1.125rem" : "0.9375rem"
-                }; ${
-                  isBrutalist || isRetro ? "text-transform: uppercase;" : ""
-                }">
-                      ${testimonial.author || ""}
-                    </h4>
-                    <p style="color: var(--color-text-secondary); font-size: ${
-                      isBrutalist || isRetro ? "1rem" : "0.875rem"
-                    }; ${
-                  isBrutalist || isRetro
-                    ? "text-transform: uppercase; letter-spacing: 1px; font-weight: 700;"
-                    : ""
-                }">
-                      ${testimonial.role || ""}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            `
-              )
-              .join("")}
+                isGradient || isRetro
+                  ? "999px"
+                  : isBrutalist
+                  ? "0"
+                  : isNeumorphism || isGlassmorphism
+                  ? "8px"
+                  : "6px"
+              }; font-size: ${
+                isBrutalist || isRetro ? "0.875rem" : "0.75rem"
+              }; color: ${
+                isBrutalist ? "var(--color-bg)" : "var(--color-text-secondary)"
+              }; font-weight: ${
+                isBrutalist ? "900" : isRetro ? "700" : "600"
+              }; ${
+                isBrutalist || isRetro
+                  ? "text-transform: uppercase; letter-spacing: 1px;"
+                  : ""
+              } ${isGlassmorphism ? "backdrop-filter: blur(10px);" : ""}">
+            ${tag.trim()}
+          </span>
+          `
+            )
+            .join("")}
+        </div>
+        `
+            : ""
+        }
+        ${
+          project.link
+            ? `
+        <a href="${
+          project.link
+        }" target="_blank" style="align-self: flex-start; padding: ${
+                isBrutalist ? "1rem 1.5rem" : "0.75rem 1.5rem"
+              }; border-radius: ${
+                isGradient || isRetro
+                  ? "999px"
+                  : isBrutalist
+                  ? "0"
+                  : isNeumorphism || isGlassmorphism
+                  ? "12px"
+                  : "8px"
+              }; text-decoration: none; font-weight: ${
+                isBrutalist || isRetro ? "700" : "500"
+              }; transition: all 0.2s; border: ${
+                isBrutalist ? "3px" : isRetro ? "2px" : "1px"
+              } solid ${
+                isBrutalist
+                  ? "var(--color-text)"
+                  : isRetro
+                  ? "var(--color-accent)"
+                  : isGlassmorphism
+                  ? "rgba(255,255,255,0.1)"
+                  : "var(--color-border)"
+              }; color: ${
+                isBrutalist ? "var(--color-bg)" : "var(--color-text)"
+              }; font-size: ${
+                isBrutalist || isRetro ? "1rem" : "0.875rem"
+              }; background: ${
+                isBrutalist
+                  ? "var(--color-text)"
+                  : isGlassmorphism
+                  ? "rgba(255,255,255,0.05)"
+                  : isNeumorphism
+                  ? "var(--color-bg)"
+                  : "transparent"
+              }; ${
+                isBrutalist || isRetro
+                  ? "text-transform: uppercase; letter-spacing: 1px;"
+                  : ""
+              } ${
+                isGlassmorphism
+                  ? "backdrop-filter: blur(10px);"
+                  : isNeumorphism
+                  ? getNeumorphismShadow(false)
+                  : ""
+              }" 
+          onmouseover="${
+            isBrutalist
+              ? `this.style.background='var(--color-bg)'; this.style.color='var(--color-text)'`
+              : isRetro
+              ? `this.style.background='var(--color-accent)'; this.style.color='var(--color-bg)'; this.style.boxShadow='0 0 20px var(--color-accent)'`
+              : isGlassmorphism
+              ? `this.style.background='rgba(255,255,255,0.1)'`
+              : isNeumorphism
+              ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
+              : `this.style.background='var(--color-surface)'`
+          }" 
+          onmouseout="${
+            isBrutalist
+              ? `this.style.background='var(--color-text)'; this.style.color='var(--color-bg)'`
+              : isRetro
+              ? `this.style.background='transparent'; this.style.color='var(--color-text)'; this.style.boxShadow='none'`
+              : isGlassmorphism
+              ? `this.style.background='rgba(255,255,255,0.05)'`
+              : isNeumorphism
+              ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
+              : `this.style.background='transparent'`
+          }">
+          View Project →
+        </a>
+        `
+            : ""
+        }
+      </div>
+      `
+        )
+        .join("")}
+    </div>
+  </div>
+</section>
+`
+    : ""
+}
+
+<!-- Testimonials with Theme-Specific Styling -->
+${
+  data.testimonials && data.testimonials.length > 0
+    ? `
+<section class="testimonials" style="padding: ${
+        isRetro || isElegant ? "8rem 0" : "6rem 0"
+      };">
+  <div class="container" style="max-width: 1100px;">
+    <h2 style="font-family: ${
+      isElegant ? "Playfair Display, serif" : "inherit"
+    }; font-size: clamp(${isBrutalist || isRetro ? "2.5rem" : "2rem"}, 5vw, ${
+        isBrutalist || isRetro ? "4rem" : "3rem"
+      }); font-weight: ${
+        isBrutalist ? "900" : isRetro ? "700" : isElegant ? "600" : "700"
+      }; margin-bottom: 3rem; letter-spacing: ${
+        isRetro ? "3px" : "-0.02em"
+      }; text-align: center; ${
+        isBrutalist || isRetro ? "text-transform: uppercase;" : ""
+      } ${
+        isGradient
+          ? "background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"
+          : isRetro
+          ? "background: linear-gradient(90deg, var(--color-accent), #00f5ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"
+          : ""
+      }">
+      What People Say
+    </h2>
+    <div class="testimonials-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(${
+      isBrutalist || isElegant ? "320px" : "300px"
+    }, 1fr)); gap: ${isElegant ? "3rem" : "2rem"};">
+      ${data.testimonials
+        .map(
+          (testimonial) => `
+      <div class="card" style="padding: ${
+        isBrutalist || isElegant ? "2.5rem" : "2rem"
+      }; border-radius: ${
+            isGradient
+              ? "20px"
+              : isBrutalist || isElegant
+              ? "0"
+              : isRetro
+              ? "0"
+              : isNeumorphism || isGlassmorphism
+              ? "20px"
+              : "12px"
+          }; border: ${isBrutalist ? "3px" : isRetro ? "2px" : "1px"} solid ${
+            isBrutalist || isRetro
+              ? "var(--color-accent)"
+              : isGlassmorphism
+              ? "rgba(255,255,255,0.1)"
+              : "var(--color-border)"
+          }; transition: all ${
+            isBrutalist || isRetro ? "0.2s" : "0.3s"
+          }; background: ${
+            isGradient
+              ? "linear-gradient(135deg, rgba(102,126,234,0.02), rgba(118,75,162,0.02))"
+              : isGlassmorphism
+              ? "rgba(255,255,255,0.05)"
+              : isNeumorphism
+              ? "var(--color-bg)"
+              : isRetro
+              ? "rgba(255,47,181,0.03)"
+              : "var(--color-bg)"
+          }; ${
+            isGlassmorphism
+              ? "backdrop-filter: blur(20px);"
+              : isNeumorphism
+              ? getNeumorphismShadow(false)
+              : ""
+          }" 
+        onmouseover="${
+          isBrutalist
+            ? `this.style.transform='translate(-4px, -4px)'; this.style.boxShadow='8px 8px 0 var(--color-accent)'`
+            : isGradient
+            ? `this.style.borderColor='var(--color-accent)'; this.style.transform='translateY(-4px)'; this.style.boxShadow='0 15px 40px rgba(102,126,234,0.1)'`
+            : isRetro
+            ? `this.style.transform='translateY(-4px)'; this.style.boxShadow='0 10px 30px rgba(255,47,181,0.2)'`
+            : isGlassmorphism
+            ? `this.style.borderColor='var(--color-accent)'; this.style.transform='translateY(-4px)'`
+            : isNeumorphism
+            ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
+            : `this.style.borderColor='var(--color-accent)'; this.style.transform='translateY(-4px)'`
+        }" 
+        onmouseout="${
+          isBrutalist
+            ? `this.style.transform='translate(0, 0)'; this.style.boxShadow='none'`
+            : isGradient
+            ? `this.style.borderColor='var(--color-border)'; this.style.transform='translateY(0)'; this.style.boxShadow='none'`
+            : isRetro
+            ? `this.style.transform='translateY(0)'; this.style.boxShadow='none'`
+            : isGlassmorphism
+            ? `this.style.borderColor='rgba(255,255,255,0.1)'; this.style.transform='translateY(0)'`
+            : isNeumorphism
+            ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
+            : `this.style.borderColor='var(--color-border)'; this.style.transform='translateY(0)'`
+        }">
+        <p style="font-family: ${
+          isElegant
+            ? "Playfair Display, serif"
+            : isRetro
+            ? "Space Mono, monospace"
+            : "inherit"
+        }; font-size: ${
+            isBrutalist || isRetro
+              ? "1.375rem"
+              : isElegant
+              ? "1.25rem"
+              : "1.125rem"
+          }; line-height: ${
+            isElegant ? "1.9" : "1.8"
+          }; margin-bottom: 2rem; font-style: ${
+            isElegant ? "italic" : "normal"
+          }; color: var(--color-text); font-weight: ${
+            isBrutalist ? "700" : "normal"
+          };">
+          "${testimonial.quote || ""}"
+        </p>
+        <div style="display: flex; align-items: center; gap: 1rem; padding-top: 1.5rem; border-top: ${
+          isBrutalist ? "3px" : isRetro ? "2px" : "1px"
+        } solid ${
+            isBrutalist || isRetro
+              ? "var(--color-accent)"
+              : isNeumorphism || isGlassmorphism
+              ? "transparent"
+              : "var(--color-border)"
+          };">
+          <div>
+            <h4 style="font-weight: ${
+              isBrutalist ? "900" : isRetro ? "700" : "600"
+            }; margin-bottom: 0.25rem; font-size: ${
+            isBrutalist || isRetro ? "1.125rem" : "0.9375rem"
+          }; ${isBrutalist || isRetro ? "text-transform: uppercase;" : ""}">
+              ${testimonial.author || ""}
+            </h4>
+            <p style="color: var(--color-text-secondary); font-size: ${
+              isBrutalist || isRetro ? "1rem" : "0.875rem"
+            }; ${
+            isBrutalist || isRetro
+              ? "text-transform: uppercase; letter-spacing: 1px; font-weight: 700;"
+              : ""
+          }">
+              ${testimonial.role || ""}
+            </p>
           </div>
         </div>
-      </section>
+      </div>
       `
-          : ""
-      }
+        )
+        .join("")}
+    </div>
+  </div>
+</section>
+`
+    : ""
+}
 
-      <!-- Contact CTA with Theme-Specific Styling -->
-      <section id="contact" class="contact" style="padding: 8rem 0 6rem; background: ${
+<!-- Contact CTA with Theme-Specific Styling -->
+<section id="contact" class="contact" style="padding: 8rem 0 6rem; background: ${
         isBrutalist
           ? "var(--color-accent)"
           : isGradient
@@ -3611,9 +3630,9 @@ export const templates = {
           ? "border-radius: 20px; margin: 0 2rem; box-shadow: 0 20px 60px rgba(255,47,181,0.4);"
           : ""
       }">
-        <div class="container" style="max-width: ${
-          isNeumorphism || isGlassmorphism ? "800px" : "700px"
-        }; ${
+  <div class="container" style="max-width: ${
+    isNeumorphism || isGlassmorphism ? "800px" : "700px"
+  }; ${
         isGlassmorphism || isNeumorphism
           ? `padding: 5rem 3rem!important; border-radius: 32px; ${
               isGlassmorphism
@@ -3622,43 +3641,43 @@ export const templates = {
             }`
           : ""
       }">
-          ${
-            isBrutalist
-              ? `
-          <h2 style="font-size: clamp(2.5rem, 6vw, 5rem); text-transform: uppercase; font-weight: 900; margin-bottom: 1.5rem; letter-spacing: -0.03em; color: var(--color-bg);">
-            WORK TOGETHER
-          </h2>
-          `
-              : isElegant
-              ? `
-          <h2 style="font-family: Playfair Display, serif; font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 600; margin-bottom: 1.5rem; letter-spacing: -0.03em; color: var(--color-text);">
-            Let's Work Together
-          </h2>
-          `
-              : isRetro
-              ? `
-          <h2 style="font-size: clamp(2rem, 6vw, 4rem); margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: 3px; font-weight: 700;">
-            JOIN THE TEAM
-          </h2>
-          `
-              : `
-          <h2 style="font-size: clamp(2.5rem, 6vw, 4rem); font-weight: ${
-            isNeumorphism || isGlassmorphism ? "800" : "800"
-          }; margin-bottom: 1.5rem; letter-spacing: -0.03em; color: ${
-                  isGradient || isRetro ? "white" : "var(--color-text)"
-                };">
-            Let's Work Together
-          </h2>
-          `
-          }
-          
-          <p style="font-family: ${
-            isElegant
-              ? "Lato, sans-serif"
-              : isRetro
-              ? "Space Mono, monospace"
-              : "inherit"
-          }; font-size: ${
+    ${
+      isBrutalist
+        ? `
+    <h2 style="font-size: clamp(2.5rem, 6vw, 5rem); text-transform: uppercase; font-weight: 900; margin-bottom: 1.5rem; letter-spacing: -0.03em; color: var(--color-bg);">
+      WORK TOGETHER
+    </h2>
+    `
+        : isElegant
+        ? `
+    <h2 style="font-family: Playfair Display, serif; font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 600; margin-bottom: 1.5rem; letter-spacing: -0.03em; color: var(--color-text);">
+      Let's Work Together
+    </h2>
+    `
+        : isRetro
+        ? `
+    <h2 style="font-size: clamp(2rem, 6vw, 4rem); margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: 3px; font-weight: 700;">
+      JOIN THE TEAM
+    </h2>
+    `
+        : `
+    <h2 style="font-size: clamp(2.5rem, 6vw, 4rem); font-weight: ${
+      isNeumorphism || isGlassmorphism ? "800" : "800"
+    }; margin-bottom: 1.5rem; letter-spacing: -0.03em; color: ${
+            isGradient || isRetro ? "white" : "var(--color-text)"
+          };">
+      Let's Work Together
+    </h2>
+    `
+    }
+    
+    <p style="font-family: ${
+      isElegant
+        ? "Lato, sans-serif"
+        : isRetro
+        ? "Space Mono, monospace"
+        : "inherit"
+    }; font-size: ${
         isBrutalist || isRetro ? "1.5rem" : isElegant ? "1.125rem" : "1.25rem"
       }; color: ${
         isBrutalist
@@ -3669,107 +3688,107 @@ export const templates = {
       }; margin-bottom: 3rem; line-height: 1.7; font-weight: ${
         isElegant ? "300" : "normal"
       };">
-            Have a project in mind? Let's create something amazing together.
-          </p>
-          
-          ${
-            data.contactEmail
-              ? `
-          <a href="mailto:${
-            data.contactEmail
-          }" class="btn btn-primary" style="padding: ${
-                  isBrutalist ? "1.5rem 3rem" : "1.25rem 3rem"
-                }; font-size: ${
-                  isBrutalist || isRetro ? "1.25rem" : "1.125rem"
-                }; border-radius: ${
-                  isGradient || isRetro
-                    ? "999px"
-                    : isBrutalist
-                    ? "0"
-                    : isNeumorphism || isGlassmorphism
-                    ? "16px"
-                    : isElegant
-                    ? "0"
-                    : "8px"
-                }; text-decoration: none; font-weight: ${
-                  isBrutalist || isRetro ? "700" : "500"
-                }; transition: all 0.2s; display: inline-block; background: ${
-                  isBrutalist || isGradient || isRetro
-                    ? "white"
-                    : isGlassmorphism
-                    ? "rgba(255,255,255,0.15)"
-                    : isNeumorphism
-                    ? "var(--color-bg)"
-                    : isElegant
-                    ? "var(--color-accent)"
-                    : "var(--color-accent)"
-                }; color: ${
-                  isBrutalist
-                    ? "var(--color-accent)"
-                    : isGradient
-                    ? "#667eea"
-                    : isRetro
-                    ? "var(--color-accent)"
-                    : isGlassmorphism
-                    ? "var(--color-text)"
-                    : isNeumorphism
-                    ? "var(--color-text)"
-                    : isElegant
-                    ? "white"
-                    : "white"
-                }; ${
-                  isBrutalist
-                    ? "text-transform: uppercase; border: 4px solid white;"
-                    : isRetro
-                    ? "text-transform: uppercase; letter-spacing: 1px; border: 2px solid white;"
-                    : isElegant
-                    ? "letter-spacing: 0.5px; border: 1px solid var(--color-accent);"
-                    : isGlassmorphism
-                    ? "backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 8px 20px rgba(0,0,0,0.3);"
-                    : isNeumorphism
-                    ? getNeumorphismShadow(false)
-                    : ""
-                }" 
-            onmouseover="this.style.transform='translateY(-2px)'; ${
-              isBrutalist
-                ? `this.style.background='transparent'; this.style.color='white'`
-                : isRetro
-                ? `this.style.background='transparent'; this.style.color='white'; this.style.borderColor='white'`
-                : isElegant
-                ? `this.style.background='transparent'; this.style.color='var(--color-accent)'`
-                : isGradient
-                ? `this.style.transform='scale(1.05)'`
-                : isGlassmorphism
-                ? `this.style.transform='translateY(-3px)'; this.style.boxShadow='0 12px 30px rgba(0,0,0,0.4)'`
-                : isNeumorphism
-                ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
-                : `this.style.opacity='0.9'`
-            }" 
-            onmouseout="this.style.transform='translateY(0)'; ${
-              isBrutalist
-                ? `this.style.background='white'; this.style.color='var(--color-accent)'`
-                : isRetro
-                ? `this.style.background='white'; this.style.color='var(--color-accent)'`
-                : isElegant
-                ? `this.style.background='var(--color-accent)'; this.style.color='white'`
-                : isGradient
-                ? `this.style.transform='scale(1)'`
-                : isGlassmorphism
-                ? `this.style.boxShadow='0 8px 20px rgba(0,0,0,0.3)'`
-                : isNeumorphism
-                ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
-                : `this.style.opacity='1'`
-            }">
-            Get in Touch
-          </a>
-          `
+      Have a project in mind? Let's create something amazing together.
+    </p>
+    
+    ${
+      data.contactEmail
+        ? `
+    <a href="mailto:${
+      data.contactEmail
+    }" class="btn btn-primary" style="padding: ${
+            isBrutalist ? "1.5rem 3rem" : "1.25rem 3rem"
+          }; font-size: ${
+            isBrutalist || isRetro ? "1.25rem" : "1.125rem"
+          }; border-radius: ${
+            isGradient || isRetro
+              ? "999px"
+              : isBrutalist
+              ? "0"
+              : isNeumorphism || isGlassmorphism
+              ? "16px"
+              : isElegant
+              ? "0"
+              : "8px"
+          }; text-decoration: none; font-weight: ${
+            isBrutalist || isRetro ? "700" : "500"
+          }; transition: all 0.2s; display: inline-block; background: ${
+            isBrutalist || isGradient || isRetro
+              ? "white"
+              : isGlassmorphism
+              ? "rgba(255,255,255,0.15)"
+              : isNeumorphism
+              ? "var(--color-bg)"
+              : isElegant
+              ? "var(--color-accent)"
+              : "var(--color-accent)"
+          }; color: ${
+            isBrutalist
+              ? "var(--color-accent)"
+              : isGradient
+              ? "#667eea"
+              : isRetro
+              ? "var(--color-accent)"
+              : isGlassmorphism
+              ? "var(--color-text)"
+              : isNeumorphism
+              ? "var(--color-text)"
+              : isElegant
+              ? "white"
+              : "white"
+          }; ${
+            isBrutalist
+              ? "text-transform: uppercase; border: 4px solid white;"
+              : isRetro
+              ? "text-transform: uppercase; letter-spacing: 1px; border: 2px solid white;"
+              : isElegant
+              ? "letter-spacing: 0.5px; border: 1px solid var(--color-accent);"
+              : isGlassmorphism
+              ? "backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 8px 20px rgba(0,0,0,0.3);"
+              : isNeumorphism
+              ? getNeumorphismShadow(false)
               : ""
-          }
-        </div>
-      </section>
+          }" 
+      onmouseover="this.style.transform='translateY(-2px)'; ${
+        isBrutalist
+          ? `this.style.background='transparent'; this.style.color='white'`
+          : isRetro
+          ? `this.style.background='transparent'; this.style.color='white'; this.style.borderColor='white'`
+          : isElegant
+          ? `this.style.background='transparent'; this.style.color='var(--color-accent)'`
+          : isGradient
+          ? `this.style.transform='scale(1.05)'`
+          : isGlassmorphism
+          ? `this.style.transform='translateY(-3px)'; this.style.boxShadow='0 12px 30px rgba(0,0,0,0.4)'`
+          : isNeumorphism
+          ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
+          : `this.style.opacity='0.9'`
+      }" 
+      onmouseout="this.style.transform='translateY(0)'; ${
+        isBrutalist
+          ? `this.style.background='white'; this.style.color='var(--color-accent)'`
+          : isRetro
+          ? `this.style.background='white'; this.style.color='var(--color-accent)'`
+          : isElegant
+          ? `this.style.background='var(--color-accent)'; this.style.color='white'`
+          : isGradient
+          ? `this.style.transform='scale(1)'`
+          : isGlassmorphism
+          ? `this.style.boxShadow='0 8px 20px rgba(0,0,0,0.3)'`
+          : isNeumorphism
+          ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
+          : `this.style.opacity='1'`
+      }">
+      Get in Touch
+    </a>
+    `
+        : ""
+    }
+  </div>
+</section>
 
-      <!-- Footer with Theme-Specific Styling -->
-      <footer style="padding: ${
+<!-- Footer with Theme-Specific Styling -->
+<footer style="padding: ${
         isBrutalist ? "4rem 0" : isRetro ? "3rem 0" : "3rem 0"
       }; ${
         isBrutalist
@@ -3790,148 +3809,138 @@ export const templates = {
           ? "backdrop-filter: blur(20px); background: rgba(255,255,255,0.02);"
           : ""
       }">
-        <div class="container">
-          <p>© 2024 ${data.name || "Your Name"}. ${
+  <div class="container">
+    <p>© 2024 ${data.name || "Your Name"}. ${
         isBrutalist
           ? "DESIGNED WITH POWER."
           : isRetro
           ? "DESIGNED WITH VIBES."
           : "Designed with care."
       }</p>
-        </div>
-      </footer>
+  </div>
+</footer>
 
-      <style>
-        ${
-          isNeumorphism
-            ? `
-        /* Neumorphism CSS Variables */
-        :root {
-          --neomorph-shadow-out: 20px 20px 60px #c5c9ce, -20px -20px 60px #ffffff;
-          --neomorph-shadow-in: inset 20px 20px 60px #c5c9ce, inset -20px -20px 60px #ffffff;
-        }
-        
-        [data-theme="dark"] {
-          --neomorph-shadow-out: 32px 32px 64px #2a2d34, -32px -32px 64px #383d46;
-          --neomorph-shadow-in: inset 32px 32px 64px #2a2d34, inset -32px -32px 64px #383d46;
-        }
-        `
-            : ""
-        }
-        
-        ${
-          isRetro
-            ? `
-        /* Retro grid background */
-        body::before {
-          content: '';
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background-image: 
-            linear-gradient(rgba(255,47,181,0.03) 2px, transparent 2px),
-            linear-gradient(90deg, rgba(255,47,181,0.03) 2px, transparent 2px);
-          background-size: 50px 50px;
-          pointer-events: none;
-          z-index: 0;
-        }
-        main { position: relative; z-index: 1; }
-        
-        /* Retro glitch effect */
-        .glitch::before,
-        .glitch::after {
-          content: attr(data-text);
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-        }
-        
-        .glitch::before {
-          animation: glitch1 2s infinite;
-          color: var(--color-accent);
-          z-index: -1;
-        }
-        
-        .glitch::after {
-          animation: glitch2 3s infinite;
-          color: #00f5ff;
-          z-index: -2;
-        }
-        
-        @keyframes glitch1 {
-          0%, 100% { transform: translate(0); }
-          20% { transform: translate(-2px, 2px); }
-          40% { transform: translate(-2px, -2px); }
-          60% { transform: translate(2px, 2px); }
-          80% { transform: translate(2px, -2px); }
-        }
-        
-        @keyframes glitch2 {
-          0%, 100% { transform: translate(0); }
-          20% { transform: translate(2px, -2px); }
-          40% { transform: translate(2px, 2px); }
-          60% { transform: translate(-2px, -2px); }
-          80% { transform: translate(-2px, 2px); }
-        }
-        
-        @keyframes glow {
-          from { filter: drop-shadow(0 0 10px var(--color-accent)); }
-          to { filter: drop-shadow(0 0 30px #00f5ff); }
-        }
-        `
-            : ""
-        }
-        
-        /* Responsive Design */
-        @media (max-width: 768px) {
-          header { position: ${
-            isBrutalist ? "relative" : "relative"
-          } !important; }
-          .container { padding: 0 1.5rem !important; }
-          .hero { padding: 5rem 0 4rem !important; min-height: auto !important; }
-          ${
-            isNeumorphism
-              ? `.hero-content { padding: 3rem 2rem !important; }`
-              : ""
-          }
-          ${
-            isNeumorphism
-              ? `nav > div { padding: 1rem 1.5rem !important; }`
-              : ""
-          }
-          .stats-grid { grid-template-columns: 1fr !important; gap: 1.5rem !important; }
-          .timeline { padding-left: 1.5rem !important; }
-          .timeline-line { display: none; }
-          .timeline > div > div:first-child { display: none; }
-          .projects-grid { grid-template-columns: 1fr !important; }
-          .testimonials-grid { grid-template-columns: 1fr !important; }
-          section[style*="padding: 6rem"] { padding: 4rem 0 !important; }
-          section[style*="padding: 8rem"] { padding: 5rem 0 !important; }
-        }
-        
-        @media (max-width: 640px) {
-          .cta-group {
-            flex-direction: column !important;
-            width: 100%;
-          }
-          .cta-group a {
-            width: 100%;
-            text-align: center;
-          }
-        }
-        
-        @media (max-width: 480px) {
-          .stats-grid > div {
-            padding: 1rem;
-            background: var(--color-bg);
-            border-radius: 8px;
-          }
-        }
-      </style>
+<style>
+  ${
+    isNeumorphism
+      ? `
+  /* Neumorphism CSS Variables */
+  :root {
+    --neomorph-shadow-out: 20px 20px 60px #c5c9ce, -20px -20px 60px #ffffff;
+    --neomorph-shadow-in: inset 20px 20px 60px #c5c9ce, inset -20px -20px 60px #ffffff;
+  }
+  
+  [data-theme="dark"] {
+    --neomorph-shadow-out: 32px 32px 64px #2a2d34, -32px -32px 64px #383d46;
+    --neomorph-shadow-in: inset 32px 32px 64px #2a2d34, inset -32px -32px 64px #383d46;
+  }
+  `
+      : ""
+  }
+  
+  ${
+    isRetro
+      ? `
+  /* Retro grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+      linear-gradient(rgba(255,47,181,0.03) 2px, transparent 2px),
+      linear-gradient(90deg, rgba(255,47,181,0.03) 2px, transparent 2px);
+    background-size: 50px 50px;
+    pointer-events: none;
+    z-index: 0;
+  }
+  main { position: relative; z-index: 1; }
+  
+  /* Retro glitch effect */
+  .glitch::before,
+  .glitch::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+  
+  .glitch::before {
+    animation: glitch1 2s infinite;
+    color: var(--color-accent);
+    z-index: -1;
+  }
+  
+  .glitch::after {
+    animation: glitch2 3s infinite;
+    color: #00f5ff;
+    z-index: -2;
+  }
+  
+  @keyframes glitch1 {
+    0%, 100% { transform: translate(0); }
+    20% { transform: translate(-2px, 2px); }
+    40% { transform: translate(-2px, -2px); }
+    60% { transform: translate(2px, 2px); }
+    80% { transform: translate(2px, -2px); }
+  }
+  
+  @keyframes glitch2 {
+    0%, 100% { transform: translate(0); }
+    20% { transform: translate(2px, -2px); }
+    40% { transform: translate(2px, 2px); }
+    60% { transform: translate(-2px, -2px); }
+    80% { transform: translate(-2px, 2px); }
+  }
+  
+  @keyframes glow {
+    from { filter: drop-shadow(0 0 10px var(--color-accent)); }
+    to { filter: drop-shadow(0 0 30px #00f5ff); }
+  }
+  `
+      : ""
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    header { position: ${isBrutalist ? "relative" : "relative"} !important; }
+    .container { padding: 0 1.5rem !important; }
+    .hero { padding: 5rem 0 4rem !important; min-height: auto !important; }
+    ${isNeumorphism ? `.hero-content { padding: 3rem 2rem !important; }` : ""}
+    ${isNeumorphism ? `nav > div { padding: 1rem 1.5rem !important; }` : ""}
+    .stats-grid { grid-template-columns: 1fr !important; gap: 1.5rem !important; }
+    .timeline { padding-left: 1.5rem !important; }
+    .timeline-line { display: none; }
+    .timeline > div > div:first-child { display: none; }
+    .projects-grid { grid-template-columns: 1fr !important; }
+    .testimonials-grid { grid-template-columns: 1fr !important; }
+    section[style*="padding: 6rem"] { padding: 4rem 0 !important; }
+    section[style*="padding: 8rem"] { padding: 5rem 0 !important; }
+  }
+  
+  @media (max-width: 640px) {
+    .cta-group {
+      flex-direction: column !important;
+      width: 100%;
+    }
+    .cta-group a {
+      width: 100%;
+      text-align: center;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .stats-grid > div {
+      padding: 1rem;
+      background: var(--color-bg);
+      border-radius: 8px;
+    }
+  }
+</style>
     `;
     },
   }),
@@ -5172,7 +5181,7 @@ export const templates = {
           : "var(--color-border)"
       }; ${isBrutalist || isGradient || isRetro ? "color: white;" : ""} ${
         isRetro
-          ? "border-radius: 20px; margin: 0 2rem; box-shadow: 0 20px 60px rgba(255,47,181,0.4);"
+          ? "border-radius: 20px; margin: 2rem; box-shadow: 0 20px 60px rgba(255,47,181,0.4);"
           : ""
       }">
           <div class="container" style="max-width: ${
@@ -5534,7 +5543,7 @@ export const templates = {
         
         /* Responsive Design */
         @media (max-width: 768px) {
-          .container { padding: 0 1.5rem !important; }
+          .container { padding: 1.5rem !important; }
           .nav-links { display: none !important; }
           .hero { padding: 5rem 0 4rem !important; }
           ${
@@ -5638,16 +5647,12 @@ export const templates = {
         default: "",
         accept: "image/jpeg,image/png,image/webp",
       },
-
-      // NEW: QR Code URL Field
       qrUrl: {
         type: "url",
         default: "https://alexmorgan.com",
-        label: "QR Code Destination (link to your website, LinkedIn, etc.)",
+        label: "QR Code Destination",
         description: "The URL that the QR code will point to",
       },
-
-      // NEW: vCard Customization Fields
       vcardPrefix: {
         type: "select",
         label: "Name Prefix (optional)",
@@ -5675,7 +5680,6 @@ export const templates = {
           { value: "MBA", label: "MBA" },
         ],
       },
-
       socialLinks: {
         type: "group",
         label: "Social Links",
@@ -5747,11 +5751,12 @@ export const templates = {
       const isRetro = themeId === "retro";
       const isGlassmorphism = themeId === "glassmorphism";
       const isNeumorphism = themeId === "neumorphism";
+      const isMinimal = themeId === "minimal";
 
       // Determine if we're in dark mode
       const isDark = colorMode === "dark";
 
-      // Neumorphism box-shadow helpers
+      // Neumorphism box-shadow helpers from landing-page
       const getNeumorphismShadow = (inset = false) => {
         if (!isNeumorphism) return "";
         return inset
@@ -5769,168 +5774,324 @@ export const templates = {
         return "var(--neomorph-shadow-out)";
       };
 
+      // Icon SVGs (replacing emojis)
+      const icons = {
+        email: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="M22 6l-10 7L2 6"/></svg>`,
+        phone: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>`,
+        website: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`,
+        location: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>`,
+        skills: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>`,
+        connect: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>`,
+        save: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>`,
+        copy: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`,
+        qr: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="8" height="8"/><rect x="13" y="3" width="8" height="8"/><rect x="3" y="13" width="8" height="8"/><path d="M13 13h3M13 16v3M16 16h3M19 13v3"/></svg>`,
+      };
+
+      // Theme-specific color helpers - Updated glassmorphism to match landing-page
+      const getCardBackground = () => {
+        if (isGradient)
+          return "linear-gradient(135deg, rgba(102,126,234,0.03), rgba(118,75,162,0.03))";
+        if (isGlassmorphism)
+          return isDark ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.1)";
+        if (isNeumorphism) return "var(--color-bg)";
+        if (isRetro) return "var(--color-bg)";
+        return "var(--color-bg)";
+      };
+
+      const getCardBorder = () => {
+        if (isBrutalist || isRetro) return "3px solid var(--color-accent)";
+        if (isGlassmorphism) return "1px solid rgba(255,255,255,0.15)";
+        if (isElegant) return "1px solid var(--color-border)";
+        return "1px solid var(--color-border)";
+      };
+
+      const getCardBorderRadius = () => {
+        if (isBrutalist || isElegant || isRetro) return "0";
+        if (isGradient) return "32px";
+        if (isGlassmorphism || isNeumorphism) return "24px";
+        return "16px";
+      };
+
+      const getCardShadow = () => {
+        if (isGlassmorphism) return "0 20px 60px rgba(0,0,0,0.15)";
+        if (isGradient) return "0 20px 60px rgba(102,126,234,0.12)";
+        if (isBrutalist) return "12px 12px 0 var(--color-accent)";
+        if (isRetro)
+          return "0 0 0 3px var(--color-bg), 0 0 0 6px var(--color-accent)";
+        if (isNeumorphism) return getNeumorphismShadow(false);
+        return "0 10px 40px rgba(0,0,0,0.08)";
+      };
+
+      const getAvatarSize = () => {
+        if (isBrutalist) return "130px";
+        if (isElegant) return "110px";
+        return "120px";
+      };
+
+      const getAvatarBorderRadius = () => {
+        if (isBrutalist || isElegant || isRetro) return "0";
+        return "50%";
+      };
+
+      const getAvatarBorder = () => {
+        if (isBrutalist) return "4px solid var(--color-accent)";
+        return "4px solid var(--color-bg)";
+      };
+
+      const getAvatarShadow = () => {
+        if (isNeumorphism) return getNeumorphismShadow(false);
+        if (isGradient) return "0 10px 30px rgba(102,126,234,0.3)";
+        return "0 4px 12px rgba(0,0,0,0.15)";
+      };
+
+      const getContactItemBackground = () => {
+        if (isGlassmorphism)
+          return isDark ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.08)";
+        if (isNeumorphism) return "var(--color-bg)";
+        if (isRetro) return "rgba(255,47,181,0.03)";
+        return "var(--color-surface)";
+      };
+
+      const getContactItemBorder = () => {
+        if (isBrutalist || isRetro) return "3px solid var(--color-accent)";
+        if (isGlassmorphism) return "1px solid rgba(255,255,255,0.2)";
+        return "1px solid var(--color-border)";
+      };
+
+      const getContactItemBorderRadius = () => {
+        if (isBrutalist || isElegant) return "0";
+        if (isGradient || isRetro) return "12px";
+        if (isGlassmorphism || isNeumorphism) return "12px";
+        return "8px";
+      };
+
+      const getPrimaryButtonBackground = () => {
+        if (isGradient) return "linear-gradient(135deg, #667eea, #764ba2)";
+        if (isRetro)
+          return "linear-gradient(90deg, var(--color-accent), #b537f2)";
+        if (isBrutalist) return "var(--color-accent)";
+        return "var(--color-accent)";
+      };
+
+      const getPrimaryButtonColor = () => {
+        return "white";
+      };
+
+      const getSecondaryButtonBackground = () => {
+        if (isBrutalist) return "var(--color-bg)";
+        if (isGlassmorphism)
+          return isDark ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.08)";
+        if (isNeumorphism) return "var(--color-bg)";
+        return "transparent";
+      };
+
+      const getSecondaryButtonColor = () => {
+        if (isBrutalist) return "var(--color-accent)";
+        return "var(--color-text)";
+      };
+
+      const getSecondaryButtonBorder = () => {
+        if (isBrutalist) return "3px solid var(--color-accent)";
+        if (isRetro) return "2px solid var(--color-accent)";
+        if (isElegant) return "1px solid var(--color-border)";
+        if (isGlassmorphism) return "1px solid rgba(255,255,255,0.2)";
+        return "1px solid var(--color-border)";
+      };
+
       // Function to generate QR code URL
       const generateQRCodeURL = (url) => {
-        // Use a free QR code API
         const encodedURL = encodeURIComponent(
           url || data.website || window.location.href
         );
-        // Create a QR code with appropriate colors for theme
         const bgColor = isDark ? "2d3748" : "ffffff";
         const fgColor = isDark ? "ffffff" : "000000";
         return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodedURL}&bgcolor=${bgColor}&color=${fgColor}&qzone=1`;
       };
 
-      // Function to generate vCard content
-      const generateVCard = () => {
-        let vcard = `BEGIN:VCARD
-  VERSION:3.0`;
-
-        // Name components
-        const fullName = data.name || "";
-        const nameParts = fullName.split(" ");
-        const firstName = nameParts[0] || "";
-        const lastName = nameParts.slice(1).join(" ") || "";
-
-        vcard += `\nN:${lastName};${firstName};;${data.vcardPrefix || ""};${
-          data.vcardSuffix || ""
-        }`;
-        vcard += `\nFN:${
-          data.vcardPrefix ? data.vcardPrefix + " " : ""
-        }${fullName}${data.vcardSuffix ? " " + data.vcardSuffix : ""}`;
-
-        // Organization and title
-        if (data.company) vcard += `\nORG:${data.company}`;
-        if (data.title) vcard += `\nTITLE:${data.title}`;
-
-        // Contact info
-        if (data.email) vcard += `\nEMAIL;TYPE=WORK,INTERNET:${data.email}`;
-        if (data.phone) {
-          const cleanPhone = data.phone.replace(/[^\d+]/g, "");
-          vcard += `\nTEL;TYPE=WORK,VOICE:${cleanPhone}`;
-        }
-
-        // URLs
-        if (data.website) vcard += `\nURL;TYPE=WORK:${data.website}`;
-
-        // Add social media URLs
-        if (data.socialLinks && data.socialLinks.length > 0) {
-          data.socialLinks.forEach((link, index) => {
-            if (link.url) {
-              vcard += `\nURL;TYPE=${link.platform || "OTHER"}:${link.url}`;
-            }
-          });
-        }
-
-        // Location and notes
-        if (data.location) vcard += `\nADR;TYPE=WORK:;;;${data.location};;;;`;
-        if (data.bio)
-          vcard += `\nNOTE:${data.bio.replace(/\n/g, " ").substring(0, 200)}`;
-
-        // Timestamp
-        const now = new Date();
-        const formattedDate =
-          now.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
-        vcard += `\nREV:${formattedDate}`;
-
-        vcard += `\nEND:VCARD`;
-        return vcard;
-      };
-
       return `
-  <!-- Minimal Header with Theme Toggle -->
-  <header style="padding: 1rem; position: fixed; top: 1rem; right: 1rem; z-index: 100;">
-    <label class="theme-toggle-switch-wrapper" style="cursor: pointer; ${
-      isNeumorphism
-        ? `padding: 0.5rem; border-radius: 12px; display: inline-block; background: var(--color-bg); ${getNeumorphismShadow(
-            false
-          )}`
-        : isGlassmorphism
-        ? "padding: 0.5rem; border-radius: 12px; background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2);"
-        : isBrutalist
-        ? "padding: 0.5rem; border: 3px solid var(--color-accent);"
-        : "padding: 0.5rem; background: var(--color-surface); border-radius: 12px; border: 1px solid var(--color-border);"
-    }">
-      <input type="checkbox" class="theme-toggle-switch" onclick="toggleTheme()" aria-label="Toggle theme">
-      <span class="theme-toggle-slider"></span>
-    </label>
-  </header>
+        <script>
+          const cardData = ${JSON.stringify(data || {})};
+          const isDark = ${colorMode === "dark" ? "true" : "false"};
+          
+          function generateVCardContent() {
+            let vcard = \`BEGIN:VCARD\\nVERSION:3.0\`;
+            const fullName = cardData.name || "";
+            const nameParts = fullName.split(' ');
+            const firstName = nameParts[0] || '';
+            const lastName = nameParts.slice(1).join(' ') || '';
+            
+            vcard += \`\\nN:\${lastName};\${firstName};;\${cardData.vcardPrefix || ''};\${cardData.vcardSuffix || ''}\`;
+            vcard += \`\\nFN:\${cardData.vcardPrefix ? cardData.vcardPrefix + ' ' : ''}\${fullName}\${cardData.vcardSuffix ? ' ' + cardData.vcardSuffix : ''}\`;
+            
+            if (cardData.company) vcard += \`\\nORG:\${cardData.company}\`;
+            if (cardData.title) vcard += \`\\nTITLE:\${cardData.title}\`;
+            if (cardData.email) vcard += \`\\nEMAIL;TYPE=WORK,INTERNET:\${cardData.email}\`;
+            if (cardData.phone) {
+              const cleanPhone = cardData.phone.replace(/[^\\d+]/g, '');
+              vcard += \`\\nTEL;TYPE=WORK,VOICE:\${cleanPhone}\`;
+            }
+            if (cardData.website) vcard += \`\\nURL;TYPE=WORK:\${cardData.website}\`;
+            
+            if (cardData.socialLinks && cardData.socialLinks.length > 0) {
+              cardData.socialLinks.forEach((link) => {
+                if (link.url) {
+                  const platform = link.platform === 'Other' && link.customPlatform ? link.customPlatform : link.platform;
+                  vcard += \`\\nURL;TYPE=\${platform}:\${link.url}\`;
+                }
+              });
+            }
+            
+            if (cardData.location) vcard += \`\\nADR;TYPE=WORK:;;;\${cardData.location};;;;\`;
+            if (cardData.bio) vcard += \`\\nNOTE:\${cardData.bio.replace(/\\n/g, ' ').substring(0, 200)}\`;
+            
+            const now = new Date();
+            const formattedDate = now.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+            vcard += \`\\nREV:\${formattedDate}\\nEND:VCARD\`;
+            return vcard;
+          }
   
-  <!-- Card Container with Theme-Specific Background -->
-  <div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem; background: ${
-    isBrutalist
-      ? "var(--color-text)"
-      : isGradient
-      ? "linear-gradient(135deg, rgba(102,126,234,0.08), rgba(240,147,251,0.08))"
-      : isRetro
-      ? "var(--color-bg)"
-      : "var(--color-bg)"
-  }; ${isRetro ? "position: relative;" : ""}">
-    <div style="max-width: ${
-      isBrutalist ? "550px" : isElegant ? "520px" : "500px"
-    }; width: 100%; position: relative;">
-      
-      <!-- Main Card with Theme-Specific Styling -->
-      <div class="business-card" style="padding: ${
-        isBrutalist
-          ? "3rem"
-          : isElegant
-          ? "3.5rem"
-          : isNeumorphism
-          ? "3rem"
-          : "3rem"
-      }; position: relative; overflow: visible; border-radius: ${
-        isGradient
-          ? "32px"
-          : isBrutalist || isElegant
-          ? "0"
-          : isRetro
-          ? "0"
-          : isNeumorphism || isGlassmorphism
-          ? "24px"
-          : "16px"
-      }; border: ${isBrutalist ? "4px" : isRetro ? "3px" : "1px"} solid ${
-        isBrutalist || isRetro
-          ? "var(--color-accent)"
-          : isGlassmorphism
-          ? "rgba(255,255,255,0.15)"
-          : "var(--color-border)"
-      }; background: ${
-        isGradient
-          ? "linear-gradient(135deg, rgba(102,126,234,0.03), rgba(118,75,162,0.03))"
-          : isGlassmorphism
-          ? "rgba(255,255,255,0.08)"
-          : isNeumorphism
-          ? "var(--color-bg)"
-          : isRetro
-          ? "var(--color-bg)"
-          : isBrutalist
-          ? "var(--color-bg)"
-          : "var(--color-bg)"
-      }; ${
+          function saveContact() {
+            const vcard = generateVCardContent();
+            const blob = new Blob([vcard], { type: 'text/vcard' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            const fileName = \`\${(cardData.name || "contact").replace(/\\s/g, "_")}_contact.vcf\`;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            showFeedback('Contact saved as ' + fileName);
+          }
+  
+          function copyVCard() {
+            const vcard = generateVCardContent();
+            navigator.clipboard.writeText(vcard).then(() => {
+              showFeedback('vCard copied to clipboard!');
+            }).catch(err => {
+              console.error('Failed to copy: ', err);
+              showFeedback('Failed to copy to clipboard', true);
+            });
+          }
+  
+          function scanQRCode() {
+            const qrUrl = cardData.qrUrl || cardData.website;
+            if (qrUrl) {
+              window.open(qrUrl, '_blank');
+            } else {
+              showFeedback('No URL set for QR code', true);
+            }
+          }
+  
+          function generateQRCode() {
+            const qrUrl = cardData.qrUrl || cardData.website || window.location.href;
+            const encodedURL = encodeURIComponent(qrUrl);
+            const bgColor = isDark ? '2d3748' : 'ffffff';
+            const fgColor = isDark ? 'ffffff' : '000000';
+            const qrCodeURL = \`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=\${encodedURL}&bgcolor=\${bgColor}&color=\${fgColor}&qzone=1\`;
+            
+            const qrContainer = document.getElementById('qr-code');
+            if (qrContainer) {
+              qrContainer.innerHTML = \`<img src="\${qrCodeURL}" alt="QR Code" style="width: 100%; height: 100%; object-fit: cover;">\`;
+            }
+          }
+  
+          function showFeedback(message, isError = false) {
+            const feedbackEl = document.getElementById('action-feedback');
+            const feedbackText = document.getElementById('feedback-text');
+            
+            if (feedbackEl && feedbackText) {
+              feedbackText.textContent = message;
+              feedbackEl.style.display = 'block';
+              feedbackEl.style.background = isError ? 'var(--color-error-bg, #fee)' : 'var(--color-success-bg, #efe)';
+              feedbackEl.style.color = isError ? 'var(--color-error, #c00)' : 'var(--color-success, #090)';
+              
+              setTimeout(() => {
+                feedbackEl.style.display = 'none';
+              }, 3000);
+            }
+          }
+  
+          function setupQRCodeTooltip() {
+            const qrContainer = document.getElementById('qr-container');
+            const tooltip = document.getElementById('qr-tooltip');
+            
+            if (qrContainer && tooltip) {
+              qrContainer.addEventListener('mouseenter', () => {
+                tooltip.style.opacity = '1';
+                tooltip.style.transform = 'translateY(0)';
+              });
+              
+              qrContainer.addEventListener('mouseleave', () => {
+                tooltip.style.opacity = '0';
+                tooltip.style.transform = 'translateY(10px)';
+              });
+            }
+          }
+  
+          window.addEventListener('DOMContentLoaded', () => {
+            generateQRCode();
+            setupQRCodeTooltip();
+            document.addEventListener('themeChanged', generateQRCode);
+          });
+        </script>
+  
+        <!-- Minimal Header with Theme Toggle -->
+        <header style="background: none!important; padding: 1rem; position: fixed; top: 1rem; right: 1rem; z-index: 100; border: none!important; backdrop-filter: none!important; box-shadow: none!important">
+          <label class="theme-toggle-switch-wrapper" style="cursor: pointer; padding: 0.5rem; ${
+            isNeumorphism ? getNeumorphismShadow(false) : ""
+          } border-radius: 12px; background: ${
         isGlassmorphism
-          ? "backdrop-filter: blur(20px); box-shadow: 0 20px 60px rgba(0,0,0,0.15);"
-          : isNeumorphism
-          ? getNeumorphismShadow(false)
-          : isGradient
-          ? "box-shadow: 0 20px 60px rgba(102,126,234,0.12);"
-          : isBrutalist
-          ? "box-shadow: 12px 12px 0 var(--color-accent);"
-          : isRetro
-          ? "box-shadow: 0 0 0 3px var(--color-bg), 0 0 0 6px var(--color-accent);"
-          : "box-shadow: 0 10px 40px rgba(0,0,0,0.08);"
+          ? isDark
+            ? "rgba(255,255,255,0.1)"
+            : "rgba(255,255,255,0.15)"
+          : "var(--color-surface)"
+      } ${
+        isGlassmorphism
+          ? "backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2);"
+          : ""
       }">
+            <input type="checkbox" class="theme-toggle-switch" onclick="toggleTheme()" aria-label="Toggle theme">
+            <span class="theme-toggle-slider"></span>
+          </label>
+        </header>
         
-        <!-- QR Code in Corner with Clickable URL -->
-        <div id="qr-container" style="position: absolute; top: ${
-          isBrutalist ? "1.5rem" : isElegant ? "2rem" : "1.5rem"
-        }; right: ${
+        <!-- Card Container -->
+        <div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem; background: ${
+          isBrutalist
+            ? "var(--color-text)"
+            : isGradient
+            ? "linear-gradient(135deg, rgba(102,126,234,0.08), rgba(240,147,251,0.08))"
+            : isRetro
+            ? "var(--color-bg)"
+            : isGlassmorphism
+            ? isDark
+              ? "transparent"
+              : "linear-gradient(135deg, rgba(102,126,234,0.03), rgba(118,75,162,0.03))"
+            : "var(--color-bg)"
+        }; ${isRetro ? "position: relative;" : ""}">
+          <div style="max-width: ${
+            isBrutalist ? "550px" : isElegant ? "520px" : "500px"
+          }; width: 100%; position: relative;">
+            
+            <!-- Main Card -->
+            <div class="business-card" style="padding: ${
+              isBrutalist ? "3rem" : isElegant ? "3.5rem" : "3rem"
+            }; position: relative; overflow: visible; border-radius: ${getCardBorderRadius()}; border: ${getCardBorder()}; background: ${getCardBackground()}; ${
+        isGlassmorphism ? "backdrop-filter: blur(20px);" : ""
+      } ${
+        isGlassmorphism ? "box-shadow: 0 8px 32px rgba(31, 38, 135, 0.1);" : ""
+      } ${getCardShadow()};">
+              
+              <!-- QR Code Container -->
+              <div id="qr-container" style="position: absolute; top: ${
+                isBrutalist ? "1.5rem" : isElegant ? "2rem" : "1.5rem"
+              }; right: ${
         isBrutalist ? "1.5rem" : isElegant ? "2rem" : "1.5rem"
       }; width: ${isBrutalist ? "90px" : "80px"}; height: ${
         isBrutalist ? "90px" : "80px"
-      }; border: ${isBrutalist ? "3px" : isRetro ? "2px" : "2px"} solid ${
-        isBrutalist || isRetro ? "var(--color-accent)" : "var(--color-border)"
-      }; border-radius: ${
+      }; border: ${getContactItemBorder()}; border-radius: ${
         isGradient ? "16px" : isBrutalist || isElegant || isRetro ? "0" : "12px"
       }; overflow: hidden; ${
         isGlassmorphism
@@ -5939,152 +6100,85 @@ export const templates = {
           ? getNeumorphismShadow(true)
           : ""
       } ${isBrutalist ? "transform: rotate(3deg);" : ""}; cursor: pointer;" 
-           onclick="scanQRCode()"
-           onmouseover="this.style.transform='${
-             isBrutalist ? "rotate(6deg) " : ""
-           }scale(1.05)'" 
-           onmouseout="this.style.transform='${
-             isBrutalist ? "rotate(3deg) " : ""
-           }scale(1)'">
-          <div id="qr-code" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
-            <div style="text-align: center; padding: 0.5rem; color: var(--color-text-secondary); font-size: 0.625rem;">
-              <div style="font-size: 1.5rem; margin-bottom: 0.25rem;">📱</div>
-              QR Code
-            </div>
-          </div>
-          <div id="qr-tooltip" style="position: absolute; bottom: 100%; right: 0; margin-bottom: 0.5rem; padding: 0.5rem 0.75rem; background: ${
-            isDark ? "rgba(0,0,0,0.9)" : "rgba(255,255,255,0.95)"
-          }; border-radius: 6px; font-size: 0.75rem; color: ${
+                   onclick="scanQRCode()"
+                   onmouseover="this.style.transform='${
+                     isBrutalist ? "rotate(6deg) " : ""
+                   }scale(1.05)'" 
+                   onmouseout="this.style.transform='${
+                     isBrutalist ? "rotate(3deg) " : ""
+                   }scale(1)'">
+                <div id="qr-code" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+                  <div style="text-align: center; padding: 0.5rem; color: var(--color-text-secondary);">
+                    ${icons.qr}
+                    <div style="font-size: 0.625rem; margin-top: 0.25rem;">QR Code</div>
+                  </div>
+                </div>
+                <div id="qr-tooltip" style="position: absolute; bottom: 100%; right: 0; margin-bottom: 0.5rem; padding: 0.5rem 0.75rem; background: ${
+                  isDark ? "rgba(0,0,0,0.9)" : "rgba(255,255,255,0.95)"
+                }; border-radius: 6px; font-size: 0.75rem; color: ${
         isDark ? "white" : "var(--color-text)"
       }; box-shadow: 0 4px 12px rgba(0,0,0,0.15); opacity: 0; transform: translateY(10px); transition: all 0.3s; pointer-events: none; white-space: nowrap; z-index: 10; border: 1px solid var(--color-border);">
-            Click to visit: ${data.qrUrl || data.website || "No URL set"}
-            <div style="position: absolute; top: 100%; right: 10px; border: 5px solid transparent; border-top-color: ${
-              isDark ? "rgba(0,0,0,0.9)" : "rgba(255,255,255,0.95)"
-            };"></div>
-          </div>
-        </div>
-        
-        <!-- Decorative Background Elements -->
-        ${
-          isBrutalist
-            ? `
-        <div style="position: absolute; top: -10px; left: -10px; width: 100px; height: 100px; background: var(--color-accent); opacity: 0.1; z-index: 0; transform: rotate(45deg);"></div>
-        `
-            : ""
-        }
-        
-        ${
-          isGradient
-            ? `
-        <div style="position: absolute; top: 0; left: 0; right: 0; height: 150px; background: linear-gradient(135deg, rgba(102,126,234,0.08), rgba(240,147,251,0.08)); opacity: 0.6; z-index: 0; border-radius: ${
-          isGradient ? "32px 32px 0 0" : "0"
-        };"></div>
-        `
-            : ""
-        }
-        
-        ${
-          isRetro
-            ? `
-        <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, var(--color-accent), #00f5ff, var(--color-accent)); z-index: 0;"></div>
-        `
-            : ""
-        }
-        
-        ${
-          !isBrutalist && !isGradient && !isRetro
-            ? `
-        <div style="position: absolute; top: 0; left: 0; right: 0; height: 120px; background: var(--color-surface); opacity: ${
-          isElegant ? "0.3" : "0.5"
-        }; z-index: 0; ${
-                isGlassmorphism ? "backdrop-filter: blur(10px);" : ""
-              }"></div>
-        `
-            : ""
-        }
-        
-        <!-- Profile Section -->
-        <div style="position: relative; z-index: 1; margin-bottom: 2rem; padding-right: ${
-          isBrutalist ? "110px" : "100px"
-        };">
-        <!-- Avatar with Theme Styling -->
-        ${
-          data.avatar
-            ? `
-        <div style="width: ${
-          isBrutalist ? "130px" : isElegant ? "110px" : "120px"
-        }; height: ${
-                isBrutalist ? "130px" : isElegant ? "110px" : "120px"
-              }; margin: 0 auto 2rem; overflow: hidden; ${
-                isBrutalist || isElegant || isRetro
-                  ? "border-radius: 0;"
-                  : "border-radius: 50%;"
-              } border: ${isBrutalist ? "4px" : "4px"} solid ${
-                isBrutalist ? "var(--color-accent)" : "var(--color-bg)"
-              }; ${
-                isBrutalist
-                  ? "transform: rotate(-5deg);"
-                  : isRetro
-                  ? "clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);"
-                  : ""
-              } ${
-                isNeumorphism
-                  ? getNeumorphismShadow(false)
-                  : isGradient
-                  ? "box-shadow: 0 10px 30px rgba(102,126,234,0.3);"
-                  : "box-shadow: 0 4px 12px rgba(0,0,0,0.15);"
-              }">
-          <img src="${data.avatar}" alt="${
-                data.name || "Profile"
-              }" style="width: 100%; height: 100%; object-fit: cover;" />
-        </div>
-        `
-            : `
-        <div style="width: ${
-          isBrutalist ? "130px" : isElegant ? "110px" : "120px"
-        }; height: ${
-                isBrutalist ? "130px" : isElegant ? "110px" : "120px"
-              }; margin: 0 auto 2rem; display: flex; align-items: center; justify-content: center; background: ${
-                isGradient
-                  ? "linear-gradient(135deg, #667eea, #764ba2)"
-                  : isRetro
-                  ? "linear-gradient(135deg, var(--color-accent), #b537f2)"
-                  : "var(--color-surface)"
-              }; ${
-                isBrutalist || isElegant || isRetro
-                  ? "border-radius: 0;"
-                  : "border-radius: 50%;"
-              } border: ${isBrutalist ? "4px" : "4px"} solid ${
-                isBrutalist ? "var(--color-accent)" : "var(--color-border)"
-              }; ${
-                isBrutalist
-                  ? "transform: rotate(-5deg);"
-                  : isRetro
-                  ? "clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);"
-                  : ""
-              } ${
-                isNeumorphism
-                  ? getNeumorphismShadow(false)
-                  : isGradient
-                  ? "box-shadow: 0 10px 30px rgba(102,126,234,0.3);"
-                  : ""
-              }">
-          <span style="font-size: 3rem; opacity: 0.5;">👤</span>
-        </div>
-        `
-        }
-          
-          <h1 ${
-            isRetro
-              ? `class="glitch-card" data-text="${data.name || "Your Name"}"`
-              : ""
-          } style="font-family: ${
-        isElegant
-          ? "Playfair Display, serif"
-          : isRetro
-          ? "Space Mono, monospace"
-          : "inherit"
-      }; font-size: ${
+                  Click to visit: ${data.qrUrl || data.website || "No URL set"}
+                  <div style="position: absolute; top: 100%; right: 10px; border: 5px solid transparent; border-top-color: ${
+                    isDark ? "rgba(0,0,0,0.9)" : "rgba(255,255,255,0.95)"
+                  };"></div>
+                </div>
+              </div>
+              
+              <!-- Profile Section -->
+              <div style="position: relative; z-index: 1; margin-bottom: 2rem; padding-right: ${
+                isBrutalist ? "110px" : "100px"
+              };">
+                ${
+                  data.avatar
+                    ? `
+                <div style="width: ${getAvatarSize()}; height: ${getAvatarSize()}; margin: 0 auto 2rem; overflow: hidden; border-radius: ${getAvatarBorderRadius()}; border: ${getAvatarBorder()}; ${
+                        isBrutalist
+                          ? "transform: rotate(-5deg);"
+                          : isRetro
+                          ? "clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);"
+                          : ""
+                      } box-shadow: ${getAvatarShadow()};">
+                  <img src="${data.avatar}" alt="${
+                        data.name
+                      }" style="width: 100%; height: 100%; object-fit: cover;" />
+                </div>
+                `
+                    : `
+                <div style="width: ${getAvatarSize()}; height: ${getAvatarSize()}; margin: 0 auto 2rem; display: flex; align-items: center; justify-content: center; background: ${
+                        isGradient
+                          ? "linear-gradient(135deg, #667eea, #764ba2)"
+                          : isRetro
+                          ? "linear-gradient(135deg, var(--color-accent), #b537f2)"
+                          : isGlassmorphism
+                          ? isDark
+                            ? "rgba(255,255,255,0.1)"
+                            : "linear-gradient(135deg, rgba(102,126,234,0.1), rgba(118,75,162,0.1))"
+                          : "var(--color-surface)"
+                      }; border-radius: ${getAvatarBorderRadius()}; border: ${getAvatarBorder()}; ${
+                        isBrutalist
+                          ? "transform: rotate(-5deg);"
+                          : isRetro
+                          ? "clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);"
+                          : ""
+                      } box-shadow: ${getAvatarShadow()};">
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="${
+                    isGradient || isRetro ? "white" : "var(--color-text)"
+                  }" stroke-width="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
+                  </svg>
+                </div>
+                `
+                }
+                  
+                  <h1 style="font-family: ${
+                    isElegant
+                      ? "Playfair Display, serif"
+                      : isRetro
+                      ? "Space Mono, monospace"
+                      : "inherit"
+                  }; font-size: ${
         isBrutalist
           ? "2.5rem"
           : isRetro
@@ -6097,626 +6191,524 @@ export const templates = {
       }; margin-bottom: 0.5rem; letter-spacing: ${
         isBrutalist || isRetro ? "1px" : "-0.02em"
       }; ${isBrutalist || isRetro ? "text-transform: uppercase;" : ""} ${
-        isBrutalist
-          ? "color: var(--color-accent);"
-          : isRetro
+        isRetro
           ? "position: relative; background: linear-gradient(90deg, var(--color-accent), #00f5ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"
-          : '"'
+          : ""
       }">
-            ${
-              isBrutalist
-                ? `<span style="background: var(--color-accent); color: var(--color-bg); padding: 0 0.5rem; display: inline-block; transform: rotate(-2deg);">${
-                    (data.name || "Your Name").split(" ")[0]
-                  }</span> ${(data.name || "Your Name")
-                    .split(" ")
-                    .slice(1)
-                    .join(" ")}`
-                : ""
-            }
-            ${
-              isGradient
-                ? (data.name || "Your Name")
-                    .split(" ")
-                    .map((word, i) =>
-                      i === (data.name || "Your Name").split(" ").length - 1
-                        ? `<span style="background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">${word}</span>`
-                        : word
-                    )
-                    .join(" ")
-                : ""
-            }
-            ${!isBrutalist && !isGradient ? data.name || "Your Name" : ""}
-          </h1>
-          
-          ${
-            data.title
-              ? `
-          <p style="font-family: ${
-            isElegant
-              ? "Lato, sans-serif"
-              : isRetro
-              ? "Space Mono, monospace"
-              : "inherit"
-          }; font-size: ${
-                  isBrutalist || isRetro ? "1.25rem" : "1.125rem"
-                }; color: var(--color-accent); font-weight: ${
-                  isBrutalist ? "800" : "600"
-                }; margin-bottom: 0.25rem; ${
-                  isBrutalist || isRetro
-                    ? "text-transform: uppercase; letter-spacing: 1px;"
-                    : ""
-                }">
-            ${data.title}
-          </p>
-          `
-              : ""
-          }
-          
-          ${
-            data.company
-              ? `
-          <p style="font-family: ${
-            isElegant
-              ? "Lato, sans-serif"
-              : isRetro
-              ? "Space Mono, monospace"
-              : "inherit"
-          }; font-size: ${
-                  isBrutalist || isRetro ? "1.125rem" : "1rem"
-                }; color: var(--color-text-secondary); margin-bottom: ${
-                  data.tagline ? "1rem" : "0"
-                }; font-weight: ${isElegant ? "300" : "normal"};">
-            ${data.company}
-          </p>
-          `
-              : ""
-          }
-          
-          ${
-            data.tagline
-              ? `
-          <p style="font-family: ${
-            isElegant
-              ? "Lato, sans-serif"
-              : isRetro
-              ? "Space Mono, monospace"
-              : "inherit"
-          }; font-size: ${
-                  isBrutalist ? "1rem" : "0.9375rem"
-                }; color: var(--color-text-secondary); font-style: ${
-                  isElegant ? "italic" : "normal"
-                }; margin-bottom: 1.5rem; font-weight: ${
-                  isElegant ? "300" : "normal"
-                }; ${isBrutalist ? "font-weight: 700;" : ""}">
-            ${isBrutalist ? "" : '"'}${data.tagline}${isBrutalist ? "" : '"'}
-          </p>
-          `
-              : ""
-          }
-          
-          ${
-            data.location
-              ? `
-          <p style="font-family: ${
-            isRetro ? "Space Mono, monospace" : "inherit"
-          }; font-size: ${
-                  isBrutalist || isRetro ? "0.9375rem" : "0.875rem"
-                }; color: var(--color-text-secondary); display: flex; align-items: center; gap: 0.5rem; ${
-                  isBrutalist
-                    ? "font-weight: 700; text-transform: uppercase;"
-                    : ""
-                }">
-            ${isBrutalist ? "📍" : "📍"} ${data.location}
-          </p>
-          `
-              : ""
-          }
-        </div>
-  
-        <!-- Bio with Theme-Specific Styling -->
-        ${
-          data.bio
-            ? `
-        <div style="padding: ${
-          isBrutalist ? "1.75rem" : "1.5rem"
-        } 0; border-top: ${
-                isBrutalist ? "3px" : isRetro ? "2px" : "1px"
-              } solid ${
-                isBrutalist || isRetro
-                  ? "var(--color-accent)"
-                  : "var(--color-border)"
-              }; border-bottom: ${
-                isBrutalist ? "3px" : isRetro ? "2px" : "1px"
-              } solid ${
-                isBrutalist || isRetro
-                  ? "var(--color-accent)"
-                  : "var(--color-border)"
-              }; margin-bottom: 1.5rem; ${
-                isGlassmorphism
-                  ? "background: rgba(255,255,255,0.03); backdrop-filter: blur(10px); padding-left: 1rem; padding-right: 1rem; border-radius: 12px;"
-                  : isNeumorphism
-                  ? `background: var(--color-surface); padding-left: 1.5rem; padding-right: 1.5rem; border-radius: 16px; ${getNeumorphismShadow(
-                      true
-                    )}`
-                  : ""
-              }">
-          <p style="font-family: ${
-            isElegant
-              ? "Lato, sans-serif"
-              : isRetro
-              ? "Space Mono, monospace"
-              : "inherit"
-          }; font-size: ${
-                isBrutalist || isRetro ? "1.0625rem" : "0.9375rem"
-              }; line-height: ${
-                isElegant ? "1.9" : "1.7"
-              }; color: var(--color-text-secondary); font-weight: ${
-                isElegant ? "300" : "normal"
-              };">
-            ${data.bio}
-          </p>
-        </div>
-        `
-            : ""
-        }
-  
-        <!-- Contact Info with Theme-Specific Cards -->
-        <div style="display: grid; gap: ${
-          isBrutalist ? "1rem" : "0.75rem"
-        }; margin-bottom: 2rem;">
-          ${
-            data.email
-              ? `
-          <a href="mailto:${
-            data.email
-          }" style="display: flex; align-items: center; gap: ${
-                  isBrutalist ? "1rem" : "0.75rem"
-                }; padding: ${
-                  isBrutalist ? "1.125rem" : isElegant ? "1rem" : "0.875rem"
-                }; background: ${
-                  isGlassmorphism
-                    ? "rgba(255,255,255,0.05)"
-                    : isNeumorphism
-                    ? "var(--color-bg)"
-                    : isRetro
-                    ? "rgba(255,47,181,0.03)"
-                    : "var(--color-surface)"
-                }; border: ${
-                  isBrutalist ? "3px" : isRetro ? "2px" : "1px"
-                } solid ${
-                  isBrutalist || isRetro
-                    ? "var(--color-accent)"
-                    : isGlassmorphism
-                    ? "rgba(255,255,255,0.1)"
-                    : "var(--color-border)"
-                }; border-radius: ${
-                  isGradient || isRetro
-                    ? "12px"
-                    : isBrutalist || isElegant
-                    ? "0"
-                    : isNeumorphism || isGlassmorphism
-                    ? "12px"
-                    : "8px"
-                }; text-decoration: none; color: var(--color-text); transition: all 0.2s; ${
-                  isGlassmorphism
-                    ? "backdrop-filter: blur(10px);"
-                    : isNeumorphism
-                    ? getNeumorphismShadow(false)
-                    : ""
-                }" 
-            onmouseover="${
-              isBrutalist
-                ? `this.style.transform='translate(-3px, -3px)'; this.style.boxShadow='6px 6px 0 var(--color-accent)'`
-                : isRetro
-                ? `this.style.boxShadow='0 0 20px rgba(255,47,181,0.3)'`
-                : isGlassmorphism
-                ? `this.style.borderColor='var(--color-accent)'`
-                : isNeumorphism
-                ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
-                : `this.style.borderColor='var(--color-accent)'`
-            }" 
-            onmouseout="${
-              isBrutalist
-                ? `this.style.transform='translate(0, 0)'; this.style.boxShadow='none'`
-                : isRetro
-                ? `this.style.boxShadow='none'`
-                : isGlassmorphism
-                ? `this.style.borderColor='rgba(255,255,255,0.1)'`
-                : isNeumorphism
-                ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
-                : `this.style.borderColor='var(--color-border)'`
-            }">
-            <span style="font-size: ${
-              isBrutalist ? "1.5rem" : "1.25rem"
-            };">✉️</span>
-            <span style="font-family: ${
-              isRetro ? "Space Mono, monospace" : "inherit"
-            }; font-size: ${
-                  isBrutalist || isRetro ? "0.9375rem" : "0.875rem"
-                }; font-weight: ${
-                  isBrutalist ? "700" : isRetro ? "600" : "500"
-                }; ${isBrutalist ? "text-transform: uppercase;" : ""}">${
-                  data.email
-                }</span>
-          </a>
-          `
-              : ""
-          }
-          
-          ${
-            data.phone
-              ? `
-          <a href="tel:${data.phone.replace(
-            /\s/g,
-            ""
-          )}" style="display: flex; align-items: center; gap: ${
-                  isBrutalist ? "1rem" : "0.75rem"
-                }; padding: ${
-                  isBrutalist ? "1.125rem" : isElegant ? "1rem" : "0.875rem"
-                }; background: ${
-                  isGlassmorphism
-                    ? "rgba(255,255,255,0.05)"
-                    : isNeumorphism
-                    ? "var(--color-bg)"
-                    : isRetro
-                    ? "rgba(255,47,181,0.03)"
-                    : "var(--color-surface)"
-                }; border: ${
-                  isBrutalist ? "3px" : isRetro ? "2px" : "1px"
-                } solid ${
-                  isBrutalist || isRetro
-                    ? "var(--color-accent)"
-                    : isGlassmorphism
-                    ? "rgba(255,255,255,0.1)"
-                    : "var(--color-border)"
-                }; border-radius: ${
-                  isGradient || isRetro
-                    ? "12px"
-                    : isBrutalist || isElegant
-                    ? "0"
-                    : isNeumorphism || isGlassmorphism
-                    ? "12px"
-                    : "8px"
-                }; text-decoration: none; color: var(--color-text); transition: all 0.2s; ${
-                  isGlassmorphism
-                    ? "backdrop-filter: blur(10px);"
-                    : isNeumorphism
-                    ? getNeumorphismShadow(false)
-                    : ""
-                }" 
-            onmouseover="${
-              isBrutalist
-                ? `this.style.transform='translate(-3px, -3px)'; this.style.boxShadow='6px 6px 0 var(--color-accent)'`
-                : isRetro
-                ? `this.style.boxShadow='0 0 20px rgba(255,47,181,0.3)'`
-                : isGlassmorphism
-                ? `this.style.borderColor='var(--color-accent)'`
-                : isNeumorphism
-                ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
-                : `this.style.borderColor='var(--color-accent)'`
-            }" 
-            onmouseout="${
-              isBrutalist
-                ? `this.style.transform='translate(0, 0)'; this.style.boxShadow='none'`
-                : isRetro
-                ? `this.style.boxShadow='none'`
-                : isGlassmorphism
-                ? `this.style.borderColor='rgba(255,255,255,0.1)'`
-                : isNeumorphism
-                ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
-                : `this.style.borderColor='var(--color-border)'`
-            }">
-            <span style="font-size: ${
-              isBrutalist ? "1.5rem" : "1.25rem"
-            };">📞</span>
-            <span style="font-family: ${
-              isRetro ? "Space Mono, monospace" : "inherit"
-            }; font-size: ${
-                  isBrutalist || isRetro ? "0.9375rem" : "0.875rem"
-                }; font-weight: ${
-                  isBrutalist ? "700" : isRetro ? "600" : "500"
-                }; ${isBrutalist ? "text-transform: uppercase;" : ""}">${
-                  data.phone
-                }</span>
-          </a>
-          `
-              : ""
-          }
-          
-          ${
-            data.website
-              ? `
-          <a href="${
-            data.website
-          }" target="_blank" style="display: flex; align-items: center; gap: ${
-                  isBrutalist ? "1rem" : "0.75rem"
-                }; padding: ${
-                  isBrutalist ? "1.125rem" : isElegant ? "1rem" : "0.875rem"
-                }; background: ${
-                  isGlassmorphism
-                    ? "rgba(255,255,255,0.05)"
-                    : isNeumorphism
-                    ? "var(--color-bg)"
-                    : isRetro
-                    ? "rgba(255,47,181,0.03)"
-                    : "var(--color-surface)"
-                }; border: ${
-                  isBrutalist ? "3px" : isRetro ? "2px" : "1px"
-                } solid ${
-                  isBrutalist || isRetro
-                    ? "var(--color-accent)"
-                    : isGlassmorphism
-                    ? "rgba(255,255,255,0.1)"
-                    : "var(--color-border)"
-                }; border-radius: ${
-                  isGradient || isRetro
-                    ? "12px"
-                    : isBrutalist || isElegant
-                    ? "0"
-                    : isNeumorphism || isGlassmorphism
-                    ? "12px"
-                    : "8px"
-                }; text-decoration: none; color: var(--color-text); transition: all 0.2s; ${
-                  isGlassmorphism
-                    ? "backdrop-filter: blur(10px);"
-                    : isNeumorphism
-                    ? getNeumorphismShadow(false)
-                    : ""
-                }" 
-            onmouseover="${
-              isBrutalist
-                ? `this.style.transform='translate(-3px, -3px)'; this.style.boxShadow='6px 6px 0 var(--color-accent)'`
-                : isRetro
-                ? `this.style.boxShadow='0 0 20px rgba(255,47,181,0.3)'`
-                : isGlassmorphism
-                ? `this.style.borderColor='var(--color-accent)'`
-                : isNeumorphism
-                ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
-                : `this.style.borderColor='var(--color-accent)'`
-            }" 
-            onmouseout="${
-              isBrutalist
-                ? `this.style.transform='translate(0, 0)'; this.style.boxShadow='none'`
-                : isRetro
-                ? `this.style.boxShadow='none'`
-                : isGlassmorphism
-                ? `this.style.borderColor='rgba(255,255,255,0.1)'`
-                : isNeumorphism
-                ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
-                : `this.style.borderColor='var(--color-border)'`
-            }">
-            <span style="font-size: ${
-              isBrutalist ? "1.5rem" : "1.25rem"
-            };">🌐</span>
-            <span style="font-family: ${
-              isRetro ? "Space Mono, monospace" : "inherit"
-            }; font-size: ${
-                  isBrutalist || isRetro ? "0.9375rem" : "0.875rem"
-                }; font-weight: ${
-                  isBrutalist ? "700" : isRetro ? "600" : "500"
-                }; ${
-                  isBrutalist ? "text-transform: uppercase;" : ""
-                }">${data.website
-                  .replace("https://", "")
-                  .replace("http://", "")}</span>
-          </a>
-          `
-              : ""
-          }
-        </div>
-  
-        <!-- Skills with Theme-Specific Badges -->
-        ${
-          data.skills && data.skills.length > 0
-            ? `
-        <div style="margin-bottom: 2rem;">
-          <h3 style="font-family: ${
-            isElegant ? "Playfair Display, serif" : "inherit"
-          }; font-size: ${isBrutalist ? "0.875rem" : "0.75rem"}; font-weight: ${
-                isBrutalist ? "900" : "700"
-              }; text-transform: uppercase; letter-spacing: ${
-                isBrutalist || isRetro ? "2px" : "0.1em"
-              }; color: var(--color-text-secondary); margin-bottom: 1rem;">
-            ${isBrutalist ? "⚡ " : ""}Expertise
-          </h3>
-          <div style="display: flex; flex-wrap: wrap; gap: ${
-            isBrutalist ? "0.75rem" : "0.5rem"
-          };">
-            ${data.skills
-              .map(
-                (skill) => `
-              <span style="font-family: ${
-                isRetro ? "Space Mono, monospace" : "inherit"
-              }; padding: ${
-                  isBrutalist ? "0.625rem 1.125rem" : "0.375rem 0.875rem"
-                }; background: ${
-                  isGradient
-                    ? "linear-gradient(135deg, rgba(102,126,234,0.1), rgba(118,75,162,0.1))"
-                    : isGlassmorphism
-                    ? "rgba(255,255,255,0.08)"
-                    : isNeumorphism
-                    ? "var(--color-bg)"
-                    : isRetro
-                    ? "rgba(255,47,181,0.05)"
-                    : "var(--color-surface)"
-                }; border: ${
-                  isBrutalist ? "2px" : isRetro ? "2px" : "1px"
-                } solid ${
-                  isBrutalist || isRetro
-                    ? "var(--color-accent)"
-                    : isGlassmorphism
-                    ? "rgba(255,255,255,0.15)"
-                    : "var(--color-border)"
-                }; border-radius: ${
-                  isGradient || isRetro
-                    ? "999px"
-                    : isBrutalist || isElegant
-                    ? "0"
-                    : isNeumorphism || isGlassmorphism
-                    ? "12px"
-                    : "999px"
-                }; font-size: ${
-                  isBrutalist || isRetro ? "0.875rem" : "0.8125rem"
-                }; font-weight: ${
-                  isBrutalist ? "900" : isRetro ? "700" : "600"
-                }; ${
-                  isBrutalist || isRetro
-                    ? "text-transform: uppercase; letter-spacing: 0.5px;"
-                    : ""
-                } ${
-                  isGlassmorphism
-                    ? "backdrop-filter: blur(10px);"
-                    : isNeumorphism
-                    ? getNeumorphismShadow(false)
-                    : ""
-                }">
-                ${skill}
-              </span>
-            `
-              )
-              .join("")}
-          </div>
-        </div>
-        `
-            : ""
-        }
-  
-        <!-- Social Links with Theme-Specific Styling -->
-        ${
-          data.socialLinks && data.socialLinks.length > 0
-            ? `
-        <div style="padding-top: 2rem; border-top: ${
-          isBrutalist ? "3px" : isRetro ? "2px" : "1px"
-        } solid ${
-                isBrutalist || isRetro
-                  ? "var(--color-accent)"
-                  : "var(--color-border)"
-              };">
-          <h3 style="font-family: ${
-            isElegant ? "Playfair Display, serif" : "inherit"
-          }; font-size: ${isBrutalist ? "0.875rem" : "0.75rem"}; font-weight: ${
-                isBrutalist ? "900" : "700"
-              }; text-transform: uppercase; letter-spacing: ${
-                isBrutalist || isRetro ? "2px" : "0.1em"
-              }; color: var(--color-text-secondary); margin-bottom: 1rem;">
-            ${isBrutalist ? "🔗 " : ""}Connect
-          </h3>
-          <div style="display: flex; flex-wrap: wrap; gap: ${
-            isBrutalist ? "0.75rem" : "0.5rem"
-          };">
-            ${data.socialLinks
-              .map((link) => {
-                const platformName =
-                  link.platform === "Other" && link.customPlatform
-                    ? link.customPlatform
-                    : link.platform;
-                return `
-              <a href="${link.url}" target="_blank" style="font-family: ${
-                  isRetro ? "Space Mono, monospace" : "inherit"
-                }; font-size: ${
-                  isBrutalist || isRetro ? "0.875rem" : "0.8125rem"
-                }; padding: ${
-                  isBrutalist ? "0.75rem 1.25rem" : "0.625rem 1rem"
-                }; display: flex; align-items: center; gap: 0.5rem; border-radius: ${
-                  isGradient || isRetro
-                    ? "12px"
-                    : isBrutalist || isElegant
-                    ? "0"
-                    : isNeumorphism || isGlassmorphism
-                    ? "12px"
-                    : "8px"
-                }; text-decoration: none; border: ${
-                  isBrutalist ? "2px" : isRetro ? "2px" : "1px"
-                } solid ${
-                  isBrutalist || isRetro
-                    ? "var(--color-accent)"
-                    : isGlassmorphism
-                    ? "rgba(255,255,255,0.1)"
-                    : "var(--color-border)"
-                }; color: var(--color-text); transition: all 0.2s; background: ${
-                  isGlassmorphism
-                    ? "rgba(255,255,255,0.05)"
-                    : isNeumorphism
-                    ? "var(--color-bg)"
-                    : isRetro
-                    ? "rgba(255,47,181,0.03)"
-                    : "transparent"
-                }; font-weight: ${
-                  isBrutalist ? "900" : isRetro ? "700" : "600"
-                }; ${
-                  isBrutalist || isRetro
-                    ? "text-transform: uppercase; letter-spacing: 0.5px;"
-                    : ""
-                } ${
-                  isGlassmorphism
-                    ? "backdrop-filter: blur(10px);"
-                    : isNeumorphism
-                    ? getNeumorphismShadow(false)
-                    : ""
-                }" 
-                onmouseover="${
-                  isBrutalist
-                    ? `this.style.background='var(--color-accent)'; this.style.color='var(--color-bg)'`
-                    : isRetro
-                    ? `this.style.background='rgba(255,47,181,0.1)'; this.style.boxShadow='0 0 15px rgba(255,47,181,0.2)'`
-                    : isGlassmorphism
-                    ? `this.style.background='rgba(255,255,255,0.1)'`
-                    : isNeumorphism
-                    ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
-                    : `this.style.background='var(--color-surface)'`
-                }" 
-                onmouseout="${
-                  isBrutalist
-                    ? `this.style.background='transparent'; this.style.color='var(--color-text)'`
-                    : isRetro
-                    ? `this.style.background='rgba(255,47,181,0.03)'; this.style.boxShadow='none'`
-                    : isGlassmorphism
-                    ? `this.style.background='rgba(255,255,255,0.05)'`
-                    : isNeumorphism
-                    ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
-                    : `this.style.background='transparent'`
-                }">
-                <span>${platformName}</span>
+                    ${data.name || "Your Name"}
+                  </h1>
+                  
+                  ${
+                    data.title
+                      ? `
+                  <p style="font-family: ${
+                    isElegant
+                      ? "Lato, sans-serif"
+                      : isRetro
+                      ? "Space Mono, monospace"
+                      : "inherit"
+                  }; font-size: ${
+                          isBrutalist || isRetro ? "1.25rem" : "1.125rem"
+                        }; color: var(--color-accent); font-weight: ${
+                          isBrutalist ? "800" : "600"
+                        }; margin-bottom: 0.25rem; ${
+                          isBrutalist || isRetro
+                            ? "text-transform: uppercase; letter-spacing: 1px;"
+                            : ""
+                        }">
+                    ${data.title}
+                  </p>
+                  `
+                      : ""
+                  }
+                  
+                  ${
+                    data.company
+                      ? `
+                  <p style="font-family: ${
+                    isElegant
+                      ? "Lato, sans-serif"
+                      : isRetro
+                      ? "Space Mono, monospace"
+                      : "inherit"
+                  }; font-size: ${
+                          isBrutalist || isRetro ? "1.125rem" : "1rem"
+                        }; color: var(--color-text-secondary); margin-bottom: ${
+                          data.tagline ? "1rem" : "0"
+                        }; font-weight: ${isElegant ? "300" : "normal"};">
+                    ${data.company}
+                  </p>
+                  `
+                      : ""
+                  }
+                  
+                  ${
+                    data.tagline
+                      ? `
+                  <p style="font-family: ${
+                    isElegant
+                      ? "Lato, sans-serif"
+                      : isRetro
+                      ? "Space Mono, monospace"
+                      : "inherit"
+                  }; font-size: ${
+                          isBrutalist ? "1rem" : "0.9375rem"
+                        }; color: var(--color-text-secondary); font-style: ${
+                          isElegant ? "italic" : "normal"
+                        }; margin-bottom: 1.5rem; font-weight: ${
+                          isElegant ? "300" : "normal"
+                        }; ${isBrutalist ? "font-weight: 700;" : ""}">
+                    ${data.tagline}
+                  </p>
+                  `
+                      : ""
+                  }
+                  
+                  ${
+                    data.location
+                      ? `
+                  <p style="font-family: ${
+                    isRetro ? "Space Mono, monospace" : "inherit"
+                  }; font-size: ${
+                          isBrutalist || isRetro ? "0.9375rem" : "0.875rem"
+                        }; color: var(--color-text-secondary); display: flex; align-items: center; gap: 0.5rem;">
+                    ${icons.location}
+                    ${data.location}
+                  </p>
+                  `
+                      : ""
+                  }
+                </div>
+    
+                <!-- Bio -->
                 ${
-                  link.username
-                    ? `<span style="opacity: 0.6; font-size: ${
-                        isBrutalist ? "0.75rem" : "0.75rem"
-                      };">${link.username}</span>`
+                  data.bio
+                    ? `
+                <div style="padding: ${
+                  isBrutalist ? "1.75rem" : "1.5rem"
+                } 0; border-top: ${
+                        isBrutalist ? "3px" : isRetro ? "2px" : "1px"
+                      } solid ${
+                        isBrutalist || isRetro
+                          ? "var(--color-accent)"
+                          : "var(--color-border)"
+                      }; border-bottom: ${
+                        isBrutalist ? "3px" : isRetro ? "2px" : "1px"
+                      } solid ${
+                        isBrutalist || isRetro
+                          ? "var(--color-accent)"
+                          : "var(--color-border)"
+                      }; margin-bottom: 1.5rem; ${
+                        isGlassmorphism
+                          ? "background: rgba(255,255,255,0.03); backdrop-filter: blur(10px); padding-left: 1rem; padding-right: 1rem; border-radius: 12px;"
+                          : isNeumorphism
+                          ? `background: var(--color-surface); padding-left: 1.5rem; padding-right: 1.5rem; border-radius: 16px; ${getNeumorphismShadow(
+                              true
+                            )}`
+                          : ""
+                      }">
+                  <p style="font-family: ${
+                    isElegant
+                      ? "Lato, sans-serif"
+                      : isRetro
+                      ? "Space Mono, monospace"
+                      : "inherit"
+                  }; font-size: ${
+                        isBrutalist || isRetro ? "1.0625rem" : "0.9375rem"
+                      }; line-height: ${
+                        isElegant ? "1.9" : "1.7"
+                      }; color: var(--color-text-secondary); font-weight: ${
+                        isElegant ? "300" : "normal"
+                      };">
+                    ${data.bio}
+                  </p>
+                </div>
+                `
                     : ""
                 }
-              </a>
-              `;
-              })
-              .join("")}
-          </div>
-        </div>
-        `
-            : ""
-        }
-  
-        <!-- Contact Action Buttons -->
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: ${
-          isBrutalist ? "1rem" : "0.75rem"
-        }; margin-top: 2rem;">
-          <!-- Save Contact Button -->
-          <button onclick="saveContact()" style="padding: ${
-            isBrutalist ? "1rem" : "0.875rem"
-          }; font-size: ${
+    
+                <!-- Contact Info -->
+                <div style="display: grid; gap: ${
+                  isBrutalist ? "1rem" : "0.75rem"
+                }; margin-bottom: 2rem;">
+                  ${
+                    data.email
+                      ? `
+                  <a href="mailto:${
+                    data.email
+                  }" style="display: flex; align-items: center; gap: ${
+                          isBrutalist ? "1rem" : "0.75rem"
+                        }; padding: ${
+                          isBrutalist
+                            ? "1.125rem"
+                            : isElegant
+                            ? "1rem"
+                            : "0.875rem"
+                        }; background: ${getContactItemBackground()}; border: ${getContactItemBorder()}; border-radius: ${getContactItemBorderRadius()}; text-decoration: none; color: var(--color-text); transition: all 0.2s; ${
+                          isGlassmorphism
+                            ? "backdrop-filter: blur(10px);"
+                            : isNeumorphism
+                            ? getNeumorphismShadow(false)
+                            : ""
+                        }" 
+                    onmouseover="${
+                      isBrutalist
+                        ? `this.style.transform='translate(-3px, -3px)'; this.style.boxShadow='6px 6px 0 var(--color-accent)'`
+                        : isRetro
+                        ? `this.style.boxShadow='0 0 20px var(--color-accent)'`
+                        : isGlassmorphism
+                        ? `this.style.borderColor='var(--color-accent)'`
+                        : isNeumorphism
+                        ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
+                        : `this.style.borderColor='var(--color-accent)'`
+                    }" 
+                    onmouseout="${
+                      isBrutalist
+                        ? `this.style.transform='translate(0, 0)'; this.style.boxShadow='none'`
+                        : isRetro
+                        ? `this.style.boxShadow='none'`
+                        : isGlassmorphism
+                        ? `this.style.borderColor='rgba(255,255,255,0.2)'`
+                        : isNeumorphism
+                        ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
+                        : `this.style.borderColor='var(--color-border)'`
+                    }">
+                    ${icons.email}
+                    <span style="font-family: ${
+                      isRetro ? "Space Mono, monospace" : "inherit"
+                    }; font-size: ${
+                          isBrutalist || isRetro ? "0.9375rem" : "0.875rem"
+                        }; font-weight: ${
+                          isBrutalist ? "700" : isRetro ? "600" : "500"
+                        }; ${isBrutalist ? "text-transform: uppercase;" : ""}">
+                      ${data.email}
+                    </span>
+                  </a>
+                  `
+                      : ""
+                  }
+                  
+                  ${
+                    data.phone
+                      ? `
+                  <a href="tel:${data.phone.replace(
+                    /\s/g,
+                    ""
+                  )}" style="display: flex; align-items: center; gap: ${
+                          isBrutalist ? "1rem" : "0.75rem"
+                        }; padding: ${
+                          isBrutalist
+                            ? "1.125rem"
+                            : isElegant
+                            ? "1rem"
+                            : "0.875rem"
+                        }; background: ${getContactItemBackground()}; border: ${getContactItemBorder()}; border-radius: ${getContactItemBorderRadius()}; text-decoration: none; color: var(--color-text); transition: all 0.2s; ${
+                          isGlassmorphism
+                            ? "backdrop-filter: blur(10px);"
+                            : isNeumorphism
+                            ? getNeumorphismShadow(false)
+                            : ""
+                        }" 
+                    onmouseover="${
+                      isBrutalist
+                        ? `this.style.transform='translate(-3px, -3px)'; this.style.boxShadow='6px 6px 0 var(--color-accent)'`
+                        : isRetro
+                        ? `this.style.boxShadow='0 0 20px var(--color-accent)'`
+                        : isGlassmorphism
+                        ? `this.style.borderColor='var(--color-accent)'`
+                        : isNeumorphism
+                        ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
+                        : `this.style.borderColor='var(--color-accent)'`
+                    }" 
+                    onmouseout="${
+                      isBrutalist
+                        ? `this.style.transform='translate(0, 0)'; this.style.boxShadow='none'`
+                        : isRetro
+                        ? `this.style.boxShadow='none'`
+                        : isGlassmorphism
+                        ? `this.style.borderColor='rgba(255,255,255,0.2)'`
+                        : isNeumorphism
+                        ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
+                        : `this.style.borderColor='var(--color-border)'`
+                    }">
+                    ${icons.phone}
+                    <span style="font-family: ${
+                      isRetro ? "Space Mono, monospace" : "inherit"
+                    }; font-size: ${
+                          isBrutalist || isRetro ? "0.9375rem" : "0.875rem"
+                        }; font-weight: ${
+                          isBrutalist ? "700" : isRetro ? "600" : "500"
+                        }; ${isBrutalist ? "text-transform: uppercase;" : ""}">
+                      ${data.phone}
+                    </span>
+                  </a>
+                  `
+                      : ""
+                  }
+                  
+                  ${
+                    data.website
+                      ? `
+                  <a href="${
+                    data.website
+                  }" target="_blank" style="display: flex; align-items: center; gap: ${
+                          isBrutalist ? "1rem" : "0.75rem"
+                        }; padding: ${
+                          isBrutalist
+                            ? "1.125rem"
+                            : isElegant
+                            ? "1rem"
+                            : "0.875rem"
+                        }; background: ${getContactItemBackground()}; border: ${getContactItemBorder()}; border-radius: ${getContactItemBorderRadius()}; text-decoration: none; color: var(--color-text); transition: all 0.2s; ${
+                          isGlassmorphism
+                            ? "backdrop-filter: blur(10px);"
+                            : isNeumorphism
+                            ? getNeumorphismShadow(false)
+                            : ""
+                        }" 
+                    onmouseover="${
+                      isBrutalist
+                        ? `this.style.transform='translate(-3px, -3px)'; this.style.boxShadow='6px 6px 0 var(--color-accent)'`
+                        : isRetro
+                        ? `this.style.boxShadow='0 0 20px var(--color-accent)'`
+                        : isGlassmorphism
+                        ? `this.style.borderColor='var(--color-accent)'`
+                        : isNeumorphism
+                        ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
+                        : `this.style.borderColor='var(--color-accent)'`
+                    }" 
+                    onmouseout="${
+                      isBrutalist
+                        ? `this.style.transform='translate(0, 0)'; this.style.boxShadow='none'`
+                        : isRetro
+                        ? `this.style.boxShadow='none'`
+                        : isGlassmorphism
+                        ? `this.style.borderColor='rgba(255,255,255,0.2)'`
+                        : isNeumorphism
+                        ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
+                        : `this.style.borderColor='var(--color-border)'`
+                    }">
+                    ${icons.website}
+                    <span style="font-family: ${
+                      isRetro ? "Space Mono, monospace" : "inherit"
+                    }; font-size: ${
+                          isBrutalist || isRetro ? "0.9375rem" : "0.875rem"
+                        }; font-weight: ${
+                          isBrutalist ? "700" : isRetro ? "600" : "500"
+                        }; ${isBrutalist ? "text-transform: uppercase;" : ""}">
+                      ${data.website
+                        .replace("https://", "")
+                        .replace("http://", "")}
+                    </span>
+                  </a>
+                  `
+                      : ""
+                  }
+                </div>
+    
+                <!-- Skills -->
+                ${
+                  data.skills && data.skills.length > 0
+                    ? `
+                <div style="margin-bottom: 2rem;">
+                  <h3 style="font-family: ${
+                    isElegant ? "Playfair Display, serif" : "inherit"
+                  }; font-size: ${
+                        isBrutalist ? "0.875rem" : "0.75rem"
+                      }; font-weight: ${
+                        isBrutalist ? "900" : "700"
+                      }; text-transform: uppercase; letter-spacing: ${
+                        isBrutalist || isRetro ? "2px" : "0.1em"
+                      }; color: var(--color-text-secondary); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                    ${icons.skills}
+                    Expertise
+                  </h3>
+                  <div style="display: flex; flex-wrap: wrap; gap: ${
+                    isBrutalist ? "0.75rem" : "0.5rem"
+                  };">
+                    ${data.skills
+                      .map(
+                        (skill) => `
+                      <span style="font-family: ${
+                        isRetro ? "Space Mono, monospace" : "inherit"
+                      }; padding: ${
+                          isBrutalist
+                            ? "0.625rem 1.125rem"
+                            : "0.375rem 0.875rem"
+                        }; background: ${
+                          isGradient
+                            ? "linear-gradient(135deg, rgba(102,126,234,0.1), rgba(118,75,162,0.1))"
+                            : isGlassmorphism
+                            ? "rgba(255,255,255,0.08)"
+                            : isNeumorphism
+                            ? "var(--color-bg)"
+                            : isRetro
+                            ? "rgba(255,47,181,0.05)"
+                            : "var(--color-surface)"
+                        }; border: ${
+                          isBrutalist ? "2px" : isRetro ? "2px" : "1px"
+                        } solid ${
+                          isBrutalist || isRetro
+                            ? "var(--color-accent)"
+                            : isGlassmorphism
+                            ? "rgba(255,255,255,0.15)"
+                            : "var(--color-border)"
+                        }; border-radius: ${
+                          isGradient || isRetro
+                            ? "999px"
+                            : isBrutalist || isElegant
+                            ? "0"
+                            : isNeumorphism || isGlassmorphism
+                            ? "12px"
+                            : "999px"
+                        }; font-size: ${
+                          isBrutalist || isRetro ? "0.875rem" : "0.8125rem"
+                        }; font-weight: ${
+                          isBrutalist ? "900" : isRetro ? "700" : "600"
+                        }; ${
+                          isBrutalist || isRetro
+                            ? "text-transform: uppercase; letter-spacing: 0.5px;"
+                            : ""
+                        } ${
+                          isGlassmorphism
+                            ? "backdrop-filter: blur(10px);"
+                            : isNeumorphism
+                            ? getNeumorphismShadow(false)
+                            : ""
+                        }">
+                        ${skill}
+                      </span>
+                    `
+                      )
+                      .join("")}
+                  </div>
+                </div>
+                `
+                    : ""
+                }
+    
+                <!-- Social Links -->
+                ${
+                  data.socialLinks && data.socialLinks.length > 0
+                    ? `
+                <div style="padding-top: 2rem; border-top: ${
+                  isBrutalist ? "3px" : isRetro ? "2px" : "1px"
+                } solid ${
+                        isBrutalist || isRetro
+                          ? "var(--color-accent)"
+                          : "var(--color-border)"
+                      };">
+                  <h3 style="font-family: ${
+                    isElegant ? "Playfair Display, serif" : "inherit"
+                  }; font-size: ${
+                        isBrutalist ? "0.875rem" : "0.75rem"
+                      }; font-weight: ${
+                        isBrutalist ? "900" : "700"
+                      }; text-transform: uppercase; letter-spacing: ${
+                        isBrutalist || isRetro ? "2px" : "0.1em"
+                      }; color: var(--color-text-secondary); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                    ${icons.connect}
+                    Connect
+                  </h3>
+                  <div style="display: flex; flex-wrap: wrap; gap: ${
+                    isBrutalist ? "0.75rem" : "0.5rem"
+                  };">
+                    ${data.socialLinks
+                      .map((link) => {
+                        const platformName =
+                          link.platform === "Other" && link.customPlatform
+                            ? link.customPlatform
+                            : link.platform;
+                        return `
+                      <a href="${
+                        link.url
+                      }" target="_blank" style="font-family: ${
+                          isRetro ? "Space Mono, monospace" : "inherit"
+                        }; font-size: ${
+                          isBrutalist || isRetro ? "0.875rem" : "0.8125rem"
+                        }; padding: ${
+                          isBrutalist ? "0.75rem 1.25rem" : "0.625rem 1rem"
+                        }; display: flex; align-items: center; gap: 0.5rem; border-radius: ${
+                          isGradient || isRetro
+                            ? "12px"
+                            : isBrutalist || isElegant
+                            ? "0"
+                            : isNeumorphism || isGlassmorphism
+                            ? "12px"
+                            : "8px"
+                        }; text-decoration: none; border: ${
+                          isBrutalist ? "2px" : isRetro ? "2px" : "1px"
+                        } solid ${
+                          isBrutalist || isRetro
+                            ? "var(--color-accent)"
+                            : isGlassmorphism
+                            ? "rgba(255,255,255,0.1)"
+                            : "var(--color-border)"
+                        }; color: var(--color-text); transition: all 0.2s; background: ${
+                          isGlassmorphism
+                            ? "rgba(255,255,255,0.05)"
+                            : isNeumorphism
+                            ? "var(--color-bg)"
+                            : isRetro
+                            ? "rgba(255,47,181,0.03)"
+                            : "transparent"
+                        }; font-weight: ${
+                          isBrutalist ? "900" : isRetro ? "700" : "600"
+                        }; ${
+                          isBrutalist || isRetro
+                            ? "text-transform: uppercase; letter-spacing: 0.5px;"
+                            : ""
+                        } ${
+                          isGlassmorphism
+                            ? "backdrop-filter: blur(10px);"
+                            : isNeumorphism
+                            ? getNeumorphismShadow(false)
+                            : ""
+                        }" 
+                        onmouseover="${
+                          isBrutalist
+                            ? `this.style.background='var(--color-accent)'; this.style.color='var(--color-bg)'`
+                            : isRetro
+                            ? `this.style.background='rgba(255,47,181,0.1)'; this.style.boxShadow='0 0 15px var(--color-accent)'`
+                            : isGlassmorphism
+                            ? `this.style.background='rgba(255,255,255,0.1)'`
+                            : isNeumorphism
+                            ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
+                            : `this.style.background='var(--color-surface)'`
+                        }" 
+                        onmouseout="${
+                          isBrutalist
+                            ? `this.style.background='transparent'; this.style.color='var(--color-text)'`
+                            : isRetro
+                            ? `this.style.background='rgba(255,47,181,0.03)'; this.style.boxShadow='none'`
+                            : isGlassmorphism
+                            ? `this.style.background='rgba(255,255,255,0.05)'`
+                            : isNeumorphism
+                            ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
+                            : `this.style.background='transparent'`
+                        }">
+                        ${platformName}
+                      </a>
+                    `;
+                      })
+                      .join("")}
+                  </div>
+                </div>
+                `
+                    : ""
+                }
+    
+                <!-- Contact Action Buttons -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: ${
+                  isBrutalist ? "1rem" : "0.75rem"
+                }; margin-top: 2rem;">
+                  <!-- Save Contact Button -->
+                  <button onclick="saveContact()" style="padding: ${
+                    isBrutalist ? "1rem" : "0.875rem"
+                  }; font-size: ${
         isBrutalist || isRetro ? "1rem" : "0.875rem"
-      }; cursor: pointer; background: ${
-        isGradient
-          ? "linear-gradient(135deg, #667eea, #764ba2)"
-          : isRetro
-          ? "linear-gradient(90deg, var(--color-accent), #b537f2)"
-          : isBrutalist
-          ? "var(--color-accent)"
-          : "var(--color-accent)"
-      }; color: white; border: ${
-        isBrutalist
-          ? "3px solid var(--color-accent)"
-          : isRetro
-          ? "2px solid var(--color-accent)"
-          : "none"
+      }; cursor: pointer; background: ${getPrimaryButtonBackground()}; color: ${getPrimaryButtonColor()}; border: none; ${
+        isGlassmorphism ? "background: var(--color-bg)" : ""
       }; border-radius: ${
         isGradient || isRetro
           ? "999px"
@@ -6740,54 +6732,38 @@ export const templates = {
           ? getNeumorphismShadow(false)
           : ""
       }" 
-            onmouseover="${
-              isBrutalist
-                ? `this.style.background='var(--color-bg)'; this.style.color='var(--color-accent)'`
-                : isGradient
-                ? `this.style.transform='translateY(-2px)'; this.style.boxShadow='0 12px 30px rgba(102,126,234,0.4)'`
-                : isRetro
-                ? `this.style.transform='translateY(-2px)'; this.style.boxShadow='0 0 30px rgba(255,47,181,0.5)'`
-                : isNeumorphism
-                ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
-                : `this.style.transform='translateY(-2px)'; this.style.opacity='0.9'`
-            }" 
-            onmouseout="${
-              isBrutalist
-                ? `this.style.background='var(--color-accent)'; this.style.color='white'`
-                : isGradient
-                ? `this.style.transform='translateY(0)'; this.style.boxShadow='0 8px 20px rgba(102,126,234,0.3)'`
-                : isRetro
-                ? `this.style.transform='translateY(0)'; this.style.boxShadow='0 0 20px rgba(255,47,181,0.3)'`
-                : isNeumorphism
-                ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
-                : `this.style.transform='translateY(0)'; this.style.opacity='1'`
-            }">
-            <span>💾</span>
-            Save Contact
-          </button>
-          
-          <!-- Copy vCard Button -->
-          <button onclick="copyVCard()" style="padding: ${
-            isBrutalist ? "1rem" : "0.875rem"
-          }; font-size: ${
+                    onmouseover="${
+                      isBrutalist
+                        ? `this.style.background='var(--color-bg)'; this.style.color='var(--color-accent)'`
+                        : isGradient
+                        ? `this.style.transform='translateY(-2px)'; this.style.boxShadow='0 12px 30px rgba(102,126,234,0.4)'`
+                        : isRetro
+                        ? `this.style.transform='translateY(-2px)'; this.style.boxShadow='0 0 30px rgba(255,47,181,0.5)'`
+                        : isNeumorphism
+                        ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
+                        : `this.style.transform='translateY(-2px)'; this.style.opacity='0.9'`
+                    }" 
+                    onmouseout="${
+                      isBrutalist
+                        ? `this.style.background='var(--color-accent)'; this.style.color='white'`
+                        : isGradient
+                        ? `this.style.transform='translateY(0)'; this.style.boxShadow='0 8px 20px rgba(102,126,234,0.3)'`
+                        : isRetro
+                        ? `this.style.transform='translateY(0)'; this.style.boxShadow='0 0 20px rgba(255,47,181,0.3)'`
+                        : isNeumorphism
+                        ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
+                        : `this.style.transform='translateY(0)'; this.style.opacity='1'`
+                    }">
+                    ${icons.save}
+                    Save Contact
+                  </button>
+                  
+                  <!-- Copy vCard Button -->
+                  <button onclick="copyVCard()" style="padding: ${
+                    isBrutalist ? "1rem" : "0.875rem"
+                  }; font-size: ${
         isBrutalist || isRetro ? "1rem" : "0.875rem"
-      }; cursor: pointer; background: ${
-        isBrutalist
-          ? "var(--color-bg)"
-          : isGlassmorphism
-          ? "rgba(255,255,255,0.05)"
-          : isNeumorphism
-          ? "var(--color-bg)"
-          : "transparent"
-      }; color: ${
-        isBrutalist ? "var(--color-accent)" : "var(--color-text)"
-      }; border: ${isBrutalist ? "3px" : isRetro ? "2px" : "1px"} solid ${
-        isBrutalist || isRetro
-          ? "var(--color-accent)"
-          : isGlassmorphism
-          ? "rgba(255,255,255,0.1)"
-          : "var(--color-border)"
-      }; border-radius: ${
+      }; cursor: pointer; background: ${getSecondaryButtonBackground()}; color: ${getSecondaryButtonColor()}; border: ${getSecondaryButtonBorder()}; border-radius: ${
         isGradient || isRetro
           ? "999px"
           : isBrutalist || isElegant
@@ -6808,321 +6784,222 @@ export const templates = {
           ? getNeumorphismShadow(false)
           : ""
       }" 
-            onmouseover="${
-              isBrutalist
-                ? `this.style.background='var(--color-accent)'; this.style.color='var(--color-bg)'`
-                : isRetro
-                ? `this.style.background='var(--color-accent)'; this.style.color='var(--color-bg)'; this.style.boxShadow='0 0 20px rgba(255,47,181,0.3)'`
-                : isGlassmorphism
-                ? `this.style.background='rgba(255,255,255,0.1)'`
-                : isNeumorphism
-                ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
-                : `this.style.background='var(--color-surface)'`
-            }" 
-            onmouseout="${
-              isBrutalist
-                ? `this.style.background='var(--color-bg)'; this.style.color='var(--color-accent)'`
-                : isRetro
-                ? `this.style.background='transparent'; this.style.color='var(--color-text)'; this.style.boxShadow='none'`
-                : isGlassmorphism
-                ? `this.style.background='rgba(255,255,255,0.05)'`
-                : isNeumorphism
-                ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
-                : `this.style.background='transparent'`
-            }">
-            <span>📋</span>
-            Copy vCard
-          </button>
+                    onmouseover="${
+                      isBrutalist
+                        ? `this.style.background='var(--color-accent)'; this.style.color='var(--color-bg)'`
+                        : isRetro
+                        ? `this.style.background='var(--color-accent)'; this.style.color='var(--color-bg)'; this.style.boxShadow='0 0 20px var(--color-accent)'`
+                        : isGlassmorphism
+                        ? `this.style.background='rgba(255,255,255,0.1)'`
+                        : isNeumorphism
+                        ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
+                        : `this.style.background='var(--color-surface)'`
+                    }" 
+                    onmouseout="${
+                      isBrutalist
+                        ? `this.style.background='var(--color-bg)'; this.style.color='var(--color-accent)'`
+                        : isRetro
+                        ? `this.style.background='transparent'; this.style.color='var(--color-text)'; this.style.boxShadow='none'`
+                        : isGlassmorphism
+                        ? `this.style.background='rgba(255,255,255,0.05)'`
+                        : isNeumorphism
+                        ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
+                        : `this.style.background='transparent'`
+                    }">
+                    ${icons.copy}
+                    Copy vCard
+                  </button>
+                </div>
+                
+                <!-- Action Feedback Message -->
+                <div id="action-feedback" style="margin-top: 1rem; padding: 0.75rem; text-align: center; font-size: 0.875rem; color: var(--color-text-secondary); display: none; border-radius: 8px; background: var(--color-surface);">
+                  <span id="feedback-text"></span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-        
-        <!-- Action Feedback Message -->
-        <div id="action-feedback" style="margin-top: 1rem; padding: 0.75rem; text-align: center; font-size: 0.875rem; color: var(--color-text-secondary); display: none; border-radius: 8px; background: var(--color-surface);">
-          <span id="feedback-text"></span>
-        </div>
-      </div>
-    </div>
-  </div>
-  
-  <script>
-    const cardData = ${JSON.stringify(data || {})};
-    const isDark = ${colorMode === "dark" ? "true" : "false"};
-    // Generate vCard content
-    function generateVCardContent() {
-      let vcard = \`BEGIN:VCARD
-  VERSION:3.0\`;
-  
-      // Name components
-      const fullName = cardData.name || "";
-      const nameParts = fullName.split(' ');
-      const firstName = nameParts[0] || '';
-      const lastName = nameParts.slice(1).join(' ') || '';
-      
-      vcard += \`\\nN:\${lastName};\${firstName};;\${cardData.vcardPrefix || ''};\${cardData.vcardSuffix || ''}\`;
-      vcard += \`\\nFN:\${cardData.vcardPrefix ? cardData.vcardPrefix + ' ' : ''}\${fullName}\${cardData.vcardSuffix ? ' ' + cardData.vcardSuffix : ''}\`;
-      
-      // Organization and title
-      if (cardData.company) vcard += \`\\nORG:\${cardData.company}\`;
-      if (cardData.title) vcard += \`\\nTITLE:\${cardData.title}\`;
-      
-      // Contact info
-      if (cardData.email) vcard += \`\\nEMAIL;TYPE=WORK,INTERNET:\${cardData.email}\`;
-      if (cardData.phone) {
-        const cleanPhone = cardData.phone.replace(/[^\\d+]/g, '');
-        vcard += \`\\nTEL;TYPE=WORK,VOICE:\${cleanPhone}\`;
-      }
-      
-      // URLs
-      if (cardData.website) vcard += \`\\nURL;TYPE=WORK:\${cardData.website}\`;
-      
-      // Add social media URLs
-      if (cardData.socialLinks && cardData.socialLinks.length > 0) {
-        cardData.socialLinks.forEach((link) => {
-          if (link.url) {
-            const platform = link.platform === 'Other' && link.customPlatform ? link.customPlatform : link.platform;
-            vcard += \`\\nURL;TYPE=\${platform}:\${link.url}\`;
+    
+        <style>
+          ${
+            isNeumorphism
+              ? `
+          /* Neumorphism CSS Variables - From landing-page */
+          :root {
+            --neomorph-shadow-out: 20px 20px 60px #c5c9ce, -20px -20px 60px #ffffff;
+            --neomorph-shadow-in: inset 20px 20px 60px #c5c9ce, inset -20px -20px 60px #ffffff;
           }
-        });
-      }
-      
-      // Location and notes
-      if (cardData.location) vcard += \`\\nADR;TYPE=WORK:;;;\${cardData.location};;;;\`;
-      if (cardData.bio) vcard += \`\\nNOTE:\${cardData.bio.replace(/\\n/g, ' ').substring(0, 200)}\`;
-      
-      // Timestamp
-      const now = new Date();
-      const formattedDate = now.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
-      vcard += \`\\nREV:\${formattedDate}\`;
-      
-      vcard += \`\\nEND:VCARD\`;
-      return vcard;
-    }
-  
-    // Save contact as vCard file
-    function saveContact() {
-      const vcard = generateVCardContent();
-      const blob = new Blob([vcard], { type: 'text/vcard' });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      const fileName = \`\${(cardData.name || "contact").replace(/\\s/g, "_")}_contact.vcf\`;
-      a.download = fileName;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
-      
-      showFeedback('Contact saved as ' + fileName);
-    }
-  
-    // Copy vCard to clipboard
-    function copyVCard() {
-      const vcard = generateVCardContent();
-      navigator.clipboard.writeText(vcard).then(() => {
-        showFeedback('vCard copied to clipboard!');
-      }).catch(err => {
-        console.error('Failed to copy: ', err);
-        showFeedback('Failed to copy to clipboard', true);
-      });
-    }
-  
-    // Open QR code URL
-    function scanQRCode() {
-      const data = ${JSON.stringify(data)};
-      const qrUrl = data.qrUrl || data.website;
-      if (qrUrl) {
-        window.open(qrUrl, '_blank');
-      } else {
-        showFeedback('No URL set for QR code', true);
-      }
-    }
-  
-    // Show QR code tooltip on hover
-    function setupQRCodeTooltip() {
-      const qrContainer = document.getElementById('qr-container');
-      const tooltip = document.getElementById('qr-tooltip');
-      
-      if (qrContainer && tooltip) {
-        qrContainer.addEventListener('mouseenter', () => {
-          tooltip.style.opacity = '1';
-          tooltip.style.transform = 'translateY(0)';
-        });
-        
-        qrContainer.addEventListener('mouseleave', () => {
-          tooltip.style.opacity = '0';
-          tooltip.style.transform = 'translateY(10px)';
-        });
-      }
-    }
-  
-    function generateQRCode() {
-      const qrUrl = cardData.qrUrl || cardData.website || window.location.href;
-      const encodedURL = encodeURIComponent(qrUrl);
-      const bgColor = isDark ? '2d3748' : 'ffffff';
-      const fgColor = isDark ? 'ffffff' : '000000';
-      
-      const qrCodeURL = \`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=\${encodedURL}&bgcolor=\${bgColor}&color=\${fgColor}&qzone=1\`;
-      
-      const qrContainer = document.getElementById('qr-code');
-      if (qrContainer) {
-        qrContainer.innerHTML = \`<img src="\${qrCodeURL}" alt="QR Code" style="width: 100%; height: 100%; object-fit: cover;">\`;
-      }
-    }
-  
-    // Show feedback message
-    function showFeedback(message, isError = false) {
-      const feedbackEl = document.getElementById('action-feedback');
-      const feedbackText = document.getElementById('feedback-text');
-      
-      if (feedbackEl && feedbackText) {
-        feedbackText.textContent = message;
-        feedbackEl.style.display = 'block';
-        feedbackEl.style.background = isError ? 'var(--color-error-bg, #fee)' : 'var(--color-success-bg, #efe)';
-        feedbackEl.style.color = isError ? 'var(--color-error, #c00)' : 'var(--color-success, #090)';
-        
-        setTimeout(() => {
-          feedbackEl.style.display = 'none';
-        }, 3000);
-      }
-    }
-  
-    // Initialize when page loads
-    window.addEventListener('DOMContentLoaded', () => {
-      generateQRCode();
-      setupQRCodeTooltip();
-      
-      // Regenerate QR code when theme changes
-      document.addEventListener('themeChanged', generateQRCode);
-    });
-  </script>
-  
-  <style>
-    ${
-      isNeumorphism
-        ? `
-    /* Neumorphism CSS Variables */
-    :root {
-      --neomorph-shadow-out: 20px 20px 60px #c5c9ce, -20px -20px 60px #ffffff;
-      --neomorph-shadow-in: inset 8px 8px 16px #c5c9ce, inset -8px -8px 16px #ffffff;
-    }
-    
-    [data-theme="dark"] {
-      --neomorph-shadow-out: 32px 32px 64px #2a2d34, -32px -32px 64px #383d46;
-      --neomorph-shadow-in: inset 16px 16px 32px #2a2d34, inset -16px -16px 32px #383d46;
-    }
-    `
-        : ""
-    }
-    
-    ${
-      isRetro
-        ? `
-    /* Retro grid background */
-    body::before {
-      content: '';
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-image: 
-        linear-gradient(rgba(255,47,181,0.02) 2px, transparent 2px),
-        linear-gradient(90deg, rgba(255,47,181,0.02) 2px, transparent 2px);
-      background-size: 50px 50px;
-      pointer-events: none;
-      z-index: 0;
-    }
-    
-    /* Retro glitch effect for card */
-    .glitch-card::before,
-    .glitch-card::after {
-      content: attr(data-text);
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-    }
-    
-    .glitch-card::before {
-      animation: glitch-card1 3s infinite;
-      color: var(--color-accent);
-      z-index: -1;
-    }
-    
-    .glitch-card::after {
-      animation: glitch-card2 4s infinite;
-      color: #00f5ff;
-      z-index: -2;
-    }
-    
-    @keyframes glitch-card1 {
-      0%, 100% { transform: translate(0); }
-      25% { transform: translate(-1px, 1px); }
-      50% { transform: translate(-1px, -1px); }
-      75% { transform: translate(1px, 1px); }
-    }
-    
-    @keyframes glitch-card2 {
-      0%, 100% { transform: translate(0); }
-      25% { transform: translate(1px, -1px); }
-      50% { transform: translate(1px, 1px); }
-      75% { transform: translate(-1px, -1px); }
-    }
-    `
-        : ""
-    }
-    
-    /* Responsive Design */
-    @media (max-width: 768px) {
-      .business-card {
-        padding: 2.5rem 2rem !important;
-      }
-      
-      #qr-container {
-        width: 70px !important;
-        height: 70px !important;
-        top: 1rem !important;
-        right: 1rem !important;
-      }
-      
-      .business-card > div:first-of-type {
-        padding-right: 85px !important;
-      }
-      
-      .contact-buttons {
-        grid-template-columns: 1fr !important;
-      }
-    }
-    
-    @media (max-width: 480px) {
-      .business-card {
-        padding: 2rem 1.5rem !important;
-      }
-      
-      #qr-container {
-        width: 60px !important;
-        height: 60px !important;
-      }
-      
-      .business-card > div:first-of-type {
-        padding-right: 75px !important;
-      }
-      
-      h1 {
-        font-size: 1.75rem !important;
-      }
-      
-      .social-links {
-        flex-direction: column !important;
-      }
-      
-      .social-links a {
-        width: 100%;
-        justify-content: center;
-      }
-    }
-  </style>
-  `;
+          
+          [data-theme="dark"] {
+            --neomorph-shadow-out: 32px 32px 64px #2a2d34, -32px -32px 64px #383d46;
+            --neomorph-shadow-in: inset 32px 32px 64px #2a2d34, inset -32px -32px 64px #383d46;
+          }
+          `
+              : ""
+          }
+          
+          ${
+            isRetro
+              ? `
+          /* Retro grid background */
+          body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+              linear-gradient(rgba(255,47,181,0.02) 2px, transparent 2px),
+              linear-gradient(90deg, rgba(255,47,181,0.02) 2px, transparent 2px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: 0;
+          }
+          `
+              : ""
+          }
+          
+          /* Responsive Design */
+          @media (max-width: 768px) {
+            header {
+              background: none!important;
+            }
+            .business-card {
+              padding: 2.5rem 2rem !important;
+            }
+            
+            #qr-container {
+              width: 70px !important;
+              height: 70px !important;
+              top: 1rem !important;
+              right: 1rem !important;
+            }
+            
+            .business-card > div:first-of-type {
+              padding-right: 85px !important;
+            }
+            
+            .contact-buttons {
+              grid-template-columns: 1fr !important;
+            }
+          }
+          
+          @media (max-width: 640px) {
+            .business-card {
+              padding: 2rem 1.5rem !important;
+            }
+            
+            #qr-container {
+              width: 60px !important;
+              height: 60px !important;
+            }
+            
+            .business-card > div:first-of-type {
+              padding-right: 75px !important;
+            }
+            
+            h1 {
+              font-size: 1.75rem !important;
+            }
+            
+            .social-links {
+              flex-direction: column !important;
+            }
+            
+            .social-links a {
+              width: 100%;
+              justify-content: center;
+            }
+            
+            /* Stack buttons on small screens */
+            .business-card > div:last-of-type {
+              grid-template-columns: 1fr !important;
+            }
+          }
+          
+          @media (max-width: 480px) {
+            .business-card {
+              padding: 1.5rem !important;
+            }
+            
+            h1 {
+              font-size: 1.5rem !important;
+            }
+            
+            .contact-info a {
+              padding: 0.75rem !important;
+            }
+            
+            .skills span {
+              font-size: 0.75rem !important;
+              padding: 0.25rem 0.5rem !important;
+            }
+          }
+          
+          /* Gradient animation */
+          ${
+            isGradient || isRetro
+              ? `
+          @keyframes gradient {
+            0%, 100% { background-position: 0 50%; }
+            50% { background-position: 100% 50%; }
+          }
+          `
+              : ""
+          }
+          
+          ${
+            isRetro
+              ? `
+          /* Retro glitch effect */
+          .glitch::before,
+          .glitch::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+          }
+          
+          .glitch::before {
+            animation: glitch1 2s infinite;
+            color: var(--color-accent);
+            z-index: -1;
+          }
+          
+          .glitch::after {
+            animation: glitch2 3s infinite;
+            color: #00f5ff;
+            z-index: -2;
+          }
+          
+          @keyframes glitch1 {
+            0%, 100% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+          }
+          
+          @keyframes glitch2 {
+            0%, 100% { transform: translate(0); }
+            20% { transform: translate(2px, -2px); }
+            40% { transform: translate(2px, 2px); }
+            60% { transform: translate(-2px, -2px); }
+            80% { transform: translate(-2px, 2px); }
+          }
+          
+          @keyframes glow {
+            from { filter: drop-shadow(0 0 10px var(--color-accent)); }
+            to { filter: drop-shadow(0 0 30px #00f5ff); }
+          }
+          `
+              : ""
+          }
+        </style>
+      `;
     },
   }),
   // ============================================
@@ -7135,6 +7012,19 @@ export const templates = {
     image: "resume",
     category: "Personal",
     fields: {
+      // New show/hide controls like landing page
+      showPageHeader: {
+        type: "boolean",
+        default: true,
+        label: "Show Page Header",
+      },
+      showThemeToggle: {
+        type: "boolean",
+        default: true,
+        label: "Show Theme Toggle",
+      },
+
+      // Existing fields with same structure
       name: {
         type: "text",
         default: "Sarah Johnson",
@@ -7327,7 +7217,11 @@ export const templates = {
       },
     },
     structure: (data, theme, colorMode) => {
-      // Enhanced theme detection like tutoring template
+      // Get show/hide options with defaults
+      const showPageHeader = data.showPageHeader !== false;
+      const showThemeToggle = data.showThemeToggle !== false && showPageHeader;
+
+      // Enhanced theme detection like landing page template
       const themeId = theme?.id || "minimal";
       const isBrutalist = themeId === "brutalist";
       const isMinimal = themeId === "minimal";
@@ -7338,7 +7232,30 @@ export const templates = {
       const isNeumorphism = themeId === "neumorphism";
       const isDark = colorMode === "dark";
 
-      // Neumorphism helper functions
+      // SVG Icon Mapping with currentColor (replaces all emojis)
+      const iconMap = {
+        email: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>`,
+        phone: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>`,
+        location: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>`,
+        website: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`,
+        linkedin: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>`,
+        github: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>`,
+        summary: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>`,
+        experience: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7h-3a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2Z"/><path d="M16 21V5a2 2 0 0 0-2-2h-6a2 2 0 0 0-2 2v16"/><rect x="6" y="3" width="4" height="4" rx="1"/><path d="M9 12h2"/><path d="M9 16h2"/></svg>`,
+        education: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m4 10 7.106 3.553a2 2 0 0 0 1.788 0L20 10"/><rect x="2" y="8" width="20" height="8" rx="2"/><path d="M6 16h0"/><path d="M10 16h0"/></svg>`,
+        skills: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg>`,
+        certifications: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c1.1 0 2-1 2-2H10c0 1 .9 2 2 2Z"/><path d="M18 10a6 6 0 0 0-12 0c0 4 6 7 6 7s6-3 6-7Z"/><path d="M14 10h-4"/><path d="m8 14 2 2 4-4"/></svg>`,
+        languages: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg>`,
+        print: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6"/><rect x="6" y="14" width="12" height="8" rx="1"/></svg>`,
+      };
+
+      // Helper function for icon display - now uses currentColor
+      const getIcon = (iconName, size = "1em", alt = "") => {
+        const iconStyle = `width: ${size}; height: ${size}; display: inline-block; vertical-align: -0.125em;`;
+        return `<span style="${iconStyle}" aria-label="${alt}">${iconMap[iconName]}</span>`;
+      };
+
+      // Neumorphism helper functions (from landing page)
       const getNeumorphismShadow = (inset = false) => {
         if (!isNeumorphism) return "";
         return inset
@@ -7366,21 +7283,51 @@ export const templates = {
         `;
       };
 
-      // Gradient animation helper
-      const getGradientText = (text) => {
-        if (!isGradient) return text;
-        return `<span style="background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">${text}</span>`;
+      // Theme toggle HTML helper
+      const getThemeToggle = () => {
+        if (!showThemeToggle) return "";
+        return `
+          <label class="theme-toggle-switch-wrapper" style="cursor: pointer; ${
+            isNeumorphism
+              ? `padding: 0.5rem; border-radius: 12px; background: var(--color-bg); ${getNeumorphismShadow(
+                  false
+                )}`
+              : ""
+          }">
+            <input type="checkbox" class="theme-toggle-switch" onclick="toggleTheme()" aria-label="Toggle theme">
+            <span class="theme-toggle-slider"></span>
+          </label>
+        `;
+      };
+
+      // Get text color based on theme (fixes brutalism text colors)
+      const getTextColor = (type = "primary") => {
+        if (isBrutalist) {
+          // For brutalist theme in dark mode, icons should use background color for contrast
+          // In light mode, use accent color
+          return isDark ? "var(--color-bg)" : "var(--color-accent)";
+        }
+
+        // For other themes, icons inherit the current text color
+        if (type === "primary") return "var(--color-text)";
+        if (type === "secondary") return "var(--color-text-secondary)";
+        return "var(--color-accent)";
       };
 
       return `
-        <!-- Header with Theme Toggle -->
+        <!-- Page Header (Conditional) -->
+        ${
+          showPageHeader
+            ? `
         <header style="padding: 1.5rem 0; border-bottom: ${
           isBrutalist ? "3px" : isRetro ? "2px" : "1px"
         } solid ${
-        isBrutalist || isRetro ? "var(--color-accent)" : "var(--color-border)"
-      }; margin-bottom: 2rem; background: ${
-        isGlassmorphism ? "rgba(255, 255, 255, 0.1)" : "var(--color-bg)"
-      } ${isGlassmorphism ? "backdrop-filter: blur(20px);" : ""}">
+                isBrutalist || isRetro
+                  ? "var(--color-accent)"
+                  : "var(--color-border)"
+              }; margin-bottom: 2rem; background: ${
+                isGlassmorphism ? "rgba(255, 255, 255, 0.1)" : "var(--color-bg)"
+              } ${isGlassmorphism ? "backdrop-filter: blur(20px);" : ""}">
           <div class="container" style="max-width: 900px; margin: 0 auto; padding: 0 1rem; display: flex; justify-content: space-between; align-items: center;">
             <div style="font-family: ${
               isElegant
@@ -7389,40 +7336,38 @@ export const templates = {
                 ? "Space Mono, monospace"
                 : "inherit"
             }; font-weight: ${isBrutalist ? "900" : "600"}; font-size: ${
-        isBrutalist || isRetro ? "1.25rem" : "1.125rem"
-      }; ${
-        isBrutalist || isRetro
-          ? "text-transform: uppercase; letter-spacing: 1px;"
-          : ""
-      } ${
-        isGradient
-          ? "background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"
-          : isRetro
-          ? "background: linear-gradient(90deg, var(--color-accent), #00f5ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"
-          : ""
-      }">Resume</div>
-            <label class="theme-toggle-switch-wrapper" style="cursor: pointer; ${
-              isNeumorphism
-                ? `padding: 0.5rem; border-radius: 12px; background: var(--color-bg); ${getNeumorphismShadow(
-                    false
-                  )}`
-                : ""
-            }">
-              <input type="checkbox" class="theme-toggle-switch" onclick="toggleTheme()" aria-label="Toggle theme">
-              <span class="theme-toggle-slider"></span>
-            </label>
+                isBrutalist || isRetro ? "1.25rem" : "1.125rem"
+              }; ${
+                isBrutalist || isRetro
+                  ? "text-transform: uppercase; letter-spacing: 1px;"
+                  : ""
+              } ${
+                isGradient
+                  ? "background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"
+                  : isRetro
+                  ? "background: linear-gradient(90deg, var(--color-accent), #00f5ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"
+                  : ""
+              }">Resume</div>
+            ${getThemeToggle()}
           </div>
         </header>
-  
-        <div style="min-height: 100vh; padding: 2rem 1rem; background: ${
-          isBrutalist
-            ? "var(--color-text)"
-            : isGradient
-            ? "linear-gradient(135deg, rgba(102,126,234,0.03), rgba(240,147,251,0.03))"
-            : isRetro
-            ? "var(--color-surface)"
-            : "var(--color-bg)"
-        }; ${isRetro ? "position: relative; overflow: hidden;" : ""}">
+        `
+            : ""
+        }
+    
+        <div style="min-height: 100vh; padding: ${
+          showPageHeader ? "2rem 1rem" : "4rem 1rem 2rem"
+        }; background: ${
+        isBrutalist
+          ? "var(--color-text)"
+          : isGradient
+          ? "linear-gradient(135deg, rgba(102,126,234,0.03), rgba(240,147,251,0.03))"
+          : isRetro
+          ? "var(--color-surface)"
+          : isGlassmorphism
+          ? ""
+          : "var(--color-bg)"
+      }; ${isRetro ? "position: relative; overflow: hidden;" : ""}">
           ${
             isRetro
               ? `
@@ -7566,7 +7511,7 @@ export const templates = {
                   : ""
               }
               
-              <!-- Contact Info -->
+              <!-- Contact Info with SVG Icons -->
               <div style="display: flex; flex-wrap: wrap; gap: ${
                 isBrutalist ? "1.5rem" : "1rem"
               }; font-size: ${
@@ -7578,22 +7523,28 @@ export const templates = {
       } position: relative; z-index: 1;">
                 ${
                   data.email
-                    ? `<span style="display: flex; align-items: center; gap: 0.5rem;">✉️ ${data.email}</span>`
+                    ? `<span style="display: flex; align-items: center; gap: 0.5rem;">${getIcon(
+                        "email"
+                      )} ${data.email}</span>`
                     : ""
                 }
                 ${
                   data.phone
-                    ? `<span style="display: flex; align-items: center; gap: 0.5rem;">📞 ${data.phone}</span>`
+                    ? `<span style="display: flex; align-items: center; gap: 0.5rem;">${getIcon(
+                        "phone"
+                      )} ${data.phone}</span>`
                     : ""
                 }
                 ${
                   data.location
-                    ? `<span style="display: flex; align-items: center; gap: 0.5rem;">📍 ${data.location}</span>`
+                    ? `<span style="display: flex; align-items: center; gap: 0.5rem;">${getIcon(
+                        "location"
+                      )} ${data.location}</span>`
                     : ""
                 }
               </div>
               
-              <!-- Links -->
+              <!-- Links with SVG Icons -->
               ${
                 data.website || data.linkedin || data.github
                   ? `
@@ -7650,17 +7601,18 @@ export const templates = {
                           : isNeumorphism
                           ? getNeumorphismShadow(false)
                           : ""
-                      }" onmouseover="${
-                        isBrutalist
-                          ? `this.style.background='var(--color-bg)'; this.style.color='var(--color-accent)'`
-                          : isRetro
-                          ? `this.style.background='#00f5ff'; this.style.color='#0d001a'; this.style.boxShadow='0 0 20px #00f5ff'`
-                          : isGlassmorphism
-                          ? `this.style.background='rgba(255,255,255,0.1)'`
-                          : isNeumorphism
-                          ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
-                          : `this.style.background='var(--color-surface)'`
-                      }" onmouseout="${
+                      } display: flex; align-items: center; gap: 0.5rem;" 
+                    onmouseover="${
+                      isBrutalist
+                        ? `this.style.background='var(--color-bg)'; this.style.color='var(--color-accent)'`
+                        : isRetro
+                        ? `this.style.background='#00f5ff'; this.style.color='#0d001a'; this.style.boxShadow='0 0 20px #00f5ff'`
+                        : isGlassmorphism
+                        ? `this.style.background='rgba(255,255,255,0.1)'`
+                        : isNeumorphism
+                        ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
+                        : `this.style.background='var(--color-surface)'`
+                    }" onmouseout="${
                         isBrutalist
                           ? `this.style.background='transparent'; this.style.color='var(--color-bg)'`
                           : isRetro
@@ -7670,7 +7622,9 @@ export const templates = {
                           : isNeumorphism
                           ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
                           : `this.style.background='transparent'`
-                      }">🌐 Website</a>`
+                      }">
+                    ${getIcon("website", "1em", "Website")} Website
+                  </a>`
                     : ""
                 }
                 ${
@@ -7721,17 +7675,18 @@ export const templates = {
                           : isNeumorphism
                           ? getNeumorphismShadow(false)
                           : ""
-                      }" onmouseover="${
-                        isBrutalist
-                          ? `this.style.background='var(--color-bg)'; this.style.color='var(--color-accent)'`
-                          : isRetro
-                          ? `this.style.background='#00f5ff'; this.style.color='#0d001a'; this.style.boxShadow='0 0 20px #00f5ff'`
-                          : isGlassmorphism
-                          ? `this.style.background='rgba(255,255,255,0.1)'`
-                          : isNeumorphism
-                          ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
-                          : `this.style.background='var(--color-surface)'`
-                      }" onmouseout="${
+                      } display: flex; align-items: center; gap: 0.5rem;" 
+                    onmouseover="${
+                      isBrutalist
+                        ? `this.style.background='var(--color-bg)'; this.style.color='var(--color-accent)'`
+                        : isRetro
+                        ? `this.style.background='#00f5ff'; this.style.color='#0d001a'; this.style.boxShadow='0 0 20px #00f5ff'`
+                        : isGlassmorphism
+                        ? `this.style.background='rgba(255,255,255,0.1)'`
+                        : isNeumorphism
+                        ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
+                        : `this.style.background='var(--color-surface)'`
+                    }" onmouseout="${
                         isBrutalist
                           ? `this.style.background='transparent'; this.style.color='var(--color-bg)'`
                           : isRetro
@@ -7741,7 +7696,9 @@ export const templates = {
                           : isNeumorphism
                           ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
                           : `this.style.background='transparent'`
-                      }">💼 LinkedIn</a>`
+                      }">
+                    ${getIcon("linkedin", "1em", "LinkedIn")} LinkedIn
+                  </a>`
                     : ""
                 }
                 ${
@@ -7792,17 +7749,18 @@ export const templates = {
                           : isNeumorphism
                           ? getNeumorphismShadow(false)
                           : ""
-                      }" onmouseover="${
-                        isBrutalist
-                          ? `this.style.background='var(--color-bg)'; this.style.color='var(--color-accent)'`
-                          : isRetro
-                          ? `this.style.background='#00f5ff'; this.style.color='#0d001a'; this.style.boxShadow='0 0 20px #00f5ff'`
-                          : isGlassmorphism
-                          ? `this.style.background='rgba(255,255,255,0.1)'`
-                          : isNeumorphism
-                          ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
-                          : `this.style.background='var(--color-surface)'`
-                      }" onmouseout="${
+                      } display: flex; align-items: center; gap: 0.5rem;" 
+                    onmouseover="${
+                      isBrutalist
+                        ? `this.style.background='var(--color-bg)'; this.style.color='var(--color-accent)'`
+                        : isRetro
+                        ? `this.style.background='#00f5ff'; this.style.color='#0d001a'; this.style.boxShadow='0 0 20px #00f5ff'`
+                        : isGlassmorphism
+                        ? `this.style.background='rgba(255,255,255,0.1)'`
+                        : isNeumorphism
+                        ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
+                        : `this.style.background='var(--color-surface)'`
+                    }" onmouseout="${
                         isBrutalist
                           ? `this.style.background='transparent'; this.style.color='var(--color-bg)'`
                           : isRetro
@@ -7812,7 +7770,9 @@ export const templates = {
                           : isNeumorphism
                           ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
                           : `this.style.background='transparent'`
-                      }">💻 GitHub</a>`
+                      }">
+                    ${getIcon("github", "1em", "GitHub")} GitHub
+                  </a>`
                     : ""
                 }
               </div>
@@ -7826,7 +7786,7 @@ export const templates = {
               isBrutalist || isElegant ? "2.5rem" : "2rem"
             };">
               
-              <!-- Summary -->
+              <!-- Summary with SVG Icon -->
               ${
                 data.summary
                   ? `
@@ -7849,8 +7809,8 @@ export const templates = {
                         : isRetro
                         ? "border-bottom: 2px solid var(--color-accent); padding-bottom: 0.5rem;"
                         : ""
-                    }">
-                  ${isBrutalist ? "⚡ " : ""}Professional Summary
+                    } display: flex; align-items: center; gap: 0.5rem;">
+                  ${getIcon("summary")} Professional Summary
                 </h2>
                 <p style="font-family: ${
                   isElegant
@@ -7862,7 +7822,7 @@ export const templates = {
                       isBrutalist || isRetro ? "1.0625rem" : "1rem"
                     }; line-height: ${
                       isElegant ? "1.9" : "1.8"
-                    }; color: var(--color-text-secondary); font-weight: ${
+                    }; color: ${getTextColor("secondary")}; font-weight: ${
                       isElegant ? "300" : "normal"
                     }; ${isRetro ? "letter-spacing: 0.5px;" : ""}">
                   ${data.summary}
@@ -7872,7 +7832,7 @@ export const templates = {
                   : ""
               }
   
-              <!-- Experience -->
+              <!-- Experience with SVG Icon -->
               ${
                 data.experience && data.experience.length > 0
                   ? `
@@ -7895,8 +7855,8 @@ export const templates = {
                         : isRetro
                         ? "border-bottom: 2px solid var(--color-accent); padding-bottom: 0.5rem;"
                         : ""
-                    }">
-                  ${isBrutalist ? "💼 " : ""}Work Experience
+                    } display: flex; align-items: center; gap: 0.5rem;">
+                  ${getIcon("experience")} Work Experience
                 </h2>
                 <div style="display: flex; flex-direction: column; gap: ${
                   isBrutalist || isElegant ? "2.5rem" : "2rem"
@@ -7944,7 +7904,9 @@ export const templates = {
                         isBrutalist || isRetro ? "1.25rem" : "1.125rem"
                       }; font-weight: ${
                         isBrutalist ? "900" : "700"
-                      }; margin-bottom: 0.25rem; ${
+                      }; margin-bottom: 0.25rem; color: ${getTextColor(
+                        "primary"
+                      )}; ${
                         isBrutalist || isRetro
                           ? "text-transform: uppercase; letter-spacing: 0.5px;"
                           : ""
@@ -7955,7 +7917,7 @@ export const templates = {
                             isRetro ? "Space Mono, monospace" : "inherit"
                           }; font-size: ${
                         isBrutalist || isRetro ? "1.0625rem" : "1rem"
-                      }; color: var(--color-text-secondary); font-weight: ${
+                      }; color: ${getTextColor("secondary")}; font-weight: ${
                         isBrutalist || isRetro ? "700" : "600"
                       }; ${isRetro ? "letter-spacing: 0.5px;" : ""}">
                             ${job.company || ""} ${
@@ -7967,7 +7929,7 @@ export const templates = {
                           isRetro ? "Space Mono, monospace" : "inherit"
                         }; font-size: ${
                         isBrutalist || isRetro ? "0.9375rem" : "0.875rem"
-                      }; color: var(--color-text-secondary); font-weight: ${
+                      }; color: ${getTextColor("secondary")}; font-weight: ${
                         isBrutalist || isRetro ? "700" : "600"
                       }; white-space: nowrap; ${
                         isBrutalist || isRetro
@@ -7994,7 +7956,7 @@ export const templates = {
                               isBrutalist || isRetro ? "1rem" : "0.9375rem"
                             }; line-height: ${
                               isElegant ? "1.9" : "1.7"
-                            }; color: var(--color-text-secondary); ${
+                            }; color: ${getTextColor("secondary")}; ${
                               isBrutalist ? "font-weight: 600;" : ""
                             } ${isRetro ? "letter-spacing: 0.5px;" : ""}">
                             ${achievement}
@@ -8016,7 +7978,7 @@ export const templates = {
                   : ""
               }
   
-              <!-- Education -->
+              <!-- Education with SVG Icon -->
               ${
                 data.education && data.education.length > 0
                   ? `
@@ -8039,8 +8001,8 @@ export const templates = {
                         : isRetro
                         ? "border-bottom: 2px solid var(--color-accent); padding-bottom: 0.5rem;"
                         : ""
-                    }">
-                  ${isBrutalist ? "🎓 " : ""}Education
+                    } display: flex; align-items: center; gap: 0.5rem;">
+                  ${getIcon("education")} Education
                 </h2>
                 <div style="display: flex; flex-direction: column; gap: ${
                   isBrutalist || isElegant ? "2.5rem" : "2rem"
@@ -8088,7 +8050,9 @@ export const templates = {
                         isBrutalist || isRetro ? "1.25rem" : "1.125rem"
                       }; font-weight: ${
                         isBrutalist ? "900" : "700"
-                      }; margin-bottom: 0.25rem; ${
+                      }; margin-bottom: 0.25rem; color: ${getTextColor(
+                        "primary"
+                      )}; ${
                         isBrutalist || isRetro
                           ? "text-transform: uppercase; letter-spacing: 0.5px;"
                           : ""
@@ -8099,7 +8063,7 @@ export const templates = {
                             isRetro ? "Space Mono, monospace" : "inherit"
                           }; font-size: ${
                         isBrutalist || isRetro ? "1.0625rem" : "1rem"
-                      }; color: var(--color-text-secondary); font-weight: ${
+                      }; color: ${getTextColor("secondary")}; font-weight: ${
                         isBrutalist || isRetro ? "700" : "600"
                       }; ${isRetro ? "letter-spacing: 0.5px;" : ""}">
                             ${edu.school || ""} ${
@@ -8115,7 +8079,9 @@ export const templates = {
                                   isBrutalist || isRetro
                                     ? "0.9375rem"
                                     : "0.875rem"
-                                }; color: var(--color-text-secondary); margin-top: 0.25rem; ${
+                                }; color: ${getTextColor(
+                                  "secondary"
+                                )}; margin-top: 0.25rem; ${
                                   isBrutalist ? "font-weight: 600;" : ""
                                 } ${isRetro ? "letter-spacing: 0.5px;" : ""}">
                             ${edu.details}
@@ -8128,7 +8094,7 @@ export const templates = {
                           isRetro ? "Space Mono, monospace" : "inherit"
                         }; font-size: ${
                         isBrutalist || isRetro ? "0.9375rem" : "0.875rem"
-                      }; color: var(--color-text-secondary); font-weight: ${
+                      }; color: ${getTextColor("secondary")}; font-weight: ${
                         isBrutalist || isRetro ? "700" : "600"
                       }; ${
                         isBrutalist || isRetro
@@ -8148,7 +8114,7 @@ export const templates = {
                   : ""
               }
   
-              <!-- Skills -->
+              <!-- Skills with SVG Icon -->
               ${
                 data.skills && data.skills.length > 0
                   ? `
@@ -8171,8 +8137,8 @@ export const templates = {
                         : isRetro
                         ? "border-bottom: 2px solid var(--color-accent); padding-bottom: 0.5rem;"
                         : ""
-                    }">
-                  ${isBrutalist ? "⚡ " : ""}Skills
+                    } display: flex; align-items: center; gap: 0.5rem;">
+                  ${getIcon("skills")} Skills
                 </h2>
                 <div style="display: grid; gap: ${
                   isBrutalist || isElegant ? "1.5rem" : "1rem"
@@ -8191,7 +8157,7 @@ export const templates = {
                         isBrutalist ? "1rem" : "0.75rem"
                       }; text-transform: uppercase; letter-spacing: ${
                         isBrutalist || isRetro ? "1px" : "0.05em"
-                      }; color: var(--color-text-secondary); ${
+                      }; color: ${getTextColor("secondary")}; ${
                         isRetro ? "letter-spacing: 0.5px;" : ""
                       }">
                         ${isGradient && index === 0 ? "✨ " : ""}${
@@ -8252,7 +8218,7 @@ export const templates = {
                                       : isRetro
                                       ? "700"
                                       : "600"
-                                  }; ${
+                                  }; color: ${getTextColor("primary")}; ${
                                     isBrutalist || isRetro
                                       ? "text-transform: uppercase; letter-spacing: 0.5px;"
                                       : ""
@@ -8302,7 +8268,7 @@ export const templates = {
                 isBrutalist || isElegant ? "300px" : "280px"
               }, 1fr)); gap: ${isBrutalist || isElegant ? "3rem" : "2rem"};">
                 
-                <!-- Certifications -->
+                <!-- Certifications with SVG Icon -->
                 ${
                   data.certifications && data.certifications.length > 0
                     ? `
@@ -8323,8 +8289,8 @@ export const templates = {
                           : isRetro
                           ? "border-bottom: 2px solid #00f5ff; padding-bottom: 0.5rem;"
                           : ""
-                      }">
-                    ${isBrutalist ? "🏆 " : ""}Certifications
+                      } display: flex; align-items: center; gap: 0.5rem;">
+                    ${getIcon("certifications")} Certifications
                   </h2>
                   <div style="display: flex; flex-direction: column; gap: ${
                     isBrutalist ? "1.5rem" : "1rem"
@@ -8370,7 +8336,9 @@ export const templates = {
                           isBrutalist || isRetro ? "1rem" : "0.9375rem"
                         }; font-weight: ${
                           isBrutalist ? "900" : "700"
-                        }; margin-bottom: 0.25rem; ${
+                        }; margin-bottom: 0.25rem; color: ${getTextColor(
+                          "primary"
+                        )}; ${
                           isBrutalist || isRetro
                             ? "text-transform: uppercase;"
                             : ""
@@ -8381,7 +8349,7 @@ export const templates = {
                           isRetro ? "Space Mono, monospace" : "inherit"
                         }; font-size: ${
                           isBrutalist || isRetro ? "0.9375rem" : "0.875rem"
-                        }; color: var(--color-text-secondary); ${
+                        }; color: ${getTextColor("secondary")}; ${
                           isBrutalist || isRetro ? "font-weight: 700;" : ""
                         } ${isRetro ? "letter-spacing: 0.5px;" : ""}">
                           ${cert.issuer || ""} ${
@@ -8398,7 +8366,7 @@ export const templates = {
                     : ""
                 }
   
-                <!-- Languages -->
+                <!-- Languages with SVG Icon -->
                 ${
                   data.languages && data.languages.length > 0
                     ? `
@@ -8419,8 +8387,8 @@ export const templates = {
                           : isRetro
                           ? "border-bottom: 2px solid var(--color-accent); padding-bottom: 0.5rem;"
                           : ""
-                      }">
-                    ${isBrutalist ? "🌍 " : ""}Languages
+                      } display: flex; align-items: center; gap: 0.5rem;">
+                    ${getIcon("languages")} Languages
                   </h2>
                   <div style="display: flex; flex-direction: column; gap: ${
                     isBrutalist ? "1.5rem" : "1rem"
@@ -8466,7 +8434,7 @@ export const templates = {
                           isBrutalist || isRetro ? "1rem" : "0.9375rem"
                         }; font-weight: ${
                           isBrutalist || isRetro ? "900" : "600"
-                        }; ${
+                        }; color: ${getTextColor("primary")}; ${
                           isBrutalist || isRetro
                             ? "text-transform: uppercase;"
                             : ""
@@ -8477,7 +8445,7 @@ export const templates = {
                           isRetro ? "Space Mono, monospace" : "inherit"
                         }; font-size: ${
                           isBrutalist || isRetro ? "0.9375rem" : "0.875rem"
-                        }; color: var(--color-text-secondary); ${
+                        }; color: ${getTextColor("secondary")}; ${
                           isBrutalist || isRetro ? "font-weight: 700;" : ""
                         } ${isRetro ? "letter-spacing: 0.5px;" : ""}">
                           ${lang.proficiency || ""}
@@ -8495,7 +8463,7 @@ export const templates = {
   
             </div>
   
-            <!-- Footer -->
+            <!-- Footer with SVG Icon -->
             <footer style="padding: ${
               isBrutalist ? "2.5rem" : "2rem"
             }; background: ${
@@ -8524,9 +8492,11 @@ export const templates = {
               ${
                 data.footerText
                   ? `
-              <div style="margin-bottom: 1.5rem; color: var(--color-text-secondary); font-size: 0.875rem; font-weight: ${
-                isBrutalist ? "900" : "normal"
-              }; ${
+              <div style="margin-bottom: 1.5rem; color: ${
+                isBrutalist ? "var(--color-bg)" : "var(--color-text-secondary)"
+              }; font-size: 0.875rem; font-weight: ${
+                      isBrutalist ? "900" : "normal"
+                    }; ${
                       isRetro ? "letter-spacing: 0.5px;" : ""
                     } white-space: pre-line;">
                 ${data.footerText}
@@ -8588,7 +8558,7 @@ export const templates = {
           : isGradient
           ? "box-shadow: 0 8px 20px rgba(102,126,234,0.3);"
           : ""
-      }" 
+      } display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin: 0 auto;" 
                 onmouseover="${
                   isBrutalist
                     ? `this.style.background='var(--color-accent)'; this.style.color='var(--color-bg)'`
@@ -8611,7 +8581,7 @@ export const templates = {
                     ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
                     : `this.style.transform='translateY(0)'; this.style.opacity='1'`
                 }">
-                ${isBrutalist ? "🖨️ " : "🖨️ "}Print / Save as PDF
+                ${getIcon("print")} Print / Save as PDF
               </button>
             </footer>
   
@@ -8730,15 +8700,20 @@ export const templates = {
               max-width: 100% !important;
               margin: 0 !important;
             }
+            svg {
+              fill: black !important;
+              stroke: black !important;
+            }
+            
+            /* Brutalism theme print adjustments */
             ${
               isBrutalist
                 ? `
             .resume-header {
               background: white !important;
-              color: black !important;
             }
-            .resume-header h1, .resume-header p, .resume-header div, .resume-header span {
-              color: black !important;
+            .resume-header svg {
+              stroke: black !important;
             }
             `
                 : ""
@@ -8806,16 +8781,33 @@ export const templates = {
       `;
     },
   }),
-
   // ============================================
   // TEMPLATE 6: PHOTOGRAPHY PORTFOLIO (MASONRY)
   // ============================================
   "photo-masonry": new Template("photo-masonry", {
     name: "Photography Portfolio (Masonry)",
-    description: "Dynamic masonry grid photography portfolio",
+    description:
+      "Dynamic masonry grid photography portfolio with full theme support",
     category: "Portfolio",
     image: "photography-masonry",
     fields: {
+      // Enhanced show/hide controls like landing page
+      showHeader: {
+        type: "boolean",
+        default: true,
+        label: "Show Header",
+      },
+      showThemeToggle: {
+        type: "boolean",
+        default: true,
+        label: "Show Theme Toggle",
+      },
+      showServices: {
+        type: "checkbox",
+        label: "Show Services Section",
+        default: true,
+      },
+
       photographerName: {
         type: "text",
         default: "Emma Wilson",
@@ -8831,11 +8823,6 @@ export const templates = {
         type: "text",
         default: "#gallery",
         label: "Hero Button Link",
-      },
-      showServices: {
-        type: "checkbox",
-        label: "Show Services Section",
-        default: true,
       },
       servicesTitle: {
         type: "text",
@@ -8857,8 +8844,6 @@ export const templates = {
         label: "Contact Button Text",
         default: "Get in Touch",
       },
-
-      // Footer
       footerText: {
         type: "text",
         label: "Footer Copyright Text",
@@ -8991,11 +8976,6 @@ export const templates = {
         itemLabel: "Service",
         min: 0,
         max: 4,
-        price: {
-          type: "text",
-          label: "Price (optional)",
-          default: "",
-        },
         fields: {
           name: { type: "text", label: "Service Name", default: "" },
           description: { type: "textarea", label: "Description", default: "" },
@@ -9017,7 +8997,12 @@ export const templates = {
       },
     },
     structure: (data, theme, colorMode) => {
-      // Detect theme style for dynamic elements
+      // Get show/hide options with defaults
+      const showHeader = data.showHeader !== false;
+      const showThemeToggle = data.showThemeToggle !== false && showHeader;
+      const showServices = data.showServices !== false;
+
+      // Enhanced theme detection system (matching landing page)
       const themeId = theme?.id || "minimal";
       const isBrutalist = themeId === "brutalist";
       const isGradient = themeId === "gradient";
@@ -9025,8 +9010,26 @@ export const templates = {
       const isRetro = themeId === "retro";
       const isGlassmorphism = themeId === "glassmorphism";
       const isNeumorphism = themeId === "neumorphism";
+      const isDark = colorMode === "dark";
 
-      // Neumorphism box-shadow helpers
+      // SVG Icon Mapping (consistent with other templates)
+      const iconMap = {
+        camera: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>`,
+        gallery: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`,
+        filter: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>`,
+        close: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`,
+        prev: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>`,
+        next: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>`,
+        mail: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>`,
+        instagram: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>`,
+      };
+
+      // Helper function for icons - FIXED to ensure proper flex alignment
+      const getIcon = (iconName, size = "1em", alt = "") => {
+        return `<span style="width: ${size}; height: ${size}; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;" aria-label="${alt}">${iconMap[iconName]}</span>`;
+      };
+
+      // Neumorphism helper functions (from landing page) - FIXED for proper light/dark mode
       const getNeumorphismShadow = (inset = false) => {
         if (!isNeumorphism) return "";
         return inset
@@ -9044,112 +9047,154 @@ export const templates = {
         return "var(--neomorph-shadow-out)";
       };
 
-      return `
-      <!-- Minimal Floating Header with Theme Toggle -->
-      <header style="position: fixed; top: ${
-        isBrutalist ? "1.5rem" : "2rem"
-      }; left: ${isBrutalist ? "1.5rem" : "2rem"}; right: ${
-        isBrutalist ? "1.5rem" : "2rem"
-      }; z-index: 1000; display: flex; justify-content: space-between; align-items: center;">
-        <div style="background: ${
-          isGlassmorphism ? "rgba(255,255,255,0.1)" : "var(--color-bg)"
-        }; ${
-        isGlassmorphism
-          ? "backdrop-filter: blur(20px);"
-          : "backdrop-filter: blur(10px);"
-      } padding: ${
-        isBrutalist ? "1.25rem 2rem" : "1rem 1.5rem"
-      }; border-radius: ${
-        isGradient || isRetro
-          ? "999px"
-          : isBrutalist || isElegant
-          ? "0"
-          : isNeumorphism || isGlassmorphism
-          ? "24px"
-          : "50px"
-      }; border: ${isBrutalist ? "3px" : isRetro ? "2px" : "1px"} solid ${
-        isBrutalist || isRetro
-          ? "var(--color-accent)"
-          : isGlassmorphism
-          ? "rgba(255,255,255,0.2)"
-          : "var(--color-border)"
-      }; ${
-        isBrutalist
-          ? "box-shadow: 6px 6px 0 var(--color-accent);"
-          : isGradient
-          ? "box-shadow: 0 8px 24px rgba(102,126,234,0.15);"
-          : isNeumorphism
-          ? getNeumorphismShadow(false)
-          : "box-shadow: 0 4px 12px rgba(0,0,0,0.1);"
-      }">
-          <h1 style="font-family: ${
-            isElegant
-              ? "Playfair Display, serif"
-              : isRetro
-              ? "Space Mono, monospace"
-              : "inherit"
-          }; font-size: ${
-        isBrutalist || isRetro ? "1.25rem" : "1.125rem"
-      }; font-weight: ${isBrutalist ? "900" : "700"}; letter-spacing: ${
-        isBrutalist || isRetro ? "1px" : "-0.01em"
-      }; margin: 0; ${
-        isBrutalist || isRetro ? "text-transform: uppercase;" : ""
-      } ${
-        isGradient
-          ? "background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"
-          : isRetro
-          ? "background: linear-gradient(90deg, var(--color-accent), #00f5ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"
-          : ""
-      }">${data.photographerName || "Photographer"}</h1>
-        </div>
-        <label class="theme-toggle-switch-wrapper" style="cursor: pointer; background: ${
-          isGlassmorphism ? "rgba(255,255,255,0.1)" : "var(--color-bg)"
-        }; ${
-        isGlassmorphism
-          ? "backdrop-filter: blur(20px);"
-          : "backdrop-filter: blur(10px);"
-      } padding: ${isBrutalist ? "1rem" : "0.75rem"}; border-radius: ${
-        isBrutalist || isElegant ? "0" : "50%"
-      }; border: ${isBrutalist ? "3px" : isRetro ? "2px" : "1px"} solid ${
-        isBrutalist || isRetro
-          ? "var(--color-accent)"
-          : isGlassmorphism
-          ? "rgba(255,255,255,0.2)"
-          : "var(--color-border)"
-      }; ${
-        isBrutalist
-          ? "box-shadow: 6px 6px 0 var(--color-accent);"
-          : isGradient
-          ? "box-shadow: 0 8px 24px rgba(102,126,234,0.15);"
-          : isNeumorphism
-          ? getNeumorphismShadow(false)
-          : "box-shadow: 0 4px 12px rgba(0,0,0,0.1);"
-      }">
-          <input type="checkbox" class="theme-toggle-switch" onclick="toggleTheme()" aria-label="Toggle theme">
-          <span class="theme-toggle-slider"></span>
-        </label>
-      </header>
+      // Theme toggle helper function - FIXED: removed background, proper alignment
+      const getThemeToggle = () => {
+        if (!showThemeToggle) return "";
+        return `
+          <label class="theme-toggle-switch-wrapper" style="cursor: pointer; ${
+            isNeumorphism
+              ? `padding: 0.5rem; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; box-shadow: var(--neomorph-shadow-out);`
+              : ""
+          }">
+            <input type="checkbox" class="theme-toggle-switch" onclick="toggleTheme()" aria-label="Toggle theme">
+            <span class="theme-toggle-slider"></span>
+          </label>
+        `;
+      };
 
-      <!-- Compact Hero Section -->
-      <section style="min-height: ${
-        isBrutalist || isRetro ? "85vh" : "75vh"
-      }; display: flex; align-items: center; justify-content: center; text-align: center; position: relative; background: ${
+      return `
+        <!-- Enhanced Header - FIXED: No background color, proper flex alignment, same row on mobile -->
+        ${
+          showHeader
+            ? `
+        <header style="box-shadow: none!important;backdrop-filter: none!important;border: none!important;background:none!important;position: fixed; top: ${
+          isBrutalist ? "1.5rem" : "2rem"
+        }; left: ${isBrutalist ? "1.5rem" : "2rem"}; right: ${
+                isBrutalist ? "1.5rem" : "2rem"
+              }; z-index: 1000; display: flex; justify-content: space-between; align-items: center; flex-wrap: nowrap; gap: 1rem;">
+          <div style="${
+            isGlassmorphism
+              ? ""
+              : isNeumorphism
+              ? `background: var(--color-bg); ${getNeumorphismShadow(false)}`
+              : "background: var(--color-bg);"
+          } padding: ${
+                isBrutalist ? "1.25rem 2rem" : "1rem 1.5rem"
+              }; border-radius: ${
+                isGradient || isRetro
+                  ? "999px"
+                  : isBrutalist || isElegant
+                  ? "0"
+                  : isNeumorphism || isGlassmorphism
+                  ? "24px"
+                  : "50px"
+              }; border: ${
+                isBrutalist
+                  ? "3px"
+                  : isRetro
+                  ? "2px"
+                  : isGlassmorphism
+                  ? "1px"
+                  : "1px"
+              } solid ${
+                isBrutalist || isRetro
+                  ? "var(--color-accent)"
+                  : isGlassmorphism
+                  ? "rgba(255,255,255,0.2)"
+                  : isNeumorphism
+                  ? "transparent"
+                  : "var(--color-border)"
+              }; ${
+                isBrutalist
+                  ? "box-shadow: 6px 6px 0 var(--color-accent);"
+                  : isGradient
+                  ? ""
+                  : isNeumorphism
+                  ? ""
+                  : isGlassmorphism
+                  ? "box-shadow: 0 8px 32px rgba(31, 38, 135, 0.1);"
+                  : "box-shadow: 0 4px 12px rgba(0,0,0,0.1);"
+              }">
+            <h1 style="font-family: ${
+              isElegant
+                ? "Playfair Display, serif"
+                : isRetro
+                ? "Space Mono, monospace"
+                : "inherit"
+            }; font-size: ${
+                isBrutalist || isRetro ? "1.25rem" : "1.125rem"
+              }; font-weight: ${isBrutalist ? "900" : "700"}; letter-spacing: ${
+                isBrutalist || isRetro ? "1px" : "-0.01em"
+              }; margin: 0; display: flex; align-items: center; gap: 0.5rem; ${
+                isBrutalist || isRetro ? "text-transform: uppercase;" : ""
+              } ${
+                isGradient
+                  ? "background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"
+                  : isRetro
+                  ? "background: linear-gradient(90deg, var(--color-accent), #00f5ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"
+                  : isGlassmorphism
+                  ? "color: var(--color-text);"
+                  : isNeumorphism
+                  ? "color: var(--color-text);"
+                  : ""
+              }">
+              ${getIcon("camera", "1.25em", "Camera")} ${
+                data.photographerName || "Photographer"
+              }
+            </h1>
+          </div>
+          ${getThemeToggle()}
+        </header>
+        `
+            : ""
+        }
+  
+        <!-- Enhanced Hero Section -->
+        <section style="min-height: ${
+          isBrutalist || isRetro ? "85vh" : "75vh"
+        }; display: flex; align-items: center; justify-content: center; text-align: center; position: relative; background: ${
         isBrutalist
           ? "var(--color-text)"
           : isGradient
           ? "linear-gradient(135deg, rgba(102,126,234,0.05), rgba(240,147,251,0.05))"
+          : isGlassmorphism
+          ? ""
+          : isNeumorphism
+          ? "var(--color-bg)"
           : isRetro
           ? "var(--color-bg)"
           : "var(--color-bg)"
-      }; padding: 8rem 2rem 4rem;">
-        <div style="max-width: ${isElegant ? "650px" : "700px"}; z-index: 1;">
-          <h2 ${
-            isRetro
-              ? `class="glitch-photo" data-text="${
-                  data.photographerName || "Photographer"
-                }"`
+      }; padding: ${showHeader ? "8rem 2rem 4rem" : "4rem 2rem 4rem"};">
+          ${
+            isGradient
+              ? `<div style="position: absolute; inset: 0; background: linear-gradient(135deg, rgba(102,126,234,0.03), rgba(240,147,251,0.03)); z-index: 0;"></div>`
               : ""
-          } style="font-family: ${
+          }
+          ${
+            isRetro
+              ? `<div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-image: 
+            linear-gradient(rgba(255,47,181,0.02) 2px, transparent 2px),
+            linear-gradient(90deg, rgba(255,47,181,0.02) 2px, transparent 2px);
+            background-size: 50px 50px; pointer-events: none; z-index: 0;"></div>`
+              : ""
+          }
+          
+          <div style="max-width: ${
+            isElegant ? "650px" : "700px"
+          }; z-index: 1; ${
+        isNeumorphism
+          ? `padding: 4rem 3rem; border-radius: 32px; ${getNeumorphismShadow(
+              false
+            )}`
+          : ""
+      }">
+            <h2 ${
+              isRetro
+                ? `class="glitch-photo" data-text="${
+                    data.photographerName || "Photographer"
+                  }"`
+                : ""
+            } style="font-family: ${
         isElegant
           ? "Playfair Display, serif"
           : isRetro
@@ -9176,99 +9221,103 @@ export const templates = {
           ? "position: relative;"
           : ""
       }">
+              ${
+                isBrutalist
+                  ? (data.photographerName || "Photographer")
+                      .split(" ")
+                      .map((word, i) =>
+                        i === 0
+                          ? `<span style="background: var(--color-accent); color: var(--color-bg); padding: 0 0.5rem; display: inline-block; transform: rotate(-2deg);">${word}</span>`
+                          : word
+                      )
+                      .join(" ")
+                  : ""
+              }
+              ${
+                isGradient
+                  ? (data.photographerName || "Photographer")
+                      .split(" ")
+                      .map((word, i) =>
+                        i ===
+                        (data.photographerName || "Photographer").split(" ")
+                          .length -
+                          1
+                          ? `<span style="background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">${word}</span>`
+                          : word
+                      )
+                      .join(" ")
+                  : ""
+              }
+              ${
+                isRetro
+                  ? `<span style="background: linear-gradient(90deg, var(--color-accent), #00f5ff, var(--color-accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">${
+                      data.photographerName || "Photographer"
+                    }</span>`
+                  : ""
+              }
+              ${
+                !isBrutalist && !isGradient && !isRetro
+                  ? data.photographerName || "Photographer"
+                  : ""
+              }
+            </h2>
             ${
-              isBrutalist
-                ? (data.photographerName || "Photographer")
-                    .split(" ")
-                    .map((word, i) =>
-                      i === 0
-                        ? `<span style="background: var(--color-accent); color: var(--color-bg); padding: 0 0.5rem; display: inline-block; transform: rotate(-2deg);">${word}</span>`
-                        : word
-                    )
-                    .join(" ")
+              data.tagline
+                ? `
+            <p style="font-family: ${
+              isElegant
+                ? "Lato, sans-serif"
+                : isRetro
+                ? "Space Mono, monospace"
+                : "inherit"
+            }; font-size: clamp(${
+                    isBrutalist || isRetro ? "1.5rem" : "1.25rem"
+                  }, 3vw, ${
+                    isBrutalist || isRetro ? "2rem" : "1.75rem"
+                  }); color: ${
+                    isBrutalist ? "var(--color-bg)" : "var(--color-accent)"
+                  }; margin-bottom: 2rem; font-weight: ${
+                    isBrutalist ? "800" : isElegant ? "400" : "600"
+                  }; ${
+                    isBrutalist || isRetro
+                      ? "text-transform: uppercase; letter-spacing: 2px;"
+                      : ""
+                  }">
+              ${data.tagline}
+            </p>
+            `
                 : ""
             }
             ${
-              isGradient
-                ? (data.photographerName || "Photographer")
-                    .split(" ")
-                    .map((word, i) =>
-                      i ===
-                      (data.photographerName || "Photographer").split(" ")
-                        .length -
-                        1
-                        ? `<span style="background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">${word}</span>`
-                        : word
-                    )
-                    .join(" ")
+              data.bio
+                ? `
+            <p style="font-family: ${
+              isElegant
+                ? "Lato, sans-serif"
+                : isRetro
+                ? "Space Mono, monospace"
+                : "inherit"
+            }; font-size: ${
+                    isBrutalist || isRetro ? "1.25rem" : "1.125rem"
+                  }; color: ${
+                    isBrutalist
+                      ? "var(--color-bg)"
+                      : "var(--color-text-secondary)"
+                  }; margin-bottom: 3rem; line-height: ${
+                    isElegant ? "1.9" : "1.8"
+                  }; font-weight: ${isElegant ? "300" : "normal"}; max-width: ${
+                    isElegant ? "600px" : "700px"
+                  }; margin-left: auto; margin-right: auto;">
+              ${data.bio}
+            </p>
+            `
                 : ""
             }
-            ${
-              isRetro
-                ? `<span style="background: linear-gradient(90deg, var(--color-accent), #00f5ff, var(--color-accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">${
-                    data.photographerName || "Photographer"
-                  }</span>`
-                : ""
-            }
-            ${
-              !isBrutalist && !isGradient && !isRetro
-                ? data.photographerName || "Photographer"
-                : ""
-            }
-          </h2>
-          ${
-            data.tagline
-              ? `
-          <p style="font-family: ${
-            isElegant
-              ? "Lato, sans-serif"
-              : isRetro
-              ? "Space Mono, monospace"
-              : "inherit"
-          }; font-size: clamp(${
-                  isBrutalist || isRetro ? "1.5rem" : "1.25rem"
-                }, 3vw, ${
-                  isBrutalist || isRetro ? "2rem" : "1.75rem"
-                }); color: ${
-                  isBrutalist ? "var(--color-bg)" : "var(--color-accent)"
-                }; margin-bottom: 2rem; font-weight: ${
-                  isBrutalist ? "800" : isElegant ? "400" : "600"
-                }; ${
-                  isBrutalist || isRetro
-                    ? "text-transform: uppercase; letter-spacing: 2px;"
-                    : ""
-                }">
-            ${data.tagline}
-          </p>
-          `
-              : ""
-          }
-          ${
-            data.bio
-              ? `
-          <p style="font-family: ${
-            isElegant
-              ? "Lato, sans-serif"
-              : isRetro
-              ? "Space Mono, monospace"
-              : "inherit"
-          }; font-size: ${
-                  isBrutalist || isRetro ? "1.25rem" : "1.125rem"
-                }; color: ${
-                  isBrutalist
-                    ? "var(--color-bg)"
-                    : "var(--color-text-secondary)"
-                }; margin-bottom: 3rem; line-height: ${
-                  isElegant ? "1.9" : "1.8"
-                }; font-weight: ${isElegant ? "300" : "normal"};">
-            ${data.bio}
-          </p>
-          `
-              : ""
-          }
-          <a href="#gallery" style="display: inline-block; padding: ${
-            isBrutalist ? "1.25rem 3rem" : "1rem 2.5rem"
-          }; background: ${
+            <a href="${
+              data.heroButtonLink || "#gallery"
+            }" style="display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: ${
+        isBrutalist ? "1.25rem 3rem" : "1rem 2.5rem"
+      }; background: ${
         isBrutalist
           ? "var(--color-accent)"
           : isGradient
@@ -9302,258 +9351,470 @@ export const templates = {
           : isRetro
           ? "border: 2px solid var(--color-accent); text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 0 30px rgba(255,47,181,0.3);"
           : isGlassmorphism
-          ? "backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2);"
+          ? "backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2);"
           : isNeumorphism
           ? getNeumorphismShadow(false)
           : ""
       } ${isGradient ? "box-shadow: 0 10px 30px rgba(102,126,234,0.3);" : ""}" 
-            onmouseover="${
-              isBrutalist
-                ? `this.style.transform='translate(-4px, -4px)'; this.style.boxShadow='8px 8px 0 var(--color-accent)'`
-                : isGradient
-                ? `this.style.transform='translateY(-4px)'; this.style.boxShadow='0 15px 40px rgba(102,126,234,0.4)'`
-                : isRetro
-                ? `this.style.transform='translateY(-4px)'; this.style.boxShadow='0 0 50px rgba(255,47,181,0.5)'`
-                : isNeumorphism
-                ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
-                : `this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 20px rgba(0,0,0,0.15)'`
-            }" 
-            onmouseout="${
-              isBrutalist
-                ? `this.style.transform='translate(0, 0)'; this.style.boxShadow='none'`
-                : isGradient
-                ? `this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 30px rgba(102,126,234,0.3)'`
-                : isRetro
-                ? `this.style.transform='translateY(0)'; this.style.boxShadow='0 0 30px rgba(255,47,181,0.3)'`
-                : isNeumorphism
-                ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
-                : `this.style.transform='translateY(0)'; this.style.boxShadow='none'`
-            }">
-            View Gallery ${isBrutalist ? "↓" : "↓"}
-          </a>
-        </div>
-      </section>
-
-      <!-- Filter Pills -->
-      <section id="gallery" style="padding: ${
-        isBrutalist || isRetro ? "5rem 0 2rem" : "4rem 0 2rem"
-      }; background: ${isBrutalist ? "var(--color-text)" : "var(--color-bg)"};">
-        <div class="container">
-          <div style="display: flex; justify-content: center; flex-wrap: wrap; gap: ${
-            isBrutalist ? "1rem" : "0.75rem"
-          }; margin-bottom: ${isBrutalist ? "4rem" : "3rem"};">
-            ${
-              data.categories && data.categories.length > 0
-                ? data.categories
-                    .map(
-                      (cat, index) => `
-              <button 
-                class="filter-btn ${index === 0 ? "active" : ""}" 
-                onclick="filterGallery('${cat.toLowerCase()}')"
-                style="font-family: ${
-                  isRetro ? "Space Mono, monospace" : "inherit"
-                }; padding: ${
-                        isBrutalist ? "1rem 2rem" : "0.75rem 1.75rem"
-                      }; background: ${
-                        index === 0
-                          ? isBrutalist
-                            ? "var(--color-accent)"
-                            : isGradient
-                            ? "linear-gradient(135deg, #667eea, #764ba2)"
-                            : isRetro
-                            ? "var(--color-accent)"
-                            : isGlassmorphism
-                            ? "rgba(255,255,255,0.15)"
-                            : isNeumorphism
-                            ? "var(--color-bg)"
-                            : "var(--color-text)"
-                          : "transparent"
-                      }; color: ${
-                        index === 0
-                          ? isBrutalist || isGradient || isRetro
-                            ? "white"
-                            : isGlassmorphism || isNeumorphism
-                            ? "var(--color-text)"
-                            : "var(--color-bg)"
-                          : isBrutalist
-                          ? "var(--color-bg)"
-                          : "var(--color-text)"
-                      }; border: ${
-                        isBrutalist ? "3px" : isRetro ? "2px" : "2px"
-                      } solid ${
-                        index === 0
-                          ? isBrutalist
-                            ? "var(--color-accent)"
-                            : isRetro
-                            ? "var(--color-accent)"
-                            : isGlassmorphism
-                            ? "rgba(255,255,255,0.2)"
-                            : "var(--color-text)"
-                          : isBrutalist || isRetro
-                          ? "var(--color-accent)"
-                          : isGlassmorphism
-                          ? "rgba(255,255,255,0.1)"
-                          : "var(--color-border)"
-                      }; border-radius: ${
-                        isGradient || isRetro
-                          ? "999px"
-                          : isBrutalist || isElegant
-                          ? "0"
-                          : isNeumorphism || isGlassmorphism
-                          ? "16px"
-                          : "50px"
-                      }; font-weight: ${
-                        isBrutalist || isRetro ? "700" : "600"
-                      }; cursor: pointer; transition: all 0.2s; font-size: ${
-                        isBrutalist || isRetro ? "1rem" : "0.9375rem"
-                      }; ${
-                        isBrutalist || isRetro
-                          ? "text-transform: uppercase; letter-spacing: 1px;"
-                          : ""
-                      } ${
-                        isGlassmorphism && index === 0
-                          ? "backdrop-filter: blur(10px);"
-                          : ""
-                      } ${
-                        isNeumorphism && index === 0
-                          ? getNeumorphismShadow(false)
-                          : ""
-                      }"
-              >
-                ${cat}
-              </button>
-            `
-                    )
-                    .join("")
-                : ""
-            }
+              onmouseover="${
+                isBrutalist
+                  ? `this.style.transform='translate(-4px, -4px)'; this.style.boxShadow='8px 8px 0 var(--color-accent)'`
+                  : isGradient
+                  ? `this.style.transform='translateY(-4px)'; this.style.boxShadow='0 15px 40px rgba(102,126,234,0.4)'`
+                  : isRetro
+                  ? `this.style.transform='translateY(-4px)'; this.style.boxShadow='0 0 50px rgba(255,47,181,0.5)'`
+                  : isNeumorphism
+                  ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
+                  : `this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 20px rgba(0,0,0,0.15)'`
+              }" 
+              onmouseout="${
+                isBrutalist
+                  ? `this.style.transform='translate(0, 0)'; this.style.boxShadow='none'`
+                  : isGradient
+                  ? `this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 30px rgba(102,126,234,0.3)'`
+                  : isRetro
+                  ? `this.style.transform='translateY(0)'; this.style.boxShadow='0 0 30px rgba(255,47,181,0.3)'`
+                  : isNeumorphism
+                  ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
+                  : `this.style.transform='translateY(0)'; this.style.boxShadow='none'`
+              }">
+              ${getIcon("gallery", "1em", "Gallery")} ${
+        data.heroButtonText || "View Gallery"
+      }
+            </a>
           </div>
-        </div>
-      </section>
-
-      <!-- Masonry Gallery with Theme-Specific Styling -->
-      <section style="padding: 0 0 ${
-        isBrutalist || isRetro ? "8rem" : "6rem"
-      }; background: ${isBrutalist ? "var(--color-text)" : "var(--color-bg)"};">
-        <div class="container">
-          <div id="masonry-grid" style="column-count: 3; column-gap: ${
-            isBrutalist ? "2rem" : isElegant ? "2rem" : "1.5rem"
-          };">
-            ${
-              data.photos && data.photos.length > 0
-                ? data.photos
-                    .map(
-                      (photo, index) => `
-              <div class="gallery-item" data-category="${(
-                photo.category || ""
-              ).toLowerCase()}" style="break-inside: avoid; margin-bottom: ${
-                        isBrutalist ? "2rem" : isElegant ? "2rem" : "1.5rem"
-                      }; cursor: pointer; position: relative; overflow: hidden; border-radius: ${
-                        isGradient
-                          ? "24px"
-                          : isBrutalist || isElegant || isRetro
-                          ? "0"
-                          : isNeumorphism || isGlassmorphism
-                          ? "20px"
-                          : "16px"
-                      }; ${
-                        isBrutalist
-                          ? "border: 3px solid var(--color-accent);"
-                          : isRetro
-                          ? "border: 2px solid var(--color-accent);"
-                          : ""
-                      }" onclick="openLightbox(${index})">
-                <div style="position: relative; overflow: hidden; border-radius: ${
-                  isGradient
-                    ? "24px"
-                    : isBrutalist || isElegant || isRetro
-                    ? "0"
-                    : isNeumorphism || isGlassmorphism
-                    ? "20px"
-                    : "16px"
-                }; transition: all 0.3s; ${
-                        isNeumorphism
-                          ? getNeumorphismShadow(false)
-                          : isGradient
-                          ? "box-shadow: 0 10px 30px rgba(0,0,0,0.08);"
-                          : isGlassmorphism
-                          ? "box-shadow: 0 10px 30px rgba(0,0,0,0.1);"
-                          : ""
-                      }">
-                  <img 
-                    src="${photo.imageUrl || ""}" 
-                    alt="${photo.title || "Photo"}"
-                    style="width: 100%; height: auto; display: block; transition: transform ${
-                      isBrutalist || isRetro ? "0.2s" : "0.5s"
-                    } ease; ${
-                        isGlassmorphism ? "filter: brightness(0.95);" : ""
-                      }"
-                    onmouseover="this.style.transform='scale(${
-                      isBrutalist ? "1.05" : isRetro ? "1.08" : "1.08"
-                    })'"
-                    onmouseout="this.style.transform='scale(1)'"
-                  />
-                  <div style="position: absolute; inset: 0; background: ${
+        </section>
+  
+        <!-- Services Section (Conditional) -->
+        ${
+          showServices && data.services && data.services.length > 0
+            ? `
+        <section style="padding: ${
+          isBrutalist || isRetro ? "6rem 0" : "5rem 0"
+        }; background: ${
+                isBrutalist
+                  ? "var(--color-accent)"
+                  : isGradient
+                  ? "linear-gradient(135deg, rgba(102,126,234,0.1), rgba(240,147,251,0.1))"
+                  : isGlassmorphism
+                  ? "rgba(255,255,255,0.02)"
+                  : isNeumorphism
+                  ? "var(--color-bg)"
+                  : isRetro
+                  ? "var(--color-surface)"
+                  : "var(--color-bg)"
+              }; border-top: ${
+                isBrutalist
+                  ? "4px"
+                  : isRetro
+                  ? "3px"
+                  : isGlassmorphism || isNeumorphism
+                  ? "0"
+                  : "1px"
+              } solid ${
+                isBrutalist || isRetro
+                  ? "var(--color-accent)"
+                  : isGlassmorphism || isNeumorphism
+                  ? "transparent"
+                  : "var(--color-border)"
+              }; ${
+                isGlassmorphism
+                  ? "backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);"
+                  : ""
+              }">
+          <div class="container" style="max-width: 1200px; margin: 0 auto; padding: 0 2rem;">
+            <h2 style="font-family: ${
+              isElegant ? "Playfair Display, serif" : "inherit"
+            }; font-size: clamp(${
+                isBrutalist || isRetro ? "2.5rem" : "2rem"
+              }, 5vw, ${
+                isBrutalist || isRetro ? "4rem" : "3rem"
+              }); font-weight: ${
+                isBrutalist ? "900" : "700"
+              }; text-align: center; margin-bottom: 3rem; ${
+                isBrutalist
+                  ? "color: var(--color-bg);"
+                  : isRetro
+                  ? "color: var(--color-accent); text-transform: uppercase; letter-spacing: 2px;"
+                  : ""
+              } ${
+                isGradient
+                  ? "background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"
+                  : ""
+              }">
+              ${data.servicesTitle || "Services"}
+            </h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: ${
+              isBrutalist || isElegant ? "2rem" : "1.5rem"
+            };">
+              ${data.services
+                .map(
+                  (service, index) => `
+                <div style="padding: ${
+                  isBrutalist ? "2.5rem" : "2rem"
+                }; background: ${
+                    isBrutalist
+                      ? "var(--color-bg)"
+                      : isGlassmorphism
+                      ? "rgba(255,255,255,0.1)"
+                      : isNeumorphism
+                      ? "var(--color-bg)"
+                      : "var(--color-surface)"
+                  }; border-radius: ${
+                    isGradient
+                      ? "24px"
+                      : isBrutalist || isElegant || isRetro
+                      ? "0"
+                      : isNeumorphism || isGlassmorphism
+                      ? "20px"
+                      : "12px"
+                  }; border: ${
+                    isBrutalist
+                      ? "3px"
+                      : isRetro
+                      ? "2px"
+                      : isGlassmorphism
+                      ? "1px"
+                      : "1px"
+                  } solid ${
+                    isBrutalist || isRetro
+                      ? "var(--color-accent)"
+                      : isGlassmorphism
+                      ? "rgba(255,255,255,0.2)"
+                      : isNeumorphism
+                      ? "transparent"
+                      : "var(--color-border)"
+                  }; transition: all 0.3s; ${
+                    isNeumorphism
+                      ? getNeumorphismShadow(false)
+                      : isGlassmorphism
+                      ? "backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); box-shadow: 0 8px 32px rgba(31, 38, 135, 0.1);"
+                      : ""
+                  }" 
+                  onmouseover="${
+                    isBrutalist
+                      ? `this.style.transform='translate(-4px, -4px)'; this.style.boxShadow='8px 8px 0 var(--color-accent)'`
+                      : isGradient
+                      ? `this.style.transform='translateY(-8px)'; this.style.boxShadow='0 20px 40px rgba(102,126,234,0.15)'`
+                      : isRetro
+                      ? `this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 40px rgba(255,47,181,0.3)'`
+                      : isNeumorphism
+                      ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
+                      : isGlassmorphism
+                      ? `this.style.transform='translateY(-4px)'; this.style.borderColor='var(--color-accent)'`
+                      : `this.style.transform='translateY(-4px)'; this.style.borderColor='var(--color-accent)'`
+                  }" 
+                  onmouseout="${
+                    isBrutalist
+                      ? `this.style.transform='translate(0, 0)'; this.style.boxShadow='none'`
+                      : isGradient
+                      ? `this.style.transform='translateY(0)'; this.style.boxShadow='none'`
+                      : isRetro
+                      ? `this.style.transform='translateY(0)'; this.style.boxShadow='none'`
+                      : isNeumorphism
+                      ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
+                      : isGlassmorphism
+                      ? `this.style.transform='translateY(0)'; this.style.borderColor='rgba(255,255,255,0.2)'`
+                      : `this.style.transform='translateY(0)'; this.style.borderColor='var(--color-border)'`
+                  }">
+                  <h3 style="font-family: ${
+                    isElegant
+                      ? "Playfair Display, serif"
+                      : isRetro
+                      ? "Space Mono, monospace"
+                      : "inherit"
+                  }; font-size: ${
+                    isBrutalist || isRetro ? "1.5rem" : "1.25rem"
+                  }; font-weight: ${
+                    isBrutalist ? "900" : "700"
+                  }; margin-bottom: 1rem; ${
+                    isBrutalist || isRetro
+                      ? "text-transform: uppercase; letter-spacing: 1px;"
+                      : ""
+                  } color: ${
                     isBrutalist
                       ? "var(--color-accent)"
+                      : isNeumorphism || isGlassmorphism
+                      ? "var(--color-accent)"
+                      : "var(--color-text)"
+                  };">
+                    ${service.name}
+                  </h3>
+                  <p style="font-family: ${
+                    isElegant
+                      ? "Lato, sans-serif"
                       : isRetro
-                      ? "linear-gradient(to top, var(--color-accent) 0%, rgba(255,47,181,0.6) 50%, transparent 100%)"
-                      : "linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.4) 50%, transparent 100%)"
-                  }; display: flex; align-items: flex-end; padding: ${
-                        isBrutalist ? "2.5rem" : "2rem"
-                      }; opacity: 0; transition: opacity 0.3s; ${
-                        isGlassmorphism ? "backdrop-filter: blur(10px);" : ""
-                      }" class="photo-overlay">
-                    <div>
-                      <h3 style="font-family: ${
-                        isElegant
-                          ? "Playfair Display, serif"
+                      ? "Space Mono, monospace"
+                      : "inherit"
+                  }; color: ${
+                    isBrutalist
+                      ? "var(--color-accent)"
+                      : "var(--color-text-secondary)"
+                  }; line-height: 1.7; font-size: ${
+                    isBrutalist || isRetro ? "1.125rem" : "1rem"
+                  };">
+                    ${service.description}
+                  </p>
+                </div>
+              `
+                )
+                .join("")}
+            </div>
+          </div>
+        </section>
+        `
+            : ""
+        }
+  
+        <!-- Enhanced Filter Section -->
+        <section id="gallery" style="padding: ${
+          isBrutalist || isRetro ? "6rem 0 2rem" : "5rem 0 2rem"
+        }; background: ${
+        isBrutalist
+          ? "var(--color-text)"
+          : isGlassmorphism
+          ? ""
+          : "var(--color-bg)"
+      };">
+          <div class="container" style="max-width: 1200px; margin: 0 auto; padding: 0 2rem;">
+            <div style="display: flex; justify-content: center; flex-wrap: wrap; gap: ${
+              isBrutalist ? "1rem" : "0.75rem"
+            }; margin-bottom: ${isBrutalist ? "4rem" : "3rem"};">
+              ${
+                data.categories && data.categories.length > 0
+                  ? data.categories
+                      .map(
+                        (cat, index) => `
+                  <button 
+                    class="filter-btn ${index === 0 ? "active" : ""}" 
+                    onclick="filterGallery('${cat.toLowerCase()}')"
+                    style="font-family: ${
+                      isRetro ? "Space Mono, monospace" : "inherit"
+                    }; padding: ${
+                          isBrutalist ? "1rem 2rem" : "0.75rem 1.75rem"
+                        }; background: ${
+                          index === 0
+                            ? isBrutalist
+                              ? "var(--color-accent)"
+                              : isGradient
+                              ? "linear-gradient(135deg, #667eea, #764ba2)"
+                              : isRetro
+                              ? "var(--color-accent)"
+                              : isGlassmorphism
+                              ? "rgba(255,255,255,0.15)"
+                              : isNeumorphism
+                              ? "var(--color-bg)"
+                              : "var(--color-text)"
+                            : "transparent"
+                        }; color: ${
+                          index === 0
+                            ? isBrutalist || isGradient || isRetro
+                              ? "white"
+                              : isGlassmorphism || isNeumorphism
+                              ? "var(--color-text)"
+                              : "var(--color-bg)"
+                            : isBrutalist
+                            ? "var(--color-bg)"
+                            : "var(--color-text)"
+                        }; border: ${
+                          isBrutalist ? "3px" : isRetro ? "2px" : "2px"
+                        } solid ${
+                          index === 0
+                            ? isBrutalist
+                              ? "var(--color-accent)"
+                              : isRetro
+                              ? "var(--color-accent)"
+                              : isGlassmorphism
+                              ? "rgba(255,255,255,0.2)"
+                              : isNeumorphism
+                              ? "transparent"
+                              : "var(--color-text)"
+                            : isBrutalist || isRetro
+                            ? "var(--color-accent)"
+                            : isGlassmorphism
+                            ? "rgba(255,255,255,0.1)"
+                            : isNeumorphism
+                            ? "transparent"
+                            : "var(--color-border)"
+                        }; border-radius: ${
+                          isGradient || isRetro
+                            ? "999px"
+                            : isBrutalist || isElegant
+                            ? "0"
+                            : isNeumorphism || isGlassmorphism
+                            ? "16px"
+                            : "50px"
+                        }; font-weight: ${
+                          isBrutalist || isRetro ? "700" : "600"
+                        }; cursor: pointer; transition: all 0.2s; font-size: ${
+                          isBrutalist || isRetro ? "1rem" : "0.9375rem"
+                        }; ${
+                          isBrutalist || isRetro
+                            ? "text-transform: uppercase; letter-spacing: 1px;"
+                            : ""
+                        } display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; ${
+                          isGlassmorphism && index === 0
+                            ? "backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);"
+                            : ""
+                        } ${
+                          isNeumorphism
+                            ? index === 0
+                              ? getNeumorphismShadow(true)
+                              : getNeumorphismShadow(false)
+                            : ""
+                        }"
+                  >
+                    ${
+                      index === 0 ? getIcon("filter", "1em", "Filter") : ""
+                    } ${cat}
+                  </button>
+                `
+                      )
+                      .join("")
+                  : ""
+              }
+            </div>
+          </div>
+        </section>
+  
+        <!-- Enhanced Masonry Gallery -->
+        <section style="padding: 0 0 ${
+          isBrutalist || isRetro ? "8rem" : "6rem"
+        }; background: ${
+        isBrutalist
+          ? "var(--color-text)"
+          : isGlassmorphism
+          ? ""
+          : "var(--color-bg)"
+      };">
+          <div class="container" style="max-width: 1400px; margin: 0 auto; padding: 0 2rem;">
+            <div id="masonry-grid" style="column-count: 3; column-gap: ${
+              isBrutalist ? "2rem" : isElegant ? "2rem" : "1.5rem"
+            };">
+              ${
+                data.photos && data.photos.length > 0
+                  ? data.photos
+                      .map(
+                        (photo, index) => `
+                  <div class="gallery-item" data-category="${(
+                    photo.category || ""
+                  ).toLowerCase()}" style="break-inside: avoid; margin-bottom: ${
+                          isBrutalist ? "2rem" : isElegant ? "2rem" : "1.5rem"
+                        }; cursor: pointer; position: relative; overflow: hidden; border-radius: ${
+                          isGradient
+                            ? "24px"
+                            : isBrutalist || isElegant || isRetro
+                            ? "0"
+                            : isNeumorphism || isGlassmorphism
+                            ? "20px"
+                            : "16px"
+                        }; ${
+                          isBrutalist
+                            ? "border: 3px solid var(--color-accent);"
+                            : isRetro
+                            ? "border: 2px solid var(--color-accent);"
+                            : ""
+                        }" onclick="openLightbox(${index})">
+                    <div style="position: relative; overflow: hidden; border-radius: ${
+                      isGradient
+                        ? "24px"
+                        : isBrutalist || isElegant || isRetro
+                        ? "0"
+                        : isNeumorphism || isGlassmorphism
+                        ? "20px"
+                        : "16px"
+                    }; transition: all 0.3s; ${
+                          isNeumorphism
+                            ? getNeumorphismShadow(false)
+                            : isGradient
+                            ? "box-shadow: 0 10px 30px rgba(0,0,0,0.08);"
+                            : isGlassmorphism
+                            ? "box-shadow: 0 10px 30px rgba(0,0,0,0.1);"
+                            : ""
+                        }">
+                      <img 
+                        src="${photo.imageUrl || ""}" 
+                        alt="${photo.title || "Photo"}"
+                        loading="lazy"
+                        style="width: 100%; height: auto; display: block; transition: transform ${
+                          isBrutalist || isRetro ? "0.3s" : "0.5s"
+                        } ease; aspect-ratio: 4/3; object-fit: cover; ${
+                          isGlassmorphism ? "filter: brightness(0.95);" : ""
+                        }"
+                        onmouseover="this.style.transform='scale(${
+                          isBrutalist ? "1.05" : isRetro ? "1.08" : "1.08"
+                        })'"
+                        onmouseout="this.style.transform='scale(1)'"
+                      />
+                      <div style="position: absolute; inset: 0; background: ${
+                        isBrutalist
+                          ? "var(--color-accent)"
                           : isRetro
-                          ? "Space Mono, monospace"
-                          : "inherit"
-                      }; font-size: ${
-                        isBrutalist ? "1.5rem" : isRetro ? "1.25rem" : "1.25rem"
-                      }; font-weight: ${
-                        isBrutalist ? "900" : "700"
-                      }; margin-bottom: 0.5rem; color: ${
-                        isBrutalist ? "var(--color-bg)" : "white"
-                      }; ${
-                        isBrutalist || isRetro
-                          ? "text-transform: uppercase; letter-spacing: 1px;"
-                          : ""
-                      }">${photo.title || ""}</h3>
-                      ${
-                        photo.description
-                          ? `<p style="font-family: ${
-                              isRetro ? "Space Mono, monospace" : "inherit"
-                            }; font-size: ${
-                              isBrutalist || isRetro ? "0.9375rem" : "0.875rem"
-                            }; color: ${
-                              isBrutalist
-                                ? "var(--color-bg)"
-                                : "rgba(255,255,255,0.9)"
-                            }; ${isBrutalist ? "font-weight: 700;" : ""}">${
-                              photo.description
-                            }</p>`
-                          : ""
-                      }
+                          ? "linear-gradient(to top, var(--color-accent) 0%, rgba(255,47,181,0.6) 50%, transparent 100%)"
+                          : "linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.4) 50%, transparent 100%)"
+                      }; display: flex; align-items: flex-end; padding: ${
+                          isBrutalist ? "2.5rem" : "2rem"
+                        }; opacity: 0; transition: opacity 0.3s; ${
+                          isGlassmorphism
+                            ? "backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);"
+                            : ""
+                        }" class="photo-overlay">
+                        <div>
+                          <h3 style="font-family: ${
+                            isElegant
+                              ? "Playfair Display, serif"
+                              : isRetro
+                              ? "Space Mono, monospace"
+                              : "inherit"
+                          }; font-size: ${
+                          isBrutalist
+                            ? "1.5rem"
+                            : isRetro
+                            ? "1.25rem"
+                            : "1.25rem"
+                        }; font-weight: ${
+                          isBrutalist ? "900" : "700"
+                        }; margin-bottom: 0.5rem; color: ${
+                          isBrutalist ? "var(--color-bg)" : "white"
+                        }; ${
+                          isBrutalist || isRetro
+                            ? "text-transform: uppercase; letter-spacing: 1px;"
+                            : ""
+                        }">${photo.title || ""}</h3>
+                          ${
+                            photo.description
+                              ? `<p style="font-family: ${
+                                  isRetro ? "Space Mono, monospace" : "inherit"
+                                }; font-size: ${
+                                  isBrutalist || isRetro
+                                    ? "0.9375rem"
+                                    : "0.875rem"
+                                }; color: ${
+                                  isBrutalist
+                                    ? "var(--color-bg)"
+                                    : "rgba(255,255,255,0.9)"
+                                }; ${isBrutalist ? "font-weight: 700;" : ""}">${
+                                  photo.description
+                                }</p>`
+                              : ""
+                          }
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>
-            `
-                    )
-                    .join("")
-                : ""
-            }
+                `
+                      )
+                      .join("")
+                  : ""
+              }
+            </div>
           </div>
-        </div>
-      </section>
-
-      <!-- Simplified Contact CTA -->
-      <section style="padding: ${
-        isBrutalist || isRetro ? "10rem 0 8rem" : "8rem 0 6rem"
-      }; text-align: center; background: ${
+        </section>
+  
+        <!-- Enhanced Contact CTA Section -->
+        <section style="padding: ${
+          isBrutalist || isRetro ? "10rem 0 8rem" : "8rem 0 6rem"
+        }; text-align: center; background: ${
         isBrutalist
           ? "var(--color-accent)"
           : isGradient
@@ -9564,28 +9825,34 @@ export const templates = {
           ? "var(--color-surface)"
           : isGlassmorphism
           ? "transparent"
+          : isNeumorphism
+          ? "var(--color-bg)"
           : "var(--color-bg)"
       }; ${isRetro ? "border-top: 3px solid #00f5ff;" : ""} ${
         isBrutalist || isGradient || isRetro ? "color: white;" : ""
+      } ${
+        isElegant
+          ? "border-top: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border);"
+          : ""
       }">
-        <div class="container" style="max-width: ${
-          isElegant ? "650px" : "700px"
-        }; ${
+          <div class="container" style="max-width: ${
+            isElegant ? "650px" : "700px"
+          }; margin: 0 auto; padding: 0 2rem; ${
         isGlassmorphism
-          ? "padding: 5rem 3rem; border-radius: 32px; background: rgba(255,255,255,0.05); backdrop-filter: blur(20px); box-shadow: 0 8px 32px rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.1);"
+          ? "padding: 5rem 3rem; border-radius: 32px; background: rgba(255,255,255,0.1); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15); border: 1px solid rgba(255,255,255,0.2);"
           : isNeumorphism
           ? `padding: 5rem 3rem; border-radius: 32px; ${getNeumorphismShadow(
               false
             )}`
           : ""
       }">
-          <h2 style="font-family: ${
-            isElegant
-              ? "Playfair Display, serif"
-              : isRetro
-              ? "Space Mono, monospace"
-              : "inherit"
-          }; font-size: clamp(${
+            <h2 style="font-family: ${
+              isElegant
+                ? "Playfair Display, serif"
+                : isRetro
+                ? "Space Mono, monospace"
+                : "inherit"
+            }; font-size: clamp(${
         isBrutalist || isRetro ? "2.5rem" : "2.5rem"
       }, 7vw, ${isBrutalist || isRetro ? "6rem" : "5rem"}); font-weight: ${
         isBrutalist || isNeumorphism
@@ -9606,21 +9873,21 @@ export const templates = {
           ? "color: white;"
           : ""
       }">
-            ${
-              isBrutalist
-                ? "GET IN TOUCH"
+              ${
+                isBrutalist
+                  ? "GET IN TOUCH"
+                  : isRetro
+                  ? "LETS SHOOT"
+                  : data.ctaTitle || "Let's Create Together"
+              }
+            </h2>
+            <p style="font-family: ${
+              isElegant
+                ? "Lato, sans-serif"
                 : isRetro
-                ? "LETS SHOOT"
-                : "Let's Create Together"
-            }
-          </h2>
-          <p style="font-family: ${
-            isElegant
-              ? "Lato, sans-serif"
-              : isRetro
-              ? "Space Mono, monospace"
-              : "inherit"
-          }; font-size: ${
+                ? "Space Mono, monospace"
+                : "inherit"
+            }; font-size: ${
         isBrutalist || isRetro ? "1.375rem" : "1.25rem"
       }; color: ${
         isBrutalist
@@ -9630,277 +9897,324 @@ export const templates = {
           : "var(--color-text-secondary)"
       }; margin-bottom: 3rem; line-height: 1.7; font-weight: ${
         isElegant ? "300" : "normal"
-      };">
-            Available for commissions and collaborations worldwide
-          </p>
-          <div style="display: flex; gap: ${
-            isBrutalist ? "1.5rem" : "1rem"
-          }; justify-content: center; flex-wrap: wrap;">
-            ${
-              data.email
-                ? `
-            <a href="mailto:${data.email}" style="font-family: ${
-                    isRetro ? "Space Mono, monospace" : "inherit"
-                  }; padding: ${
-                    isBrutalist ? "1.5rem 3rem" : "1.25rem 2.5rem"
-                  }; background: ${
-                    isBrutalist || isGradient || isRetro
-                      ? "white"
-                      : isGlassmorphism
-                      ? "rgba(255,255,255,0.15)"
-                      : isNeumorphism
-                      ? "var(--color-bg)"
-                      : "var(--color-accent)"
-                  }; color: ${
-                    isBrutalist
-                      ? "var(--color-accent)"
-                      : isGradient
-                      ? "#667eea"
-                      : isRetro
-                      ? "var(--color-accent)"
-                      : isGlassmorphism || isNeumorphism
-                      ? "var(--color-text)"
-                      : "white"
-                  }; text-decoration: none; border-radius: ${
-                    isGradient || isRetro
-                      ? "999px"
-                      : isBrutalist || isElegant
-                      ? "0"
-                      : isNeumorphism || isGlassmorphism
-                      ? "16px"
-                      : "50px"
-                  }; font-weight: ${
-                    isBrutalist || isRetro ? "700" : "600"
-                  }; font-size: ${
-                    isBrutalist || isRetro ? "1.25rem" : "1.125rem"
-                  }; transition: all 0.2s; ${
-                    isBrutalist
-                      ? "border: 3px solid white; text-transform: uppercase; letter-spacing: 1px;"
-                      : isRetro
-                      ? "border: 2px solid white; text-transform: uppercase; letter-spacing: 1px;"
-                      : isGlassmorphism
-                      ? "backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2);"
-                      : isNeumorphism
-                      ? getNeumorphismShadow(false)
-                      : ""
-                  }" 
-              onmouseover="${
-                isBrutalist
-                  ? `this.style.background='transparent'; this.style.color='white'`
-                  : isRetro
-                  ? `this.style.background='transparent'; this.style.color='white'`
-                  : isGradient
-                  ? `this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 20px rgba(0,0,0,0.2)'`
-                  : isNeumorphism
-                  ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
-                  : `this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 20px rgba(0,0,0,0.15)'`
-              }" 
-              onmouseout="${
-                isBrutalist
-                  ? `this.style.background='white'; this.style.color='var(--color-accent)'`
-                  : isRetro
-                  ? `this.style.background='white'; this.style.color='var(--color-accent)'`
-                  : isGradient
-                  ? `this.style.transform='translateY(0)'; this.style.boxShadow='none'`
-                  : isNeumorphism
-                  ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
-                  : `this.style.transform='translateY(0)'; this.style.boxShadow='none'`
-              }">
-              Get in Touch
-            </a>
-            `
-                : ""
-            }
-            ${
-              data.instagram
-                ? `
-            <a href="https://instagram.com/${data.instagram.replace(
-              "@",
-              ""
-            )}" target="_blank" style="font-family: ${
-                    isRetro ? "Space Mono, monospace" : "inherit"
-                  }; padding: ${
-                    isBrutalist ? "1.5rem 3rem" : "1.25rem 2.5rem"
-                  }; background: transparent; color: ${
-                    isBrutalist || isGradient || isRetro
-                      ? "white"
-                      : "var(--color-text)"
-                  }; text-decoration: none; border-radius: ${
-                    isGradient || isRetro
-                      ? "999px"
-                      : isBrutalist || isElegant
-                      ? "0"
-                      : isNeumorphism || isGlassmorphism
-                      ? "16px"
-                      : "50px"
-                  }; border: ${
-                    isBrutalist ? "3px" : isRetro ? "2px" : "2px"
-                  } solid ${
-                    isBrutalist || isGradient || isRetro
-                      ? "white"
-                      : isGlassmorphism
-                      ? "rgba(255,255,255,0.2)"
-                      : "var(--color-border)"
-                  }; font-weight: ${
-                    isBrutalist || isRetro ? "700" : "600"
-                  }; font-size: ${
-                    isBrutalist || isRetro ? "1.25rem" : "1.125rem"
-                  }; transition: all 0.2s; ${
-                    isBrutalist || isRetro
-                      ? "text-transform: uppercase; letter-spacing: 1px;"
-                      : ""
-                  } ${
-                    isGlassmorphism
-                      ? "backdrop-filter: blur(10px);"
-                      : isNeumorphism
-                      ? getNeumorphismShadow(false)
-                      : ""
-                  }" 
-              onmouseover="${
-                isBrutalist || isRetro
-                  ? `this.style.background='white'; this.style.color='var(--color-accent)'`
-                  : isGradient
-                  ? `this.style.borderColor='white'`
-                  : `this.style.borderColor='var(--color-text)'`
-              }" 
-              onmouseout="${
-                isBrutalist || isRetro
-                  ? `this.style.background='transparent'; this.style.color='white'`
-                  : isGradient
-                  ? `this.style.borderColor='white'`
-                  : `this.style.borderColor='var(--color-border)'`
-              }">
-              ${data.instagram}
-            </a>
-            `
-                : ""
-            }
+      }; max-width: 600px; margin-left: auto; margin-right: auto;">
+              ${
+                data.ctaSubtitle ||
+                "Available for commissions and collaborations worldwide"
+              }
+            </p>
+            <div style="display: flex; gap: ${
+              isBrutalist ? "1.5rem" : "1rem"
+            }; justify-content: center; flex-wrap: wrap;">
+              ${
+                data.email
+                  ? `
+              <a href="mailto:${data.email}" style="font-family: ${
+                      isRetro ? "Space Mono, monospace" : "inherit"
+                    }; padding: ${
+                      isBrutalist ? "1.5rem 3rem" : "1.25rem 2.5rem"
+                    }; background: ${
+                      isBrutalist || isGradient || isRetro
+                        ? "white"
+                        : isGlassmorphism
+                        ? "rgba(255,255,255,0.15)"
+                        : isNeumorphism
+                        ? "var(--color-bg)"
+                        : "var(--color-accent)"
+                    }; color: ${
+                      isBrutalist
+                        ? "var(--color-accent)"
+                        : isGradient
+                        ? "#667eea"
+                        : isRetro
+                        ? "var(--color-accent)"
+                        : isGlassmorphism || isNeumorphism
+                        ? "var(--color-text)"
+                        : "white"
+                    }; text-decoration: none; border-radius: ${
+                      isGradient || isRetro
+                        ? "999px"
+                        : isBrutalist || isElegant
+                        ? "0"
+                        : isNeumorphism || isGlassmorphism
+                        ? "16px"
+                        : "50px"
+                    }; font-weight: ${
+                      isBrutalist || isRetro ? "700" : "600"
+                    }; font-size: ${
+                      isBrutalist || isRetro ? "1.25rem" : "1.125rem"
+                    }; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; ${
+                      isBrutalist
+                        ? "border: 3px solid white; text-transform: uppercase; letter-spacing: 1px;"
+                        : isRetro
+                        ? "border: 2px solid white; text-transform: uppercase; letter-spacing: 1px;"
+                        : isGlassmorphism
+                        ? "backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2);"
+                        : isNeumorphism
+                        ? getNeumorphismShadow(false)
+                        : ""
+                    }" 
+                onmouseover="${
+                  isBrutalist
+                    ? `this.style.background='transparent'; this.style.color='white'`
+                    : isRetro
+                    ? `this.style.background='transparent'; this.style.color='white'`
+                    : isGradient
+                    ? `this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 20px rgba(0,0,0,0.2)'`
+                    : isNeumorphism
+                    ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
+                    : `this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 20px rgba(0,0,0,0.15)'`
+                }" 
+                onmouseout="${
+                  isBrutalist
+                    ? `this.style.background='white'; this.style.color='var(--color-accent)'`
+                    : isRetro
+                    ? `this.style.background='white'; this.style.color='var(--color-accent)'`
+                    : isGradient
+                    ? `this.style.transform='translateY(0)'; this.style.boxShadow='none'`
+                    : isNeumorphism
+                    ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
+                    : `this.style.transform='translateY(0)'; this.style.boxShadow='none'`
+                }">
+                ${getIcon("mail", "1em", "Email")} ${
+                      data.ctaButtonText || "Get in Touch"
+                    }
+              </a>
+              `
+                  : ""
+              }
+              ${
+                data.instagram
+                  ? `
+              <a href="https://instagram.com/${data.instagram.replace(
+                "@",
+                ""
+              )}" target="_blank" style="font-family: ${
+                      isRetro ? "Space Mono, monospace" : "inherit"
+                    }; padding: ${
+                      isBrutalist ? "1.5rem 3rem" : "1.25rem 2.5rem"
+                    }; background: transparent; color: ${
+                      isBrutalist || isGradient || isRetro
+                        ? "white"
+                        : "var(--color-text)"
+                    }; text-decoration: none; border-radius: ${
+                      isGradient || isRetro
+                        ? "999px"
+                        : isBrutalist || isElegant
+                        ? "0"
+                        : isNeumorphism || isGlassmorphism
+                        ? "16px"
+                        : "50px"
+                    }; border: ${
+                      isBrutalist ? "3px" : isRetro ? "2px" : "2px"
+                    } solid ${
+                      isBrutalist || isGradient || isRetro
+                        ? "white"
+                        : isGlassmorphism
+                        ? "rgba(255,255,255,0.2)"
+                        : isNeumorphism
+                        ? "transparent"
+                        : "var(--color-border)"
+                    }; font-weight: ${
+                      isBrutalist || isRetro ? "700" : "600"
+                    }; font-size: ${
+                      isBrutalist || isRetro ? "1.25rem" : "1.125rem"
+                    }; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; ${
+                      isBrutalist || isRetro
+                        ? "text-transform: uppercase; letter-spacing: 1px;"
+                        : ""
+                    } ${
+                      isGlassmorphism
+                        ? "backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);"
+                        : isNeumorphism
+                        ? getNeumorphismShadow(false)
+                        : ""
+                    }" 
+                onmouseover="${
+                  isBrutalist || isRetro
+                    ? `this.style.background='white'; this.style.color='var(--color-accent)'`
+                    : isGradient
+                    ? `this.style.borderColor='white'`
+                    : isNeumorphism
+                    ? `this.style.boxShadow='${getNeumorphismHoverShadow()}'`
+                    : `this.style.borderColor='var(--color-text)'`
+                }" 
+                onmouseout="${
+                  isBrutalist || isRetro
+                    ? `this.style.background='transparent'; this.style.color='white'`
+                    : isGradient
+                    ? `this.style.borderColor='white'`
+                    : isNeumorphism
+                    ? `this.style.boxShadow='${getNeumorphismNormalShadow()}'`
+                    : `this.style.borderColor='var(--color-border)'`
+                }">
+                ${getIcon("instagram", "1em", "Instagram")} ${data.instagram}
+              </a>
+              `
+                  : ""
+              }
+            </div>
           </div>
-        </div>
-      </section>
-
-      <!-- Minimal Footer -->
-      <footer style="padding: ${
-        isBrutalist ? "3rem 0" : "2rem 0"
-      }; text-align: center; color: var(--color-text-secondary); font-size: ${
+        </section>
+  
+        <!-- Enhanced Footer -->
+        <footer style="padding: ${
+          isBrutalist ? "3rem 0" : "2rem 0"
+        }; text-align: center; color: ${
+        isBrutalist ? "var(--color-bg)" : "var(--color-text-secondary)"
+      }; font-size: ${
         isBrutalist || isRetro ? "1rem" : "0.875rem"
-      }; border-top: ${isBrutalist ? "3px" : isRetro ? "2px" : "1px"} solid ${
-        isBrutalist || isRetro ? "var(--color-accent)" : "var(--color-border)"
+      }; border-top: ${
+        isBrutalist
+          ? "3px"
+          : isRetro
+          ? "2px"
+          : isGlassmorphism || isNeumorphism
+          ? "0"
+          : "1px"
+      } solid ${
+        isBrutalist || isRetro
+          ? "var(--color-accent)"
+          : isGlassmorphism || isNeumorphism
+          ? "transparent"
+          : "var(--color-border)"
       }; font-weight: ${isBrutalist ? "900" : isRetro ? "700" : "normal"}; ${
         isBrutalist || isRetro
           ? "text-transform: uppercase; letter-spacing: 2px;"
           : ""
+      } background: ${
+        isBrutalist
+          ? "var(--color-accent)"
+          : isGlassmorphism
+          ? "rgba(255,255,255,0.02)"
+          : "var(--color-bg)"
+      }; ${
+        isGlassmorphism
+          ? "backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);"
+          : ""
       }">
-        <div class="container">
-          <p>© 2024 ${data.photographerName || "Photographer"}</p>
-        </div>
-      </footer>
-
-      <!-- Fullscreen Lightbox with Theme-Specific Styling -->
-      <div id="lightbox" style="display: none; position: fixed; inset: 0; background: ${
-        isBrutalist ? "var(--color-accent)" : "rgba(0,0,0,0.97)"
-      }; z-index: 10000; align-items: center; justify-content: center; padding: 2rem;" onclick="closeLightbox()">
-        <button onclick="closeLightbox()" style="position: absolute; top: 2rem; right: 2rem; background: ${
-          isGlassmorphism
-            ? "rgba(255,255,255,0.1)"
-            : isBrutalist
-            ? "var(--color-bg)"
-            : "rgba(255,255,255,0.1)"
-        }; border: ${
+          <div class="container" style="max-width: 1200px; margin: 0 auto; padding: 0 2rem;">
+            <p>
+              ${data.footerText || "© 2024"} ${
+        data.photographerName || "Photographer"
+      }
+            </p>
+          </div>
+        </footer>
+  
+        <!-- Enhanced Lightbox -->
+        <div id="lightbox" style="display: none; position: fixed; inset: 0; background: ${
+          isBrutalist
+            ? "var(--color-accent)"
+            : isGlassmorphism
+            ? "rgba(0,0,0,0.8)"
+            : "rgba(0,0,0,0.97)"
+        }; z-index: 10000; align-items: center; justify-content: center; padding: 2rem; ${
+        isGlassmorphism
+          ? "backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);"
+          : ""
+      }" onclick="closeLightbox()">
+          <button onclick="closeLightbox()" style="position: absolute; top: 2rem; right: 2rem; background: ${
+            isGlassmorphism
+              ? "rgba(255,255,255,0.1)"
+              : isBrutalist
+              ? "var(--color-bg)"
+              : "rgba(255,255,255,0.1)"
+          }; border: ${
         isBrutalist ? "3px solid var(--color-bg)" : "none"
       }; color: ${
         isBrutalist ? "var(--color-text)" : "white"
       }; width: 56px; height: 56px; border-radius: ${
         isBrutalist || isElegant ? "0" : "50%"
-      }; font-size: 1.5rem; cursor: pointer; backdrop-filter: blur(10px); transition: all 0.2s; font-weight: ${
+      }; font-size: 1.5rem; cursor: pointer; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); transition: all 0.2s; font-weight: ${
         isBrutalist ? "900" : "normal"
-      };" onmouseover="this.style.background='${
-        isBrutalist
-          ? "var(--color-text)"
-          : isGlassmorphism
-          ? "rgba(255,255,255,0.2)"
-          : "rgba(255,255,255,0.2)"
-      }'; ${
-        isBrutalist ? "this.style.color='var(--color-bg)'" : ""
-      }" onmouseout="this.style.background='${
-        isBrutalist
-          ? "var(--color-bg)"
-          : isGlassmorphism
-          ? "rgba(255,255,255,0.1)"
-          : "rgba(255,255,255,0.1)"
-      }'; ${
-        isBrutalist ? "this.style.color='var(--color-text)'" : ""
-      }">×</button>
-        <button onclick="event.stopPropagation(); prevPhoto()" style="position: absolute; left: 2rem; background: ${
-          isGlassmorphism
-            ? "rgba(255,255,255,0.1)"
-            : isBrutalist
-            ? "var(--color-bg)"
-            : "rgba(255,255,255,0.1)"
-        }; border: ${
+      }; display: inline-flex; align-items: center; justify-content: center;" 
+          onmouseover="this.style.background='${
+            isBrutalist
+              ? "var(--color-text)"
+              : isGlassmorphism
+              ? "rgba(255,255,255,0.2)"
+              : "rgba(255,255,255,0.2)"
+          }'; ${isBrutalist ? "this.style.color='var(--color-bg)'" : ""}" 
+          onmouseout="this.style.background='${
+            isBrutalist
+              ? "var(--color-bg)"
+              : isGlassmorphism
+              ? "rgba(255,255,255,0.1)"
+              : "rgba(255,255,255,0.1)"
+          }'; ${isBrutalist ? "this.style.color='var(--color-text)'" : ""}">
+            ${getIcon("close", "1.5em", "Close")}
+          </button>
+          <button onclick="event.stopPropagation(); prevPhoto()" style="position: absolute; left: 2rem; background: ${
+            isGlassmorphism
+              ? "rgba(255,255,255,0.1)"
+              : isBrutalist
+              ? "var(--color-bg)"
+              : "rgba(255,255,255,0.1)"
+          }; border: ${
         isBrutalist ? "3px solid var(--color-bg)" : "none"
       }; color: ${
         isBrutalist ? "var(--color-text)" : "white"
       }; width: 56px; height: 56px; border-radius: ${
         isBrutalist || isElegant ? "0" : "50%"
-      }; font-size: 1.5rem; cursor: pointer; backdrop-filter: blur(10px); transition: all 0.2s; font-weight: ${
+      }; font-size: 1.5rem; cursor: pointer; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); transition: all 0.2s; font-weight: ${
         isBrutalist ? "900" : "normal"
-      };" onmouseover="this.style.background='${
-        isBrutalist
-          ? "var(--color-text)"
-          : isGlassmorphism
-          ? "rgba(255,255,255,0.2)"
-          : "rgba(255,255,255,0.2)"
-      }'; ${
-        isBrutalist ? "this.style.color='var(--color-bg)'" : ""
-      }" onmouseout="this.style.background='${
-        isBrutalist
-          ? "var(--color-bg)"
-          : isGlassmorphism
-          ? "rgba(255,255,255,0.1)"
-          : "rgba(255,255,255,0.1)"
-      }'; ${
-        isBrutalist ? "this.style.color='var(--color-text)'" : ""
-      }">←</button>
-        <button onclick="event.stopPropagation(); nextPhoto()" style="position: absolute; right: 2rem; background: ${
-          isGlassmorphism
-            ? "rgba(255,255,255,0.1)"
-            : isBrutalist
-            ? "var(--color-bg)"
-            : "rgba(255,255,255,0.1)"
-        }; border: ${
+      }; display: inline-flex; align-items: center; justify-content: center;" 
+          onmouseover="this.style.background='${
+            isBrutalist
+              ? "var(--color-text)"
+              : isGlassmorphism
+              ? "rgba(255,255,255,0.2)"
+              : "rgba(255,255,255,0.2)"
+          }'; ${isBrutalist ? "this.style.color='var(--color-bg)'" : ""}" 
+          onmouseout="this.style.background='${
+            isBrutalist
+              ? "var(--color-bg)"
+              : isGlassmorphism
+              ? "rgba(255,255,255,0.1)"
+              : "rgba(255,255,255,0.1)"
+          }'; ${isBrutalist ? "this.style.color='var(--color-text)'" : ""}">
+            ${getIcon("prev", "1.5em", "Previous")}
+          </button>
+          <button onclick="event.stopPropagation(); nextPhoto()" style="position: absolute; right: 2rem; background: ${
+            isGlassmorphism
+              ? "rgba(255,255,255,0.1)"
+              : isBrutalist
+              ? "var(--color-bg)"
+              : "rgba(255,255,255,0.1)"
+          }; border: ${
         isBrutalist ? "3px solid var(--color-bg)" : "none"
       }; color: ${
         isBrutalist ? "var(--color-text)" : "white"
       }; width: 56px; height: 56px; border-radius: ${
         isBrutalist || isElegant ? "0" : "50%"
-      }; font-size: 1.5rem; cursor: pointer; backdrop-filter: blur(10px); transition: all 0.2s; font-weight: ${
+      }; font-size: 1.5rem; cursor: pointer; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); transition: all 0.2s; font-weight: ${
         isBrutalist ? "900" : "normal"
-      };" onmouseover="this.style.background='${
-        isBrutalist
-          ? "var(--color-text)"
-          : isGlassmorphism
-          ? "rgba(255,255,255,0.2)"
-          : "rgba(255,255,255,0.2)"
-      }'; ${
-        isBrutalist ? "this.style.color='var(--color-bg)'" : ""
-      }" onmouseout="this.style.background='${
-        isBrutalist
-          ? "var(--color-bg)"
-          : isGlassmorphism
-          ? "rgba(255,255,255,0.1)"
-          : "rgba(255,255,255,0.1)"
-      }'; ${
-        isBrutalist ? "this.style.color='var(--color-text)'" : ""
-      }">→</button>
-        <div style="max-width: 90vw; max-height: 90vh; text-align: center;">
-          <img id="lightbox-img" src="" alt="" style="max-width: 100%; max-height: 85vh; object-fit: contain; border-radius: ${
-            isGradient
-              ? "24px"
-              : isBrutalist || isElegant || isRetro
-              ? "0"
-              : "12px"
-          }; ${
+      }; display: inline-flex; align-items: center; justify-content: center;" 
+          onmouseover="this.style.background='${
+            isBrutalist
+              ? "var(--color-text)"
+              : isGlassmorphism
+              ? "rgba(255,255,255,0.2)"
+              : "rgba(255,255,255,0.2)"
+          }'; ${isBrutalist ? "this.style.color='var(--color-bg)'" : ""}" 
+          onmouseout="this.style.background='${
+            isBrutalist
+              ? "var(--color-bg)"
+              : isGlassmorphism
+              ? "rgba(255,255,255,0.1)"
+              : "rgba(255,255,255,0.1)"
+          }'; ${isBrutalist ? "this.style.color='var(--color-text)'" : ""}">
+            ${getIcon("next", "1.5em", "Next")}
+          </button>
+          <div style="max-width: 90vw; max-height: 90vh; text-align: center;">
+            <img id="lightbox-img" src="" alt="" style="max-width: 100%; max-height: 85vh; object-fit: contain; border-radius: ${
+              isGradient
+                ? "24px"
+                : isBrutalist || isElegant || isRetro
+                ? "0"
+                : "12px"
+            }; ${
         isBrutalist
           ? "border: 4px solid var(--color-bg);"
           : isRetro
@@ -9911,205 +10225,419 @@ export const templates = {
           ? "16px 16px 0 var(--color-bg)"
           : "0 20px 60px rgba(0,0,0,0.5)"
       };" onclick="event.stopPropagation()">
-          <div id="lightbox-info" style="color: ${
-            isBrutalist ? "var(--color-bg)" : "white"
-          }; margin-top: 2rem; padding: 1rem;"></div>
+            <div id="lightbox-info" style="color: ${
+              isBrutalist ? "var(--color-bg)" : "white"
+            }; margin-top: 2rem; padding: 1rem;"></div>
+          </div>
         </div>
-      </div>
-
-      <style>
-        ${
-          isNeumorphism
-            ? `
-        /* Neumorphism CSS Variables */
-        :root {
-          --neomorph-shadow-out: 20px 20px 60px #c5c9ce, -20px -20px 60px #ffffff;
-          --neomorph-shadow-in: inset 8px 8px 16px #c5c9ce, inset -8px -8px 16px #ffffff;
-        }
-        
-        [data-theme="dark"] {
-          --neomorph-shadow-out: 32px 32px 64px #2a2d34, -32px -32px 64px #383d46;
-          --neomorph-shadow-in: inset 16px 16px 32px #2a2d34, inset -16px -16px 32px #383d46;
-        }
-        `
-            : ""
-        }
-        
-        ${
-          isRetro
-            ? `
-        /* Retro grid background */
-        body::before {
-          content: '';
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background-image: 
-            linear-gradient(rgba(255,47,181,0.02) 2px, transparent 2px),
-            linear-gradient(90deg, rgba(255,47,181,0.02) 2px, transparent 2px);
-          background-size: 50px 50px;
-          pointer-events: none;
-          z-index: 0;
-        }
-        
-        /* Retro glitch effect for photos */
-        .glitch-photo::before,
-        .glitch-photo::after {
-          content: attr(data-text);
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-        }
-        
-        .glitch-photo::before {
-          animation: glitch-photo1 3s infinite;
-          color: var(--color-accent);
-          z-index: -1;
-        }
-        
-        .glitch-photo::after {
-          animation: glitch-photo2 4s infinite;
-          color: #00f5ff;
-          z-index: -2;
-        }
-        
-        @keyframes glitch-photo1 {
-          0%, 100% { transform: translate(0); }
-          25% { transform: translate(-2px, 2px); }
-          50% { transform: translate(-2px, -2px); }
-          75% { transform: translate(2px, 2px); }
-        }
-        
-        @keyframes glitch-photo2 {
-          0%, 100% { transform: translate(0); }
-          25% { transform: translate(2px, -2px); }
-          50% { transform: translate(2px, 2px); }
-          75% { transform: translate(-2px, -2px); }
-        }
-        `
-            : ""
-        }
-        
-        .photo-overlay { pointer-events: none; }
-        .gallery-item:hover .photo-overlay { opacity: 1; }
-        
-        .filter-btn:hover {
-          transform: translateY(-2px);
-        }
-        
-        .filter-btn.active {
-          background: ${
-            isBrutalist
-              ? "var(--color-accent)"
-              : isGradient
-              ? "linear-gradient(135deg, #667eea, #764ba2)"
-              : isRetro
-              ? "var(--color-accent)"
-              : isGlassmorphism
-              ? "rgba(255,255,255,0.15)"
-              : isNeumorphism
-              ? "var(--color-bg)"
-              : "var(--color-text)"
-          } !important;
-          color: ${
-            isBrutalist || isGradient || isRetro
-              ? "white"
-              : isGlassmorphism || isNeumorphism
-              ? "var(--color-text)"
-              : "var(--color-bg)"
-          } !important;
-          border-color: ${
-            isBrutalist
-              ? "var(--color-accent)"
-              : isRetro
-              ? "var(--color-accent)"
-              : "var(--color-text)"
-          } !important;
-        }
-        
-        @media (max-width: 1024px) {
-          #masonry-grid { column-count: 2; column-gap: 1.5rem; }
-          header { top: 1rem; left: 1rem; right: 1rem; }
-        }
-        
-        @media (max-width: 768px) {
-          #masonry-grid { column-count: 1; column-gap: 0; }
-          header { flex-direction: column; gap: 1rem; align-items: stretch; }
-          header > div { text-align: center; }
-        }
-        
-        @media (max-width: 640px) {
-          .container { padding: 0 1.5rem !important; }
-        }
-      </style>
-
-      <script>
-        const photos = ${JSON.stringify(data.photos || [])};
-        let currentPhotoIndex = 0;
-        
-        function filterGallery(category) {
-          const items = document.querySelectorAll('.gallery-item');
-          const buttons = document.querySelectorAll('.filter-btn');
+  
+        <style>
+          ${
+            isNeumorphism
+              ? `
+          /* Neumorphism CSS Variables - FIXED for proper light/dark mode */
+          :root {
+            --neomorph-shadow-out: 20px 20px 60px #c5c9ce, -20px -20px 60px #ffffff;
+            --neomorph-shadow-in: inset 8px 8px 16px #c5c9ce, inset -8px -8px 16px #ffffff;
+          }
           
-          buttons.forEach(btn => {
-            btn.classList.remove('active');
-          });
+          [data-theme="dark"] {
+            --neomorph-shadow-out: 32px 32px 64px #2a2d34, -32px -32px 64px #383d46;
+            --neomorph-shadow-in: inset 16px 16px 32px #2a2d34, inset -16px -16px 32px #383d46;
+          }
+          `
+              : ""
+          }
           
-          event.target.classList.add('active');
+          ${
+            isRetro
+              ? `
+          /* Retro Theme Styles */
+          .glitch-photo {
+            position: relative;
+            display: inline-block;
+          }
           
-          items.forEach(item => {
-            if (category === 'all' || item.dataset.category === category) {
-              item.style.display = 'block';
-            } else {
-              item.style.display = 'none';
+          .glitch-photo::before,
+          .glitch-photo::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+          }
+          
+          .glitch-photo::before {
+            animation: glitch-photo1 3s infinite;
+            color: var(--color-accent);
+            z-index: -1;
+          }
+          
+          .glitch-photo::after {
+            animation: glitch-photo2 4s infinite;
+            color: #00f5ff;
+            z-index: -2;
+          }
+          
+          @keyframes glitch-photo1 {
+            0%, 100% { transform: translate(0); }
+            25% { transform: translate(-2px, 2px); }
+            50% { transform: translate(-2px, -2px); }
+            75% { transform: translate(2px, 2px); }
+          }
+          
+          @keyframes glitch-photo2 {
+            0%, 100% { transform: translate(0); }
+            25% { transform: translate(2px, -2px); }
+            50% { transform: translate(2px, 2px); }
+            75% { transform: translate(-2px, -2px); }
+          }
+          `
+              : ""
+          }
+          
+          /* Photo overlay animation */
+          .photo-overlay { pointer-events: none; }
+          .gallery-item:hover .photo-overlay { opacity: 1; }
+          
+          /* Filter button animations - FIXED for neumorphism active state */
+          .filter-btn {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          }
+          
+          .filter-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: ${
+              isBrutalist
+                ? "6px 6px 0 var(--color-accent)"
+                : isGradient
+                ? "0 8px 20px rgba(102,126,234,0.2)"
+                : isRetro
+                ? "0 0 20px rgba(255,47,181,0.3)"
+                : isNeumorphism
+                ? "var(--neomorph-shadow-in)"
+                : "0 4px 12px rgba(0,0,0,0.1)"
+            };
+          }
+          
+          .filter-btn.active {
+            background: ${
+              isBrutalist
+                ? "var(--color-accent)"
+                : isGradient
+                ? "linear-gradient(135deg, #667eea, #764ba2)"
+                : isRetro
+                ? "var(--color-accent)"
+                : isGlassmorphism
+                ? "rgba(255,255,255,0.15)"
+                : isNeumorphism
+                ? "var(--color-bg)"
+                : "var(--color-text)"
+            } !important;
+            color: ${
+              isBrutalist || isGradient || isRetro
+                ? "white"
+                : isGlassmorphism || isNeumorphism
+                ? "var(--color-text)"
+                : "var(--color-bg)"
+            } !important;
+            border-color: ${
+              isBrutalist
+                ? "var(--color-accent)"
+                : isRetro
+                ? "var(--color-accent)"
+                : isNeumorphism
+                ? "transparent"
+                : "var(--color-text)"
+            } !important;
+            ${
+              isNeumorphism
+                ? "box-shadow: var(--neomorph-shadow-in) !important;"
+                : ""
+            }
+          }
+          
+          /* Masonry grid responsive behavior - FIXED for header staying in row */
+          @media (max-width: 1200px) {
+            #masonry-grid { column-count: 3; column-gap: 1.5rem; }
+          }
+          
+          @media (max-width: 900px) {
+            #masonry-grid { column-count: 2!important; column-gap: 1.5rem!important; }
+            .container { padding: 0 1.5rem !important; }
+          }
+          
+          @media (max-width: 768px) {
+            #masonry-grid { column-count: 1!important; column-gap: 0!important; }
+            /* FIXED: Header stays in same row on smaller screens */
+            header { 
+              flex-wrap: nowrap !important; 
+              gap: 0.75rem !important;
+            }
+            header > div:first-child { 
+              padding: 0.75rem 1rem !important;
+            }
+            header h1 {
+              font-size: 1rem !important;
+            }
+            section[style*="padding: 8rem"] { padding: 6rem 0 3rem !important; }
+            section[style*="padding: 6rem"] { padding: 4rem 0 2rem !important; }
+            section[style*="padding: 10rem"] { padding: 6rem 0 4rem !important; }
+            
+            /* Stack contact buttons on mobile */
+            section:last-of-type div[style*="display: flex"][style*="gap"] {
+              flex-direction: column;
+              align-items: center;
+            }
+            
+            section:last-of-type div[style*="display: flex"][style*="gap"] a {
+              width: 100%;
+              max-width: 300px;
+              text-align: center;
+              justify-content: center;
+            }
+          }
+          
+          @media (max-width: 640px) {
+            .container { padding: 0 1rem !important; }
+            header { top: 1rem !important; left: 1rem !important; right: 1rem !important; }
+            header > div:first-child { 
+              padding: 0.625rem 0.875rem !important;
+            }
+            header h1 {
+              font-size: 0.875rem !important;
+            }
+          }
+          
+          @media (max-width: 480px) {
+            header h1 {
+              font-size: 0.75rem !important;
+            }
+            header > div:first-child { 
+              padding: 0.5rem 0.75rem !important;
+            }
+          }
+          
+          /* Smooth transitions */
+          .gallery-item {
+            transition: transform 0.3s ease, opacity 0.3s ease;
+          }
+          
+          /* Loading animation for images */
+          .gallery-item img {
+            transition: opacity 0.3s ease;
+          }
+          
+          .gallery-item img.loading {
+            opacity: 0.5;
+          }
+          
+          /* Lightbox animation */
+          #lightbox {
+            transition: opacity 0.3s ease;
+          }
+          
+          #lightbox[style*="display: none"] {
+            opacity: 0;
+            pointer-events: none;
+          }
+          
+          #lightbox[style*="display: flex"] {
+            opacity: 1;
+            pointer-events: all;
+          }
+          
+          /* Print styles */
+          @media print {
+            header, .filter-btn, #lightbox, footer a {
+              display: none !important;
+            }
+            
+            section {
+              break-inside: avoid;
+            }
+            
+            #masonry-grid {
+              column-count: 2 !important;
+              column-gap: 1rem !important;
+            }
+          }
+        </style>
+  
+        <script>
+          const photos = ${JSON.stringify(data.photos || [])};
+          let currentPhotoIndex = 0;
+          let activeFilter = 'all';
+          
+          function filterGallery(category) {
+            activeFilter = category;
+            const items = document.querySelectorAll('.gallery-item');
+            const buttons = document.querySelectorAll('.filter-btn');
+            
+            // Update active button
+            buttons.forEach(btn => {
+              btn.classList.remove('active');
+              // Remove filter icon from non-active buttons
+              const iconSpan = btn.querySelector('span[aria-label="Filter"]');
+              if (iconSpan) {
+                iconSpan.remove();
+              }
+            });
+            
+            event.target.classList.add('active');
+            // Add filter icon to active button
+            if (!event.target.querySelector('span[aria-label="Filter"]')) {
+              const iconHtml = \`${getIcon("filter", "1em", "Filter")}\`;
+              event.target.insertAdjacentHTML('afterbegin', iconHtml + ' ');
+            }
+            
+            // Filter items
+            items.forEach(item => {
+              if (category === 'all' || item.dataset.category === category) {
+                item.style.display = 'block';
+                setTimeout(() => {
+                  item.style.opacity = '1';
+                  item.style.transform = 'translateY(0)';
+                }, 10);
+              } else {
+                item.style.opacity = '0';
+                item.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                  item.style.display = 'none';
+                }, 300);
+              }
+            });
+          }
+          
+          function openLightbox(index) {
+            currentPhotoIndex = index;
+            showPhoto(index);
+            const lightbox = document.getElementById('lightbox');
+            lightbox.style.display = 'flex';
+            lightbox.style.opacity = '0';
+            document.body.style.overflow = 'hidden';
+            
+            // Animate in
+            setTimeout(() => {
+              lightbox.style.opacity = '1';
+            }, 10);
+          }
+          
+          function closeLightbox() {
+            const lightbox = document.getElementById('lightbox');
+            lightbox.style.opacity = '0';
+            
+            setTimeout(() => {
+              lightbox.style.display = 'none';
+              document.body.style.overflow = 'auto';
+            }, 300);
+          }
+          
+          function showPhoto(index) {
+            const photo = photos[index];
+            const img = document.getElementById('lightbox-img');
+            const info = document.getElementById('lightbox-info');
+            
+            // Show loading state
+            img.style.opacity = '0.5';
+            
+            // Load image
+            const image = new Image();
+            image.src = photo.imageUrl;
+            image.onload = () => {
+              img.src = photo.imageUrl;
+              img.style.opacity = '1';
+            };
+            
+            info.innerHTML = \`
+              <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem;">\${photo.title || ''}</h3>
+              \${photo.description ? \`<p style="font-size: 1rem; opacity: 0.8;">\${photo.description}</p>\` : ''}
+              <p style="font-size: 0.875rem; opacity: 0.6; margin-top: 0.5rem;">\${photo.category || ''}</p>
+            \`;
+          }
+          
+          function prevPhoto() {
+            let newIndex = currentPhotoIndex - 1;
+            if (newIndex < 0) newIndex = photos.length - 1;
+            
+            // Skip photos not in current filter
+            if (activeFilter !== 'all') {
+              let found = false;
+              let attempts = 0;
+              while (!found && attempts < photos.length) {
+                if (photos[newIndex].category.toLowerCase() === activeFilter) {
+                  found = true;
+                } else {
+                  newIndex--;
+                  if (newIndex < 0) newIndex = photos.length - 1;
+                }
+                attempts++;
+              }
+            }
+            
+            currentPhotoIndex = newIndex;
+            showPhoto(currentPhotoIndex);
+          }
+          
+          function nextPhoto() {
+            let newIndex = currentPhotoIndex + 1;
+            if (newIndex >= photos.length) newIndex = 0;
+            
+            // Skip photos not in current filter
+            if (activeFilter !== 'all') {
+              let found = false;
+              let attempts = 0;
+              while (!found && attempts < photos.length) {
+                if (photos[newIndex].category.toLowerCase() === activeFilter) {
+                  found = true;
+                } else {
+                  newIndex++;
+                  if (newIndex >= photos.length) newIndex = 0;
+                }
+                attempts++;
+              }
+            }
+            
+            currentPhotoIndex = newIndex;
+            showPhoto(currentPhotoIndex);
+          }
+          
+          // Keyboard navigation
+          document.addEventListener('keydown', (e) => {
+            const lightbox = document.getElementById('lightbox');
+            if (lightbox.style.display === 'flex' || lightbox.style.opacity !== '0') {
+              if (e.key === 'Escape') closeLightbox();
+              if (e.key === 'ArrowLeft') prevPhoto();
+              if (e.key === 'ArrowRight') nextPhoto();
             }
           });
-        }
-        
-        function openLightbox(index) {
-          currentPhotoIndex = index;
-          showPhoto(index);
-          document.getElementById('lightbox').style.display = 'flex';
-          document.body.style.overflow = 'hidden';
-        }
-        
-        function closeLightbox() {
-          document.getElementById('lightbox').style.display = 'none';
-          document.body.style.overflow = 'auto';
-        }
-        
-        function showPhoto(index) {
-          const photo = photos[index];
-          document.getElementById('lightbox-img').src = photo.imageUrl;
-          document.getElementById('lightbox-info').innerHTML = \`
-            <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem;">\${photo.title || ''}</h3>
-            \${photo.description ? \`<p style="font-size: 1rem; opacity: 0.8;">\${photo.description}</p>\` : ''}
-          \`;
-        }
-        
-        function prevPhoto() {
-          currentPhotoIndex = (currentPhotoIndex - 1 + photos.length) % photos.length;
-          showPhoto(currentPhotoIndex);
-        }
-        
-        function nextPhoto() {
-          currentPhotoIndex = (currentPhotoIndex + 1) % photos.length;
-          showPhoto(currentPhotoIndex);
-        }
-        
-        document.addEventListener('keydown', (e) => {
-          if (document.getElementById('lightbox').style.display === 'flex') {
-            if (e.key === 'Escape') closeLightbox();
-            if (e.key === 'ArrowLeft') prevPhoto();
-            if (e.key === 'ArrowRight') nextPhoto();
-          }
-        });
-      </script>
-    `;
+          
+          // Lazy load images
+          document.addEventListener('DOMContentLoaded', function() {
+            const images = document.querySelectorAll('.gallery-item img');
+            
+            const imageObserver = new IntersectionObserver((entries, observer) => {
+              entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                  const img = entry.target;
+                  if (!img.src && img.dataset.src) {
+                    img.src = img.dataset.src;
+                  }
+                  observer.unobserve(img);
+                }
+              });
+            });
+            
+            images.forEach(img => {
+              img.dataset.src = img.src;
+              img.src = '';
+              img.classList.add('loading');
+              imageObserver.observe(img);
+            });
+          });
+        </script>
+      `;
     },
   }),
 
@@ -40350,37 +40878,46 @@ export function renderTemplate(
     throw new Error("Invalid template or theme ID");
   }
 
+  console.log("hellOoo: ", customization);
+
   // Transform image objects to URLs before passing to template
   const transformedCustomization = transformImageDataForTemplate(customization);
-
+  console.log("helllooo:", transformedCustomization);
   return template.render(transformedCustomization, theme, colorMode);
 }
 
-// Helper function to extract URLs from image objects
-function transformImageDataForTemplate(customization) {
-  if (!customization) return customization;
+function transformImageDataForTemplate(data) {
+  if (!data) return data;
 
-  const transformed = { ...customization };
-
-  Object.keys(transformed).forEach((key) => {
-    const value = transformed[key];
-
-    if (value && typeof value === "object") {
-      // Single image object
-      if (value.signedUrl || value.url) {
-        transformed[key] = value.signedUrl || value.url;
-      }
-      // Array of image objects
-      else if (Array.isArray(value)) {
-        transformed[key] = value.map((item) => {
-          if (typeof item === "object" && (item.signedUrl || item.url)) {
-            return item.signedUrl || item.url;
-          }
-          return item;
-        });
-      }
+  const transform = (value) => {
+    if (value === null || value === undefined) return value;
+    console.log("value: ", value);
+    // If it's an image object with a URL
+    if (
+      typeof value === "object" &&
+      (value.signedUrl || value.url) &&
+      !value?.platform
+    ) {
+      return value.signedUrl || value.url;
     }
-  });
 
-  return transformed;
+    // Arrays: recursively map
+    if (Array.isArray(value)) {
+      return value.map((item) => transform(item));
+    }
+
+    // Plain objects: recursively transform each key
+    if (typeof value === "object") {
+      const result = {};
+      for (const key in value) {
+        result[key] = transform(value[key]);
+      }
+      return result;
+    }
+
+    // Primitive
+    return value;
+  };
+
+  return transform(data);
 }

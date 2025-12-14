@@ -55,7 +55,7 @@
   }
 
   &__subtitle {
-    font-size: 1.125rem;
+    font-size: 0.9375rem;
     color: var(--color-text-secondary);
     margin-bottom: calc(var(--spacing-unit) * 2);
     line-height: 1.6;
@@ -255,7 +255,23 @@
 @media screen and (max-width: 680px) {
   .hero {
     &__title {
-      font-size: 76px;
+      font-size: 78px;
+    }
+
+    &__subtitle {
+      display: none;
+    }
+
+    &__subtitle-container {
+      top: 85%;
+    }
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .hero {
+    &__title {
+      font-size: 68px;
     }
   }
 }

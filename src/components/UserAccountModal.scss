@@ -224,7 +224,7 @@
   gap: calc(var(--spacing-unit) * 1);
 
   label {
-    font-size: 0.875rem;
+    font-size: 0.75rem;
     font-weight: 600;
     color: var(--color-text-primary);
   }
@@ -234,7 +234,7 @@
     padding: calc(var(--spacing-unit) * 1.5) calc(var(--spacing-unit) * 2);
     background: var(--color-surface);
     color: var(--color-text-primary);
-    font-size: 0.9375rem;
+    font-size: 0.75rem;
     font-family: inherit;
     transition: all var(--transition-fast);
     border-radius: var(--radius-md);

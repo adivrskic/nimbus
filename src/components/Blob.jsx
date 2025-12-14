@@ -7,13 +7,21 @@ const Blob = ({ color = "#efeff0", wireframe = false }) => {
   const rendererRef = useRef(null);
   const cameraRef = useRef(null);
   const animationRef = useRef();
+  const cloudGroupRef = useRef();
 
   const { theme } = useTheme();
 
   const [isLoaded, setIsLoaded] = useState(false);
   const [dynamicBlur, setDynamicBlur] = useState(1);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
+    // Check for mobile
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+
     const mount = mountRef.current;
     if (!mount) return;
 
@@ -219,6 +227,7 @@ const Blob = ({ color = "#efeff0", wireframe = false }) => {
 
     // ----- CREATE CLOUD GROUP (multiple overlapping puffs) -----
     const cloudGroup = new THREE.Group();
+    cloudGroupRef.current = cloudGroup;
 
     const mat = new THREE.ShaderMaterial({
       uniforms,
@@ -230,10 +239,25 @@ const Blob = ({ color = "#efeff0", wireframe = false }) => {
       depthWrite: false,
     });
 
-    // Main cloud body - slightly flattened sphere
+    // Adjust base opacity for mobile vs desktop
+    if (window.innerWidth < 768) {
+      mat.opacity = 0.6; // Less opaque on mobile
+    } else {
+      mat.opacity = 0.92; // Original opacity
+    }
+
+    // Main cloud body - adjust proportions based on device
     const mainGeo = new THREE.IcosahedronGeometry(3, 32);
     const mainCloud = new THREE.Mesh(mainGeo, mat);
-    mainCloud.scale.set(1.7, 0.75, 0.9);
+
+    if (window.innerWidth < 768) {
+      // On mobile: less wide, more vertical
+      mainCloud.scale.set(1.2, 0.85, 0.8);
+    } else {
+      // On desktop: original proportions
+      mainCloud.scale.set(1.7, 0.75, 0.9);
+    }
+
     cloudGroup.add(mainCloud);
 
     // Add puffy bulges around the main body (like cotton balls clustered together)
@@ -265,24 +289,37 @@ const Blob = ({ color = "#efeff0", wireframe = false }) => {
       puffGeometries.push(puffGeo);
       const puff = new THREE.Mesh(puffGeo, mat);
       puff.position.set(pos[0], pos[1], pos[2]);
-      puff.scale.set(scale[0], scale[1], scale[1]);
+
+      if (window.innerWidth < 768) {
+        // On mobile: adjust puff scales to be less wide
+        puff.scale.set(scale[0] * 0.85, scale[1], scale[1] * 0.9);
+      } else {
+        puff.scale.set(scale[0], scale[1], scale[1]);
+      }
+
       cloudGroup.add(puff);
     });
 
     scene.add(cloudGroup);
 
     // ----- RESPONSIVE SCALE -----
-    const getScaleFactor = () => {
-      const width = window.innerWidth;
-      if (width < 480) return 0.4;
-      if (width < 768) return 0.55;
-      if (width < 1200) return 0.75;
-      return 0.95;
-    };
-
     const updateForScreen = () => {
-      const scale = getScaleFactor();
-      cloudGroup.scale.set(scale, scale, scale);
+      const width = window.innerWidth;
+      const isMobileNow = width < 768;
+      setIsMobile(isMobileNow);
+
+      if (cloudGroupRef.current) {
+        if (isMobileNow) {
+          // Mobile: smaller overall, more vertical, less wide
+          cloudGroupRef.current.scale.set(0.75, 0.9, 0.75);
+          // Reduce opacity on mobile
+          mat.opacity = 0.6;
+        } else {
+          // Desktop: original scale
+          cloudGroupRef.current.scale.set(0.95, 0.95, 0.95);
+          mat.opacity = 0.92;
+        }
+      }
     };
 
     updateForScreen();
@@ -303,7 +340,7 @@ const Blob = ({ color = "#efeff0", wireframe = false }) => {
       const t = clock.getElapsedTime();
       uniforms.u_time.value = t;
       // Soft blur animation
-      const base = 4;
+      const base = isMobile ? 3 : 4; // Less blur on mobile
       const range = 1;
       const noise = Math.sin(t * 0.001) * range;
       const jitter = (Math.random() - 0.2) * 0.001;
@@ -336,21 +373,29 @@ const Blob = ({ color = "#efeff0", wireframe = false }) => {
       ref={mountRef}
       style={{
         position: "absolute",
-        top: "40%",
+        top: isMobile ? "90%" : "40%", // Lower on mobile (55% vs 40%)
         left: "50%",
         transform: isLoaded
-          ? "translate(-50%, -50%) scale(1.87)"
+          ? `translate(-50%, -50%) scale(${isMobile ? 1.5 : 1.97})`
           : "translate(-50%, -50%) scale(1.04)",
-        width: "100%",
-        height: "100%",
+        width: "100%", // Less wide on mobile (80% vs 100%)
+        height: isMobile ? "120%" : "100%", // Slightly taller but not too much
         overflow: "hidden",
         zIndex: 1,
-        opacity: isLoaded ? (theme === "dark" ? 0.75 : 1) : 0,
+        opacity: isLoaded
+          ? theme === "dark"
+            ? isMobile
+              ? 0.55
+              : 0.75 // Less opaque on mobile
+            : isMobile
+            ? 0.65
+            : 1 // Less opaque on mobile
+          : 0,
         filter: isLoaded ? `blur(${dynamicBlur.toFixed(1)}px)` : "blur(64px)",
         pointerEvents: "none",
         transition:
           "opacity 1.6s ease-out, transform 1.7s ease-out, filter 0.7s ease-out",
-        backdropFilter: "blur(34px)",
+        backdropFilter: isMobile ? "blur(20px)" : "blur(34px)", // Less blur on mobile
       }}
     />
   );

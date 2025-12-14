@@ -33,6 +33,7 @@ function getTemplateFields(template) {
   const customizable = {};
 
   Object.entries(template.fields).forEach(([key, field]) => {
+    console.log("hello: ", field);
     customizable[key] = {
       type: field.type,
       label: field.label,
@@ -103,6 +104,8 @@ function CustomizeModal({
         customizable: getTemplateFields(template),
       }
     : null;
+
+  console.log("config: ", templateConfig);
 
   const [customization, setCustomization] = useState(() => {
     const defaults = {};

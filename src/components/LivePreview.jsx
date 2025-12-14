@@ -8,6 +8,8 @@ function LivePreview({ templateId, customization, images }) {
   const { theme: globalTheme } = useTheme();
   const [viewMode, setViewMode] = useState("desktop");
 
+  console.log("live preview: ", customization);
+
   // Local color mode state
   const [localColorMode, setLocalColorMode] = useState(() => {
     if (customization?.colorMode) {
