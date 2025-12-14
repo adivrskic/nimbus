@@ -254,6 +254,7 @@
       font-size: 0.8125rem;
       color: var(--style-text-secondary, var(--color-text-secondary));
       line-height: 1.5;
+      font-weight: 200;
       transition: color 0.2s ease;
 
       @media (max-width: $breakpoint-lg) {
@@ -751,7 +752,7 @@
 
     &.active {
       background: var(--style-accent);
-      border-color: #fff;
+      // border-color: #fff;
       opacity: 1;
     }
   }

@@ -49,14 +49,16 @@
   }
 
   &__label {
-    font-size: 0.875rem;
-    font-weight: 500;
+    font-size: 0.75rem;
+    font-weight: 400;
     color: var(--color-text-secondary);
   }
 
   &__mode {
     font-weight: 600;
+    font-size: 0.75rem;
     color: var(--color-text-primary);
+    text-transform: capitalize;
   }
 
   &__content {

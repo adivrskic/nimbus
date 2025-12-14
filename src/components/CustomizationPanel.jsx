@@ -33,6 +33,7 @@ import {
   Type,
   List,
   CheckSquare,
+  ToggleLeft,
 } from "lucide-react";
 import { getAllThemes } from "../styles/themes";
 import { useTheme } from "../contexts/ThemeContext";
@@ -79,6 +80,8 @@ function CustomizationPanel({
     Text: Type,
     List: List,
     Checkbox: CheckSquare,
+    Toggle: ToggleLeft,
+    "Display Options": ToggleLeft,
   };
 
   // Automatically categorize fields into sections
@@ -91,6 +94,20 @@ function CustomizationPanel({
 
     // Color mode selector
     if (key === "colorMode") return "Design Style";
+
+    // Boolean/toggle fields for show/hide options
+    if (field.type === "boolean") {
+      // Check if it's a show/hide toggle
+      if (
+        key.includes("show") ||
+        key.includes("hide") ||
+        key.includes("display") ||
+        key.includes("visible")
+      ) {
+        return "Display Options";
+      }
+      return "Display Options";
+    }
 
     // Images and visual content
     if (
@@ -196,6 +213,7 @@ function CustomizationPanel({
   // Define a preferred order for sections
   const sectionOrder = [
     "Design Style",
+    "Display Options",
     "Basic Info",
     "Images & Media",
     "Content",
@@ -211,6 +229,7 @@ function CustomizationPanel({
     "Date",
     "Number",
     "Checkbox",
+    "Toggle",
   ];
 
   // Sort sections by preferred order
@@ -687,7 +706,7 @@ function CustomizationPanel({
 
   const renderFieldInput = (field, value, onFieldChange, path) => {
     // Handle undefined values by using defaults
-    const fieldValue = value !== undefined ? value : field.default || "";
+    const fieldValue = value !== undefined ? value : field.default;
 
     switch (field.type) {
       case "text":
@@ -698,7 +717,7 @@ function CustomizationPanel({
           <input
             type={field.type}
             className="field__input"
-            value={fieldValue}
+            value={fieldValue || ""}
             onChange={(e) => onFieldChange(e.target.value)}
             placeholder={field.placeholder}
             required={field.required}
@@ -710,7 +729,7 @@ function CustomizationPanel({
         return (
           <textarea
             className="field__textarea"
-            value={fieldValue}
+            value={fieldValue || ""}
             onChange={(e) => onFieldChange(e.target.value)}
             placeholder={field.placeholder}
             rows={field.rows || 4}
@@ -723,7 +742,7 @@ function CustomizationPanel({
         return (
           <select
             className="field__select"
-            value={fieldValue}
+            value={fieldValue || ""}
             onChange={(e) => onFieldChange(e.target.value)}
             required={field.required}
             disabled={field.disabled}
@@ -750,7 +769,7 @@ function CustomizationPanel({
             <input
               type="number"
               className="field__input field__number"
-              value={fieldValue}
+              value={fieldValue || ""}
               onChange={(e) => onFieldChange(parseFloat(e.target.value))}
               placeholder={field.placeholder}
               min={field.min}
@@ -763,6 +782,36 @@ function CustomizationPanel({
           </div>
         );
 
+      case "boolean":
+        // Boolean toggle switch
+        const boolValue =
+          fieldValue !== undefined
+            ? fieldValue
+            : field.default !== undefined
+            ? field.default
+            : true;
+        return (
+          <div className="field__boolean-wrapper">
+            <label className="field__boolean-label">
+              <input
+                type="checkbox"
+                className="field__boolean-input"
+                checked={boolValue}
+                onChange={(e) => onFieldChange(e.target.checked)}
+                disabled={field.disabled}
+              />
+              <span className="field__boolean-switch">
+                <span className="field__boolean-switch-handle"></span>
+              </span>
+              <span className="field__boolean-text">
+                {boolValue
+                  ? field.enabledLabel || "Enabled"
+                  : field.disabledLabel || "Disabled"}
+              </span>
+            </label>
+          </div>
+        );
+
       case "checkbox":
         return (
           <div className="field__checkbox-wrapper">
@@ -770,7 +819,7 @@ function CustomizationPanel({
               <input
                 type="checkbox"
                 className="field__checkbox"
-                checked={fieldValue}
+                checked={fieldValue || false}
                 onChange={(e) => onFieldChange(e.target.checked)}
                 disabled={field.disabled}
               />
@@ -790,14 +839,14 @@ function CustomizationPanel({
             <input
               type="color"
               className="field__color-input"
-              value={fieldValue}
+              value={fieldValue || "#000000"}
               onChange={(e) => onFieldChange(e.target.value)}
               disabled={field.disabled}
             />
             <input
               type="text"
               className="field__input field__color-text"
-              value={fieldValue}
+              value={fieldValue || ""}
               onChange={(e) => onFieldChange(e.target.value)}
               placeholder="#000000"
               disabled={field.disabled}
@@ -818,6 +867,7 @@ function CustomizationPanel({
             multiple={field.multiple || false}
             showUrlInput={true}
             disabled={field.disabled}
+            requireAuth={true} // Enable authentication requirement
             privateBucket={true} // Add this for private bucket
             bucket="site-images" // Optional, defaults to "site-images"
             expiresIn={3600} // Optional, defaults to 1 hour
@@ -831,7 +881,7 @@ function CustomizationPanel({
           <input
             type={field.type}
             className="field__input"
-            value={fieldValue}
+            value={fieldValue || ""}
             onChange={(e) => onFieldChange(e.target.value)}
             required={field.required}
             disabled={field.disabled}
@@ -872,7 +922,7 @@ function CustomizationPanel({
             <input
               type="range"
               className="field__range"
-              value={fieldValue}
+              value={fieldValue || field.min || 0}
               onChange={(e) => onFieldChange(parseFloat(e.target.value))}
               min={field.min}
               max={field.max}

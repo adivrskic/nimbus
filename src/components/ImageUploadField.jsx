@@ -10,6 +10,8 @@ import {
   CheckCircle,
   RefreshCw,
   Shield,
+  LogIn,
+  Lock,
 } from "lucide-react";
 import {
   uploadImage,
@@ -19,6 +21,7 @@ import {
   getSignedImageUrl,
   getMultipleSignedUrls,
 } from "../utils/imageUtils";
+import { supabase } from "../lib/supabaseClient"; // Import supabase
 import "./ImageUploadField.scss";
 
 function ImageUploadField({
@@ -34,8 +37,9 @@ function ImageUploadField({
   showUrlInput = true,
   disabled = false,
   bucket = "site-images",
-  privateBucket = true, // NEW: flag for private bucket
-  expiresIn = 3600, // NEW: signed URL expiration in seconds
+  privateBucket = true,
+  expiresIn = 3600,
+  requireAuth = true, // NEW: Option to require authentication
 }) {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState({
@@ -47,24 +51,21 @@ function ImageUploadField({
   const [urlInput, setUrlInput] = useState("");
   const [dragActive, setDragActive] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [imageData, setImageData] = useState(() => {
-    // Initialize state from value prop
     if (!value) return multiple ? [] : null;
 
     if (multiple && Array.isArray(value)) {
-      // For multiple images, value should be array of objects with path and signedUrl
       return value.map((item) => {
         if (typeof item === "string") {
-          // Backward compatibility: string URL
           return { url: item, isExternal: true };
         }
-        return item; // Already object with path/signedUrl
+        return item;
       });
     } else if (!multiple && typeof value === "object" && value !== null) {
-      // Single image object
       return value;
     } else if (!multiple && typeof value === "string") {
-      // Backward compatibility: string URL
       return { url: value, isExternal: true };
     }
     return multiple ? [] : null;
@@ -72,9 +73,38 @@ function ImageUploadField({
 
   const fileInputRef = useRef(null);
 
+  // Check authentication status
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        setIsCheckingAuth(true);
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+        setIsAuthenticated(!!session);
+      } catch (error) {
+        console.error("Error checking authentication:", error);
+        setIsAuthenticated(false);
+      } finally {
+        setIsCheckingAuth(false);
+      }
+    };
+
+    checkAuth();
+
+    // Listen for auth state changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      setIsAuthenticated(!!session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
   // Refresh signed URLs when they expire or on mount
   useEffect(() => {
-    if (!privateBucket || disabled || !imageData) return;
+    if (!privateBucket || disabled || !imageData || !isAuthenticated) return;
 
     const refreshSignedUrls = async () => {
       try {
@@ -130,13 +160,12 @@ function ImageUploadField({
       }
     };
 
-    // Check if any URLs need refreshing
     const needsRefresh = () => {
       if (multiple && Array.isArray(imageData)) {
         return imageData.some(
           (item) =>
             !item.isExternal &&
-            (!item.expiresAt || Date.now() > item.expiresAt - 60000) // Refresh 1 minute before expiry
+            (!item.expiresAt || Date.now() > item.expiresAt - 60000)
         );
       } else if (!multiple && imageData && !imageData.isExternal) {
         return !imageData.expiresAt || Date.now() > imageData.expiresAt - 60000;
@@ -155,13 +184,20 @@ function ImageUploadField({
     onChange,
     expiresIn,
     bucket,
+    isAuthenticated,
   ]);
 
-  // Handle file selection with private bucket support
+  // Handle file selection with authentication check
   const handleFileSelect = useCallback(
     async (files) => {
       if (!files || files.length === 0) return;
       if (disabled) return;
+
+      // Check authentication if required
+      if (requireAuth && !isAuthenticated) {
+        setError("Please sign in to upload images");
+        return;
+      }
 
       setError(null);
       setIsUploading(true);
@@ -172,7 +208,6 @@ function ImageUploadField({
           const filesToUpload = Array.from(files).slice(0, maxFiles);
           setUploadProgress({ current: 0, total: filesToUpload.length });
 
-          // For private buckets, we'll handle uploads differently
           if (privateBucket) {
             const uploadResults = [];
 
@@ -190,7 +225,6 @@ function ImageUploadField({
               }
 
               try {
-                // Upload with private bucket option
                 const result = await uploadImage(file, siteId, fieldPath, {
                   bucket,
                   privateBucket,
@@ -232,13 +266,11 @@ function ImageUploadField({
               setError(`${errors.length} file(s) failed to upload`);
             }
 
-            // Append to existing values
             const currentValues = Array.isArray(imageData) ? imageData : [];
             const newData = [...currentValues, ...successfulUploads];
             setImageData(newData);
             onChange(newData);
           } else {
-            // Original public bucket logic
             const results = await uploadMultipleImages(
               filesToUpload,
               siteId,
@@ -273,7 +305,6 @@ function ImageUploadField({
             return;
           }
 
-          // Upload with private bucket option
           const result = await uploadImage(file, siteId, fieldPath, {
             bucket,
             privateBucket,
@@ -316,6 +347,8 @@ function ImageUploadField({
       disabled,
       privateBucket,
       bucket,
+      requireAuth,
+      isAuthenticated,
     ]
   );
 
@@ -327,7 +360,6 @@ function ImageUploadField({
 
       const url = urlInput.trim();
 
-      // Basic URL validation
       try {
         new URL(url);
       } catch {
@@ -378,86 +410,52 @@ function ImageUploadField({
     [handleFileSelect]
   );
 
-  // Remove an image
-  const handleRemove = useCallback(
-    async (index) => {
-      if (multiple) {
-        const currentValues = Array.isArray(imageData) ? [...imageData] : [];
-        const removedItem = currentValues[index];
-        currentValues.splice(index, 1);
+  // Handle sign in
+  const handleSignIn = useCallback(() => {
+    // You can trigger your auth modal or redirect to sign in page
+    // For example, if using Supabase auth:
+    supabase.auth.signInWithOAuth({
+      provider: "github",
+      // or your preferred provider
+    });
+  }, []);
 
-        setImageData(currentValues);
-        onChange(currentValues);
+  // Check if user can interact with the upload field
+  const canUpload = !requireAuth || isAuthenticated;
+  const isActuallyDisabled = disabled || !canUpload;
 
-        // Try to delete from storage if it's a Supabase private image
-        if (removedItem && removedItem.path && !removedItem.isExternal) {
-          try {
-            await deleteImage(removedItem.path, bucket);
-            console.log("Deleted image from storage:", removedItem.path);
-          } catch (deleteError) {
-            console.warn("Failed to delete from storage:", deleteError);
-          }
-        }
-      } else {
-        // For single image, delete from storage if applicable
-        if (imageData && imageData.path && !imageData.isExternal) {
-          try {
-            await deleteImage(imageData.path, bucket);
-          } catch (deleteError) {
-            console.warn("Failed to delete from storage:", deleteError);
-          }
-        }
+  // Render authentication prompt
+  const renderAuthPrompt = () => {
+    if (isCheckingAuth) {
+      return (
+        <div className="image-upload-field__auth-prompt checking">
+          <Loader2 size={20} className="spinning" />
+          <span>Checking authentication...</span>
+        </div>
+      );
+    }
 
-        setImageData(null);
-        onChange(null);
-      }
-    },
-    [multiple, imageData, onChange, bucket]
-  );
+    if (!isAuthenticated && requireAuth) {
+      return (
+        <div className="image-upload-field__auth-prompt">
+          <div className="image-upload-field__auth-icon">
+            <Lock size={24} />
+          </div>
+          <div className="image-upload-field__auth-content">
+            <h4 className="image-upload-field__auth-title">
+              Sign in to upload images
+            </h4>
+            <p className="image-upload-field__auth-message">
+              You need to be signed in to upload images to this site. This
+              ensures your images are securely stored and managed.
+            </p>
+          </div>
+        </div>
+      );
+    }
 
-  // Refresh a single signed URL
-  const handleRefreshUrl = useCallback(
-    async (item) => {
-      if (!item.path || item.isExternal) return;
-
-      try {
-        setIsRefreshing(true);
-        const signedResult = await getSignedImageUrl(
-          item.path,
-          expiresIn,
-          bucket
-        );
-
-        if (multiple) {
-          const updatedData = imageData.map((img) =>
-            img.path === item.path
-              ? {
-                  ...img,
-                  signedUrl: signedResult.signedUrl,
-                  expiresAt: signedResult.expiresAt,
-                }
-              : img
-          );
-          setImageData(updatedData);
-          onChange(updatedData);
-        } else {
-          const updatedData = {
-            ...imageData,
-            signedUrl: signedResult.signedUrl,
-            expiresAt: signedResult.expiresAt,
-          };
-          setImageData(updatedData);
-          onChange(updatedData);
-        }
-      } catch (error) {
-        console.error("Failed to refresh URL:", error);
-        setError("Failed to refresh image URL");
-      } finally {
-        setIsRefreshing(false);
-      }
-    },
-    [multiple, imageData, onChange, expiresIn, bucket]
-  );
+    return null;
+  };
 
   // Get image source URL for display
   const getImageSrc = (item) => {
@@ -474,7 +472,7 @@ function ImageUploadField({
     return item.url || "";
   };
 
-  // Check if URL is expired (for private bucket)
+  // Check if URL is expired
   const isUrlExpired = (item) => {
     if (!privateBucket || !item || item.isExternal) return false;
     return item.expiresAt && Date.now() > item.expiresAt;
@@ -611,122 +609,136 @@ function ImageUploadField({
 
   return (
     <div
-      className={`image-upload-field ${disabled ? "disabled" : ""} ${
+      className={`image-upload-field ${isActuallyDisabled ? "disabled" : ""} ${
         privateBucket ? "private" : "public"
-      }`}
+      } ${!canUpload ? "needs-auth" : ""}`}
     >
-      {/* Upload Area */}
-      <div
-        className={`image-upload-field__dropzone ${
-          dragActive ? "active" : ""
-        } ${isUploading ? "uploading" : ""}`}
-        onDragEnter={handleDrag}
-        onDragLeave={handleDrag}
-        onDragOver={handleDrag}
-        onDrop={handleDrop}
-        onClick={() =>
-          !isUploading && !disabled && fileInputRef.current?.click()
-        }
-      >
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept={accept}
-          multiple={multiple}
-          onChange={(e) => handleFileSelect(e.target.files)}
-          disabled={disabled || isUploading}
-          style={{ display: "none" }}
-        />
+      {/* Authentication Prompt */}
+      {!canUpload && renderAuthPrompt()}
 
-        {isUploading ? (
-          <div className="image-upload-field__uploading">
-            <Loader2 size={32} className="spinning" />
-            {uploadProgress.total > 1 && (
-              <span>
-                Uploading {uploadProgress.current} of {uploadProgress.total}
-              </span>
+      {/* Upload Area (only show if authenticated) */}
+      {canUpload && (
+        <>
+          <div
+            className={`image-upload-field__dropzone ${
+              dragActive ? "active" : ""
+            } ${isUploading ? "uploading" : ""}`}
+            onDragEnter={handleDrag}
+            onDragLeave={handleDrag}
+            onDragOver={handleDrag}
+            onDrop={handleDrop}
+            onClick={() =>
+              !isUploading &&
+              !isActuallyDisabled &&
+              fileInputRef.current?.click()
+            }
+          >
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept={accept}
+              multiple={multiple}
+              onChange={(e) => handleFileSelect(e.target.files)}
+              disabled={isActuallyDisabled || isUploading}
+              style={{ display: "none" }}
+            />
+
+            {isUploading ? (
+              <div className="image-upload-field__uploading">
+                <Loader2 size={32} className="spinning" />
+                {uploadProgress.total > 1 && (
+                  <span>
+                    Uploading {uploadProgress.current} of {uploadProgress.total}
+                  </span>
+                )}
+                <span>Processing...</span>
+                {privateBucket && (
+                  <small>Images will be stored privately</small>
+                )}
+              </div>
+            ) : (
+              <div className="image-upload-field__placeholder">
+                <Upload size={32} />
+                <span className="image-upload-field__text">
+                  {dragActive
+                    ? "Drop image here"
+                    : multiple
+                    ? "Click or drag images to upload"
+                    : "Click or drag an image to upload"}
+                </span>
+                <span className="image-upload-field__hint">
+                  JPG, PNG, WebP up to 5MB
+                  {multiple && ` (max ${maxFiles} files)`}
+                  {privateBucket && " • Private storage"}
+                </span>
+              </div>
             )}
-            <span>Processing...</span>
-            {privateBucket && <small>Images will be stored privately</small>}
           </div>
-        ) : (
-          <div className="image-upload-field__placeholder">
-            <Upload size={32} />
-            <span className="image-upload-field__text">
-              {dragActive
-                ? "Drop image here"
-                : multiple
-                ? "Click or drag images to upload"
-                : "Click or drag an image to upload"}
-            </span>
-            <span className="image-upload-field__hint">
-              JPG, PNG, WebP up to 5MB
-              {multiple && ` (max ${maxFiles} files)`}
-              {privateBucket && " • Private storage"}
-            </span>
-          </div>
-        )}
-      </div>
 
-      {/* URL Input Option */}
-      {showUrlInput && !isUploading && (
-        <div className="image-upload-field__url-section">
-          {showUrlForm ? (
-            <form
-              onSubmit={handleUrlSubmit}
-              className="image-upload-field__url-form"
-            >
-              <input
-                type="url"
-                value={urlInput}
-                onChange={(e) => setUrlInput(e.target.value)}
-                placeholder="https://example.com/image.jpg"
-                disabled={disabled}
-              />
-              <button type="submit" disabled={!urlInput.trim() || disabled}>
-                <CheckCircle size={18} />
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setShowUrlForm(false);
-                  setUrlInput("");
-                }}
-              >
-                <X size={18} />
-              </button>
-            </form>
-          ) : (
-            <button
-              type="button"
-              className="image-upload-field__url-toggle"
-              onClick={() => setShowUrlForm(true)}
-              disabled={disabled}
-            >
-              <Link size={16} />
-              Or paste image URL
-            </button>
+          {/* URL Input Option */}
+          {showUrlInput && !isUploading && (
+            <div className="image-upload-field__url-section">
+              {showUrlForm ? (
+                <form
+                  onSubmit={handleUrlSubmit}
+                  className="image-upload-field__url-form"
+                >
+                  <input
+                    type="url"
+                    value={urlInput}
+                    onChange={(e) => setUrlInput(e.target.value)}
+                    placeholder="https://example.com/image.jpg"
+                    disabled={isActuallyDisabled}
+                  />
+                  <button
+                    type="submit"
+                    disabled={!urlInput.trim() || isActuallyDisabled}
+                  >
+                    <CheckCircle size={18} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowUrlForm(false);
+                      setUrlInput("");
+                    }}
+                  >
+                    <X size={18} />
+                  </button>
+                </form>
+              ) : (
+                <button
+                  type="button"
+                  className="image-upload-field__url-toggle"
+                  onClick={() => setShowUrlForm(true)}
+                  disabled={isActuallyDisabled}
+                >
+                  <Link size={16} />
+                  Or paste image URL
+                </button>
+              )}
+              {showUrlInput && (
+                <p className="image-upload-field__url-disclaimer">
+                  {privateBucket
+                    ? "External URLs are public. Use upload for private storage."
+                    : "External URLs may not be 100% reliable"}
+                </p>
+              )}
+            </div>
           )}
-          {showUrlInput && (
-            <p className="image-upload-field__url-disclaimer">
-              {privateBucket
-                ? "External URLs are public. Use upload for private storage."
-                : "External URLs may not be 100% reliable"}
-            </p>
+
+          {/* Error Message */}
+          {error && (
+            <div className="image-upload-field__error">
+              <AlertCircle size={16} />
+              <span>{error}</span>
+            </div>
           )}
-        </div>
-      )}
 
-      {/* Error Message */}
-      {error && (
-        <div className="image-upload-field__error">
-          <AlertCircle size={16} />
-          <span>{error}</span>
-        </div>
+          {/* Preview */}
+          {multiple ? renderMultiplePreview() : renderSinglePreview()}
+        </>
       )}
-
-      {/* Preview */}
-      {multiple ? renderMultiplePreview() : renderSinglePreview()}
 
       {/* Hint */}
       {hint && <p className="image-upload-field__field-hint">{hint}</p>}
