@@ -40,7 +40,7 @@ import {
 import { supabase } from "../lib/supabaseClient";
 import { useAuth } from "../contexts/AuthContext";
 import useModalAnimation from "../hooks/useModalAnimation";
-import CustomizeModal from "./CustomizeModal";
+// import CustomizeModal from "./CustomizeModal";
 import CustomDomainRegistrationModal from "./CustomDomainRegistrationModal";
 import "./PaymentModal.scss";
 
@@ -2091,7 +2091,7 @@ export default function PaymentModal({
   const [deployment, setDeployment] = useState(null);
   const { shouldRender, isVisible } = useModalAnimation(isOpen, 400);
   // Add these new state variables
-  const [isCustomizeModalOpen, setIsCustomizeModalOpen] = useState(false);
+  // const [isCustomizeModalOpen, setIsCustomizeModalOpen] = useState(false);
   const [isDomainModalOpen, setIsDomainModalOpen] = useState(false);
   const [activeSiteForEditing, setActiveSiteForEditing] = useState(null);
 
@@ -2134,7 +2134,7 @@ export default function PaymentModal({
       // Add any other site data you need
     });
 
-    setIsCustomizeModalOpen(true);
+    // setIsCustomizeModalOpen(true);
   };
 
   const handleOpenDomainModal = () => {
@@ -2317,14 +2317,14 @@ export default function PaymentModal({
           </div>
         </div>
       </div>
-      <CustomizeModal
+      {/* <CustomizeModal
         isOpen={isCustomizeModalOpen}
         onClose={() => setIsCustomizeModalOpen(false)}
         templateId={deployment?.templateId}
         customization={deployment?.customization}
         isDeployedSite={true}
         siteData={activeSiteForEditing}
-      />
+      /> */}
 
       <CustomDomainRegistrationModal
         isOpen={isDomainModalOpen}

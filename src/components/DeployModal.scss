@@ -1,0 +1,322 @@
+@import "../styles/variables.scss";
+
+.deploy-modal {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  background: var(--color-surface);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xl);
+  overflow: hidden;
+  transform: translateY(20px) scale(0.95);
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  &.active {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+
+  &__header {
+    padding: 2rem 2rem 1.5rem;
+    text-align: center;
+    border-bottom: 1px solid var(--color-border);
+
+    .deploy-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 56px;
+      height: 56px;
+      margin: 0 auto 1rem;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      border-radius: var(--radius-lg);
+      color: white;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    }
+
+    h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      margin-bottom: 0.5rem;
+    }
+
+    p {
+      font-size: 0.9375rem;
+      color: var(--color-text-secondary);
+    }
+  }
+
+  &__content {
+    padding: 1.5rem 2rem;
+  }
+
+  &__error {
+    padding: 0.75rem 1rem;
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    border-radius: var(--radius-md);
+    color: #ef4444;
+    font-size: 0.875rem;
+    text-align: center;
+    margin-top: 1rem;
+  }
+
+  &__footer {
+    padding: 1.5rem 2rem 2rem;
+    border-top: 1px solid var(--color-border);
+    background: var(--color-surface-elevated);
+
+    .price-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      font-size: 0.9375rem;
+      color: var(--color-text-secondary);
+
+      .price {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--color-text-primary);
+      }
+    }
+
+    .deploy-btn {
+      width: 100%;
+      padding: 1rem;
+      font-size: 1rem;
+
+      .spinning {
+        animation: spin 1s linear infinite;
+      }
+    }
+
+    .secure-note {
+      margin-top: 1rem;
+      text-align: center;
+      font-size: 0.75rem;
+      color: var(--color-text-tertiary);
+    }
+  }
+
+  &__success {
+    padding: 3rem 2rem;
+    text-align: center;
+
+    .success-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 72px;
+      height: 72px;
+      margin: 0 auto 1.5rem;
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      border-radius: 50%;
+      color: white;
+      box-shadow: 0 4px 20px rgba(34, 197, 94, 0.3);
+    }
+
+    h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--color-text-primary);
+      margin-bottom: 0.5rem;
+    }
+
+    p {
+      font-size: 0.9375rem;
+      color: var(--color-text-secondary);
+      margin-bottom: 1.5rem;
+    }
+
+    .deployed-url {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 1rem 1.5rem;
+      background: var(--color-background);
+      border-radius: var(--radius-lg);
+      margin-bottom: 2rem;
+
+      svg:first-child {
+        color: var(--color-accent);
+      }
+
+      a {
+        color: var(--color-accent);
+        font-weight: 600;
+        text-decoration: none;
+        word-break: break-all;
+
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+
+      button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        background: var(--color-surface);
+        border: none;
+        border-radius: var(--radius-sm);
+        color: var(--color-text-secondary);
+        cursor: pointer;
+        transition: all var(--transition-fast);
+
+        &:hover {
+          background: var(--color-surface-elevated);
+          color: var(--color-text-primary);
+        }
+      }
+    }
+
+    .success-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+
+      .btn {
+        min-width: 140px;
+      }
+    }
+  }
+}
+
+.subdomain-input {
+  margin-bottom: 1.5rem;
+
+  label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin-bottom: 0.5rem;
+  }
+
+  .subdomain-field {
+    display: flex;
+    align-items: center;
+    background: var(--color-background);
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    transition: border-color var(--transition-fast);
+
+    &:focus-within {
+      border-color: var(--color-accent);
+    }
+
+    .prefix,
+    .suffix {
+      padding: 0.75rem;
+      font-size: 0.875rem;
+      color: var(--color-text-tertiary);
+      background: var(--color-surface-elevated);
+      white-space: nowrap;
+    }
+
+    input {
+      flex: 1;
+      padding: 0.75rem;
+      border: none;
+      background: transparent;
+      color: var(--color-text-primary);
+      font-size: 1rem;
+      font-weight: 500;
+      min-width: 0;
+
+      &::placeholder {
+        color: var(--color-text-tertiary);
+      }
+
+      &:focus {
+        outline: none;
+      }
+    }
+  }
+
+  .subdomain-error {
+    display: block;
+    margin-top: 0.5rem;
+    font-size: 0.75rem;
+    color: #ef4444;
+  }
+
+  .subdomain-hint {
+    display: block;
+    margin-top: 0.5rem;
+    font-size: 0.75rem;
+    color: var(--color-text-tertiary);
+  }
+}
+
+.deploy-features {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+
+  .feature {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8125rem;
+    color: var(--color-text-secondary);
+
+    svg {
+      color: #22c55e;
+    }
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Mobile responsive
+@media (max-width: 480px) {
+  .deploy-modal {
+    &__header,
+    &__content,
+    &__footer {
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+
+    &__success {
+      padding: 2rem 1.5rem;
+    }
+  }
+
+  .subdomain-input .subdomain-field {
+    flex-direction: column;
+    align-items: stretch;
+
+    .prefix,
+    .suffix {
+      text-align: center;
+      padding: 0.5rem;
+    }
+
+    input {
+      text-align: center;
+    }
+  }
+
+  .deploy-features {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+  }
+}
