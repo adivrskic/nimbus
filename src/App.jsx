@@ -11,7 +11,7 @@ import ScrollToTop from "./components/ScrollToTop";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import ResetPasswordModal from "./components/ResetPasswordModal";
-
+import { BlobProvider } from "./contexts/BlobContext";
 import "./styles/global.scss";
 
 const Home = lazy(() => import("./pages/Home"));
@@ -130,10 +130,12 @@ function App() {
     <Router>
       <AuthProvider>
         <ThemeProvider>
-          <ScrollToTop />
-          <div className="app">
-            <AppContent />
-          </div>
+          <BlobProvider>
+            <ScrollToTop />
+            <div className="app">
+              <AppContent />
+            </div>
+          </BlobProvider>
         </ThemeProvider>
       </AuthProvider>
     </Router>
