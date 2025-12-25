@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { X, Coins, Check, Zap, Star, Loader2 } from "lucide-react";
+import { X, Coins, Check, Loader2 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import useModalAnimation from "../hooks/useModalAnimation";
 import "./TokenPurchaseModal.scss";
@@ -9,23 +9,20 @@ const TOKEN_PACKAGES = [
     id: "small",
     tokens: 10,
     price: 2,
-    icon: <Coins size={24} />,
-    description: "Quick top-up",
+    perToken: "$0.20",
   },
   {
     id: "medium",
     tokens: 50,
     price: 8,
-    icon: <Zap size={24} />,
-    description: "Most popular",
+    perToken: "$0.16",
     popular: true,
   },
   {
     id: "large",
     tokens: 100,
     price: 15,
-    icon: <Star size={24} />,
-    description: "Best value",
+    perToken: "$0.15",
     savings: "25% off",
   },
 ];
@@ -49,7 +46,6 @@ function TokenPurchaseModal({ isOpen, onClose }) {
     setError(null);
 
     try {
-      // Create Stripe checkout session
       const response = await fetch("/api/tokens/purchase", {
         method: "POST",
         headers: {
@@ -59,7 +55,7 @@ function TokenPurchaseModal({ isOpen, onClose }) {
         body: JSON.stringify({
           packageId: pkg.id,
           tokens: pkg.tokens,
-          amount: pkg.price * 100, // cents
+          amount: pkg.price * 100,
           userId: user?.id,
         }),
       });
@@ -69,8 +65,6 @@ function TokenPurchaseModal({ isOpen, onClose }) {
       }
 
       const { checkoutUrl } = await response.json();
-
-      // Redirect to Stripe
       window.location.href = checkoutUrl;
     } catch (err) {
       console.error("Purchase error:", err);
@@ -85,84 +79,80 @@ function TokenPurchaseModal({ isOpen, onClose }) {
 
   return (
     <div
-      className={`modal-overlay ${isVisible ? "active" : ""}`}
+      className={`tokens-overlay ${isVisible ? "active" : ""}`}
       onClick={closeModal}
     >
       <div
-        className={`token-purchase-modal ${isVisible ? "active" : ""}`}
+        className={`tokens-content ${isVisible ? "active" : ""}`}
         onClick={(e) => e.stopPropagation()}
       >
-        <button className="modal-close" onClick={closeModal}>
-          <X size={20} />
-        </button>
-
-        <div className="token-purchase-modal__header">
-          <div className="token-icon">
-            <Coins size={28} />
+        <div className="tokens-header">
+          <div className="tokens-title">
+            <Coins size={16} />
+            <span>Get Tokens</span>
           </div>
-          <h2>Get More Tokens</h2>
-          <p>Choose a token package to power your creations</p>
-
-          {profile?.tokens !== undefined && (
-            <div className="current-balance">
-              Current balance: <strong>{profile.tokens} tokens</strong>
-            </div>
-          )}
+          <button className="tokens-close" onClick={closeModal}>
+            <X size={16} />
+          </button>
         </div>
 
-        <div className="token-purchase-modal__packages">
+        {profile?.tokens !== undefined && (
+          <div className="tokens-balance">
+            <span>Current balance</span>
+            <span>{profile.tokens} tokens</span>
+          </div>
+        )}
+
+        <div className="tokens-packages">
           {TOKEN_PACKAGES.map((pkg) => (
-            <div
+            <button
               key={pkg.id}
-              className={`token-package ${
+              className={`token-option ${
                 selectedPackage === pkg.id ? "selected" : ""
-              } ${pkg.popular ? "popular" : ""}`}
+              }`}
               onClick={() => setSelectedPackage(pkg.id)}
             >
-              {pkg.popular && <div className="popular-badge">Most Popular</div>}
-              {pkg.savings && (
-                <div className="savings-badge">{pkg.savings}</div>
-              )}
-
-              <div className="token-package__icon">{pkg.icon}</div>
-              <div className="token-package__info">
-                <h3>{pkg.tokens} Tokens</h3>
-                <p className="token-package__description">{pkg.description}</p>
-                <div className="token-package__price">${pkg.price}</div>
-                <div className="token-package__per-token">
-                  ${(pkg.price / pkg.tokens).toFixed(2)}/token
-                </div>
+              <div className="token-option__left">
+                <span className="token-option__amount">
+                  {pkg.tokens} tokens
+                </span>
+                <span className="token-option__rate">{pkg.perToken}/token</span>
               </div>
-
-              <div className="token-package__check">
-                {selectedPackage === pkg.id && <Check size={20} />}
+              <div className="token-option__right">
+                {pkg.savings && (
+                  <span className="token-option__badge">{pkg.savings}</span>
+                )}
+                {pkg.popular && (
+                  <span className="token-option__badge token-option__badge--popular">
+                    Popular
+                  </span>
+                )}
+                <span className="token-option__price">${pkg.price}</span>
+                {selectedPackage === pkg.id && (
+                  <span className="token-option__check">
+                    <Check size={12} />
+                  </span>
+                )}
               </div>
-            </div>
+            </button>
           ))}
         </div>
 
-        {error && <div className="token-purchase-modal__error">{error}</div>}
+        {error && <div className="tokens-error">{error}</div>}
 
-        <div className="token-purchase-modal__footer">
-          <button
-            className="btn btn-primary purchase-btn"
-            onClick={handlePurchase}
-            disabled={isProcessing}
-          >
-            {isProcessing ? (
-              <>
-                <Loader2 size={18} className="spinning" />
-                Processing...
-              </>
-            ) : (
-              <>
-                Buy {selectedPkg?.tokens} Tokens for ${selectedPkg?.price}
-              </>
-            )}
-          </button>
+        <button
+          className="tokens-btn"
+          onClick={handlePurchase}
+          disabled={isProcessing}
+        >
+          {isProcessing ? (
+            <Loader2 size={14} className="spinning" />
+          ) : (
+            `Buy ${selectedPkg?.tokens} for $${selectedPkg?.price}`
+          )}
+        </button>
 
-          <p className="secure-note">ðŸ”’ Secured by Stripe</p>
-        </div>
+        <div className="tokens-note">Secured by Stripe</div>
       </div>
     </div>
   );

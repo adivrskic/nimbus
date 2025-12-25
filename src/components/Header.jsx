@@ -17,6 +17,7 @@ import ForgotPasswordModal from "./ForgotPasswordModal";
 import UserAccountModal from "./UserAccountModal";
 import TokenPurchaseModal from "./TokenPurchaseModal";
 import ProjectsModal from "./ProjectsModal";
+import BillingModal from "./BillingModal";
 import { useTheme } from "../contexts/ThemeContext";
 import "./Header.scss";
 
@@ -41,6 +42,7 @@ function Header() {
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
   const [isTokenModalOpen, setIsTokenModalOpen] = useState(false);
   const [isProjectsModalOpen, setIsProjectsModalOpen] = useState(false);
+  const [isBillingModalOpen, setIsBillingModalOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isPageLoading, setIsPageLoading] = useState(false);
@@ -250,22 +252,12 @@ function Header() {
                           className="dropdown-item"
                           onClick={() => {
                             setIsUserMenuOpen(false);
-                            setIsTokenModalOpen(true);
+                            setIsBillingModalOpen(true);
                           }}
                         >
                           <CreditCard size={16} />
-                          Buy Tokens
+                          Billing
                         </button>
-
-                        <button
-                          className="dropdown-item"
-                          onClick={handleOpenAccountModal}
-                          disabled={isLoggingOut || authIsLoading}
-                        >
-                          <Settings size={16} />
-                          Account Settings
-                        </button>
-
                         <button
                           className="dropdown-item dropdown-item--danger"
                           onClick={handleLogout}
@@ -340,6 +332,12 @@ function Header() {
       <ProjectsModal
         isOpen={isProjectsModalOpen}
         onClose={() => setIsProjectsModalOpen(false)}
+      />
+
+      {/* Billing Modal */}
+      <BillingModal
+        isOpen={isBillingModalOpen}
+        onClose={() => setIsBillingModalOpen(false)}
       />
     </>
   );

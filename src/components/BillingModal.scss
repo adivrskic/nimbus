@@ -1,6 +1,6 @@
-// TokenPurchaseModal.scss - Minimal style matching token breakdown
+// BillingModal.scss - Minimal style matching token breakdown
 
-.tokens-overlay {
+.billing-overlay {
   position: fixed;
   inset: 0;
   z-index: 1000;
@@ -18,10 +18,11 @@
   }
 }
 
-.tokens-content {
+.billing-content {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  align-items: center;
+  gap: 16px;
   padding: 24px;
   min-width: 280px;
   max-width: 90vw;
@@ -37,28 +38,23 @@
   }
 }
 
-.tokens-header {
+.billing-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 16px;
+  width: 100%;
   padding-bottom: 12px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.04);
 }
 
-.tokens-title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+.billing-title {
   font-size: 1.125rem;
   font-weight: 700;
   color: #2b2b2b;
-
-  svg {
-    color: #2b2b2b;
-  }
 }
 
-.tokens-close {
+.billing-close {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -77,115 +73,48 @@
   }
 }
 
-.tokens-balance {
+.billing-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  color: #666;
+}
+
+.billing-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.billing-item {
   display: flex;
   justify-content: space-between;
   font-size: 0.8125rem;
   color: #b3b3b3;
-  padding-bottom: 12px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
-}
 
-.tokens-packages {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.token-option {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  padding: 12px 14px;
-  background: rgba(0, 0, 0, 0.02);
-  border: 1px solid transparent;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: all 0.15s ease;
-
-  &:hover {
-    background: rgba(0, 0, 0, 0.04);
-  }
-
-  &.selected {
-    background: rgba(43, 43, 43, 0.04);
-    border-color: rgba(43, 43, 43, 0.15);
-  }
-
-  &__left {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 2px;
-  }
-
-  &__amount {
-    font-size: 0.875rem;
+  &--total {
+    padding-top: 12px;
+    border-top: 1px solid rgba(0, 0, 0, 0.04);
     font-weight: 600;
     color: #2b2b2b;
   }
-
-  &__rate {
-    font-size: 0.6875rem;
-    color: #b3b3b3;
-  }
-
-  &__right {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  &__badge {
-    padding: 3px 8px;
-    background: rgba(16, 185, 129, 0.1);
-    border-radius: 4px;
-    font-size: 0.625rem;
-    font-weight: 600;
-    color: #10b981;
-    text-transform: uppercase;
-    letter-spacing: 0.02em;
-
-    &--popular {
-      background: rgba(43, 43, 43, 0.08);
-      color: #666;
-    }
-  }
-
-  &__price {
-    font-size: 0.9375rem;
-    font-weight: 700;
-    color: #2b2b2b;
-  }
-
-  &__check {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 20px;
-    height: 20px;
-    background: #2b2b2b;
-    border-radius: 50%;
-    color: white;
-  }
 }
 
-.tokens-error {
-  padding: 10px 12px;
-  background: rgba(239, 68, 68, 0.08);
-  border-radius: 8px;
-  font-size: 0.8125rem;
-  color: #ef4444;
+.billing-info {
+  font-size: 0.75rem;
+  color: #b3b3b3;
   text-align: center;
 }
 
-.tokens-btn {
+.billing-btn {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   width: 100%;
+  margin-top: 4px;
   padding: 12px;
   background: #2b2b2b;
   border: none;
@@ -207,12 +136,6 @@
   }
 }
 
-.tokens-note {
-  font-size: 0.75rem;
-  color: #b3b3b3;
-  text-align: center;
-}
-
 .spinning {
   animation: spin 1s linear infinite;
 }
@@ -227,7 +150,7 @@
 }
 
 @media (max-width: 640px) {
-  .tokens-content {
+  .billing-content {
     min-width: 260px;
     padding: 20px;
   }
