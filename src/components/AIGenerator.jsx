@@ -32,6 +32,7 @@ import {
   getBreakdownDisplay,
   formatTokenCost,
 } from "../utils/tokenCalculator";
+import { supabase } from "../lib/supabaseClient";
 import "./AIGenerator.scss";
 
 // Template type options
@@ -864,40 +865,78 @@ Return ONLY the complete HTML code, no explanations.
       return;
     }
 
+    if (!editedCode) {
+      setError("No website to save. Generate one first.");
+      return;
+    }
+
     setIsSaving(true);
+    setError(null);
+
     try {
-      // Save to Supabase
-      const response = await fetch("/api/projects/save", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${user?.access_token}`,
-        },
-        body: JSON.stringify({
-          name: projectName,
-          html: editedCode,
-          prompt,
-          customization: {
-            templateType,
-            stylePreset,
-            fontPairing,
-            colorScheme,
-            customColors,
-            colorMode,
+      const { data, error: fnError } = await supabase.functions.invoke(
+        "save-project",
+        {
+          body: {
+            projectId: currentProject?.id || null, // If editing existing project
+            name: projectName,
+            description: prompt, // Save the original prompt as description
+            html: editedCode,
+            prompt: prompt,
+            customization: {
+              templateType,
+              stylePreset,
+              fontPairing,
+              colorScheme,
+              customColors,
+              colorMode,
+            },
           },
-        }),
-      });
+        }
+      );
 
-      if (!response.ok) throw new Error("Failed to save project");
+      if (fnError) throw fnError;
 
-      const data = await response.json();
       setCurrentProject(data.project);
-      // Show success notification
+
+      // Show success feedback (you can use a toast notification instead)
+      // For now, we'll just update the button text temporarily
+      const successMessage = currentProject?.id
+        ? "Project updated!"
+        : "Project saved!";
+
+      // You could show a notification here
+      console.log(successMessage, data.project);
     } catch (err) {
       console.error("Save error:", err);
       setError("Failed to save project. Please try again.");
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleLoadProject = (project) => {
+    // Set the project data
+    setCurrentProject(project);
+    setProjectName(project.name);
+    setEditedCode(project.html_content);
+    setGeneratedCode(project.html_content);
+    setShowPreview(true);
+
+    // Restore customization settings if available
+    if (project.customization) {
+      const c = project.customization;
+      if (c.templateType) setTemplateType(c.templateType);
+      if (c.stylePreset) setStylePreset(c.stylePreset);
+      if (c.fontPairing) setFontPairing(c.fontPairing);
+      if (c.colorScheme) setColorScheme(c.colorScheme);
+      if (c.customColors) setCustomColors(c.customColors);
+      if (c.colorMode) setColorMode(c.colorMode);
+    }
+
+    // Set the original prompt if available
+    if (project.description) {
+      setPrompt(project.description);
     }
   };
 

@@ -1,10 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import {
-  Moon,
-  Sun,
   Cloudy,
-  Settings,
   LogOut,
   ChevronDown,
   Coins,
@@ -13,7 +10,6 @@ import {
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import AuthModal from "./AuthModal";
-import ForgotPasswordModal from "./ForgotPasswordModal";
 import UserAccountModal from "./UserAccountModal";
 import TokenPurchaseModal from "./TokenPurchaseModal";
 import ProjectsModal from "./ProjectsModal";
@@ -21,7 +17,7 @@ import BillingModal from "./BillingModal";
 import { useTheme } from "../contexts/ThemeContext";
 import "./Header.scss";
 
-function Header() {
+function Header({ onEditProject, onDeployProject }) {
   const { theme, toggleTheme } = useTheme();
   const location = useLocation();
   const isHomePage = location.pathname === "/";
@@ -49,7 +45,6 @@ function Header() {
 
   const userMenuRef = useRef(null);
 
-  // Get user tokens
   const userTokens = profile?.tokens || 0;
 
   useEffect(() => {
@@ -110,11 +105,6 @@ function Header() {
     await logout();
   };
 
-  const handleOpenAccountModal = () => {
-    setIsAccountModalOpen(true);
-    setIsUserMenuOpen(false);
-  };
-
   const handleAuthSuccess = () => {
     setIsAuthModalOpen(false);
     clearJustVerifiedFlag();
@@ -159,14 +149,14 @@ function Header() {
     return authIsLoading;
   };
 
-  const getTokenStatusClass = () => {
-    if (userTokens >= 50) return "high";
-    if (userTokens >= 20) return "medium";
-    return "low";
-  };
-
   return (
     <>
+      {/* Blur backdrop - covers everything below header when dropdown is open */}
+      <div
+        className={`header-backdrop ${isUserMenuOpen ? "active" : ""}`}
+        onClick={() => setIsUserMenuOpen(false)}
+      />
+
       <header className="header">
         <div className="container">
           <div className="header__content">
@@ -180,13 +170,12 @@ function Header() {
             <nav className="header__nav">
               {isAuthenticated ? (
                 <>
-                  {/* Token Display in Header */}
                   <button
-                    className={`header__tokens header__tokens--${getTokenStatusClass()}`}
+                    className="header__tokens"
                     onClick={() => setIsTokenModalOpen(true)}
                     title="Get more tokens"
                   >
-                    <Coins size={16} />
+                    <Coins size={14} />
                     <span>{userTokens}</span>
                   </button>
 
@@ -197,37 +186,24 @@ function Header() {
                       disabled={isLoggingOut || authIsLoading}
                     >
                       <div className="user-avatar">{getUserInitials()}</div>
-                      <span className="user-name">{getUserDisplayName()}</span>
                       <ChevronDown
-                        size={16}
+                        size={14}
                         className={`chevron ${isUserMenuOpen ? "open" : ""}`}
                       />
                     </button>
 
                     {isUserMenuOpen && (
-                      <div className="header__user-dropdown">
-                        <div className="dropdown-header">
-                          <div className="user-avatar-large">
-                            {getUserInitials()}
-                          </div>
-                          <div className="user-info">
-                            <p className="user-name">{getUserDisplayName()}</p>
-                            <p className="user-email">{user?.email}</p>
-                          </div>
+                      <div className="dropdown">
+                        <div className="dropdown__header">
+                          <span className="dropdown__name">
+                            {getUserDisplayName()}
+                          </span>
+                          <span className="dropdown__email">{user?.email}</span>
                         </div>
 
-                        {/* Token Balance in Dropdown */}
-                        <div
-                          className={`dropdown-tokens dropdown-tokens--${getTokenStatusClass()}`}
-                        >
-                          <div className="token-info">
-                            <Coins size={18} />
-                            <span className="token-count">
-                              {userTokens} tokens
-                            </span>
-                          </div>
+                        <div className="dropdown__tokens">
+                          <span>{userTokens} tokens</span>
                           <button
-                            className="btn btn-sm btn-primary"
                             onClick={() => {
                               setIsUserMenuOpen(false);
                               setIsTokenModalOpen(true);
@@ -237,44 +213,47 @@ function Header() {
                           </button>
                         </div>
 
-                        <button
-                          className="dropdown-item"
-                          onClick={() => {
-                            setIsUserMenuOpen(false);
-                            setIsProjectsModalOpen(true);
-                          }}
-                        >
-                          <FolderOpen size={16} />
-                          My Projects
-                        </button>
+                        <div className="dropdown__items">
+                          <button
+                            className="dropdown__item"
+                            onClick={() => {
+                              setIsUserMenuOpen(false);
+                              setIsProjectsModalOpen(true);
+                            }}
+                          >
+                            <FolderOpen size={14} />
+                            Projects
+                          </button>
 
-                        <button
-                          className="dropdown-item"
-                          onClick={() => {
-                            setIsUserMenuOpen(false);
-                            setIsBillingModalOpen(true);
-                          }}
-                        >
-                          <CreditCard size={16} />
-                          Billing
-                        </button>
-                        <button
-                          className="dropdown-item dropdown-item--danger"
-                          onClick={handleLogout}
-                          disabled={isLoggingOut || authIsLoading}
-                        >
-                          {isLoggingOut ? (
-                            <>
-                              <span className="spinner-small"></span>
-                              Signing Out...
-                            </>
-                          ) : (
-                            <>
-                              <LogOut size={16} />
-                              Sign Out
-                            </>
-                          )}
-                        </button>
+                          <button
+                            className="dropdown__item"
+                            onClick={() => {
+                              setIsUserMenuOpen(false);
+                              setIsBillingModalOpen(true);
+                            }}
+                          >
+                            <CreditCard size={14} />
+                            Billing
+                          </button>
+
+                          <button
+                            className="dropdown__item dropdown__item--danger"
+                            onClick={handleLogout}
+                            disabled={isLoggingOut || authIsLoading}
+                          >
+                            {isLoggingOut ? (
+                              <>
+                                <span className="spinner-small"></span>
+                                Signing Out...
+                              </>
+                            ) : (
+                              <>
+                                <LogOut size={14} />
+                                Sign Out
+                              </>
+                            )}
+                          </button>
+                        </div>
                       </div>
                     )}
                   </div>
@@ -300,7 +279,6 @@ function Header() {
         </div>
       </header>
 
-      {/* Auth Modal */}
       <AuthModal
         isOpen={isAuthModalOpen}
         onClose={handleCloseAuthModal}
@@ -308,13 +286,6 @@ function Header() {
         onForgotPassword={handleForgotPassword}
       />
 
-      {/* Forgot Password Modal */}
-      <ForgotPasswordModal
-        isOpen={isForgotPasswordOpen}
-        onClose={() => setIsForgotPasswordOpen(false)}
-      />
-
-      {/* User Account Modal */}
       {isAuthenticated && (
         <UserAccountModal
           isOpen={isAccountModalOpen}
@@ -322,19 +293,24 @@ function Header() {
         />
       )}
 
-      {/* Token Purchase Modal */}
       <TokenPurchaseModal
         isOpen={isTokenModalOpen}
         onClose={() => setIsTokenModalOpen(false)}
       />
 
-      {/* Projects Modal */}
       <ProjectsModal
         isOpen={isProjectsModalOpen}
         onClose={() => setIsProjectsModalOpen(false)}
+        onEditProject={(project) => {
+          setIsProjectsModalOpen(false);
+          onEditProject?.(project);
+        }}
+        onDeployProject={(project) => {
+          setIsProjectsModalOpen(false);
+          onDeployProject?.(project);
+        }}
       />
 
-      {/* Billing Modal */}
       <BillingModal
         isOpen={isBillingModalOpen}
         onClose={() => setIsBillingModalOpen(false)}

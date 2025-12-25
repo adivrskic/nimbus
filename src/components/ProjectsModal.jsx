@@ -9,9 +9,9 @@ import {
   Rocket,
   Loader2,
   FileCode,
-  Globe,
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
+import { supabase } from "../lib/supabaseClient";
 import useModalAnimation from "../hooks/useModalAnimation";
 import "./ProjectsModal.scss";
 
@@ -36,44 +36,14 @@ function ProjectsModal({ isOpen, onClose, onEditProject, onDeployProject }) {
   const fetchProjects = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch("/api/projects", {
-        headers: {
-          Authorization: `Bearer ${user?.access_token}`,
-        },
-      });
+      const { data, error } = await supabase.functions.invoke("get-projects");
 
-      if (!response.ok) throw new Error("Failed to fetch projects");
+      if (error) throw error;
 
-      const data = await response.json();
-      setProjects(data.projects || []);
+      setProjects(data?.projects || []);
     } catch (err) {
       console.error("Error fetching projects:", err);
-      setProjects([
-        {
-          id: "1",
-          name: "Tech Startup Landing",
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-          deployed_url: "https://tech-startup.nimbus.site",
-          template_type: "landing",
-        },
-        {
-          id: "2",
-          name: "Portfolio Site",
-          created_at: new Date(Date.now() - 86400000).toISOString(),
-          updated_at: new Date(Date.now() - 86400000).toISOString(),
-          deployed_url: null,
-          template_type: "portfolio",
-        },
-        {
-          id: "3",
-          name: "Restaurant Menu",
-          created_at: new Date(Date.now() - 172800000).toISOString(),
-          updated_at: new Date(Date.now() - 172800000).toISOString(),
-          deployed_url: "https://gourmet-eats.nimbus.site",
-          template_type: "restaurant",
-        },
-      ]);
+      setProjects([]);
     } finally {
       setIsLoading(false);
     }
@@ -84,20 +54,57 @@ function ProjectsModal({ isOpen, onClose, onEditProject, onDeployProject }) {
 
     setDeletingId(projectId);
     try {
-      const response = await fetch(`/api/projects/${projectId}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${user?.access_token}`,
-        },
+      const { error } = await supabase.functions.invoke("delete-project", {
+        body: { projectId },
       });
 
-      if (!response.ok) throw new Error("Failed to delete project");
+      if (error) throw error;
 
       setProjects((prev) => prev.filter((p) => p.id !== projectId));
     } catch (err) {
       console.error("Delete error:", err);
     } finally {
       setDeletingId(null);
+    }
+  };
+
+  const handleEdit = async (project) => {
+    // Fetch full project with HTML content
+    try {
+      const { data, error } = await supabase
+        .from("projects")
+        .select("*")
+        .eq("id", project.id)
+        .single();
+
+      if (error) throw error;
+
+      if (data) {
+        onEditProject?.(data);
+        closeModal();
+      }
+    } catch (err) {
+      console.error("Error loading project:", err);
+    }
+  };
+
+  const handleDeploy = async (project) => {
+    // Fetch full project with HTML content
+    try {
+      const { data, error } = await supabase
+        .from("projects")
+        .select("*")
+        .eq("id", project.id)
+        .single();
+
+      if (error) throw error;
+
+      if (data) {
+        onDeployProject?.(data);
+        closeModal();
+      }
+    } catch (err) {
+      console.error("Error loading project:", err);
     }
   };
 
@@ -148,7 +155,7 @@ function ProjectsModal({ isOpen, onClose, onEditProject, onDeployProject }) {
             </div>
           ) : filteredProjects.length === 0 ? (
             <div className="projects-empty">
-              <span>No projects yet</span>
+              <span>{searchQuery ? "No matches" : "No projects yet"}</span>
             </div>
           ) : (
             filteredProjects.map((project) => (
@@ -159,14 +166,16 @@ function ProjectsModal({ isOpen, onClose, onEditProject, onDeployProject }) {
                     <span>{project.name}</span>
                   </div>
                   <div className="project-meta">
-                    <span className="project-type">
-                      {project.template_type}
-                    </span>
+                    {project.template_type && (
+                      <span className="project-type">
+                        {project.template_type}
+                      </span>
+                    )}
                     <span className="project-date">
                       <Calendar size={10} />
                       {formatDate(project.updated_at)}
                     </span>
-                    {project.deployed_url && (
+                    {project.is_deployed && project.deployed_url && (
                       <span className="project-status">Live</span>
                     )}
                   </div>
@@ -174,12 +183,12 @@ function ProjectsModal({ isOpen, onClose, onEditProject, onDeployProject }) {
                 <div className="project-actions">
                   <button
                     className="action-btn"
-                    onClick={() => onEditProject?.(project)}
+                    onClick={() => handleEdit(project)}
                     title="Edit"
                   >
                     <Edit3 size={14} />
                   </button>
-                  {project.deployed_url ? (
+                  {project.is_deployed && project.deployed_url ? (
                     <a
                       href={project.deployed_url}
                       target="_blank"
@@ -192,7 +201,7 @@ function ProjectsModal({ isOpen, onClose, onEditProject, onDeployProject }) {
                   ) : (
                     <button
                       className="action-btn action-btn--primary"
-                      onClick={() => onDeployProject?.(project)}
+                      onClick={() => handleDeploy(project)}
                       title="Deploy"
                     >
                       <Rocket size={14} />

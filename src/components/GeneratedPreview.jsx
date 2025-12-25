@@ -5,16 +5,17 @@ import {
   Smartphone,
   ExternalLink,
   Maximize2,
+  Minimize2,
+  X,
 } from "lucide-react";
 import "./GeneratedPreview.scss";
 
-function GeneratedPreview({ html }) {
+function GeneratedPreview({ html, onClose }) {
   const [viewMode, setViewMode] = useState("desktop");
   const [isFullscreen, setIsFullscreen] = useState(false);
   const iframeRef = useRef(null);
   const containerRef = useRef(null);
 
-  // Update iframe content when HTML changes
   useEffect(() => {
     if (!html || !iframeRef.current) return;
 
@@ -26,7 +27,6 @@ function GeneratedPreview({ html }) {
     doc.close();
   }, [html]);
 
-  // Handle fullscreen toggle
   const toggleFullscreen = () => {
     if (!containerRef.current) return;
 
@@ -46,7 +46,6 @@ function GeneratedPreview({ html }) {
     setIsFullscreen(!isFullscreen);
   };
 
-  // Listen for fullscreen changes
   useEffect(() => {
     const handleFullscreenChange = () => {
       setIsFullscreen(!!document.fullscreenElement);
@@ -64,12 +63,10 @@ function GeneratedPreview({ html }) {
     };
   }, []);
 
-  // Open in new tab
   const openInNewTab = () => {
     const blob = new Blob([html], { type: "text/html" });
     const url = URL.createObjectURL(blob);
     window.open(url, "_blank");
-    // Cleanup after a delay
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
 
@@ -84,80 +81,87 @@ function GeneratedPreview({ html }) {
     }
   };
 
+  const getViewportLabel = () => {
+    switch (viewMode) {
+      case "mobile":
+        return "375px";
+      case "tablet":
+        return "768px";
+      default:
+        return "100%";
+    }
+  };
+
   return (
     <div
       ref={containerRef}
-      className={`generated-preview ${
-        isFullscreen ? "generated-preview--fullscreen" : ""
-      }`}
+      className={`preview ${isFullscreen ? "preview--fullscreen" : ""}`}
     >
-      <div className="generated-preview__toolbar">
-        <div className="generated-preview__device-selector">
+      <div className="preview-toolbar">
+        <div className="preview-devices">
           <button
-            className={`device-btn ${viewMode === "desktop" ? "active" : ""}`}
+            className={`preview-device ${
+              viewMode === "desktop" ? "active" : ""
+            }`}
             onClick={() => setViewMode("desktop")}
-            title="Desktop view"
+            title="Desktop"
           >
-            <Monitor size={18} />
+            <Monitor size={14} />
           </button>
           <button
-            className={`device-btn ${viewMode === "tablet" ? "active" : ""}`}
+            className={`preview-device ${
+              viewMode === "tablet" ? "active" : ""
+            }`}
             onClick={() => setViewMode("tablet")}
-            title="Tablet view"
+            title="Tablet"
           >
-            <Tablet size={18} />
+            <Tablet size={14} />
           </button>
           <button
-            className={`device-btn ${viewMode === "mobile" ? "active" : ""}`}
+            className={`preview-device ${
+              viewMode === "mobile" ? "active" : ""
+            }`}
             onClick={() => setViewMode("mobile")}
-            title="Mobile view"
+            title="Mobile"
           >
-            <Smartphone size={18} />
+            <Smartphone size={14} />
           </button>
+          <span className="preview-viewport">{getViewportLabel()}</span>
         </div>
 
-        <div className="generated-preview__info">
-          <span className="viewport-label">
-            {viewMode === "desktop" && "Desktop"}
-            {viewMode === "tablet" && "Tablet (768px)"}
-            {viewMode === "mobile" && "Mobile (375px)"}
-          </span>
-        </div>
-
-        <div className="generated-preview__actions">
+        <div className="preview-actions">
           <button
-            className="action-btn"
+            className="preview-action"
             onClick={openInNewTab}
             title="Open in new tab"
           >
-            <ExternalLink size={16} />
+            <ExternalLink size={14} />
           </button>
           <button
-            className="action-btn"
+            className="preview-action"
             onClick={toggleFullscreen}
-            title="Toggle fullscreen"
+            title={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
           >
-            <Maximize2 size={16} />
+            {isFullscreen ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
           </button>
+          {onClose && (
+            <button className="preview-close" onClick={onClose} title="Close">
+              <X size={14} />
+            </button>
+          )}
         </div>
       </div>
 
-      <div className="generated-preview__content">
+      <div className="preview-content">
         <div
-          className={`generated-preview__frame-wrapper generated-preview__frame-wrapper--${viewMode}`}
+          className={`preview-frame preview-frame--${viewMode}`}
           style={{ maxWidth: getFrameWidth() }}
         >
-          {/* Device frame for mobile/tablet */}
-          {viewMode !== "desktop" && (
-            <div className="device-frame">
-              <div className="device-frame__notch"></div>
-            </div>
-          )}
-
+          {viewMode !== "desktop" && <div className="preview-notch" />}
           <iframe
             ref={iframeRef}
-            className="generated-preview__iframe"
-            title="Generated Website Preview"
+            className="preview-iframe"
+            title="Preview"
             sandbox="allow-scripts allow-same-origin"
           />
         </div>
