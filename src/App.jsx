@@ -10,7 +10,6 @@ import Footer from "./components/Footer";
 import ScrollToTop from "./components/ScrollToTop";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
-import ResetPasswordModal from "./components/ResetPasswordModal";
 import { BlobProvider } from "./contexts/BlobContext";
 import "./styles/global.scss";
 
@@ -108,10 +107,6 @@ function AppContent() {
         </Routes>
       </Suspense>
       <Footer />
-      <ResetPasswordModal
-        isOpen={showResetPassword}
-        onClose={() => setShowResetPassword(false)}
-      />
     </>
   );
 }

@@ -1,68 +1,47 @@
-// pages/Roadmap.jsx
-import { ArrowUp } from "lucide-react";
 import "./SecondaryPages.scss";
 
 function Roadmap() {
   const roadmapItems = [
     {
       status: "completed",
-      title: "Core Template System",
-      description:
-        "Professional templates with real-time customization and export",
+      title: "Core Templates",
+      description: "Professional templates with customization",
     },
     {
       status: "completed",
-      title: "Dark Mode Support",
-      description: "Light, dark, and auto themes for all templates",
+      title: "Dark Mode",
+      description: "Light, dark, and auto themes",
     },
     {
       status: "in-progress",
       title: "Easy Deployments",
-      description: "One-click deployment to popular hosting platforms",
-      badge: "Paid Feature",
+      description: "One-click to hosting platforms",
     },
     {
       status: "planned",
-      title: "Custom Styling Editor",
-      description:
-        "Advanced visual editor for fine-tuning colors, fonts, and spacing",
+      title: "Visual Editor",
+      description: "Advanced styling and layout controls",
     },
     {
       status: "planned",
       title: "Form Builder",
-      description:
-        "Add contact forms, signup forms, and surveys with backend integration",
+      description: "Contact forms with backend integration",
     },
     {
       status: "planned",
       title: "Multi-Page Sites",
-      description: "Create full websites with multiple pages and navigation",
+      description: "Full websites with navigation",
     },
     {
       status: "planned",
       title: "Blog System",
-      description:
-        "Built-in blog templates with markdown support and RSS feeds",
-    },
-    {
-      status: "planned",
-      title: "Advanced Components",
-      description:
-        "Galleries, testimonials, pricing tables, and more pre-built sections",
-    },
-    {
-      status: "planned",
-      title: "Custom Domain Management",
-      description:
-        "Connect and manage your own domain names directly through Nimbus",
-      badge: "Paid Feature",
+      description: "Built-in blog with markdown support",
     },
   ];
 
   return (
     <div className="page">
       <div className="container">
-        {/* Header */}
         <header className="page-header">
           <h1 className="page-header__title">Roadmap</h1>
           <p className="page-header__subtitle">
@@ -70,13 +49,11 @@ function Roadmap() {
           </p>
         </header>
 
-        {/* Main Content */}
         <div className="page-content">
-          {/* Status Legend */}
           <div className="status-legend">
             <div className="status-legend__item">
               <span className="status-legend__dot status-legend__dot--completed"></span>
-              Completed
+              Complete
             </div>
             <div className="status-legend__item">
               <span className="status-legend__dot status-legend__dot--in-progress"></span>
@@ -88,7 +65,6 @@ function Roadmap() {
             </div>
           </div>
 
-          {/* Timeline */}
           <div className="timeline">
             {roadmapItems.map((item, index) => (
               <div
@@ -97,24 +73,17 @@ function Roadmap() {
               >
                 <div className="timeline-item__marker"></div>
                 <div className="timeline-item__content">
-                  <h3>
-                    {item.title}
-                    {item.badge && (
-                      <span className="timeline-item__badge">{item.badge}</span>
-                    )}
-                  </h3>
+                  <h3>{item.title}</h3>
                   <p>{item.description}</p>
                 </div>
               </div>
             ))}
           </div>
 
-          {/* Feature Request CTA */}
           <div className="contact-block">
-            <h3 className="contact-block__title">Have a feature request?</h3>
+            <h3 className="contact-block__title">Suggest a feature</h3>
             <p className="contact-block__text">
-              We'd love to hear your ideas. Reach out at{" "}
-              <a href="mailto:hello@nimbus.com">hello@nimbus.com</a>
+              Email <a href="mailto:hello@nimbus.com">hello@nimbus.com</a>
             </p>
           </div>
         </div>

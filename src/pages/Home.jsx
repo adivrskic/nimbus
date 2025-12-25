@@ -5,9 +5,6 @@ import {
   Sparkles,
   Loader2,
   X,
-  Monitor,
-  Tablet,
-  Smartphone,
   Download,
   Rocket,
   RotateCcw,
@@ -25,12 +22,12 @@ import {
   Target,
   Building2,
   Users,
-  Star,
   Award,
   Layers,
   Grid3X3,
   Palette,
   Maximize,
+  Maximize2,
   Circle,
   Image,
   Zap,
@@ -39,18 +36,26 @@ import {
   Pin,
   Lightbulb,
   Compass,
-  Check,
+  Globe,
+  Trash2,
+  HelpCircle,
+  Shield,
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
+import { supabase } from "../lib/supabaseClient";
 import AuthModal from "../components/AuthModal";
 import TokenPurchaseModal from "../components/TokenPurchaseModal";
 import DeployModal from "../components/DeployModal";
+import GeneratedPreview from "../components/GeneratedPreview";
 import {
   calculateTokenCost,
   checkTokenBalance,
   getBreakdownDisplay,
 } from "../utils/tokenCalculator";
+import MetallicBlob from "../components/MetallicBlob";
 import "./Home.scss";
+
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 
 // ==================== ANIMATION VARIANTS ====================
 
@@ -58,44 +63,27 @@ const overlayVariants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: {
-      duration: 0.2,
-      ease: "easeOut",
-    },
+    transition: { duration: 0.2, ease: "easeOut" },
   },
   exit: {
     opacity: 0,
-    transition: {
-      duration: 0.15,
-      ease: "easeIn",
-    },
+    transition: { duration: 0.15, ease: "easeIn" },
   },
 };
 
 const contentVariants = {
-  hidden: {
-    opacity: 0,
-    scale: 0.98,
-    y: 4,
-  },
+  hidden: { opacity: 0, scale: 0.98, y: 4 },
   visible: {
     opacity: 1,
     scale: 1,
     y: 0,
-    transition: {
-      duration: 0.3,
-      ease: [0.16, 1, 0.3, 1],
-      delayChildren: 0.05,
-    },
+    transition: { duration: 0.3, ease: [0.16, 1, 0.3, 1], delayChildren: 0.05 },
   },
   exit: {
     opacity: 0,
     scale: 0.98,
     y: 4,
-    transition: {
-      duration: 0.2,
-      ease: "easeIn",
-    },
+    transition: { duration: 0.2, ease: "easeIn" },
   },
 };
 
@@ -103,79 +91,38 @@ const pillContainerVariants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: {
-      staggerChildren: 0.02,
-      delayChildren: 0.1,
-    },
+    transition: { staggerChildren: 0.02, delayChildren: 0.1 },
   },
-  exit: {
-    opacity: 0,
-    transition: { duration: 0.1 },
-  },
+  exit: { opacity: 0, transition: { duration: 0.1 } },
 };
 
 const pillVariants = {
-  hidden: {
-    opacity: 0,
-    scale: 0.95,
-    y: 6,
-  },
+  hidden: { opacity: 0, scale: 0.95, y: 6 },
   visible: {
     opacity: 1,
     scale: 1,
     y: 0,
-    transition: {
-      duration: 0.25,
-      ease: [0.23, 1, 0.32, 1],
-    },
+    transition: { duration: 0.25, ease: [0.23, 1, 0.32, 1] },
   },
-  exit: {
-    opacity: 0,
-    scale: 0.95,
-    transition: { duration: 0.15 },
-  },
-  hover: {
-    y: -1,
-    transition: { duration: 0.15 },
-  },
-  tap: {
-    scale: 0.98,
-    transition: { duration: 0.1 },
-  },
+  exit: { opacity: 0, scale: 0.95, transition: { duration: 0.15 } },
+  hover: { y: -1, transition: { duration: 0.15 } },
+  tap: { scale: 0.98, transition: { duration: 0.1 } },
 };
 
 const activePillVariants = {
-  hidden: {
-    opacity: 0,
-    scale: 0.9,
-    x: -8,
-  },
+  hidden: { opacity: 0, scale: 0.9, x: -8 },
   visible: {
     opacity: 1,
     scale: 1,
     x: 0,
-    transition: {
-      duration: 0.25,
-      ease: [0.23, 1, 0.32, 1],
-    },
+    transition: { duration: 0.25, ease: [0.23, 1, 0.32, 1] },
   },
-  exit: {
-    opacity: 0,
-    scale: 0.9,
-    x: -8,
-    transition: { duration: 0.15 },
-  },
-  hover: {
-    x: 2,
-    transition: { duration: 0.15 },
-  },
+  exit: { opacity: 0, scale: 0.9, x: -8, transition: { duration: 0.15 } },
+  hover: { x: 2, transition: { duration: 0.15 } },
 };
 
 const tokenContentVariants = {
-  hidden: {
-    opacity: 0,
-    y: 8,
-  },
+  hidden: { opacity: 0, y: 8 },
   visible: {
     opacity: 1,
     y: 0,
@@ -186,101 +133,46 @@ const tokenContentVariants = {
       delayChildren: 0.05,
     },
   },
-  exit: {
-    opacity: 0,
-    y: 8,
-    transition: { duration: 0.15 },
-  },
+  exit: { opacity: 0, y: 8, transition: { duration: 0.15 } },
 };
 
 const tokenItemVariants = {
-  hidden: {
-    opacity: 0,
-    x: -6,
-  },
-  visible: {
-    opacity: 1,
-    x: 0,
-    transition: {
-      duration: 0.2,
-      ease: "easeOut",
-    },
-  },
+  hidden: { opacity: 0, x: -6 },
+  visible: { opacity: 1, x: 0, transition: { duration: 0.2, ease: "easeOut" } },
 };
 
 const slideVariants = {
-  enter: (direction) => ({
-    x: direction > 0 ? 24 : -24,
-    opacity: 0,
-  }),
+  enter: (direction) => ({ x: direction > 0 ? 24 : -24, opacity: 0 }),
   center: {
     x: 0,
     opacity: 1,
-    transition: {
-      duration: 0.25,
-      ease: [0.23, 1, 0.32, 1],
-    },
+    transition: { duration: 0.25, ease: [0.23, 1, 0.32, 1] },
   },
   exit: (direction) => ({
     x: direction < 0 ? 24 : -24,
     opacity: 0,
-    transition: {
-      duration: 0.15,
-      ease: "easeIn",
-    },
+    transition: { duration: 0.15, ease: "easeIn" },
   }),
 };
 
-const previewModalVariants = {
-  hidden: {
-    opacity: 0,
-  },
+const previewOverlayVariants = {
+  hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: {
-      duration: 0.25,
-      ease: [0.23, 1, 0.32, 1],
-    },
+    transition: { duration: 0.25, ease: [0.23, 1, 0.32, 1] },
   },
-  exit: {
-    opacity: 0,
-    transition: { duration: 0.2 },
-  },
+  exit: { opacity: 0, transition: { duration: 0.2 } },
 };
 
 const previewContentVariants = {
-  hidden: {
-    opacity: 0,
-    scale: 0.96,
-    y: 12,
-  },
+  hidden: { opacity: 0, scale: 0.96, y: 12 },
   visible: {
     opacity: 1,
     scale: 1,
     y: 0,
-    transition: {
-      duration: 0.3,
-      ease: [0.23, 1, 0.32, 1],
-    },
+    transition: { duration: 0.3, ease: [0.23, 1, 0.32, 1] },
   },
-  exit: {
-    opacity: 0,
-    scale: 0.96,
-    y: 12,
-    transition: { duration: 0.2 },
-  },
-};
-
-const fadeInOutVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { duration: 0.2 },
-  },
-  exit: {
-    opacity: 0,
-    transition: { duration: 0.15 },
-  },
+  exit: { opacity: 0, scale: 0.96, y: 12, transition: { duration: 0.2 } },
 };
 
 // ==================== OPTIONS CONFIG ====================
@@ -294,6 +186,7 @@ const OPTIONS = {
     choices: [
       { value: "Landing Page", prompt: "single-page landing page" },
       { value: "Business Site", prompt: "multi-section business website" },
+      { value: "Multi Page", prompt: "multi-page website" },
       { value: "Portfolio", prompt: "portfolio showcasing projects" },
       {
         value: "SaaS Product",
@@ -318,6 +211,7 @@ const OPTIONS = {
       { value: "Bold", prompt: "bold with strong colors and high contrast" },
       { value: "Tech", prompt: "futuristic and tech-forward" },
       { value: "Playful", prompt: "playful and creative with unique elements" },
+      { value: "Neumorphism", prompt: "soft ui" },
     ],
   },
   palette: {
@@ -733,7 +627,6 @@ const OPTIONS = {
   },
 };
 
-// Category order for display (customColors shown only when palette is "Custom")
 const CATEGORIES = [
   "template",
   "style",
@@ -762,25 +655,47 @@ const CATEGORIES = [
 
 function Home() {
   const { user, isAuthenticated, profile } = useAuth();
-
+  const [showHelp, setShowHelp] = useState(false);
   const [prompt, setPrompt] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
-  const [generatedHtml, setGeneratedHtml] = useState(null);
+  const [generatedHtml, setGeneratedHtml] = useState(() => {
+    if (typeof window !== "undefined") {
+      return sessionStorage.getItem("generatedHtml") || null;
+    }
+    return null;
+  });
+  const [localTokens, setLocalTokens] = useState(null);
 
-  // Initialize selections as empty (no defaults)
+  // Use ref to track if we just completed generation (prevents race conditions)
+  const justGeneratedRef = useRef(false);
+
+  // Persist generated HTML to sessionStorage
+  useEffect(() => {
+    if (generatedHtml) {
+      sessionStorage.setItem("generatedHtml", generatedHtml);
+    }
+  }, [generatedHtml]);
+
+  // Debug: log when key states change
+  useEffect(() => {
+    console.log(
+      "[DEBUG] generatedHtml changed:",
+      generatedHtml ? "has HTML" : "null"
+    );
+  }, [generatedHtml]);
+
   const [selections, setSelections] = useState(() => {
     const initial = {};
     Object.entries(OPTIONS).forEach(([key, opt]) => {
       if (opt.multi) {
-        initial[key] = []; // Empty array for multi-select
+        initial[key] = [];
       } else if (opt.isColorPicker) {
-        // Initialize custom colors with their defaults
         initial[key] = {};
         opt.fields.forEach((field) => {
           initial[key][field.key] = field.default;
         });
       } else {
-        initial[key] = null; // Null for single-select (nothing selected)
+        initial[key] = null;
       }
     });
     return initial;
@@ -791,9 +706,34 @@ function Home() {
   const [activeOption, setActiveOption] = useState(null);
   const [slideDirection, setSlideDirection] = useState(1);
   const [showTokenOverlay, setShowTokenOverlay] = useState(false);
-  const [showPreview, setShowPreview] = useState(false);
-  const [previewDevice, setPreviewDevice] = useState("desktop");
+  const [showPreview, setShowPreviewInternal] = useState(() => {
+    if (typeof window !== "undefined") {
+      return sessionStorage.getItem("showPreview") === "true";
+    }
+    return false;
+  });
+  const [isPreviewMinimized, setIsPreviewMinimizedInternal] = useState(() => {
+    if (typeof window !== "undefined") {
+      return sessionStorage.getItem("isPreviewMinimized") === "true";
+    }
+    return false;
+  });
   const [showCode, setShowCode] = useState(false);
+  const [generationTime, setGenerationTime] = useState(0);
+
+  // Wrapper functions to persist to sessionStorage
+  const setShowPreview = (val) => {
+    const newVal = typeof val === "function" ? val(showPreview) : val;
+    console.log("[DEBUG] setShowPreview called with:", newVal);
+    sessionStorage.setItem("showPreview", newVal.toString());
+    setShowPreviewInternal(newVal);
+  };
+
+  const setIsPreviewMinimized = (val) => {
+    const newVal = typeof val === "function" ? val(isPreviewMinimized) : val;
+    sessionStorage.setItem("isPreviewMinimized", newVal.toString());
+    setIsPreviewMinimizedInternal(newVal);
+  };
 
   // Modals
   const [showAuth, setShowAuth] = useState(false);
@@ -802,21 +742,152 @@ function Home() {
   const [pendingAction, setPendingAction] = useState(null);
 
   const inputRef = useRef(null);
+  const enhanceInputRef = useRef(null);
+  const generationTimerRef = useRef(null);
 
-  // Check if a category has a selection (not null/empty)
+  // Typewriter placeholder animation
+  const examplePrompts = [
+    "A modern portfolio site for a photographer with a dark theme...",
+    "Landing page for an AI startup with gradient backgrounds...",
+    "Restaurant website with online menu and reservation form...",
+    "Personal blog with minimalist design and reading progress...",
+    "SaaS dashboard landing page with pricing comparison...",
+    "Creative agency site with bold typography and animations...",
+  ];
+
+  const [placeholderText, setPlaceholderText] = useState("");
+  const [placeholderIndex, setPlaceholderIndex] = useState(0);
+  const [charIndex, setCharIndex] = useState(0);
+  const [isTyping, setIsTyping] = useState(true);
+  const placeholderTimeoutRef = useRef(null);
+  // Check if user has made any customizations
+  const hasCustomizations = useMemo(() => {
+    return Object.entries(selections).some(([key, value]) => {
+      if (Array.isArray(value)) {
+        return value.length > 0;
+      }
+      if (typeof value === "object" && value !== null) {
+        return Object.keys(value).length > 0;
+      }
+      return value !== null;
+    });
+  }, [selections]);
+
+  const showPlaceholderAnimation = !prompt && !isGenerating;
+
+  // Update the useEffect for typewriter timing:
+
+  useEffect(() => {
+    if (!showPlaceholderAnimation) {
+      setPlaceholderText("");
+      return;
+    }
+
+    const currentPrompt = examplePrompts[placeholderIndex];
+
+    const typeCharacter = () => {
+      if (isTyping) {
+        // Typing forward
+        if (charIndex < currentPrompt.length) {
+          setPlaceholderText(currentPrompt.slice(0, charIndex + 1));
+          setCharIndex((prev) => prev + 1);
+          placeholderTimeoutRef.current = setTimeout(
+            typeCharacter,
+            10 + Math.random() * 20 // Typing speed
+          );
+        } else {
+          // Finished typing, wait 1 second then start erasing
+          placeholderTimeoutRef.current = setTimeout(() => {
+            setIsTyping(false);
+            typeCharacter();
+          }, 1000); // Wait 1 second before erasing
+        }
+      } else {
+        // Erasing
+        if (charIndex > 0) {
+          setCharIndex((prev) => prev - 1);
+          setPlaceholderText(currentPrompt.slice(0, charIndex - 1));
+          placeholderTimeoutRef.current = setTimeout(typeCharacter, 20); // Erasing speed
+        } else {
+          // Finished erasing, wait 1 second then start typing next prompt
+          placeholderTimeoutRef.current = setTimeout(() => {
+            setPlaceholderIndex((prev) => (prev + 1) % examplePrompts.length);
+            setIsTyping(true);
+            placeholderTimeoutRef.current = setTimeout(typeCharacter, 1000); // Wait 1 second before typing next
+          }, 1000); // Wait 1 second after erasing before moving to next prompt
+        }
+      }
+    };
+
+    placeholderTimeoutRef.current = setTimeout(typeCharacter, 100); // Initial delay
+
+    return () => {
+      if (placeholderTimeoutRef.current) {
+        clearTimeout(placeholderTimeoutRef.current);
+      }
+    };
+  }, [showPlaceholderAnimation, placeholderIndex, charIndex, isTyping]);
+
+  // Clean up timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (placeholderTimeoutRef.current) {
+        clearTimeout(placeholderTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  // Reset typewriter when user starts typing
+  useEffect(() => {
+    if (prompt.trim()) {
+      setPlaceholderText("");
+      if (placeholderTimeoutRef.current) {
+        clearTimeout(placeholderTimeoutRef.current);
+      }
+    } else if (!hasCustomizations && !isGenerating) {
+      // Restart the typewriter effect
+      setPlaceholderIndex(0);
+      setCharIndex(0);
+      setIsTyping(true);
+    }
+  }, [prompt, hasCustomizations, isGenerating]);
+
+  // Generation timer
+  useEffect(() => {
+    if (isGenerating) {
+      setGenerationTime(0);
+      generationTimerRef.current = setInterval(() => {
+        setGenerationTime((t) => t + 1);
+      }, 1000);
+    } else {
+      if (generationTimerRef.current) {
+        clearInterval(generationTimerRef.current);
+        generationTimerRef.current = null;
+      }
+    }
+    return () => {
+      if (generationTimerRef.current) {
+        clearInterval(generationTimerRef.current);
+      }
+    };
+  }, [isGenerating]);
+
+  const getEstimatedTime = () => {
+    const avgTime = 20; // Average generation time in seconds
+    const remaining = Math.max(0, avgTime - generationTime);
+    if (generationTime < 5) return "Initializing...";
+    if (remaining > 0) return `~${remaining}s remaining`;
+    return "Almost done...";
+  };
+
   const hasSelection = (key) => {
     const opt = OPTIONS[key];
     if (!opt) return false;
-    if (opt.multi) {
-      return selections[key]?.length > 0;
-    }
-    if (opt.isColorPicker) {
-      return selections.palette === "Custom";
-    }
+    if (opt.multi) return selections[key]?.length > 0;
+    if (opt.isColorPicker) return selections.palette === "Custom";
     return selections[key] !== null && selections[key] !== undefined;
   };
 
-  // Get display value for a selection
   const getDisplayValue = (key) => {
     const opt = OPTIONS[key];
     if (opt.multi) {
@@ -828,45 +899,38 @@ function Home() {
     return selections[key];
   };
 
-  // Build the full prompt for AI - only includes selected options
   const buildFullPrompt = () => {
     const s = selections;
 
-    // Get prompt text for a selection, returns null if not selected
     const getPromptText = (key) => {
       const opt = OPTIONS[key];
       if (!opt) return null;
-
       if (opt.multi) {
         if (!selections[key] || selections[key].length === 0) return null;
-        const items = selections[key].map((val) => {
-          const choice = opt.choices.find((c) => c.value === val);
-          return choice?.prompt || val;
-        });
-        return items.join(", ");
+        return selections[key]
+          .map((val) => {
+            const choice = opt.choices.find((c) => c.value === val);
+            return choice?.prompt || val;
+          })
+          .join(", ");
       }
-
       if (selections[key] === null || selections[key] === undefined)
         return null;
       const choice = opt.choices.find((c) => c.value === selections[key]);
       return choice?.prompt || selections[key];
     };
 
-    // Build conditional line - only add if selection exists
     const addLine = (label, key) => {
       const text = getPromptText(key);
       return text ? `- ${label}: ${text}` : null;
     };
 
-    // Template line (required for basic structure)
     const templateText = getPromptText("template");
     const templateLine = templateText ? `a ${templateText}` : "a";
 
-    // Build design specs - only include selected ones
     const designSpecs = [
       addLine("Style", "style"),
       addLine("Colors", "palette"),
-      // Add custom colors if palette is "Custom"
       s.palette === "Custom" && s.customColors
         ? `- Custom Colors: primary ${s.customColors.primary}, secondary ${s.customColors.secondary}, accent ${s.customColors.accent}, background ${s.customColors.background}, text ${s.customColors.text}`
         : null,
@@ -878,7 +942,6 @@ function Home() {
       addLine("Inspiration", "inspiration"),
     ].filter(Boolean);
 
-    // Build content specs
     const contentSpecs = [
       addLine("Brand Voice", "tone"),
       addLine("Copy Length", "copyLength"),
@@ -888,7 +951,6 @@ function Home() {
       addLine("Target Audience", "audience"),
     ].filter(Boolean);
 
-    // Build sections list
     const sectionsText =
       s.sections && s.sections.length > 0
         ? s.sections
@@ -902,7 +964,6 @@ function Home() {
             .join("\n")
         : null;
 
-    // Build sticky elements
     const stickyText =
       s.stickyElements && s.stickyElements.length > 0
         ? s.stickyElements
@@ -916,60 +977,41 @@ function Home() {
             .join("\n")
         : null;
 
-    // Build visual specs
     const visualSpecs = [
       addLine("Images", "images"),
       addLine("Animations", "animation"),
       addLine("Social Proof", "socialProof"),
     ].filter(Boolean);
 
-    // Build technical specs
     const techSpecs = [
       addLine("CSS", "framework"),
       addLine("Accessibility", "accessibility"),
     ].filter(Boolean);
 
-    // Creative direction
     const creativityText = getPromptText("creativity");
 
-    // Assemble the prompt - only include sections that have content
     let promptParts = [
       `Create ${templateLine} website.`,
       "",
       `USER DESCRIPTION: ${prompt}`,
     ];
 
-    if (designSpecs.length > 0) {
+    if (designSpecs.length > 0)
       promptParts.push("", "DESIGN SPECIFICATIONS:", ...designSpecs);
-    }
-
-    if (contentSpecs.length > 0) {
+    if (contentSpecs.length > 0)
       promptParts.push("", "CONTENT & BRAND:", ...contentSpecs);
-    }
-
-    if (sectionsText) {
+    if (sectionsText)
       promptParts.push("", "PAGE SECTIONS (in this order):", sectionsText);
-    }
-
-    if (visualSpecs.length > 0) {
+    if (visualSpecs.length > 0)
       promptParts.push("", "VISUAL ELEMENTS:", ...visualSpecs);
-    }
-
-    if (stickyText) {
-      promptParts.push("", "UI ELEMENTS:", stickyText);
-    }
-
-    if (techSpecs.length > 0) {
-      promptParts.push("", "TECHNICAL:", ...techSpecs);
-    }
-
-    if (creativityText) {
+    if (stickyText) promptParts.push("", "UI ELEMENTS:", stickyText);
+    if (techSpecs.length > 0) promptParts.push("", "TECHNICAL:", ...techSpecs);
+    if (creativityText)
       promptParts.push(
         "",
         "CREATIVE DIRECTION:",
         `- Creativity Level: ${creativityText}`
       );
-    }
 
     promptParts.push(
       "",
@@ -987,25 +1029,13 @@ Return ONLY the HTML code, no explanations.`
     return promptParts.join("\n");
   };
 
-  // Token calculation
   const tokenCost = useMemo(() => {
-    return calculateTokenCost(prompt, {
-      templateType: selections.template?.toLowerCase(),
-      stylePreset: selections.style?.toLowerCase(),
-      darkMode: selections.mode === "Dark",
-      selectedSections: selections.sections,
-      layoutType: selections.layout?.toLowerCase(),
-      imageStyle: selections.images?.toLowerCase(),
-      framework: selections.framework?.toLowerCase(),
-      colorPalette: selections.palette?.toLowerCase(),
-      advancedOptions: [],
-    });
+    return calculateTokenCost(prompt, selections, false);
   }, [prompt, selections]);
 
-  const userTokens = profile?.tokens || 0;
+  const userTokens = localTokens ?? profile?.tokens ?? 0;
   const tokenBalance = checkTokenBalance(userTokens, tokenCost.cost);
 
-  // Get categories with selections for pills display
   const getActiveCategories = () => {
     return CATEGORIES.filter((key) => hasSelection(key)).map((key) => ({
       key,
@@ -1018,11 +1048,18 @@ Return ONLY the HTML code, no explanations.`
 
   useEffect(() => {
     const handleEsc = (e) => {
-      if (e.key === "Escape") closeAllOverlays();
+      if (e.key === "Escape") {
+        if (showPreview) {
+          setShowPreview(false);
+          setIsPreviewMinimized(true);
+        } else {
+          closeAllOverlays();
+        }
+      }
     };
     document.addEventListener("keydown", handleEsc);
     return () => document.removeEventListener("keydown", handleEsc);
-  }, []);
+  }, [showPreview]);
 
   const closeAllOverlays = () => {
     setShowOverlay(false);
@@ -1041,11 +1078,15 @@ Return ONLY the HTML code, no explanations.`
       }));
     } else {
       setSelections((prev) => ({ ...prev, [optionKey]: value }));
-      // Go back to categories after single selection
-      setTimeout(() => {
-        setSlideDirection(-1);
-        setActiveOption(null);
-      }, 120);
+
+      // Only close overlay automatically for non-Custom selections
+      // Keep it open for Custom colors so user can pick colors
+      if (!(optionKey === "palette" && value === "Custom")) {
+        setTimeout(() => {
+          setSlideDirection(-1);
+          setActiveOption(null);
+        }, 120);
+      }
     }
   };
 
@@ -1093,31 +1134,91 @@ Return ONLY the HTML code, no explanations.`
     closeAllOverlays();
 
     const fullPrompt = buildFullPrompt();
-    console.log("Full prompt:", fullPrompt);
 
     try {
-      const response = await fetch("/api/generate-website", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${user?.access_token}`,
-        },
-        body: JSON.stringify({
-          prompt: fullPrompt,
-          customization: selections,
-        }),
-      });
+      // Get session without triggering listeners
+      const { data: sessionData } = await supabase.auth.getSession();
+      const accessToken = sessionData?.session?.access_token;
 
-      if (response.ok) {
-        const data = await response.json();
-        setGeneratedHtml(data.html);
-      } else {
-        setGeneratedHtml(generateDemo());
+      if (!accessToken) {
+        console.error("No access token");
+        setIsGenerating(false);
+        setShowAuth(true);
+        return;
       }
-    } catch {
-      setGeneratedHtml(generateDemo());
-    } finally {
+
+      // Call the Supabase edge function
+      const response = await fetch(
+        `${SUPABASE_URL}/functions/v1/generate-website`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify({
+            prompt: fullPrompt,
+            customization: selections,
+            isRefinement: false,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        if (response.status === 402) {
+          setShowTokens(true);
+          setIsGenerating(false);
+          return;
+        }
+
+        if (response.status === 401) {
+          setShowAuth(true);
+          setIsGenerating(false);
+          return;
+        }
+
+        throw new Error(data.error || "Generation failed");
+      }
+
+      if (data.success && data.html) {
+        console.log("[DEBUG] Generation successful, setting state...");
+
+        // Update local token balance immediately
+        if (typeof data.tokensRemaining === "number") {
+          setLocalTokens(data.tokensRemaining);
+        }
+
+        // Mark that we just generated - prevents any race conditions
+        justGeneratedRef.current = true;
+
+        // Set the HTML and show preview
+        setGeneratedHtml(data.html);
+        setIsGenerating(false);
+        setIsPreviewMinimized(false);
+        setShowPreview(true);
+
+        console.log(
+          "[DEBUG] State set - showPreview: true, html length:",
+          data.html.length
+        );
+
+        // Clear the flag after a short delay
+        setTimeout(() => {
+          justGeneratedRef.current = false;
+          console.log("[DEBUG] Generation lock released");
+        }, 1000);
+      } else {
+        throw new Error("No HTML returned");
+      }
+    } catch (error) {
+      console.error("Generation error:", error);
+      // Fallback to demo
+      const demoHtml = generateDemo();
+      setGeneratedHtml(demoHtml);
       setIsGenerating(false);
+      setIsPreviewMinimized(false);
       setShowPreview(true);
     }
   };
@@ -1174,22 +1275,12 @@ Return ONLY the HTML code, no explanations.`
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-:root{
-  --primary:${primaryColor};
-  --primary-dark:${colors[0]};
-  --primary-light:${colors[2]};
-  --bg:${bg};
-  --text:${text};
-  --muted:${muted};
-  --surface:${surface};
-  --border:${border};
-  --radius:${radius};
-  --font:${fontFam};
-}
+:root{--primary:${primaryColor};--primary-dark:${colors[0]};--primary-light:${
+      colors[2]
+    };--bg:${bg};--text:${text};--muted:${muted};--surface:${surface};--border:${border};--radius:${radius};--font:${fontFam}}
 html{scroll-behavior:smooth}
 body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.6;-webkit-font-smoothing:antialiased}
 .container{max-width:1120px;margin:0 auto;padding:0 24px}
-
 nav{position:${
       hasSticky ? "fixed" : "relative"
     };top:0;left:0;right:0;padding:16px 0;background:${
@@ -1202,7 +1293,6 @@ nav .container{display:flex;justify-content:space-between;align-items:center}
 .nav-links a:hover{color:var(--text)}
 .nav-cta{padding:10px 20px;background:var(--primary);color:#fff;text-decoration:none;border-radius:var(--radius);font-size:0.875rem;font-weight:600;transition:background 0.15s}
 .nav-cta:hover{background:var(--primary-dark)}
-
 .hero{min-height:100vh;display:flex;align-items:center;padding:${
       hasSticky ? "120px 0 80px" : "80px 0"
     }}
@@ -1210,38 +1300,32 @@ nav .container{display:flex;justify-content:space-between;align-items:center}
 .hero h1{font-size:clamp(2.5rem,5vw,4rem);font-weight:700;line-height:1.1;margin-bottom:24px;letter-spacing:-0.02em}
 .hero p{font-size:1.125rem;color:var(--muted);margin-bottom:32px;line-height:1.7}
 .hero-btns{display:flex;gap:12px;flex-wrap:wrap}
-
 .btn{display:inline-flex;align-items:center;gap:8px;padding:14px 28px;font-size:0.9375rem;font-weight:600;text-decoration:none;border-radius:var(--radius);transition:all 0.15s;border:none;cursor:pointer}
 .btn-primary{background:var(--primary);color:#fff}
 .btn-primary:hover{background:var(--primary-dark)}
 .btn-secondary{background:var(--surface);color:var(--text);border:1px solid var(--border)}
 .btn-secondary:hover{border-color:var(--muted)}
-
 section{padding:100px 0}
 .section-header{text-align:center;margin-bottom:64px}
 .section-header h2{font-size:2.25rem;font-weight:700;margin-bottom:16px}
 .section-header p{color:var(--muted);font-size:1.125rem;max-width:600px;margin:0 auto}
-
 .features{background:var(--surface)}
 .features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:24px}
 .feature{padding:32px;background:var(--bg);border-radius:var(--radius);border:1px solid var(--border)}
 .feature-icon{width:48px;height:48px;background:var(--primary);color:#fff;border-radius:calc(var(--radius) * 0.75);display:flex;align-items:center;justify-content:center;margin-bottom:20px;font-size:1.25rem}
 .feature h3{font-size:1.125rem;font-weight:600;margin-bottom:12px}
 .feature p{color:var(--muted);font-size:0.9375rem}
-
 .cta-section{text-align:center;background:var(--primary);color:#fff;border-radius:var(--radius);margin:0 24px;padding:80px 40px}
 .cta-section h2{font-size:2.25rem;font-weight:700;margin-bottom:16px}
 .cta-section p{opacity:0.9;font-size:1.125rem;margin-bottom:32px;max-width:500px;margin-left:auto;margin-right:auto}
 .cta-section .btn{background:#fff;color:var(--primary)}
 .cta-section .btn:hover{background:var(--primary-light);color:var(--primary-dark)}
-
 footer{padding:48px 0;border-top:1px solid var(--border)}
 .footer-content{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:24px}
 .footer-links{display:flex;gap:24px}
 .footer-links a{color:var(--muted);text-decoration:none;font-size:0.875rem}
 .footer-links a:hover{color:var(--text)}
 .footer-copy{color:var(--muted);font-size:0.875rem}
-
 ${
   hasFloatingCta
     ? `.floating-cta{position:fixed;bottom:24px;right:24px;padding:14px 24px;background:var(--primary);color:#fff;border-radius:9999px;font-weight:600;text-decoration:none;box-shadow:0 4px 24px rgba(0,0,0,0.15);z-index:99}`
@@ -1254,113 +1338,34 @@ ${
       };width:56px;height:56px;background:var(--primary);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.5rem;box-shadow:0 4px 24px rgba(0,0,0,0.15);z-index:99;cursor:pointer;border:none}`
     : ""
 }
-
-@media(max-width:768px){
-  .nav-links{display:none}
-  .hero h1{font-size:2rem}
-  .features-grid{grid-template-columns:1fr}
-  .footer-content{flex-direction:column;text-align:center}
-  .cta-section{margin:0 16px;padding:60px 24px}
-}
-
+@media(max-width:768px){.nav-links{display:none}.hero h1{font-size:2rem}.features-grid{grid-template-columns:1fr}.footer-content{flex-direction:column;text-align:center}.cta-section{margin:0 16px;padding:60px 24px}}
 ${
   s.animation !== "None"
-    ? `
-@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-.hero-content{animation:fadeUp 0.5s ease-out}
-.feature{animation:fadeUp 0.5s ease-out backwards}
-.feature:nth-child(1){animation-delay:0.1s}
-.feature:nth-child(2){animation-delay:0.2s}
-.feature:nth-child(3){animation-delay:0.3s}
-`
+    ? `@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}.hero-content{animation:fadeUp 0.5s ease-out}.feature{animation:fadeUp 0.5s ease-out backwards}.feature:nth-child(1){animation-delay:0.1s}.feature:nth-child(2){animation-delay:0.2s}.feature:nth-child(3){animation-delay:0.3s}`
     : ""
 }
 </style>
 </head>
 <body>
-
-<nav>
-  <div class="container">
-    <div class="logo">${prompt.split(" ")[0] || "Brand"}</div>
-    <ul class="nav-links">
-      <li><a href="#features">Features</a></li>
-      <li><a href="#about">About</a></li>
-      <li><a href="#contact">Contact</a></li>
-    </ul>
-    <a href="#cta" class="nav-cta">${ctaText}</a>
-  </div>
-</nav>
-
-<section class="hero">
-  <div class="container">
-    <div class="hero-content">
-      <h1>${prompt || "Build Something Amazing"}</h1>
-      <p>${
-        s.copyLength === "Minimal"
-          ? "Transform your ideas into reality."
-          : s.copyLength === "Detailed"
-          ? "Transform your ideas into reality with our powerful platform. We provide everything you need to create, launch, and grow your digital presence. Join thousands of satisfied customers who have already made the switch."
-          : "Transform your ideas into reality with our powerful platform. Start building today and see what's possible."
-      }</p>
-      <div class="hero-btns">
-        <a href="#cta" class="btn btn-primary">${ctaText}</a>
-        <a href="#features" class="btn btn-secondary">Learn More</a>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="features" id="features">
-  <div class="container">
-    <div class="section-header">
-      <h2>Why Choose Us</h2>
-      <p>Everything you need to succeed</p>
-    </div>
-    <div class="features-grid">
-      <div class="feature">
-        <div class="feature-icon">⚡</div>
-        <h3>Lightning Fast</h3>
-        <p>Optimized for speed and performance.</p>
-      </div>
-      <div class="feature">
-        <div class="feature-icon">🎨</div>
-        <h3>Beautiful Design</h3>
-        <p>Stunning visuals that capture attention.</p>
-      </div>
-      <div class="feature">
-        <div class="feature-icon">📱</div>
-        <h3>Fully Responsive</h3>
-        <p>Looks perfect on every device.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section id="cta">
-  <div class="cta-section">
-    <h2>Ready to Get Started?</h2>
-    <p>Join thousands of satisfied customers today.</p>
-    <a href="#" class="btn">${
-      s.cta === "Urgent" ? "Start Free Now →" : "Get Started"
-    }</a>
-  </div>
-</section>
-
-<footer>
-  <div class="container">
-    <div class="footer-content">
-      <div class="footer-links">
-        <a href="#">Privacy</a>
-        <a href="#">Terms</a>
-        <a href="#">Contact</a>
-      </div>
-      <div class="footer-copy">© ${new Date().getFullYear()} ${
+<nav><div class="container"><div class="logo">${
       prompt.split(" ")[0] || "Brand"
-    }</div>
-    </div>
-  </div>
-</footer>
-
+    }</div><ul class="nav-links"><li><a href="#features">Features</a></li><li><a href="#about">About</a></li><li><a href="#contact">Contact</a></li></ul><a href="#cta" class="nav-cta">${ctaText}</a></div></nav>
+<section class="hero"><div class="container"><div class="hero-content"><h1>${
+      prompt || "Build Something Amazing"
+    }</h1><p>${
+      s.copyLength === "Minimal"
+        ? "Transform your ideas into reality."
+        : s.copyLength === "Detailed"
+        ? "Transform your ideas into reality with our powerful platform. We provide everything you need to create, launch, and grow your digital presence. Join thousands of satisfied customers who have already made the switch."
+        : "Transform your ideas into reality with our powerful platform. Start building today and see what's possible."
+    }</p><div class="hero-btns"><a href="#cta" class="btn btn-primary">${ctaText}</a><a href="#features" class="btn btn-secondary">Learn More</a></div></div></div></section>
+<section class="features" id="features"><div class="container"><div class="section-header"><h2>Why Choose Us</h2><p>Everything you need to succeed</p></div><div class="features-grid"><div class="feature"><div class="feature-icon">⚡</div><h3>Lightning Fast</h3><p>Optimized for speed and performance.</p></div><div class="feature"><div class="feature-icon">🎨</div><h3>Beautiful Design</h3><p>Stunning visuals that capture attention.</p></div><div class="feature"><div class="feature-icon">📱</div><h3>Fully Responsive</h3><p>Looks perfect on every device.</p></div></div></div></section>
+<section id="cta"><div class="cta-section"><h2>Ready to Get Started?</h2><p>Join thousands of satisfied customers today.</p><a href="#" class="btn">${
+      s.cta === "Urgent" ? "Start Free Now →" : "Get Started"
+    }</a></div></section>
+<footer><div class="container"><div class="footer-content"><div class="footer-links"><a href="#">Privacy</a><a href="#">Terms</a><a href="#">Contact</a></div><div class="footer-copy">© ${new Date().getFullYear()} ${
+      prompt.split(" ")[0] || "Brand"
+    }</div></div></div></footer>
 ${
   hasFloatingCta
     ? `<a href="#cta" class="floating-cta">${
@@ -1369,7 +1374,6 @@ ${
     : ""
 }
 ${hasChat ? `<button class="chat-btn">💬</button>` : ""}
-
 </body>
 </html>`;
   };
@@ -1385,6 +1389,78 @@ ${hasChat ? `<button class="chat-btn">💬</button>` : ""}
     URL.revokeObjectURL(url);
   };
 
+  const handleEnhance = async () => {
+    const value = enhanceInputRef.current?.value?.trim();
+    if (!value || !generatedHtml) return;
+
+    if (!isAuthenticated) {
+      setShowAuth(true);
+      return;
+    }
+
+    setIsGenerating(true);
+
+    try {
+      // Get session without triggering listeners
+      const { data: sessionData } = await supabase.auth.getSession();
+      const accessToken = sessionData?.session?.access_token;
+
+      if (!accessToken) {
+        setShowAuth(true);
+        setIsGenerating(false);
+        return;
+      }
+
+      const response = await fetch(
+        `${SUPABASE_URL}/functions/v1/generate-website`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify({
+            prompt: value,
+            customization: selections,
+            isRefinement: true,
+            previousHtml: generatedHtml,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        if (response.status === 402) {
+          setShowTokens(true);
+          setIsGenerating(false);
+          return;
+        }
+        throw new Error(data.error || "Refinement failed");
+      }
+
+      if (data.success && data.html) {
+        // Update local token balance
+        if (typeof data.tokensRemaining === "number") {
+          setLocalTokens(data.tokensRemaining);
+        }
+
+        setGeneratedHtml(data.html);
+        if (enhanceInputRef.current) {
+          enhanceInputRef.current.value = "";
+        }
+
+        console.log(
+          `Refinement complete. Tokens used: ${data.tokensUsed}, Remaining: ${data.tokensRemaining}`
+        );
+      }
+    } catch (error) {
+      console.error("Refinement error:", error);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -1394,8 +1470,11 @@ ${hasChat ? `<button class="chat-btn">💬</button>` : ""}
 
   const breakdown = getBreakdownDisplay(tokenCost.breakdown);
 
+  console.log(showPlaceholderAnimation);
+
   return (
     <div className="home">
+      <MetallicBlob />
       <div className="home__center">
         {/* Search Bar */}
         <motion.div
@@ -1404,15 +1483,32 @@ ${hasChat ? `<button class="chat-btn">💬</button>` : ""}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
         >
-          <input
-            ref={inputRef}
-            type="text"
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Describe your website..."
-            className="home__input"
-          />
+          <div className="home__input-wrapper">
+            <input
+              ref={inputRef}
+              type="text"
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder={
+                showPlaceholderAnimation ? "" : "Describe your website..."
+              }
+              className="home__input"
+              style={{
+                background: "transparent",
+                position: "relative",
+                zIndex: 2,
+              }}
+            />
+            {showPlaceholderAnimation && (
+              <div className="home__typewriter-overlay">
+                <span className="home__typewriter-text">
+                  {placeholderText}
+                  <span className="home__typewriter-cursor">|</span>
+                </span>
+              </div>
+            )}
+          </div>
           <div className="home__search-right">
             <AnimatePresence>
               {prompt.trim() && (
@@ -1431,10 +1527,19 @@ ${hasChat ? `<button class="chat-btn">💬</button>` : ""}
                   }}
                 >
                   <Coins size={14} />
-                  <span>{tokenCost.cost}</span>
+                  <span>-{tokenCost.cost}</span>
                 </motion.button>
               )}
             </AnimatePresence>
+            <motion.button
+              className="home__help-btn"
+              onClick={() => setShowHelp(true)}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              title="Get Help"
+            >
+              <HelpCircle size={18} />
+            </motion.button>
             <motion.button
               className={`home__gear-btn ${showOverlay ? "active" : ""}`}
               onClick={() => {
@@ -1462,6 +1567,56 @@ ${hasChat ? `<button class="chat-btn">💬</button>` : ""}
             </motion.button>
           </div>
         </motion.div>
+
+        {/* Generation Progress */}
+        <AnimatePresence>
+          {isGenerating && (
+            <motion.div
+              className="home__generating"
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+            >
+              <Loader2 size={14} className="spin" />
+              <span>Generating your website... {getEstimatedTime()}</span>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Minimized Preview Pill */}
+        <AnimatePresence>
+          {generatedHtml && isPreviewMinimized && !isGenerating && (
+            <motion.div
+              className="home__preview-pill"
+              initial={{ opacity: 0, y: -10, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -10, scale: 0.95 }}
+              transition={{ duration: 0.2 }}
+            >
+              <button
+                className="home__preview-pill-main"
+                onClick={() => {
+                  setIsPreviewMinimized(false);
+                  setShowPreview(true);
+                }}
+              >
+                <span>Generated Site</span>
+                <Maximize2 size={12} />
+              </button>
+              <button
+                className="home__preview-pill-discard"
+                onClick={() => {
+                  setGeneratedHtml(null);
+                  setIsPreviewMinimized(false);
+                }}
+                title="Discard"
+              >
+                <X size={12} />
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Active Selection Pills */}
         <AnimatePresence mode="popLayout">
@@ -1620,7 +1775,6 @@ ${hasChat ? `<button class="chat-btn">💬</button>` : ""}
                           ? selections[activeOption]?.includes(choice.value)
                           : selections[activeOption] === choice.value;
 
-                        // Color palette with swatches
                         if (activeOption === "palette" && choice.colors) {
                           return (
                             <motion.button
@@ -1645,7 +1799,6 @@ ${hasChat ? `<button class="chat-btn">💬</button>` : ""}
                           );
                         }
 
-                        // Custom color option
                         if (activeOption === "palette" && choice.isCustom) {
                           return (
                             <motion.button
@@ -1691,26 +1844,61 @@ ${hasChat ? `<button class="chat-btn">💬</button>` : ""}
                         );
                       })}
                     </motion.div>
-
-                    {/* Custom Color Picker - shows when Custom palette is selected */}
                     {activeOption === "palette" &&
                       selections.palette === "Custom" && (
                         <motion.div
-                          className="home__custom-colors"
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: "auto" }}
-                          exit={{ opacity: 0, height: 0 }}
+                          className="home__color-pills-wrapper"
+                          initial={{ opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.2 }}
                         >
-                          <div className="home__custom-colors-grid">
+                          <div className="home__color-pills">
                             {OPTIONS.customColors.fields.map((field) => (
-                              <div
-                                key={field.key}
-                                className="home__color-field"
-                              >
-                                <label>{field.label}</label>
-                                <div className="home__color-input-wrapper">
+                              <div key={field.key} className="home__color-pill">
+                                <label className="home__color-pill-label">
+                                  {field.label}
+                                </label>
+                                <div className="home__color-pill-input-group">
+                                  <button
+                                    className="home__color-pill-btn"
+                                    style={{
+                                      backgroundColor:
+                                        selections.customColors?.[field.key] ||
+                                        field.default,
+                                      borderColor: `rgba(255, 255, 255, ${
+                                        selections.customColors?.[field.key]
+                                          ? "0.2"
+                                          : "0.1"
+                                      })`,
+                                    }}
+                                    onClick={() => {
+                                      // Create a hidden color input and trigger it
+                                      const input =
+                                        document.createElement("input");
+                                      input.type = "color";
+                                      input.value =
+                                        selections.customColors?.[field.key] ||
+                                        field.default;
+                                      input.onchange = (e) => {
+                                        setSelections((prev) => ({
+                                          ...prev,
+                                          customColors: {
+                                            ...prev.customColors,
+                                            [field.key]: e.target.value,
+                                          },
+                                        }));
+                                      };
+                                      input.click();
+                                    }}
+                                  >
+                                    <span className="home__color-pill-value">
+                                      {selections.customColors?.[field.key] ||
+                                        field.default}
+                                    </span>
+                                  </button>
                                   <input
                                     type="color"
+                                    className="home__color-pill-input-hidden"
                                     value={
                                       selections.customColors?.[field.key] ||
                                       field.default
@@ -1725,17 +1913,21 @@ ${hasChat ? `<button class="chat-btn">💬</button>` : ""}
                                       }));
                                     }}
                                   />
-                                  <span className="home__color-value">
-                                    {selections.customColors?.[field.key] ||
-                                      field.default}
-                                  </span>
                                 </div>
                               </div>
                             ))}
                           </div>
+
+                          <motion.button
+                            className="home__done-btn"
+                            onClick={goToCategories}
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                          >
+                            Done
+                          </motion.button>
                         </motion.div>
                       )}
-
                     {OPTIONS[activeOption]?.multi && (
                       <motion.button
                         className="home__done-btn"
@@ -1834,129 +2026,112 @@ ${hasChat ? `<button class="chat-btn">💬</button>` : ""}
         )}
       </AnimatePresence>
 
-      {/* Preview Modal */}
+      {/* Preview Modal with GeneratedPreview */}
       <AnimatePresence>
         {showPreview && generatedHtml && (
           <motion.div
-            className="preview-modal"
-            onClick={() => setShowPreview(false)}
-            variants={previewModalVariants}
+            className="preview-overlay"
+            onClick={() => {
+              setShowPreview(false);
+              setIsPreviewMinimized(true);
+            }}
+            variants={previewOverlayVariants}
             initial="hidden"
             animate="visible"
             exit="exit"
           >
             <motion.div
-              className="preview-modal__content"
+              className="preview-container"
               onClick={(e) => e.stopPropagation()}
               variants={previewContentVariants}
               initial="hidden"
               animate="visible"
               exit="exit"
             >
-              <div className="preview-modal__header">
-                <div className="preview-modal__tabs">
+              {/* Extra controls header */}
+              <div className="preview-header">
+                <div className="preview-tabs">
                   <button
-                    className={!showCode ? "active" : ""}
+                    className={`preview-tab ${!showCode ? "active" : ""}`}
                     onClick={() => setShowCode(false)}
                   >
-                    <Eye size={14} /> Preview
+                    <Eye size={14} />
+                    Preview
                   </button>
                   <button
-                    className={showCode ? "active" : ""}
+                    className={`preview-tab ${showCode ? "active" : ""}`}
                     onClick={() => setShowCode(true)}
                   >
-                    <Code2 size={14} /> Code
+                    <Code2 size={14} />
+                    Code
                   </button>
                 </div>
-                <div className="preview-modal__devices">
+
+                <div className="preview-actions">
                   <button
-                    className={previewDevice === "desktop" ? "active" : ""}
-                    onClick={() => setPreviewDevice("desktop")}
+                    className="preview-action-btn"
+                    onClick={handleGenerate}
+                    disabled={isGenerating}
+                    title="Regenerate"
                   >
-                    <Monitor size={15} />
+                    <RotateCcw
+                      size={14}
+                      className={isGenerating ? "spin" : ""}
+                    />
                   </button>
                   <button
-                    className={previewDevice === "tablet" ? "active" : ""}
-                    onClick={() => setPreviewDevice("tablet")}
+                    className="preview-action-btn"
+                    onClick={handleDownload}
+                    title="Download"
                   >
-                    <Tablet size={15} />
+                    <Download size={14} />
                   </button>
                   <button
-                    className={previewDevice === "mobile" ? "active" : ""}
-                    onClick={() => setPreviewDevice("mobile")}
-                  >
-                    <Smartphone size={15} />
-                  </button>
-                </div>
-                <div className="preview-modal__actions">
-                  <button onClick={handleGenerate} disabled={isGenerating}>
-                    <RotateCcw size={15} />
-                  </button>
-                  <button onClick={handleDownload}>
-                    <Download size={15} />
-                  </button>
-                  <button
-                    className="preview-modal__deploy"
+                    className="preview-deploy-btn"
                     onClick={() => setShowDeploy(true)}
                   >
-                    <Rocket size={14} /> Deploy
+                    <Rocket size={14} />
+                    Deploy
                   </button>
                   <button
-                    className="preview-modal__close"
-                    onClick={() => setShowPreview(false)}
+                    className="preview-close-btn"
+                    onClick={() => {
+                      setShowPreview(false);
+                      setIsPreviewMinimized(true);
+                    }}
+                    title="Minimize"
                   >
-                    <X size={18} />
+                    <X size={16} />
                   </button>
                 </div>
               </div>
-              <div className="preview-modal__body">
-                <AnimatePresence mode="wait">
-                  {showCode ? (
-                    <motion.div
-                      key="code"
-                      className="preview-modal__code"
-                      variants={fadeInOutVariants}
-                      initial="hidden"
-                      animate="visible"
-                      exit="exit"
-                    >
-                      <pre>
-                        <code>{generatedHtml}</code>
-                      </pre>
-                    </motion.div>
-                  ) : (
-                    <motion.div
-                      key="preview"
-                      className={`preview-modal__frame preview-modal__frame--${previewDevice}`}
-                      variants={fadeInOutVariants}
-                      initial="hidden"
-                      animate="visible"
-                      exit="exit"
-                      layout
-                    >
-                      <iframe
-                        srcDoc={generatedHtml}
-                        title="Preview"
-                        sandbox="allow-scripts"
-                      />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+
+              {/* Content area */}
+              <div className="preview-body">
+                {showCode ? (
+                  <div className="preview-code">
+                    <pre>
+                      <code>{generatedHtml}</code>
+                    </pre>
+                  </div>
+                ) : (
+                  <GeneratedPreview html={generatedHtml} />
+                )}
               </div>
-              <div className="preview-modal__enhance">
+
+              {/* Enhance input */}
+              <div className="preview-enhance">
                 <input
+                  ref={enhanceInputRef}
                   type="text"
                   placeholder="Describe changes..."
-                  className="preview-modal__enhance-input"
                   onKeyDown={(e) => {
-                    if (e.key === "Enter" && e.target.value.trim()) {
-                      setPrompt((prev) => prev + ". " + e.target.value);
-                      e.target.value = "";
-                      handleGenerate();
-                    }
+                    if (e.key === "Enter") handleEnhance();
                   }}
                 />
-                <ChevronRight size={16} />
+                <button onClick={handleEnhance}>
+                  <ChevronRight size={16} />
+                </button>
               </div>
             </motion.div>
           </motion.div>
@@ -1992,6 +2167,165 @@ ${hasChat ? `<button class="chat-btn">💬</button>` : ""}
           }
         />
       )}
+      {/* Help Modal */}
+      {/* Help Modal */}
+      <AnimatePresence>
+        {showHelp && (
+          <motion.div
+            className="help-overlay"
+            onClick={() => setShowHelp(false)}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <motion.div
+              className="help-content"
+              onClick={(e) => e.stopPropagation()}
+              initial={{ opacity: 0, scale: 0.98, y: 4 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.98, y: 4 }}
+              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <div className="help-header">
+                <div className="help-title">
+                  <HelpCircle size={18} />
+                  <span>How to Use Website AI</span>
+                </div>
+                <button
+                  className="help-close"
+                  onClick={() => setShowHelp(false)}
+                >
+                  <X size={16} />
+                </button>
+              </div>
+
+              <div className="help-section">
+                <div className="help-section__title">
+                  <Sparkles size={14} />
+                  <span>AI Generation</span>
+                </div>
+                <div className="help-section__content">
+                  <p>
+                    Describe your website in natural language. The AI will
+                    understand your vision and generate a complete,
+                    production-ready website.
+                  </p>
+                  <ul>
+                    <li>Be specific about your business or purpose</li>
+                    <li>Mention any special features you need</li>
+                    <li>Include your target audience</li>
+                    <li>Describe the look and feel you want</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div className="help-section">
+                <div className="help-section__title">
+                  <Settings size={14} />
+                  <span>Customization Options</span>
+                </div>
+                <div className="help-section__content">
+                  <p>
+                    Click the gear button to access detailed customization
+                    options:
+                  </p>
+                  <ul>
+                    <li>Choose from 20+ design categories</li>
+                    <li>Select templates, colors, fonts, and layouts</li>
+                    <li>Pick your industry and target audience</li>
+                    <li>Configure page sections and features</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div className="help-section">
+                <div className="help-section__title">
+                  <Coins size={14} />
+                  <span>Token System</span>
+                </div>
+                <div className="help-section__content">
+                  <p>
+                    Every generation uses tokens. Our system is transparent and
+                    cost-effective:
+                  </p>
+                  <ul>
+                    <li>
+                      <strong>25 FREE tokens</strong> when you sign up
+                    </li>
+                    <li>Token cost shown before generation</li>
+                    <li>Complex websites use more tokens</li>
+                    <li>Simple sites use fewer tokens</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div className="help-section">
+                <div className="help-section__title">
+                  <Rocket size={14} />
+                  <span>Deploy with Nimbus</span>
+                </div>
+                <div className="help-section__content">
+                  <p>One-click deployment to Nimbus platform:</p>
+                  <ul>
+                    <li>Deploy your generated site in seconds</li>
+                    <li>Automatic SSL certificates included</li>
+                    <li>Global CDN for fast loading worldwide</li>
+                    <li>Custom domain support</li>
+                    <li>Continuous deployment from your projects</li>
+                    <li>Free tier available with basic features</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div className="help-section">
+                <div className="help-section__title">
+                  <Shield size={14} />
+                  <span>Security & Privacy</span>
+                </div>
+                <div className="help-section__content">
+                  <p>Your security and privacy are our top priorities:</p>
+                  <ul>
+                    <li>All data is encrypted and secure</li>
+                    <li>Payments processed securely through Stripe</li>
+                    <li>We never store your payment details</li>
+                    <li>Your generated websites are private to you</li>
+                    <li>No usage of your content for training models</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div className="help-tip">
+                <Lightbulb size={14} />
+                <span>
+                  <strong>Tip:</strong> Start with a simple description, then
+                  refine using the customization options for better results.
+                </span>
+              </div>
+
+              {/* Example Prompts Section */}
+              <div className="help-examples">
+                <div className="help-examples__title">Try these examples:</div>
+                <div className="help-examples__grid">
+                  {examplePrompts.map((example, index) => (
+                    <button
+                      key={index}
+                      className="help-example-pill"
+                      onClick={() => {
+                        setPrompt(example);
+                        setShowHelp(false);
+                        inputRef.current?.focus();
+                      }}
+                    >
+                      {example}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
