@@ -4,19 +4,19 @@ import {
   Route,
   useLocation,
 } from "react-router-dom";
-import { useEffect, lazy, Suspense } from "react";
+import { useEffect, lazy, Suspense, useState } from "react"; // Added useState
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import ScrollToTop from "./components/ScrollToTop";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
-import { BlobProvider } from "./contexts/BlobContext";
+import { ProjectProvider } from "./contexts/ProjectContext";
+import LegalModal from "./components/LegalModal"; // ADD THIS
+import RoadmapModal from "./components/RoadmapModal"; // ADD THIS
+import SupportModal from "./components/SupportModal"; // ADD THIS
 import "./styles/global.scss";
 
 const Home = lazy(() => import("./pages/Home"));
-const Roadmap = lazy(() => import("./pages/Roadmap"));
-const Support = lazy(() => import("./pages/Support"));
-const Legal = lazy(() => import("./pages/Legal"));
 
 const PageLoader = () => {
   const { isAuthenticated } = useAuth();
@@ -83,11 +83,14 @@ const PageLoader = () => {
     </div>
   );
 };
-
 function AppContent() {
   const location = useLocation();
   const { showResetPassword, setShowResetPassword, setSessionFromHash } =
     useAuth();
+
+  const [showLegal, setShowLegal] = useState(false);
+  const [showRoadmap, setShowRoadmap] = useState(false);
+  const [showSupport, setShowSupport] = useState(false); // ADD THIS STATE
 
   useEffect(() => {
     if (location.hash.includes("access_token")) {
@@ -101,16 +104,29 @@ function AppContent() {
       <Suspense fallback={<PageLoader />}>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/roadmap" element={<Roadmap />} />
-          <Route path="/support" element={<Support />} />
-          <Route path="/legal" element={<Legal />} />
         </Routes>
       </Suspense>
-      <Footer />
+
+      {/* Pass all handlers to Footer */}
+      <Footer
+        onLegalClick={() => setShowLegal(true)}
+        onRoadmapClick={() => setShowRoadmap(true)}
+        onSupportClick={() => setShowSupport(true)}
+      />
+
+      {/* Render all modals */}
+      <LegalModal isOpen={showLegal} onClose={() => setShowLegal(false)} />
+      <RoadmapModal
+        isOpen={showRoadmap}
+        onClose={() => setShowRoadmap(false)}
+      />
+      <SupportModal
+        isOpen={showSupport}
+        onClose={() => setShowSupport(false)}
+      />
     </>
   );
 }
-
 function App() {
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -125,12 +141,12 @@ function App() {
     <Router>
       <AuthProvider>
         <ThemeProvider>
-          <BlobProvider>
+          <ProjectProvider>
             <ScrollToTop />
             <div className="app">
               <AppContent />
             </div>
-          </BlobProvider>
+          </ProjectProvider>
         </ThemeProvider>
       </AuthProvider>
     </Router>

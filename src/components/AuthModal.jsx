@@ -53,7 +53,7 @@ function AuthModal({ isOpen, onClose, onAuthSuccess }) {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="auth-header">
-          <span className="auth-title">Sign in to build</span>
+          <span className="auth-title">Sign in to create</span>
           <button className="auth-close" onClick={handleClose}>
             <X size={16} />
           </button>

@@ -9,18 +9,21 @@ import {
   CreditCard,
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
+import { useProject } from "../contexts/ProjectContext"; // ADD THIS
 import AuthModal from "./AuthModal";
-import UserAccountModal from "./UserAccountModal";
 import TokenPurchaseModal from "./TokenPurchaseModal";
 import ProjectsModal from "./ProjectsModal";
 import BillingModal from "./BillingModal";
 import { useTheme } from "../contexts/ThemeContext";
 import "./Header.scss";
 
-function Header({ onEditProject, onDeployProject }) {
+function Header() {
   const { theme, toggleTheme } = useTheme();
   const location = useLocation();
   const isHomePage = location.pathname === "/";
+
+  // USE CONTEXT INSTEAD OF PROPS
+  const { editProject, deployProject } = useProject();
 
   const {
     user,
@@ -286,28 +289,22 @@ function Header({ onEditProject, onDeployProject }) {
         onForgotPassword={handleForgotPassword}
       />
 
-      {isAuthenticated && (
-        <UserAccountModal
-          isOpen={isAccountModalOpen}
-          onClose={() => setIsAccountModalOpen(false)}
-        />
-      )}
-
       <TokenPurchaseModal
         isOpen={isTokenModalOpen}
         onClose={() => setIsTokenModalOpen(false)}
       />
 
+      {/* UPDATED: Use context functions instead of props */}
       <ProjectsModal
         isOpen={isProjectsModalOpen}
         onClose={() => setIsProjectsModalOpen(false)}
         onEditProject={(project) => {
           setIsProjectsModalOpen(false);
-          onEditProject?.(project);
+          editProject(project); // Use context
         }}
         onDeployProject={(project) => {
           setIsProjectsModalOpen(false);
-          onDeployProject?.(project);
+          deployProject(project); // Use context
         }}
       />
 

@@ -1,244 +1,299 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   X,
   Rocket,
-  Globe,
   Check,
-  ExternalLink,
   Copy,
   Loader2,
-  Sparkles,
-  Shield,
-  Zap,
+  ExternalLink,
+  ChevronRight,
+  AlertCircle,
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
+import { supabase } from "../lib/supabaseClient";
 import useModalAnimation from "../hooks/useModalAnimation";
 import "./DeployModal.scss";
 
-const DEPLOY_PRICE = 3; // $3 per deployment
+const DEPLOY_PRICE = 3;
 
-function DeployModal({ isOpen, onClose, projectName, html }) {
-  const { user } = useAuth();
-  const { isVisible, isAnimating, closeModal } = useModalAnimation(
+function DeployModal({
+  isOpen,
+  onClose,
+  projectName,
+  html,
+  projectId,
+  prompt,
+  customization,
+}) {
+  const { shouldRender, isVisible, closeModal } = useModalAnimation(
     isOpen,
     onClose
   );
+  const { user } = useAuth();
 
-  const [subdomain, setSubdomain] = useState(
-    projectName
-      ?.toLowerCase()
-      .replace(/[^a-z0-9]/g, "-")
-      .slice(0, 30) || ""
-  );
-  const [isDeploying, setIsDeploying] = useState(false);
-  const [deployedUrl, setDeployedUrl] = useState(null);
+  const [step, setStep] = useState(1); // 1: subdomain, 2: success
+  const [subdomain, setSubdomain] = useState("");
+  const [processing, setProcessing] = useState(false);
   const [error, setError] = useState(null);
-  const [subdomainError, setSubdomainError] = useState(null);
+  const [deployedUrl, setDeployedUrl] = useState(null);
+  const [copied, setCopied] = useState(false);
 
-  const validateSubdomain = (value) => {
-    const cleaned = value.toLowerCase().replace(/[^a-z0-9-]/g, "");
-    setSubdomain(cleaned);
-
-    if (cleaned.length < 3) {
-      setSubdomainError("Subdomain must be at least 3 characters");
-    } else if (cleaned.length > 30) {
-      setSubdomainError("Subdomain must be 30 characters or less");
-    } else if (cleaned.startsWith("-") || cleaned.endsWith("-")) {
-      setSubdomainError("Subdomain cannot start or end with a hyphen");
-    } else {
-      setSubdomainError(null);
+  // Initialize subdomain from project name
+  useEffect(() => {
+    if (isOpen && projectName) {
+      const cleaned = projectName
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, "-")
+        .replace(/-+/g, "-")
+        .replace(/^-|-$/g, "")
+        .slice(0, 30);
+      setSubdomain(cleaned || "my-site");
     }
+  }, [isOpen, projectName]);
+
+  // Reset on close
+  useEffect(() => {
+    if (!isOpen) {
+      setStep(1);
+      setError(null);
+      setDeployedUrl(null);
+      setProcessing(false);
+    }
+  }, [isOpen]);
+
+  // Check for success return from Stripe
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const sessionId = params.get("session_id");
+    const deployedSubdomain = params.get("subdomain");
+
+    if (sessionId && deployedSubdomain) {
+      setDeployedUrl(`https://nimbus-${deployedSubdomain}.vercel.app`);
+      setStep(2);
+      // Clean URL
+      window.history.replaceState({}, "", window.location.pathname);
+    }
+  }, []);
+
+  const validateSubdomain = () => {
+    if (subdomain.length < 3) return "Min 3 characters";
+    if (subdomain.length > 30) return "Max 30 characters";
+    if (!/^[a-z0-9-]+$/.test(subdomain))
+      return "Letters, numbers, hyphens only";
+    if (subdomain.startsWith("-") || subdomain.endsWith("-"))
+      return "Can't start/end with hyphen";
+    return null;
   };
 
   const handleDeploy = async () => {
-    if (!subdomain || subdomainError) return;
+    if (validateSubdomain()) return;
 
-    setIsDeploying(true);
+    setProcessing(true);
     setError(null);
 
     try {
-      // Check subdomain availability
-      const checkResponse = await fetch(
-        `/api/deploy/check-subdomain?subdomain=${subdomain}`
+      let currentProjectId = projectId;
+
+      // If no projectId, save the project first
+      if (!currentProjectId) {
+        const projectData = {
+          user_id: user.id,
+          name: projectName || `Project ${new Date().toLocaleDateString()}`,
+          html_content: html,
+          template_type: customization?.template || "landing",
+          style_preset: customization?.style || "modern",
+          customization: {
+            ...customization,
+            prompt: prompt,
+          },
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        };
+
+        const { data: savedProject, error: saveError } = await supabase
+          .from("projects")
+          .insert(projectData)
+          .select()
+          .single();
+
+        if (saveError)
+          throw new Error("Failed to save project: " + saveError.message);
+        currentProjectId = savedProject.id;
+      }
+
+      // Create checkout session
+      const { data, error: invokeError } = await supabase.functions.invoke(
+        "create-deployment-checkout",
+        {
+          body: {
+            projectId: currentProjectId,
+            siteName: projectName || subdomain,
+            subdomain: subdomain,
+            successUrl: `${window.location.origin}/?session_id={CHECKOUT_SESSION_ID}&subdomain=${subdomain}`,
+            cancelUrl: window.location.href,
+          },
+        }
       );
-      const checkData = await checkResponse.json();
 
-      if (!checkData.available) {
-        setError("This subdomain is already taken. Please choose another.");
-        setIsDeploying(false);
-        return;
-      }
+      if (invokeError) throw invokeError;
+      if (data?.error) throw new Error(data.error);
 
-      // Create Stripe checkout for deployment
-      const response = await fetch("/api/deploy/create-checkout", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${user?.access_token}`,
-        },
-        body: JSON.stringify({
-          subdomain,
-          html,
-          projectName,
-          userId: user?.id,
-          price: DEPLOY_PRICE * 100, // cents
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to create checkout session");
-      }
-
-      const data = await response.json();
-
-      // For demo purposes, simulate successful deployment
-      // In production, redirect to Stripe checkout
-      if (data.checkoutUrl) {
-        window.location.href = data.checkoutUrl;
+      if (data?.url) {
+        window.location.href = data.url;
       } else {
-        // Demo mode - simulate deployment
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-        setDeployedUrl(`https://${subdomain}.nimbus.site`);
+        throw new Error("No checkout URL returned");
       }
     } catch (err) {
       console.error("Deploy error:", err);
-      setError("Failed to deploy. Please try again.");
-    } finally {
-      setIsDeploying(false);
+      setError(err.message || "Failed to start checkout");
+      setProcessing(false);
     }
   };
 
-  const copyToClipboard = () => {
-    if (deployedUrl) {
-      navigator.clipboard.writeText(deployedUrl);
-    }
+  const copyUrl = () => {
+    navigator.clipboard.writeText(deployedUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
-  if (!isVisible) return null;
+  if (!shouldRender) return null;
 
   return (
     <div
-      className={`modal-overlay ${isAnimating ? "active" : ""}`}
+      className={`deploy-overlay ${isVisible ? "active" : ""}`}
       onClick={closeModal}
     >
       <div
-        className={`deploy-modal ${isAnimating ? "active" : ""}`}
+        className={`deploy-content ${isVisible ? "active" : ""}`}
         onClick={(e) => e.stopPropagation()}
       >
-        <button className="modal-close" onClick={closeModal}>
-          <X size={20} />
-        </button>
-
-        {deployedUrl ? (
-          // Success state
-          <div className="deploy-modal__success">
-            <div className="success-icon">
-              <Check size={32} />
-            </div>
-            <h2>Your site is live! 🎉</h2>
-            <p>Your website has been deployed successfully.</p>
-
-            <div className="deployed-url">
-              <Globe size={18} />
-              <a href={deployedUrl} target="_blank" rel="noopener noreferrer">
-                {deployedUrl}
-              </a>
-              <button onClick={copyToClipboard} title="Copy URL">
-                <Copy size={16} />
+        {step === 1 && (
+          <>
+            <div className="deploy-header">
+              <span className="deploy-title">
+                <Rocket size={16} />
+                Deploy
+              </span>
+              <button className="deploy-close" onClick={closeModal}>
+                <X size={16} />
               </button>
             </div>
 
-            <div className="success-actions">
+            <div className="deploy-field">
+              <label>Site URL</label>
+              <div className="deploy-input-group">
+                <span className="deploy-input-prefix">nimbus-</span>
+                <input
+                  type="text"
+                  value={subdomain}
+                  onChange={(e) =>
+                    setSubdomain(
+                      e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "")
+                    )
+                  }
+                  placeholder="my-site"
+                  maxLength={30}
+                  disabled={processing}
+                />
+                <span className="deploy-input-suffix">.vercel.app</span>
+              </div>
+              {subdomain && validateSubdomain() && (
+                <span className="deploy-field-error">
+                  {validateSubdomain()}
+                </span>
+              )}
+            </div>
+
+            <div className="deploy-summary">
+              <div className="deploy-summary-row">
+                <span>One-time deployment</span>
+                <strong>${DEPLOY_PRICE}</strong>
+              </div>
+            </div>
+
+            <div className="deploy-features">
+              <span>✓ Free SSL</span>
+              <span>✓ Global CDN</span>
+              <span>✓ Custom domain later</span>
+            </div>
+
+            {error && (
+              <div className="deploy-error">
+                <AlertCircle size={14} />
+                {error}
+              </div>
+            )}
+
+            <div className="deploy-nav">
+              <button
+                className="deploy-btn-secondary"
+                onClick={closeModal}
+                disabled={processing}
+              >
+                Cancel
+              </button>
+              <button
+                className="deploy-btn-primary"
+                onClick={handleDeploy}
+                disabled={processing || validateSubdomain()}
+              >
+                {processing ? (
+                  <>
+                    <Loader2 size={14} className="spinning" />
+                    Processing...
+                  </>
+                ) : (
+                  <>
+                    <Rocket size={14} />
+                    Deploy ${DEPLOY_PRICE}
+                  </>
+                )}
+              </button>
+            </div>
+
+            <p className="deploy-secure-note">🔒 Secure checkout via Stripe</p>
+          </>
+        )}
+
+        {step === 2 && (
+          <>
+            <div className="deploy-header">
+              <span className="deploy-title deploy-title--success">
+                <Check size={16} />
+                Live!
+              </span>
+              <button className="deploy-close" onClick={closeModal}>
+                <X size={16} />
+              </button>
+            </div>
+
+            <div className="deploy-success">
+              <div className="deploy-url-box">
+                <a href={deployedUrl} target="_blank" rel="noopener noreferrer">
+                  {deployedUrl?.replace("https://", "")}
+                </a>
+                <button onClick={copyUrl} className="deploy-copy-btn">
+                  {copied ? <Check size={14} /> : <Copy size={14} />}
+                </button>
+              </div>
+              <p className="deploy-success-note">
+                Your site is live! Add a custom domain from your Projects.
+              </p>
+            </div>
+
+            <div className="deploy-nav">
+              <button className="deploy-btn-secondary" onClick={closeModal}>
+                Done
+              </button>
               <a
                 href={deployedUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn btn-primary"
+                className="deploy-btn-primary"
               >
-                <ExternalLink size={18} />
+                <ExternalLink size={14} />
                 Visit Site
               </a>
-              <button className="btn btn-secondary" onClick={closeModal}>
-                Done
-              </button>
-            </div>
-          </div>
-        ) : (
-          // Configuration state
-          <>
-            <div className="deploy-modal__header">
-              <div className="deploy-icon">
-                <Rocket size={28} />
-              </div>
-              <h2>Deploy Your Website</h2>
-              <p>Your site will be live in seconds</p>
-            </div>
-
-            <div className="deploy-modal__content">
-              <div className="subdomain-input">
-                <label>Choose your subdomain</label>
-                <div className="subdomain-field">
-                  <span className="prefix">https://</span>
-                  <input
-                    type="text"
-                    value={subdomain}
-                    onChange={(e) => validateSubdomain(e.target.value)}
-                    placeholder="my-awesome-site"
-                    maxLength={30}
-                  />
-                  <span className="suffix">.nimbus.site</span>
-                </div>
-                {subdomainError && (
-                  <span className="subdomain-error">{subdomainError}</span>
-                )}
-                <span className="subdomain-hint">
-                  Letters, numbers, and hyphens only. 3-30 characters.
-                </span>
-              </div>
-
-              <div className="deploy-features">
-                <div className="feature">
-                  <Shield size={18} />
-                  <span>Free SSL certificate</span>
-                </div>
-                <div className="feature">
-                  <Zap size={18} />
-                  <span>Global CDN</span>
-                </div>
-                <div className="feature">
-                  <Sparkles size={18} />
-                  <span>Instant deployment</span>
-                </div>
-              </div>
-
-              {error && <div className="deploy-modal__error">{error}</div>}
-            </div>
-
-            <div className="deploy-modal__footer">
-              <div className="price-info">
-                <span>One-time deployment fee</span>
-                <span className="price">${DEPLOY_PRICE}</span>
-              </div>
-
-              <button
-                className="btn btn-primary deploy-btn"
-                onClick={handleDeploy}
-                disabled={isDeploying || !subdomain || !!subdomainError}
-              >
-                {isDeploying ? (
-                  <>
-                    <Loader2 size={18} className="spinning" />
-                    Deploying...
-                  </>
-                ) : (
-                  <>
-                    <Rocket size={18} />
-                    Deploy for ${DEPLOY_PRICE}
-                  </>
-                )}
-              </button>
-
-              <p className="secure-note">🔒 Secure payment via Stripe</p>
             </div>
           </>
         )}
