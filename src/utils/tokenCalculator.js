@@ -1,13 +1,6 @@
 // utils/tokenCalculator.js
 // Dynamic token cost calculation - MUST MATCH edge function exactly
 
-/**
- * Calculate the token cost for generating a website
- * @param {string} prompt - The user's description
- * @param {Object} selections - Customization selections object
- * @param {boolean} isRefinement - Whether this is a refinement of existing content
- * @returns {{ cost: number, breakdown: Object, estimate: string }}
- */
 export function calculateTokenCost(
   prompt,
   selections = {},
@@ -15,14 +8,10 @@ export function calculateTokenCost(
 ) {
   const breakdown = {};
 
-  // Base cost - reduced for better free tier experience
-  if (isRefinement) {
-    breakdown.base = 3;
-  } else {
-    breakdown.base = 5;
-  }
+  // Base cost
+  breakdown.base = isRefinement ? 3 : 5;
 
-  // Prompt complexity (word count) - simplified, lower costs
+  // Prompt complexity (word count)
   const wordCount = prompt
     .trim()
     .split(/\s+/)
@@ -38,26 +27,26 @@ export function calculateTokenCost(
     breakdown.promptComplexity = 3;
   }
 
-  // Template complexity - additive, not multiplicative
+  // Template
   const templateCosts = {
     "Landing Page": 0,
-    "Business Site": 2,
+    "Marketing Site": 2,
+    "Multi Page": 3,
     Portfolio: 2,
-    "SaaS Product": 4,
+    SaaS: 4,
     Blog: 3,
     "E-commerce": 5,
+    Documentation: 3,
+    "Web App": 4,
   };
   breakdown.template = templateCosts[selections.template] ?? 0;
 
-  // Sections - only charge for many sections
+  // Sections
   const sectionCount = (selections.sections || []).length;
-  if (sectionCount > 6) {
-    breakdown.sections = Math.floor((sectionCount - 6) * 0.5);
-  } else {
-    breakdown.sections = 0;
-  }
+  breakdown.sections =
+    sectionCount > 6 ? Math.floor((sectionCount - 6) * 0.5) : 0;
 
-  // Style complexity
+  // Style
   const styleCosts = {
     Minimal: 0,
     Modern: 0,
@@ -65,33 +54,90 @@ export function calculateTokenCost(
     Bold: 1,
     Tech: 1,
     Playful: 1,
+    Neumorphic: 1,
+    Brutalist: 1,
+    Editorial: 1,
+    Luxury: 2,
   };
   breakdown.style = styleCosts[selections.style] ?? 0;
 
-  // Layout complexity
+  // Layout
   const layoutCosts = {
+    "Vertical Stack": 0,
     "Single Page": 0,
     "Card Grid": 1,
+    "Split Screen": 1,
     Asymmetric: 2,
     Centered: 0,
+    Editorial: 1,
+    Dashboard: 2,
+    Masonry: 2,
+    "Hero-Focused": 0,
   };
   breakdown.layout = layoutCosts[selections.layout] ?? 0;
+
+  // Density
+  const densityCosts = {
+    Spacious: 0,
+    Balanced: 0,
+    Compact: 1,
+  };
+  breakdown.density = densityCosts[selections.density] ?? 0;
+
+  // Corners
+  const cornerCosts = {
+    Sharp: 0,
+    Subtle: 0,
+    Rounded: 0,
+    Pill: 1,
+    Fluid: 1,
+  };
+  breakdown.corners = cornerCosts[selections.corners] ?? 0;
 
   // Framework
   const frameworkCosts = {
     "Vanilla CSS": 0,
     "Tailwind Classes": 2,
+    "Tailwind + Extracted Components": 3,
+    "CSS Modules": 1,
+    "BEM CSS": 1,
+    "Design Tokens": 2,
   };
   breakdown.framework = frameworkCosts[selections.framework] ?? 0;
 
-  // Animation
+  // Animation (new scale)
   const animationCosts = {
     None: 0,
-    Subtle: 0,
-    Moderate: 1,
-    Rich: 2,
+    Minimal: 0,
+    Subtle: 1,
+    Moderate: 2,
+    Expressive: 3,
+    Immersive: 4,
+    "Performance-First": 0,
   };
   breakdown.animation = animationCosts[selections.animation] ?? 0;
+
+  // Interaction
+  const interactionCosts = {
+    Static: 0,
+    Interactive: 1,
+    "App-Like": 2,
+  };
+  breakdown.interaction = interactionCosts[selections.interaction] ?? 0;
+
+  // Images
+  const imageCosts = {
+    Photography: 1,
+    Stock: 1,
+    "Product Screenshots": 1,
+    Illustrations: 1,
+    Abstract: 0,
+    "3D Graphics": 2,
+    "AI Generated": 2,
+    "Icons Only": 0,
+    "Text Only": 0,
+  };
+  breakdown.images = imageCosts[selections.images] ?? 0;
 
   // Custom colors
   if (selections.palette === "Custom") {
@@ -103,16 +149,6 @@ export function calculateTokenCost(
     breakdown.darkMode = 1;
   }
 
-  // Image style
-  const imageCosts = {
-    Placeholders: 0,
-    Abstract: 0,
-    Illustrations: 1,
-    "Icons Only": 0,
-    None: 0,
-  };
-  breakdown.images = imageCosts[selections.images] ?? 0;
-
   // Accessibility
   const accessibilityCosts = {
     Basic: 0,
@@ -121,7 +157,7 @@ export function calculateTokenCost(
   };
   breakdown.accessibility = accessibilityCosts[selections.accessibility] ?? 0;
 
-  // Creativity level
+  // Creativity
   const creativityCosts = {
     Conservative: 0,
     Balanced: 0,
@@ -129,27 +165,54 @@ export function calculateTokenCost(
   };
   breakdown.creativity = creativityCosts[selections.creativity] ?? 0;
 
-  // Calculate total - simple sum, no multipliers
+  // Inspiration
+  const inspirationCosts = {
+    "Modern Startup": 0,
+    Apple: 1,
+    Stripe: 1,
+    Editorial: 0,
+    Brutalist: 1,
+    Neubrutalism: 1,
+    Dashboard: 1,
+    Playful: 0,
+    Futuristic: 1,
+    Corporate: 0,
+    Monochrome: 0,
+    "Surprise Me": 1,
+    Notion: 1,
+    Figma: 1,
+    Linear: 1,
+    Framer: 1,
+    Dropbox: 0,
+    Spotify: 1,
+    "Figma Community": 0,
+    "Dribbble Shot": 1,
+    Awwwards: 2,
+    "SaaS B2B": 1,
+    Portfolio: 0,
+    Ecommerce: 1,
+  };
+  if (selections.inspiration) {
+    breakdown.inspiration = inspirationCosts[selections.inspiration] ?? 0;
+  }
+
+  // NOTE: tone, font, copyLength, cta, goal, industry, audience,
+  // socialProof, stickyElements, hierarchy, persistent
+  // are intentionally NOT charged here (cost 0).
+
   const totalCost = Object.values(breakdown).reduce(
     (sum, cost) => sum + (cost || 0),
     0
   );
 
-  // Apply bounds
   let finalCost = Math.max(5, totalCost);
   finalCost = Math.min(finalCost, isRefinement ? 15 : 35);
 
-  // Generate estimate description
   let estimate = "";
-  if (finalCost <= 8) {
-    estimate = "Simple";
-  } else if (finalCost <= 15) {
-    estimate = "Standard";
-  } else if (finalCost <= 22) {
-    estimate = "Complex";
-  } else {
-    estimate = "Premium";
-  }
+  if (finalCost <= 8) estimate = "Simple";
+  else if (finalCost <= 15) estimate = "Standard";
+  else if (finalCost <= 22) estimate = "Complex";
+  else estimate = "Premium";
 
   return {
     cost: finalCost,
@@ -159,11 +222,6 @@ export function calculateTokenCost(
   };
 }
 
-/**
- * Get a breakdown description for display
- * @param {Object} breakdown - The breakdown object from calculateTokenCost
- * @returns {Array<{ label: string, cost: number, type: string }>}
- */
 export function getBreakdownDisplay(breakdown) {
   const labels = {
     base: "Base generation",
@@ -172,13 +230,17 @@ export function getBreakdownDisplay(breakdown) {
     sections: "Extra sections",
     style: "Design style",
     layout: "Layout type",
+    density: "Content density",
+    corners: "Corner style",
     framework: "CSS framework",
     animation: "Animations",
+    interaction: "Interactivity",
     customColors: "Custom colors",
     darkMode: "Dark mode",
     images: "Image style",
     accessibility: "Accessibility",
     creativity: "AI creativity",
+    inspiration: "Design inspiration",
   };
 
   const display = Object.entries(breakdown)
@@ -189,7 +251,6 @@ export function getBreakdownDisplay(breakdown) {
       type: cost < 0 ? "discount" : "addition",
     }));
 
-  // Sort: base first, then by cost descending
   display.sort((a, b) => {
     if (a.label === "Base generation") return -1;
     if (b.label === "Base generation") return 1;
@@ -199,12 +260,6 @@ export function getBreakdownDisplay(breakdown) {
   return display;
 }
 
-/**
- * Check if user has enough tokens
- * @param {number} available - Available tokens
- * @param {number} required - Required tokens
- * @returns {{ sufficient: boolean, deficit: number, percentage: number, status: string }}
- */
 export function checkTokenBalance(available, required) {
   const deficit = Math.max(0, required - available);
   const percentage = required > 0 ? (available / required) * 100 : 100;
@@ -224,11 +279,6 @@ export function checkTokenBalance(available, required) {
   };
 }
 
-/**
- * Format token cost for display
- * @param {number} cost
- * @returns {string}
- */
 export function formatTokenCost(cost) {
   if (cost === 1) return "1 token";
   return `${Math.ceil(cost)} tokens`;

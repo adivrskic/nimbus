@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from "react";
 import { X, Loader, ExternalLink } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import useModalAnimation from "../hooks/useModalAnimation";
-import NotificationModal from "./NotificationModal";
 import "./BillingModal.scss";
 
 function BillingModal({ isOpen, onClose }) {
@@ -195,13 +194,6 @@ function BillingModal({ isOpen, onClose }) {
           )}
         </div>
       </div>
-
-      <NotificationModal
-        isOpen={notification.isOpen}
-        onClose={() => setNotification({ ...notification, isOpen: false })}
-        message={notification.message}
-        type={notification.type}
-      />
     </>
   );
 }

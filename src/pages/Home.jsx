@@ -1,6 +1,8 @@
 // Home.jsx - Options flow back to categories, with icons and prompt building
 import { useState, useMemo, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useProject } from "../contexts/ProjectContext";
+import LegalModal from "../components/LegalModal"; // or wherever you put it
 import {
   Sparkles,
   Loader2,
@@ -40,6 +42,9 @@ import {
   Trash2,
   HelpCircle,
   Shield,
+  Link,
+  Save,
+  Check,
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { supabase } from "../lib/supabaseClient";
@@ -180,20 +185,46 @@ const previewContentVariants = {
 const OPTIONS = {
   template: {
     label: "Template",
-    subtitle: "Choose your page structure",
+    subtitle: "Overall site structure",
     icon: Layout,
     promptKey: "template_type",
     choices: [
-      { value: "Landing Page", prompt: "single-page landing page" },
-      { value: "Business Site", prompt: "multi-section business website" },
-      { value: "Multi Page", prompt: "multi-page website" },
-      { value: "Portfolio", prompt: "portfolio showcasing projects" },
       {
-        value: "SaaS Product",
-        prompt: "SaaS product marketing site with pricing",
+        value: "Landing Page",
+        prompt: "Use a single-page landing page optimized for conversion",
       },
-      { value: "Blog", prompt: "blog with article layouts" },
-      { value: "E-commerce", prompt: "e-commerce product showcase" },
+      {
+        value: "Marketing Site",
+        prompt: "Use a multi-section marketing website",
+      },
+      {
+        value: "Multi Page",
+        prompt: "Use a traditional multi-page website with navigation",
+      },
+      {
+        value: "Portfolio",
+        prompt: "Use a portfolio-focused site showcasing work and case studies",
+      },
+      {
+        value: "SaaS",
+        prompt: "Use a SaaS marketing site with product sections and pricing",
+      },
+      {
+        value: "Blog",
+        prompt: "Use a blog-centric layout with article listings",
+      },
+      {
+        value: "E-commerce",
+        prompt: "Use an e-commerce layout with product browsing",
+      },
+      {
+        value: "Documentation",
+        prompt: "Use a documentation-style layout with side navigation",
+      },
+      {
+        value: "Web App",
+        prompt: "Use a web application-style interface layout",
+      },
     ],
   },
   style: {
@@ -202,16 +233,25 @@ const OPTIONS = {
     icon: Paintbrush,
     promptKey: "design_style",
     choices: [
-      { value: "Minimal", prompt: "minimal and clean with lots of whitespace" },
+      { value: "Minimal", prompt: "Use a minimal, whitespace-heavy design" },
       {
         value: "Modern",
-        prompt: "modern and contemporary with bold typography",
+        prompt: "Use a modern, contemporary design with bold typography",
       },
-      { value: "Elegant", prompt: "elegant and sophisticated" },
-      { value: "Bold", prompt: "bold with strong colors and high contrast" },
-      { value: "Tech", prompt: "futuristic and tech-forward" },
-      { value: "Playful", prompt: "playful and creative with unique elements" },
-      { value: "Neumorphism", prompt: "soft ui" },
+      { value: "Elegant", prompt: "Use an elegant and refined visual style" },
+      { value: "Bold", prompt: "Use a bold, high-contrast visual style" },
+      { value: "Tech", prompt: "Use a futuristic, tech-forward aesthetic" },
+      { value: "Playful", prompt: "Use a playful and creative visual style" },
+      { value: "Neumorphic", prompt: "Use a soft UI neumorphic style" },
+      {
+        value: "Brutalist",
+        prompt: "Use a raw, brutalist design with minimal polish",
+      },
+      {
+        value: "Editorial",
+        prompt: "Use an editorial, magazine-inspired layout",
+      },
+      { value: "Luxury", prompt: "Use a premium, high-end luxury aesthetic" },
     ],
   },
   palette: {
@@ -302,44 +342,38 @@ const OPTIONS = {
   },
   font: {
     label: "Typography",
-    subtitle: "Font style and personality",
-    icon: Type,
+    subtitle: "Font style and hierarchy",
     promptKey: "typography",
+    icon: Type,
     choices: [
-      {
-        value: "Sans-serif",
-        prompt: "clean sans-serif typography (Inter or similar)",
-      },
-      {
-        value: "Serif",
-        prompt: "elegant serif typography (Playfair Display or similar)",
-      },
-      {
-        value: "Geometric",
-        prompt: "geometric sans-serif (Space Grotesk or similar)",
-      },
-      {
-        value: "Rounded",
-        prompt: "friendly rounded typography (Poppins or similar)",
-      },
-      {
-        value: "Monospace",
-        prompt: "technical monospace accents for headings",
-      },
+      { value: "Sans Serif", prompt: "Use clean sans-serif typography" },
+      { value: "Serif", prompt: "Use classic serif typography" },
+      { value: "Display", prompt: "Use expressive display fonts for headings" },
+      { value: "Mono", prompt: "Use monospaced fonts for a technical feel" },
+      { value: "Variable", prompt: "Use modern variable fonts" },
     ],
   },
   tone: {
-    label: "Brand Voice",
-    subtitle: "How your copy should sound",
+    label: "Tone of Voice",
+    subtitle: "How the copy should sound",
+    promptKey: "tone",
     icon: MessageSquare,
-    promptKey: "brand_tone",
     choices: [
-      { value: "Professional", prompt: "professional and trustworthy tone" },
-      { value: "Friendly", prompt: "warm and friendly tone" },
-      { value: "Luxury", prompt: "premium and luxurious tone" },
-      { value: "Casual", prompt: "casual and conversational tone" },
-      { value: "Bold", prompt: "confident and bold tone" },
-      { value: "Technical", prompt: "technical and precise tone" },
+      {
+        value: "Professional",
+        prompt: "Use a professional and confident tone",
+      },
+      { value: "Friendly", prompt: "Use a friendly and approachable tone" },
+      { value: "Authoritative", prompt: "Use an authoritative expert tone" },
+      { value: "Conversational", prompt: "Use a conversational, human tone" },
+      {
+        value: "Inspirational",
+        prompt: "Use an inspirational and motivating tone",
+      },
+      {
+        value: "Direct",
+        prompt: "Use a concise, direct tone with minimal fluff",
+      },
     ],
   },
   copyLength: {
@@ -404,41 +438,118 @@ const OPTIONS = {
   },
   industry: {
     label: "Industry",
-    subtitle: "Your business category",
+    subtitle: "Primary business domain",
     icon: Building2,
     promptKey: "industry",
     choices: [
-      { value: "Technology", prompt: "technology/software industry" },
-      { value: "Healthcare", prompt: "healthcare/medical industry" },
-      { value: "Finance", prompt: "finance/fintech industry" },
-      { value: "Real Estate", prompt: "real estate industry" },
-      { value: "Education", prompt: "education/e-learning industry" },
-      { value: "E-commerce", prompt: "e-commerce/retail industry" },
-      { value: "Agency", prompt: "agency/consulting industry" },
-      { value: "Food & Restaurant", prompt: "food/restaurant industry" },
-      { value: "Fitness", prompt: "fitness/wellness industry" },
-      { value: "Creative", prompt: "creative/design industry" },
+      {
+        value: "Technology",
+        prompt: "Build for the technology and software industry",
+      },
+      { value: "SaaS", prompt: "Build for a SaaS product company" },
+      {
+        value: "Healthcare",
+        prompt: "Build for the healthcare or medical industry",
+      },
+      { value: "Finance", prompt: "Build for finance, banking, or fintech" },
+      {
+        value: "Real Estate",
+        prompt: "Build for real estate, property, or rentals",
+      },
+      {
+        value: "Education",
+        prompt: "Build for education, training, or e-learning",
+      },
+      { value: "E-commerce", prompt: "Build for e-commerce or online retail" },
+      {
+        value: "Agency",
+        prompt: "Build for a professional agency or consultancy",
+      },
+      {
+        value: "Marketing",
+        prompt: "Build for a marketing or growth-focused business",
+      },
+      {
+        value: "Food & Beverage",
+        prompt: "Build for restaurants, cafes, or food brands",
+      },
+      {
+        value: "Fitness & Wellness",
+        prompt: "Build for fitness, wellness, or health coaching",
+      },
+      {
+        value: "Creative",
+        prompt: "Build for creative studios, designers, or artists",
+      },
+      {
+        value: "Nonprofit",
+        prompt: "Build for nonprofit or mission-driven organizations",
+      },
+      { value: "Legal", prompt: "Build for legal services or law firms" },
+      {
+        value: "Construction",
+        prompt: "Build for construction, trades, or contractors",
+      },
+      {
+        value: "Hospitality",
+        prompt: "Build for hotels, travel, or hospitality businesses",
+      },
+      {
+        value: "Manufacturing",
+        prompt: "Build for manufacturing or industrial companies",
+      },
     ],
   },
   audience: {
     label: "Target Audience",
-    subtitle: "Who are you building for?",
+    subtitle: "Primary users or buyers",
     icon: Users,
     promptKey: "target_audience",
     choices: [
-      { value: "General", prompt: "general consumer audience" },
-      { value: "B2B", prompt: "business professionals and decision makers" },
       {
-        value: "Developers",
-        prompt: "software developers and technical users",
+        value: "General Consumers",
+        prompt: "Target a broad consumer audience",
       },
-      { value: "Creatives", prompt: "designers and creative professionals" },
       {
-        value: "Enterprise",
-        prompt: "enterprise and large organization buyers",
+        value: "B2B Buyers",
+        prompt: "Target business buyers and decision-makers",
       },
-      { value: "Startups", prompt: "startup founders and entrepreneurs" },
-      { value: "Young Adults", prompt: "young adults and millennials" },
+      { value: "Developers", prompt: "Target developers and technical users" },
+      {
+        value: "Founders",
+        prompt: "Target startup founders and entrepreneurs",
+      },
+      {
+        value: "Executives",
+        prompt: "Target executives and senior leadership",
+      },
+      {
+        value: "Enterprise Buyers",
+        prompt: "Target enterprise procurement teams",
+      },
+      { value: "SMBs", prompt: "Target small and medium-sized businesses" },
+      {
+        value: "Creatives",
+        prompt: "Target designers and creative professionals",
+      },
+      { value: "Students", prompt: "Target students and learners" },
+      {
+        value: "Educators",
+        prompt: "Target teachers, instructors, or trainers",
+      },
+      { value: "Recruiters", prompt: "Target hiring managers and recruiters" },
+      {
+        value: "Agencies",
+        prompt: "Target agencies purchasing tools or services",
+      },
+      {
+        value: "Young Adults",
+        prompt: "Target young adults and digital-native users",
+      },
+      {
+        value: "Non-Technical",
+        prompt: "Target non-technical users who value simplicity",
+      },
     ],
   },
   sections: {
@@ -448,17 +559,72 @@ const OPTIONS = {
     multi: true,
     promptKey: "sections",
     choices: [
-      { value: "Hero", prompt: "hero section with headline and CTA" },
-      { value: "Features", prompt: "features/benefits section" },
-      { value: "How It Works", prompt: "how it works/process section" },
-      { value: "Testimonials", prompt: "testimonials/reviews section" },
-      { value: "Pricing", prompt: "pricing table section" },
-      { value: "FAQ", prompt: "FAQ section" },
-      { value: "Team", prompt: "team members section" },
-      { value: "Gallery", prompt: "image gallery/portfolio section" },
-      { value: "Stats", prompt: "statistics/metrics section" },
-      { value: "Contact", prompt: "contact form section" },
-      { value: "CTA", prompt: "final call-to-action section" },
+      {
+        value: "Hero",
+        prompt:
+          "Include a hero section with headline, subtext, and primary CTA",
+      },
+      {
+        value: "Logos",
+        prompt: "Include a trusted-by or customer logos section",
+      },
+      {
+        value: "Problem",
+        prompt: "Include a problem or pain-point framing section",
+      },
+      { value: "Solution", prompt: "Include a solution overview section" },
+      { value: "Features", prompt: "Include a features and benefits section" },
+      {
+        value: "How It Works",
+        prompt: "Include a step-by-step how-it-works section",
+      },
+      { value: "Use Cases", prompt: "Include use cases or scenarios section" },
+      {
+        value: "Integrations",
+        prompt: "Include integrations or compatibility section",
+      },
+      {
+        value: "Testimonials",
+        prompt: "Include testimonials or customer reviews",
+      },
+      {
+        value: "Case Studies",
+        prompt: "Include case studies or success stories",
+      },
+      {
+        value: "Stats",
+        prompt: "Include metrics, KPIs, or performance statistics",
+      },
+      { value: "Pricing", prompt: "Include a pricing plans section" },
+      {
+        value: "Comparison",
+        prompt: "Include a comparison versus alternatives section",
+      },
+      {
+        value: "Security",
+        prompt: "Include security, privacy, or compliance information",
+      },
+      { value: "FAQ", prompt: "Include a frequently asked questions section" },
+      { value: "Team", prompt: "Include a team or founders section" },
+      { value: "About", prompt: "Include an about the company section" },
+      {
+        value: "Blog Preview",
+        prompt: "Include recent articles or insights preview",
+      },
+      { value: "Gallery", prompt: "Include an image or project gallery" },
+      { value: "Contact", prompt: "Include a contact form or contact details" },
+      {
+        value: "Newsletter",
+        prompt: "Include an email newsletter signup section",
+      },
+      {
+        value: "CTA",
+        prompt: "Include a final conversion-focused call-to-action",
+      },
+      {
+        value: "Footer",
+        prompt: "Include a comprehensive footer with links and legal info",
+      },
     ],
   },
   layout: {
@@ -467,33 +633,85 @@ const OPTIONS = {
     icon: Grid3X3,
     promptKey: "layout_type",
     choices: [
-      { value: "Single Page", prompt: "single scrolling page" },
-      { value: "Card Grid", prompt: "card-based grid layout" },
-      { value: "Asymmetric", prompt: "creative asymmetric layout" },
-      { value: "Centered", prompt: "centered content layout" },
+      {
+        value: "Vertical Stack",
+        prompt: "Use a vertical stacked layout with full-width sections",
+      },
+      {
+        value: "Single Page",
+        prompt: "Use a single scrolling layout with clear section separation",
+      },
+      { value: "Card Grid", prompt: "Use a modular card-based grid layout" },
+      {
+        value: "Split Screen",
+        prompt: "Use a split-screen layout with content side-by-side",
+      },
+      {
+        value: "Asymmetric",
+        prompt: "Use a creative asymmetric layout with visual tension",
+      },
+      {
+        value: "Centered",
+        prompt: "Use a centered layout with narrow content columns",
+      },
+      {
+        value: "Editorial",
+        prompt: "Use an editorial layout with strong typographic hierarchy",
+      },
+      {
+        value: "Dashboard",
+        prompt: "Use a dashboard-style layout with panels and widgets",
+      },
+      {
+        value: "Masonry",
+        prompt: "Use a masonry-style grid with uneven card heights",
+      },
+      {
+        value: "Hero-Focused",
+        prompt: "Emphasize a large hero section with supporting content below",
+      },
     ],
   },
   density: {
-    label: "Spacing",
-    subtitle: "Whitespace and breathing room",
+    label: "Content Density",
+    subtitle: "Spacing and information density",
+    promptKey: "layout_density",
     icon: Maximize,
-    promptKey: "visual_density",
     choices: [
-      { value: "Spacious", prompt: "very spacious with lots of whitespace" },
-      { value: "Balanced", prompt: "balanced spacing" },
-      { value: "Compact", prompt: "compact with denser content" },
+      {
+        value: "Spacious",
+        prompt: "Use spacious layouts with generous margins",
+      },
+      {
+        value: "Balanced",
+        prompt: "Use a balanced layout with moderate spacing",
+      },
+      {
+        value: "Compact",
+        prompt: "Use a compact layout with dense information",
+      },
     ],
   },
   corners: {
     label: "Corner Style",
-    subtitle: "Border radius for elements",
+    subtitle: "Border radius treatment",
     icon: Circle,
     promptKey: "corner_style",
     choices: [
-      { value: "Sharp", prompt: "sharp square corners" },
-      { value: "Slightly Rounded", prompt: "slightly rounded corners (4-8px)" },
-      { value: "Rounded", prompt: "rounded corners (12-16px)" },
-      { value: "Pill", prompt: "fully rounded pill-shaped elements" },
+      { value: "Sharp", prompt: "Use sharp square corners throughout" },
+      {
+        value: "Subtle",
+        prompt: "Use subtly rounded corners for a clean look",
+      },
+      {
+        value: "Rounded",
+        prompt: "Use clearly rounded corners on cards and buttons",
+      },
+      { value: "Pill", prompt: "Use pill-shaped fully rounded elements" },
+      {
+        value: "Fluid",
+        prompt: "Use fluid, organic corner radii with soft shapes",
+      },
     ],
   },
   images: {
@@ -503,25 +721,81 @@ const OPTIONS = {
     promptKey: "image_style",
     choices: [
       {
-        value: "Placeholders",
-        prompt: "placeholder images from Unsplash or similar",
+        value: "Photography",
+        prompt: "Use high-quality real-world photography",
       },
-      { value: "Abstract", prompt: "abstract geometric shapes and patterns" },
-      { value: "Illustrations", prompt: "illustrated graphics" },
-      { value: "Icons Only", prompt: "icon-based with minimal images" },
-      { value: "None", prompt: "no images, text-focused" },
+      { value: "Stock", prompt: "Use polished stock photography" },
+      {
+        value: "Product Screenshots",
+        prompt: "Use product UI screenshots and mockups",
+      },
+      {
+        value: "Illustrations",
+        prompt: "Use custom illustrations and vector graphics",
+      },
+      {
+        value: "Abstract",
+        prompt: "Use abstract shapes, gradients, and patterns",
+      },
+      { value: "3D Graphics", prompt: "Use 3D renders or isometric graphics" },
+      { value: "AI Generated", prompt: "Use AI-generated visuals and imagery" },
+      { value: "Icons Only", prompt: "Use icons instead of images" },
+      { value: "Text Only", prompt: "Avoid images and focus on typography" },
     ],
   },
   animation: {
     label: "Animation",
-    subtitle: "Motion and transitions",
+    subtitle: "Motion and interaction level",
     icon: Zap,
     promptKey: "animation_level",
     choices: [
-      { value: "None", prompt: "no animations" },
-      { value: "Subtle", prompt: "subtle fade and slide animations" },
-      { value: "Moderate", prompt: "moderate animations with scroll effects" },
-      { value: "Rich", prompt: "rich animations and micro-interactions" },
+      { value: "None", prompt: "Do not use animations or motion effects" },
+      {
+        value: "Minimal",
+        prompt: "Use minimal transitions for state changes only",
+      },
+      { value: "Subtle", prompt: "Use subtle fades and gentle motion" },
+      { value: "Moderate", prompt: "Use scroll-based reveals and transitions" },
+      {
+        value: "Expressive",
+        prompt: "Use expressive animations and micro-interactions",
+      },
+      {
+        value: "Immersive",
+        prompt: "Use immersive motion including parallax and 3D effects",
+      },
+      {
+        value: "Performance-First",
+        prompt: "Prioritize performance-friendly animations only",
+      },
+    ],
+  },
+  interaction: {
+    label: "Interactivity",
+    subtitle: "User interaction depth",
+    promptKey: "interaction_level",
+    icon: Zap,
+    choices: [
+      { value: "Static", prompt: "Primarily static content" },
+      {
+        value: "Interactive",
+        prompt: "Interactive elements like tabs and accordions",
+      },
+      { value: "App-Like", prompt: "Highly interactive, app-like experience" },
+    ],
+  },
+  hierarchy: {
+    label: "Visual Hierarchy",
+    subtitle: "Emphasis and flow",
+    promptKey: "visual_hierarchy",
+    icon: Layers,
+    choices: [
+      {
+        value: "Strong",
+        prompt: "Use strong visual hierarchy with clear focal points",
+      },
+      { value: "Balanced", prompt: "Use balanced hierarchy across sections" },
+      { value: "Flat", prompt: "Use a flat hierarchy with minimal emphasis" },
     ],
   },
   socialProof: {
@@ -561,11 +835,33 @@ const OPTIONS = {
     choices: [
       {
         value: "Vanilla CSS",
-        prompt: "plain HTML and CSS with CSS custom properties",
+        prompt:
+          "plain HTML and CSS with CSS custom properties and a small, well-structured stylesheet",
       },
       {
         value: "Tailwind Classes",
-        prompt: "using Tailwind CSS utility classes",
+        prompt:
+          "using Tailwind CSS utility classes with sensible grouping and minimal custom CSS",
+      },
+      {
+        value: "Tailwind + Extracted Components",
+        prompt:
+          "using Tailwind CSS utility classes but extracting repeated patterns into reusable component classNames",
+      },
+      {
+        value: "CSS Modules",
+        prompt:
+          "using CSS Modules with locally-scoped class names and a small, maintainable styles file",
+      },
+      {
+        value: "BEM CSS",
+        prompt:
+          "using semantic BEM-style class names and a single stylesheet following block__element--modifier conventions",
+      },
+      {
+        value: "Design Tokens",
+        prompt:
+          "using CSS custom properties as design tokens for colors, spacing, and typography that can be reused across components",
       },
     ],
   },
@@ -611,19 +907,133 @@ const OPTIONS = {
     choices: [
       {
         value: "Modern Startup",
-        prompt: "inspired by modern startup websites (Linear, Vercel)",
+        prompt:
+          "inspired by modern startup websites (Linear, Vercel, Notion, Superhuman)",
       },
       {
         value: "Apple",
-        prompt: "inspired by Apple's minimal, premium aesthetic",
+        prompt:
+          "inspired by Apple's minimal, premium aesthetic with generous whitespace, subtle motion, and large product imagery",
       },
       {
         value: "Stripe",
-        prompt: "inspired by Stripe's developer-focused clean design",
+        prompt:
+          "inspired by Stripe's developer-focused clean design, strong typography, and subtle gradients",
       },
-      { value: "Editorial", prompt: "inspired by editorial/magazine layouts" },
-      { value: "Brutalist", prompt: "inspired by brutalist web design" },
+      {
+        value: "Editorial",
+        prompt:
+          "inspired by editorial and magazine layouts with strong typographic hierarchy and generous whitespace",
+      },
+      {
+        value: "Brutalist",
+        prompt:
+          "inspired by brutalist web design with bold type, stark contrast, and intentionally raw layouts",
+      },
+      {
+        value: "Neubrutalism",
+        prompt:
+          "inspired by neubrutalist UI with chunky cards, thick borders, shadows, and vivid accent colors",
+      },
+      {
+        value: "Dashboard",
+        prompt:
+          "inspired by modern SaaS dashboards (Linear, Height, Asana) with cards, tables, and dense information layouts",
+      },
+      {
+        value: "Playful",
+        prompt:
+          "inspired by playful, colorful product marketing sites with soft shapes and friendly illustrations",
+      },
+      {
+        value: "Futuristic",
+        prompt:
+          "inspired by futuristic and sci-fi interfaces with glowing accents, dark backgrounds, and subtle glassmorphism",
+      },
+      {
+        value: "Corporate",
+        prompt:
+          "inspired by traditional enterprise and corporate sites with conservative colors and straightforward layouts",
+      },
+      {
+        value: "Monochrome",
+        prompt:
+          "inspired by monochrome and high-contrast designs using mostly grayscale with a single accent color",
+      },
+      {
+        value: "Surprise Me",
+        prompt:
+          "choose any tasteful contemporary web aesthetic that best fits the content and target audience",
+      },
+      {
+        value: "Notion",
+        prompt:
+          "inspired by Notion’s calm workspace aesthetic with minimal chrome, muted colors, and document-like layouts",
+      },
+      {
+        value: "Figma",
+        prompt:
+          "inspired by Figma’s product-led UI with clear panels, toolbars, and a neutral canvas feel",
+      },
+      {
+        value: "Linear",
+        prompt:
+          "inspired by Linear’s ultra-minimal, fast, and opinionated product design with strong typography and dark/light modes",
+      },
+      {
+        value: "Framer",
+        prompt:
+          "inspired by Framer’s motion-rich marketing pages with big gradients, bold sections, and smooth animations",
+      },
+      {
+        value: "Dropbox",
+        prompt:
+          "inspired by Dropbox’s friendly, illustration-heavy brand with lots of whitespace and approachable typography",
+      },
+      {
+        value: "Spotify",
+        prompt:
+          "inspired by Spotify’s bold, music-inspired visuals with dark bases, saturated accents, and expressive imagery",
+      },
+      {
+        value: "Figma Community",
+        prompt:
+          "inspired by playful, community-driven UI kits with bright colors, cards, and modular sections",
+      },
+      {
+        value: "Dribbble Shot",
+        prompt:
+          "inspired by polished Dribbble-style concept UIs with strong grids, shadows, and glossy UI elements",
+      },
+      {
+        value: "Awwwards",
+        prompt:
+          "inspired by award-winning experimental websites with unconventional layouts, strong motion, and immersive visuals",
+      },
+      {
+        value: "SaaS B2B",
+        prompt:
+          "inspired by modern B2B SaaS marketing sites with clear value props, pricing tables, logos, and simple hero layouts",
+      },
+      {
+        value: "Portfolio",
+        prompt:
+          "inspired by creative portfolio sites with large imagery, editorial typography, and project-focused layouts",
+      },
+      {
+        value: "Ecommerce",
+        prompt:
+          "inspired by modern ecommerce product pages with prominent imagery, clear CTAs, and trust signals",
+      },
     ],
+  },
+
+  persistent: {
+    label: "Content & Assets",
+    subtitle: "Branding, images, and links",
+    icon: Globe,
+    promptKey: "persistent_content",
+    isPersistent: true,
   },
 };
 
@@ -651,6 +1061,10 @@ const CATEGORIES = [
   "accessibility",
   "creativity",
   "inspiration",
+  "interaction",
+  "hierarchy",
+  "persistent",
+  // "customColors" is handled specially when palette is "Custom"
 ];
 
 function Home() {
@@ -665,6 +1079,53 @@ function Home() {
     return null;
   });
   const [localTokens, setLocalTokens] = useState(null);
+  const { pendingProject, pendingAction, clearPendingProject } = useProject();
+  const [showLegal, setShowLegal] = useState(false);
+
+  useEffect(() => {
+    if (!pendingProject || !pendingAction) return;
+
+    console.log(
+      "Home: Processing pending project action:",
+      pendingAction,
+      pendingProject.id
+    );
+
+    if (pendingAction === "edit") {
+      // Load project into preview for editing
+      setGeneratedHtml(pendingProject.html_content);
+
+      // Restore prompt from customization
+      const savedPrompt =
+        pendingProject.customization?.prompt || pendingProject.name || "";
+      setPrompt(savedPrompt);
+
+      // Restore selections/customization if available
+      if (pendingProject.customization) {
+        const { prompt: _, ...savedSelections } = pendingProject.customization;
+        setSelections((prev) => ({ ...prev, ...savedSelections }));
+      }
+
+      // Show preview
+      setShowPreview(true);
+      setIsPreviewMinimized(false);
+
+      // Clear the pending project
+      clearPendingProject();
+    } else if (pendingAction === "deploy") {
+      // Load project and open deploy modal
+      setGeneratedHtml(pendingProject.html_content);
+
+      // You might want to store the project ID for the deploy process
+      // setCurrentProjectId(pendingProject.id);
+
+      // Open deploy modal
+      setShowDeploy(true);
+
+      // Clear the pending project
+      clearPendingProject();
+    }
+  }, [pendingProject, pendingAction, clearPendingProject]);
 
   // Use ref to track if we just completed generation (prevents race conditions)
   const justGeneratedRef = useRef(false);
@@ -690,6 +1151,7 @@ function Home() {
       if (opt.multi) {
         initial[key] = [];
       } else if (opt.isColorPicker) {
+        // Initialize with default values
         initial[key] = {};
         opt.fields.forEach((field) => {
           initial[key][field.key] = field.default;
@@ -700,6 +1162,42 @@ function Home() {
     });
     return initial;
   });
+
+  const [persistentOptions, setPersistentOptions] = useState({
+    socialMedia: {
+      facebook: "",
+      twitter: "",
+      instagram: "",
+      linkedIn: "",
+      github: "",
+      dribbble: "",
+    },
+    contactInfo: {
+      email: "",
+      phone: "",
+      address: "",
+      contactFormEndpoint: "",
+    },
+    branding: {
+      logoUrl: "",
+      faviconUrl: "",
+      brandName: "",
+      tagline: "",
+    },
+    images: [], // Array of image URLs or objects
+    links: {
+      termsOfService: "",
+      privacyPolicy: "",
+      pricingPage: "",
+      blog: "",
+    },
+  });
+
+  // New overlay tab state
+  const [overlayTab, setOverlayTab] = useState("design"); // 'design' | 'content'
+
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
 
   // UI State
   const [showOverlay, setShowOverlay] = useState(false);
@@ -739,7 +1237,7 @@ function Home() {
   const [showAuth, setShowAuth] = useState(false);
   const [showTokens, setShowTokens] = useState(false);
   const [showDeploy, setShowDeploy] = useState(false);
-  const [pendingAction, setPendingAction] = useState(null);
+  const [_, setPendingAction] = useState(null);
 
   const inputRef = useRef(null);
   const enhanceInputRef = useRef(null);
@@ -883,19 +1381,38 @@ function Home() {
   const hasSelection = (key) => {
     const opt = OPTIONS[key];
     if (!opt) return false;
+
     if (opt.multi) return selections[key]?.length > 0;
-    if (opt.isColorPicker) return selections.palette === "Custom";
+
+    if (opt.isColorPicker) {
+      // Only show as selected if palette is set to "Custom"
+      return selections.palette === "Custom";
+    }
+
     return selections[key] !== null && selections[key] !== undefined;
   };
 
   const getDisplayValue = (key) => {
     const opt = OPTIONS[key];
+    if (!opt) return null;
+
     if (opt.multi) {
       const count = selections[key]?.length || 0;
       if (count === 0) return null;
       if (count === 1) return selections[key][0];
       return `${count} selected`;
     }
+
+    // Handle custom colors specially
+    if (key === "palette" && selections[key] === "Custom") {
+      return "Custom Colors";
+    }
+
+    // Handle customColors object - return null since it's not a displayable value
+    if (key === "customColors") {
+      return null; // Don't display this as an active pill
+    }
+
     return selections[key];
   };
 
@@ -996,6 +1513,106 @@ function Home() {
       `USER DESCRIPTION: ${prompt}`,
     ];
 
+    // Add persistent content first
+    const hasPersistentContent = Object.values(persistentOptions).some(
+      (section) =>
+        typeof section === "object"
+          ? Object.values(section).some(
+              (value) =>
+                value &&
+                (Array.isArray(value)
+                  ? value.length > 0
+                  : typeof value === "string"
+                  ? value.trim().length > 0
+                  : false)
+            )
+          : Array.isArray(section)
+          ? section.length > 0
+          : section
+    );
+
+    if (hasPersistentContent) {
+      const persistentParts = [];
+
+      // Branding
+      if (
+        persistentOptions.branding.brandName ||
+        persistentOptions.branding.tagline ||
+        persistentOptions.branding.logoUrl
+      ) {
+        persistentParts.push("", "BRANDING:");
+        if (persistentOptions.branding.brandName)
+          persistentParts.push(
+            `- Brand Name: ${persistentOptions.branding.brandName}`
+          );
+        if (persistentOptions.branding.tagline)
+          persistentParts.push(
+            `- Tagline: ${persistentOptions.branding.tagline}`
+          );
+        if (persistentOptions.branding.logoUrl)
+          persistentParts.push(
+            `- Logo URL: ${persistentOptions.branding.logoUrl}`
+          );
+      }
+
+      // Social Media
+      const socialLinks = Object.entries(persistentOptions.socialMedia)
+        .filter(([_, url]) => url && url.trim())
+        .map(([platform, url]) => `- ${platform}: ${url}`);
+
+      if (socialLinks.length > 0) {
+        persistentParts.push("", "SOCIAL MEDIA LINKS:", ...socialLinks);
+      }
+
+      // Contact Info
+      const contactInfo = [];
+      if (
+        persistentOptions.contactInfo.email &&
+        persistentOptions.contactInfo.email.trim()
+      )
+        contactInfo.push(`- Email: ${persistentOptions.contactInfo.email}`);
+      if (
+        persistentOptions.contactInfo.phone &&
+        persistentOptions.contactInfo.phone.trim()
+      )
+        contactInfo.push(`- Phone: ${persistentOptions.contactInfo.phone}`);
+      if (
+        persistentOptions.contactInfo.contactFormEndpoint &&
+        persistentOptions.contactInfo.contactFormEndpoint.trim()
+      )
+        contactInfo.push(
+          `- Form Endpoint: ${persistentOptions.contactInfo.contactFormEndpoint}`
+        );
+
+      if (contactInfo.length > 0) {
+        persistentParts.push("", "CONTACT INFORMATION:", ...contactInfo);
+      }
+
+      // Important Links
+      const links = Object.entries(persistentOptions.links)
+        .filter(([_, url]) => url && url.trim())
+        .map(([linkType, url]) => `- ${linkType}: ${url}`);
+
+      if (links.length > 0) {
+        persistentParts.push("", "IMPORTANT LINKS:", ...links);
+      }
+
+      // Images
+      if (persistentOptions.images.length > 0) {
+        persistentParts.push("", "IMAGES:");
+        persistentOptions.images.forEach((img, i) => {
+          persistentParts.push(
+            `- Image ${i + 1}: ${img.alt || "Uploaded image"}`
+          );
+        });
+      }
+
+      if (persistentParts.length > 0) {
+        promptParts.push("", "PERSISTENT CONTENT:", ...persistentParts);
+      }
+    }
+
+    // Continue with existing specs
     if (designSpecs.length > 0)
       promptParts.push("", "DESIGN SPECIFICATIONS:", ...designSpecs);
     if (contentSpecs.length > 0)
@@ -1016,14 +1633,14 @@ function Home() {
     promptParts.push(
       "",
       `REQUIREMENTS:
-1. Return a complete, production-ready HTML file with embedded CSS and JavaScript
-2. Must be fully responsive (mobile, tablet, desktop)
-3. Use semantic HTML5 elements
-4. Include proper meta tags
-5. Apply the design specifications consistently
-6. Make it visually polished and professional
-
-Return ONLY the HTML code, no explanations.`
+  1. Return a complete, production-ready HTML file with embedded CSS and JavaScript
+  2. Must be fully responsive (mobile, tablet, desktop)
+  3. Use semantic HTML5 elements
+  4. Include proper meta tags
+  5. Apply the design specifications consistently
+  6. Make it visually polished and professional
+  
+  Return ONLY the HTML code, no explanations.`
     );
 
     return promptParts.join("\n");
@@ -1037,7 +1654,11 @@ Return ONLY the HTML code, no explanations.`
   const tokenBalance = checkTokenBalance(userTokens, tokenCost.cost);
 
   const getActiveCategories = () => {
-    return CATEGORIES.filter((key) => hasSelection(key)).map((key) => ({
+    return CATEGORIES.filter((key) => {
+      if (!hasSelection(key)) return false;
+      const displayValue = getDisplayValue(key);
+      return displayValue !== null && displayValue !== undefined;
+    }).map((key) => ({
       key,
       label: OPTIONS[key].label,
       value: getDisplayValue(key),
@@ -1079,14 +1700,23 @@ Return ONLY the HTML code, no explanations.`
     } else {
       setSelections((prev) => ({ ...prev, [optionKey]: value }));
 
-      // Only close overlay automatically for non-Custom selections
-      // Keep it open for Custom colors so user can pick colors
-      if (!(optionKey === "palette" && value === "Custom")) {
-        setTimeout(() => {
-          setSlideDirection(-1);
-          setActiveOption(null);
-        }, 120);
+      // Special handling for palette selection
+      if (optionKey === "palette" && value === "Custom") {
+        // Don't close the overlay, stay in the palette section
+        // The custom colors editor will be shown automatically
+        return;
       }
+
+      if (optionKey === "persistent") {
+        setOverlayTab("content");
+        return;
+      }
+
+      // Close overlay after selection
+      setTimeout(() => {
+        setSlideDirection(-1);
+        setActiveOption(null);
+      }, 120);
     }
   };
 
@@ -1114,6 +1744,66 @@ Return ONLY the HTML code, no explanations.`
   const selectCategory = (id) => {
     setSlideDirection(1);
     setActiveOption(id);
+  };
+
+  const handleSaveProject = async () => {
+    // Debug: Check what we're sending
+    console.log("Save project called");
+    console.log("generatedHtml exists:", !!generatedHtml);
+    console.log("generatedHtml length:", generatedHtml?.length || 0);
+    console.log("prompt:", prompt);
+
+    if (!generatedHtml) {
+      alert("No generated HTML to save");
+      return;
+    }
+
+    if (!isAuthenticated) {
+      setShowAuth(true);
+      return;
+    }
+
+    setIsSaving(true);
+    setSaveSuccess(false);
+
+    try {
+      const requestBody = {
+        name: prompt ? prompt.slice(0, 50) : "Untitled Project",
+        htmlContent: generatedHtml,
+        prompt: prompt || "",
+        templateType: selections.template || null,
+        designStyle: selections.style || null,
+        customization: selections,
+      };
+
+      // Debug: Log what we're sending
+      console.log("Sending to save-project:", {
+        name: requestBody.name,
+        htmlContentLength: requestBody.htmlContent?.length,
+        prompt: requestBody.prompt,
+      });
+
+      const { data, error } = await supabase.functions.invoke("save-project", {
+        body: requestBody,
+      });
+
+      console.log("Response:", { data, error });
+
+      if (error) throw error;
+
+      if (data?.success) {
+        setSaveSuccess(true);
+        setTimeout(() => setSaveSuccess(false), 2000);
+        console.log("Project saved:", data.project?.id);
+      } else {
+        throw new Error(data?.error || "Failed to save");
+      }
+    } catch (error) {
+      console.error("Save error:", error);
+      alert(`Failed to save project: ${error.message || error}`);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleGenerate = async () => {
@@ -1470,11 +2160,9 @@ ${hasChat ? `<button class="chat-btn">💬</button>` : ""}
 
   const breakdown = getBreakdownDisplay(tokenCost.breakdown);
 
-  console.log(showPlaceholderAnimation);
-
   return (
     <div className="home">
-      <MetallicBlob />
+      {/* <MetallicBlob /> */}
       <div className="home__center">
         {/* Search Bar */}
         <motion.div
@@ -1568,22 +2256,6 @@ ${hasChat ? `<button class="chat-btn">💬</button>` : ""}
           </div>
         </motion.div>
 
-        {/* Generation Progress */}
-        <AnimatePresence>
-          {isGenerating && (
-            <motion.div
-              className="home__generating"
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.2 }}
-            >
-              <Loader2 size={14} className="spin" />
-              <span>Generating your website... {getEstimatedTime()}</span>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
         {/* Minimized Preview Pill */}
         <AnimatePresence>
           {generatedHtml && isPreviewMinimized && !isGenerating && (
@@ -1661,6 +2333,7 @@ ${hasChat ? `<button class="chat-btn">💬</button>` : ""}
       </div>
 
       {/* Options Overlay */}
+      {/* Options Overlay */}
       <AnimatePresence>
         {showOverlay && (
           <motion.div
@@ -1672,115 +2345,95 @@ ${hasChat ? `<button class="chat-btn">💬</button>` : ""}
             exit="exit"
           >
             <motion.div
-              className="home__overlay-content"
+              className="home__overlay-content home__overlay-content--split"
               onClick={(e) => e.stopPropagation()}
               variants={contentVariants}
               initial="hidden"
               animate="visible"
               exit="exit"
             >
-              <AnimatePresence mode="wait" custom={slideDirection}>
-                {!activeOption ? (
-                  <motion.div
-                    key="categories"
-                    custom={slideDirection}
-                    variants={slideVariants}
-                    initial="enter"
-                    animate="center"
-                    exit="exit"
-                    className="home__category-pills"
-                  >
+              {/* Top Section: Design Options */}
+              <div className="overlay-section overlay-section--top">
+                <AnimatePresence mode="wait" custom={slideDirection}>
+                  {!activeOption ? (
                     <motion.div
-                      className="home__pills-grid"
+                      key="categories"
+                      className="categories-section"
                       variants={pillContainerVariants}
                       initial="hidden"
                       animate="visible"
+                      exit="exit"
                     >
-                      {CATEGORIES.map((catKey) => {
-                        const opt = OPTIONS[catKey];
-                        const Icon = opt.icon;
-                        const isSelected = hasSelection(catKey);
-
-                        return (
-                          <motion.button
-                            key={catKey}
-                            className={`home__category-pill ${
-                              isSelected ? "home__category-pill--active" : ""
-                            }`}
-                            onClick={() => selectCategory(catKey)}
-                            variants={pillVariants}
-                            whileHover="hover"
-                            whileTap="tap"
-                          >
-                            <Icon size={15} />
-                            <span>{opt.label}</span>
-                          </motion.button>
-                        );
-                      })}
+                      <motion.div className="home__pills-grid">
+                        {CATEGORIES.filter(
+                          (cat) =>
+                            cat !== "persistent" && cat !== "customColors"
+                        ).map((catKey) => {
+                          const opt = OPTIONS[catKey];
+                          const Icon = opt.icon;
+                          const isSelected = hasSelection(catKey);
+                          return (
+                            <motion.button
+                              key={catKey}
+                              className={`home__category-pill ${
+                                isSelected ? "home__category-pill--active" : ""
+                              }`}
+                              onClick={() => selectCategory(catKey)}
+                              variants={pillVariants}
+                            >
+                              {Icon && <Icon size={14} />}
+                              <span>{opt.label}</span>
+                            </motion.button>
+                          );
+                        })}
+                      </motion.div>
                     </motion.div>
-                    <motion.button
-                      className="home__close-overlay"
-                      onClick={closeAllOverlays}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 0.3 }}
-                    >
-                      Done
-                    </motion.button>
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key="choices"
-                    custom={slideDirection}
-                    variants={slideVariants}
-                    initial="enter"
-                    animate="center"
-                    exit="exit"
-                    className="home__option-choices"
-                  >
+                  ) : (
                     <motion.div
-                      className="home__option-header"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 0.05 }}
+                      key="choices"
+                      className="choices-section"
+                      variants={slideVariants}
+                      initial="enter"
+                      animate="center"
+                      exit="exit"
+                      custom={slideDirection}
                     >
-                      <motion.button
-                        className="home__back-btn"
-                        onClick={goToCategories}
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                      >
-                        ←
-                      </motion.button>
-                      <div className="home__option-header-text">
-                        <span className="home__option-header-label">
-                          {OPTIONS[activeOption]?.label}
-                        </span>
-                        {OPTIONS[activeOption]?.subtitle && (
+                      <div className="home__option-header">
+                        <button
+                          className="home__back-btn"
+                          onClick={goToCategories}
+                        >
+                          ←
+                        </button>
+                        <div className="home__option-header-text">
+                          <span className="home__option-header-label">
+                            {OPTIONS[activeOption]?.label}
+                          </span>
                           <span className="home__option-header-subtitle">
                             {OPTIONS[activeOption]?.subtitle}
                           </span>
-                        )}
+                        </div>
                       </div>
-                    </motion.div>
-                    <motion.div
-                      className="home__choice-pills"
-                      variants={pillContainerVariants}
-                      initial="hidden"
-                      animate="visible"
-                    >
-                      {OPTIONS[activeOption]?.choices.map((choice) => {
-                        const isMulti = OPTIONS[activeOption].multi;
-                        const isSelected = isMulti
-                          ? selections[activeOption]?.includes(choice.value)
-                          : selections[activeOption] === choice.value;
 
-                        if (activeOption === "palette" && choice.colors) {
+                      <motion.div
+                        className="home__choice-pills"
+                        variants={pillContainerVariants}
+                        initial="hidden"
+                        animate="visible"
+                      >
+                        {OPTIONS[activeOption]?.choices?.map((choice) => {
+                          const isMulti = OPTIONS[activeOption].multi;
+                          const isActive = isMulti
+                            ? selections[activeOption]?.includes(choice.value)
+                            : selections[activeOption] === choice.value;
+
                           return (
                             <motion.button
                               key={choice.value}
-                              className={`home__choice-pill home__choice-pill--color ${
-                                isSelected ? "active" : ""
+                              className={`home__choice-pill ${
+                                isActive ? "active" : ""
+                              } ${
+                                choice.colors ? "home__choice-pill--color" : ""
                               }`}
                               onClick={() =>
                                 handleSelect(activeOption, choice.value)
@@ -1789,97 +2442,46 @@ ${hasChat ? `<button class="chat-btn">💬</button>` : ""}
                               whileHover="hover"
                               whileTap="tap"
                             >
-                              <div className="home__color-dots">
-                                {choice.colors.map((c, i) => (
-                                  <span key={i} style={{ background: c }} />
-                                ))}
-                              </div>
+                              {choice.colors && (
+                                <div className="home__color-dots">
+                                  {choice.colors.map((color, i) => (
+                                    <span
+                                      key={i}
+                                      style={{ background: color }}
+                                    />
+                                  ))}
+                                </div>
+                              )}
                               <span>{choice.value}</span>
                             </motion.button>
                           );
-                        }
+                        })}
+                      </motion.div>
 
-                        if (activeOption === "palette" && choice.isCustom) {
-                          return (
-                            <motion.button
-                              key={choice.value}
-                              className={`home__choice-pill home__choice-pill--color ${
-                                isSelected ? "active" : ""
-                              }`}
-                              onClick={() =>
-                                handleSelect(activeOption, choice.value)
-                              }
-                              variants={pillVariants}
-                              whileHover="hover"
-                              whileTap="tap"
-                            >
-                              <div className="home__color-dots home__color-dots--custom">
-                                <span
-                                  style={{
-                                    background:
-                                      "linear-gradient(135deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3)",
-                                  }}
-                                />
-                              </div>
-                              <span>{choice.value}</span>
-                            </motion.button>
-                          );
-                        }
-
-                        return (
-                          <motion.button
-                            key={choice.value}
-                            className={`home__choice-pill ${
-                              isSelected ? "active" : ""
-                            }`}
-                            onClick={() =>
-                              handleSelect(activeOption, choice.value)
-                            }
-                            variants={pillVariants}
-                            whileHover="hover"
-                            whileTap="tap"
+                      {/* Custom Colors Section */}
+                      {activeOption === "palette" &&
+                        selections.palette === "Custom" && (
+                          <motion.div
+                            className="home__custom-colors"
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.2 }}
                           >
-                            {choice.value}
-                          </motion.button>
-                        );
-                      })}
-                    </motion.div>
-                    {activeOption === "palette" &&
-                      selections.palette === "Custom" && (
-                        <motion.div
-                          className="home__color-pills-wrapper"
-                          initial={{ opacity: 0, y: -10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.2 }}
-                        >
-                          <div className="home__color-pills">
-                            {OPTIONS.customColors.fields.map((field) => (
-                              <div key={field.key} className="home__color-pill">
-                                <label className="home__color-pill-label">
-                                  {field.label}
-                                </label>
-                                <div className="home__color-pill-input-group">
-                                  <button
-                                    className="home__color-pill-btn"
-                                    style={{
-                                      backgroundColor:
+                            <div className="home__custom-colors-grid">
+                              {OPTIONS.customColors.fields.map((field) => (
+                                <div
+                                  key={field.key}
+                                  className="home__color-field"
+                                >
+                                  <label>{field.label}</label>
+                                  <div className="home__color-input-wrapper">
+                                    <input
+                                      type="color"
+                                      value={
                                         selections.customColors?.[field.key] ||
-                                        field.default,
-                                      borderColor: `rgba(255, 255, 255, ${
-                                        selections.customColors?.[field.key]
-                                          ? "0.2"
-                                          : "0.1"
-                                      })`,
-                                    }}
-                                    onClick={() => {
-                                      // Create a hidden color input and trigger it
-                                      const input =
-                                        document.createElement("input");
-                                      input.type = "color";
-                                      input.value =
-                                        selections.customColors?.[field.key] ||
-                                        field.default;
-                                      input.onchange = (e) => {
+                                        field.default
+                                      }
+                                      onChange={(e) => {
                                         setSelections((prev) => ({
                                           ...prev,
                                           customColors: {
@@ -1887,63 +2489,147 @@ ${hasChat ? `<button class="chat-btn">💬</button>` : ""}
                                             [field.key]: e.target.value,
                                           },
                                         }));
-                                      };
-                                      input.click();
-                                    }}
-                                  >
-                                    <span className="home__color-pill-value">
+                                      }}
+                                    />
+                                    <span>
                                       {selections.customColors?.[field.key] ||
                                         field.default}
                                     </span>
-                                  </button>
-                                  <input
-                                    type="color"
-                                    className="home__color-pill-input-hidden"
-                                    value={
-                                      selections.customColors?.[field.key] ||
-                                      field.default
-                                    }
-                                    onChange={(e) => {
-                                      setSelections((prev) => ({
-                                        ...prev,
-                                        customColors: {
-                                          ...prev.customColors,
-                                          [field.key]: e.target.value,
-                                        },
-                                      }));
-                                    }}
-                                  />
+                                  </div>
                                 </div>
-                              </div>
-                            ))}
-                          </div>
+                              ))}
+                            </div>
+                          </motion.div>
+                        )}
 
-                          <motion.button
-                            className="home__done-btn"
-                            onClick={goToCategories}
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
-                          >
-                            Done
-                          </motion.button>
-                        </motion.div>
+                      {OPTIONS[activeOption]?.multi && (
+                        <motion.button
+                          className="home__done-btn"
+                          onClick={goToCategories}
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                        >
+                          Done
+                        </motion.button>
                       )}
-                    {OPTIONS[activeOption]?.multi && (
-                      <motion.button
-                        className="home__done-btn"
-                        onClick={goToCategories}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.15 }}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                      >
-                        Done
-                      </motion.button>
-                    )}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* Bottom Section: Content & Assets */}
+              {/* Bottom Section: Content & Assets */}
+              <div className="overlay-section overlay-section--bottom">
+                <motion.div
+                  className="persistent-options-grid"
+                  variants={pillContainerVariants}
+                  initial="hidden"
+                  animate="visible"
+                >
+                  {/* Brand Name */}
+                  <motion.div
+                    className="persistent-field"
+                    variants={pillVariants}
+                    whileHover="hover"
+                    whileTap="tap"
+                  >
+                    <label>Brand Name</label>
+                    <input
+                      type="text"
+                      value={persistentOptions.branding.brandName}
+                      onChange={(e) =>
+                        setPersistentOptions((prev) => ({
+                          ...prev,
+                          branding: {
+                            ...prev.branding,
+                            brandName: e.target.value,
+                          },
+                        }))
+                      }
+                      placeholder="Your Company"
+                    />
                   </motion.div>
-                )}
-              </AnimatePresence>
+
+                  {/* Tagline */}
+                  <motion.div
+                    className="persistent-field"
+                    variants={pillVariants}
+                    whileHover="hover"
+                    whileTap="tap"
+                  >
+                    <label>Tagline</label>
+                    <input
+                      type="text"
+                      value={persistentOptions.branding.tagline}
+                      onChange={(e) =>
+                        setPersistentOptions((prev) => ({
+                          ...prev,
+                          branding: {
+                            ...prev.branding,
+                            tagline: e.target.value,
+                          },
+                        }))
+                      }
+                      placeholder="Your tagline here"
+                    />
+                  </motion.div>
+
+                  {/* Email */}
+                  <motion.div
+                    className="persistent-field"
+                    variants={pillVariants}
+                    whileHover="hover"
+                    whileTap="tap"
+                  >
+                    <label>Email</label>
+                    <input
+                      type="email"
+                      value={persistentOptions.contactInfo.email}
+                      onChange={(e) =>
+                        setPersistentOptions((prev) => ({
+                          ...prev,
+                          contactInfo: {
+                            ...prev.contactInfo,
+                            email: e.target.value,
+                          },
+                        }))
+                      }
+                      placeholder="contact@example.com"
+                    />
+                  </motion.div>
+
+                  {/* Social fields */}
+                  {Object.entries(persistentOptions.socialMedia)
+                    .slice(0, 4)
+                    .map(([platform, url]) => (
+                      <motion.div
+                        key={platform}
+                        className="persistent-field persistent-field--small"
+                        variants={pillVariants}
+                        whileHover="hover"
+                        whileTap="tap"
+                      >
+                        <label>
+                          {platform.charAt(0).toUpperCase() + platform.slice(1)}
+                        </label>
+                        <input
+                          type="url"
+                          value={url}
+                          onChange={(e) =>
+                            setPersistentOptions((prev) => ({
+                              ...prev,
+                              socialMedia: {
+                                ...prev.socialMedia,
+                                [platform]: e.target.value,
+                              },
+                            }))
+                          }
+                          placeholder={`${platform}.com/...`}
+                        />
+                      </motion.div>
+                    ))}
+                </motion.div>
+              </div>
             </motion.div>
           </motion.div>
         )}
@@ -2068,31 +2754,49 @@ ${hasChat ? `<button class="chat-btn">💬</button>` : ""}
                 </div>
 
                 <div className="preview-actions">
+                  {/* Save to Projects Button */}
                   <button
-                    className="preview-action-btn"
-                    onClick={handleGenerate}
-                    disabled={isGenerating}
-                    title="Regenerate"
+                    className={`preview-save-btn ${
+                      saveSuccess ? "success" : ""
+                    }`}
+                    onClick={handleSaveProject}
+                    disabled={isSaving}
+                    title="Save to Projects"
                   >
-                    <RotateCcw
-                      size={14}
-                      className={isGenerating ? "spin" : ""}
-                    />
+                    {isSaving ? (
+                      <Loader2 size={14} className="spin" />
+                    ) : saveSuccess ? (
+                      <>
+                        <Check size={14} />
+                        <span>Saved!</span>
+                      </>
+                    ) : (
+                      <>
+                        <Save size={14} />
+                        <span>Save</span>
+                      </>
+                    )}
                   </button>
+
+                  {/* Download Button */}
                   <button
                     className="preview-action-btn"
                     onClick={handleDownload}
-                    title="Download"
+                    title="Download HTML"
                   >
                     <Download size={14} />
                   </button>
+
+                  {/* Deploy Button */}
                   <button
                     className="preview-deploy-btn"
                     onClick={() => setShowDeploy(true)}
                   >
                     <Rocket size={14} />
-                    Deploy
+                    <span>Deploy</span>
                   </button>
+
+                  {/* Close/Minimize Button */}
                   <button
                     className="preview-close-btn"
                     onClick={() => {
@@ -2161,10 +2865,12 @@ ${hasChat ? `<button class="chat-btn">💬</button>` : ""}
         <DeployModal
           isOpen={showDeploy}
           onClose={() => setShowDeploy(false)}
-          htmlContent={generatedHtml}
+          html={generatedHtml}
           projectName={
             prompt.split(" ").slice(0, 3).join("-").toLowerCase() || "my-site"
           }
+          prompt={prompt}
+          customization={selections}
         />
       )}
       {/* Help Modal */}
@@ -2221,10 +2927,6 @@ ${hasChat ? `<button class="chat-btn">💬</button>` : ""}
               </div>
 
               <div className="help-section">
-                <div className="help-section__title">
-                  <Settings size={14} />
-                  <span>Customization Options</span>
-                </div>
                 <div className="help-section__content">
                   <p>
                     Click the gear button to access detailed customization
@@ -2326,6 +3028,7 @@ ${hasChat ? `<button class="chat-btn">💬</button>` : ""}
           </motion.div>
         )}
       </AnimatePresence>
+      <LegalModal isOpen={showLegal} onClose={() => setShowLegal(false)} />
     </div>
   );
 }
