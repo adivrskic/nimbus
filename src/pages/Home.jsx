@@ -4,21 +4,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useProject } from "../contexts/ProjectContext";
 import LegalModal from "../components/LegalModal"; // or wherever you put it
 import {
-  Sparkles,
-  Loader2,
-  X,
-  Download,
-  Rocket,
-  RotateCcw,
-  Code2,
-  Eye,
-  ChevronRight,
-  Settings,
-  Coins,
   Layout,
   Paintbrush,
-  Type,
+  ChevronLeft,
+  Palette,
   Sun,
+  Coins,
+  Rocket,
+  Type,
   MessageSquare,
   FileText,
   Target,
@@ -27,25 +20,85 @@ import {
   Award,
   Layers,
   Grid3X3,
-  Palette,
-  Maximize,
-  Maximize2,
+  Maximize as Maximize2,
   Circle,
   Image,
-  Zap,
+  BarChart,
+  Workflow,
+  Maximize,
+  Edit,
   Code,
+  X,
+  Zap,
+  Code as Code2,
   Accessibility,
   Pin,
   Lightbulb,
   Compass,
   Globe,
-  Trash2,
-  HelpCircle,
+  Blend,
+  AlignJustify,
+  AlignLeft,
+  Quote,
+  Gauge,
+
+  // Additional verified icons
+  Menu,
+  Smartphone,
+  Monitor,
+  Search,
+  Share2,
+  Square,
+  Minus,
+  Mail,
+  Bell,
   Shield,
-  Link,
-  Save,
+  Moon,
+  ArrowDown,
+  ChevronDown,
+  HelpCircle,
+  AlertCircle,
+  Play,
+  RefreshCw,
+  Tag,
+  User,
+  Folder,
+  Table,
+  BarChart2,
+  TrendingUp,
+  DollarSign,
+  GitBranch,
+  Eye,
+  Star,
+  Heart,
   Check,
+  Settings,
+  List,
+  Link,
+  Clock,
+  Calendar,
+  MapPin,
+  Phone,
+  Send,
+  Download,
+  Upload,
+  Copy,
+  Trash2,
+  Edit as Edit3,
+  Save,
+  Home as Home2,
+  Key,
+  Lock,
+  Filter,
+  MoreHorizontal,
+  ExternalLink,
+  Bookmark,
+  Hash,
+  AtSign,
+  MousePointer,
+  Sparkles,
 } from "lucide-react";
+
 import { useAuth } from "../contexts/AuthContext";
 import { supabase } from "../lib/supabaseClient";
 import AuthModal from "../components/AuthModal";
@@ -61,6 +114,14 @@ import MetallicBlob from "../components/MetallicBlob";
 import "./Home.scss";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+
+function chunk(array, size) {
+  const result = [];
+  for (let i = 0; i < array.length; i += size) {
+    result.push(array.slice(i, i + size));
+  }
+  return result;
+}
 
 // ==================== ANIMATION VARIANTS ====================
 
@@ -851,7 +912,7 @@ const OPTIONS = {
       {
         value: "CSS Modules",
         prompt:
-          "using CSS Modules with locally-scoped class names and a small, maintainable styles file",
+          "using CSS Modules with locally scoped class names and a small, maintainable styles file",
       },
       {
         value: "BEM CSS",
@@ -861,7 +922,7 @@ const OPTIONS = {
       {
         value: "Design Tokens",
         prompt:
-          "using CSS custom properties as design tokens for colors, spacing, and typography that can be reused across components",
+          "using CSS custom properties as design tokens for reusable design values",
       },
     ],
   },
@@ -968,32 +1029,32 @@ const OPTIONS = {
       {
         value: "Notion",
         prompt:
-          "inspired by Notion’s calm workspace aesthetic with minimal chrome, muted colors, and document-like layouts",
+          "inspired by Notionâ€™s calm workspace aesthetic with minimal chrome, muted colors, and document-like layouts",
       },
       {
         value: "Figma",
         prompt:
-          "inspired by Figma’s product-led UI with clear panels, toolbars, and a neutral canvas feel",
+          "inspired by Figmaâ€™s product-led UI with clear panels, toolbars, and a neutral canvas feel",
       },
       {
         value: "Linear",
         prompt:
-          "inspired by Linear’s ultra-minimal, fast, and opinionated product design with strong typography and dark/light modes",
+          "inspired by Linearâ€™s ultra-minimal, fast, and opinionated product design with strong typography and dark/light modes",
       },
       {
         value: "Framer",
         prompt:
-          "inspired by Framer’s motion-rich marketing pages with big gradients, bold sections, and smooth animations",
+          "inspired by Framerâ€™s motion-rich marketing pages with big gradients, bold sections, and smooth animations",
       },
       {
         value: "Dropbox",
         prompt:
-          "inspired by Dropbox’s friendly, illustration-heavy brand with lots of whitespace and approachable typography",
+          "inspired by Dropboxâ€™s friendly, illustration-heavy brand with lots of whitespace and approachable typography",
       },
       {
         value: "Spotify",
         prompt:
-          "inspired by Spotify’s bold, music-inspired visuals with dark bases, saturated accents, and expressive imagery",
+          "inspired by Spotifyâ€™s bold, music-inspired visuals with dark bases, saturated accents, and expressive imagery",
       },
       {
         value: "Figma Community",
@@ -1027,7 +1088,6 @@ const OPTIONS = {
       },
     ],
   },
-
   persistent: {
     label: "Content & Assets",
     subtitle: "Branding, images, and links",
@@ -1035,37 +1095,1187 @@ const OPTIONS = {
     promptKey: "persistent_content",
     isPersistent: true,
   },
+  navigation: {
+    label: "Navigation Style",
+    subtitle: "Header and menu design",
+    icon: Menu,
+    promptKey: "navigation_style",
+    choices: [
+      { value: "Standard", prompt: "Use a standard horizontal navigation bar" },
+      {
+        value: "Centered Logo",
+        prompt: "Use navigation with centered logo and split menu items",
+      },
+      {
+        value: "Hamburger",
+        prompt: "Use a hamburger menu that expands to full navigation",
+      },
+      { value: "Sidebar", prompt: "Use a persistent sidebar navigation" },
+      {
+        value: "Mega Menu",
+        prompt: "Use mega menu dropdowns with rich content",
+      },
+      {
+        value: "Floating",
+        prompt: "Use a floating/pill-shaped navigation bar",
+      },
+      {
+        value: "Transparent",
+        prompt: "Use a transparent navigation that becomes solid on scroll",
+      },
+      {
+        value: "Minimal",
+        prompt: "Use minimal navigation with only essential links",
+      },
+      { value: "Bottom Nav", prompt: "Use mobile-style bottom navigation bar" },
+      {
+        value: "Split",
+        prompt: "Use split navigation with logo left and CTA right",
+      },
+      { value: "Tabbed", prompt: "Use tabbed navigation for content sections" },
+      {
+        value: "Breadcrumb",
+        prompt: "Include breadcrumb navigation for hierarchy",
+      },
+      {
+        value: "Vertical Dots",
+        prompt: "Use vertical dot navigation for single-page scroll",
+      },
+      {
+        value: "Command Palette",
+        prompt: "Include a command palette / search modal (⌘K)",
+      },
+      { value: "No Navigation", prompt: "Minimal or no visible navigation" },
+    ],
+  },
+  contentFlow: {
+    label: "Content Flow",
+    subtitle: "Information architecture",
+    icon: Workflow,
+    promptKey: "content_flow",
+    choices: [
+      { value: "Linear", prompt: "Use a linear, top-to-bottom content flow" },
+      {
+        value: "Hub & Spoke",
+        prompt: "Use a hub-and-spoke navigation structure",
+      },
+      { value: "Z Pattern", prompt: "Use a Z-pattern visual flow" },
+      { value: "F Pattern", prompt: "Use an F-pattern for text-heavy content" },
+      {
+        value: "Inverted Pyramid",
+        prompt: "Use inverted pyramid with key info first",
+      },
+      { value: "Story Arc", prompt: "Use a storytelling arc structure" },
+      {
+        value: "Problem-Solution",
+        prompt: "Use problem-solution-benefit flow",
+      },
+      { value: "Feature Led", prompt: "Lead with features, then benefits" },
+      { value: "Benefit Led", prompt: "Lead with benefits, then features" },
+    ],
+  },
+  gradientStyle: {
+    label: "Gradient Usage",
+    subtitle: "Gradient application",
+    icon: Blend,
+    promptKey: "gradient_style",
+    choices: [
+      { value: "None", prompt: "Do not use gradients" },
+      { value: "Subtle", prompt: "Use subtle, barely-visible gradients" },
+      { value: "Background", prompt: "Use gradients for section backgrounds" },
+      { value: "Text", prompt: "Use gradient text effects" },
+      { value: "Buttons", prompt: "Use gradients on buttons and CTAs" },
+      { value: "Cards", prompt: "Use gradient card backgrounds" },
+      { value: "Mesh", prompt: "Use mesh gradients for organic effects" },
+      { value: "Radial", prompt: "Use radial gradients" },
+      { value: "Conic", prompt: "Use conic/angular gradients" },
+      { value: "Animated", prompt: "Use animated gradient effects" },
+      { value: "Aurora", prompt: "Use aurora/northern lights style gradients" },
+      { value: "Noise", prompt: "Use gradients with noise texture overlay" },
+    ],
+  },
+  backgroundPattern: {
+    label: "Background Pattern",
+    subtitle: "Background textures and patterns",
+    icon: Grid3X3,
+    promptKey: "background_pattern",
+    choices: [
+      { value: "None", prompt: "Use solid color backgrounds only" },
+      { value: "Dots", prompt: "Use dot pattern backgrounds" },
+      { value: "Grid", prompt: "Use grid pattern backgrounds" },
+      { value: "Lines", prompt: "Use line pattern backgrounds" },
+      { value: "Waves", prompt: "Use wave pattern backgrounds" },
+      { value: "Geometric", prompt: "Use geometric pattern backgrounds" },
+      { value: "Noise", prompt: "Use noise/grain texture backgrounds" },
+      { value: "Gradient Mesh", prompt: "Use gradient mesh backgrounds" },
+      { value: "Blobs", prompt: "Use blob shape backgrounds" },
+      { value: "Topography", prompt: "Use topographic map style backgrounds" },
+      { value: "Circuit", prompt: "Use circuit board pattern backgrounds" },
+      { value: "Isometric", prompt: "Use isometric pattern backgrounds" },
+      { value: "Paper", prompt: "Use paper texture backgrounds" },
+      { value: "Fabric", prompt: "Use fabric/canvas texture backgrounds" },
+      { value: "Marble", prompt: "Use marble texture backgrounds" },
+      { value: "Abstract", prompt: "Use abstract art backgrounds" },
+      { value: "Photo Overlay", prompt: "Use photo backgrounds with overlays" },
+    ],
+  },
+  shadowStyle: {
+    label: "Shadow Style",
+    subtitle: "Elevation and depth",
+    icon: Layers,
+    promptKey: "shadow_style",
+    choices: [
+      { value: "None", prompt: "Do not use shadows" },
+      { value: "Subtle", prompt: "Use subtle, soft shadows" },
+      { value: "Medium", prompt: "Use medium elevation shadows" },
+      { value: "Heavy", prompt: "Use heavy, pronounced shadows" },
+      { value: "Colored", prompt: "Use colored shadows matching brand colors" },
+      { value: "Hard", prompt: "Use hard-edged shadows without blur" },
+      { value: "Layered", prompt: "Use layered multiple shadows for depth" },
+      { value: "Inset", prompt: "Use inset shadows for pressed effects" },
+      { value: "Long", prompt: "Use long, directional shadows" },
+      { value: "Glow", prompt: "Use glow effects instead of shadows" },
+      { value: "Neumorphic", prompt: "Use neumorphic soft shadows" },
+      { value: "Brutalist", prompt: "Use brutalist offset solid shadows" },
+    ],
+  },
+  hoverEffects: {
+    label: "Hover Effects",
+    subtitle: "Interactive hover states",
+    icon: MousePointer,
+    promptKey: "hover_effects",
+    choices: [
+      { value: "None", prompt: "Minimal hover effects" },
+      { value: "Subtle", prompt: "Use subtle color/opacity hover changes" },
+      { value: "Scale", prompt: "Use scale/grow hover effects" },
+      { value: "Lift", prompt: "Use lift/shadow hover effects" },
+      { value: "Glow", prompt: "Use glow hover effects" },
+      { value: "Color Shift", prompt: "Use color shift hover effects" },
+      { value: "Underline", prompt: "Use animated underline hover effects" },
+      { value: "Fill", prompt: "Use fill/wipe hover effects" },
+      { value: "Tilt", prompt: "Use 3D tilt hover effects" },
+      { value: "Reveal", prompt: "Use reveal/expose hover effects" },
+      { value: "Magnetic", prompt: "Use magnetic cursor-following effects" },
+      { value: "Morphing", prompt: "Use morphing shape hover effects" },
+    ],
+  },
+  headingStyle: {
+    label: "Heading Style",
+    subtitle: "Headline treatment",
+    icon: Type,
+    promptKey: "heading_style",
+    choices: [
+      { value: "Simple", prompt: "Use simple, clean headings" },
+      { value: "Bold", prompt: "Use bold, heavy headings" },
+      { value: "Light", prompt: "Use light, thin headings" },
+      { value: "Uppercase", prompt: "Use uppercase/all-caps headings" },
+      { value: "Underlined", prompt: "Use underlined headings" },
+      { value: "Highlighted", prompt: "Use highlighted/marked headings" },
+      { value: "Gradient", prompt: "Use gradient text headings" },
+      { value: "Outlined", prompt: "Use outlined/stroke text headings" },
+    ],
+  },
+  // SCROLL BEHAVIOR
+  scrollBehavior: {
+    label: "Scroll Behavior",
+    subtitle: "Scroll interactions",
+    icon: ArrowDown,
+    promptKey: "scroll_behavior",
+    choices: [
+      { value: "Standard", prompt: "Use standard scroll behavior" },
+      { value: "Smooth", prompt: "Use smooth scrolling for anchor links" },
+      {
+        value: "Snap",
+        prompt: "Use scroll snap for section-by-section viewing",
+      },
+      { value: "Parallax", prompt: "Use parallax scrolling effects" },
+      { value: "Reveal", prompt: "Use scroll-triggered reveal animations" },
+      { value: "Progress", prompt: "Show scroll progress indicator" },
+      { value: "Sticky", prompt: "Use sticky sections during scroll" },
+    ],
+  },
+
+  // LOADING STYLE
+  loadingStyle: {
+    label: "Loading States",
+    subtitle: "Loading animations",
+    icon: RefreshCw,
+    promptKey: "loading_style",
+    choices: [
+      { value: "None", prompt: "No loading indicators" },
+      { value: "Spinner", prompt: "Use spinner loading indicators" },
+      {
+        value: "Skeleton",
+        prompt: "Use skeleton/shimmer loading placeholders",
+      },
+      { value: "Progress Bar", prompt: "Use progress bar loading indicators" },
+      { value: "Dots", prompt: "Use animated dots loading indicators" },
+      { value: "Pulse", prompt: "Use pulsing loading effects" },
+    ],
+  },
+
+  // TESTIMONIAL STYLE
+  testimonialStyle: {
+    label: "Testimonial Style",
+    subtitle: "Customer quote design",
+    icon: MessageSquare,
+    promptKey: "testimonial_style",
+    choices: [
+      { value: "Cards", prompt: "Display testimonials as cards" },
+      { value: "Carousel", prompt: "Display testimonials in a carousel" },
+      { value: "Grid", prompt: "Display testimonials in a grid" },
+      {
+        value: "Single Featured",
+        prompt: "Display one large featured testimonial",
+      },
+      { value: "Masonry", prompt: "Display testimonials in masonry layout" },
+      { value: "Video", prompt: "Display video testimonials" },
+      { value: "Tweet Style", prompt: "Display testimonials as tweet cards" },
+      {
+        value: "With Logos",
+        prompt: "Display testimonials with company logos",
+      },
+      { value: "Marquee", prompt: "Display testimonials in scrolling marquee" },
+    ],
+  },
+
+  // PRICING STYLE
+  pricingStyle: {
+    label: "Pricing Style",
+    subtitle: "Pricing table design",
+    icon: DollarSign,
+    promptKey: "pricing_style",
+    choices: [
+      { value: "Cards", prompt: "Use pricing cards side by side" },
+      { value: "Table", prompt: "Use a traditional pricing table" },
+      { value: "Comparison", prompt: "Use a feature comparison grid" },
+      { value: "Toggle", prompt: "Use monthly/annual toggle pricing" },
+      {
+        value: "Tiered",
+        prompt: "Use tiered pricing with feature progression",
+      },
+      {
+        value: "Highlighted",
+        prompt: "Highlight recommended plan prominently",
+      },
+      { value: "Minimal", prompt: "Use minimal single-price display" },
+    ],
+  },
+
+  // FOOTER STYLE
+  footerStyle: {
+    label: "Footer Style",
+    subtitle: "Footer layout design",
+    icon: Layout,
+    promptKey: "footer_style",
+    choices: [
+      { value: "Simple", prompt: "Use a simple single-line footer" },
+      { value: "Minimal", prompt: "Use a minimal footer with just essentials" },
+      { value: "Standard", prompt: "Use a standard multi-column footer" },
+      { value: "Fat", prompt: "Use a fat footer with extensive links" },
+      {
+        value: "Mega",
+        prompt: "Use a mega footer with newsletter and socials",
+      },
+      { value: "CTA", prompt: "Use a footer with prominent CTA section" },
+      {
+        value: "Newsletter",
+        prompt: "Use a footer focused on newsletter signup",
+      },
+      { value: "Dark", prompt: "Use a dark-themed footer" },
+    ],
+  },
+  faqStyle: {
+    label: "FAQ Style",
+    subtitle: "FAQ design",
+    icon: HelpCircle,
+    promptKey: "faq_style",
+    choices: [
+      { value: "Accordion", prompt: "Use accordion-style FAQ" },
+      { value: "Cards", prompt: "Use card-style FAQ" },
+      { value: "Two Column", prompt: "Use two-column FAQ layout" },
+      { value: "Categorized", prompt: "Use categorized/tabbed FAQ" },
+      { value: "Search", prompt: "Include FAQ search functionality" },
+      { value: "Minimal", prompt: "Use minimal list-style FAQ" },
+    ],
+  },
+
+  // TEAM STYLE
+  teamStyle: {
+    label: "Team Section",
+    subtitle: "Team member display",
+    icon: Users,
+    promptKey: "team_style",
+    choices: [
+      { value: "Grid", prompt: "Use a grid of team member cards" },
+      { value: "Carousel", prompt: "Use a team carousel" },
+      { value: "Featured", prompt: "Feature key team members prominently" },
+      { value: "Hover Reveal", prompt: "Reveal info on hover" },
+      { value: "Social Links", prompt: "Include social links for team" },
+      { value: "Minimal", prompt: "Use minimal avatars only" },
+    ],
+  },
+
+  // STATS STYLE
+  statsStyle: {
+    label: "Stats Display",
+    subtitle: "Metrics and numbers",
+    icon: BarChart2,
+    promptKey: "stats_style",
+    choices: [
+      { value: "Simple", prompt: "Use simple number display" },
+      { value: "Cards", prompt: "Use stat cards" },
+      { value: "Counters", prompt: "Use animated counter numbers" },
+      { value: "Progress", prompt: "Use progress bar stats" },
+      { value: "Charts", prompt: "Use chart visualizations" },
+      { value: "Icons", prompt: "Use stats with icons" },
+      { value: "Grid", prompt: "Use a stats grid layout" },
+    ],
+  },
+
+  // CONTACT STYLE
+  contactStyle: {
+    label: "Contact Section",
+    subtitle: "Contact area design",
+    icon: Mail,
+    promptKey: "contact_style",
+    choices: [
+      { value: "Form Only", prompt: "Use a simple contact form" },
+      { value: "Form + Info", prompt: "Use form with contact information" },
+      { value: "Split", prompt: "Use split layout with form and details" },
+      { value: "Map + Form", prompt: "Include map with contact form" },
+      { value: "Calendly", prompt: "Include calendar booking widget" },
+      { value: "Cards", prompt: "Use contact method cards" },
+      { value: "Minimal", prompt: "Use minimal email/phone only" },
+    ],
+  },
+
+  // RESPONSIVE APPROACH
+  responsiveApproach: {
+    label: "Responsive Approach",
+    subtitle: "Mobile/desktop strategy",
+    icon: Smartphone,
+    promptKey: "responsive_approach",
+    choices: [
+      {
+        value: "Mobile First",
+        prompt: "Design mobile-first with progressive enhancement",
+      },
+      {
+        value: "Desktop First",
+        prompt: "Design desktop-first with graceful degradation",
+      },
+      { value: "Fluid", prompt: "Use fluid layouts that scale smoothly" },
+    ],
+  },
+
+  // MOBILE MENU
+  mobileMenu: {
+    label: "Mobile Menu",
+    subtitle: "Mobile navigation style",
+    icon: Smartphone,
+    promptKey: "mobile_menu",
+    choices: [
+      { value: "Hamburger Slide", prompt: "Use a slide-out hamburger menu" },
+      { value: "Full Screen", prompt: "Use a full-screen overlay menu" },
+      { value: "Bottom Sheet", prompt: "Use a bottom sheet menu" },
+      { value: "Bottom Nav", prompt: "Use a fixed bottom navigation bar" },
+      { value: "Dropdown", prompt: "Use a dropdown menu from header" },
+    ],
+  },
+  darkModeToggle: {
+    label: "Dark Mode Toggle",
+    subtitle: "Theme switching",
+    icon: Moon,
+    promptKey: "dark_mode_toggle",
+    choices: [
+      { value: "None", prompt: "No dark mode toggle" },
+      { value: "Header", prompt: "Include toggle in header" },
+      { value: "Footer", prompt: "Include toggle in footer" },
+      { value: "System", prompt: "Auto-detect system preference" },
+    ],
+  },
+
+  // COOKIE BANNER
+  cookieBanner: {
+    label: "Cookie Banner",
+    subtitle: "GDPR/consent handling",
+    icon: Shield,
+    promptKey: "cookie_banner",
+    choices: [
+      { value: "None", prompt: "No cookie banner" },
+      { value: "Simple", prompt: "Use a simple accept/decline banner" },
+      { value: "Bottom Bar", prompt: "Use a bottom bar cookie notice" },
+      { value: "Corner", prompt: "Use a corner popup cookie notice" },
+      { value: "Minimal", prompt: "Use a minimal, unobtrusive notice" },
+    ],
+  },
+
+  // SEO LEVEL
+  seoLevel: {
+    label: "SEO Focus",
+    subtitle: "Search optimization",
+    icon: Search,
+    promptKey: "seo_level",
+    choices: [
+      { value: "Basic", prompt: "Include basic meta tags and structure" },
+      { value: "Standard", prompt: "Include standard SEO with semantic HTML" },
+      { value: "Advanced", prompt: "Include advanced SEO with schema markup" },
+    ],
+  },
+
+  // PERFORMANCE
+  performanceLevel: {
+    label: "Performance",
+    subtitle: "Speed optimization",
+    icon: Zap,
+    promptKey: "performance_level",
+    choices: [
+      { value: "Standard", prompt: "Use standard web performance practices" },
+      {
+        value: "Optimized",
+        prompt: "Optimize for fast loading and Core Web Vitals",
+      },
+      {
+        value: "Ultra Light",
+        prompt: "Minimize everything for fastest possible load",
+      },
+    ],
+  },
+
+  // BRAND PERSONALITY
+  brandPersonality: {
+    label: "Brand Personality",
+    subtitle: "Brand character traits",
+    icon: Heart,
+    promptKey: "brand_personality",
+    choices: [
+      {
+        value: "Professional",
+        prompt: "Use a professional, corporate personality",
+      },
+      { value: "Friendly", prompt: "Use a friendly, approachable personality" },
+      { value: "Bold", prompt: "Use a bold, confident personality" },
+      { value: "Playful", prompt: "Use a playful, fun personality" },
+      {
+        value: "Sophisticated",
+        prompt: "Use a sophisticated, refined personality",
+      },
+      {
+        value: "Innovative",
+        prompt: "Use an innovative, cutting-edge personality",
+      },
+      {
+        value: "Trustworthy",
+        prompt: "Use a trustworthy, reliable personality",
+      },
+      { value: "Energetic", prompt: "Use an energetic, dynamic personality" },
+      { value: "Calm", prompt: "Use a calm, serene personality" },
+      { value: "Warm", prompt: "Use a warm, caring personality" },
+    ],
+  },
+
+  // TAB STYLE
+  tabStyle: {
+    label: "Tab Style",
+    subtitle: "Tab navigation design",
+    icon: Folder,
+    promptKey: "tab_style",
+    choices: [
+      { value: "Underline", prompt: "Use underline tab indicators" },
+      { value: "Pill", prompt: "Use pill-shaped tabs" },
+      { value: "Boxed", prompt: "Use boxed/bordered tabs" },
+      { value: "Button", prompt: "Use button-style tabs" },
+      { value: "Minimal", prompt: "Use minimal text tabs" },
+      { value: "Vertical", prompt: "Use vertical tabs" },
+    ],
+  },
+
+  // ACCORDION STYLE
+  accordionStyle: {
+    label: "Accordion Style",
+    subtitle: "Expandable content",
+    icon: ChevronDown,
+    promptKey: "accordion_style",
+    choices: [
+      { value: "Simple", prompt: "Use simple accordion with chevron" },
+      { value: "Bordered", prompt: "Use bordered accordion items" },
+      { value: "Card", prompt: "Use card-style accordion" },
+      { value: "Flush", prompt: "Use flush/edge-to-edge accordion" },
+      { value: "Icon", prompt: "Use plus/minus icon accordion" },
+      { value: "Animated", prompt: "Use animated accordion transitions" },
+    ],
+  },
+
+  // CAROUSEL STYLE
+  carouselStyle: {
+    label: "Carousel Style",
+    subtitle: "Slider design",
+    icon: Play,
+    promptKey: "carousel_style",
+    choices: [
+      { value: "None", prompt: "Don't use carousels" },
+      { value: "Simple", prompt: "Use simple arrow navigation carousels" },
+      { value: "Dots", prompt: "Use dot indicator carousels" },
+      { value: "Thumbnails", prompt: "Use thumbnail navigation carousels" },
+      { value: "Center Mode", prompt: "Use center-focused carousels" },
+      { value: "Auto Play", prompt: "Use auto-playing carousels" },
+      { value: "Fade", prompt: "Use fade transition carousels" },
+      { value: "Multi Item", prompt: "Use multi-item visible carousels" },
+    ],
+  },
+
+  // NOTIFICATION STYLE
+  notificationStyle: {
+    label: "Notification Style",
+    subtitle: "Alert and toast design",
+    icon: Bell,
+    promptKey: "notification_style",
+    choices: [
+      { value: "Toast", prompt: "Use toast notifications" },
+      { value: "Banner", prompt: "Use banner notifications" },
+      { value: "Inline", prompt: "Use inline alert messages" },
+      { value: "Modal", prompt: "Use modal alerts" },
+      { value: "Slide In", prompt: "Use slide-in notifications" },
+      { value: "Floating", prompt: "Use floating corner notifications" },
+    ],
+  },
+
+  // BADGE STYLE
+  badgeStyle: {
+    label: "Badge Style",
+    subtitle: "Tags and labels",
+    icon: Tag,
+    promptKey: "badge_style",
+    choices: [
+      { value: "Pill", prompt: "Use pill-shaped badges" },
+      { value: "Rounded", prompt: "Use rounded corner badges" },
+      { value: "Square", prompt: "Use square badges" },
+      { value: "Outlined", prompt: "Use outline/ghost badges" },
+      { value: "Filled", prompt: "Use solid filled badges" },
+      { value: "Dot", prompt: "Use dot status indicators" },
+      { value: "Gradient", prompt: "Use gradient badges" },
+    ],
+  },
+
+  // AVATAR STYLE
+  avatarStyle: {
+    label: "Avatar Style",
+    subtitle: "User avatar design",
+    icon: User,
+    promptKey: "avatar_style",
+    choices: [
+      { value: "Circle", prompt: "Use circular avatars" },
+      { value: "Rounded", prompt: "Use rounded square avatars" },
+      { value: "Square", prompt: "Use square avatars" },
+      { value: "Initials", prompt: "Use initials as avatar fallback" },
+      { value: "Bordered", prompt: "Use bordered avatars" },
+      { value: "Stacked", prompt: "Use stacked avatar groups" },
+      { value: "With Status", prompt: "Use avatars with status indicators" },
+    ],
+  },
+
+  // PROGRESS STYLE
+  progressStyle: {
+    label: "Progress Style",
+    subtitle: "Progress indicators",
+    icon: TrendingUp,
+    promptKey: "progress_style",
+    choices: [
+      { value: "Bar", prompt: "Use horizontal progress bars" },
+      { value: "Circle", prompt: "Use circular progress indicators" },
+      { value: "Steps", prompt: "Use step indicators" },
+      { value: "Dots", prompt: "Use dot progress indicators" },
+      { value: "Number", prompt: "Use numbered progress" },
+      { value: "Percentage", prompt: "Use percentage display" },
+    ],
+  },
+
+  // TABLE STYLE
+  tableStyle: {
+    label: "Table Style",
+    subtitle: "Data table design",
+    icon: Table,
+    promptKey: "table_style",
+    choices: [
+      { value: "Simple", prompt: "Use simple, clean tables" },
+      { value: "Striped", prompt: "Use zebra-striped tables" },
+      { value: "Bordered", prompt: "Use bordered tables" },
+      { value: "Borderless", prompt: "Use borderless tables" },
+      { value: "Cards", prompt: "Convert tables to cards on mobile" },
+      { value: "Compact", prompt: "Use compact, dense tables" },
+      { value: "Sortable", prompt: "Use sortable column headers" },
+    ],
+  },
+  socialSharing: {
+    label: "Social Sharing",
+    subtitle: "Social media integration",
+    icon: Share2,
+    promptKey: "social_sharing",
+    choices: [
+      { value: "None", prompt: "No social sharing features" },
+      { value: "Buttons", prompt: "Include social share buttons" },
+      { value: "Links", prompt: "Include social media links" },
+      { value: "Follow", prompt: "Include follow buttons" },
+      { value: "Open Graph", prompt: "Include Open Graph meta tags" },
+    ],
+  },
+
+  // MEDIA HANDLING
+  mediaHandling: {
+    label: "Media Display",
+    subtitle: "Image and video handling",
+    icon: Image,
+    promptKey: "media_handling",
+    choices: [
+      { value: "Standard", prompt: "Use standard image display" },
+      { value: "Lazy Load", prompt: "Use lazy loading for images" },
+      { value: "Blur Up", prompt: "Use blur-up placeholder loading" },
+      { value: "Lightbox", prompt: "Use lightbox for image galleries" },
+      { value: "Masonry", prompt: "Use masonry layout for images" },
+      { value: "Video Modal", prompt: "Open videos in modal players" },
+      { value: "Responsive Images", prompt: "Use responsive srcset images" },
+    ],
+  },
+
+  // CODE BLOCK STYLE
+  codeBlockStyle: {
+    label: "Code Blocks",
+    subtitle: "Code snippet styling",
+    icon: Code,
+    promptKey: "code_block_style",
+    choices: [
+      { value: "None", prompt: "No code blocks needed" },
+      { value: "Simple", prompt: "Use simple monospace code blocks" },
+      { value: "Highlighted", prompt: "Use syntax-highlighted code blocks" },
+      { value: "Dark", prompt: "Use dark theme code blocks" },
+      { value: "Light", prompt: "Use light theme code blocks" },
+      { value: "Line Numbers", prompt: "Include line numbers in code" },
+      { value: "Copy Button", prompt: "Include copy button for code" },
+      { value: "Terminal", prompt: "Use terminal-style code display" },
+    ],
+  },
+
+  // ERROR PAGE STYLE
+  errorPageStyle: {
+    label: "Error Pages",
+    subtitle: "404 page design",
+    icon: AlertCircle,
+    promptKey: "error_page_style",
+    choices: [
+      { value: "Simple", prompt: "Use a simple error page" },
+      { value: "Illustrated", prompt: "Use an illustrated error page" },
+      { value: "Animated", prompt: "Use an animated error page" },
+      { value: "Playful", prompt: "Use a playful/fun error page" },
+      { value: "Minimal", prompt: "Use a minimal error page" },
+      { value: "Search", prompt: "Include search on error page" },
+    ],
+  },
+
+  // CTA SECTION STYLE
+  ctaSectionStyle: {
+    label: "CTA Section",
+    subtitle: "Call-to-action block",
+    icon: Target,
+    promptKey: "cta_section_style",
+    choices: [
+      { value: "Centered", prompt: "Use a centered CTA section" },
+      { value: "Split", prompt: "Use a split CTA with image" },
+      { value: "Full Width", prompt: "Use a full-width CTA banner" },
+      { value: "Card", prompt: "Use a card-style CTA" },
+      { value: "Gradient", prompt: "Use a gradient background CTA" },
+      { value: "Image Background", prompt: "Use an image background CTA" },
+      { value: "Floating", prompt: "Use a floating/sticky CTA" },
+      { value: "Newsletter", prompt: "Use a newsletter signup CTA" },
+    ],
+  },
+
+  // LINK STYLE
+  linkStyle: {
+    label: "Link Style",
+    subtitle: "Text link treatment",
+    icon: Link,
+    promptKey: "link_style",
+    choices: [
+      { value: "Underline", prompt: "Use underlined links" },
+      { value: "No Underline", prompt: "Use links without underline" },
+      { value: "Hover Underline", prompt: "Show underline only on hover" },
+      { value: "Color Only", prompt: "Distinguish links by color only" },
+      { value: "Bold", prompt: "Use bold text for links" },
+      { value: "Arrow", prompt: "Add arrow icon to links" },
+      { value: "Animated", prompt: "Use animated link effects" },
+    ],
+  },
+
+  // LIST STYLE
+  listStyle: {
+    label: "List Style",
+    subtitle: "List and bullet design",
+    icon: List,
+    promptKey: "list_style",
+    choices: [
+      { value: "Standard", prompt: "Use standard bullet lists" },
+      { value: "Check", prompt: "Use checkmark lists" },
+      { value: "Arrow", prompt: "Use arrow bullet lists" },
+      { value: "Number", prompt: "Use numbered lists" },
+      { value: "Icon", prompt: "Use custom icon bullets" },
+      { value: "Card", prompt: "Use card-style list items" },
+      { value: "Timeline", prompt: "Use timeline-style lists" },
+    ],
+  },
+
+  // SPACING SCALE
+  spacingScale: {
+    label: "Spacing Scale",
+    subtitle: "Whitespace system",
+    icon: Maximize,
+    promptKey: "spacing_scale",
+    choices: [
+      { value: "Tight", prompt: "Use tight spacing throughout" },
+      { value: "Default", prompt: "Use standard spacing scale" },
+      { value: "Relaxed", prompt: "Use relaxed, generous spacing" },
+      { value: "Dramatic", prompt: "Use dramatic whitespace for impact" },
+    ],
+  },
+
+  // BORDER WIDTH
+  borderWidth: {
+    label: "Border Width",
+    subtitle: "Line thickness",
+    icon: Square,
+    promptKey: "border_width",
+    choices: [
+      { value: "None", prompt: "Avoid borders" },
+      { value: "Hairline", prompt: "Use 1px hairline borders" },
+      { value: "Thin", prompt: "Use thin 1-2px borders" },
+      { value: "Medium", prompt: "Use medium 2-3px borders" },
+      { value: "Thick", prompt: "Use thick 3-4px borders" },
+      { value: "Heavy", prompt: "Use heavy 4px+ borders" },
+    ],
+  },
+
+  // MICRO COPY
+  microCopy: {
+    label: "Micro Copy",
+    subtitle: "UI text style",
+    icon: FileText,
+    promptKey: "micro_copy",
+    choices: [
+      { value: "Formal", prompt: "Use formal, professional UI text" },
+      { value: "Casual", prompt: "Use casual, friendly UI text" },
+      { value: "Minimal", prompt: "Use minimal, essential-only text" },
+      { value: "Helpful", prompt: "Use helpful, explanatory text" },
+      { value: "Playful", prompt: "Use playful, personality-filled text" },
+      { value: "Technical", prompt: "Use technical, precise text" },
+    ],
+  },
+
+  // EMPTY STATES
+  emptyStates: {
+    label: "Empty States",
+    subtitle: "No-content design",
+    icon: Folder,
+    promptKey: "empty_states",
+    choices: [
+      { value: "Simple", prompt: "Use simple text empty states" },
+      { value: "Illustrated", prompt: "Use illustrated empty states" },
+      { value: "Actionable", prompt: "Use empty states with CTAs" },
+      { value: "Minimal", prompt: "Use minimal empty states" },
+      { value: "Animated", prompt: "Use animated empty states" },
+    ],
+  },
+  heroStyle: {
+    label: "Hero Style",
+    subtitle: "Above-the-fold design",
+    icon: Maximize2,
+    promptKey: "hero_style",
+    choices: [
+      {
+        value: "Centered",
+        prompt: "Use a centered hero with headline, subtext, and CTA",
+      },
+      {
+        value: "Split",
+        prompt: "Use a split hero with content on one side, image on other",
+      },
+      {
+        value: "Full Screen",
+        prompt: "Use a full-screen hero taking up entire viewport",
+      },
+      { value: "Video Background", prompt: "Use a hero with video background" },
+      {
+        value: "Animated",
+        prompt: "Use a hero with animated graphics or illustrations",
+      },
+      { value: "Gradient", prompt: "Use a hero with bold gradient background" },
+      { value: "Minimal", prompt: "Use a minimal text-only hero" },
+      {
+        value: "Product Showcase",
+        prompt: "Use a hero showcasing the product with mockups",
+      },
+      { value: "Stats", prompt: "Use a hero with key statistics and metrics" },
+      {
+        value: "Testimonial",
+        prompt: "Use a hero featuring a prominent testimonial",
+      },
+      {
+        value: "Interactive",
+        prompt: "Use an interactive hero with demos or configurators",
+      },
+      { value: "Parallax", prompt: "Use a parallax scrolling hero effect" },
+      { value: "3D", prompt: "Use a hero with 3D graphics or WebGL elements" },
+      { value: "Carousel", prompt: "Use a hero carousel with multiple slides" },
+      {
+        value: "Search Focused",
+        prompt: "Use a hero centered around a search input",
+      },
+      {
+        value: "Card Stack",
+        prompt: "Use a hero with stacked cards or features",
+      },
+      {
+        value: "Asymmetric",
+        prompt: "Use an asymmetric hero with unconventional layout",
+      },
+      {
+        value: "Bento Grid",
+        prompt: "Use a bento box grid hero with multiple elements",
+      },
+    ],
+  },
+
+  // ==================== NEW BUTTON STYLE CATEGORY ====================
+
+  buttonStyle: {
+    label: "Button Style",
+    subtitle: "Button and CTA design",
+    icon: MousePointer,
+    promptKey: "button_style",
+    choices: [
+      {
+        value: "Solid",
+        prompt: "Use solid filled buttons with background color",
+      },
+      { value: "Outline", prompt: "Use outline/ghost buttons with borders" },
+      { value: "Gradient", prompt: "Use buttons with gradient backgrounds" },
+      { value: "Pill", prompt: "Use pill-shaped fully rounded buttons" },
+      {
+        value: "Sharp",
+        prompt: "Use sharp rectangular buttons with no border radius",
+      },
+      { value: "Rounded", prompt: "Use buttons with subtle rounded corners" },
+      { value: "Icon + Text", prompt: "Use buttons with icons alongside text" },
+      {
+        value: "Animated",
+        prompt: "Use buttons with hover animations and transitions",
+      },
+      { value: "3D/Elevated", prompt: "Use 3D buttons with shadows and depth" },
+      {
+        value: "Underline",
+        prompt: "Use underline-style text links as buttons",
+      },
+      { value: "Glow", prompt: "Use buttons with glow effects on hover" },
+      {
+        value: "Neubrutalist",
+        prompt: "Use thick-bordered neubrutalist style buttons",
+      },
+      { value: "Glass", prompt: "Use glassmorphism style buttons with blur" },
+      { value: "Split", prompt: "Use split buttons with multiple actions" },
+      {
+        value: "Loading States",
+        prompt: "Include loading spinner states for buttons",
+      },
+    ],
+  },
+
+  // ==================== NEW CARD STYLE CATEGORY ====================
+
+  cardStyle: {
+    label: "Card Style",
+    subtitle: "Card and container design",
+    icon: Square,
+    promptKey: "card_style",
+    choices: [
+      { value: "Flat", prompt: "Use flat cards with subtle borders" },
+      { value: "Elevated", prompt: "Use elevated cards with shadows" },
+      { value: "Bordered", prompt: "Use cards with prominent borders" },
+      {
+        value: "Glass",
+        prompt: "Use glassmorphism cards with blur and transparency",
+      },
+      { value: "Gradient", prompt: "Use cards with gradient backgrounds" },
+      { value: "Outlined", prompt: "Use cards with outline/stroke only" },
+      { value: "Hover Lift", prompt: "Use cards that lift/scale on hover" },
+      { value: "Image Heavy", prompt: "Use cards with large featured images" },
+      { value: "Compact", prompt: "Use compact, dense card layouts" },
+      { value: "Expanded", prompt: "Use spacious cards with generous padding" },
+      {
+        value: "Asymmetric",
+        prompt: "Use asymmetric card layouts with varied sizes",
+      },
+      { value: "Stacked", prompt: "Use overlapping stacked card effects" },
+      { value: "Neumorphic", prompt: "Use neumorphic soft shadow cards" },
+      {
+        value: "Brutalist",
+        prompt: "Use brutalist cards with thick borders and bold shadows",
+      },
+      {
+        value: "Interactive",
+        prompt: "Use interactive cards with flip or expand animations",
+      },
+    ],
+  },
+
+  // ==================== NEW FORM STYLE CATEGORY ====================
+
+  formStyle: {
+    label: "Form Style",
+    subtitle: "Input and form design",
+    icon: Edit3,
+    promptKey: "form_style",
+    choices: [
+      { value: "Standard", prompt: "Use standard form inputs with borders" },
+      { value: "Underline", prompt: "Use underline-only input fields" },
+      { value: "Filled", prompt: "Use filled background input fields" },
+      {
+        value: "Floating Label",
+        prompt: "Use floating label inputs that animate",
+      },
+      { value: "Outlined", prompt: "Use outlined inputs with rounded corners" },
+      { value: "Minimal", prompt: "Use minimal, borderless inputs" },
+      { value: "Inline", prompt: "Use inline form layouts" },
+      { value: "Card", prompt: "Wrap form fields in card containers" },
+      {
+        value: "Stepped",
+        prompt: "Use multi-step form with progress indicator",
+      },
+      {
+        value: "Conversational",
+        prompt: "Use conversational, chatbot-style forms",
+      },
+      {
+        value: "Inline Validation",
+        prompt: "Include inline validation messages",
+      },
+      { value: "Large", prompt: "Use large, prominent input fields" },
+      { value: "Compact", prompt: "Use compact, space-efficient inputs" },
+      { value: "Searchable", prompt: "Use searchable dropdowns and selects" },
+      { value: "Date Picker", prompt: "Include date picker with calendar UI" },
+    ],
+  },
+
+  // ==================== NEW ICON STYLE CATEGORY ====================
+
+  iconStyle: {
+    label: "Icon Style",
+    subtitle: "Icon design approach",
+    icon: Sparkles,
+    promptKey: "icon_style",
+    choices: [
+      { value: "Line", prompt: "Use line/stroke icons" },
+      { value: "Solid", prompt: "Use solid filled icons" },
+      { value: "Duo-tone", prompt: "Use duo-tone icons with two colors" },
+      {
+        value: "Outlined",
+        prompt: "Use outlined icons with consistent stroke",
+      },
+      { value: "Colored", prompt: "Use colorful icons with brand colors" },
+      { value: "Gradient", prompt: "Use icons with gradient fills" },
+      { value: "3D", prompt: "Use 3D or isometric icons" },
+      { value: "Hand-drawn", prompt: "Use hand-drawn style icons" },
+      { value: "Minimal", prompt: "Use minimal, simplified icons" },
+      { value: "Detailed", prompt: "Use detailed, illustrative icons" },
+      {
+        value: "Animated",
+        prompt: "Use animated icons with micro-interactions",
+      },
+      { value: "Emoji", prompt: "Use emoji as icons" },
+      { value: "Custom Illustrations", prompt: "Use custom illustrated icons" },
+      { value: "Phosphor", prompt: "Use Phosphor icon style" },
+      { value: "Heroicons", prompt: "Use Heroicons style" },
+      { value: "Lucide", prompt: "Use Lucide icon style" },
+      { value: "Feather", prompt: "Use Feather icon style" },
+    ],
+  },
+  typographyScale: {
+    label: "Type Scale",
+    subtitle: "Typography sizing system",
+    icon: Type,
+    promptKey: "type_scale",
+    choices: [
+      {
+        value: "Compact",
+        prompt: "Use a compact type scale with smaller sizes",
+      },
+      { value: "Default", prompt: "Use a standard type scale" },
+      { value: "Large", prompt: "Use a large type scale for emphasis" },
+      {
+        value: "Dramatic",
+        prompt: "Use a dramatic type scale with huge headlines",
+      },
+      {
+        value: "Fluid",
+        prompt: "Use fluid/responsive typography that scales with viewport",
+      },
+      {
+        value: "Modular",
+        prompt: "Use a strict modular scale (e.g., 1.25 ratio)",
+      },
+    ],
+  },
+
+  dividerStyle: {
+    label: "Section Dividers",
+    subtitle: "How sections are separated",
+    icon: Minus,
+    promptKey: "divider_style",
+    choices: [
+      { value: "None", prompt: "No visible dividers between sections" },
+      { value: "Line", prompt: "Use simple line dividers" },
+      { value: "Wave", prompt: "Use wave-shaped dividers" },
+      { value: "Angle", prompt: "Use angled/diagonal dividers" },
+      { value: "Curve", prompt: "Use curved dividers" },
+      { value: "Mountain", prompt: "Use mountain/peak shaped dividers" },
+      { value: "Gradient Fade", prompt: "Use gradient fade transitions" },
+      { value: "Color Block", prompt: "Use alternating color blocks" },
+      { value: "Zigzag", prompt: "Use zigzag pattern dividers" },
+      { value: "Torn Paper", prompt: "Use torn paper edge dividers" },
+      { value: "Dots", prompt: "Use dot row dividers" },
+      { value: "Space", prompt: "Use generous whitespace as dividers" },
+    ],
+  },
 };
 
+// ==================== EXPANDED CATEGORIES ====================
+// Grouped by function for easier organization
+
 const CATEGORIES = [
+  // Structure & Layout
   "template",
+  "navigation",
+  "layout",
+  "sections",
+  "contentFlow",
+  "hierarchy",
+  "density",
+
+  // Visual Style
   "style",
+  "inspiration",
   "palette",
+  "customColors",
   "mode",
+  "gradientStyle",
+  "backgroundPattern",
+  "corners",
+  "shadowStyle",
+  "hoverEffects",
+
+  // Typography
   "font",
+  "typographyScale",
+  "headingStyle",
+
+  // Components
+  "heroStyle",
+  "buttonStyle",
+  "cardStyle",
+  "formStyle",
+  "iconStyle",
+  "badgeStyle",
+  "avatarStyle",
+  "tabStyle",
+  "accordionStyle",
+  "carouselStyle",
+  "notificationStyle",
+  "progressStyle",
+  "tableStyle",
+  "linkStyle",
+  "listStyle",
+  "emptyStates",
+
+  // Content Blocks
+  "testimonialStyle",
+  "pricingStyle",
+  "statsStyle",
+  "teamStyle",
+  "faqStyle",
+  "contactStyle",
+  "footerStyle",
+  "ctaSectionStyle",
+  "socialProof",
+
+  // Content & Copy
   "tone",
   "copyLength",
+  "brandPersonality",
+  "microCopy",
   "cta",
   "goal",
   "industry",
   "audience",
-  "sections",
-  "layout",
-  "density",
-  "corners",
-  "images",
+
+  // Effects & Motion
   "animation",
-  "socialProof",
-  "stickyElements",
+  "interaction",
+  "scrollBehavior",
+  "loadingStyle",
+
+  // Spacing & Borders
+  "spacingScale",
+  "dividerStyle",
+  "borderWidth",
+
+  // Media
+  "images",
+  "mediaHandling",
+  "codeBlockStyle",
+
+  // Technical
   "framework",
   "accessibility",
+  "seoLevel",
+  "performanceLevel",
+  "responsiveApproach",
+  "mobileMenu",
+
+  // Features
+  "darkModeToggle",
+  "cookieBanner",
+  "socialSharing",
+  "stickyElements",
+  "errorPageStyle",
+
+  // AI Controls
   "creativity",
-  "inspiration",
-  "interaction",
-  "hierarchy",
+
+  // Persistent / Brand Assets
   "persistent",
-  // "customColors" is handled specially when palette is "Custom"
 ];
+
+function InfinitePillRow({ children, reverse, duration = 35 }) {
+  return (
+    <div className="pill-row">
+      <motion.div
+        className="pill-row__track"
+        animate={{
+          x: reverse ? ["-50%", "0%"] : ["0%", "-50%"],
+        }}
+        transition={{
+          x: {
+            repeat: Infinity,
+            repeatType: "loop",
+            duration,
+            ease: "linear",
+          },
+        }}
+      >
+        {children}
+        {children}
+      </motion.div>
+    </div>
+  );
+}
 
 function Home() {
   const { user, isAuthenticated, profile } = useAuth();
@@ -1238,6 +2448,10 @@ function Home() {
   const [showTokens, setShowTokens] = useState(false);
   const [showDeploy, setShowDeploy] = useState(false);
   const [_, setPendingAction] = useState(null);
+
+  // Enhance input state
+  const [enhancePrompt, setEnhancePrompt] = useState("");
+  const [showEnhanceTokenOverlay, setShowEnhanceTokenOverlay] = useState(false);
 
   const inputRef = useRef(null);
   const enhanceInputRef = useRef(null);
@@ -1653,6 +2867,12 @@ function Home() {
   const userTokens = localTokens ?? profile?.tokens ?? 0;
   const tokenBalance = checkTokenBalance(userTokens, tokenCost.cost);
 
+  // Token cost for enhance/refinement
+  const enhanceTokenCost = useMemo(() => {
+    return calculateTokenCost(enhancePrompt, selections, true);
+  }, [enhancePrompt, selections]);
+  const enhanceBreakdown = getBreakdownDisplay(enhanceTokenCost.breakdown);
+
   const getActiveCategories = () => {
     return CATEGORIES.filter((key) => {
       if (!hasSelection(key)) return false;
@@ -1950,7 +3170,7 @@ function Home() {
 
     const ctaText =
       s.cta === "Urgent"
-        ? "Get Started Now →"
+        ? "Get Started Now â†’"
         : s.cta === "Subtle"
         ? "Learn More"
         : "Get Started";
@@ -2049,21 +3269,21 @@ ${
         ? "Transform your ideas into reality with our powerful platform. We provide everything you need to create, launch, and grow your digital presence. Join thousands of satisfied customers who have already made the switch."
         : "Transform your ideas into reality with our powerful platform. Start building today and see what's possible."
     }</p><div class="hero-btns"><a href="#cta" class="btn btn-primary">${ctaText}</a><a href="#features" class="btn btn-secondary">Learn More</a></div></div></div></section>
-<section class="features" id="features"><div class="container"><div class="section-header"><h2>Why Choose Us</h2><p>Everything you need to succeed</p></div><div class="features-grid"><div class="feature"><div class="feature-icon">⚡</div><h3>Lightning Fast</h3><p>Optimized for speed and performance.</p></div><div class="feature"><div class="feature-icon">🎨</div><h3>Beautiful Design</h3><p>Stunning visuals that capture attention.</p></div><div class="feature"><div class="feature-icon">📱</div><h3>Fully Responsive</h3><p>Looks perfect on every device.</p></div></div></div></section>
+<section class="features" id="features"><div class="container"><div class="section-header"><h2>Why Choose Us</h2><p>Everything you need to succeed</p></div><div class="features-grid"><div class="feature"><div class="feature-icon">âš¡</div><h3>Lightning Fast</h3><p>Optimized for speed and performance.</p></div><div class="feature"><div class="feature-icon">ðŸŽ¨</div><h3>Beautiful Design</h3><p>Stunning visuals that capture attention.</p></div><div class="feature"><div class="feature-icon">ðŸ“±</div><h3>Fully Responsive</h3><p>Looks perfect on every device.</p></div></div></div></section>
 <section id="cta"><div class="cta-section"><h2>Ready to Get Started?</h2><p>Join thousands of satisfied customers today.</p><a href="#" class="btn">${
-      s.cta === "Urgent" ? "Start Free Now →" : "Get Started"
+      s.cta === "Urgent" ? "Start Free Now â†’" : "Get Started"
     }</a></div></section>
-<footer><div class="container"><div class="footer-content"><div class="footer-links"><a href="#">Privacy</a><a href="#">Terms</a><a href="#">Contact</a></div><div class="footer-copy">© ${new Date().getFullYear()} ${
+<footer><div class="container"><div class="footer-content"><div class="footer-links"><a href="#">Privacy</a><a href="#">Terms</a><a href="#">Contact</a></div><div class="footer-copy">Â© ${new Date().getFullYear()} ${
       prompt.split(" ")[0] || "Brand"
     }</div></div></div></footer>
 ${
   hasFloatingCta
     ? `<a href="#cta" class="floating-cta">${
-        s.cta === "Urgent" ? "Try Free →" : "Get Started"
+        s.cta === "Urgent" ? "Try Free â†’" : "Get Started"
       }</a>`
     : ""
 }
-${hasChat ? `<button class="chat-btn">💬</button>` : ""}
+${hasChat ? `<button class="chat-btn">ðŸ’¬</button>` : ""}
 </body>
 </html>`;
   };
@@ -2080,8 +3300,10 @@ ${hasChat ? `<button class="chat-btn">💬</button>` : ""}
   };
 
   const handleEnhance = async () => {
-    const value = enhanceInputRef.current?.value?.trim();
+    const value = enhancePrompt.trim();
     if (!value || !generatedHtml) return;
+
+    setShowEnhanceTokenOverlay(false);
 
     if (!isAuthenticated) {
       setShowAuth(true);
@@ -2136,9 +3358,7 @@ ${hasChat ? `<button class="chat-btn">💬</button>` : ""}
         }
 
         setGeneratedHtml(data.html);
-        if (enhanceInputRef.current) {
-          enhanceInputRef.current.value = "";
-        }
+        setEnhancePrompt("");
 
         console.log(
           `Refinement complete. Tokens used: ${data.tokensUsed}, Remaining: ${data.tokensRemaining}`
@@ -2159,6 +3379,12 @@ ${hasChat ? `<button class="chat-btn">💬</button>` : ""}
   };
 
   const breakdown = getBreakdownDisplay(tokenCost.breakdown);
+
+  const categoryItems = CATEGORIES.filter(
+    (cat) => cat !== "persistent" && cat !== "customColors"
+  );
+
+  const categoryRows = chunk(categoryItems, 9);
 
   return (
     <div className="home">
@@ -2354,6 +3580,125 @@ ${hasChat ? `<button class="chat-btn">💬</button>` : ""}
             >
               {/* Top Section: Design Options */}
               <div className="overlay-section overlay-section--top">
+                <motion.div
+                  className="persistent-options-grid"
+                  variants={pillContainerVariants}
+                  initial="hidden"
+                  animate="visible"
+                >
+                  <div>
+                    {/* Brand Name */}
+                    <motion.div
+                      className="persistent-field"
+                      variants={pillVariants}
+                      whileHover="hover"
+                      whileTap="tap"
+                    >
+                      <label>Brand Name</label>
+                      <input
+                        type="text"
+                        value={persistentOptions.branding.brandName}
+                        onChange={(e) =>
+                          setPersistentOptions((prev) => ({
+                            ...prev,
+                            branding: {
+                              ...prev.branding,
+                              brandName: e.target.value,
+                            },
+                          }))
+                        }
+                        placeholder="Your Company"
+                      />
+                    </motion.div>
+
+                    {/* Tagline */}
+                    <motion.div
+                      className="persistent-field"
+                      variants={pillVariants}
+                      whileHover="hover"
+                      whileTap="tap"
+                    >
+                      <label>Tagline</label>
+                      <input
+                        type="text"
+                        value={persistentOptions.branding.tagline}
+                        onChange={(e) =>
+                          setPersistentOptions((prev) => ({
+                            ...prev,
+                            branding: {
+                              ...prev.branding,
+                              tagline: e.target.value,
+                            },
+                          }))
+                        }
+                        placeholder="Your tagline here"
+                      />
+                    </motion.div>
+
+                    {/* Email */}
+                    <motion.div
+                      className="persistent-field"
+                      variants={pillVariants}
+                      whileHover="hover"
+                      whileTap="tap"
+                    >
+                      <label>Email</label>
+                      <input
+                        type="email"
+                        value={persistentOptions.contactInfo.email}
+                        onChange={(e) =>
+                          setPersistentOptions((prev) => ({
+                            ...prev,
+                            contactInfo: {
+                              ...prev.contactInfo,
+                              email: e.target.value,
+                            },
+                          }))
+                        }
+                        placeholder="contact@example.com"
+                      />
+                    </motion.div>
+                  </div>
+
+                  <div>
+                    {/* Social fields */}
+                    {Object.entries(persistentOptions.socialMedia)
+                      .slice(0, 4)
+                      .map(([platform, url]) => (
+                        <motion.div
+                          key={platform}
+                          className="persistent-field persistent-field--small"
+                          variants={pillVariants}
+                          whileHover="hover"
+                          whileTap="tap"
+                        >
+                          <label>
+                            {platform.charAt(0).toUpperCase() +
+                              platform.slice(1)}
+                          </label>
+                          <input
+                            type="url"
+                            value={url}
+                            onChange={(e) =>
+                              setPersistentOptions((prev) => ({
+                                ...prev,
+                                socialMedia: {
+                                  ...prev.socialMedia,
+                                  [platform]: e.target.value,
+                                },
+                              }))
+                            }
+                            placeholder={`${platform}.com/...`}
+                          />
+                        </motion.div>
+                      ))}
+                  </div>
+                </motion.div>
+              </div>
+
+              {/* Bottom Section: Content & Assets */}
+              {/* Bottom Section: Content & Assets */}
+              <div className="overlay-section overlay-section--bottom">
                 <AnimatePresence mode="wait" custom={slideDirection}>
                   {!activeOption ? (
                     <motion.div
@@ -2364,29 +3709,39 @@ ${hasChat ? `<button class="chat-btn">💬</button>` : ""}
                       animate="visible"
                       exit="exit"
                     >
-                      <motion.div className="home__pills-grid">
-                        {CATEGORIES.filter(
-                          (cat) =>
-                            cat !== "persistent" && cat !== "customColors"
-                        ).map((catKey) => {
-                          const opt = OPTIONS[catKey];
-                          const Icon = opt.icon;
-                          const isSelected = hasSelection(catKey);
-                          return (
-                            <motion.button
-                              key={catKey}
-                              className={`home__category-pill ${
-                                isSelected ? "home__category-pill--active" : ""
-                              }`}
-                              onClick={() => selectCategory(catKey)}
-                              variants={pillVariants}
-                            >
-                              {Icon && <Icon size={14} />}
-                              <span>{opt.label}</span>
-                            </motion.button>
-                          );
-                        })}
-                      </motion.div>
+                      <div className="home__pills-rows">
+                        {categoryRows.map((row, rowIndex) => (
+                          <InfinitePillRow
+                            key={rowIndex}
+                            reverse={rowIndex % 2 === 1}
+                            duration={40 - rowIndex * 2}
+                          >
+                            <div className="pill-row__content">
+                              {row.map((catKey) => {
+                                const opt = OPTIONS[catKey];
+                                const Icon = opt?.icon;
+                                const isSelected = hasSelection(catKey);
+
+                                return (
+                                  <motion.button
+                                    key={catKey}
+                                    className={`home__category-pill ${
+                                      isSelected
+                                        ? "home__category-pill--active"
+                                        : ""
+                                    }`}
+                                    onClick={() => selectCategory(catKey)}
+                                    variants={pillVariants}
+                                  >
+                                    {Icon && <Icon size={14} />}
+                                    <span>{opt?.label}</span>
+                                  </motion.button>
+                                );
+                              })}
+                            </div>
+                          </InfinitePillRow>
+                        ))}
+                      </div>
                     </motion.div>
                   ) : (
                     <motion.div
@@ -2403,7 +3758,7 @@ ${hasChat ? `<button class="chat-btn">💬</button>` : ""}
                           className="home__back-btn"
                           onClick={goToCategories}
                         >
-                          ←
+                          <ChevronLeft />
                         </button>
                         <div className="home__option-header-text">
                           <span className="home__option-header-label">
@@ -2515,120 +3870,6 @@ ${hasChat ? `<button class="chat-btn">💬</button>` : ""}
                     </motion.div>
                   )}
                 </AnimatePresence>
-              </div>
-
-              {/* Bottom Section: Content & Assets */}
-              {/* Bottom Section: Content & Assets */}
-              <div className="overlay-section overlay-section--bottom">
-                <motion.div
-                  className="persistent-options-grid"
-                  variants={pillContainerVariants}
-                  initial="hidden"
-                  animate="visible"
-                >
-                  {/* Brand Name */}
-                  <motion.div
-                    className="persistent-field"
-                    variants={pillVariants}
-                    whileHover="hover"
-                    whileTap="tap"
-                  >
-                    <label>Brand Name</label>
-                    <input
-                      type="text"
-                      value={persistentOptions.branding.brandName}
-                      onChange={(e) =>
-                        setPersistentOptions((prev) => ({
-                          ...prev,
-                          branding: {
-                            ...prev.branding,
-                            brandName: e.target.value,
-                          },
-                        }))
-                      }
-                      placeholder="Your Company"
-                    />
-                  </motion.div>
-
-                  {/* Tagline */}
-                  <motion.div
-                    className="persistent-field"
-                    variants={pillVariants}
-                    whileHover="hover"
-                    whileTap="tap"
-                  >
-                    <label>Tagline</label>
-                    <input
-                      type="text"
-                      value={persistentOptions.branding.tagline}
-                      onChange={(e) =>
-                        setPersistentOptions((prev) => ({
-                          ...prev,
-                          branding: {
-                            ...prev.branding,
-                            tagline: e.target.value,
-                          },
-                        }))
-                      }
-                      placeholder="Your tagline here"
-                    />
-                  </motion.div>
-
-                  {/* Email */}
-                  <motion.div
-                    className="persistent-field"
-                    variants={pillVariants}
-                    whileHover="hover"
-                    whileTap="tap"
-                  >
-                    <label>Email</label>
-                    <input
-                      type="email"
-                      value={persistentOptions.contactInfo.email}
-                      onChange={(e) =>
-                        setPersistentOptions((prev) => ({
-                          ...prev,
-                          contactInfo: {
-                            ...prev.contactInfo,
-                            email: e.target.value,
-                          },
-                        }))
-                      }
-                      placeholder="contact@example.com"
-                    />
-                  </motion.div>
-
-                  {/* Social fields */}
-                  {Object.entries(persistentOptions.socialMedia)
-                    .slice(0, 4)
-                    .map(([platform, url]) => (
-                      <motion.div
-                        key={platform}
-                        className="persistent-field persistent-field--small"
-                        variants={pillVariants}
-                        whileHover="hover"
-                        whileTap="tap"
-                      >
-                        <label>
-                          {platform.charAt(0).toUpperCase() + platform.slice(1)}
-                        </label>
-                        <input
-                          type="url"
-                          value={url}
-                          onChange={(e) =>
-                            setPersistentOptions((prev) => ({
-                              ...prev,
-                              socialMedia: {
-                                ...prev.socialMedia,
-                                [platform]: e.target.value,
-                              },
-                            }))
-                          }
-                          placeholder={`${platform}.com/...`}
-                        />
-                      </motion.div>
-                    ))}
-                </motion.div>
               </div>
             </motion.div>
           </motion.div>
@@ -2754,6 +3995,15 @@ ${hasChat ? `<button class="chat-btn">💬</button>` : ""}
                 </div>
 
                 <div className="preview-actions">
+                  {/* Download Button */}
+                  <button
+                    className="preview-save-btn"
+                    onClick={handleDownload}
+                    title="Download HTML"
+                  >
+                    <Download size={14} />
+                    <span>Download</span>
+                  </button>
                   {/* Save to Projects Button */}
                   <button
                     className={`preview-save-btn ${
@@ -2776,15 +4026,6 @@ ${hasChat ? `<button class="chat-btn">💬</button>` : ""}
                         <span>Save</span>
                       </>
                     )}
-                  </button>
-
-                  {/* Download Button */}
-                  <button
-                    className="preview-action-btn"
-                    onClick={handleDownload}
-                    title="Download HTML"
-                  >
-                    <Download size={14} />
                   </button>
 
                   {/* Deploy Button */}
@@ -2824,19 +4065,130 @@ ${hasChat ? `<button class="chat-btn">💬</button>` : ""}
               </div>
 
               {/* Enhance input */}
-              <div className="preview-enhance">
-                <input
-                  ref={enhanceInputRef}
-                  type="text"
-                  placeholder="Describe changes..."
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") handleEnhance();
-                  }}
-                />
-                <button onClick={handleEnhance}>
-                  <ChevronRight size={16} />
-                </button>
+              <div className="preview-enhance home__search">
+                <div className="home__input-wrapper">
+                  <input
+                    ref={enhanceInputRef}
+                    type="text"
+                    value={enhancePrompt}
+                    onChange={(e) => setEnhancePrompt(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && !isGenerating) handleEnhance();
+                    }}
+                    placeholder="Describe changes..."
+                    className="home__input"
+                    style={{
+                      background: "transparent",
+                      position: "relative",
+                      zIndex: 2,
+                    }}
+                    disabled={isGenerating}
+                  />
+                </div>
+                <div className="home__search-right">
+                  <AnimatePresence>
+                    {enhancePrompt.trim() && (
+                      <motion.button
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.8 }}
+                        transition={{ duration: 0.15 }}
+                        className={`home__token-btn ${
+                          showEnhanceTokenOverlay ? "active" : ""
+                        }`}
+                        onClick={() =>
+                          setShowEnhanceTokenOverlay(!showEnhanceTokenOverlay)
+                        }
+                      >
+                        <Coins size={14} />
+                        <span>-{enhanceTokenCost.cost}</span>
+                      </motion.button>
+                    )}
+                  </AnimatePresence>
+                  <motion.button
+                    className="home__submit"
+                    onClick={handleEnhance}
+                    disabled={isGenerating || !enhancePrompt.trim()}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    {isGenerating ? (
+                      <Loader2 size={16} className="spin" />
+                    ) : (
+                      <ChevronRight size={16} />
+                    )}
+                  </motion.button>
+                </div>
               </div>
+
+              {/* Enhance Token Overlay */}
+              <AnimatePresence>
+                {showEnhanceTokenOverlay && (
+                  <motion.div
+                    className="home__overlay-content home__overlay-content--token preview-enhance__token-overlay"
+                    onClick={(e) => e.stopPropagation()}
+                    variants={tokenContentVariants}
+                    initial="hidden"
+                    animate="visible"
+                    exit="exit"
+                  >
+                    <motion.div
+                      className="home__token-header"
+                      variants={tokenItemVariants}
+                    >
+                      <Coins size={18} />
+                      <span className="home__token-total">
+                        {enhanceTokenCost.cost} tokens
+                      </span>
+                    </motion.div>
+                    <motion.div className="home__token-breakdown">
+                      {enhanceBreakdown.map((item, i) => (
+                        <motion.div
+                          key={i}
+                          className={`home__token-item ${
+                            item.type === "discount" ? "discount" : ""
+                          }`}
+                          variants={tokenItemVariants}
+                        >
+                          <span>{item.label}</span>
+                          <span>
+                            {item.type === "discount" ? "-" : "+"}
+                            {item.cost}
+                          </span>
+                        </motion.div>
+                      ))}
+                    </motion.div>
+                    {isAuthenticated && (
+                      <motion.div
+                        className="home__token-balance"
+                        variants={tokenItemVariants}
+                      >
+                        <span>Your balance</span>
+                        <span
+                          className={`home__balance-value home__balance-value--${tokenBalance.status}`}
+                        >
+                          {userTokens} tokens
+                        </span>
+                      </motion.div>
+                    )}
+                    {(!isAuthenticated ||
+                      userTokens < enhanceTokenCost.cost) && (
+                      <motion.button
+                        className="home__buy-btn"
+                        onClick={() => {
+                          setShowEnhanceTokenOverlay(false);
+                          setShowTokens(true);
+                        }}
+                        variants={tokenItemVariants}
+                        whileHover={{ scale: 1.01 }}
+                        whileTap={{ scale: 0.99 }}
+                      >
+                        Get More Tokens
+                      </motion.button>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </motion.div>
           </motion.div>
         )}

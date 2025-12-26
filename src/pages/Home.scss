@@ -292,7 +292,7 @@ body {
     align-items: center;
     gap: 20px;
     padding: 32px;
-    max-width: 90vw;
+    // max-width: 90vw;
     background: transparent;
     box-shadow: none;
 
@@ -304,7 +304,7 @@ body {
     // Split layout - design on top, content on bottom
     &--split {
       width: 100%;
-      max-width: 800px;
+      // max-width: 800px;
       padding: 0;
       gap: 0;
     }
@@ -1452,7 +1452,7 @@ body {
   }
 
   &--bottom {
-    padding-top: 20px;
+    padding: 0 !important;
     min-height: 160px;
   }
 }
@@ -1491,6 +1491,11 @@ body {
   flex-wrap: wrap;
   gap: 12px;
   justify-content: center;
+
+  > div {
+    display: flex;
+    gap: 8px;
+  }
 }
 
 .persistent-field {
@@ -1530,4 +1535,128 @@ body {
       background: var(--color-bg);
     }
   }
+}
+// Preview enhance with token calculator
+.preview-enhance {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-top: 1px solid var(--border, rgba(255, 255, 255, 0.1));
+  background: var(--surface-elevated, rgba(0, 0, 0, 0.2));
+
+  &__input-wrapper {
+    flex: 1;
+    position: relative;
+    display: flex;
+    align-items: center;
+
+    input {
+      width: 100%;
+      padding-right: 80px; // Make room for token badge
+    }
+  }
+
+  &__token-badge {
+    position: absolute;
+    right: 12px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    background: var(--surface, rgba(255, 255, 255, 0.08));
+    border: 1px solid var(--border, rgba(255, 255, 255, 0.1));
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--primary, #3b82f6);
+    pointer-events: none;
+    white-space: nowrap;
+
+    svg {
+      opacity: 0.8;
+    }
+  }
+
+  button {
+    flex-shrink: 0;
+
+    &.generating {
+      opacity: 0.7;
+      cursor: wait;
+    }
+
+    &:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+  }
+}
+/* ADD TO Home.scss */
+
+.preview-enhance {
+  position: relative;
+  border-top: 1px solid var(--border, rgba(255, 255, 255, 0.1));
+  border-radius: 0 0 12px 12px;
+}
+
+.preview-enhance__token-overlay {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  right: 12px;
+  z-index: 100;
+}
+.infinite-row {
+  overflow: hidden;
+  width: 100%;
+  position: relative;
+}
+
+.infinite-track {
+  display: flex;
+  width: max-content;
+  will-change: transform;
+}
+
+.home__pills-grid,
+.home__choice-pills {
+  display: flex;
+  gap: 0.75rem;
+  padding-right: 0.75rem;
+}
+
+.home__pills-grid-wrapper,
+.home__choice-pills-wrapper {
+  width: 100%;
+  overflow: hidden;
+}
+.infinite-row:hover .infinite-track {
+  animation-play-state: paused;
+}
+.home__pills-rows,
+.home__choice-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.pill-row {
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+.pill-row__track {
+  display: flex;
+  width: max-content;
+  will-change: transform;
+}
+
+.pill-row__content {
+  display: flex;
+  gap: 0.75rem;
+  padding-right: 0.75rem;
+}
+.home__pills-rows:hover .pill-row__track {
+  animation-play-state: paused;
 }
