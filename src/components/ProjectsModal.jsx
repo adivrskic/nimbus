@@ -12,6 +12,10 @@ import {
   Globe,
   AlertTriangle,
   Check,
+  Settings,
+  RefreshCw,
+  ChevronDown,
+  Copy,
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { supabase } from "../lib/supabaseClient";
@@ -35,7 +39,9 @@ function ProjectsModal({
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [deletingId, setDeletingId] = useState(null);
-  const [loadingAction, setLoadingAction] = useState(null); // { id, type: 'edit' | 'deploy' }
+  const [loadingAction, setLoadingAction] = useState(null);
+  const [expandedProject, setExpandedProject] = useState(null);
+  const [copied, setCopied] = useState(null);
 
   useEffect(() => {
     if (isOpen && user) {
@@ -64,7 +70,6 @@ function ProjectsModal({
   const handleEdit = async (project) => {
     setLoadingAction({ id: project.id, type: "edit" });
     try {
-      // Fetch full project with html_content
       const { data, error } = await supabase
         .from("projects")
         .select("*")
@@ -85,7 +90,6 @@ function ProjectsModal({
   const handleDeploy = async (project) => {
     setLoadingAction({ id: project.id, type: "deploy" });
     try {
-      // Fetch full project with html_content
       const { data, error } = await supabase
         .from("projects")
         .select("*")
@@ -132,6 +136,16 @@ function ProjectsModal({
     setDeletingId(null);
   };
 
+  const toggleExpand = (projectId) => {
+    setExpandedProject(expandedProject === projectId ? null : projectId);
+  };
+
+  const copyUrl = (url, projectId) => {
+    navigator.clipboard.writeText(url);
+    setCopied(projectId);
+    setTimeout(() => setCopied(null), 2000);
+  };
+
   const filteredProjects = projects.filter((project) => {
     const name = project.name || project.customization?.prompt || "";
     return name.toLowerCase().includes(searchQuery.toLowerCase());
@@ -164,7 +178,23 @@ function ProjectsModal({
       return { text: project.custom_domain, status: "pending" };
     }
     if (project.subdomain) {
-      return { text: `${project.subdomain}.vercel.app`, status: "default" };
+      return {
+        text: `nimbus-${project.subdomain}.vercel.app`,
+        status: "default",
+      };
+    }
+    return null;
+  };
+
+  const getDeployedUrl = (project) => {
+    if (project.custom_domain && project.domain_status === "active") {
+      return `https://${project.custom_domain}`;
+    }
+    if (project.deployed_url) {
+      return project.deployed_url;
+    }
+    if (project.subdomain) {
+      return `https://nimbus-${project.subdomain}.vercel.app`;
     }
     return null;
   };
@@ -212,7 +242,7 @@ function ProjectsModal({
                 key={project.id}
                 className={`project-item ${
                   deletingId === project.id ? "deleting" : ""
-                }`}
+                } ${expandedProject === project.id ? "expanded" : ""}`}
               >
                 {/* Delete confirmation overlay */}
                 {deletingId === project.id && (
@@ -231,107 +261,198 @@ function ProjectsModal({
                   </div>
                 )}
 
-                <div className="project-info">
-                  <div className="project-name">
-                    <FileCode size={14} />
-                    <span>{getProjectName(project)}</span>
-                  </div>
-                  <div className="project-meta">
-                    <span className="project-type">
-                      {project.template_type || project.style_preset}
-                    </span>
-                    <span className="project-date">
-                      <Calendar size={10} />
-                      {formatDate(project.updated_at)}
-                    </span>
-                    {project.is_deployed && (
-                      <span className="project-status live">Live</span>
-                    )}
-                    {getDomainStatus(project) && (
-                      <span
-                        className={`project-domain ${
-                          getDomainStatus(project).status
-                        }`}
-                      >
-                        {getDomainStatus(project).status === "active" && (
-                          <Check size={10} />
-                        )}
-                        {getDomainStatus(project).text}
+                <div
+                  className="project-main"
+                  onClick={() =>
+                    project.is_deployed && toggleExpand(project.id)
+                  }
+                >
+                  <div className="project-info">
+                    <div className="project-name">
+                      <FileCode size={14} />
+                      <span>{getProjectName(project)}</span>
+                    </div>
+                    <div className="project-meta">
+                      <span className="project-type">
+                        {project.template_type || project.style_preset}
                       </span>
-                    )}
+                      <span className="project-date">
+                        <Calendar size={10} />
+                        {formatDate(project.updated_at)}
+                      </span>
+                      {project.is_deployed && (
+                        <span className="project-status live">Live</span>
+                      )}
+                    </div>
                   </div>
-                </div>
 
-                <div className="project-actions">
-                  {/* Edit button */}
-                  <button
-                    className="action-btn"
-                    onClick={() => handleEdit(project)}
-                    disabled={loadingAction?.id === project.id}
-                    title="Edit"
-                  >
-                    {loadingAction?.id === project.id &&
-                    loadingAction?.type === "edit" ? (
-                      <Loader2 size={14} className="spinning" />
-                    ) : (
-                      <Edit3 size={14} />
-                    )}
-                  </button>
-
-                  {/* Domain button (only for deployed projects) */}
-                  {project.is_deployed && (
+                  <div className="project-actions">
+                    {/* Edit button */}
                     <button
                       className="action-btn"
-                      onClick={() => handleDomain(project)}
-                      title={
-                        project.custom_domain
-                          ? "Manage Domain"
-                          : "Add Custom Domain"
-                      }
-                    >
-                      <Globe size={14} />
-                    </button>
-                  )}
-
-                  {/* Deploy/Visit button */}
-                  {project.is_deployed ? (
-                    <a
-                      href={
-                        project.deployed_url ||
-                        `https://nimbus-${project.subdomain}.vercel.app`
-                      }
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="action-btn"
-                      title="Visit"
-                    >
-                      <ExternalLink size={14} />
-                    </a>
-                  ) : (
-                    <button
-                      className="action-btn action-btn--primary"
-                      onClick={() => handleDeploy(project)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEdit(project);
+                      }}
                       disabled={loadingAction?.id === project.id}
-                      title="Deploy"
+                      title="Edit"
                     >
                       {loadingAction?.id === project.id &&
-                      loadingAction?.type === "deploy" ? (
+                      loadingAction?.type === "edit" ? (
                         <Loader2 size={14} className="spinning" />
                       ) : (
-                        <Rocket size={14} />
+                        <Edit3 size={14} />
                       )}
                     </button>
-                  )}
 
-                  {/* Delete button */}
-                  <button
-                    className="action-btn action-btn--danger"
-                    onClick={() => handleDelete(project.id)}
-                    title="Delete"
-                  >
-                    <Trash2 size={14} />
-                  </button>
+                    {/* Deploy/Visit button */}
+                    {project.is_deployed ? (
+                      <>
+                        <a
+                          href={getDeployedUrl(project)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="action-btn"
+                          title="Visit"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <ExternalLink size={14} />
+                        </a>
+                        <button
+                          className="action-btn"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleExpand(project.id);
+                          }}
+                          title="Manage"
+                        >
+                          <ChevronDown
+                            size={14}
+                            style={{
+                              transform:
+                                expandedProject === project.id
+                                  ? "rotate(180deg)"
+                                  : "rotate(0)",
+                              transition: "transform 0.2s",
+                            }}
+                          />
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        className="action-btn action-btn--primary"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeploy(project);
+                        }}
+                        disabled={loadingAction?.id === project.id}
+                        title="Deploy"
+                      >
+                        {loadingAction?.id === project.id &&
+                        loadingAction?.type === "deploy" ? (
+                          <Loader2 size={14} className="spinning" />
+                        ) : (
+                          <Rocket size={14} />
+                        )}
+                      </button>
+                    )}
+
+                    {/* Delete button */}
+                    <button
+                      className="action-btn action-btn--danger"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(project.id);
+                      }}
+                      title="Delete"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
                 </div>
+
+                {/* Expanded section for deployed projects */}
+                {project.is_deployed && expandedProject === project.id && (
+                  <div className="project-expanded">
+                    <div className="project-domains">
+                      <div className="project-domain-section">
+                        <label>Current URL</label>
+                        <div className="project-url-row">
+                          <a
+                            href={getDeployedUrl(project)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            {getDeployedUrl(project)?.replace("https://", "")}
+                          </a>
+                          <button
+                            className="copy-btn"
+                            onClick={() =>
+                              copyUrl(getDeployedUrl(project), project.id)
+                            }
+                          >
+                            {copied === project.id ? (
+                              <Check size={12} />
+                            ) : (
+                              <Copy size={12} />
+                            )}
+                          </button>
+                        </div>
+                      </div>
+
+                      {getDomainStatus(project) && (
+                        <div className="project-domain-section">
+                          <label>Domain Status</label>
+                          <div className="project-domain-status">
+                            <span
+                              className={`status-badge ${
+                                getDomainStatus(project).status
+                              }`}
+                            >
+                              {getDomainStatus(project).status === "active" && (
+                                <Check size={10} />
+                              )}
+                              {getDomainStatus(project).status ===
+                                "pending" && (
+                                <Loader2 size={10} className="spinning" />
+                              )}
+                              {getDomainStatus(project).status}
+                            </span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="project-domain-actions">
+                      {project.custom_domain ? (
+                        <button
+                          className="domain-action-btn"
+                          onClick={() => handleDomain(project)}
+                        >
+                          <Settings size={14} />
+                          Manage Domain
+                        </button>
+                      ) : (
+                        <button
+                          className="domain-action-btn domain-action-btn--primary"
+                          onClick={() => handleDomain(project)}
+                        >
+                          <Globe size={14} />
+                          Add Custom Domain
+                        </button>
+                      )}
+
+                      <button
+                        className="domain-action-btn"
+                        onClick={() => handleDeploy(project)}
+                        title="Redeploy with changes"
+                      >
+                        <RefreshCw size={14} />
+                        Redeploy
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             ))
           )}
