@@ -2404,6 +2404,7 @@ function Home() {
     },
   });
 
+  const [isInputExpanded, setIsInputExpanded] = useState(false);
   // New overlay tab state
   const [overlayTab, setOverlayTab] = useState("design"); // 'design' | 'content'
 
@@ -2486,7 +2487,27 @@ function Home() {
     });
   }, [selections]);
 
-  const showPlaceholderAnimation = !prompt && !isGenerating;
+  // Handle input focus
+  const handleInputFocus = () => {
+    setIsInputExpanded(true);
+  };
+
+  // Handle input blur
+  const handleInputBlur = () => {
+    // Only collapse if input is empty
+    if (!prompt.trim()) {
+      setIsInputExpanded(false);
+    }
+  };
+
+  // Update expanded state when prompt changes
+  useEffect(() => {
+    if (prompt.trim()) {
+      setIsInputExpanded(true);
+    }
+  }, [prompt]);
+
+  const showPlaceholderAnimation = !prompt && !isGenerating && !isInputExpanded;
 
   // Update the useEffect for typewriter timing:
 
@@ -2557,7 +2578,7 @@ function Home() {
       if (placeholderTimeoutRef.current) {
         clearTimeout(placeholderTimeoutRef.current);
       }
-    } else if (!hasCustomizations && !isGenerating) {
+    } else if (!hasCustomizations && !isGenerating && !isInputExpanded) {
       // Restart the typewriter effect
       setPlaceholderIndex(0);
       setCharIndex(0);
@@ -3391,28 +3412,28 @@ ${hasChat ? `<button class="chat-btn">ðŸ’¬</button>` : ""}
     <div className="home">
       <div className="home__center">
         {/* Search Bar */}
+        {/* Search Bar */}
         <motion.div
-          className="home__search"
+          className={`home__search ${
+            isInputExpanded ? "home__search--expanded" : ""
+          }`}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
         >
           <div className="home__input-wrapper">
-            <input
+            <textarea
               ref={inputRef}
-              type="text"
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
               onKeyDown={handleKeyDown}
+              onFocus={handleInputFocus}
+              onBlur={handleInputBlur}
               placeholder={
                 showPlaceholderAnimation ? "" : "Describe your website..."
               }
               className="home__input"
-              style={{
-                background: "transparent",
-                position: "relative",
-                zIndex: 2,
-              }}
+              rows={1}
             />
             {showPlaceholderAnimation && (
               <div className="home__typewriter-overlay">
@@ -3425,12 +3446,12 @@ ${hasChat ? `<button class="chat-btn">ðŸ’¬</button>` : ""}
           </div>
           <div className="home__search-right">
             <AnimatePresence>
-              {prompt.trim() && (
+              {(prompt.trim() || isInputExpanded) && (
                 <motion.button
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.8 }}
-                  transition={{ duration: 0.15 }}
+                  initial={{ opacity: 0, scale: 0.8, width: 0 }}
+                  animate={{ opacity: 1, scale: 1, width: "auto" }}
+                  exit={{ opacity: 0, scale: 0.8, width: 0 }}
+                  transition={{ duration: 0.2 }}
                   className={`home__token-btn ${
                     showTokenOverlay ? "active" : ""
                   }`}
@@ -3441,21 +3462,26 @@ ${hasChat ? `<button class="chat-btn">ðŸ’¬</button>` : ""}
                   }}
                 >
                   <Coins size={14} />
-                  <span>-{tokenCost.cost}</span>
+                  <span className="home__btn-text">-{tokenCost.cost}</span>
                 </motion.button>
               )}
             </AnimatePresence>
             <motion.button
-              className="home__help-btn"
+              className={`home__help-btn ${
+                isInputExpanded ? "home__help-btn--expanded" : ""
+              }`}
               onClick={() => setShowHelp(true)}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               title="Get Help"
             >
               <HelpCircle size={18} />
+              <span className="home__btn-text">Help</span>
             </motion.button>
             <motion.button
-              className={`home__gear-btn ${showOverlay ? "active" : ""}`}
+              className={`home__gear-btn ${showOverlay ? "active" : ""} ${
+                isInputExpanded ? "home__gear-btn--expanded" : ""
+              }`}
               onClick={() => {
                 setShowOverlay(!showOverlay);
                 setShowTokenOverlay(false);
@@ -3465,9 +3491,12 @@ ${hasChat ? `<button class="chat-btn">ðŸ’¬</button>` : ""}
               whileTap={{ scale: 0.95 }}
             >
               <Settings size={18} />
+              <span className="home__btn-text">Options</span>
             </motion.button>
             <motion.button
-              className="home__submit"
+              className={`home__submit ${
+                isInputExpanded ? "home__submit--expanded" : ""
+              }`}
               onClick={handleGenerate}
               disabled={isGenerating || !prompt.trim()}
               whileHover={{ scale: 1.05 }}
@@ -3478,6 +3507,7 @@ ${hasChat ? `<button class="chat-btn">ðŸ’¬</button>` : ""}
               ) : (
                 <Sparkles size={16} />
               )}
+              <span className="home__btn-text">Generate</span>
             </motion.button>
           </div>
         </motion.div>

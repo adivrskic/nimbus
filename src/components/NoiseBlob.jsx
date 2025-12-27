@@ -15,6 +15,14 @@ import {
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { mergeVertices } from "three/examples/jsm/utils/BufferGeometryUtils";
 
+// Check if viewport is mobile/portrait tablet
+const isMobileOrPortrait = () => {
+  return (
+    window.innerWidth <= 768 ||
+    (window.innerWidth <= 1024 && window.innerHeight > window.innerWidth)
+  );
+};
+
 // 4D Simplex Noise GLSL (by Ian McEwan, Ashima Arts)
 const noiseGLSL = `
 vec4 permute(vec4 x){return mod(((x*34.0)+1.0)*x, 289.0);}
@@ -127,6 +135,10 @@ export default function NoiseBlob({
   directionalIntensity = 0.5, // Main light strength
   hemisphereIntensity = 0.375, // Sky/ground light strength
 
+  // === MOBILE/PORTRAIT RESPONSIVE ===
+  mobileScaleMultiplier = 1.4, // How much larger the blob is on mobile (1 = same size)
+  mobileCameraYOffset = 6, // How much to move camera up on mobile (blob appears lower)
+
   // === CONTAINER ===
   className = "",
   style = {},
@@ -135,6 +147,9 @@ export default function NoiseBlob({
   const rendererRef = useRef(null);
   const animationIdRef = useRef(null);
   const cleanedUpRef = useRef(false);
+  const sceneRef = useRef(null);
+  const cameraRef = useRef(null);
+  const uniformsRef = useRef(null);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -151,6 +166,12 @@ export default function NoiseBlob({
     // Scene setup
     const scene = new Scene();
     scene.background = new Color(backgroundColor);
+    sceneRef.current = scene;
+
+    // Determine initial responsive settings
+    const mobile = isMobileOrPortrait();
+    const initialCameraY = mobile ? mobileCameraYOffset : 0;
+    const initialScale = mobile ? baseScale * mobileScaleMultiplier : baseScale;
 
     // Camera
     const camera = new PerspectiveCamera(
@@ -159,7 +180,9 @@ export default function NoiseBlob({
       1,
       1000
     );
-    camera.position.set(0, 0, cameraDistance);
+    camera.position.set(0, initialCameraY, cameraDistance);
+    camera.lookAt(0, 0, 0);
+    cameraRef.current = camera;
 
     // Renderer
     const renderer = new WebGLRenderer({ antialias: true });
@@ -176,11 +199,16 @@ export default function NoiseBlob({
     controls.enableZoom = enableZoom;
     controls.autoRotate = autoRotate;
     controls.autoRotateSpeed = autoRotateSpeed;
+    controls.target.set(0, 0, 0);
 
     // Uniforms
     const uniforms = {
       time: { value: 0 },
+      noiseScale: { value: noiseScale },
+      noiseAmplitude: { value: noiseAmplitude },
+      baseScale: { value: initialScale },
     };
+    uniformsRef.current = uniforms;
 
     // Lights
     const directionalLight = new DirectionalLight(
@@ -211,9 +239,9 @@ export default function NoiseBlob({
       wireframe: wireframe,
       onBeforeCompile: (shader) => {
         shader.uniforms.time = uniforms.time;
-        shader.uniforms.noiseScale = { value: noiseScale };
-        shader.uniforms.noiseAmplitude = { value: noiseAmplitude };
-        shader.uniforms.baseScale = { value: baseScale };
+        shader.uniforms.noiseScale = uniforms.noiseScale;
+        shader.uniforms.noiseAmplitude = uniforms.noiseAmplitude;
+        shader.uniforms.baseScale = uniforms.baseScale;
 
         shader.vertexShader = `
           uniform float time;
@@ -264,7 +292,7 @@ export default function NoiseBlob({
     // Clock
     const clock = new Clock();
 
-    // Handle resize
+    // Handle resize with responsive adjustments
     const handleResize = () => {
       if (!container || cleanedUpRef.current) return;
       const width = container.clientWidth;
@@ -272,6 +300,20 @@ export default function NoiseBlob({
       camera.aspect = width / height;
       camera.updateProjectionMatrix();
       renderer.setSize(width, height);
+
+      // Update camera position and scale based on screen size
+      const mobile = isMobileOrPortrait();
+      camera.position.y = mobile ? mobileCameraYOffset : 0;
+      camera.position.z = cameraDistance;
+      controls.target.set(0, 0, 0);
+      controls.update();
+
+      // Update blob scale
+      if (uniformsRef.current) {
+        uniformsRef.current.baseScale.value = mobile
+          ? baseScale * mobileScaleMultiplier
+          : baseScale;
+      }
     };
     window.addEventListener("resize", handleResize);
 
@@ -304,6 +346,9 @@ export default function NoiseBlob({
         container.removeChild(renderer.domElement);
       }
       rendererRef.current = null;
+      sceneRef.current = null;
+      cameraRef.current = null;
+      uniformsRef.current = null;
     };
   }, [
     color,
@@ -326,6 +371,8 @@ export default function NoiseBlob({
     ambientIntensity,
     directionalIntensity,
     hemisphereIntensity,
+    mobileScaleMultiplier,
+    mobileCameraYOffset,
   ]);
 
   return (
@@ -336,6 +383,8 @@ export default function NoiseBlob({
         width: "100%",
         height: "100%",
         position: "absolute",
+        transform: isMobileOrPortrait() ? "translateY(50%)" : "",
+        pointerEvents: "none",
         ...style,
       }}
     />
