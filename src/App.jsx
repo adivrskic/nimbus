@@ -14,6 +14,7 @@ import { ProjectProvider } from "./contexts/ProjectContext";
 import LegalModal from "./components/LegalModal"; // ADD THIS
 import RoadmapModal from "./components/RoadmapModal"; // ADD THIS
 import SupportModal from "./components/SupportModal"; // ADD THIS
+import NoiseBlob from "./components/NoiseBlob";
 import "./styles/global.scss";
 
 const Home = lazy(() => import("./pages/Home"));
@@ -101,6 +102,7 @@ function AppContent() {
   return (
     <>
       <Header />
+      <NoiseBlob />
       <Suspense fallback={<PageLoader />}>
         <Routes>
           <Route path="/" element={<Home />} />
