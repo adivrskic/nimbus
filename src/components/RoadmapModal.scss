@@ -23,13 +23,9 @@
   padding: 24px;
   min-width: 320px;
   max-width: 90vw;
-  max-height: 78vh;
-  background: transparent;
-  opacity: 0;
-  transform: scale(0.98) translateY(4px);
-  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1),
-    transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  max-height: 70vh;
   overflow-y: auto;
+  background: transparent;
 
   &.active {
     opacity: 1;

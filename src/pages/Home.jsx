@@ -11,6 +11,7 @@ import {
   Sun,
   Coins,
   Rocket,
+  ChevronRight,
   Type,
   MessageSquare,
   FileText,
@@ -110,7 +111,7 @@ import {
   checkTokenBalance,
   getBreakdownDisplay,
 } from "../utils/tokenCalculator";
-import MetallicBlob from "../components/MetallicBlob";
+import NoiseBlob from "../components/NoiseBlob";
 import "./Home.scss";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
@@ -3388,7 +3389,6 @@ ${hasChat ? `<button class="chat-btn">ðŸ’¬</button>` : ""}
 
   return (
     <div className="home">
-      {/* <MetallicBlob /> */}
       <div className="home__center">
         {/* Search Bar */}
         <motion.div
