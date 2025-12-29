@@ -1751,3 +1751,563 @@ body {
 .home__pills-rows:hover .pill-row__track {
   animation-play-state: paused;
 }
+// ==================== OPTIONS OVERLAY ====================
+
+.options-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+// ==================== INTRO ANIMATION ====================
+
+.options-intro {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.options-intro__pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  max-width: 400px;
+  justify-content: center;
+  transform-origin: center;
+}
+
+.options-intro__pill {
+  padding: 12px 20px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 999px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #2b2b2b;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+// ==================== MAIN CONTENT ====================
+
+.options-content {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 800px;
+  max-height: 80vh;
+  background: transparent;
+}
+
+// ==================== HEADER ====================
+
+.options-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+  margin-bottom: 16px;
+}
+
+.options-header__left {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.options-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #2b2b2b;
+}
+
+.options-subtitle {
+  font-size: 0.75rem;
+  color: #999;
+}
+
+.options-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: rgba(0, 0, 0, 0.04);
+  border: none;
+  border-radius: 50%;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.08);
+    color: #2b2b2b;
+  }
+}
+
+// ==================== FILTER TABS ====================
+
+.options-filters {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+  overflow-x: auto;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.options-filter {
+  padding: 8px 14px;
+  background: transparent;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #777;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.02);
+    border-color: rgba(0, 0, 0, 0.1);
+    color: #2b2b2b;
+  }
+
+  &.active {
+    background: #2b2b2b;
+    border-color: #2b2b2b;
+    color: white;
+  }
+}
+
+// ==================== BODY ====================
+
+.options-body {
+  display: flex;
+  gap: 24px;
+  flex: 1;
+  min-height: 0;
+}
+
+// ==================== BRAND SECTION ====================
+
+.options-brand {
+  width: 220px;
+  flex-shrink: 0;
+  padding-right: 20px;
+  border-right: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.options-brand__title {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 12px;
+}
+
+.options-brand__label {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: #999;
+  margin: 12px 0 8px;
+}
+
+.options-brand__row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.options-brand__social {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.options-input {
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  border-radius: 8px;
+  font-size: 0.75rem;
+  color: #2b2b2b;
+  transition: all 0.15s ease;
+
+  &::placeholder {
+    color: #b3b3b3;
+  }
+
+  &:focus {
+    outline: none;
+    background: rgba(255, 255, 255, 0.8);
+    border-color: rgba(0, 0, 0, 0.1);
+  }
+
+  &--small {
+    padding: 8px 10px;
+    font-size: 0.6875rem;
+  }
+}
+
+// ==================== DESIGN SECTION ====================
+
+.options-design {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 4px;
+
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 2px;
+  }
+}
+
+// ==================== OPTIONS GRID ====================
+
+.options-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 6px;
+}
+
+.options-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: left;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.8);
+    border-color: rgba(0, 0, 0, 0.08);
+
+    .options-card__arrow {
+      opacity: 1;
+    }
+  }
+
+  &--active {
+    background: rgba(43, 43, 43, 0.04);
+    border-color: rgba(43, 43, 43, 0.15);
+
+    .options-card__icon {
+      background: #2b2b2b;
+      color: white;
+    }
+  }
+}
+
+.options-card__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: rgba(0, 0, 0, 0.04);
+  border-radius: 6px;
+  color: #666;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+
+.options-card__info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.options-card__label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #2b2b2b;
+}
+
+.options-card__value {
+  font-size: 0.625rem;
+  color: #666;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.options-card__arrow {
+  color: #b3b3b3;
+  opacity: 0.5;
+  flex-shrink: 0;
+  transition: opacity 0.15s ease;
+}
+
+// ==================== CHOICES VIEW ====================
+
+.options-choices {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.options-choices__header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.options-back {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: rgba(0, 0, 0, 0.04);
+  border: none;
+  border-radius: 50%;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.08);
+    color: #2b2b2b;
+  }
+}
+
+.options-choices__title {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  span:first-child {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: #2b2b2b;
+  }
+}
+
+.options-choices__subtitle {
+  font-size: 0.6875rem;
+  color: #999;
+}
+
+.options-reset {
+  padding: 6px 10px;
+  background: transparent;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 6px;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: #999;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    border-color: #ef4444;
+    color: #ef4444;
+  }
+}
+
+.options-choices__grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.options-choice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #2b2b2b;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.8);
+    border-color: rgba(0, 0, 0, 0.08);
+  }
+
+  &--active {
+    background: rgba(43, 43, 43, 0.06);
+    border-color: #2b2b2b;
+
+    svg {
+      color: #2b2b2b;
+    }
+  }
+}
+
+.options-choice__colors {
+  display: flex;
+  gap: 2px;
+
+  span {
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+  }
+}
+
+// ==================== CUSTOM COLORS ====================
+
+.options-custom-colors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.options-color-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  > span {
+    font-size: 0.625rem;
+    font-weight: 500;
+    color: #999;
+    text-transform: uppercase;
+  }
+}
+
+.options-color-picker {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px 4px 4px;
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    border-color: rgba(0, 0, 0, 0.1);
+  }
+
+  input[type="color"] {
+    width: 22px;
+    height: 22px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    padding: 0;
+
+    &::-webkit-color-swatch-wrapper {
+      padding: 0;
+    }
+
+    &::-webkit-color-swatch {
+      border: none;
+      border-radius: 3px;
+    }
+  }
+
+  span {
+    font-family: "SF Mono", "Fira Code", monospace;
+    font-size: 0.625rem;
+    color: #999;
+    text-transform: uppercase;
+  }
+}
+
+// ==================== DONE BUTTON ====================
+
+.options-done {
+  align-self: flex-start;
+  padding: 10px 20px;
+  background: #2b2b2b;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background: #1a1a1a;
+  }
+}
+
+// ==================== RESPONSIVE ====================
+
+@media (max-width: 768px) {
+  .options-content {
+    max-width: 100%;
+    max-height: 100vh;
+    padding: 16px;
+  }
+
+  .options-body {
+    flex-direction: column;
+  }
+
+  .options-brand {
+    width: 100%;
+    padding-right: 0;
+    padding-bottom: 16px;
+    border-right: none;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+  }
+
+  .options-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .options-intro__pills {
+    max-width: 90vw;
+  }
+}
+
+@media (max-width: 480px) {
+  .options-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .options-filters {
+    gap: 6px;
+  }
+
+  .options-filter {
+    padding: 6px 10px;
+    font-size: 0.6875rem;
+  }
+}

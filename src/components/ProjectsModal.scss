@@ -79,35 +79,6 @@
   }
 }
 
-.projects-search {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 0;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
-
-  svg {
-    color: #b3b3b3;
-    flex-shrink: 0;
-  }
-
-  input {
-    flex: 1;
-    background: none;
-    border: none;
-    color: #2b2b2b;
-    font-size: 0.8125rem;
-
-    &::placeholder {
-      color: #b3b3b3;
-    }
-
-    &:focus {
-      outline: none;
-    }
-  }
-}
-
 .projects-list {
   flex: 1;
   overflow-y: auto;
@@ -124,7 +95,7 @@
   justify-content: center;
   gap: 8px;
   padding: 32px 16px;
-  color: #b3b3b3;
+  color: #777;
   font-size: 0.8125rem;
 }
 
@@ -167,7 +138,7 @@
   align-items: center;
   justify-content: center;
   gap: 12px;
-  background: rgba(239, 68, 68, 0.08);
+  background: #f87878;
   backdrop-filter: blur(4px);
   z-index: 1;
   border-radius: 10px;
@@ -194,11 +165,10 @@
   .delete-cancel {
     background: rgba(0, 0, 0, 0.04);
     border: 1px solid rgba(0, 0, 0, 0.06);
-    color: #666;
+    color: #fff;
 
     &:hover {
       background: rgba(0, 0, 0, 0.08);
-      color: #2b2b2b;
     }
   }
 
@@ -225,7 +195,7 @@
   margin-bottom: 4px;
 
   svg {
-    color: #b3b3b3;
+    color: #777;
     flex-shrink: 0;
   }
 
@@ -248,7 +218,7 @@
 
 .project-type {
   font-size: 0.6875rem;
-  color: #b3b3b3;
+  color: #777;
   text-transform: capitalize;
 }
 
@@ -257,7 +227,7 @@
   align-items: center;
   gap: 4px;
   font-size: 0.6875rem;
-  color: #b3b3b3;
+  color: #777;
 
   svg {
     width: 10px;
@@ -373,7 +343,7 @@
     display: block;
     font-size: 0.625rem;
     font-weight: 600;
-    color: #b3b3b3;
+    color: #777;
     margin-bottom: 4px;
     text-transform: uppercase;
     letter-spacing: 0.04em;
@@ -387,7 +357,7 @@
 
   a {
     font-size: 0.75rem;
-    color: #2b2b2b;
+    color: #777;
     text-decoration: none;
     font-weight: 500;
 
@@ -399,7 +369,7 @@
   .copy-btn {
     background: none;
     border: none;
-    color: #b3b3b3;
+    color: #777;
     cursor: pointer;
     padding: 4px;
     border-radius: 4px;

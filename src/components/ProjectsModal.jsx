@@ -216,17 +216,6 @@ function ProjectsModal({
             <X size={16} />
           </button>
         </div>
-
-        <div className="projects-search">
-          <Search size={14} />
-          <input
-            type="text"
-            placeholder="Search..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
-
         <div className="projects-list">
           {isLoading ? (
             <div className="projects-loading">
@@ -247,8 +236,6 @@ function ProjectsModal({
                 {/* Delete confirmation overlay */}
                 {deletingId === project.id && (
                   <div className="project-delete-confirm">
-                    <AlertTriangle size={16} />
-                    <span>Delete?</span>
                     <button className="delete-cancel" onClick={cancelDelete}>
                       Cancel
                     </button>

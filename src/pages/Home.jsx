@@ -2414,6 +2414,8 @@ function Home() {
   // UI State
   const [showOverlay, setShowOverlay] = useState(false);
   const [activeOption, setActiveOption] = useState(null);
+  const [showOverlayIntro, setShowOverlayIntro] = useState(false);
+  const [categoryFilter, setCategoryFilter] = useState("");
   const [slideDirection, setSlideDirection] = useState(1);
   const [showTokenOverlay, setShowTokenOverlay] = useState(false);
   const [showPreview, setShowPreviewInternal] = useState(() => {
@@ -2486,6 +2488,20 @@ function Home() {
       return value !== null;
     });
   }, [selections]);
+
+  // Add this useEffect for intro animation
+  useEffect(() => {
+    if (showOverlay) {
+      setShowOverlayIntro(true);
+      const timer = setTimeout(() => {
+        setShowOverlayIntro(false);
+      }, 1000);
+      return () => clearTimeout(timer);
+    } else {
+      setShowOverlayIntro(false);
+      setCategoryFilter("");
+    }
+  }, [showOverlay]);
 
   // Handle input focus
   const handleInputFocus = () => {
@@ -2561,7 +2577,97 @@ function Home() {
       }
     };
   }, [showPlaceholderAnimation, placeholderIndex, charIndex, isTyping]);
+  // Category filter groups
+  const CATEGORY_GROUPS = {
+    layout: [
+      "template",
+      "navigation",
+      "layout",
+      "sections",
+      "contentFlow",
+      "hierarchy",
+      "density",
+      "heroStyle",
+      "footerStyle",
+    ],
+    visual: [
+      "style",
+      "inspiration",
+      "palette",
+      "mode",
+      "gradientStyle",
+      "backgroundPattern",
+      "corners",
+      "shadowStyle",
+      "hoverEffects",
+      "animation",
+      "dividerStyle",
+    ],
+    content: [
+      "tone",
+      "copyLength",
+      "brandPersonality",
+      "microCopy",
+      "cta",
+      "goal",
+      "industry",
+      "audience",
+      "socialProof",
+    ],
+    components: [
+      "buttonStyle",
+      "cardStyle",
+      "formStyle",
+      "iconStyle",
+      "badgeStyle",
+      "avatarStyle",
+      "tabStyle",
+      "accordionStyle",
+      "carouselStyle",
+      "testimonialStyle",
+      "pricingStyle",
+      "statsStyle",
+      "teamStyle",
+      "faqStyle",
+      "contactStyle",
+    ],
+    technical: [
+      "framework",
+      "accessibility",
+      "seoLevel",
+      "performanceLevel",
+      "responsiveApproach",
+      "mobileMenu",
+      "darkModeToggle",
+      "cookieBanner",
+    ],
+  };
 
+  useEffect(() => {
+    if (showOverlay) {
+      setShowOverlayIntro(true);
+      const timer = setTimeout(() => {
+        setShowOverlayIntro(false);
+      }, 900);
+      return () => clearTimeout(timer);
+    } else {
+      setShowOverlayIntro(false);
+      setCategoryFilter("");
+      setActiveOption(null);
+    }
+  }, [showOverlay]);
+
+  const getFilteredCategories = () => {
+    const baseCategories = CATEGORIES.filter(
+      (cat) => cat !== "persistent" && cat !== "customColors"
+    );
+
+    if (!categoryFilter) return baseCategories;
+
+    return baseCategories.filter((cat) =>
+      CATEGORY_GROUPS[categoryFilter]?.includes(cat)
+    );
+  };
   // Clean up timeout on unmount
   useEffect(() => {
     return () => {
@@ -3587,321 +3693,422 @@ ${hasChat ? `<button class="chat-btn">ðŸ’¬</button>` : ""}
           )}
         </AnimatePresence>
       </div>
-
-      {/* Options Overlay */}
       {/* Options Overlay */}
       <AnimatePresence>
         {showOverlay && (
           <motion.div
-            className="home__overlay"
+            className="options-overlay"
             onClick={closeAllOverlays}
-            variants={overlayVariants}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
           >
-            <motion.div
-              className="home__overlay-content home__overlay-content--split"
-              onClick={(e) => e.stopPropagation()}
-              variants={contentVariants}
-              initial="hidden"
-              animate="visible"
-              exit="exit"
-            >
-              {/* Top Section: Design Options */}
-              <div className="overlay-section overlay-section--top">
+            {/* Intro Animation */}
+            <AnimatePresence>
+              {showOverlayIntro && (
                 <motion.div
-                  className="persistent-options-grid"
-                  variants={pillContainerVariants}
-                  initial="hidden"
-                  animate="visible"
+                  className="options-intro"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.2 }}
                 >
-                  <div>
-                    {/* Brand Name */}
-                    <motion.div
-                      className="persistent-field"
-                      variants={pillVariants}
-                      whileHover="hover"
-                      whileTap="tap"
-                    >
-                      <label>Brand Name</label>
-                      <input
-                        type="text"
-                        value={persistentOptions.branding.brandName}
-                        onChange={(e) =>
-                          setPersistentOptions((prev) => ({
-                            ...prev,
-                            branding: {
-                              ...prev.branding,
-                              brandName: e.target.value,
-                            },
-                          }))
-                        }
-                        placeholder="Your Company"
-                      />
-                    </motion.div>
-
-                    {/* Tagline */}
-                    <motion.div
-                      className="persistent-field"
-                      variants={pillVariants}
-                      whileHover="hover"
-                      whileTap="tap"
-                    >
-                      <label>Tagline</label>
-                      <input
-                        type="text"
-                        value={persistentOptions.branding.tagline}
-                        onChange={(e) =>
-                          setPersistentOptions((prev) => ({
-                            ...prev,
-                            branding: {
-                              ...prev.branding,
-                              tagline: e.target.value,
-                            },
-                          }))
-                        }
-                        placeholder="Your tagline here"
-                      />
-                    </motion.div>
-
-                    {/* Email */}
-                    <motion.div
-                      className="persistent-field"
-                      variants={pillVariants}
-                      whileHover="hover"
-                      whileTap="tap"
-                    >
-                      <label>Email</label>
-                      <input
-                        type="email"
-                        value={persistentOptions.contactInfo.email}
-                        onChange={(e) =>
-                          setPersistentOptions((prev) => ({
-                            ...prev,
-                            contactInfo: {
-                              ...prev.contactInfo,
-                              email: e.target.value,
-                            },
-                          }))
-                        }
-                        placeholder="contact@example.com"
-                      />
-                    </motion.div>
-                  </div>
-
-                  <div>
-                    {/* Social fields */}
-                    {Object.entries(persistentOptions.socialMedia)
-                      .slice(0, 4)
-                      .map(([platform, url]) => (
-                        <motion.div
-                          key={platform}
-                          className="persistent-field persistent-field--small"
-                          variants={pillVariants}
-                          whileHover="hover"
-                          whileTap="tap"
-                        >
-                          <label>
-                            {platform.charAt(0).toUpperCase() +
-                              platform.slice(1)}
-                          </label>
-                          <input
-                            type="url"
-                            value={url}
-                            onChange={(e) =>
-                              setPersistentOptions((prev) => ({
-                                ...prev,
-                                socialMedia: {
-                                  ...prev.socialMedia,
-                                  [platform]: e.target.value,
-                                },
-                              }))
-                            }
-                            placeholder={`${platform}.com/...`}
-                          />
-                        </motion.div>
-                      ))}
-                  </div>
+                  <motion.div
+                    className="options-intro__pills"
+                    initial={{ scale: 0.6, rotate: -45, opacity: 0 }}
+                    animate={{
+                      scale: [0.6, 1.3, 1.2],
+                      rotate: [-45, -45, -45],
+                      opacity: [0, 1, 1],
+                    }}
+                    transition={{
+                      duration: 0.8,
+                      times: [0, 0.5, 1],
+                      ease: [0.23, 1, 0.32, 1],
+                    }}
+                  >
+                    {[
+                      "Template",
+                      "Style",
+                      "Colors",
+                      "Typography",
+                      "Layout",
+                      "Sections",
+                      "Animation",
+                      "Images",
+                    ].map((label, i) => (
+                      <motion.div
+                        key={label}
+                        className="options-intro__pill"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: i * 0.03, duration: 0.3 }}
+                      >
+                        {label}
+                      </motion.div>
+                    ))}
+                  </motion.div>
                 </motion.div>
-              </div>
+              )}
+            </AnimatePresence>
 
-              {/* Bottom Section: Content & Assets */}
-              {/* Bottom Section: Content & Assets */}
-              <div className="overlay-section overlay-section--bottom">
-                <AnimatePresence mode="wait" custom={slideDirection}>
-                  {!activeOption ? (
-                    <motion.div
-                      key="categories"
-                      className="categories-section"
-                      variants={pillContainerVariants}
-                      initial="hidden"
-                      animate="visible"
-                      exit="exit"
+            {/* Main Content */}
+            <AnimatePresence>
+              {!showOverlayIntro && (
+                <motion.div
+                  className="options-content"
+                  onClick={(e) => e.stopPropagation()}
+                  initial={{ opacity: 0, scale: 0.98, y: 4 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.98, y: 4 }}
+                  transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                >
+                  {/* Header */}
+                  <div className="options-header">
+                    <div className="options-header__left">
+                      <span className="options-title">Customize</span>
+                      <span className="options-subtitle">
+                        {activeOption
+                          ? OPTIONS[activeOption]?.label
+                          : `${
+                              Object.keys(selections).filter((k) =>
+                                hasSelection(k)
+                              ).length
+                            } options set`}
+                      </span>
+                    </div>
+                    <button
+                      className="options-close"
+                      onClick={closeAllOverlays}
                     >
-                      <div className="home__pills-rows">
-                        {categoryRows.map((row, rowIndex) => (
-                          <InfinitePillRow
-                            key={rowIndex}
-                            reverse={rowIndex % 2 === 1}
-                            duration={40 - rowIndex * 2}
+                      <X size={16} />
+                    </button>
+                  </div>
+
+                  {/* Filter Tabs */}
+                  <div className="options-filters">
+                    <button
+                      className={`options-filter ${
+                        categoryFilter === "" ? "active" : ""
+                      }`}
+                      onClick={() => setCategoryFilter("")}
+                    >
+                      All
+                    </button>
+                    <button
+                      className={`options-filter ${
+                        categoryFilter === "layout" ? "active" : ""
+                      }`}
+                      onClick={() => setCategoryFilter("layout")}
+                    >
+                      Layout
+                    </button>
+                    <button
+                      className={`options-filter ${
+                        categoryFilter === "visual" ? "active" : ""
+                      }`}
+                      onClick={() => setCategoryFilter("visual")}
+                    >
+                      Visual
+                    </button>
+                    <button
+                      className={`options-filter ${
+                        categoryFilter === "content" ? "active" : ""
+                      }`}
+                      onClick={() => setCategoryFilter("content")}
+                    >
+                      Content
+                    </button>
+                    <button
+                      className={`options-filter ${
+                        categoryFilter === "components" ? "active" : ""
+                      }`}
+                      onClick={() => setCategoryFilter("components")}
+                    >
+                      Components
+                    </button>
+                    <button
+                      className={`options-filter ${
+                        categoryFilter === "technical" ? "active" : ""
+                      }`}
+                      onClick={() => setCategoryFilter("technical")}
+                    >
+                      Technical
+                    </button>
+                  </div>
+
+                  {/* Two Column Layout */}
+                  <div className="options-body">
+                    {/* Left: Brand Info */}
+                    <div className="options-brand">
+                      <div className="options-brand__title">
+                        Brand & Contact
+                      </div>
+
+                      <div className="options-brand__row">
+                        <input
+                          type="text"
+                          value={persistentOptions.branding.brandName}
+                          onChange={(e) =>
+                            setPersistentOptions((prev) => ({
+                              ...prev,
+                              branding: {
+                                ...prev.branding,
+                                brandName: e.target.value,
+                              },
+                            }))
+                          }
+                          placeholder="Brand name"
+                          className="options-input"
+                        />
+                        <input
+                          type="text"
+                          value={persistentOptions.branding.tagline}
+                          onChange={(e) =>
+                            setPersistentOptions((prev) => ({
+                              ...prev,
+                              branding: {
+                                ...prev.branding,
+                                tagline: e.target.value,
+                              },
+                            }))
+                          }
+                          placeholder="Tagline"
+                          className="options-input"
+                        />
+                      </div>
+
+                      <div className="options-brand__row">
+                        <input
+                          type="email"
+                          value={persistentOptions.contactInfo.email}
+                          onChange={(e) =>
+                            setPersistentOptions((prev) => ({
+                              ...prev,
+                              contactInfo: {
+                                ...prev.contactInfo,
+                                email: e.target.value,
+                              },
+                            }))
+                          }
+                          placeholder="Email"
+                          className="options-input"
+                        />
+                        <input
+                          type="tel"
+                          value={persistentOptions.contactInfo.phone}
+                          onChange={(e) =>
+                            setPersistentOptions((prev) => ({
+                              ...prev,
+                              contactInfo: {
+                                ...prev.contactInfo,
+                                phone: e.target.value,
+                              },
+                            }))
+                          }
+                          placeholder="Phone"
+                          className="options-input"
+                        />
+                      </div>
+
+                      <div className="options-brand__label">Social</div>
+                      <div className="options-brand__social">
+                        {Object.entries(persistentOptions.socialMedia)
+                          .slice(0, 4)
+                          .map(([platform, url]) => (
+                            <input
+                              key={platform}
+                              type="url"
+                              value={url}
+                              onChange={(e) =>
+                                setPersistentOptions((prev) => ({
+                                  ...prev,
+                                  socialMedia: {
+                                    ...prev.socialMedia,
+                                    [platform]: e.target.value,
+                                  },
+                                }))
+                              }
+                              placeholder={platform}
+                              className="options-input options-input--small"
+                            />
+                          ))}
+                      </div>
+                    </div>
+
+                    {/* Right: Design Options */}
+                    <div className="options-design">
+                      <AnimatePresence mode="wait">
+                        {!activeOption ? (
+                          <motion.div
+                            key="grid"
+                            className="options-grid"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.15 }}
                           >
-                            <div className="pill-row__content">
-                              {row.map((catKey) => {
-                                const opt = OPTIONS[catKey];
-                                const Icon = opt?.icon;
-                                const isSelected = hasSelection(catKey);
+                            {getFilteredCategories().map((catKey) => {
+                              const opt = OPTIONS[catKey];
+                              const Icon = opt?.icon;
+                              const isSelected = hasSelection(catKey);
+                              const displayVal = getDisplayValue(catKey);
+
+                              return (
+                                <motion.button
+                                  key={catKey}
+                                  className={`options-card ${
+                                    isSelected ? "options-card--active" : ""
+                                  }`}
+                                  onClick={() => selectCategory(catKey)}
+                                  whileHover={{ y: -2 }}
+                                  whileTap={{ scale: 0.98 }}
+                                >
+                                  <div className="options-card__icon">
+                                    {Icon && <Icon size={14} />}
+                                  </div>
+                                  <div className="options-card__info">
+                                    <span className="options-card__label">
+                                      {opt?.label}
+                                    </span>
+                                    {isSelected && displayVal && (
+                                      <span className="options-card__value">
+                                        {displayVal}
+                                      </span>
+                                    )}
+                                  </div>
+                                  <ChevronRight
+                                    size={12}
+                                    className="options-card__arrow"
+                                  />
+                                </motion.button>
+                              );
+                            })}
+                          </motion.div>
+                        ) : (
+                          <motion.div
+                            key="choices"
+                            className="options-choices"
+                            initial={{ opacity: 0, x: 10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -10 }}
+                            transition={{ duration: 0.15 }}
+                          >
+                            <div className="options-choices__header">
+                              <button
+                                className="options-back"
+                                onClick={goToCategories}
+                              >
+                                <ChevronLeft size={14} />
+                              </button>
+                              <div className="options-choices__title">
+                                <span>{OPTIONS[activeOption]?.label}</span>
+                                <span className="options-choices__subtitle">
+                                  {OPTIONS[activeOption]?.subtitle}
+                                </span>
+                              </div>
+                              {hasSelection(activeOption) && (
+                                <button
+                                  className="options-reset"
+                                  onClick={() => resetSelection(activeOption)}
+                                >
+                                  Reset
+                                </button>
+                              )}
+                            </div>
+
+                            <div className="options-choices__grid">
+                              {OPTIONS[activeOption]?.choices?.map((choice) => {
+                                const isMulti = OPTIONS[activeOption].multi;
+                                const isActive = isMulti
+                                  ? selections[activeOption]?.includes(
+                                      choice.value
+                                    )
+                                  : selections[activeOption] === choice.value;
 
                                 return (
-                                  <motion.button
-                                    key={catKey}
-                                    className={`home__category-pill ${
-                                      isSelected
-                                        ? "home__category-pill--active"
-                                        : ""
+                                  <button
+                                    key={choice.value}
+                                    className={`options-choice ${
+                                      isActive ? "options-choice--active" : ""
                                     }`}
-                                    onClick={() => selectCategory(catKey)}
-                                    variants={pillVariants}
+                                    onClick={() =>
+                                      handleSelect(activeOption, choice.value)
+                                    }
                                   >
-                                    {Icon && <Icon size={14} />}
-                                    <span>{opt?.label}</span>
-                                  </motion.button>
+                                    {choice.colors && (
+                                      <div className="options-choice__colors">
+                                        {choice.colors.map((color, i) => (
+                                          <span
+                                            key={i}
+                                            style={{ background: color }}
+                                          />
+                                        ))}
+                                      </div>
+                                    )}
+                                    <span>{choice.value}</span>
+                                    {isActive && <Check size={12} />}
+                                  </button>
                                 );
                               })}
                             </div>
-                          </InfinitePillRow>
-                        ))}
-                      </div>
-                    </motion.div>
-                  ) : (
-                    <motion.div
-                      key="choices"
-                      className="choices-section"
-                      variants={slideVariants}
-                      initial="enter"
-                      animate="center"
-                      exit="exit"
-                      custom={slideDirection}
-                    >
-                      <div className="home__option-header">
-                        <button
-                          className="home__back-btn"
-                          onClick={goToCategories}
-                        >
-                          <ChevronLeft />
-                        </button>
-                        <div className="home__option-header-text">
-                          <span className="home__option-header-label">
-                            {OPTIONS[activeOption]?.label}
-                          </span>
-                          <span className="home__option-header-subtitle">
-                            {OPTIONS[activeOption]?.subtitle}
-                          </span>
-                        </div>
-                      </div>
 
-                      <motion.div
-                        className="home__choice-pills"
-                        variants={pillContainerVariants}
-                        initial="hidden"
-                        animate="visible"
-                      >
-                        {OPTIONS[activeOption]?.choices?.map((choice) => {
-                          const isMulti = OPTIONS[activeOption].multi;
-                          const isActive = isMulti
-                            ? selections[activeOption]?.includes(choice.value)
-                            : selections[activeOption] === choice.value;
-
-                          return (
-                            <motion.button
-                              key={choice.value}
-                              className={`home__choice-pill ${
-                                isActive ? "active" : ""
-                              } ${
-                                choice.colors ? "home__choice-pill--color" : ""
-                              }`}
-                              onClick={() =>
-                                handleSelect(activeOption, choice.value)
-                              }
-                              variants={pillVariants}
-                              whileHover="hover"
-                              whileTap="tap"
-                            >
-                              {choice.colors && (
-                                <div className="home__color-dots">
-                                  {choice.colors.map((color, i) => (
-                                    <span
-                                      key={i}
-                                      style={{ background: color }}
-                                    />
+                            {/* Custom Colors */}
+                            {activeOption === "palette" &&
+                              selections.palette === "Custom" && (
+                                <div className="options-custom-colors">
+                                  {OPTIONS.customColors.fields.map((field) => (
+                                    <div
+                                      key={field.key}
+                                      className="options-color-field"
+                                    >
+                                      <span>{field.label}</span>
+                                      <div className="options-color-picker">
+                                        <input
+                                          type="color"
+                                          value={
+                                            selections.customColors?.[
+                                              field.key
+                                            ] || field.default
+                                          }
+                                          onChange={(e) => {
+                                            setSelections((prev) => ({
+                                              ...prev,
+                                              customColors: {
+                                                ...prev.customColors,
+                                                [field.key]: e.target.value,
+                                              },
+                                            }));
+                                          }}
+                                        />
+                                        <span>
+                                          {selections.customColors?.[
+                                            field.key
+                                          ] || field.default}
+                                        </span>
+                                      </div>
+                                    </div>
                                   ))}
                                 </div>
                               )}
-                              <span>{choice.value}</span>
-                            </motion.button>
-                          );
-                        })}
-                      </motion.div>
 
-                      {/* Custom Colors Section */}
-                      {activeOption === "palette" &&
-                        selections.palette === "Custom" && (
-                          <motion.div
-                            className="home__custom-colors"
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.2 }}
-                          >
-                            <div className="home__custom-colors-grid">
-                              {OPTIONS.customColors.fields.map((field) => (
-                                <div
-                                  key={field.key}
-                                  className="home__color-field"
-                                >
-                                  <label>{field.label}</label>
-                                  <div className="home__color-input-wrapper">
-                                    <input
-                                      type="color"
-                                      value={
-                                        selections.customColors?.[field.key] ||
-                                        field.default
-                                      }
-                                      onChange={(e) => {
-                                        setSelections((prev) => ({
-                                          ...prev,
-                                          customColors: {
-                                            ...prev.customColors,
-                                            [field.key]: e.target.value,
-                                          },
-                                        }));
-                                      }}
-                                    />
-                                    <span>
-                                      {selections.customColors?.[field.key] ||
-                                        field.default}
-                                    </span>
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
+                            {OPTIONS[activeOption]?.multi && (
+                              <button
+                                className="options-done"
+                                onClick={goToCategories}
+                              >
+                                Done ({selections[activeOption]?.length || 0})
+                              </button>
+                            )}
                           </motion.div>
                         )}
-
-                      {OPTIONS[activeOption]?.multi && (
-                        <motion.button
-                          className="home__done-btn"
-                          onClick={goToCategories}
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                        >
-                          Done
-                        </motion.button>
-                      )}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            </motion.div>
+                      </AnimatePresence>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </motion.div>
         )}
       </AnimatePresence>
@@ -4278,7 +4485,7 @@ ${hasChat ? `<button class="chat-btn">ðŸ’¬</button>` : ""}
               <div className="help-header">
                 <div className="help-title">
                   <HelpCircle size={18} />
-                  <span>How to Use Website AI</span>
+                  <span>How to Use Nimbus</span>
                 </div>
                 <button
                   className="help-close"
