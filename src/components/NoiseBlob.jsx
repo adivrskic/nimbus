@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import {
   AmbientLight,
   Clock,
@@ -15,7 +15,6 @@ import {
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { mergeVertices } from "three/examples/jsm/utils/BufferGeometryUtils";
 
-// Check if viewport is mobile/portrait tablet
 const isMobileOrPortrait = () => {
   return (
     window.innerWidth <= 768 ||
@@ -23,7 +22,6 @@ const isMobileOrPortrait = () => {
   );
 };
 
-// 4D Simplex Noise GLSL (by Ian McEwan, Ashima Arts)
 const noiseGLSL = `
 vec4 permute(vec4 x){return mod(((x*34.0)+1.0)*x, 289.0);}
 float permute(float x){return floor(mod(((x*34.0)+1.0)*x, 289.0));}
@@ -97,49 +95,29 @@ float snoise(vec4 v){
 }
 `;
 
-/**
- * NoiseBlob - An animated 3D blob with simplex noise displacement
- */
 export default function NoiseBlob({
-  // === APPEARANCE ===
-  color = "#ffffff", // Blob surface color
-  emissiveColor = "#0000ff", // Glow/emissive color
-  emissiveIntensity = 0.05, // How strong the glow is (0-1)
-  backgroundColor = "#ffffff", // Scene background
-  shininess = 300, // Surface shininess (0-1000)
-  wireframe = false, // Show wireframe instead of solid
-
-  // === ANIMATION ===
-  speed = 0.15, // Animation speed (0.01=slow, 0.3=fast)
-
-  // === NOISE SHAPE ===
-  noiseScale = 0.875, // Noise frequency (higher = more bumps)
-  noiseAmplitude = 0.35, // Bump height (0=smooth sphere, 1=very bumpy)
-
-  // === SIZE ===
-  baseScale = 3.5, // Base radius of the blob
-  detail = 250, // Mesh detail (50=fast, 300=smooth)
-
-  // === CAMERA ===
-  cameraDistance = 10, // Distance from blob
-  fov = 70, // Field of view
-
-  // === CONTROLS ===
-  enableControls = true, // Allow mouse/touch interaction
-  enableZoom = true, // Allow scroll to zoom
-  autoRotate = false, // Auto-spin the view
-  autoRotateSpeed = 2, // Spin speed when autoRotate=true
-
-  // === LIGHTING ===
-  ambientIntensity = 1, // Ambient light strength
-  directionalIntensity = 0.5, // Main light strength
-  hemisphereIntensity = 0.375, // Sky/ground light strength
-
-  // === MOBILE/PORTRAIT RESPONSIVE ===
-  mobileScaleMultiplier = 1.4, // How much larger the blob is on mobile (1 = same size)
-  mobileCameraYOffset = 6, // How much to move camera up on mobile (blob appears lower)
-
-  // === CONTAINER ===
+  color = "#ffffff",
+  emissiveColor = "#0000ff",
+  emissiveIntensity = 0.05,
+  backgroundColor = "#ffffff",
+  shininess = 300,
+  wireframe = false,
+  speed = 0.15,
+  noiseScale = 0.875,
+  noiseAmplitude = 0.35,
+  baseScale = 3.5,
+  detail = 250,
+  cameraDistance = 10,
+  fov = 70,
+  enableControls = true,
+  enableZoom = true,
+  autoRotate = false,
+  autoRotateSpeed = 2,
+  ambientIntensity = 1,
+  directionalIntensity = 0.5,
+  hemisphereIntensity = 0.375,
+  mobileScaleMultiplier = 1.4,
+  mobileCameraYOffset = 6,
   className = "",
   style = {},
 }) {
@@ -150,205 +128,221 @@ export default function NoiseBlob({
   const sceneRef = useRef(null);
   const cameraRef = useRef(null);
   const uniformsRef = useRef(null);
+  const [initialized, setInitialized] = useState(false);
 
+  // Defer heavy Three.js initialization
   useEffect(() => {
     if (!containerRef.current) return;
 
-    // Prevent double initialization from StrictMode
+    let initTimeout;
+    let idleCallbackId;
+
+    const initThreeJS = () => {
+      if (cleanedUpRef.current || !containerRef.current) return;
+
+      const container = containerRef.current;
+      while (container.firstChild) {
+        container.removeChild(container.firstChild);
+      }
+
+      const scene = new Scene();
+      scene.background = new Color(backgroundColor);
+      sceneRef.current = scene;
+
+      const mobile = isMobileOrPortrait();
+      const initialCameraY = mobile ? mobileCameraYOffset : 0;
+      const initialScale = mobile
+        ? baseScale * mobileScaleMultiplier
+        : baseScale;
+
+      const camera = new PerspectiveCamera(
+        fov,
+        container.clientWidth / container.clientHeight,
+        1,
+        1000
+      );
+      camera.position.set(0, initialCameraY, cameraDistance);
+      camera.lookAt(0, 0, 0);
+      cameraRef.current = camera;
+
+      const renderer = new WebGLRenderer({ antialias: true });
+      renderer.setSize(container.clientWidth, container.clientHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      container.appendChild(renderer.domElement);
+      rendererRef.current = renderer;
+
+      const controls = new OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.enablePan = false;
+      controls.enabled = enableControls;
+      controls.enableZoom = enableZoom;
+      controls.autoRotate = autoRotate;
+      controls.autoRotateSpeed = autoRotateSpeed;
+      controls.target.set(0, 0, 0);
+
+      const uniforms = {
+        time: { value: 0 },
+        noiseScale: { value: noiseScale },
+        noiseAmplitude: { value: noiseAmplitude },
+        baseScale: { value: initialScale },
+      };
+      uniformsRef.current = uniforms;
+
+      const directionalLight = new DirectionalLight(
+        0xffffff,
+        directionalIntensity
+      );
+      directionalLight.position.setScalar(1);
+      const hemisphereLight = new HemisphereLight(
+        0xffff00,
+        0x0000ff,
+        hemisphereIntensity
+      );
+      const ambientLight = new AmbientLight(0xffffff, ambientIntensity);
+      scene.add(directionalLight, hemisphereLight, ambientLight);
+
+      let geometry = new IcosahedronGeometry(1, detail);
+      geometry.deleteAttribute("normal");
+      geometry.deleteAttribute("uv");
+      geometry = mergeVertices(geometry);
+      geometry.computeVertexNormals();
+
+      const material = new MeshPhongMaterial({
+        color: new Color(color),
+        emissive: new Color(emissiveColor).multiplyScalar(emissiveIntensity),
+        shininess: shininess,
+        wireframe: wireframe,
+        onBeforeCompile: (shader) => {
+          shader.uniforms.time = uniforms.time;
+          shader.uniforms.noiseScale = uniforms.noiseScale;
+          shader.uniforms.noiseAmplitude = uniforms.noiseAmplitude;
+          shader.uniforms.baseScale = uniforms.baseScale;
+
+          shader.vertexShader = `
+            uniform float time;
+            uniform float noiseScale;
+            uniform float noiseAmplitude;
+            uniform float baseScale;
+            ${noiseGLSL}
+            float noise(vec3 p){
+              float n = snoise(vec4(p, time));
+              n = sin(n * 3.1415926 * 8.);
+              n = n * 0.5 + 0.5;
+              n *= n;
+              return n;
+            }
+            vec3 getPos(vec3 p){
+              return p * (baseScale + noise(p * noiseScale) * noiseAmplitude);
+            }
+            ${shader.vertexShader}
+          `
+            .replace(
+              `#include <beginnormal_vertex>`,
+              `#include <beginnormal_vertex>
+              
+              vec3 p0 = getPos(position);
+              
+              float theta = .1; 
+              vec3 vecTangent = normalize(cross(p0, vec3(1.0, 0.0, 0.0)) + cross(p0, vec3(0.0, 1.0, 0.0)));
+              vec3 vecBitangent = normalize(cross(vecTangent, p0));
+              vec3 ptTangentSample = getPos(normalize(p0 + theta * normalize(vecTangent)));
+              vec3 ptBitangentSample = getPos(normalize(p0 + theta * normalize(vecBitangent)));
+              
+              objectNormal = normalize(cross(ptBitangentSample - p0, ptTangentSample - p0));
+              `
+            )
+            .replace(
+              `#include <begin_vertex>`,
+              `#include <begin_vertex>
+              transformed = p0;
+            `
+            );
+        },
+      });
+
+      const mesh = new Mesh(geometry, material);
+      scene.add(mesh);
+
+      const clock = new Clock();
+
+      const handleResize = () => {
+        if (!container || cleanedUpRef.current) return;
+        const width = container.clientWidth;
+        const height = container.clientHeight;
+        camera.aspect = width / height;
+        camera.updateProjectionMatrix();
+        renderer.setSize(width, height);
+
+        const mobile = isMobileOrPortrait();
+        camera.position.y = mobile ? mobileCameraYOffset : 0;
+        camera.position.z = cameraDistance;
+        controls.target.set(0, 0, 0);
+        controls.update();
+
+        if (uniformsRef.current) {
+          uniformsRef.current.baseScale.value = mobile
+            ? baseScale * mobileScaleMultiplier
+            : baseScale;
+        }
+      };
+      window.addEventListener("resize", handleResize);
+
+      const animate = () => {
+        if (cleanedUpRef.current) return;
+        animationIdRef.current = requestAnimationFrame(animate);
+        controls.update();
+        uniforms.time.value = clock.getElapsedTime() * speed;
+        renderer.render(scene, camera);
+      };
+      animate();
+
+      setInitialized(true);
+
+      // Store cleanup function
+      containerRef.current._cleanup = () => {
+        window.removeEventListener("resize", handleResize);
+        if (animationIdRef.current) {
+          cancelAnimationFrame(animationIdRef.current);
+          animationIdRef.current = null;
+        }
+        controls.dispose();
+        geometry.dispose();
+        material.dispose();
+        renderer.dispose();
+        if (
+          renderer.domElement &&
+          renderer.domElement.parentNode === container
+        ) {
+          container.removeChild(renderer.domElement);
+        }
+        rendererRef.current = null;
+        sceneRef.current = null;
+        cameraRef.current = null;
+        uniformsRef.current = null;
+      };
+    };
+
+    // Defer initialization using requestIdleCallback or setTimeout
     cleanedUpRef.current = false;
 
-    // Clear any existing canvas
-    const container = containerRef.current;
-    while (container.firstChild) {
-      container.removeChild(container.firstChild);
+    if ("requestIdleCallback" in window) {
+      idleCallbackId = requestIdleCallback(
+        () => {
+          initTimeout = setTimeout(initThreeJS, 0);
+        },
+        { timeout: 2000 }
+      );
+    } else {
+      initTimeout = setTimeout(initThreeJS, 50);
     }
 
-    // Scene setup
-    const scene = new Scene();
-    scene.background = new Color(backgroundColor);
-    sceneRef.current = scene;
-
-    // Determine initial responsive settings
-    const mobile = isMobileOrPortrait();
-    const initialCameraY = mobile ? mobileCameraYOffset : 0;
-    const initialScale = mobile ? baseScale * mobileScaleMultiplier : baseScale;
-
-    // Camera
-    const camera = new PerspectiveCamera(
-      fov,
-      container.clientWidth / container.clientHeight,
-      1,
-      1000
-    );
-    camera.position.set(0, initialCameraY, cameraDistance);
-    camera.lookAt(0, 0, 0);
-    cameraRef.current = camera;
-
-    // Renderer
-    const renderer = new WebGLRenderer({ antialias: true });
-    renderer.setSize(container.clientWidth, container.clientHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    container.appendChild(renderer.domElement);
-    rendererRef.current = renderer;
-
-    // Controls
-    const controls = new OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-    controls.enablePan = false;
-    controls.enabled = enableControls;
-    controls.enableZoom = enableZoom;
-    controls.autoRotate = autoRotate;
-    controls.autoRotateSpeed = autoRotateSpeed;
-    controls.target.set(0, 0, 0);
-
-    // Uniforms
-    const uniforms = {
-      time: { value: 0 },
-      noiseScale: { value: noiseScale },
-      noiseAmplitude: { value: noiseAmplitude },
-      baseScale: { value: initialScale },
-    };
-    uniformsRef.current = uniforms;
-
-    // Lights
-    const directionalLight = new DirectionalLight(
-      0xffffff,
-      directionalIntensity
-    );
-    directionalLight.position.setScalar(1);
-    const hemisphereLight = new HemisphereLight(
-      0xffff00,
-      0x0000ff,
-      hemisphereIntensity
-    );
-    const ambientLight = new AmbientLight(0xffffff, ambientIntensity);
-    scene.add(directionalLight, hemisphereLight, ambientLight);
-
-    // Geometry
-    let geometry = new IcosahedronGeometry(1, detail);
-    geometry.deleteAttribute("normal");
-    geometry.deleteAttribute("uv");
-    geometry = mergeVertices(geometry);
-    geometry.computeVertexNormals();
-
-    // Material with custom shader
-    const material = new MeshPhongMaterial({
-      color: new Color(color),
-      emissive: new Color(emissiveColor).multiplyScalar(emissiveIntensity),
-      shininess: shininess,
-      wireframe: wireframe,
-      onBeforeCompile: (shader) => {
-        shader.uniforms.time = uniforms.time;
-        shader.uniforms.noiseScale = uniforms.noiseScale;
-        shader.uniforms.noiseAmplitude = uniforms.noiseAmplitude;
-        shader.uniforms.baseScale = uniforms.baseScale;
-
-        shader.vertexShader = `
-          uniform float time;
-          uniform float noiseScale;
-          uniform float noiseAmplitude;
-          uniform float baseScale;
-          ${noiseGLSL}
-          float noise(vec3 p){
-            float n = snoise(vec4(p, time));
-            n = sin(n * 3.1415926 * 8.);
-            n = n * 0.5 + 0.5;
-            n *= n;
-            return n;
-          }
-          vec3 getPos(vec3 p){
-            return p * (baseScale + noise(p * noiseScale) * noiseAmplitude);
-          }
-          ${shader.vertexShader}
-        `
-          .replace(
-            `#include <beginnormal_vertex>`,
-            `#include <beginnormal_vertex>
-            
-            vec3 p0 = getPos(position);
-            
-            float theta = .1; 
-            vec3 vecTangent = normalize(cross(p0, vec3(1.0, 0.0, 0.0)) + cross(p0, vec3(0.0, 1.0, 0.0)));
-            vec3 vecBitangent = normalize(cross(vecTangent, p0));
-            vec3 ptTangentSample = getPos(normalize(p0 + theta * normalize(vecTangent)));
-            vec3 ptBitangentSample = getPos(normalize(p0 + theta * normalize(vecBitangent)));
-            
-            objectNormal = normalize(cross(ptBitangentSample - p0, ptTangentSample - p0));
-            `
-          )
-          .replace(
-            `#include <begin_vertex>`,
-            `#include <begin_vertex>
-            transformed = p0;
-          `
-          );
-      },
-    });
-
-    // Mesh
-    const mesh = new Mesh(geometry, material);
-    scene.add(mesh);
-
-    // Clock
-    const clock = new Clock();
-
-    // Handle resize with responsive adjustments
-    const handleResize = () => {
-      if (!container || cleanedUpRef.current) return;
-      const width = container.clientWidth;
-      const height = container.clientHeight;
-      camera.aspect = width / height;
-      camera.updateProjectionMatrix();
-      renderer.setSize(width, height);
-
-      // Update camera position and scale based on screen size
-      const mobile = isMobileOrPortrait();
-      camera.position.y = mobile ? mobileCameraYOffset : 0;
-      camera.position.z = cameraDistance;
-      controls.target.set(0, 0, 0);
-      controls.update();
-
-      // Update blob scale
-      if (uniformsRef.current) {
-        uniformsRef.current.baseScale.value = mobile
-          ? baseScale * mobileScaleMultiplier
-          : baseScale;
-      }
-    };
-    window.addEventListener("resize", handleResize);
-
-    // Animation loop
-    const animate = () => {
-      if (cleanedUpRef.current) return;
-      animationIdRef.current = requestAnimationFrame(animate);
-      controls.update();
-      uniforms.time.value = clock.getElapsedTime() * speed;
-      renderer.render(scene, camera);
-    };
-    animate();
-
-    // Cleanup
     return () => {
       cleanedUpRef.current = true;
-      window.removeEventListener("resize", handleResize);
-
-      if (animationIdRef.current) {
-        cancelAnimationFrame(animationIdRef.current);
-        animationIdRef.current = null;
+      if (idleCallbackId) cancelIdleCallback(idleCallbackId);
+      if (initTimeout) clearTimeout(initTimeout);
+      if (containerRef.current?._cleanup) {
+        containerRef.current._cleanup();
       }
-
-      controls.dispose();
-      geometry.dispose();
-      material.dispose();
-      renderer.dispose();
-
-      if (renderer.domElement && renderer.domElement.parentNode === container) {
-        container.removeChild(renderer.domElement);
-      }
-      rendererRef.current = null;
-      sceneRef.current = null;
-      cameraRef.current = null;
-      uniformsRef.current = null;
     };
   }, [
     color,
@@ -385,6 +379,8 @@ export default function NoiseBlob({
         position: "absolute",
         transform: isMobileOrPortrait() ? "translateY(50%)" : "",
         pointerEvents: "none",
+        opacity: initialized ? 1 : 0,
+        transition: "opacity 0.5s ease-in",
         ...style,
       }}
     />

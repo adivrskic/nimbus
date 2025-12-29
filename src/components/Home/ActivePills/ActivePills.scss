@@ -1,0 +1,58 @@
+// components/Home/ActivePills/ActivePills.scss
+
+.active-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+  justify-content: center;
+
+  &__pill {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    background: var(--color-bg);
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: var(--shadow-sm);
+    gap: 4px;
+    border: 1px solid transparent;
+
+    &:hover {
+      background: rgba(43, 43, 43, 0.05);
+      border-color: rgba(43, 43, 43, 0.1);
+      box-shadow: var(--shadow-md);
+    }
+  }
+
+  &__label {
+    font-size: 0.675rem;
+    font-weight: 300;
+    color: var(--color-text-muted);
+  }
+
+  &__value {
+    font-size: 0.675rem;
+    font-weight: 600;
+    color: var(--color-text);
+  }
+
+  &__close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    margin-left: 4px;
+    background: rgba(0, 0, 0, 0.04);
+    border-radius: 50%;
+    color: #666;
+    transition: all 0.15s ease;
+
+    &:hover {
+      background: rgba(239, 68, 68, 0.15);
+      color: #ef4444;
+    }
+  }
+}

@@ -1,0 +1,187 @@
+// configs/categories.config.js - Category definitions and groupings
+
+export const CATEGORIES = [
+  // Structure & Layout
+  "template",
+  "navigation",
+  "layout",
+  "sections",
+  "contentFlow",
+  "hierarchy",
+  "density",
+
+  // Visual Style
+  "style",
+  "inspiration",
+  "palette",
+  "customColors",
+  "mode",
+  "gradientStyle",
+  "backgroundPattern",
+  "corners",
+  "shadowStyle",
+  "hoverEffects",
+
+  // Typography
+  "font",
+  "typographyScale",
+  "headingStyle",
+
+  // Components
+  "heroStyle",
+  "buttonStyle",
+  "cardStyle",
+  "formStyle",
+  "iconStyle",
+  "badgeStyle",
+  "avatarStyle",
+  "tabStyle",
+  "accordionStyle",
+  "carouselStyle",
+  "notificationStyle",
+  "progressStyle",
+  "tableStyle",
+  "linkStyle",
+  "listStyle",
+  "emptyStates",
+
+  // Content Blocks
+  "testimonialStyle",
+  "pricingStyle",
+  "statsStyle",
+  "teamStyle",
+  "faqStyle",
+  "contactStyle",
+  "footerStyle",
+  "ctaSectionStyle",
+  "socialProof",
+
+  // Content & Copy
+  "tone",
+  "copyLength",
+  "brandPersonality",
+  "microCopy",
+  "cta",
+  "goal",
+  "industry",
+  "audience",
+
+  // Effects & Motion
+  "animation",
+  "interaction",
+  "scrollBehavior",
+  "loadingStyle",
+
+  // Spacing & Borders
+  "spacingScale",
+  "dividerStyle",
+  "borderWidth",
+
+  // Media
+  "images",
+  "mediaHandling",
+  "codeBlockStyle",
+
+  // Technical
+  "framework",
+  "accessibility",
+  "seoLevel",
+  "performanceLevel",
+  "responsiveApproach",
+  "mobileMenu",
+
+  // Features
+  "darkModeToggle",
+  "cookieBanner",
+  "socialSharing",
+  "stickyElements",
+  "errorPageStyle",
+
+  // AI Controls
+  "creativity",
+
+  // Persistent / Brand Assets
+  "persistent",
+];
+
+export const CATEGORY_GROUPS = {
+  layout: [
+    "template",
+    "navigation",
+    "layout",
+    "sections",
+    "contentFlow",
+    "hierarchy",
+    "density",
+    "heroStyle",
+    "footerStyle",
+  ],
+  visual: [
+    "style",
+    "inspiration",
+    "palette",
+    "mode",
+    "gradientStyle",
+    "backgroundPattern",
+    "corners",
+    "shadowStyle",
+    "hoverEffects",
+    "animation",
+    "dividerStyle",
+  ],
+  content: [
+    "tone",
+    "copyLength",
+    "brandPersonality",
+    "microCopy",
+    "cta",
+    "goal",
+    "industry",
+    "audience",
+    "socialProof",
+  ],
+  components: [
+    "buttonStyle",
+    "cardStyle",
+    "formStyle",
+    "iconStyle",
+    "badgeStyle",
+    "avatarStyle",
+    "tabStyle",
+    "accordionStyle",
+    "carouselStyle",
+    "testimonialStyle",
+    "pricingStyle",
+    "statsStyle",
+    "teamStyle",
+    "faqStyle",
+    "contactStyle",
+  ],
+  technical: [
+    "framework",
+    "accessibility",
+    "seoLevel",
+    "performanceLevel",
+    "responsiveApproach",
+    "mobileMenu",
+    "darkModeToggle",
+    "cookieBanner",
+  ],
+};
+
+/**
+ * Get filtered categories based on active filter
+ * @param {string} filter - The active filter key
+ * @returns {string[]} Filtered category keys
+ */
+export const getFilteredCategories = (filter) => {
+  const baseCategories = CATEGORIES.filter(
+    (cat) => cat !== "persistent" && cat !== "customColors"
+  );
+
+  if (!filter) return baseCategories;
+
+  return baseCategories.filter((cat) => CATEGORY_GROUPS[filter]?.includes(cat));
+};
+
+export default CATEGORIES;

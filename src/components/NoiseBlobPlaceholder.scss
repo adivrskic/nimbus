@@ -1,0 +1,111 @@
+.noise-blob-wrapper {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+// CSS Placeholder - lightweight animated orb
+.noise-blob-placeholder {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 1;
+  transition: opacity 0.8s ease-out;
+
+  &--hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  &__orb {
+    // Size roughly matches the blob
+    width: min(400px, 60vw);
+    height: min(400px, 60vw);
+    border-radius: 50%;
+
+    // Gradient that mimics the blob colors
+    background: radial-gradient(
+      ellipse at 30% 30%,
+      rgba(255, 255, 255, 0.9) 0%,
+      rgba(200, 200, 255, 0.6) 30%,
+      rgba(100, 100, 200, 0.3) 60%,
+      rgba(50, 50, 150, 0.1) 80%,
+      transparent 100%
+    );
+
+    // Blur for soft edges
+    filter: blur(20px);
+
+    // Subtle morphing animation
+    animation: blob-morph 8s ease-in-out infinite,
+      blob-pulse 4s ease-in-out infinite;
+
+    // Transform for mobile positioning (matches NoiseBlob behavior)
+    @media (max-width: 768px), (max-width: 1024px) and (orientation: portrait) {
+      transform: translateY(50%);
+      width: min(500px, 80vw);
+      height: min(500px, 80vw);
+    }
+  }
+}
+
+// Morphing animation - subtle shape changes
+@keyframes blob-morph {
+  0%,
+  100% {
+    border-radius: 60% 40% 50% 50% / 50% 60% 40% 50%;
+    transform: rotate(0deg) scale(1);
+  }
+  25% {
+    border-radius: 50% 60% 40% 50% / 40% 50% 60% 50%;
+  }
+  50% {
+    border-radius: 40% 50% 60% 50% / 50% 40% 50% 60%;
+    transform: rotate(180deg) scale(1.02);
+  }
+  75% {
+    border-radius: 50% 40% 50% 60% / 60% 50% 40% 50%;
+  }
+}
+
+// Pulse animation - subtle size changes
+@keyframes blob-pulse {
+  0%,
+  100% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+
+// Actual blob container
+.noise-blob-actual {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 0.8s ease-in;
+
+  &--visible {
+    opacity: 1;
+  }
+}
+
+// Dark mode adjustments
+[data-theme="dark"] {
+  .noise-blob-placeholder__orb {
+    background: radial-gradient(
+      ellipse at 30% 30%,
+      rgba(150, 150, 200, 0.6) 0%,
+      rgba(100, 100, 180, 0.4) 30%,
+      rgba(60, 60, 140, 0.2) 60%,
+      rgba(30, 30, 100, 0.1) 80%,
+      transparent 100%
+    );
+  }
+}
