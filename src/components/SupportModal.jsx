@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Download, HelpCircle, Plus, X, Mail } from "lucide-react";
+import { Download, HelpCircle, Plus, X } from "lucide-react";
 import "./SupportModal.scss";
 
 function SupportAccordion({ items }) {
@@ -90,7 +90,7 @@ function SupportModal({ isOpen, onClose }) {
       onClick={onClose}
     >
       <div
-        className={`roadmap-content ${isOpen ? "active" : ""}`}
+        className={`support-content ${isOpen ? "active" : ""}`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="support-header">

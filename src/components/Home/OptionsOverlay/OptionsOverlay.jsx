@@ -1,7 +1,7 @@
 // components/Home/OptionsOverlay/OptionsOverlay.jsx - Main customization modal
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ChevronLeft, ChevronRight, Check } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, Check, Settings } from "lucide-react";
 import {
   INTRO_LABELS,
   OPTIONS,
@@ -11,6 +11,9 @@ import {
 } from "../../../configs";
 
 import "./OptionsOverlay.scss";
+
+// Track if intro has been shown (persists across component remounts)
+let hasShownIntro = false;
 
 function OptionsOverlay({
   isOpen,
@@ -25,15 +28,26 @@ function OptionsOverlay({
 }) {
   const [activeOption, setActiveOption] = useState(null);
   const [showIntro, setShowIntro] = useState(false);
+  const [introComplete, setIntroComplete] = useState(hasShownIntro);
   const [categoryFilter, setCategoryFilter] = useState("");
   const [slideDirection, setSlideDirection] = useState(1);
 
-  // Intro animation on open
+  // Intro animation on first open only
   useEffect(() => {
     if (isOpen) {
-      setShowIntro(true);
-      const timer = setTimeout(() => setShowIntro(false), 1000);
-      return () => clearTimeout(timer);
+      if (!hasShownIntro) {
+        setShowIntro(true);
+        setIntroComplete(false);
+        const timer = setTimeout(() => {
+          setShowIntro(false);
+          setIntroComplete(true);
+          hasShownIntro = true;
+        }, 1000);
+        return () => clearTimeout(timer);
+      } else {
+        // Skip intro on subsequent opens
+        setIntroComplete(true);
+      }
     } else {
       setShowIntro(false);
       setCategoryFilter("");
@@ -136,9 +150,9 @@ function OptionsOverlay({
         )}
       </AnimatePresence>
 
-      {/* Main Content */}
+      {/* Main Content - only show after intro completes */}
       <AnimatePresence>
-        {!showIntro && (
+        {introComplete && (
           <motion.div
             className="options-content"
             onClick={(e) => e.stopPropagation()}
@@ -150,11 +164,14 @@ function OptionsOverlay({
             {/* Header */}
             <div className="options-header">
               <div className="options-header__left">
-                <span className="options-title">Customize</span>
-                <span className="options-subtitle">
-                  {activeOption
-                    ? OPTIONS[activeOption]?.label
-                    : `${selectedCount} options set`}
+                <span className="options-title">
+                  <Settings />
+                  <span>Customize</span>
+                  <span className="options-subtitle">
+                    {activeOption
+                      ? OPTIONS[activeOption]?.label
+                      : `${selectedCount} options set`}
+                  </span>
                 </span>
               </div>
               <button className="options-close" onClick={onClose}>

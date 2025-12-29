@@ -1,7 +1,8 @@
 // hooks/useGeneration.js - Handles website generation logic
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { buildFullPrompt } from "../utils/promptBuilder";
 import { generateDemo } from "../utils/demoGenerator";
+import { useGenerationState } from "../contexts/GenerationContext";
 
 /**
  * Hook for managing website generation
@@ -17,6 +18,14 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
   const [generatedCode, setGeneratedCode] = useState(null);
   const [generationError, setGenerationError] = useState(null);
   const [enhancePrompt, setEnhancePrompt] = useState("");
+
+  // Get context setter for blob animation (renamed to avoid conflict)
+  const { setIsGenerating: setGlobalGenerating } = useGenerationState();
+
+  // Sync local isGenerating state to global context for NoiseBlob
+  useEffect(() => {
+    setGlobalGenerating(isGenerating);
+  }, [isGenerating, setGlobalGenerating]);
 
   // Track generation for cancellation
   const generationRef = useRef(null);
@@ -34,14 +43,19 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
 
       try {
         // Build the full prompt
-        const fullPrompt = buildFullPrompt(prompt, selections, persistentOptions);
+        const fullPrompt = buildFullPrompt(
+          prompt,
+          selections,
+          persistentOptions
+        );
 
         // Try Supabase generation first
         if (supabaseGenerate) {
           const result = await supabaseGenerate({
             prompt: fullPrompt,
-            userId: user?.id,
             selections,
+            isRefinement: false,
+            existingCode: null,
           });
 
           if (result?.code) {
@@ -52,6 +66,7 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
         }
 
         // Fallback to demo generation
+        console.log("No supabaseGenerate function provided, using demo");
         const demoHtml = generateDemo(prompt, selections);
         setGeneratedCode(demoHtml);
         onSuccess?.({ code: demoHtml, isDemo: true });
@@ -76,7 +91,7 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
    * Enhance existing generated code with additional changes
    */
   const enhance = useCallback(
-    async (prompt, user) => {
+    async (originalPrompt, selections, user) => {
       if (!enhancePrompt.trim() || !generatedCode || isGenerating) return;
 
       setIsGenerating(true);
@@ -85,8 +100,9 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
       try {
         if (supabaseGenerate) {
           const result = await supabaseGenerate({
-            prompt: `Enhance this website with the following changes: ${enhancePrompt}\n\nOriginal prompt: ${prompt}`,
-            userId: user?.id,
+            prompt: enhancePrompt,
+            selections: selections || {},
+            isRefinement: true,
             existingCode: generatedCode,
           });
 
@@ -110,7 +126,14 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
         setIsGenerating(false);
       }
     },
-    [enhancePrompt, generatedCode, isGenerating, supabaseGenerate, onSuccess, onError]
+    [
+      enhancePrompt,
+      generatedCode,
+      isGenerating,
+      supabaseGenerate,
+      onSuccess,
+      onError,
+    ]
   );
 
   /**

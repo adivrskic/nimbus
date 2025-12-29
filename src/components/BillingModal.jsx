@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { X, Loader, ExternalLink } from "lucide-react";
+import { X, Loader, ExternalLink, CreditCard } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import useModalAnimation from "../hooks/useModalAnimation";
 import "./BillingModal.scss";
@@ -139,7 +139,10 @@ function BillingModal({ isOpen, onClose }) {
           onClick={(e) => e.stopPropagation()}
         >
           <div className="billing-header">
-            <span className="billing-title">Billing</span>
+            <span className="billing-title">
+              <CreditCard size={16} />
+              <span>Billing</span>
+            </span>
             <button className="billing-close" onClick={onClose}>
               <X size={16} />
             </button>

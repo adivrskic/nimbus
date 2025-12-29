@@ -36,6 +36,7 @@ import TokensModal from "../components/TokenPurchaseModal";
 import DeployModal from "../components/DeployModal";
 import HelpModal from "../components/Home/HelpModal";
 import LegalModal from "../components/LegalModal";
+import { generateWebsite } from "../utils/generateWebsite";
 
 // Styles
 import "./Home.scss";
@@ -44,8 +45,10 @@ function Home() {
   // Auth context
   const { user, isAuthenticated, userTokens, refreshTokens } = useAuth();
 
+  console.log(userTokens);
+
   // Project context (for editing/deploying)
-  const { pendingProject, clearPendingProject } = useProject();
+  const { pendingProject, pendingAction, clearPendingProject } = useProject();
 
   // UI state management
   const {
@@ -110,6 +113,7 @@ function Home() {
     generate,
     enhance,
     reset: resetGeneration,
+    updateCode,
   } = useGeneration({
     onSuccess: () => {
       openPreview();
@@ -118,6 +122,7 @@ function Home() {
     onError: (error) => {
       console.error("Generation failed:", error);
     },
+    supabaseGenerate: generateWebsite,
   });
 
   // Typewriter effect for placeholder
@@ -150,6 +155,7 @@ function Home() {
   const tokenBalance = useMemo(() => {
     if (!isAuthenticated) return { status: "unknown", sufficient: false };
     const sufficient = userTokens >= tokenCost;
+    console.log("hello: ", userTokens, tokenCost);
     return {
       status: sufficient ? "good" : userTokens > 0 ? "warning" : "critical",
       sufficient,
@@ -187,17 +193,51 @@ function Home() {
     }
   });
 
-  // Handle pending project from context (edit mode)
   useEffect(() => {
-    if (pendingProject) {
-      setPrompt(pendingProject.prompt || "");
-      if (pendingProject.selections) {
-        // Load selections from project
-      }
-      clearPendingProject?.();
-    }
-  }, [pendingProject, setPrompt, clearPendingProject]);
+    if (pendingProject && pendingAction) {
+      console.log(
+        "Loading project:",
+        pendingProject.id,
+        "Action:",
+        pendingAction
+      );
 
+      // Load prompt
+      const projectPrompt =
+        pendingProject.prompt || pendingProject.customization?.prompt || "";
+      setPrompt(projectPrompt);
+
+      // Load selections/customization if available
+      if (pendingProject.customization) {
+        // If you have a way to restore selections, do it here
+        // e.g., restoreSelections(pendingProject.customization);
+      }
+
+      if (pendingAction === "edit") {
+        // Load the HTML and open preview for editing
+        if (pendingProject.html_content) {
+          updateCode(pendingProject.html_content);
+          openPreview();
+        }
+      } else if (pendingAction === "deploy") {
+        // Load the HTML and open deploy modal
+        if (pendingProject.html_content) {
+          updateCode(pendingProject.html_content);
+          openDeploy();
+        }
+      }
+
+      clearPendingProject();
+    }
+  }, [
+    pendingProject,
+    pendingAction,
+    setPrompt,
+    clearPendingProject,
+    updateCode,
+    openPreview,
+    openDeploy,
+  ]);
   // Handle generate
   const handleGenerate = useCallback(() => {
     if (!prompt.trim() || isGenerating) return;
@@ -206,6 +246,8 @@ function Home() {
       openAuth();
       return;
     }
+
+    console.log(tokenBalance);
 
     if (!tokenBalance.sufficient) {
       openTokens();
@@ -235,12 +277,13 @@ function Home() {
       return;
     }
 
-    enhance(prompt, user);
+    enhance(prompt, selections, user); // 👈 Added selections
   }, [
     enhancePrompt,
     isGenerating,
     isAuthenticated,
     prompt,
+    selections, // 👈 Add to deps
     user,
     enhance,
     openAuth,

@@ -43,7 +43,10 @@ function RoadmapModal({ isOpen, onClose }) {
   if (!isOpen) return null;
 
   return (
-    <div className={`roadmap-overlay ${isOpen ? "active" : ""}`}>
+    <div
+      className={`roadmap-overlay ${isOpen ? "active" : ""}`}
+      onClick={onClose}
+    >
       <div
         className={`roadmap-content ${isOpen ? "active" : ""}`}
         onClick={(e) => e.stopPropagation()}
@@ -78,9 +81,9 @@ function RoadmapModal({ isOpen, onClose }) {
         </div>
 
         <div className="roadmap-items">
-          {roadmapItems.map((item, i) => (
+          {roadmapItems.map((item, index) => (
             <div
-              key={i}
+              key={index}
               className={`roadmap-item roadmap-item--${item.status}`}
             >
               <div className="roadmap-item__icon">

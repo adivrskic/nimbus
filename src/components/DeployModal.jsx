@@ -17,7 +17,7 @@ import { supabase } from "../lib/supabaseClient";
 import useModalAnimation from "../hooks/useModalAnimation";
 import "./DeployModal.scss";
 
-const DEPLOY_PRICE = 3;
+const DEPLOY_PRICE = 5;
 
 function DeployModal({
   isOpen,
@@ -368,7 +368,7 @@ function DeployModal({
 
             <div className="deploy-price-info">
               <span>
-                One-time deployment fee: <strong>${DEPLOY_PRICE}</strong>
+                One-time deployment fee: <strong>${DEPLOY_PRICE}/mo</strong>
               </span>
             </div>
           </>
@@ -415,7 +415,7 @@ function DeployModal({
             <div className="deploy-summary">
               <div className="deploy-summary-row">
                 <span>One-time deployment</span>
-                <strong>${DEPLOY_PRICE}</strong>
+                <strong>${DEPLOY_PRICE}/mo</strong>
               </div>
             </div>
 
@@ -453,7 +453,7 @@ function DeployModal({
                 ) : (
                   <>
                     <Rocket size={14} />
-                    Deploy ${DEPLOY_PRICE}
+                    Deploy ${DEPLOY_PRICE}/mo
                   </>
                 )}
               </button>
@@ -545,7 +545,7 @@ function DeployModal({
             <div className="deploy-summary">
               <div className="deploy-summary-row">
                 <span>One-time deployment</span>
-                <strong>${DEPLOY_PRICE}</strong>
+                <strong>${DEPLOY_PRICE}/mo</strong>
               </div>
             </div>
 
@@ -585,7 +585,7 @@ function DeployModal({
                 ) : (
                   <>
                     <Rocket size={14} />
-                    Deploy ${DEPLOY_PRICE}
+                    Deploy ${DEPLOY_PRICE}/mo
                   </>
                 )}
               </button>

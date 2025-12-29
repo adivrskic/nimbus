@@ -16,6 +16,7 @@ import {
   RefreshCw,
   ChevronDown,
   Copy,
+  PanelsTopLeft,
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { supabase } from "../lib/supabaseClient";
@@ -211,7 +212,10 @@ function ProjectsModal({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="projects-header">
-          <span className="projects-title">Projects</span>
+          <span className="projects-title">
+            <PanelsTopLeft size={16} />
+            <span>Projects</span>
+          </span>
           <button className="projects-close" onClick={closeModal}>
             <X size={16} />
           </button>
