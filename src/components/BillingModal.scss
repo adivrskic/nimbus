@@ -63,7 +63,7 @@
   background: rgba(0, 0, 0, 0.04);
   border: none;
   border-radius: 50%;
-  color: #666;
+  color: #777;
   cursor: pointer;
   transition: all 0.15s ease;
 
@@ -78,7 +78,7 @@
   align-items: center;
   justify-content: center;
   padding: 16px;
-  color: #666;
+  color: #777;
 }
 
 .billing-breakdown {
@@ -92,7 +92,7 @@
   display: flex;
   justify-content: space-between;
   font-size: 0.8125rem;
-  color: #b3b3b3;
+  color: #777;
 
   &--total {
     padding-top: 12px;
@@ -104,7 +104,7 @@
 
 .billing-info {
   font-size: 0.75rem;
-  color: #b3b3b3;
+  color: #777;
   text-align: center;
 }
 
