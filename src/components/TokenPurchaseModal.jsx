@@ -12,7 +12,7 @@ const TOKEN_PACKAGES = [
     bonus: 0,
     price: 1.99,
     perToken: "$0.040",
-    numGensRange: "4-6",
+    numGensRange: "a few",
   },
   {
     id: "popular",
@@ -22,7 +22,7 @@ const TOKEN_PACKAGES = [
     perToken: "$0.030",
     popular: true,
     savings: "10% bonus",
-    numGensRange: "12-18",
+    numGensRange: "a bunch of",
   },
   {
     id: "pro",
@@ -31,7 +31,7 @@ const TOKEN_PACKAGES = [
     price: 9.99,
     perToken: "$0.020",
     savings: "25% bonus",
-    numGensRange: "over 30",
+    numGensRange: "a whole lot of",
   },
   {
     id: "agency",
@@ -40,7 +40,7 @@ const TOKEN_PACKAGES = [
     price: 19.99,
     perToken: "$0.014",
     savings: "40% bonus",
-    numGensRange: "over 80",
+    numGensRange: "a ludicrous amount of",
   },
 ];
 
@@ -136,7 +136,7 @@ function TokenPurchaseModal({ isOpen, onClose }) {
                     {pkg.perToken}/token
                   </span>
                   <span className="token-option__rate">
-                    Generates {pkg.numGensRange} websites
+                    Generate {pkg.numGensRange} websites
                   </span>
                 </div>
                 <div className="token-option__right">

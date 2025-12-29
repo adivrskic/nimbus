@@ -1,0 +1,275 @@
+// components/Home/PreviewModal/PreviewModal.jsx - Generated site preview modal
+import { useState, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Eye,
+  Code as Code2,
+  Download,
+  Save,
+  Rocket,
+  X,
+  Check,
+  ChevronRight,
+  Coins,
+} from "lucide-react";
+import { Loader2 } from "lucide-react";
+import GeneratedPreview from "../../GeneratedPreview";
+import {
+  previewOverlayVariants,
+  previewContentVariants,
+  tokenContentVariants,
+  tokenItemVariants,
+} from "../../../configs/animations.config";
+import "./PreviewModal.scss";
+
+function PreviewModal({
+  isOpen,
+  html,
+  onClose,
+  onMinimize,
+  onDownload,
+  onSave,
+  onDeploy,
+  isSaving,
+  saveSuccess,
+  isGenerating,
+  // Enhance props
+  enhancePrompt,
+  onEnhancePromptChange,
+  onEnhance,
+  enhanceTokenCost,
+  enhanceBreakdown,
+  showEnhanceTokenOverlay,
+  onToggleEnhanceTokenOverlay,
+  isAuthenticated,
+  userTokens,
+  tokenBalance,
+  onBuyTokens,
+}) {
+  const [showCode, setShowCode] = useState(false);
+  const enhanceInputRef = useRef(null);
+
+  if (!isOpen || !html) return null;
+
+  return (
+    <motion.div
+      className="preview-modal"
+      onClick={() => {
+        onClose();
+        onMinimize();
+      }}
+      variants={previewOverlayVariants}
+      initial="hidden"
+      animate="visible"
+      exit="exit"
+    >
+      <motion.div
+        className="preview-modal__container"
+        onClick={(e) => e.stopPropagation()}
+        variants={previewContentVariants}
+        initial="hidden"
+        animate="visible"
+        exit="exit"
+      >
+        {/* Header */}
+        <div className="preview-modal__header">
+          <div className="preview-modal__tabs">
+            <button
+              className={`preview-modal__tab ${!showCode ? "active" : ""}`}
+              onClick={() => setShowCode(false)}
+            >
+              <Eye size={14} />
+              Preview
+            </button>
+            <button
+              className={`preview-modal__tab ${showCode ? "active" : ""}`}
+              onClick={() => setShowCode(true)}
+            >
+              <Code2 size={14} />
+              Code
+            </button>
+          </div>
+
+          <div className="preview-modal__actions">
+            <button
+              className="preview-modal__action-btn"
+              onClick={onDownload}
+              title="Download HTML"
+            >
+              <Download size={14} />
+              <span>Download</span>
+            </button>
+
+            <button
+              className={`preview-modal__action-btn ${saveSuccess ? "success" : ""}`}
+              onClick={onSave}
+              disabled={isSaving}
+              title="Save to Projects"
+            >
+              {isSaving ? (
+                <Loader2 size={14} className="spin" />
+              ) : saveSuccess ? (
+                <>
+                  <Check size={14} />
+                  <span>Saved!</span>
+                </>
+              ) : (
+                <>
+                  <Save size={14} />
+                  <span>Save</span>
+                </>
+              )}
+            </button>
+
+            <button className="preview-modal__deploy-btn" onClick={onDeploy}>
+              <Rocket size={14} />
+              <span>Deploy</span>
+            </button>
+
+            <button
+              className="preview-modal__close-btn"
+              onClick={() => {
+                onClose();
+                onMinimize();
+              }}
+              title="Minimize"
+            >
+              <X size={16} />
+            </button>
+          </div>
+        </div>
+
+        {/* Body */}
+        <div className="preview-modal__body">
+          {showCode ? (
+            <div className="preview-modal__code">
+              <pre>
+                <code>{html}</code>
+              </pre>
+            </div>
+          ) : (
+            <GeneratedPreview html={html} />
+          )}
+        </div>
+
+        {/* Enhance Input */}
+        <div className="preview-modal__enhance">
+          <div className="preview-modal__enhance-wrapper">
+            <input
+              ref={enhanceInputRef}
+              type="text"
+              value={enhancePrompt}
+              onChange={(e) => onEnhancePromptChange(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !isGenerating) onEnhance();
+              }}
+              placeholder="Describe changes..."
+              className="preview-modal__enhance-input"
+              disabled={isGenerating}
+            />
+          </div>
+          <div className="preview-modal__enhance-actions">
+            <AnimatePresence>
+              {enhancePrompt.trim() && (
+                <motion.button
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  transition={{ duration: 0.15 }}
+                  className={`preview-modal__token-btn ${showEnhanceTokenOverlay ? "active" : ""}`}
+                  onClick={onToggleEnhanceTokenOverlay}
+                >
+                  <Coins size={14} />
+                  <span>-{enhanceTokenCost}</span>
+                </motion.button>
+              )}
+            </AnimatePresence>
+            <motion.button
+              className="preview-modal__submit-btn"
+              onClick={onEnhance}
+              disabled={isGenerating || !enhancePrompt.trim()}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              {isGenerating ? (
+                <Loader2 size={16} className="spin" />
+              ) : (
+                <ChevronRight size={16} />
+              )}
+            </motion.button>
+          </div>
+
+          {/* Enhance Token Overlay */}
+          <AnimatePresence>
+            {showEnhanceTokenOverlay && (
+              <motion.div
+                className="preview-modal__token-overlay"
+                onClick={(e) => e.stopPropagation()}
+                variants={tokenContentVariants}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+              >
+                <motion.div
+                  className="preview-modal__token-header"
+                  variants={tokenItemVariants}
+                >
+                  <Coins size={18} />
+                  <span className="preview-modal__token-total">
+                    {enhanceTokenCost} tokens
+                  </span>
+                </motion.div>
+                <motion.div className="preview-modal__token-breakdown">
+                  {enhanceBreakdown.map((item, i) => (
+                    <motion.div
+                      key={i}
+                      className={`preview-modal__token-item ${
+                        item.type === "discount" ? "discount" : ""
+                      }`}
+                      variants={tokenItemVariants}
+                    >
+                      <span>{item.label}</span>
+                      <span>
+                        {item.type === "discount" ? "-" : "+"}
+                        {item.cost}
+                      </span>
+                    </motion.div>
+                  ))}
+                </motion.div>
+                {isAuthenticated && (
+                  <motion.div
+                    className="preview-modal__token-balance"
+                    variants={tokenItemVariants}
+                  >
+                    <span>Your balance</span>
+                    <span
+                      className={`preview-modal__balance-value preview-modal__balance-value--${tokenBalance.status}`}
+                    >
+                      {userTokens} tokens
+                    </span>
+                  </motion.div>
+                )}
+                {(!isAuthenticated || userTokens < enhanceTokenCost) && (
+                  <motion.button
+                    className="preview-modal__buy-btn"
+                    onClick={() => {
+                      onToggleEnhanceTokenOverlay();
+                      onBuyTokens();
+                    }}
+                    variants={tokenItemVariants}
+                    whileHover={{ scale: 1.01 }}
+                    whileTap={{ scale: 0.99 }}
+                  >
+                    Get More Tokens
+                  </motion.button>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+export default PreviewModal;

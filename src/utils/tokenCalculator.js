@@ -2,7 +2,7 @@
 // Dynamic token cost calculation - MUST MATCH edge function exactly
 
 export function calculateTokenCost(
-  prompt,
+  prompt = "",
   selections = {},
   isRefinement = false
 ) {
@@ -11,8 +11,10 @@ export function calculateTokenCost(
   // Base cost
   breakdown.base = isRefinement ? 3 : 5;
 
+  const safePrompt = typeof prompt === "string" ? prompt : String(prompt ?? "");
+
   // Prompt complexity (word count)
-  const wordCount = prompt
+  const wordCount = safePrompt
     .trim()
     .split(/\s+/)
     .filter((w) => w.length > 0).length;
@@ -222,6 +224,11 @@ export function calculateTokenCost(
   };
 }
 
+/**
+ * Format breakdown object for display
+ * @param {Object} breakdown - The breakdown object from calculateTokenCost
+ * @returns {Array} Formatted array of {label, cost, type} objects
+ */
 export function getBreakdownDisplay(breakdown) {
   const labels = {
     base: "Base generation",
@@ -260,6 +267,22 @@ export function getBreakdownDisplay(breakdown) {
   return display;
 }
 
+/**
+ * Convenience wrapper that calculates token cost and returns formatted breakdown
+ * @param {Object} selections - The user's selections
+ * @param {string} prompt - The user's prompt
+ * @param {boolean} isRefinement - Whether this is a refinement/enhance request
+ * @returns {Array} Formatted breakdown for display
+ */
+export function getTokenBreakdown(
+  selections,
+  prompt = "",
+  isRefinement = false
+) {
+  const { breakdown } = calculateTokenCost(prompt, selections, isRefinement);
+  return getBreakdownDisplay(breakdown);
+}
+
 export function checkTokenBalance(available, required) {
   const deficit = Math.max(0, required - available);
   const percentage = required > 0 ? (available / required) * 100 : 100;
@@ -287,6 +310,7 @@ export function formatTokenCost(cost) {
 export default {
   calculateTokenCost,
   getBreakdownDisplay,
+  getTokenBreakdown,
   checkTokenBalance,
   formatTokenCost,
 };

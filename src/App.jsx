@@ -4,16 +4,17 @@ import {
   Route,
   useLocation,
 } from "react-router-dom";
-import { useEffect, lazy, Suspense, useState } from "react"; // Added useState
+import { useEffect, lazy, Suspense, useState } from "react";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import ScrollToTop from "./components/ScrollToTop";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { ProjectProvider } from "./contexts/ProjectContext";
-import LegalModal from "./components/LegalModal"; // ADD THIS
-import RoadmapModal from "./components/RoadmapModal"; // ADD THIS
-import SupportModal from "./components/SupportModal"; // ADD THIS
+import LegalModal from "./components/LegalModal";
+import RoadmapModal from "./components/RoadmapModal";
+import SupportModal from "./components/SupportModal";
+// Use the lazy-loading wrapper instead of direct import
 import NoiseBlob from "./components/NoiseBlob";
 import "./styles/global.scss";
 
@@ -32,7 +33,7 @@ const PageLoader = () => {
         height: "100vh",
         zIndex: 9999,
         backgroundColor: "transparent",
-        pointerEvents: "none", // Allow clicks to pass through
+        pointerEvents: "none",
       }}
     >
       {/* Loading bar stays at calculated position */}
@@ -84,6 +85,7 @@ const PageLoader = () => {
     </div>
   );
 };
+
 function AppContent() {
   const location = useLocation();
   const { showResetPassword, setShowResetPassword, setSessionFromHash } =
@@ -91,7 +93,7 @@ function AppContent() {
 
   const [showLegal, setShowLegal] = useState(false);
   const [showRoadmap, setShowRoadmap] = useState(false);
-  const [showSupport, setShowSupport] = useState(false); // ADD THIS STATE
+  const [showSupport, setShowSupport] = useState(false);
 
   useEffect(() => {
     if (location.hash.includes("access_token")) {
@@ -102,6 +104,7 @@ function AppContent() {
   return (
     <>
       <Header />
+      {/* Use the lazy wrapper - shows placeholder immediately, loads Three.js in background */}
       <NoiseBlob />
       <Suspense fallback={<PageLoader />}>
         <Routes>
@@ -129,6 +132,7 @@ function AppContent() {
     </>
   );
 }
+
 function App() {
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);

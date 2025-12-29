@@ -1,0 +1,47 @@
+// components/Home/MinimizedPreviewPill/MinimizedPreviewPill.scss
+
+.minimized-preview-pill {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 16px;
+
+  &__main {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: #2b2b2b;
+    border: none;
+    border-radius: 999px;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: white;
+    cursor: pointer;
+    transition: all 0.15s ease;
+
+    &:hover {
+      background: #1a1a1a;
+      transform: translateY(-1px);
+    }
+  }
+
+  &__discard {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: none;
+    border: none;
+    border-radius: 999px;
+    color: #999;
+    cursor: pointer;
+    transition: all 0.15s ease;
+
+    &:hover {
+      background: rgba(239, 68, 68, 0.1);
+      color: #ef4444;
+    }
+  }
+}

@@ -177,20 +177,24 @@ function BillingModal({ isOpen, onClose }) {
           <div className="billing-info">$5.00 per site per month</div>
 
           {profile?.stripe_customer_id && (
-            <button
-              className="billing-btn"
-              onClick={handleOpenStripePortal}
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <Loader size={14} className="spinning" />
-              ) : (
-                <>
-                  <ExternalLink size={14} />
-                  Manage Billing
-                </>
-              )}
-            </button>
+            <>
+              {" "}
+              <button
+                className="billing-btn"
+                onClick={handleOpenStripePortal}
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <Loader size={14} className="spinning" />
+                ) : (
+                  <>
+                    <ExternalLink size={14} />
+                    Manage Billing
+                  </>
+                )}
+              </button>
+              <span className="billing-note">Billing managed by Stripe</span>
+            </>
           )}
         </div>
       </div>
