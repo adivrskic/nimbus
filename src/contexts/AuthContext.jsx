@@ -6,6 +6,7 @@ const AuthContext = createContext();
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
+  const [userTokens, setUserTokens] = useState(0);
   const [rememberedEmail, setRememberedEmail] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showResetPassword, setShowResetPassword] = useState(false);
@@ -74,6 +75,7 @@ export function AuthProvider({ children }) {
         console.log("Invalid or expired session detected");
         setUser(null);
         setProfile(null);
+        setUserTokens(0);
         return false;
       }
 
@@ -86,6 +88,7 @@ export function AuthProvider({ children }) {
         console.log("User verification failed:", userError);
         setUser(null);
         setProfile(null);
+        setUserTokens(0);
         return false;
       }
 
@@ -94,6 +97,7 @@ export function AuthProvider({ children }) {
       console.error("Session validation error:", err);
       setUser(null);
       setProfile(null);
+      setUserTokens(0);
       return false;
     } finally {
       setLoadingSafe(false);
@@ -111,6 +115,7 @@ export function AuthProvider({ children }) {
         console.log("No valid session found");
         setUser(null);
         setProfile(null);
+        setUserTokens(0);
         return;
       }
 
@@ -126,13 +131,44 @@ export function AuthProvider({ children }) {
         console.log("No user found in session");
         setUser(null);
         setProfile(null);
+        setUserTokens(0);
       }
     } catch (err) {
       console.error("Session refresh error:", err);
       setUser(null);
       setProfile(null);
+      setUserTokens(0);
     } finally {
       setLoadingSafe(false);
+    }
+  };
+
+  // Refresh tokens from database
+  const refreshTokens = async () => {
+    if (!user?.id) return;
+
+    try {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("tokens")
+        .eq("id", user.id)
+        .single();
+
+      if (error) {
+        console.error("Error refreshing tokens:", error);
+        return;
+      }
+
+      const tokens = data?.tokens ?? 0;
+      console.log("Tokens refreshed:", tokens);
+      setUserTokens(tokens);
+
+      // Also update profile if it exists
+      if (profile) {
+        setProfile((prev) => ({ ...prev, tokens }));
+      }
+    } catch (err) {
+      console.error("Token refresh error:", err);
     }
   };
 
@@ -163,6 +199,7 @@ export function AuthProvider({ children }) {
         if (!isValidSession) {
           setUser(null);
           setProfile(null);
+          setUserTokens(0);
           if (active) {
             setLoadingSafe(false);
           }
@@ -181,6 +218,7 @@ export function AuthProvider({ children }) {
           await supabase.auth.signOut();
           setUser(null);
           setProfile(null);
+          setUserTokens(0);
           if (active) {
             setLoadingSafe(false);
           }
@@ -233,6 +271,7 @@ export function AuthProvider({ children }) {
         console.error("Auth initialization error:", error);
         setUser(null);
         setProfile(null);
+        setUserTokens(0);
       } finally {
         if (active) {
           setLoadingSafe(false);
@@ -270,6 +309,7 @@ export function AuthProvider({ children }) {
           console.log("🔄 Auth state: SIGNED_OUT event detected");
           setUser(null);
           setProfile(null);
+          setUserTokens(0);
           setJustVerifiedEmail(false);
           localStorage.removeItem("rememberedEmail");
           setRememberedEmail(null);
@@ -291,6 +331,7 @@ export function AuthProvider({ children }) {
           console.log("🔄 Auth state: No active session");
           setUser(null);
           setProfile(null);
+          setUserTokens(0);
         }
 
         setLoadingSafe(false);
@@ -325,6 +366,7 @@ export function AuthProvider({ children }) {
           console.log("Periodic check: Session is invalid, clearing state");
           setUser(null);
           setProfile(null);
+          setUserTokens(0);
         }
       }
     };
@@ -392,6 +434,10 @@ export function AuthProvider({ children }) {
 
       console.log("Profile loaded:", data);
       setProfile(data);
+
+      // Set tokens from profile
+      setUserTokens(data?.tokens ?? 0);
+
       return data;
     } catch (err) {
       console.error("Profile load error:", err);
@@ -410,6 +456,7 @@ export function AuthProvider({ children }) {
           id: userId,
           email: userData?.user?.email,
           full_name: userData?.user?.user_metadata?.full_name || null,
+          tokens: 100, // Default starting tokens for new users
         })
         .select()
         .single();
@@ -421,6 +468,7 @@ export function AuthProvider({ children }) {
 
       console.log("Profile created:", data);
       setProfile(data);
+      setUserTokens(data?.tokens ?? 100);
       return data;
     } catch (err) {
       console.error("Profile creation error:", err);
@@ -516,6 +564,7 @@ export function AuthProvider({ children }) {
       console.log("Clearing local state...");
       setUser(null);
       setProfile(null);
+      setUserTokens(0);
       setRememberedEmail(null);
       localStorage.removeItem("rememberedEmail");
       setJustVerifiedEmail(false);
@@ -579,6 +628,12 @@ export function AuthProvider({ children }) {
         .single();
       if (error) throw error;
       setProfile(data);
+
+      // Update tokens if they were part of the update
+      if (data?.tokens !== undefined) {
+        setUserTokens(data.tokens);
+      }
+
       return { success: true };
     } catch (e) {
       return { success: false, error: e.message };
@@ -682,6 +737,8 @@ export function AuthProvider({ children }) {
   const value = {
     user,
     profile,
+    userTokens,
+    refreshTokens,
     rememberedEmail,
     isLoading,
     isAuthenticated: !!user && !!user.id, // More strict check
@@ -710,6 +767,7 @@ export function AuthProvider({ children }) {
   console.log("Auth context state:", {
     user: user?.email,
     profile: !!profile,
+    userTokens,
     isLoading,
     isAuthenticated: !!user,
     justVerifiedEmail,

@@ -1,3 +1,6 @@
+// components/LegalModal/LegalModal.scss
+// Refactored to match HelpModal styles
+
 .legal-overlay {
   position: fixed;
   inset: 0;
@@ -21,9 +24,9 @@
   flex-direction: column;
   gap: 16px;
   padding: 24px;
-  min-width: 320px;
-  max-width: 480px;
-  max-height: 80vh;
+  width: 800px;
+  max-width: 90vw;
+  max-height: 70vh;
   background: transparent;
   opacity: 0;
   transform: scale(0.98) translateY(4px);
@@ -35,20 +38,35 @@
     opacity: 1;
     transform: scale(1) translateY(0);
   }
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 3px;
+  }
 }
 
 .legal-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
   padding-bottom: 12px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.04);
 }
 
 .legal-title {
-  font-size: 1.125rem;
-  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1rem;
+  font-weight: 600;
   color: #2b2b2b;
 }
 
@@ -73,19 +91,21 @@
 
 .legal-subtitle {
   font-size: 0.8125rem;
+  line-height: 1.5;
   color: #666;
 }
 
 .legal-meta {
   font-size: 0.75rem;
   color: #b3b3b3;
-  margin-top: -4px;
+  margin-top: -8px;
 }
 
 .legal-nav {
   display: flex;
-  gap: 8px;
+  gap: 6px;
   padding: 12px 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.02);
 }
 
 .legal-nav__link {
@@ -94,7 +114,8 @@
   gap: 6px;
   padding: 6px 10px;
   background: rgba(0, 0, 0, 0.02);
-  border-radius: 6px;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  border-radius: 8px;
   font-size: 0.75rem;
   font-weight: 500;
   color: #666;
@@ -104,6 +125,7 @@
 
   &:hover {
     background: rgba(0, 0, 0, 0.04);
+    border-color: rgba(0, 0, 0, 0.08);
     color: #2b2b2b;
   }
 }
@@ -111,37 +133,62 @@
 .legal-body {
   display: flex;
   flex-direction: column;
-  gap: 24px;
-  padding-top: 4px;
+  gap: 16px;
 }
 
 .legal-section {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  margin-bottom: 8px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.02);
+
+  &:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
 }
 
 .legal-section__header {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 4px;
+
+  svg {
+    color: #2b2b2b;
+  }
 }
 
 .legal-section__title {
-  font-size: 0.8125rem;
+  font-size: 0.875rem;
   font-weight: 600;
   color: #2b2b2b;
   margin: 0;
 }
 
 .legal-section__body {
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
   line-height: 1.6;
   color: #666;
 
   p {
     margin: 0 0 8px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  a {
+    color: #2b2b2b;
+    text-decoration: none;
+    font-weight: 500;
+
+    &:hover {
+      text-decoration: underline;
+    }
   }
 }
 
@@ -165,7 +212,7 @@
   padding: 10px 12px;
   background: rgba(0, 0, 0, 0.02);
   border: none;
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
   font-weight: 500;
   color: #2b2b2b;
   text-align: left;
@@ -182,6 +229,7 @@
 }
 
 .legal-accordion__icon {
+  color: #666;
   transition: transform 0.2s ease;
 }
 
@@ -201,21 +249,21 @@
 
 .legal-accordion__body {
   padding: 12px;
-  font-size: 0.75rem;
-  line-height: 1.5;
+  font-size: 0.8125rem;
+  line-height: 1.6;
   color: #666;
-  background: white;
-  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.5);
 }
 
 .legal-email {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 10px;
+  padding: 8px 12px;
   background: rgba(0, 0, 0, 0.02);
-  border-radius: 6px;
-  font-size: 0.75rem;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  border-radius: 8px;
+  font-size: 0.8125rem;
   color: #2b2b2b;
   text-decoration: none;
   margin-top: 8px;
@@ -223,23 +271,35 @@
 
   &:hover {
     background: rgba(0, 0, 0, 0.04);
+    border-color: rgba(0, 0, 0, 0.08);
   }
 }
 
+/* Notice styled like help-tip */
 .legal-notice {
-  padding: 10px;
-  background: rgba(245, 158, 11, 0.05);
-  border-radius: 6px;
-  font-size: 0.6875rem;
-  color: #b45309;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 12px;
+  background: rgba(250, 204, 21, 0.08);
+  border: 1px solid rgba(250, 204, 21, 0.12);
+  border-radius: 8px;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: #92400e;
   margin-top: 12px;
+
+  strong {
+    font-weight: 600;
+  }
 }
 
+/* Responsive */
 @media (max-width: 640px) {
   .legal-content {
     min-width: 280px;
     padding: 20px;
-    max-height: 85vh;
+    max-height: 60vh;
   }
 
   .legal-nav {

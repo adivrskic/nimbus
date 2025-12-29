@@ -7,6 +7,7 @@ import {
   Mail,
   Plus,
   X,
+  Scale,
 } from "lucide-react";
 import "./LegalModal.scss";
 
@@ -108,7 +109,10 @@ function LegalModal({ isOpen, onClose }) {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="legal-header">
-          <div className="legal-title">Legal</div>
+          <div className="legal-title">
+            <Scale size={16} />
+            <span>Legal</span>
+          </div>
           <button className="legal-close" onClick={onClose}>
             <X size={16} />
           </button>

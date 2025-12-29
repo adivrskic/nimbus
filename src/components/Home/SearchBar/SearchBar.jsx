@@ -80,8 +80,6 @@ const SearchBar = forwardRef(
               isExpanded ? "search-bar__help-btn--expanded" : ""
             }`}
             onClick={onHelpClick}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
             title="Get Help"
           >
             <HelpCircle size={18} />
@@ -92,8 +90,6 @@ const SearchBar = forwardRef(
               isExpanded ? "search-bar__gear-btn--expanded" : ""
             }`}
             onClick={onOptionsClick}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
           >
             <Settings size={18} />
             <span className="search-bar__btn-text">Options</span>
@@ -104,8 +100,6 @@ const SearchBar = forwardRef(
             }`}
             onClick={onGenerate}
             disabled={isGenerating || !value.trim()}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
           >
             {isGenerating ? (
               <Loader2 size={16} className="spin" />

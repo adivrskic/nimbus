@@ -138,15 +138,14 @@ function HelpModal({ isOpen, onClose }) {
             </motion.div>
           );
         })}
-
-        {/* Tips */}
-        <div className="help-tip">
-          <Lightbulb size={14} />
-          <span>
-            <strong>Pro Tip:</strong>{" "}
-            {TIPS[Math.floor(Math.random() * TIPS.length)]}
-          </span>
-        </div>
+        {TIPS.map((tip, index) => (
+          <div key={index} className="help-tip">
+            <Lightbulb size={14} />
+            <span>
+              <strong>Pro Tip:</strong> {tip}
+            </span>
+          </div>
+        ))}
       </motion.div>
     </motion.div>
   );

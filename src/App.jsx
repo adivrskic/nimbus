@@ -14,6 +14,11 @@ import { ProjectProvider } from "./contexts/ProjectContext";
 import LegalModal from "./components/LegalModal";
 import RoadmapModal from "./components/RoadmapModal";
 import SupportModal from "./components/SupportModal";
+import {
+  GenerationProvider,
+  useGenerationState,
+} from "./contexts/GenerationContext";
+
 // Use the lazy-loading wrapper instead of direct import
 import NoiseBlob from "./components/NoiseBlob";
 import "./styles/global.scss";
@@ -90,6 +95,7 @@ function AppContent() {
   const location = useLocation();
   const { showResetPassword, setShowResetPassword, setSessionFromHash } =
     useAuth();
+  const { isGenerating } = useGenerationState(); // Add this
 
   const [showLegal, setShowLegal] = useState(false);
   const [showRoadmap, setShowRoadmap] = useState(false);
@@ -105,7 +111,7 @@ function AppContent() {
     <>
       <Header />
       {/* Use the lazy wrapper - shows placeholder immediately, loads Three.js in background */}
-      <NoiseBlob />
+      <NoiseBlob isGenerating={isGenerating} />
       <Suspense fallback={<PageLoader />}>
         <Routes>
           <Route path="/" element={<Home />} />
@@ -148,10 +154,12 @@ function App() {
       <AuthProvider>
         <ThemeProvider>
           <ProjectProvider>
-            <ScrollToTop />
-            <div className="app">
-              <AppContent />
-            </div>
+            <GenerationProvider>
+              <ScrollToTop />
+              <div className="app">
+                <AppContent />
+              </div>
+            </GenerationProvider>
           </ProjectProvider>
         </ThemeProvider>
       </AuthProvider>
