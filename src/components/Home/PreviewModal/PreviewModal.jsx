@@ -123,10 +123,10 @@ function PreviewModal({
               )}
             </button>
 
-            <button className="preview-modal__deploy-btn" onClick={onDeploy}>
+            {/* <button className="preview-modal__deploy-btn" onClick={onDeploy}>
               <Rocket size={14} />
               <span>Deploy</span>
-            </button>
+            </button> */}
 
             <button
               className="preview-modal__close-btn"

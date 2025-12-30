@@ -372,7 +372,7 @@ function ProjectsModal({
                     </button>
 
                     {/* Deploy/Visit button */}
-                    {project.is_deployed ? (
+                    {/* {project.is_deployed ? (
                       <>
                         <a
                           href={getDeployedUrl(project)}
@@ -421,7 +421,7 @@ function ProjectsModal({
                           <Rocket size={14} />
                         )}
                       </button>
-                    )}
+                    )} */}
 
                     {/* Delete button */}
                     <button
@@ -500,7 +500,7 @@ function ProjectsModal({
                         </div>
                       )}
                     </div>
-
+                    {/* 
                     <div className="project-domain-actions">
                       {project.custom_domain ? (
                         <button
@@ -528,7 +528,7 @@ function ProjectsModal({
                         <RefreshCw size={14} />
                         Redeploy
                       </button>
-                    </div>
+                    </div> */}
                   </div>
                 )}
               </div>
