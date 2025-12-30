@@ -84,6 +84,7 @@ export function useSelections() {
    */
   const resetSelection = useCallback((key) => {
     const opt = OPTIONS[key];
+    if (!opt) return; // Guard against undefined options
     if (opt.multi) {
       setSelections((prev) => ({ ...prev, [key]: [] }));
     } else {
@@ -109,9 +110,10 @@ export function useSelections() {
         return displayValue !== null && displayValue !== undefined;
       })
       .map((key) => ({
-        key,
+        category: key, // Changed from 'key' to 'category' to match SearchBar expectations
         label: OPTIONS[key].label,
         value: getDisplayValue(key),
+        icon: OPTIONS[key].icon, // Also include icon if available
       }));
   }, [hasSelection, getDisplayValue]);
 

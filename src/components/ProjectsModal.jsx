@@ -40,6 +40,8 @@ function ProjectsModal({
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [deletingId, setDeletingId] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState(null);
   const [loadingAction, setLoadingAction] = useState(null);
   const [expandedProject, setExpandedProject] = useState(null);
   const [copied, setCopied] = useState(null);
@@ -49,6 +51,14 @@ function ProjectsModal({
       fetchProjects();
     }
   }, [isOpen, user]);
+
+  // Clear delete error when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      setDeleteError(null);
+      setDeletingId(null);
+    }
+  }, [isOpen]);
 
   const fetchProjects = async () => {
     setIsLoading(true);
@@ -114,27 +124,44 @@ function ProjectsModal({
   };
 
   const handleDelete = async (projectId) => {
+    setDeleteError(null);
     setDeletingId(projectId);
   };
 
   const confirmDelete = async (projectId) => {
+    setIsDeleting(true);
+    setDeleteError(null);
+
     try {
-      const { error } = await supabase.functions.invoke("delete-project", {
-        body: { projectId },
-      });
+      const { data, error } = await supabase.functions.invoke(
+        "delete-project",
+        {
+          body: { projectId },
+        }
+      );
 
       if (error) throw error;
 
+      // Check for warnings (partial failures)
+      if (data.warnings && data.warnings.length > 0) {
+        console.warn("Delete completed with warnings:", data.warnings);
+        // You could show a toast notification here if desired
+      }
+
+      // Remove from local state
       setProjects((prev) => prev.filter((p) => p.id !== projectId));
+      setDeletingId(null);
     } catch (err) {
       console.error("Delete error:", err);
+      setDeleteError(err.message || "Failed to delete project");
     } finally {
-      setDeletingId(null);
+      setIsDeleting(false);
     }
   };
 
   const cancelDelete = () => {
     setDeletingId(null);
+    setDeleteError(null);
   };
 
   const toggleExpand = (projectId) => {
@@ -200,6 +227,10 @@ function ProjectsModal({
     return null;
   };
 
+  const hasSubscription = (project) => {
+    return !!(project.stripe_subscription_id || project.subscription_id);
+  };
+
   if (!shouldRender) return null;
 
   return (
@@ -240,15 +271,56 @@ function ProjectsModal({
                 {/* Delete confirmation overlay */}
                 {deletingId === project.id && (
                   <div className="project-delete-confirm">
-                    <button className="delete-cancel" onClick={cancelDelete}>
-                      Cancel
-                    </button>
-                    <button
-                      className="delete-confirm"
-                      onClick={() => confirmDelete(project.id)}
-                    >
-                      Delete
-                    </button>
+                    {deleteError ? (
+                      <>
+                        <div className="delete-error">
+                          <AlertTriangle size={14} />
+                          <span>{deleteError}</span>
+                        </div>
+                        <button
+                          className="delete-cancel"
+                          onClick={cancelDelete}
+                        >
+                          Close
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <div className="delete-warning">
+                          {project.is_deployed && (
+                            <span className="delete-info">
+                              <AlertTriangle size={12} />
+                              This will remove the live site
+                              {hasSubscription(project) &&
+                                " and cancel the subscription"}
+                            </span>
+                          )}
+                        </div>
+                        <div className="delete-actions">
+                          <button
+                            className="delete-cancel"
+                            onClick={cancelDelete}
+                            disabled={isDeleting}
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            className="delete-confirm"
+                            onClick={() => confirmDelete(project.id)}
+                            disabled={isDeleting}
+                          >
+                            {isDeleting ? (
+                              <>
+                                <Loader2 size={12} className="spinning" />
+                                Deleting...
+                              </>
+                            ) : (
+                              "Delete"
+                            )}
+                          </button>
+                        </div>
+                      </>
+                    )}
                   </div>
                 )}
 
@@ -273,6 +345,9 @@ function ProjectsModal({
                       </span>
                       {project.is_deployed && (
                         <span className="project-status live">Live</span>
+                      )}
+                      {hasSubscription(project) && (
+                        <span className="project-status subscribed">Pro</span>
                       )}
                     </div>
                   </div>
@@ -408,6 +483,18 @@ function ProjectsModal({
                                 <Loader2 size={10} className="spinning" />
                               )}
                               {getDomainStatus(project).status}
+                            </span>
+                          </div>
+                        </div>
+                      )}
+
+                      {hasSubscription(project) && (
+                        <div className="project-domain-section">
+                          <label>Subscription</label>
+                          <div className="project-subscription-status">
+                            <span className="status-badge active">
+                              <Check size={10} />
+                              Active
                             </span>
                           </div>
                         </div>

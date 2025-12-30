@@ -16,13 +16,6 @@ function MinimizedPreviewPill({ onExpand, onDiscard }) {
         <span>Generated Site</span>
         <Maximize2 size={12} />
       </button>
-      <button
-        className="minimized-preview-pill__discard"
-        onClick={onDiscard}
-        title="Discard"
-      >
-        <X size={12} />
-      </button>
     </motion.div>
   );
 }

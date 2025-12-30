@@ -120,6 +120,8 @@ export default function NoiseBlob({
   mobileCameraYOffset = 6,
   className = "",
   style = {},
+  isGenerating = false,
+  transitionSpeed = 2.0,
 }) {
   const containerRef = useRef(null);
   const rendererRef = useRef(null);
@@ -129,6 +131,14 @@ export default function NoiseBlob({
   const cameraRef = useRef(null);
   const uniformsRef = useRef(null);
   const [initialized, setInitialized] = useState(false);
+  const isGeneratingRef = useRef(isGenerating);
+  const targetAmplitudeRef = useRef(isGenerating ? noiseAmplitude : 0);
+
+  // Update refs when props change
+  useEffect(() => {
+    isGeneratingRef.current = isGenerating;
+    targetAmplitudeRef.current = isGenerating ? noiseAmplitude : 0;
+  }, [isGenerating, noiseAmplitude]);
 
   // Defer heavy Three.js initialization
   useEffect(() => {
@@ -180,10 +190,13 @@ export default function NoiseBlob({
       controls.autoRotateSpeed = autoRotateSpeed;
       controls.target.set(0, 0, 0);
 
+      // Start with 0 amplitude if not generating
+      const initialAmplitude = isGeneratingRef.current ? noiseAmplitude : 0;
+
       const uniforms = {
         time: { value: 0 },
         noiseScale: { value: noiseScale },
-        noiseAmplitude: { value: noiseAmplitude },
+        noiseAmplitude: { value: initialAmplitude },
         baseScale: { value: initialScale },
       };
       uniformsRef.current = uniforms;
@@ -264,6 +277,7 @@ export default function NoiseBlob({
       scene.add(mesh);
 
       const clock = new Clock();
+      let lastTime = 0;
 
       const handleResize = () => {
         if (!container || cleanedUpRef.current) return;
@@ -290,8 +304,21 @@ export default function NoiseBlob({
       const animate = () => {
         if (cleanedUpRef.current) return;
         animationIdRef.current = requestAnimationFrame(animate);
+
+        const currentTime = clock.getElapsedTime();
+        const deltaTime = currentTime - lastTime;
+        lastTime = currentTime;
+
         controls.update();
-        uniforms.time.value = clock.getElapsedTime() * speed;
+
+        // Smoothly interpolate noiseAmplitude toward target
+        const currentAmplitude = uniforms.noiseAmplitude.value;
+        const targetAmplitude = targetAmplitudeRef.current;
+        const lerpFactor = 1 - Math.exp(-transitionSpeed * deltaTime);
+        uniforms.noiseAmplitude.value =
+          currentAmplitude + (targetAmplitude - currentAmplitude) * lerpFactor;
+
+        uniforms.time.value = currentTime * speed;
         renderer.render(scene, camera);
       };
       animate();
@@ -367,6 +394,7 @@ export default function NoiseBlob({
     hemisphereIntensity,
     mobileScaleMultiplier,
     mobileCameraYOffset,
+    transitionSpeed,
   ]);
 
   return (

@@ -25,7 +25,6 @@ import {
 // Components
 import {
   SearchBar,
-  ActivePills,
   TokenOverlay,
   OptionsOverlay,
   PreviewModal,
@@ -37,6 +36,7 @@ import DeployModal from "../components/DeployModal";
 import HelpModal from "../components/Home/HelpModal";
 import LegalModal from "../components/LegalModal";
 import { generateWebsite } from "../utils/generateWebsite";
+import { supabase } from "../lib/supabaseClient";
 
 // Styles
 import "./Home.scss";
@@ -44,8 +44,6 @@ import "./Home.scss";
 function Home() {
   // Auth context
   const { user, isAuthenticated, userTokens, refreshTokens } = useAuth();
-
-  console.log(userTokens);
 
   // Project context (for editing/deploying)
   const { pendingProject, pendingAction, clearPendingProject } = useProject();
@@ -125,6 +123,11 @@ function Home() {
     supabaseGenerate: generateWebsite,
   });
 
+  // Save state
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+  const [currentProjectId, setCurrentProjectId] = useState(null);
+
   // Typewriter effect for placeholder
   const { text: typewriterText } = useTypewriter({
     prompts: EXAMPLE_PROMPTS,
@@ -155,7 +158,6 @@ function Home() {
   const tokenBalance = useMemo(() => {
     if (!isAuthenticated) return { status: "unknown", sufficient: false };
     const sufficient = userTokens >= tokenCost;
-    console.log("hello: ", userTokens, tokenCost);
     return {
       status: sufficient ? "good" : userTokens > 0 ? "warning" : "critical",
       sufficient,
@@ -195,17 +197,13 @@ function Home() {
 
   useEffect(() => {
     if (pendingProject && pendingAction) {
-      console.log(
-        "Loading project:",
-        pendingProject.id,
-        "Action:",
-        pendingAction
-      );
-
       // Load prompt
       const projectPrompt =
         pendingProject.prompt || pendingProject.customization?.prompt || "";
       setPrompt(projectPrompt);
+
+      // Set current project ID for updates
+      setCurrentProjectId(pendingProject.id);
 
       // Load selections/customization if available
       if (pendingProject.customization) {
@@ -238,6 +236,17 @@ function Home() {
     openPreview,
     openDeploy,
   ]);
+
+  // Reset save success after delay
+  useEffect(() => {
+    if (saveSuccess) {
+      const timer = setTimeout(() => {
+        setSaveSuccess(false);
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [saveSuccess]);
+
   // Handle generate
   const handleGenerate = useCallback(() => {
     if (!prompt.trim() || isGenerating) return;
@@ -247,12 +256,14 @@ function Home() {
       return;
     }
 
-    console.log(tokenBalance);
-
     if (!tokenBalance.sufficient) {
       openTokens();
       return;
     }
+
+    // Reset project ID for new generations
+    setCurrentProjectId(null);
+    setSaveSuccess(false);
 
     generate(prompt, selections, persistentOptions, user);
   }, [
@@ -277,13 +288,13 @@ function Home() {
       return;
     }
 
-    enhance(prompt, selections, user); // 👈 Added selections
+    enhance(prompt, selections, user);
   }, [
     enhancePrompt,
     isGenerating,
     isAuthenticated,
     prompt,
-    selections, // 👈 Add to deps
+    selections,
     user,
     enhance,
     openAuth,
@@ -312,12 +323,79 @@ function Home() {
     URL.revokeObjectURL(url);
   }, [generatedCode]);
 
-  // Handle save (placeholder - implement with backend)
+  // Generate a name from the prompt
+  const generateName = useCallback((promptText) => {
+    if (!promptText) return "Untitled Project";
+    const truncated = promptText.slice(0, 50);
+    const lastSpace = truncated.lastIndexOf(" ");
+    const name = lastSpace > 20 ? truncated.slice(0, lastSpace) : truncated;
+    return name + (promptText.length > 50 ? "..." : "");
+  }, []);
+
+  // Handle save to projects
   const handleSave = useCallback(async () => {
-    if (!generatedCode || !isAuthenticated) return;
-    // TODO: Implement save to projects
-    console.log("Save to projects");
-  }, [generatedCode, isAuthenticated]);
+    if (!generatedCode || !isAuthenticated || !user) return;
+
+    setIsSaving(true);
+    setSaveSuccess(false);
+
+    try {
+      // Match your existing table schema
+      const projectData = {
+        user_id: user.id,
+        name: generateName(prompt),
+        description: prompt,
+        prompt: prompt,
+        html_content: generatedCode,
+        customization: {
+          selections,
+          persistentOptions,
+        },
+      };
+
+      let result;
+
+      if (currentProjectId) {
+        // Update existing project
+        const { data, error } = await supabase
+          .from("projects")
+          .update(projectData)
+          .eq("id", currentProjectId)
+          .eq("user_id", user.id)
+          .select()
+          .single();
+
+        if (error) throw error;
+        result = data;
+      } else {
+        // Create new project
+        const { data, error } = await supabase
+          .from("projects")
+          .insert(projectData)
+          .select()
+          .single();
+
+        if (error) throw error;
+        result = data;
+        setCurrentProjectId(result.id);
+      }
+
+      setSaveSuccess(true);
+    } catch (error) {
+      console.error("Failed to save project:", error);
+    } finally {
+      setIsSaving(false);
+    }
+  }, [
+    generatedCode,
+    isAuthenticated,
+    user,
+    prompt,
+    selections,
+    persistentOptions,
+    currentProjectId,
+    generateName,
+  ]);
 
   // Handle persistent option changes
   const handlePersistentChange = useCallback(
@@ -328,6 +406,14 @@ function Home() {
       });
     },
     [persistentOptions, updatePersistentOption]
+  );
+
+  // Handle pill click - opens options overlay
+  const handlePillClick = useCallback(
+    (category) => {
+      openOptions();
+    },
+    [openOptions]
   );
 
   // Show enhance token overlay state
@@ -357,6 +443,9 @@ function Home() {
             onOptionsClick={openOptions}
             onHelpClick={openHelp}
             onGenerate={handleGenerate}
+            activeCategories={activeCategories}
+            onPillClick={handlePillClick}
+            onResetPill={resetSelection}
           />
 
           {/* Token Overlay */}
@@ -374,15 +463,6 @@ function Home() {
               />
             )}
           </AnimatePresence>
-
-          {/* Active Selection Pills */}
-          {activeCategories.length > 0 && (
-            <ActivePills
-              categories={activeCategories}
-              onPillClick={openOptions}
-              onResetClick={resetSelection}
-            />
-          )}
         </div>
 
         {/* Generation Status */}
@@ -430,8 +510,8 @@ function Home() {
             onDownload={handleDownload}
             onSave={handleSave}
             onDeploy={openDeploy}
-            isSaving={false}
-            saveSuccess={false}
+            isSaving={isSaving}
+            saveSuccess={saveSuccess}
             isGenerating={isGenerating}
             enhancePrompt={enhancePrompt}
             onEnhancePromptChange={setEnhancePrompt}
