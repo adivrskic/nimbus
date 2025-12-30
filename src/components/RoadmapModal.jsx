@@ -3,10 +3,11 @@ import "./RoadmapModal.scss";
 
 function RoadmapModal({ isOpen, onClose }) {
   const roadmapItems = [
+    // Completed
     {
       status: "completed",
-      title: "Core Templates",
-      description: "Professional templates with customization",
+      title: "AI Site Generation",
+      description: "Generate complete sites from text prompts",
     },
     {
       status: "completed",
@@ -14,14 +15,41 @@ function RoadmapModal({ isOpen, onClose }) {
       description: "Light, dark, and auto themes",
     },
     {
+      status: "completed",
+      title: "Real-Time Preview",
+      description: "Instant preview as you customize",
+    },
+    {
+      status: "completed",
+      title: "Code Export",
+      description: "Download clean, production-ready code",
+    },
+    // In Progress
+    {
       status: "in-progress",
-      title: "Easy Deployments",
-      description: "One-click to hosting platforms",
+      title: "One-Click Deploy",
+      description: "Automatic deployment to Vercel, Netlify & more",
+    },
+    {
+      status: "in-progress",
+      title: "Advanced Customization",
+      description: "Fine-tune colors, fonts, spacing & layouts",
+    },
+    // Planned
+    {
+      status: "planned",
+      title: "CMS Integration",
+      description: "Connect to Sanity, Contentful, or Strapi",
     },
     {
       status: "planned",
-      title: "Visual Editor",
-      description: "Advanced styling and layout controls",
+      title: "AI Revisions",
+      description: "Refine your site with follow-up prompts",
+    },
+    {
+      status: "planned",
+      title: "Multi-Page Sites",
+      description: "Generate full websites with navigation",
     },
     {
       status: "planned",
@@ -30,13 +58,13 @@ function RoadmapModal({ isOpen, onClose }) {
     },
     {
       status: "planned",
-      title: "Multi-Page Sites",
-      description: "Full websites with navigation",
+      title: "Custom Domains",
+      description: "Connect your own domain with SSL",
     },
     {
       status: "planned",
-      title: "Blog System",
-      description: "Built-in blog with markdown support",
+      title: "Analytics Dashboard",
+      description: "Track visitors and engagement",
     },
   ];
 

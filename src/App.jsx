@@ -110,7 +110,6 @@ function AppContent() {
   return (
     <>
       <Header />
-      {/* Use the lazy wrapper - shows placeholder immediately, loads Three.js in background */}
       <NoiseBlob isGenerating={isGenerating} />
       <Suspense fallback={<PageLoader />}>
         <Routes>

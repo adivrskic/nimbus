@@ -9,7 +9,7 @@ import {
   Rocket,
   X,
   Check,
-  ChevronRight,
+  Sparkles,
   Coins,
 } from "lucide-react";
 import { Loader2 } from "lucide-react";
@@ -101,7 +101,9 @@ function PreviewModal({
             </button>
 
             <button
-              className={`preview-modal__action-btn ${saveSuccess ? "success" : ""}`}
+              className={`preview-modal__action-btn ${
+                saveSuccess ? "success" : ""
+              }`}
               onClick={onSave}
               disabled={isSaving}
               title="Save to Projects"
@@ -176,7 +178,9 @@ function PreviewModal({
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.8 }}
                   transition={{ duration: 0.15 }}
-                  className={`preview-modal__token-btn ${showEnhanceTokenOverlay ? "active" : ""}`}
+                  className={`preview-modal__token-btn ${
+                    showEnhanceTokenOverlay ? "active" : ""
+                  }`}
                   onClick={onToggleEnhanceTokenOverlay}
                 >
                   <Coins size={14} />
@@ -188,13 +192,11 @@ function PreviewModal({
               className="preview-modal__submit-btn"
               onClick={onEnhance}
               disabled={isGenerating || !enhancePrompt.trim()}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
             >
               {isGenerating ? (
                 <Loader2 size={16} className="spin" />
               ) : (
-                <ChevronRight size={16} />
+                <Sparkles size={16} />
               )}
             </motion.button>
           </div>

@@ -115,32 +115,21 @@ function OptionsOverlay({
         {showIntro && (
           <motion.div
             className="options-intro"
-            initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
           >
             <motion.div
               className="options-intro__pills"
-              initial={{ scale: 1.3, rotate: -45, opacity: 0 }}
-              animate={{
-                scale: [1.3, 1.3, 1.3],
-                rotate: [-45, -45, -45],
-                opacity: [0, 1, 1],
-              }}
-              transition={{
-                duration: 0.8,
-                times: [0, 0.5, 1],
-                ease: [0.23, 1, 0.32, 1],
-              }}
+              initial={{ scale: 1.3, rotate: -45, opacity: 1 }}
             >
               {allIntroLabels.map((label, i) => (
                 <motion.div
                   key={`${label}-${i}`}
                   className="options-intro__pill"
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={{ opacity: 1, y: 0 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.03, duration: 0.5 }}
+                  transition={{ delay: 0, duration: 0.5 }}
                 >
                   {label}
                 </motion.div>
@@ -253,7 +242,7 @@ function OptionsOverlay({
                   />
                 </div>
 
-                <div className="options-brand__label">Social</div>
+                <div className="options-brand__title">Social</div>
                 <div className="options-brand__social">
                   {Object.entries(persistentOptions.socialMedia)
                     .slice(0, 4)
@@ -302,8 +291,6 @@ function OptionsOverlay({
                               isSelected ? "options-card--active" : ""
                             }`}
                             onClick={() => selectCategory(catKey)}
-                            whileHover={{ y: -2 }}
-                            whileTap={{ scale: 0.98 }}
                           >
                             <div className="options-card__icon">
                               {Icon && <Icon size={14} />}
