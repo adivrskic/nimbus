@@ -228,7 +228,7 @@ function Header() {
                             Projects
                           </button>
 
-                          <button
+                          {/* <button
                             className="dropdown__item"
                             onClick={() => {
                               setIsUserMenuOpen(false);
@@ -237,7 +237,7 @@ function Header() {
                           >
                             <CreditCard size={14} />
                             Billing
-                          </button>
+                          </button> */}
 
                           <button
                             className="dropdown__item dropdown__item--danger"
@@ -308,10 +308,10 @@ function Header() {
         }}
       />
 
-      <BillingModal
+      {/* <BillingModal
         isOpen={isBillingModalOpen}
         onClose={() => setIsBillingModalOpen(false)}
-      />
+      /> */}
     </>
   );
 }
