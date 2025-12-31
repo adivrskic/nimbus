@@ -173,7 +173,7 @@
     background-color: var(--color-surface-glass, rgba(255, 255, 255, 0.15));
     backdrop-filter: var(--glass-blur);
     -webkit-backdrop-filter: var(--glass-blur);
-    border: 1px solid var(--color-border);
+    border: none;
     box-shadow: var(--shadow-md);
     -webkit-appearance: none; // Prevent iOS styling
     font-smooth: always; // Better font rendering
