@@ -1,4 +1,4 @@
-// pages/Home/Home.jsx - Refactored main Home page component
+// pages/Home/Home.jsx - Complete file with streaming support FIXED
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { AnimatePresence } from "framer-motion";
 
@@ -101,7 +101,7 @@ function Home() {
     hasCustomizations,
   } = useSelections();
 
-  // Generation logic
+  // Generation logic - STREAMING ENABLED
   const {
     isGenerating,
     generatedCode,
@@ -112,9 +112,9 @@ function Home() {
     enhance,
     reset: resetGeneration,
     updateCode,
+    isStreaming,
   } = useGeneration({
     onSuccess: () => {
-      openPreview();
       refreshTokens?.();
     },
     onError: (error) => {
@@ -127,6 +127,9 @@ function Home() {
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [currentProjectId, setCurrentProjectId] = useState(null);
+
+  // Show enhance token overlay state
+  const [showEnhanceTokenOverlay, setShowEnhanceTokenOverlay] = useState(false);
 
   // Typewriter effect for placeholder
   const { text: typewriterText } = useTypewriter({
@@ -197,28 +200,22 @@ function Home() {
 
   useEffect(() => {
     if (pendingProject && pendingAction) {
-      // Load prompt
       const projectPrompt =
         pendingProject.prompt || pendingProject.customization?.prompt || "";
       setPrompt(projectPrompt);
 
-      // Set current project ID for updates
       setCurrentProjectId(pendingProject.id);
 
-      // Load selections/customization if available
       if (pendingProject.customization) {
         // If you have a way to restore selections, do it here
-        // e.g., restoreSelections(pendingProject.customization);
       }
 
       if (pendingAction === "edit") {
-        // Load the HTML and open preview for editing
         if (pendingProject.html_content) {
           updateCode(pendingProject.html_content);
           openPreview();
         }
       } else if (pendingAction === "deploy") {
-        // Load the HTML and open deploy modal
         if (pendingProject.html_content) {
           updateCode(pendingProject.html_content);
           openDeploy();
@@ -237,7 +234,6 @@ function Home() {
     openDeploy,
   ]);
 
-  // Reset save success after delay
   useEffect(() => {
     if (saveSuccess) {
       const timer = setTimeout(() => {
@@ -247,7 +243,6 @@ function Home() {
     }
   }, [saveSuccess]);
 
-  // Handle generate
   const handleGenerate = useCallback(() => {
     if (!prompt.trim() || isGenerating) return;
 
@@ -261,11 +256,13 @@ function Home() {
       return;
     }
 
-    // Reset project ID for new generations
     setCurrentProjectId(null);
     setSaveSuccess(false);
 
-    generate(prompt, selections, persistentOptions, user);
+    // OPEN PREVIEW IMMEDIATELY for live streaming
+    openPreview();
+
+    generate(prompt, selections, persistentOptions, user, true);
   }, [
     prompt,
     isGenerating,
@@ -277,9 +274,9 @@ function Home() {
     generate,
     openAuth,
     openTokens,
+    openPreview,
   ]);
 
-  // Handle enhance
   const handleEnhance = useCallback(() => {
     if (!enhancePrompt.trim() || isGenerating) return;
 
@@ -300,7 +297,6 @@ function Home() {
     openAuth,
   ]);
 
-  // Handle keyboard shortcuts in input
   const handleKeyDown = useCallback(
     (e) => {
       if (e.key === "Enter" && !e.shiftKey) {
@@ -311,7 +307,6 @@ function Home() {
     [handleGenerate]
   );
 
-  // Handle download
   const handleDownload = useCallback(() => {
     if (!generatedCode) return;
     const blob = new Blob([generatedCode], { type: "text/html" });
@@ -323,7 +318,6 @@ function Home() {
     URL.revokeObjectURL(url);
   }, [generatedCode]);
 
-  // Generate a name from the prompt
   const generateName = useCallback((promptText) => {
     if (!promptText) return "Untitled Project";
     const truncated = promptText.slice(0, 50);
@@ -332,7 +326,6 @@ function Home() {
     return name + (promptText.length > 50 ? "..." : "");
   }, []);
 
-  // Handle save to projects
   const handleSave = useCallback(async () => {
     if (!generatedCode || !isAuthenticated || !user) return;
 
@@ -340,7 +333,6 @@ function Home() {
     setSaveSuccess(false);
 
     try {
-      // Match your existing table schema
       const projectData = {
         user_id: user.id,
         name: generateName(prompt),
@@ -356,7 +348,6 @@ function Home() {
       let result;
 
       if (currentProjectId) {
-        // Update existing project
         const { data, error } = await supabase
           .from("projects")
           .update(projectData)
@@ -368,7 +359,6 @@ function Home() {
         if (error) throw error;
         result = data;
       } else {
-        // Create new project
         const { data, error } = await supabase
           .from("projects")
           .insert(projectData)
@@ -397,7 +387,6 @@ function Home() {
     generateName,
   ]);
 
-  // Handle persistent option changes
   const handlePersistentChange = useCallback(
     (category, field, value) => {
       updatePersistentOption(category, {
@@ -408,7 +397,6 @@ function Home() {
     [persistentOptions, updatePersistentOption]
   );
 
-  // Handle pill click - opens options overlay
   const handlePillClick = useCallback(
     (category) => {
       openOptions();
@@ -416,13 +404,9 @@ function Home() {
     [openOptions]
   );
 
-  // Show enhance token overlay state
-  const [showEnhanceTokenOverlay, setShowEnhanceTokenOverlay] = useState(false);
-
   return (
     <div className="home">
       <div className="home__container">
-        {/* Main Search Area */}
         <div className="home__search-section">
           <SearchBar
             ref={inputRef}
@@ -448,7 +432,6 @@ function Home() {
             onResetPill={resetSelection}
           />
 
-          {/* Token Overlay */}
           <AnimatePresence>
             {showTokenOverlay && (
               <TokenOverlay
@@ -465,16 +448,14 @@ function Home() {
           </AnimatePresence>
         </div>
 
-        {/* Generation Status */}
         {isGenerating && (
           <div className="home__status">
             <span className="home__status-text">{getEstimatedTimeText()}</span>
           </div>
         )}
 
-        {/* Minimized Preview Pill */}
         <AnimatePresence>
-          {previewMinimized && generatedCode && (
+          {previewMinimized && (
             <MinimizedPreviewPill
               onExpand={restorePreview}
               onDiscard={resetGeneration}
@@ -483,7 +464,6 @@ function Home() {
         </AnimatePresence>
       </div>
 
-      {/* Modals */}
       <AnimatePresence>
         {showOptions && (
           <OptionsOverlay
@@ -500,11 +480,12 @@ function Home() {
         )}
       </AnimatePresence>
 
+      {/* FIXED: Show preview during generation + streaming */}
       <AnimatePresence>
-        {showPreview && generatedCode && (
+        {showPreview && (isGenerating || generatedCode) && (
           <PreviewModal
             isOpen={showPreview}
-            html={generatedCode}
+            html={generatedCode || ""}
             onClose={closePreview}
             onMinimize={minimizePreview}
             onDownload={handleDownload}
@@ -526,6 +507,7 @@ function Home() {
             userTokens={userTokens}
             tokenBalance={tokenBalance}
             onBuyTokens={openTokens}
+            isStreaming={isStreaming}
           />
         )}
       </AnimatePresence>

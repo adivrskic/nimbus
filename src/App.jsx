@@ -18,9 +18,9 @@ import {
   GenerationProvider,
   useGenerationState,
 } from "./contexts/GenerationContext";
-
-// Use the lazy-loading wrapper instead of direct import
 import NoiseBlob from "./components/NoiseBlob";
+import { useTheme } from "./contexts/ThemeContext";
+
 import "./styles/global.scss";
 
 const Home = lazy(() => import("./pages/Home"));
@@ -93,13 +93,13 @@ const PageLoader = () => {
 
 function AppContent() {
   const location = useLocation();
-  const { showResetPassword, setShowResetPassword, setSessionFromHash } =
-    useAuth();
-  const { isGenerating } = useGenerationState(); // Add this
+  const { setSessionFromHash } = useAuth();
+  const { isGenerating } = useGenerationState();
 
   const [showLegal, setShowLegal] = useState(false);
   const [showRoadmap, setShowRoadmap] = useState(false);
   const [showSupport, setShowSupport] = useState(false);
+  const { theme } = useTheme(); // Get theme from context
 
   useEffect(() => {
     if (location.hash.includes("access_token")) {
@@ -110,21 +110,19 @@ function AppContent() {
   return (
     <>
       <Header />
-      <NoiseBlob isGenerating={isGenerating} />
+      <NoiseBlob isGenerating={isGenerating} isDark={theme === "dark"} />
       <Suspense fallback={<PageLoader />}>
         <Routes>
           <Route path="/" element={<Home />} />
         </Routes>
       </Suspense>
 
-      {/* Pass all handlers to Footer */}
       <Footer
         onLegalClick={() => setShowLegal(true)}
         onRoadmapClick={() => setShowRoadmap(true)}
         onSupportClick={() => setShowSupport(true)}
       />
 
-      {/* Render all modals */}
       <LegalModal isOpen={showLegal} onClose={() => setShowLegal(false)} />
       <RoadmapModal
         isOpen={showRoadmap}

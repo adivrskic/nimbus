@@ -1,55 +1,83 @@
-// hooks/useGeneration.js - Handles website generation logic
+// hooks/useGeneration.js - FIXED streaming + preview timing
 import { useState, useCallback, useRef, useEffect } from "react";
 import { buildFullPrompt } from "../utils/promptBuilder";
 import { generateDemo } from "../utils/demoGenerator";
+import { generateWebsiteStream } from "../utils/generateWebsiteStream";
 import { useGenerationState } from "../contexts/GenerationContext";
 
-/**
- * Hook for managing website generation
- * @param {Object} options - Configuration options
- * @param {Function} options.onSuccess - Callback when generation succeeds
- * @param {Function} options.onError - Callback when generation fails
- * @param {Function} options.supabaseGenerate - Supabase generation function
- * @returns {Object} Generation state and handlers
- */
+let streamingTimeout = null;
+
 export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
-  // Generation state
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedCode, setGeneratedCode] = useState(null);
   const [generationError, setGenerationError] = useState(null);
   const [enhancePrompt, setEnhancePrompt] = useState("");
+  const [isStreaming, setIsStreaming] = useState(false);
 
-  // Get context setter for blob animation (renamed to avoid conflict)
   const { setIsGenerating: setGlobalGenerating } = useGenerationState();
+  const generationRef = useRef(null);
+  const abortControllerRef = useRef(null);
 
-  // Sync local isGenerating state to global context for NoiseBlob
   useEffect(() => {
     setGlobalGenerating(isGenerating);
   }, [isGenerating, setGlobalGenerating]);
 
-  // Track generation for cancellation
-  const generationRef = useRef(null);
+  // Debounced update for streaming
+  const debouncedSetCode = useCallback((html) => {
+    if (streamingTimeout) clearTimeout(streamingTimeout);
+    streamingTimeout = setTimeout(() => {
+      setGeneratedCode(html);
+    }, 100); // Faster updates
+  }, []);
 
-  /**
-   * Generate website from prompt and selections
-   */
   const generate = useCallback(
-    async (prompt, selections, persistentOptions, user) => {
+    async (prompt, selections, persistentOptions, user, streaming = true) => {
       if (!prompt.trim() || isGenerating) return;
+
+      // Cancel previous
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
 
       setIsGenerating(true);
       setGenerationError(null);
+      setIsStreaming(streaming);
+      setGeneratedCode(""); // Clear previous
       generationRef.current = Date.now();
+      abortControllerRef.current = new AbortController();
 
       try {
-        // Build the full prompt
         const fullPrompt = buildFullPrompt(
           prompt,
           selections,
           persistentOptions
         );
 
-        // Try Supabase generation first
+        if (streaming) {
+          const streamResult = await generateWebsiteStream({
+            prompt: fullPrompt,
+            customization: selections,
+            isRefinement: false,
+            signal: abortControllerRef.current.signal,
+          });
+
+          if (streamResult.chunks) {
+            let html = "";
+            for await (const chunk of streamResult.chunks()) {
+              console.log("chunks: ", chunk);
+              if (abortControllerRef.current?.signal.aborted) break;
+              html += chunk;
+              debouncedSetCode(html);
+            }
+            setGeneratedCode(html);
+            setIsStreaming(false);
+            onSuccess?.({ code: html, isStreaming: true });
+
+            return { code: html, isStreaming: true };
+          }
+        }
+
+        // Non-streaming fallback
         if (supabaseGenerate) {
           const result = await supabaseGenerate({
             prompt: fullPrompt,
@@ -57,39 +85,33 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
             isRefinement: false,
             existingCode: null,
           });
-
-          if (result?.code) {
-            setGeneratedCode(result.code);
+          if (result?.code || result?.html) {
+            const code = result.code || result.html;
+            setGeneratedCode(code);
             onSuccess?.(result);
             return result;
           }
         }
 
-        // Fallback to demo generation
-        console.log("No supabaseGenerate function provided, using demo");
         const demoHtml = generateDemo(prompt, selections);
         setGeneratedCode(demoHtml);
-        onSuccess?.({ code: demoHtml, isDemo: true });
-        return { code: demoHtml, isDemo: true };
+        onSuccess?.({ code: demoHtml });
+        return { code: demoHtml };
       } catch (error) {
-        console.error("Generation error:", error);
-        setGenerationError(error.message || "Generation failed");
-        onError?.(error);
-
-        // Use demo as fallback on error
-        const demoHtml = generateDemo(prompt, selections);
-        setGeneratedCode(demoHtml);
-        return { code: demoHtml, isDemo: true, error };
+        if (error.name !== "AbortError") {
+          setGenerationError(error.message);
+          onError?.(error);
+          const demoHtml = generateDemo(prompt, selections);
+          setGeneratedCode(demoHtml);
+        }
       } finally {
         setIsGenerating(false);
+        setIsStreaming(false);
       }
     },
-    [isGenerating, supabaseGenerate, onSuccess, onError]
+    [isGenerating, supabaseGenerate, onSuccess, onError, debouncedSetCode]
   );
 
-  /**
-   * Enhance existing generated code with additional changes
-   */
   const enhance = useCallback(
     async (originalPrompt, selections, user) => {
       if (!enhancePrompt.trim() || !generatedCode || isGenerating) return;
@@ -106,22 +128,17 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
             existingCode: generatedCode,
           });
 
-          if (result?.code) {
-            setGeneratedCode(result.code);
+          if (result?.code || result?.html) {
+            const code = result.code || result.html;
+            setGeneratedCode(code);
             setEnhancePrompt("");
             onSuccess?.(result);
             return result;
           }
         }
-
-        // No enhancement without backend
-        setGenerationError("Enhancement requires backend connection");
-        return null;
       } catch (error) {
-        console.error("Enhancement error:", error);
-        setGenerationError(error.message || "Enhancement failed");
+        setGenerationError(error.message);
         onError?.(error);
-        return null;
       } finally {
         setIsGenerating(false);
       }
@@ -136,44 +153,39 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
     ]
   );
 
-  /**
-   * Cancel ongoing generation
-   */
   const cancel = useCallback(() => {
-    generationRef.current = null;
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    if (streamingTimeout) clearTimeout(streamingTimeout);
     setIsGenerating(false);
+    setIsStreaming(false);
   }, []);
 
-  /**
-   * Reset generation state
-   */
   const reset = useCallback(() => {
+    if (streamingTimeout) clearTimeout(streamingTimeout);
     setIsGenerating(false);
     setGeneratedCode(null);
     setGenerationError(null);
     setEnhancePrompt("");
-    generationRef.current = null;
+    setIsStreaming(false);
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
   }, []);
 
-  /**
-   * Update generated code directly (for external edits)
-   */
   const updateCode = useCallback((code) => {
     setGeneratedCode(code);
   }, []);
 
   return {
-    // State
     isGenerating,
     generatedCode,
     generationError,
     enhancePrompt,
-
-    // Setters
+    isStreaming,
     setEnhancePrompt,
     updateCode,
-
-    // Actions
     generate,
     enhance,
     cancel,

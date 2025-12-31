@@ -7,9 +7,12 @@ import {
   Coins,
   FolderOpen,
   CreditCard,
+  Sun,
+  Moon,
+  SunMoon, // For auto mode
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
-import { useProject } from "../contexts/ProjectContext"; // ADD THIS
+import { useProject } from "../contexts/ProjectContext";
 import AuthModal from "./AuthModal";
 import TokenPurchaseModal from "./TokenPurchaseModal";
 import ProjectsModal from "./ProjectsModal";
@@ -22,9 +25,7 @@ function Header() {
   const location = useLocation();
   const isHomePage = location.pathname === "/";
 
-  // USE CONTEXT INSTEAD OF PROPS
   const { editProject, deployProject } = useProject();
-
   const {
     user,
     profile,
@@ -47,7 +48,6 @@ function Header() {
   const [isPageLoading, setIsPageLoading] = useState(false);
 
   const userMenuRef = useRef(null);
-
   const userTokens = profile?.tokens || 0;
 
   useEffect(() => {
@@ -152,6 +152,42 @@ function Header() {
     return authIsLoading;
   };
 
+  // Get the appropriate theme icon
+  const getThemeIcon = () => {
+    switch (theme) {
+      case "dark":
+        return <Moon size={16} />;
+      case "light":
+        return <Sun size={16} />;
+      default:
+        return <SunMoon size={16} />;
+    }
+  };
+
+  // Get theme label for accessibility
+  const getThemeLabel = () => {
+    switch (theme) {
+      case "dark":
+        return "Switch to light mode";
+      case "light":
+        return "Switch to dark mode";
+      default:
+        return "Toggle theme";
+    }
+  };
+
+  // Handle theme toggle with a smooth transition
+  const handleThemeToggle = () => {
+    // Add a quick fade effect
+    document.documentElement.style.transition = "background-color 0.3s ease";
+    toggleTheme();
+
+    // Remove transition after animation completes
+    setTimeout(() => {
+      document.documentElement.style.transition = "";
+    }, 300);
+  };
+
   return (
     <>
       {/* Blur backdrop - covers everything below header when dropdown is open */}
@@ -198,10 +234,22 @@ function Header() {
                     {isUserMenuOpen && (
                       <div className="dropdown">
                         <div className="dropdown__header">
-                          <span className="dropdown__name">
-                            {getUserDisplayName()}
-                          </span>
-                          <span className="dropdown__email">{user?.email}</span>
+                          <div className="dropdown__header-left">
+                            <span className="dropdown__name">
+                              {getUserDisplayName()}
+                            </span>
+                            <span className="dropdown__email">
+                              {user?.email}
+                            </span>
+                          </div>
+                          <button
+                            className="dropdown__theme-toggle"
+                            onClick={handleThemeToggle}
+                            aria-label={getThemeLabel()}
+                            title={getThemeLabel()}
+                          >
+                            {getThemeIcon()}
+                          </button>
                         </div>
 
                         <div className="dropdown__tokens">
@@ -262,20 +310,30 @@ function Header() {
                   </div>
                 </>
               ) : (
-                <button
-                  className="btn btn-primary"
-                  onClick={() => setIsAuthModalOpen(true)}
-                  disabled={shouldShowLoading()}
-                >
-                  {shouldShowLoading() ? (
-                    <span className="loading-indicator">
-                      <span className="spinner-small"></span>
-                      Loading...
-                    </span>
-                  ) : (
-                    "Get Started"
-                  )}
-                </button>
+                <>
+                  <button
+                    className="header__theme-toggle--mobile"
+                    onClick={handleThemeToggle}
+                    aria-label={getThemeLabel()}
+                    title={getThemeLabel()}
+                  >
+                    {getThemeIcon()}
+                  </button>
+                  <button
+                    className="btn btn-primary"
+                    onClick={() => setIsAuthModalOpen(true)}
+                    disabled={shouldShowLoading()}
+                  >
+                    {shouldShowLoading() ? (
+                      <span className="loading-indicator">
+                        <span className="spinner-small"></span>
+                        Loading...
+                      </span>
+                    ) : (
+                      "Get Started"
+                    )}
+                  </button>
+                </>
               )}
             </nav>
           </div>
@@ -294,17 +352,16 @@ function Header() {
         onClose={() => setIsTokenModalOpen(false)}
       />
 
-      {/* UPDATED: Use context functions instead of props */}
       <ProjectsModal
         isOpen={isProjectsModalOpen}
         onClose={() => setIsProjectsModalOpen(false)}
         onEditProject={(project) => {
           setIsProjectsModalOpen(false);
-          editProject(project); // Use context
+          editProject(project);
         }}
         onDeployProject={(project) => {
           setIsProjectsModalOpen(false);
-          deployProject(project); // Use context
+          deployProject(project);
         }}
       />
 

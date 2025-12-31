@@ -196,6 +196,16 @@
   }
 }
 
+.help-icon {
+  display: flex;
+}
+
+.help-tips {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
 // Responsive
 @media (max-width: 640px) {
   .help-content {
