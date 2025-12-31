@@ -79,7 +79,7 @@ function Footer({ onLegalClick, onRoadmapClick, onSupportClick }) {
     ranges.forEach((range, i) => {
       dropIdRef.current += 1;
       const x = range.start + Math.random() * range.width;
-      const duration = 1 + Math.random() * 0.5;
+      const duration = 1 + Math.random() * 0.1;
       const delay = i * 5 + Math.random() * 0.2;
 
       newDrops.push({
@@ -98,7 +98,7 @@ function Footer({ onLegalClick, onRoadmapClick, onSupportClick }) {
       setDrops((prev) =>
         prev.filter((d) => !newDrops.some((nd) => nd.id === d.id))
       );
-    }, 3000);
+    }, 1000);
   };
 
   const stopRain = () => {
@@ -113,7 +113,7 @@ function Footer({ onLegalClick, onRoadmapClick, onSupportClick }) {
       if (!isRaining) {
         setCurrentEmoji("");
       }
-    }, 2000);
+    }, 1000);
   };
 
   useEffect(() => {
@@ -151,7 +151,7 @@ function Footer({ onLegalClick, onRoadmapClick, onSupportClick }) {
               className="footer__icon"
               strokeWidth={1.5}
               style={{
-                transform: isRaining ? "translateY(-2px)" : "none",
+                transform: isRaining ? "translateY(-8px)" : "none",
                 transition: "transform 0.3s ease",
               }}
             />
@@ -177,23 +177,23 @@ function Footer({ onLegalClick, onRoadmapClick, onSupportClick }) {
               @keyframes emojiRain {
                 0% {
                   opacity: 0;
-                  transform: translate3d(0, 0, 0) scale(0.5);
+                  transform: translate3d(0, 0, 0) scale(0.4);
                 }
                 20% {
                   opacity: 1;
-                  transform: translate3d(0, 30px, 0) scale(0.8);
+                  transform: translate3d(0, 20px, 0) scale(0.8);
                 }
                 60% {
                   opacity: 1;
                   transform: translate3d(${
                     Math.random() * 20 - 10
-                  }px, 120px, 0) scale(1);
+                  }px, 100px, 0) scale(1);
                 }
                 100% {
                   opacity: 0;
                   transform: translate3d(${
                     Math.random() * 30 - 15
-                  }px, 250px, 0) scale(0.7);
+                  }px, 200px, 0) scale(0.7);
                 }
               }
             `}</style>

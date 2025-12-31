@@ -1,14 +1,15 @@
 .deploy-success-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(4px);
+  background: var(--color-overlay-background, rgba(0, 0, 0, 0.6));
+  backdrop-filter: var(--glass-blur-overlay, blur(4px));
+  -webkit-backdrop-filter: var(--glass-blur-overlay, blur(4px));
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 10000;
   opacity: 0;
-  transition: opacity 0.2s ease;
+  transition: opacity var(--transition-fast);
   padding: 20px;
 
   &.active {
@@ -17,16 +18,16 @@
 }
 
 .deploy-success-content {
-  background: var(--surface-elevated, #1a1a1a);
-  border: 1px solid var(--border, rgba(255, 255, 255, 0.1));
-  border-radius: 16px;
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
   width: 100%;
   max-width: 420px;
   padding: 24px;
   position: relative;
   opacity: 0;
   transform: scale(0.95) translateY(10px);
-  transition: all 0.25s cubic-bezier(0.23, 1, 0.32, 1);
+  transition: all var(--transition-base) cubic-bezier(0.23, 1, 0.32, 1);
 
   &.active {
     opacity: 1;
@@ -43,18 +44,18 @@
 .deploy-success-close {
   background: transparent;
   border: none;
-  color: var(--text-muted, rgba(255, 255, 255, 0.5));
+  color: var(--color-text-tertiary);
   cursor: pointer;
   padding: 4px;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.15s ease;
+  transition: var(--transition-base);
 
   &:hover {
-    background: var(--surface-hover, rgba(255, 255, 255, 0.05));
-    color: var(--text, #fff);
+    background: var(--color-accent-light);
+    color: var(--color-text-primary);
   }
 }
 
@@ -67,11 +68,15 @@
     width: 72px;
     height: 72px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    background: linear-gradient(
+      135deg,
+      var(--color-success) 0%,
+      var(--color-success-dark) 100%
+    );
     display: flex;
     align-items: center;
     justify-content: center;
-    color: white;
+    color: var(--color-background);
     box-shadow: 0 8px 32px rgba(16, 185, 129, 0.3);
   }
 }
@@ -79,7 +84,7 @@
 .deploy-success-title {
   font-size: 1.5rem;
   font-weight: 600;
-  color: var(--text, #fff);
+  color: var(--color-text-primary);
   text-align: center;
   margin: 0 0 20px 0;
 }
@@ -88,25 +93,25 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  background: var(--surface, rgba(255, 255, 255, 0.05));
-  border: 1px solid var(--border, rgba(255, 255, 255, 0.1));
-  border-radius: 10px;
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
   padding: 12px 16px;
   margin-bottom: 24px;
 
   &__link {
     flex: 1;
-    color: var(--primary, #3b82f6);
+    color: var(--color-primary);
     text-decoration: none;
     font-size: 0.9375rem;
     font-weight: 500;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    transition: color 0.15s ease;
+    transition: color var(--transition-fast);
 
     &:hover {
-      color: var(--primary-light, #60a5fa);
+      color: var(--color-primary-light);
       text-decoration: underline;
     }
   }
@@ -114,19 +119,19 @@
   &__copy {
     background: transparent;
     border: none;
-    color: var(--text-muted, rgba(255, 255, 255, 0.5));
+    color: var(--color-text-tertiary);
     cursor: pointer;
     padding: 6px;
-    border-radius: 6px;
+    border-radius: var(--radius-sm);
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.15s ease;
+    transition: var(--transition-base);
     flex-shrink: 0;
 
     &:hover {
-      background: var(--surface-hover, rgba(255, 255, 255, 0.1));
-      color: var(--text, #fff);
+      background: var(--color-accent-light);
+      color: var(--color-text-primary);
     }
   }
 }
@@ -144,110 +149,50 @@
   justify-content: center;
   gap: 8px;
   padding: 12px 20px;
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   font-size: 0.9375rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: var(--transition-base);
   text-decoration: none;
   border: none;
 
   &--primary {
-    background: var(--primary, #3b82f6);
-    color: white;
+    background: var(--color-primary);
+    color: var(--color-background);
 
     &:hover {
-      background: var(--primary-dark, #2563eb);
+      background: var(--color-primary-dark);
       transform: translateY(-1px);
     }
   }
 
   &--secondary {
-    background: var(--surface, rgba(255, 255, 255, 0.05));
-    border: 1px solid var(--border, rgba(255, 255, 255, 0.15));
-    color: var(--text, #fff);
+    background: var(--color-background);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-primary);
 
     &:hover {
-      background: var(--surface-hover, rgba(255, 255, 255, 0.1));
-      border-color: var(--primary, #3b82f6);
+      background: var(--color-accent-light);
+      border-color: var(--color-primary);
     }
   }
 
   &--ghost {
     background: transparent;
-    color: var(--text-muted, rgba(255, 255, 255, 0.6));
+    color: var(--color-text-tertiary);
 
     &:hover {
-      color: var(--text, #fff);
-      background: var(--surface-hover, rgba(255, 255, 255, 0.05));
+      color: var(--color-text-primary);
+      background: var(--color-accent-light);
     }
   }
 }
 
 .deploy-success-note {
   font-size: 0.8125rem;
-  color: var(--text-muted, rgba(255, 255, 255, 0.5));
+  color: var(--color-text-tertiary);
   text-align: center;
   margin: 0;
   line-height: 1.5;
-}
-
-/* Light mode support */
-@media (prefers-color-scheme: light) {
-  .deploy-success-content {
-    background: #fff;
-    border-color: rgba(0, 0, 0, 0.1);
-  }
-
-  .deploy-success-close {
-    color: rgba(0, 0, 0, 0.4);
-
-    &:hover {
-      background: rgba(0, 0, 0, 0.05);
-      color: #000;
-    }
-  }
-
-  .deploy-success-title {
-    color: #000;
-  }
-
-  .deploy-success-url {
-    background: rgba(0, 0, 0, 0.03);
-    border-color: rgba(0, 0, 0, 0.1);
-
-    &__copy {
-      color: rgba(0, 0, 0, 0.4);
-
-      &:hover {
-        background: rgba(0, 0, 0, 0.05);
-        color: #000;
-      }
-    }
-  }
-
-  .deploy-success-btn {
-    &--secondary {
-      background: rgba(0, 0, 0, 0.03);
-      border-color: rgba(0, 0, 0, 0.1);
-      color: #000;
-
-      &:hover {
-        background: rgba(0, 0, 0, 0.05);
-      }
-    }
-
-    &--ghost {
-      color: rgba(0, 0, 0, 0.5);
-
-      &:hover {
-        color: #000;
-        background: rgba(0, 0, 0, 0.03);
-      }
-    }
-  }
-
-  .deploy-success-note {
-    color: rgba(0, 0, 0, 0.5);
-  }
 }

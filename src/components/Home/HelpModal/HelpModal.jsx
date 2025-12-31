@@ -188,7 +188,7 @@ function HelpModal({ isOpen, onClose }) {
 
           {/* Tips */}
           <div className="help-tips">
-            <h4 className="help-tips__title">💡 Pro Tips</h4>
+            <h4 className="help-tips__title">Pro Tips</h4>
             {TIPS.map((tip, index) => (
               <div key={index} className="help-tip">
                 <Lightbulb size={14} />

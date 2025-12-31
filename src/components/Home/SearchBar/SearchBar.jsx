@@ -36,6 +36,7 @@ const SearchBar = forwardRef(
       activeCategories = [],
       onPillClick,
       onResetPill,
+      hasMinimizedPreview = false, // New prop
     },
     ref
   ) => {
@@ -75,7 +76,9 @@ const SearchBar = forwardRef(
         ref={containerRef}
         className={`search-bar ${
           showExpandedState ? "search-bar--expanded" : ""
-        } ${isGenerating ? "search-bar--generating" : ""}`}
+        } ${isGenerating ? "search-bar--generating" : ""} ${
+          hasMinimizedPreview ? "has-minimized-preview" : ""
+        }`}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
