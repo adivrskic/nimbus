@@ -42,7 +42,6 @@
   align-items: center;
   justify-content: space-between;
   padding-bottom: 12px;
-  border-bottom: 1px solid var(--color-border);
 }
 
 .auth-title {
@@ -126,7 +125,6 @@
 
 .auth-footer {
   padding-top: 12px;
-  border-top: 1px solid var(--color-border);
   font-size: 0.6875rem;
   font-family: var(--font-family-base, sans-serif);
   color: var(--color-text-tertiary);
