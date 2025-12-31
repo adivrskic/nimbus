@@ -1,7 +1,14 @@
 // components/Home/OptionsOverlay/OptionsOverlay.jsx - Main customization modal
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ChevronLeft, ChevronRight, Check, Settings } from "lucide-react";
+import {
+  X,
+  ChevronLeft,
+  ChevronRight,
+  Check,
+  Settings,
+  ChevronDown,
+} from "lucide-react";
 import {
   INTRO_LABELS,
   OPTIONS,
@@ -32,6 +39,10 @@ function OptionsOverlay({
   const [categoryFilter, setCategoryFilter] = useState("");
   const [slideDirection, setSlideDirection] = useState(1);
 
+  // State for collapsible sections on mobile
+  const [isBrandExpanded, setIsBrandExpanded] = useState(true);
+  const [isDesignExpanded, setIsDesignExpanded] = useState(true);
+
   // Intro animation on first open only
   useEffect(() => {
     if (isOpen) {
@@ -52,6 +63,9 @@ function OptionsOverlay({
       setShowIntro(false);
       setCategoryFilter("");
       setActiveOption(null);
+      // Reset collapsible sections when closing
+      setIsBrandExpanded(true);
+      setIsDesignExpanded(true);
     }
   }, [isOpen]);
 
@@ -121,7 +135,7 @@ function OptionsOverlay({
           >
             <motion.div
               className="options-intro__pills"
-              initial={{ scale: 1.3, rotate: -45, opacity: 1 }}
+              initial={{ scale: 1, rotate: -45, opacity: 1 }}
             >
               {allIntroLabels.map((label, i) => (
                 <motion.div
@@ -194,236 +208,286 @@ function OptionsOverlay({
             <div className="options-body">
               {/* Left: Brand Info */}
               <div className="options-brand">
-                <div className="options-brand__title">Brand & Contact</div>
-
-                <div className="options-brand__row">
-                  <input
-                    type="text"
-                    value={persistentOptions.branding.brandName}
-                    onChange={(e) =>
-                      onPersistentChange(
-                        "branding",
-                        "brandName",
-                        e.target.value
-                      )
-                    }
-                    placeholder="Brand name"
-                    className="options-input"
-                  />
-                  <input
-                    type="text"
-                    value={persistentOptions.branding.tagline}
-                    onChange={(e) =>
-                      onPersistentChange("branding", "tagline", e.target.value)
-                    }
-                    placeholder="Tagline"
-                    className="options-input"
-                  />
+                <div
+                  className="options-brand__header"
+                  onClick={() => setIsBrandExpanded(!isBrandExpanded)}
+                >
+                  <div className="options-brand__title">Brand & Contact</div>
+                  <button
+                    className={`options-brand__toggle ${
+                      !isBrandExpanded ? "collapsed" : ""
+                    }`}
+                  >
+                    <ChevronDown size={16} />
+                  </button>
                 </div>
 
-                <div className="options-brand__row">
-                  <input
-                    type="email"
-                    value={persistentOptions.contactInfo.email}
-                    onChange={(e) =>
-                      onPersistentChange("contactInfo", "email", e.target.value)
-                    }
-                    placeholder="Email"
-                    className="options-input"
-                  />
-                  <input
-                    type="tel"
-                    value={persistentOptions.contactInfo.phone}
-                    onChange={(e) =>
-                      onPersistentChange("contactInfo", "phone", e.target.value)
-                    }
-                    placeholder="Phone"
-                    className="options-input"
-                  />
-                </div>
+                <div
+                  className={`options-brand__content ${
+                    isBrandExpanded ? "expanded" : "collapsed"
+                  }`}
+                >
+                  <div className="options-brand__row">
+                    <input
+                      type="text"
+                      value={persistentOptions.branding.brandName}
+                      onChange={(e) =>
+                        onPersistentChange(
+                          "branding",
+                          "brandName",
+                          e.target.value
+                        )
+                      }
+                      placeholder="Brand name"
+                      className="options-input"
+                    />
+                    <input
+                      type="text"
+                      value={persistentOptions.branding.tagline}
+                      onChange={(e) =>
+                        onPersistentChange(
+                          "branding",
+                          "tagline",
+                          e.target.value
+                        )
+                      }
+                      placeholder="Tagline"
+                      className="options-input"
+                    />
+                  </div>
 
-                <div className="options-brand__title">Social</div>
-                <div className="options-brand__social">
-                  {Object.entries(persistentOptions.socialMedia)
-                    .slice(0, 4)
-                    .map(([platform, url]) => (
-                      <input
-                        key={platform}
-                        type="url"
-                        value={url}
-                        onChange={(e) =>
-                          onPersistentChange(
-                            "socialMedia",
-                            platform,
-                            e.target.value
-                          )
-                        }
-                        placeholder={platform}
-                        className="options-input options-input--small"
-                      />
-                    ))}
+                  <div className="options-brand__row">
+                    <input
+                      type="email"
+                      value={persistentOptions.contactInfo.email}
+                      onChange={(e) =>
+                        onPersistentChange(
+                          "contactInfo",
+                          "email",
+                          e.target.value
+                        )
+                      }
+                      placeholder="Email"
+                      className="options-input"
+                    />
+                    <input
+                      type="tel"
+                      value={persistentOptions.contactInfo.phone}
+                      onChange={(e) =>
+                        onPersistentChange(
+                          "contactInfo",
+                          "phone",
+                          e.target.value
+                        )
+                      }
+                      placeholder="Phone"
+                      className="options-input"
+                    />
+                  </div>
+
+                  <div className="options-brand__title">Social</div>
+                  <div className="options-brand__social">
+                    {Object.entries(persistentOptions.socialMedia)
+                      .slice(0, 4)
+                      .map(([platform, url]) => (
+                        <input
+                          key={platform}
+                          type="url"
+                          value={url}
+                          onChange={(e) =>
+                            onPersistentChange(
+                              "socialMedia",
+                              platform,
+                              e.target.value
+                            )
+                          }
+                          placeholder={platform}
+                          className="options-input"
+                        />
+                      ))}
+                  </div>
                 </div>
               </div>
 
               {/* Right: Design Options */}
               <div className="options-design">
-                <AnimatePresence mode="wait">
-                  {!activeOption ? (
-                    <motion.div
-                      key="grid"
-                      className="options-grid"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.15 }}
-                    >
-                      {filteredCategories.map((catKey) => {
-                        const opt = OPTIONS[catKey];
-                        if (!opt) return null;
-                        const Icon = opt?.icon;
-                        const isSelected = hasSelection(catKey);
-                        const displayVal = getDisplayValue(catKey);
+                <div
+                  className="options-design__header"
+                  onClick={() => setIsDesignExpanded(!isDesignExpanded)}
+                >
+                  <div className="options-design__title">Design Options</div>
+                  <button
+                    className={`options-design__toggle ${
+                      !isDesignExpanded ? "collapsed" : ""
+                    }`}
+                  >
+                    <ChevronDown size={16} />
+                  </button>
+                </div>
 
-                        return (
-                          <motion.button
-                            key={catKey}
-                            className={`options-card ${
-                              isSelected ? "options-card--active" : ""
-                            }`}
-                            onClick={() => selectCategory(catKey)}
-                          >
-                            <div className="options-card__icon">
-                              {Icon && <Icon size={14} />}
-                            </div>
-                            <div className="options-card__info">
-                              <span className="options-card__label">
-                                {opt?.label}
-                              </span>
-                              {isSelected && displayVal && (
-                                <span className="options-card__value">
-                                  {displayVal}
-                                </span>
-                              )}
-                            </div>
-                            <ChevronRight
-                              size={12}
-                              className="options-card__arrow"
-                            />
-                          </motion.button>
-                        );
-                      })}
-                    </motion.div>
-                  ) : (
-                    <motion.div
-                      key="choices"
-                      className="options-choices"
-                      initial={{ opacity: 0, x: 10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -10 }}
-                      transition={{ duration: 0.15 }}
-                    >
-                      <div className="options-choices__header">
-                        <button
-                          className="options-back"
-                          onClick={goToCategories}
-                        >
-                          <ChevronLeft size={14} />
-                        </button>
-                        <div className="options-choices__title">
-                          <span>{OPTIONS[activeOption]?.label}</span>
-                          <span className="options-choices__subtitle">
-                            {OPTIONS[activeOption]?.subtitle}
-                          </span>
-                        </div>
-                        {hasSelection(activeOption) && (
-                          <button
-                            className="options-reset"
-                            onClick={() => onReset(activeOption)}
-                          >
-                            Reset
-                          </button>
-                        )}
-                      </div>
-
-                      <div className="options-choices__grid">
-                        {OPTIONS[activeOption]?.choices?.map((choice) => {
-                          const isMulti = OPTIONS[activeOption].multi;
-                          const isActive = isMulti
-                            ? selections[activeOption]?.includes(choice.value)
-                            : selections[activeOption] === choice.value;
+                <div
+                  className={`options-design__content ${
+                    isDesignExpanded ? "expanded" : "collapsed"
+                  }`}
+                >
+                  <AnimatePresence mode="wait">
+                    {!activeOption ? (
+                      <motion.div
+                        key="grid"
+                        className="options-grid"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.15 }}
+                      >
+                        {filteredCategories.map((catKey) => {
+                          const opt = OPTIONS[catKey];
+                          if (!opt) return null;
+                          const Icon = opt?.icon;
+                          const isSelected = hasSelection(catKey);
+                          const displayVal = getDisplayValue(catKey);
 
                           return (
-                            <button
-                              key={choice.value}
-                              className={`options-choice ${
-                                isActive ? "options-choice--active" : ""
+                            <motion.button
+                              key={catKey}
+                              className={`options-card ${
+                                isSelected ? "options-card--active" : ""
                               }`}
-                              onClick={() =>
-                                handleSelect(activeOption, choice.value)
-                              }
+                              onClick={() => selectCategory(catKey)}
                             >
-                              {choice.colors && (
-                                <div className="options-choice__colors">
-                                  {choice.colors.map((color, i) => (
-                                    <span
-                                      key={i}
-                                      style={{ background: color }}
-                                    />
-                                  ))}
-                                </div>
-                              )}
-                              <span>{choice.value}</span>
-                              {isActive && <Check size={12} />}
-                            </button>
+                              <div className="options-card__icon">
+                                {Icon && <Icon size={14} />}
+                              </div>
+                              <div className="options-card__info">
+                                <span className="options-card__label">
+                                  {opt?.label}
+                                </span>
+                                {isSelected && displayVal && (
+                                  <span className="options-card__value">
+                                    {displayVal}
+                                  </span>
+                                )}
+                              </div>
+                              <ChevronRight
+                                size={12}
+                                className="options-card__arrow"
+                              />
+                            </motion.button>
                           );
                         })}
-                      </div>
-
-                      {/* Custom Colors Editor */}
-                      {activeOption === "palette" &&
-                        selections.palette === "Custom" && (
-                          <div className="options-custom-colors">
-                            {OPTIONS.customColors.fields.map((field) => (
-                              <div
-                                key={field.key}
-                                className="options-color-field"
-                              >
-                                <span>{field.label}</span>
-                                <div className="options-color-picker">
-                                  <input
-                                    type="color"
-                                    value={
-                                      selections.customColors?.[field.key] ||
-                                      field.default
-                                    }
-                                    onChange={(e) => {
-                                      onSelect("customColors", {
-                                        ...selections.customColors,
-                                        [field.key]: e.target.value,
-                                      });
-                                    }}
-                                  />
-                                  <span>
-                                    {selections.customColors?.[field.key] ||
-                                      field.default}
-                                  </span>
-                                </div>
-                              </div>
-                            ))}
+                      </motion.div>
+                    ) : (
+                      <motion.div
+                        key="choices"
+                        className="options-choices"
+                        initial={{ opacity: 0, x: 10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -10 }}
+                        transition={{ duration: 0.15 }}
+                      >
+                        <div className="options-choices__header">
+                          <button
+                            className="options-back"
+                            onClick={goToCategories}
+                          >
+                            <ChevronLeft size={14} />
+                          </button>
+                          <div className="options-choices__title">
+                            <span>{OPTIONS[activeOption]?.label}</span>
+                            <span className="options-choices__subtitle">
+                              {OPTIONS[activeOption]?.subtitle}
+                            </span>
                           </div>
-                        )}
+                          {hasSelection(activeOption) && (
+                            <button
+                              className="options-reset"
+                              onClick={() => onReset(activeOption)}
+                            >
+                              Reset
+                            </button>
+                          )}
+                        </div>
 
-                      {OPTIONS[activeOption]?.multi && (
-                        <button
-                          className="options-done"
-                          onClick={goToCategories}
-                        >
-                          Done ({selections[activeOption]?.length || 0})
-                        </button>
-                      )}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                        <div className="options-choices__grid">
+                          {OPTIONS[activeOption]?.choices?.map((choice) => {
+                            const isMulti = OPTIONS[activeOption].multi;
+                            const isActive = isMulti
+                              ? selections[activeOption]?.includes(choice.value)
+                              : selections[activeOption] === choice.value;
+
+                            return (
+                              <button
+                                key={choice.value}
+                                className={`options-choice ${
+                                  isActive ? "options-choice--active" : ""
+                                }`}
+                                onClick={() =>
+                                  handleSelect(activeOption, choice.value)
+                                }
+                              >
+                                {choice.colors && (
+                                  <div className="options-choice__colors">
+                                    {choice.colors.map((color, i) => (
+                                      <span
+                                        key={i}
+                                        style={{ background: color }}
+                                      />
+                                    ))}
+                                  </div>
+                                )}
+                                <span>{choice.value}</span>
+                                {isActive && <Check size={12} />}
+                              </button>
+                            );
+                          })}
+                        </div>
+
+                        {/* Custom Colors Editor */}
+                        {activeOption === "palette" &&
+                          selections.palette === "Custom" && (
+                            <div className="options-custom-colors">
+                              {OPTIONS.customColors.fields.map((field) => (
+                                <div
+                                  key={field.key}
+                                  className="options-color-field"
+                                >
+                                  <span>{field.label}</span>
+                                  <div className="options-color-picker">
+                                    <input
+                                      type="color"
+                                      value={
+                                        selections.customColors?.[field.key] ||
+                                        field.default
+                                      }
+                                      onChange={(e) => {
+                                        onSelect("customColors", {
+                                          ...selections.customColors,
+                                          [field.key]: e.target.value,
+                                        });
+                                      }}
+                                    />
+                                    <span>
+                                      {selections.customColors?.[field.key] ||
+                                        field.default}
+                                    </span>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+
+                        {OPTIONS[activeOption]?.multi && (
+                          <button
+                            className="options-done"
+                            onClick={goToCategories}
+                          >
+                            Done ({selections[activeOption]?.length || 0})
+                          </button>
+                        )}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
               </div>
             </div>
           </motion.div>

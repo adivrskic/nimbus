@@ -18,7 +18,7 @@ body {
   font-family: $font-family-base;
   background-color: var(--color-background);
   color: var(--color-text-primary);
-  line-height: 1.6;
+  line-height: 1.5;
   transition: background-color var(--transition-base),
     color var(--transition-base);
   height: 100%;
@@ -52,11 +52,6 @@ h3 {
   font-size: clamp(1.5rem, 3vw, 2rem);
 }
 
-// section:first-of-type {
-//   min-height: 100dvh;
-// }
-
-// Button base styles - Standardized with min-heights
 .btn {
   display: inline-flex;
   align-items: center;
@@ -72,7 +67,6 @@ h3 {
   text-decoration: none;
   white-space: nowrap;
   box-shadow: var(--shadow-md);
-  // min-height: 44px; // Standard button height
 
   &:disabled {
     opacity: 0.5;
@@ -119,18 +113,17 @@ h3 {
     padding: calc(var(--spacing-unit) * 2) calc(var(--spacing-unit) * 4);
     font-size: 1.125rem;
     border-radius: var(--radius-lg);
-    min-height: 56px; // Large button height
+    min-height: 56px;
   }
 
   &-sm {
     padding: calc(var(--spacing-unit) * 1) calc(var(--spacing-unit) * 2);
     font-size: 0.875rem;
     border-radius: var(--radius-sm);
-    min-height: 36px; // Small button height
+    min-height: 36px;
   }
 }
 
-// Container
 .container {
   width: 100%;
   max-width: 1440px;
@@ -142,47 +135,6 @@ h3 {
   }
 }
 
-// Section spacing
-.section {
-  padding: calc(var(--spacing-unit) * 12) 0;
-
-  @media (max-width: $breakpoint-md) {
-    padding: calc(var(--spacing-unit) * 8) 0;
-  }
-}
-
-.section-header {
-  text-align: center;
-  margin-bottom: calc(var(--spacing-unit) * 6);
-}
-
-.section-title {
-  font-size: clamp(2rem, 4vw, 3rem);
-  font-weight: 700;
-  // margin-bottom: calc(var(--spacing-unit) * 2);
-}
-
-.section-subtitle {
-  font-size: 1rem;
-  color: var(--color-text-secondary);
-  max-width: 700px;
-  margin: 0 auto;
-}
-
-// Card component - Minimal
-.card {
-  background: var(--color-surface-elevated);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  padding: calc(var(--spacing-unit) * 3);
-  transition: border-color var(--transition-base);
-
-  &:hover {
-    border-color: var(--color-text-tertiary);
-  }
-}
-
-// Focus styles
 :focus-visible {
   outline: 2px solid var(--color-accent);
   outline-offset: 2px;

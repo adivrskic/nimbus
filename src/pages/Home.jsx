@@ -430,6 +430,8 @@ function Home() {
             activeCategories={activeCategories}
             onPillClick={handlePillClick}
             onResetPill={resetSelection}
+            // Add prop to indicate minimized pill is present
+            hasMinimizedPreview={previewMinimized}
           />
 
           <AnimatePresence>
