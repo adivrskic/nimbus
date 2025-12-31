@@ -1,4 +1,5 @@
-import { useState, useRef, useEffect } from "react";
+// components/GeneratedPreview.jsx - Streaming optimized with Blob URLs
+import { useState, useRef, useEffect, useCallback } from "react";
 import {
   Monitor,
   Tablet,
@@ -10,65 +11,12 @@ import {
 } from "lucide-react";
 import "./GeneratedPreview.scss";
 
-function GeneratedPreview({ html, onClose }) {
+function GeneratedPreview({ html, onClose, isStreaming = false }) {
   const [viewMode, setViewMode] = useState("desktop");
   const [isFullscreen, setIsFullscreen] = useState(false);
   const iframeRef = useRef(null);
   const containerRef = useRef(null);
-
-  useEffect(() => {
-    if (!html || !iframeRef.current) return;
-
-    const iframe = iframeRef.current;
-    const doc = iframe.contentDocument || iframe.contentWindow.document;
-
-    doc.open();
-    doc.write(html);
-    doc.close();
-  }, [html]);
-
-  const toggleFullscreen = () => {
-    if (!containerRef.current) return;
-
-    if (!isFullscreen) {
-      if (containerRef.current.requestFullscreen) {
-        containerRef.current.requestFullscreen();
-      } else if (containerRef.current.webkitRequestFullscreen) {
-        containerRef.current.webkitRequestFullscreen();
-      }
-    } else {
-      if (document.exitFullscreen) {
-        document.exitFullscreen();
-      } else if (document.webkitExitFullscreen) {
-        document.webkitExitFullscreen();
-      }
-    }
-    setIsFullscreen(!isFullscreen);
-  };
-
-  useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
-
-    document.addEventListener("fullscreenchange", handleFullscreenChange);
-    document.addEventListener("webkitfullscreenchange", handleFullscreenChange);
-
-    return () => {
-      document.removeEventListener("fullscreenchange", handleFullscreenChange);
-      document.removeEventListener(
-        "webkitfullscreenchange",
-        handleFullscreenChange
-      );
-    };
-  }, []);
-
-  const openInNewTab = () => {
-    const blob = new Blob([html], { type: "text/html" });
-    const url = URL.createObjectURL(blob);
-    window.open(url, "_blank");
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-  };
+  const blobUrlRef = useRef(null);
 
   const getFrameWidth = () => {
     switch (viewMode) {
@@ -92,10 +40,85 @@ function GeneratedPreview({ html, onClose }) {
     }
   };
 
+  // Optimized streaming-friendly iframe updates using Blob URLs
+  useEffect(() => {
+    if (!html || !iframeRef.current) return;
+
+    const iframe = iframeRef.current;
+
+    // Clean up previous blob URL
+    if (blobUrlRef.current) {
+      URL.revokeObjectURL(blobUrlRef.current);
+      blobUrlRef.current = null;
+    }
+
+    // Create new blob from current HTML (handles partial HTML gracefully)
+    const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    blobUrlRef.current = url;
+
+    // Set iframe src - smooth updates even with partial HTML
+    iframe.src = url;
+
+    // Cleanup function
+    return () => {
+      if (blobUrlRef.current) {
+        URL.revokeObjectURL(blobUrlRef.current);
+        blobUrlRef.current = null;
+      }
+    };
+  }, [html]);
+
+  const toggleFullscreen = useCallback(() => {
+    if (!containerRef.current) return;
+
+    if (!isFullscreen) {
+      if (containerRef.current.requestFullscreen) {
+        containerRef.current.requestFullscreen();
+      } else if (containerRef.current.webkitRequestFullscreen) {
+        containerRef.current.webkitRequestFullscreen();
+      }
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+      }
+    }
+    setIsFullscreen(!isFullscreen);
+  }, [isFullscreen, setIsFullscreen]);
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    document.addEventListener("webkitfullscreenchange", handleFullscreenChange);
+
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+      document.removeEventListener(
+        "webkitfullscreenchange",
+        handleFullscreenChange
+      );
+    };
+  }, []);
+
+  const openInNewTab = useCallback(() => {
+    if (!html) return;
+    const blob = new Blob([html], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+    window.open(url, "_blank", "noopener,noreferrer");
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }, [html]);
+
   return (
     <div
       ref={containerRef}
-      className={`preview ${isFullscreen ? "preview--fullscreen" : ""}`}
+      className={`preview ${isFullscreen ? "preview--fullscreen" : ""} ${
+        isStreaming ? "preview--streaming" : ""
+      }`}
     >
       <div className="preview-toolbar">
         <div className="preview-devices">
@@ -105,6 +128,7 @@ function GeneratedPreview({ html, onClose }) {
             }`}
             onClick={() => setViewMode("desktop")}
             title="Desktop"
+            disabled={isStreaming}
           >
             <Monitor size={14} />
           </button>
@@ -114,6 +138,7 @@ function GeneratedPreview({ html, onClose }) {
             }`}
             onClick={() => setViewMode("tablet")}
             title="Tablet"
+            disabled={isStreaming}
           >
             <Tablet size={14} />
           </button>
@@ -123,6 +148,7 @@ function GeneratedPreview({ html, onClose }) {
             }`}
             onClick={() => setViewMode("mobile")}
             title="Mobile"
+            disabled={isStreaming}
           >
             <Smartphone size={14} />
           </button>
@@ -134,6 +160,7 @@ function GeneratedPreview({ html, onClose }) {
             className="preview-action"
             onClick={openInNewTab}
             title="Open in new tab"
+            disabled={isStreaming || !html}
           >
             <ExternalLink size={14} />
           </button>
@@ -160,12 +187,28 @@ function GeneratedPreview({ html, onClose }) {
           {viewMode !== "desktop" && <div className="preview-notch" />}
           <iframe
             ref={iframeRef}
-            className="preview-iframe"
+            className={`preview-iframe ${
+              isStreaming ? "preview-iframe--streaming" : ""
+            }`}
             title="Preview"
-            sandbox="allow-scripts allow-same-origin"
+            sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
           />
         </div>
       </div>
+
+      {/* Streaming overlay */}
+      {isStreaming && (
+        <div className="preview-streaming-overlay">
+          <div className="preview-streaming-indicator">
+            <div className="streaming-dots">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+            <span>Rendering live...</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

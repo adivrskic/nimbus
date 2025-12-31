@@ -1,6 +1,15 @@
-// utils/tokenCalculator.js
-// Dynamic token cost calculation - MUST MATCH edge function exactly
+// shared/tokenCalculator.js
+// SINGLE SOURCE OF TRUTH - Use this for both frontend and backend
+// For Deno/Edge Function: copy this file or import via URL
+// For Frontend: import normally
 
+/**
+ * Calculate token cost for website generation
+ * @param {string} prompt - User's prompt text
+ * @param {Object} selections - User's customization selections
+ * @param {boolean} isRefinement - Whether this is a refinement request
+ * @returns {{ cost: number, breakdown: Record<string, number>, estimate: string, wordCount: number }}
+ */
 export function calculateTokenCost(
   prompt = "",
   selections = {},
@@ -8,12 +17,15 @@ export function calculateTokenCost(
 ) {
   const breakdown = {};
 
-  // Base cost - same for both initial and refinement
-  breakdown.base = 5;
+  // ============================================
+  // BASE COST
+  // ============================================
+  breakdown.base = isRefinement ? 3 : 5;
 
+  // ============================================
+  // PROMPT COMPLEXITY
+  // ============================================
   const safePrompt = typeof prompt === "string" ? prompt : String(prompt ?? "");
-
-  // Prompt complexity (word count)
   const wordCount = safePrompt
     .trim()
     .split(/\s+/)
@@ -29,13 +41,15 @@ export function calculateTokenCost(
     breakdown.promptComplexity = 3;
   }
 
-  // For refinements, only base + prompt complexity apply
+  // ============================================
+  // FOR REFINEMENTS: Only base + prompt complexity
+  // ============================================
   if (isRefinement) {
     const totalCost = breakdown.base + breakdown.promptComplexity;
-    const finalCost = Math.min(Math.max(5, totalCost), 15);
+    const finalCost = Math.min(Math.max(3, totalCost), 15);
 
     let estimate = "";
-    if (finalCost <= 6) estimate = "Simple";
+    if (finalCost <= 5) estimate = "Simple";
     else if (finalCost <= 10) estimate = "Standard";
     else estimate = "Complex";
 
@@ -48,10 +62,8 @@ export function calculateTokenCost(
   }
 
   // ============================================
-  // STRUCTURE & LAYOUT (only for initial generation)
+  // STRUCTURE & LAYOUT
   // ============================================
-
-  // Template
   const templateCosts = {
     "Landing Page": 0,
     "Marketing Site": 2,
@@ -65,7 +77,6 @@ export function calculateTokenCost(
   };
   breakdown.template = templateCosts[selections.template] ?? 0;
 
-  // Navigation
   const navigationCosts = {
     Standard: 0,
     "Centered Logo": 1,
@@ -85,7 +96,6 @@ export function calculateTokenCost(
   };
   breakdown.navigation = navigationCosts[selections.navigation] ?? 0;
 
-  // Layout
   const layoutCosts = {
     "Vertical Stack": 0,
     "Single Page": 0,
@@ -100,12 +110,10 @@ export function calculateTokenCost(
   };
   breakdown.layout = layoutCosts[selections.layout] ?? 0;
 
-  // Sections
   const sectionCount = (selections.sections || []).length;
   breakdown.sections =
     sectionCount > 6 ? Math.floor((sectionCount - 6) * 0.5) : 0;
 
-  // Content Flow
   const contentFlowCosts = {
     Linear: 0,
     "Hub & Spoke": 1,
@@ -119,27 +127,15 @@ export function calculateTokenCost(
   };
   breakdown.contentFlow = contentFlowCosts[selections.contentFlow] ?? 0;
 
-  // Visual Hierarchy
-  const hierarchyCosts = {
-    Strong: 0,
-    Balanced: 0,
-    Flat: 0,
-  };
+  const hierarchyCosts = { Strong: 0, Balanced: 0, Flat: 0 };
   breakdown.hierarchy = hierarchyCosts[selections.hierarchy] ?? 0;
 
-  // Density
-  const densityCosts = {
-    Spacious: 0,
-    Balanced: 0,
-    Compact: 1,
-  };
+  const densityCosts = { Spacious: 0, Balanced: 0, Compact: 1 };
   breakdown.density = densityCosts[selections.density] ?? 0;
 
   // ============================================
   // VISUAL STYLE
   // ============================================
-
-  // Style
   const styleCosts = {
     Minimal: 0,
     Modern: 0,
@@ -154,7 +150,6 @@ export function calculateTokenCost(
   };
   breakdown.style = styleCosts[selections.style] ?? 0;
 
-  // Inspiration
   const inspirationCosts = {
     "Modern Startup": 0,
     Apple: 1,
@@ -185,17 +180,14 @@ export function calculateTokenCost(
     breakdown.inspiration = inspirationCosts[selections.inspiration] ?? 0;
   }
 
-  // Custom colors
   if (selections.palette === "Custom") {
     breakdown.customColors = 1;
   }
 
-  // Dark mode
   if (selections.mode === "Dark") {
     breakdown.darkMode = 1;
   }
 
-  // Gradient Style
   const gradientStyleCosts = {
     None: 0,
     Subtle: 0,
@@ -212,7 +204,6 @@ export function calculateTokenCost(
   };
   breakdown.gradientStyle = gradientStyleCosts[selections.gradientStyle] ?? 0;
 
-  // Background Pattern
   const backgroundPatternCosts = {
     None: 0,
     Dots: 1,
@@ -235,17 +226,9 @@ export function calculateTokenCost(
   breakdown.backgroundPattern =
     backgroundPatternCosts[selections.backgroundPattern] ?? 0;
 
-  // Corners
-  const cornerCosts = {
-    Sharp: 0,
-    Subtle: 0,
-    Rounded: 0,
-    Pill: 1,
-    Fluid: 1,
-  };
+  const cornerCosts = { Sharp: 0, Subtle: 0, Rounded: 0, Pill: 1, Fluid: 1 };
   breakdown.corners = cornerCosts[selections.corners] ?? 0;
 
-  // Shadow Style
   const shadowStyleCosts = {
     None: 0,
     Subtle: 0,
@@ -262,7 +245,6 @@ export function calculateTokenCost(
   };
   breakdown.shadowStyle = shadowStyleCosts[selections.shadowStyle] ?? 0;
 
-  // Hover Effects
   const hoverEffectsCosts = {
     None: 0,
     Subtle: 0,
@@ -282,11 +264,6 @@ export function calculateTokenCost(
   // ============================================
   // TYPOGRAPHY
   // ============================================
-
-  // Font (no cost - just a preference)
-  // Font costs are 0 for all options
-
-  // Typography Scale
   const typographyScaleCosts = {
     Compact: 0,
     Default: 0,
@@ -298,7 +275,6 @@ export function calculateTokenCost(
   breakdown.typographyScale =
     typographyScaleCosts[selections.typographyScale] ?? 0;
 
-  // Heading Style
   const headingStyleCosts = {
     Simple: 0,
     Bold: 0,
@@ -314,8 +290,6 @@ export function calculateTokenCost(
   // ============================================
   // COMPONENTS
   // ============================================
-
-  // Hero Style
   const heroStyleCosts = {
     Centered: 0,
     Split: 1,
@@ -338,7 +312,6 @@ export function calculateTokenCost(
   };
   breakdown.heroStyle = heroStyleCosts[selections.heroStyle] ?? 0;
 
-  // Button Style
   const buttonStyleCosts = {
     Solid: 0,
     Outline: 0,
@@ -358,7 +331,6 @@ export function calculateTokenCost(
   };
   breakdown.buttonStyle = buttonStyleCosts[selections.buttonStyle] ?? 0;
 
-  // Card Style
   const cardStyleCosts = {
     Flat: 0,
     Elevated: 0,
@@ -378,7 +350,6 @@ export function calculateTokenCost(
   };
   breakdown.cardStyle = cardStyleCosts[selections.cardStyle] ?? 0;
 
-  // Form Style
   const formStyleCosts = {
     Standard: 0,
     Underline: 0,
@@ -398,7 +369,6 @@ export function calculateTokenCost(
   };
   breakdown.formStyle = formStyleCosts[selections.formStyle] ?? 0;
 
-  // Icon Style
   const iconStyleCosts = {
     Line: 0,
     Solid: 0,
@@ -420,7 +390,6 @@ export function calculateTokenCost(
   };
   breakdown.iconStyle = iconStyleCosts[selections.iconStyle] ?? 0;
 
-  // Badge Style
   const badgeStyleCosts = {
     Pill: 0,
     Rounded: 0,
@@ -432,7 +401,6 @@ export function calculateTokenCost(
   };
   breakdown.badgeStyle = badgeStyleCosts[selections.badgeStyle] ?? 0;
 
-  // Avatar Style
   const avatarStyleCosts = {
     Circle: 0,
     Rounded: 0,
@@ -444,7 +412,6 @@ export function calculateTokenCost(
   };
   breakdown.avatarStyle = avatarStyleCosts[selections.avatarStyle] ?? 0;
 
-  // Tab Style
   const tabStyleCosts = {
     Underline: 0,
     Pill: 0,
@@ -455,7 +422,6 @@ export function calculateTokenCost(
   };
   breakdown.tabStyle = tabStyleCosts[selections.tabStyle] ?? 0;
 
-  // Accordion Style
   const accordionStyleCosts = {
     Simple: 0,
     Bordered: 0,
@@ -467,7 +433,6 @@ export function calculateTokenCost(
   breakdown.accordionStyle =
     accordionStyleCosts[selections.accordionStyle] ?? 0;
 
-  // Carousel Style
   const carouselStyleCosts = {
     None: 0,
     Simple: 1,
@@ -480,7 +445,6 @@ export function calculateTokenCost(
   };
   breakdown.carouselStyle = carouselStyleCosts[selections.carouselStyle] ?? 0;
 
-  // Notification Style
   const notificationStyleCosts = {
     Toast: 1,
     Banner: 0,
@@ -492,7 +456,6 @@ export function calculateTokenCost(
   breakdown.notificationStyle =
     notificationStyleCosts[selections.notificationStyle] ?? 0;
 
-  // Progress Style
   const progressStyleCosts = {
     Bar: 0,
     Circle: 1,
@@ -503,7 +466,6 @@ export function calculateTokenCost(
   };
   breakdown.progressStyle = progressStyleCosts[selections.progressStyle] ?? 0;
 
-  // Table Style
   const tableStyleCosts = {
     Simple: 0,
     Striped: 0,
@@ -515,10 +477,6 @@ export function calculateTokenCost(
   };
   breakdown.tableStyle = tableStyleCosts[selections.tableStyle] ?? 0;
 
-  // Link Style (no cost - just preference)
-  // All link styles cost 0
-
-  // List Style
   const listStyleCosts = {
     Standard: 0,
     Check: 0,
@@ -530,7 +488,6 @@ export function calculateTokenCost(
   };
   breakdown.listStyle = listStyleCosts[selections.listStyle] ?? 0;
 
-  // Empty States
   const emptyStatesCosts = {
     Simple: 0,
     Illustrated: 1,
@@ -543,8 +500,6 @@ export function calculateTokenCost(
   // ============================================
   // CONTENT BLOCKS
   // ============================================
-
-  // Testimonial Style
   const testimonialStyleCosts = {
     Cards: 0,
     Carousel: 1,
@@ -559,7 +514,6 @@ export function calculateTokenCost(
   breakdown.testimonialStyle =
     testimonialStyleCosts[selections.testimonialStyle] ?? 0;
 
-  // Pricing Style
   const pricingStyleCosts = {
     Cards: 0,
     Table: 0,
@@ -571,7 +525,6 @@ export function calculateTokenCost(
   };
   breakdown.pricingStyle = pricingStyleCosts[selections.pricingStyle] ?? 0;
 
-  // Stats Style
   const statsStyleCosts = {
     Simple: 0,
     Cards: 0,
@@ -583,7 +536,6 @@ export function calculateTokenCost(
   };
   breakdown.statsStyle = statsStyleCosts[selections.statsStyle] ?? 0;
 
-  // Team Style
   const teamStyleCosts = {
     Grid: 0,
     Carousel: 1,
@@ -594,7 +546,6 @@ export function calculateTokenCost(
   };
   breakdown.teamStyle = teamStyleCosts[selections.teamStyle] ?? 0;
 
-  // FAQ Style
   const faqStyleCosts = {
     Accordion: 0,
     Cards: 0,
@@ -605,7 +556,6 @@ export function calculateTokenCost(
   };
   breakdown.faqStyle = faqStyleCosts[selections.faqStyle] ?? 0;
 
-  // Contact Style
   const contactStyleCosts = {
     "Form Only": 0,
     "Form + Info": 0,
@@ -617,7 +567,6 @@ export function calculateTokenCost(
   };
   breakdown.contactStyle = contactStyleCosts[selections.contactStyle] ?? 0;
 
-  // Footer Style
   const footerStyleCosts = {
     Simple: 0,
     Minimal: 0,
@@ -630,7 +579,6 @@ export function calculateTokenCost(
   };
   breakdown.footerStyle = footerStyleCosts[selections.footerStyle] ?? 0;
 
-  // CTA Section Style
   const ctaSectionStyleCosts = {
     Centered: 0,
     Split: 1,
@@ -647,8 +595,6 @@ export function calculateTokenCost(
   // ============================================
   // EFFECTS & MOTION
   // ============================================
-
-  // Animation
   const animationCosts = {
     None: 0,
     Minimal: 0,
@@ -660,7 +606,6 @@ export function calculateTokenCost(
   };
   breakdown.animation = animationCosts[selections.animation] ?? 0;
 
-  // Interaction
   const interactionCosts = {
     Static: 0,
     Interactive: 1,
@@ -668,7 +613,6 @@ export function calculateTokenCost(
   };
   breakdown.interaction = interactionCosts[selections.interaction] ?? 0;
 
-  // Scroll Behavior
   const scrollBehaviorCosts = {
     Standard: 0,
     Smooth: 0,
@@ -681,7 +625,6 @@ export function calculateTokenCost(
   breakdown.scrollBehavior =
     scrollBehaviorCosts[selections.scrollBehavior] ?? 0;
 
-  // Loading Style
   const loadingStyleCosts = {
     None: 0,
     Spinner: 0,
@@ -695,8 +638,6 @@ export function calculateTokenCost(
   // ============================================
   // SPACING & BORDERS
   // ============================================
-
-  // Spacing Scale
   const spacingScaleCosts = {
     Tight: 0,
     Default: 0,
@@ -705,7 +646,6 @@ export function calculateTokenCost(
   };
   breakdown.spacingScale = spacingScaleCosts[selections.spacingScale] ?? 0;
 
-  // Divider Style
   const dividerStyleCosts = {
     None: 0,
     Line: 0,
@@ -722,14 +662,9 @@ export function calculateTokenCost(
   };
   breakdown.dividerStyle = dividerStyleCosts[selections.dividerStyle] ?? 0;
 
-  // Border Width (no cost - just preference)
-  // All border widths cost 0
-
   // ============================================
   // MEDIA
   // ============================================
-
-  // Images
   const imageCosts = {
     Photography: 1,
     Stock: 1,
@@ -743,7 +678,6 @@ export function calculateTokenCost(
   };
   breakdown.images = imageCosts[selections.images] ?? 0;
 
-  // Media Handling
   const mediaHandlingCosts = {
     Standard: 0,
     "Lazy Load": 0,
@@ -755,7 +689,6 @@ export function calculateTokenCost(
   };
   breakdown.mediaHandling = mediaHandlingCosts[selections.mediaHandling] ?? 0;
 
-  // Code Block Style
   const codeBlockStyleCosts = {
     None: 0,
     Simple: 0,
@@ -772,8 +705,6 @@ export function calculateTokenCost(
   // ============================================
   // TECHNICAL
   // ============================================
-
-  // Framework
   const frameworkCosts = {
     "Vanilla CSS": 0,
     "Tailwind Classes": 2,
@@ -784,35 +715,16 @@ export function calculateTokenCost(
   };
   breakdown.framework = frameworkCosts[selections.framework] ?? 0;
 
-  // Accessibility
-  const accessibilityCosts = {
-    Basic: 0,
-    Standard: 0,
-    Enhanced: 1,
-  };
+  const accessibilityCosts = { Basic: 0, Standard: 0, Enhanced: 1 };
   breakdown.accessibility = accessibilityCosts[selections.accessibility] ?? 0;
 
-  // SEO Level
-  const seoLevelCosts = {
-    Basic: 0,
-    Standard: 0,
-    Advanced: 1,
-  };
+  const seoLevelCosts = { Basic: 0, Standard: 0, Advanced: 1 };
   breakdown.seoLevel = seoLevelCosts[selections.seoLevel] ?? 0;
 
-  // Performance Level
-  const performanceLevelCosts = {
-    Standard: 0,
-    Optimized: 1,
-    "Ultra Light": 1,
-  };
+  const performanceLevelCosts = { Standard: 0, Optimized: 1, "Ultra Light": 1 };
   breakdown.performanceLevel =
     performanceLevelCosts[selections.performanceLevel] ?? 0;
 
-  // Responsive Approach (no cost - just preference)
-  // All responsive approaches cost 0
-
-  // Mobile Menu
   const mobileMenuCosts = {
     "Hamburger Slide": 0,
     "Full Screen": 1,
@@ -825,18 +737,10 @@ export function calculateTokenCost(
   // ============================================
   // FEATURES
   // ============================================
-
-  // Dark Mode Toggle
-  const darkModeToggleCosts = {
-    None: 0,
-    Header: 1,
-    Footer: 1,
-    System: 1,
-  };
+  const darkModeToggleCosts = { None: 0, Header: 1, Footer: 1, System: 1 };
   breakdown.darkModeToggle =
     darkModeToggleCosts[selections.darkModeToggle] ?? 0;
 
-  // Cookie Banner
   const cookieBannerCosts = {
     None: 0,
     Simple: 0,
@@ -846,7 +750,6 @@ export function calculateTokenCost(
   };
   breakdown.cookieBanner = cookieBannerCosts[selections.cookieBanner] ?? 0;
 
-  // Social Sharing
   const socialSharingCosts = {
     None: 0,
     Buttons: 1,
@@ -856,11 +759,9 @@ export function calculateTokenCost(
   };
   breakdown.socialSharing = socialSharingCosts[selections.socialSharing] ?? 0;
 
-  // Sticky Elements
   const stickyCount = (selections.stickyElements || []).length;
   breakdown.stickyElements = stickyCount > 0 ? Math.min(stickyCount, 2) : 0;
 
-  // Error Page Style
   const errorPageStyleCosts = {
     Simple: 0,
     Illustrated: 1,
@@ -875,27 +776,18 @@ export function calculateTokenCost(
   // ============================================
   // AI CONTROLS
   // ============================================
-
-  // Creativity
-  const creativityCosts = {
-    Conservative: 0,
-    Balanced: 0,
-    Experimental: 1,
-  };
+  const creativityCosts = { Conservative: 0, Balanced: 0, Experimental: 1 };
   breakdown.creativity = creativityCosts[selections.creativity] ?? 0;
 
   // ============================================
   // CALCULATE TOTAL
   // ============================================
-
-  // Filter out zero values and calculate total
   const totalCost = Object.values(breakdown).reduce(
     (sum, cost) => sum + (cost || 0),
     0
   );
 
-  let finalCost = Math.max(5, totalCost);
-  finalCost = Math.min(finalCost, 35);
+  const finalCost = Math.min(Math.max(5, totalCost), 35);
 
   let estimate = "";
   if (finalCost <= 8) estimate = "Simple";
@@ -912,15 +804,12 @@ export function calculateTokenCost(
 }
 
 /**
- * Format breakdown object for display
- * @param {Object} breakdown - The breakdown object from calculateTokenCost
- * @returns {Array} Formatted array of {label, cost, type} objects
+ * Format breakdown for display
  */
 export function getBreakdownDisplay(breakdown) {
   const labels = {
     base: "Base generation",
     promptComplexity: "Prompt detail",
-    // Structure & Layout
     template: "Template type",
     navigation: "Navigation style",
     layout: "Layout type",
@@ -928,7 +817,6 @@ export function getBreakdownDisplay(breakdown) {
     contentFlow: "Content flow",
     hierarchy: "Visual hierarchy",
     density: "Content density",
-    // Visual Style
     style: "Design style",
     inspiration: "Design inspiration",
     customColors: "Custom colors",
@@ -938,10 +826,8 @@ export function getBreakdownDisplay(breakdown) {
     corners: "Corner style",
     shadowStyle: "Shadow style",
     hoverEffects: "Hover effects",
-    // Typography
     typographyScale: "Type scale",
     headingStyle: "Heading style",
-    // Components
     heroStyle: "Hero style",
     buttonStyle: "Button style",
     cardStyle: "Card style",
@@ -957,7 +843,6 @@ export function getBreakdownDisplay(breakdown) {
     tableStyle: "Table style",
     listStyle: "List style",
     emptyStates: "Empty states",
-    // Content Blocks
     testimonialStyle: "Testimonial style",
     pricingStyle: "Pricing style",
     statsStyle: "Stats display",
@@ -966,67 +851,45 @@ export function getBreakdownDisplay(breakdown) {
     contactStyle: "Contact style",
     footerStyle: "Footer style",
     ctaSectionStyle: "CTA section",
-    // Effects & Motion
     animation: "Animations",
     interaction: "Interactivity",
     scrollBehavior: "Scroll behavior",
     loadingStyle: "Loading states",
-    // Spacing & Borders
     spacingScale: "Spacing scale",
     dividerStyle: "Section dividers",
-    // Media
     images: "Image style",
     mediaHandling: "Media handling",
     codeBlockStyle: "Code blocks",
-    // Technical
     framework: "CSS framework",
     accessibility: "Accessibility",
     seoLevel: "SEO focus",
     performanceLevel: "Performance",
     mobileMenu: "Mobile menu",
-    // Features
     darkModeToggle: "Dark mode toggle",
     cookieBanner: "Cookie banner",
     socialSharing: "Social sharing",
     stickyElements: "Sticky UI",
     errorPageStyle: "Error pages",
-    // AI
     creativity: "AI creativity",
   };
 
-  const display = Object.entries(breakdown)
+  return Object.entries(breakdown)
     .filter(([, cost]) => cost !== 0 && cost !== undefined)
     .map(([key, cost]) => ({
       label: labels[key] || key,
       cost: Math.abs(cost),
       type: cost < 0 ? "discount" : "addition",
-    }));
-
-  display.sort((a, b) => {
-    if (a.label === "Base generation") return -1;
-    if (b.label === "Base generation") return 1;
-    return b.cost - a.cost;
-  });
-
-  return display;
+    }))
+    .sort((a, b) => {
+      if (a.label === "Base generation") return -1;
+      if (b.label === "Base generation") return 1;
+      return b.cost - a.cost;
+    });
 }
 
 /**
- * Convenience wrapper that calculates token cost and returns formatted breakdown
- * @param {Object} selections - The user's selections
- * @param {string} prompt - The user's prompt
- * @param {boolean} isRefinement - Whether this is a refinement/enhance request
- * @returns {Array} Formatted breakdown for display
+ * Check if user has enough tokens
  */
-export function getTokenBreakdown(
-  selections,
-  prompt = "",
-  isRefinement = false
-) {
-  const { breakdown } = calculateTokenCost(prompt, selections, isRefinement);
-  return getBreakdownDisplay(breakdown);
-}
-
 export function checkTokenBalance(available, required) {
   const deficit = Math.max(0, required - available);
   const percentage = required > 0 ? (available / required) * 100 : 100;
@@ -1046,9 +909,28 @@ export function checkTokenBalance(available, required) {
   };
 }
 
+/**
+ * Format token cost for display
+ */
 export function formatTokenCost(cost) {
   if (cost === 1) return "1 token";
   return `${Math.ceil(cost)} tokens`;
+}
+
+/**
+ * Convenience wrapper that calculates token cost and returns formatted breakdown
+ * @param {Object} selections - The user's selections
+ * @param {string} prompt - The user's prompt
+ * @param {boolean} isRefinement - Whether this is a refinement/enhance request
+ * @returns {Array} Formatted breakdown for display
+ */
+export function getTokenBreakdown(
+  selections,
+  prompt = "",
+  isRefinement = false
+) {
+  const { breakdown } = calculateTokenCost(prompt, selections, isRefinement);
+  return getBreakdownDisplay(breakdown);
 }
 
 export default {

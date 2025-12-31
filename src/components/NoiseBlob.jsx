@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect, useState, useMemo } from "react";
 import {
   AmbientLight,
   Clock,
@@ -39,14 +39,13 @@ vec4 grad4(float j, vec4 ip){
 }
 
 float snoise(vec4 v){
-  const vec2  C = vec2( 0.138196601125010504,
-                        0.309016994374947451);
-  vec4 i  = floor(v + dot(v, C.yyyy) );
-  vec4 x0 = v -   i + dot(i, C.xxxx);
+  const vec2  C = vec2(0.138196601125010504, 0.309016994374947451);
+  vec4 i  = floor(v + dot(v, C.yyyy));
+  vec4 x0 = v - i + dot(i, C.xxxx);
 
   vec4 i0;
-  vec3 isX = step( x0.yzw, x0.xxx );
-  vec3 isYZ = step( x0.zww, x0.yyz );
+  vec3 isX = step(x0.yzw, x0.xxx);
+  vec3 isYZ = step(x0.zww, x0.yyz);
   i0.x = isX.x + isX.y + isX.z;
   i0.yzw = 1.0 - isX;
   i0.y += isYZ.x + isYZ.y;
@@ -54,9 +53,9 @@ float snoise(vec4 v){
   i0.z += isYZ.z;
   i0.w += 1.0 - isYZ.z;
 
-  vec4 i3 = clamp( i0, 0.0, 1.0 );
-  vec4 i2 = clamp( i0-1.0, 0.0, 1.0 );
-  vec4 i1 = clamp( i0-2.0, 0.0, 1.0 );
+  vec4 i3 = clamp(i0, 0.0, 1.0);
+  vec4 i2 = clamp(i0 - 1.0, 0.0, 1.0);
+  vec4 i1 = clamp(i0 - 2.0, 0.0, 1.0);
 
   vec4 x1 = x0 - i1 + 1.0 * C.xxxx;
   vec4 x2 = x0 - i2 + 2.0 * C.xxxx;
@@ -64,22 +63,22 @@ float snoise(vec4 v){
   vec4 x4 = x0 - 1.0 + 4.0 * C.xxxx;
 
   i = mod(i, 289.0); 
-  float j0 = permute( permute( permute( permute(i.w) + i.z) + i.y) + i.x);
-  vec4 j1 = permute( permute( permute( permute (
-             i.w + vec4(i1.w, i2.w, i3.w, 1.0 ))
-           + i.z + vec4(i1.z, i2.z, i3.z, 1.0 ))
-           + i.y + vec4(i1.y, i2.y, i3.y, 1.0 ))
-           + i.x + vec4(i1.x, i2.x, i3.x, 1.0 ));
+  float j0 = permute(permute(permute(permute(i.w) + i.z) + i.y) + i.x);
+  vec4 j1 = permute(permute(permute(permute(
+    i.w + vec4(i1.w, i2.w, i3.w, 1.0))
+    + i.z + vec4(i1.z, i2.z, i3.z, 1.0))
+    + i.y + vec4(i1.y, i2.y, i3.y, 1.0))
+    + i.x + vec4(i1.x, i2.x, i3.x, 1.0));
 
-  vec4 ip = vec4(1.0/294.0, 1.0/49.0, 1.0/7.0, 0.0) ;
+  vec4 ip = vec4(1.0/294.0, 1.0/49.0, 1.0/7.0, 0.0);
 
-  vec4 p0 = grad4(j0,   ip);
+  vec4 p0 = grad4(j0, ip);
   vec4 p1 = grad4(j1.x, ip);
   vec4 p2 = grad4(j1.y, ip);
   vec4 p3 = grad4(j1.z, ip);
   vec4 p4 = grad4(j1.w, ip);
 
-  vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2, p2), dot(p3,p3)));
+  vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2,p2), dot(p3,p3)));
   p0 *= norm.x;
   p1 *= norm.y;
   p2 *= norm.z;
@@ -87,30 +86,38 @@ float snoise(vec4 v){
   p4 *= taylorInvSqrt(dot(p4,p4));
 
   vec3 m0 = max(0.6 - vec3(dot(x0,x0), dot(x1,x1), dot(x2,x2)), 0.0);
-  vec2 m1 = max(0.6 - vec2(dot(x3,x3), dot(x4,x4)            ), 0.0);
-  m0 = m0 * m0;
-  m1 = m1 * m1;
-  return 49.0 * ( dot(m0*m0, vec3( dot( p0, x0 ), dot( p1, x1 ), dot( p2, x2 )))
-               + dot(m1*m1, vec2( dot( p3, x3 ), dot( p4, x4 ) ) ) ) ;
+  vec2 m1 = max(0.6 - vec2(dot(x3,x3), dot(x4,x4)), 0.0);
+  m0 *= m0;
+  m1 *= m1;
+
+  return 49.0 * (
+    dot(m0*m0, vec3(dot(p0,x0), dot(p1,x1), dot(p2,x2))) +
+    dot(m1*m1, vec2(dot(p3,x3), dot(p4,x4)))
+  );
 }
 `;
 
 export default function NoiseBlob({
-  color = "#ffffff",
-  emissiveColor = "#0000ff",
-  emissiveIntensity = 0.05,
-  backgroundColor = "#ffffff",
-  shininess = 300,
+  // Theme props
+  isDark = false,
+
+  // Color props (can be overridden, but will default based on theme)
+  color: colorProp,
+  emissiveColor: emissiveColorProp,
+  backgroundColor: backgroundColorProp,
+
+  // Other props
+  shininess = 600,
   wireframe = false,
-  speed = 0.15,
-  noiseScale = 0.875,
-  noiseAmplitude = 0.35,
+  speed = 0.12,
+  noiseScale = 0.475,
+  noiseAmplitude = 0.45,
   baseScale = 3.5,
-  detail = 250,
+  detail = 100,
   cameraDistance = 10,
   fov = 70,
-  enableControls = true,
-  enableZoom = true,
+  enableControls = false,
+  enableZoom = false,
   autoRotate = false,
   autoRotateSpeed = 2,
   ambientIntensity = 1,
@@ -129,18 +136,78 @@ export default function NoiseBlob({
   const cleanedUpRef = useRef(false);
   const sceneRef = useRef(null);
   const cameraRef = useRef(null);
+  const meshRef = useRef(null);
   const uniformsRef = useRef(null);
   const [initialized, setInitialized] = useState(false);
-  const isGeneratingRef = useRef(isGenerating);
-  const targetAmplitudeRef = useRef(isGenerating ? noiseAmplitude : 0);
 
-  // Update refs when props change
+  // Memoize colors based on theme to prevent unnecessary recalculations
+  const colors = useMemo(
+    () => ({
+      light: {
+        background: "#ffffff",
+        blob: "#ffffff",
+        emissive: "#ffffff",
+      },
+      dark: {
+        background: "#111111",
+        blob: "#222222",
+        emissive: "#333333",
+      },
+    }),
+    []
+  );
+
+  // Compute colors based on theme
+  const computedColors = useMemo(
+    () => ({
+      backgroundColor:
+        backgroundColorProp ||
+        (isDark ? colors.dark.background : colors.light.background),
+      color: colorProp || (isDark ? colors.dark.blob : colors.light.blob),
+      emissiveColor:
+        emissiveColorProp ||
+        (isDark ? colors.dark.emissive : colors.light.emissive),
+    }),
+    [isDark, colorProp, emissiveColorProp, backgroundColorProp, colors]
+  );
+
+  const targetAmplitudeRef = useRef(noiseAmplitude);
+
+  // Handle isGenerating prop changes
   useEffect(() => {
-    isGeneratingRef.current = isGenerating;
-    targetAmplitudeRef.current = isGenerating ? noiseAmplitude : 0;
+    if (isGenerating) {
+      targetAmplitudeRef.current = 0.8;
+    } else {
+      targetAmplitudeRef.current = noiseAmplitude;
+    }
   }, [isGenerating, noiseAmplitude]);
 
-  // Defer heavy Three.js initialization
+  // Update colors when theme changes - THIS IS THE KEY FIX
+  useEffect(() => {
+    if (!sceneRef.current || !meshRef.current) return;
+
+    const { backgroundColor, color, emissiveColor } = computedColors;
+
+    // Update scene background
+    sceneRef.current.background = new Color(backgroundColor);
+
+    // Update material colors
+    const material = meshRef.current.material;
+    if (material) {
+      material.color = new Color(color);
+      material.emissive = new Color(emissiveColor).multiplyScalar(0.25);
+      material.opacity = isDark ? 0.9 : 0.95;
+      material.shininess = isDark ? 300 : shininess;
+      material.needsUpdate = true; // Force material update
+    }
+
+    // Update renderer clear color
+    if (rendererRef.current) {
+      rendererRef.current.setClearColor(new Color(backgroundColor), 0);
+    }
+  }, [computedColors, isDark, shininess]);
+
+  // Main Three.js initialization
   useEffect(() => {
     if (!containerRef.current) return;
 
@@ -151,9 +218,9 @@ export default function NoiseBlob({
       if (cleanedUpRef.current || !containerRef.current) return;
 
       const container = containerRef.current;
-      while (container.firstChild) {
-        container.removeChild(container.firstChild);
-      }
+      container.innerHTML = "";
+
+      const { backgroundColor, color, emissiveColor } = computedColors;
 
       const scene = new Scene();
       scene.background = new Color(backgroundColor);
@@ -175,9 +242,14 @@ export default function NoiseBlob({
       camera.lookAt(0, 0, 0);
       cameraRef.current = camera;
 
-      const renderer = new WebGLRenderer({ antialias: true });
+      const renderer = new WebGLRenderer({
+        antialias: true,
+        alpha: true,
+        powerPreference: "high-performance",
+      });
       renderer.setSize(container.clientWidth, container.clientHeight);
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.setClearColor(new Color(backgroundColor), 0);
       container.appendChild(renderer.domElement);
       rendererRef.current = renderer;
 
@@ -188,30 +260,37 @@ export default function NoiseBlob({
       controls.enableZoom = enableZoom;
       controls.autoRotate = autoRotate;
       controls.autoRotateSpeed = autoRotateSpeed;
-      controls.target.set(0, 0, 0);
-
-      // Start with 0 amplitude if not generating
-      const initialAmplitude = isGeneratingRef.current ? noiseAmplitude : 0;
 
       const uniforms = {
         time: { value: 0 },
         noiseScale: { value: noiseScale },
-        noiseAmplitude: { value: initialAmplitude },
+        noiseAmplitude: { value: noiseAmplitude },
         baseScale: { value: initialScale },
       };
       uniformsRef.current = uniforms;
 
+      // Lighting - adjust for theme
+      const dirLightIntensity = isDark
+        ? directionalIntensity * 0.7
+        : directionalIntensity;
+      const hemiLightIntensity = isDark
+        ? hemisphereIntensity * 0.7
+        : hemisphereIntensity;
+      const ambLightIntensity = isDark
+        ? ambientIntensity * 0.7
+        : ambientIntensity;
+
       const directionalLight = new DirectionalLight(
         0xffffff,
-        directionalIntensity
+        dirLightIntensity
       );
-      directionalLight.position.setScalar(1);
       const hemisphereLight = new HemisphereLight(
         0xffff00,
         0x0000ff,
-        hemisphereIntensity
+        hemiLightIntensity
       );
-      const ambientLight = new AmbientLight(0xffffff, ambientIntensity);
+      const ambientLight = new AmbientLight(0xffffff, ambLightIntensity);
+
       scene.add(directionalLight, hemisphereLight, ambientLight);
 
       let geometry = new IcosahedronGeometry(1, detail);
@@ -222,14 +301,13 @@ export default function NoiseBlob({
 
       const material = new MeshPhongMaterial({
         color: new Color(color),
-        emissive: new Color(emissiveColor).multiplyScalar(emissiveIntensity),
-        shininess: shininess,
-        wireframe: wireframe,
-        onBeforeCompile: (shader) => {
-          shader.uniforms.time = uniforms.time;
-          shader.uniforms.noiseScale = uniforms.noiseScale;
-          shader.uniforms.noiseAmplitude = uniforms.noiseAmplitude;
-          shader.uniforms.baseScale = uniforms.baseScale;
+        emissive: new Color(emissiveColor).multiplyScalar(0.25),
+        shininess: isDark ? 300 : shininess,
+        wireframe,
+        transparent: true,
+        opacity: isDark ? 0.9 : 0.95,
+        onBeforeCompile(shader) {
+          shader.uniforms = { ...shader.uniforms, ...uniforms };
 
           shader.vertexShader = `
             uniform float time;
@@ -241,8 +319,7 @@ export default function NoiseBlob({
               float n = snoise(vec4(p, time));
               n = sin(n * 3.1415926 * 8.);
               n = n * 0.5 + 0.5;
-              n *= n;
-              return n;
+              return n * n;
             }
             vec3 getPos(vec3 p){
               return p * (baseScale + noise(p * noiseScale) * noiseAmplitude);
@@ -250,151 +327,107 @@ export default function NoiseBlob({
             ${shader.vertexShader}
           `
             .replace(
-              `#include <beginnormal_vertex>`,
+              "#include <beginnormal_vertex>",
               `#include <beginnormal_vertex>
-              
-              vec3 p0 = getPos(position);
-              
-              float theta = .1; 
-              vec3 vecTangent = normalize(cross(p0, vec3(1.0, 0.0, 0.0)) + cross(p0, vec3(0.0, 1.0, 0.0)));
-              vec3 vecBitangent = normalize(cross(vecTangent, p0));
-              vec3 ptTangentSample = getPos(normalize(p0 + theta * normalize(vecTangent)));
-              vec3 ptBitangentSample = getPos(normalize(p0 + theta * normalize(vecBitangent)));
-              
-              objectNormal = normalize(cross(ptBitangentSample - p0, ptTangentSample - p0));
-              `
+               vec3 p0 = getPos(position);
+               float theta = .1;
+               vec3 t = normalize(cross(p0, vec3(1,0,0)) + cross(p0, vec3(0,1,0)));
+               vec3 b = normalize(cross(t, p0));
+               vec3 pt = getPos(normalize(p0 + theta * t));
+               vec3 pb = getPos(normalize(p0 + theta * b));
+               objectNormal = normalize(cross(pb - p0, pt - p0));`
             )
             .replace(
-              `#include <begin_vertex>`,
+              "#include <begin_vertex>",
               `#include <begin_vertex>
-              transformed = p0;
-            `
+               transformed = p0;`
             );
         },
       });
 
       const mesh = new Mesh(geometry, material);
       scene.add(mesh);
+      meshRef.current = mesh;
 
       const clock = new Clock();
       let lastTime = 0;
-
-      const handleResize = () => {
-        if (!container || cleanedUpRef.current) return;
-        const width = container.clientWidth;
-        const height = container.clientHeight;
-        camera.aspect = width / height;
-        camera.updateProjectionMatrix();
-        renderer.setSize(width, height);
-
-        const mobile = isMobileOrPortrait();
-        camera.position.y = mobile ? mobileCameraYOffset : 0;
-        camera.position.z = cameraDistance;
-        controls.target.set(0, 0, 0);
-        controls.update();
-
-        if (uniformsRef.current) {
-          uniformsRef.current.baseScale.value = mobile
-            ? baseScale * mobileScaleMultiplier
-            : baseScale;
-        }
-      };
-      window.addEventListener("resize", handleResize);
 
       const animate = () => {
         if (cleanedUpRef.current) return;
         animationIdRef.current = requestAnimationFrame(animate);
 
-        const currentTime = clock.getElapsedTime();
-        const deltaTime = currentTime - lastTime;
-        lastTime = currentTime;
+        const t = clock.getElapsedTime();
+        const dt = t - lastTime;
+        lastTime = t;
 
+        if (uniformsRef.current) {
+          uniformsRef.current.noiseAmplitude.value +=
+            (targetAmplitudeRef.current -
+              uniformsRef.current.noiseAmplitude.value) *
+            (1 - Math.exp(-transitionSpeed * dt));
+
+          uniformsRef.current.time.value = t * speed;
+        }
         controls.update();
-
-        // Smoothly interpolate noiseAmplitude toward target
-        const currentAmplitude = uniforms.noiseAmplitude.value;
-        const targetAmplitude = targetAmplitudeRef.current;
-        const lerpFactor = 1 - Math.exp(-transitionSpeed * deltaTime);
-        uniforms.noiseAmplitude.value =
-          currentAmplitude + (targetAmplitude - currentAmplitude) * lerpFactor;
-
-        uniforms.time.value = currentTime * speed;
         renderer.render(scene, camera);
       };
+
       animate();
-
       setInitialized(true);
-
-      // Store cleanup function
-      containerRef.current._cleanup = () => {
-        window.removeEventListener("resize", handleResize);
-        if (animationIdRef.current) {
-          cancelAnimationFrame(animationIdRef.current);
-          animationIdRef.current = null;
-        }
-        controls.dispose();
-        geometry.dispose();
-        material.dispose();
-        renderer.dispose();
-        if (
-          renderer.domElement &&
-          renderer.domElement.parentNode === container
-        ) {
-          container.removeChild(renderer.domElement);
-        }
-        rendererRef.current = null;
-        sceneRef.current = null;
-        cameraRef.current = null;
-        uniformsRef.current = null;
-      };
     };
 
-    // Defer initialization using requestIdleCallback or setTimeout
     cleanedUpRef.current = false;
 
     if ("requestIdleCallback" in window) {
-      idleCallbackId = requestIdleCallback(
-        () => {
-          initTimeout = setTimeout(initThreeJS, 0);
-        },
-        { timeout: 2000 }
-      );
+      idleCallbackId = requestIdleCallback(() => {
+        initTimeout = setTimeout(initThreeJS, 0);
+      });
     } else {
       initTimeout = setTimeout(initThreeJS, 50);
     }
+
+    const handleResize = () => {
+      if (containerRef.current && cameraRef.current && rendererRef.current) {
+        const width = containerRef.current.clientWidth;
+        const height = containerRef.current.clientHeight;
+
+        cameraRef.current.aspect = width / height;
+        cameraRef.current.updateProjectionMatrix();
+        rendererRef.current.setSize(width, height);
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
 
     return () => {
       cleanedUpRef.current = true;
       if (idleCallbackId) cancelIdleCallback(idleCallbackId);
       if (initTimeout) clearTimeout(initTimeout);
-      if (containerRef.current?._cleanup) {
-        containerRef.current._cleanup();
+      window.removeEventListener("resize", handleResize);
+
+      if (animationIdRef.current) {
+        cancelAnimationFrame(animationIdRef.current);
+      }
+
+      if (rendererRef.current) {
+        rendererRef.current.dispose();
+        const domElement = rendererRef.current.domElement;
+        if (domElement && domElement.parentNode) {
+          domElement.parentNode.removeChild(domElement);
+        }
       }
     };
   }, [
-    color,
-    emissiveColor,
-    emissiveIntensity,
-    backgroundColor,
-    speed,
-    noiseScale,
-    noiseAmplitude,
-    baseScale,
+    // Only re-initialize on mount and when these props change
     detail,
-    shininess,
-    wireframe,
     cameraDistance,
     fov,
     enableControls,
     enableZoom,
     autoRotate,
     autoRotateSpeed,
-    ambientIntensity,
-    directionalIntensity,
-    hemisphereIntensity,
     mobileScaleMultiplier,
     mobileCameraYOffset,
-    transitionSpeed,
   ]);
 
   return (

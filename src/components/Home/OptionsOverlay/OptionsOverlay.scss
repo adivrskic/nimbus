@@ -49,6 +49,7 @@
   width: 100%;
   max-width: 1080px;
   height: 90vh;
+  padding: 16px;
   background: transparent;
 }
 
@@ -507,11 +508,16 @@
   }
 }
 
+@media (max-width: 1080px) {
+  .options-content {
+    height: 100dvh;
+  }
+}
+
 // Responsive
 @media (max-width: 768px) {
   .options-content {
     max-width: 100%;
-    max-height: 100vh;
     padding: 16px;
   }
 

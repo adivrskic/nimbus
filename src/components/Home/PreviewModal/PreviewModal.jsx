@@ -1,4 +1,4 @@
-// components/Home/PreviewModal/PreviewModal.jsx - Generated site preview modal
+// components/Home/PreviewModal/PreviewModal.jsx - Streaming support added
 import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -11,8 +11,8 @@ import {
   Check,
   Sparkles,
   Coins,
+  Loader2,
 } from "lucide-react";
-import { Loader2 } from "lucide-react";
 import GeneratedPreview from "../../GeneratedPreview";
 import {
   previewOverlayVariants,
@@ -33,7 +33,6 @@ function PreviewModal({
   isSaving,
   saveSuccess,
   isGenerating,
-  // Enhance props
   enhancePrompt,
   onEnhancePromptChange,
   onEnhance,
@@ -45,11 +44,14 @@ function PreviewModal({
   userTokens,
   tokenBalance,
   onBuyTokens,
+  isStreaming = false, // New prop
 }) {
   const [showCode, setShowCode] = useState(false);
   const enhanceInputRef = useRef(null);
 
-  if (!isOpen || !html) return null;
+  console.log(isOpen, html);
+
+  if (!isOpen) return null;
 
   return (
     <motion.div
@@ -90,11 +92,20 @@ function PreviewModal({
             </button>
           </div>
 
+          {/* Streaming indicator */}
+          {isStreaming && (
+            <div className="preview-modal__streaming-indicator">
+              <Loader2 size={12} className="spin" />
+              <span>Streaming...</span>
+            </div>
+          )}
+
           <div className="preview-modal__actions">
             <button
               className="preview-modal__action-btn"
               onClick={onDownload}
               title="Download HTML"
+              disabled={isStreaming || !html}
             >
               <Download size={14} />
               <span>Download</span>
@@ -105,7 +116,7 @@ function PreviewModal({
                 saveSuccess ? "success" : ""
               }`}
               onClick={onSave}
-              disabled={isSaving}
+              disabled={isSaving || isStreaming || !html}
               title="Save to Projects"
             >
               {isSaving ? (
@@ -123,7 +134,11 @@ function PreviewModal({
               )}
             </button>
 
-            {/* <button className="preview-modal__deploy-btn" onClick={onDeploy}>
+            {/* <button
+              className="preview-modal__deploy-btn"
+              onClick={onDeploy}
+              disabled={isStreaming || !html}
+            >
               <Rocket size={14} />
               <span>Deploy</span>
             </button> */}
@@ -150,7 +165,7 @@ function PreviewModal({
               </pre>
             </div>
           ) : (
-            <GeneratedPreview html={html} />
+            <GeneratedPreview html={html} isStreaming={isStreaming} />
           )}
         </div>
 
@@ -167,7 +182,7 @@ function PreviewModal({
               }}
               placeholder="Describe changes..."
               className="preview-modal__enhance-input"
-              disabled={isGenerating}
+              disabled={isGenerating || isStreaming}
             />
           </div>
           <div className="preview-modal__enhance-actions">
@@ -182,6 +197,7 @@ function PreviewModal({
                     showEnhanceTokenOverlay ? "active" : ""
                   }`}
                   onClick={onToggleEnhanceTokenOverlay}
+                  disabled={isStreaming}
                 >
                   <Coins size={14} />
                   <span>-{enhanceTokenCost}</span>
@@ -191,7 +207,7 @@ function PreviewModal({
             <motion.button
               className="preview-modal__submit-btn"
               onClick={onEnhance}
-              disabled={isGenerating || !enhancePrompt.trim()}
+              disabled={isGenerating || isStreaming || !enhancePrompt.trim()}
             >
               {isGenerating ? (
                 <Loader2 size={16} className="spin" />
