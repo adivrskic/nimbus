@@ -113,6 +113,7 @@ function Home() {
     reset: resetGeneration,
     updateCode,
     isStreaming,
+    streamingPhase,
   } = useGeneration({
     onSuccess: () => {
       refreshTokens?.();
@@ -510,6 +511,7 @@ function Home() {
             tokenBalance={tokenBalance}
             onBuyTokens={openTokens}
             isStreaming={isStreaming}
+            streamingPhase={streamingPhase}
           />
         )}
       </AnimatePresence>

@@ -1,4 +1,4 @@
-// hooks/useGeneration.js - FIXED streaming + preview timing
+// hooks/useGeneration.js - Streaming optimized with body-first rendering
 import { useState, useCallback, useRef, useEffect } from "react";
 import { buildFullPrompt } from "../utils/promptBuilder";
 import { generateDemo } from "../utils/demoGenerator";
@@ -13,21 +13,23 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
   const [generationError, setGenerationError] = useState(null);
   const [enhancePrompt, setEnhancePrompt] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
+  const [streamingPhase, setStreamingPhase] = useState(null); // 'head' | 'body' | 'styles' | 'scripts' | 'complete'
 
   const { setIsGenerating: setGlobalGenerating } = useGenerationState();
   const generationRef = useRef(null);
   const abortControllerRef = useRef(null);
+  const streamRef = useRef(null); // Keep reference to stream for getNormalizedHtml
 
   useEffect(() => {
     setGlobalGenerating(isGenerating);
   }, [isGenerating, setGlobalGenerating]);
 
-  // Debounced update for streaming
+  // Debounced update for streaming - faster for better UX
   const debouncedSetCode = useCallback((html) => {
     if (streamingTimeout) clearTimeout(streamingTimeout);
     streamingTimeout = setTimeout(() => {
       setGeneratedCode(html);
-    }, 100); // Faster updates
+    }, 50); // Even faster updates for smoother streaming
   }, []);
 
   const generate = useCallback(
@@ -42,6 +44,7 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
       setIsGenerating(true);
       setGenerationError(null);
       setIsStreaming(streaming);
+      setStreamingPhase("head");
       setGeneratedCode(""); // Clear previous
       generationRef.current = Date.now();
       abortControllerRef.current = new AbortController();
@@ -59,21 +62,33 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
             customization: selections,
             isRefinement: false,
             signal: abortControllerRef.current.signal,
+            // Progress callback for phase updates
+            onProgress: ({ phase, content }) => {
+              setStreamingPhase(phase);
+              // Update code on each progress (debounced)
+              debouncedSetCode(content);
+            },
           });
 
-          if (streamResult.chunks) {
-            let html = "";
-            for await (const chunk of streamResult.chunks()) {
-              console.log("chunks: ", chunk);
-              if (abortControllerRef.current?.signal.aborted) break;
-              html += chunk;
-              debouncedSetCode(html);
-            }
-            setGeneratedCode(html);
-            setIsStreaming(false);
-            onSuccess?.({ code: html, isStreaming: true });
+          // Store stream reference for later normalization
+          streamRef.current = streamResult;
 
-            return { code: html, isStreaming: true };
+          if (streamResult.chunks) {
+            // Consume the stream
+            for await (const chunk of streamResult.chunks()) {
+              if (abortControllerRef.current?.signal.aborted) break;
+              // Chunks are already handled by onProgress callback
+              // This loop just drives the async iteration
+            }
+
+            // Stream complete - get the normalized HTML (styles moved to head)
+            const normalizedHtml = streamResult.getNormalizedHtml();
+            setGeneratedCode(normalizedHtml);
+            setIsStreaming(false);
+            setStreamingPhase("complete");
+
+            onSuccess?.({ code: normalizedHtml, isStreaming: true });
+            return { code: normalizedHtml, isStreaming: true };
           }
         }
 
@@ -107,6 +122,7 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
       } finally {
         setIsGenerating(false);
         setIsStreaming(false);
+        setStreamingPhase(null);
       }
     },
     [isGenerating, supabaseGenerate, onSuccess, onError, debouncedSetCode]
@@ -116,10 +132,51 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
     async (originalPrompt, selections, user) => {
       if (!enhancePrompt.trim() || !generatedCode || isGenerating) return;
 
+      // Cancel previous
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+
       setIsGenerating(true);
       setGenerationError(null);
+      setIsStreaming(true);
+      setStreamingPhase("head");
+      abortControllerRef.current = new AbortController();
 
       try {
+        // Use streaming for enhance too
+        const streamResult = await generateWebsiteStream({
+          prompt: enhancePrompt,
+          customization: {
+            ...selections,
+            isRefinement: true,
+            previousHtml: generatedCode,
+          },
+          signal: abortControllerRef.current.signal,
+          onProgress: ({ phase, content }) => {
+            setStreamingPhase(phase);
+            debouncedSetCode(content);
+          },
+        });
+
+        streamRef.current = streamResult;
+
+        if (streamResult.chunks) {
+          for await (const chunk of streamResult.chunks()) {
+            if (abortControllerRef.current?.signal.aborted) break;
+          }
+
+          const normalizedHtml = streamResult.getNormalizedHtml();
+          setGeneratedCode(normalizedHtml);
+          setEnhancePrompt("");
+          setIsStreaming(false);
+          setStreamingPhase("complete");
+
+          onSuccess?.({ code: normalizedHtml, isStreaming: true });
+          return { code: normalizedHtml, isStreaming: true };
+        }
+
+        // Fallback to non-streaming
         if (supabaseGenerate) {
           const result = await supabaseGenerate({
             prompt: enhancePrompt,
@@ -137,10 +194,14 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
           }
         }
       } catch (error) {
-        setGenerationError(error.message);
-        onError?.(error);
+        if (error.name !== "AbortError") {
+          setGenerationError(error.message);
+          onError?.(error);
+        }
       } finally {
         setIsGenerating(false);
+        setIsStreaming(false);
+        setStreamingPhase(null);
       }
     },
     [
@@ -150,6 +211,7 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
       supabaseGenerate,
       onSuccess,
       onError,
+      debouncedSetCode,
     ]
   );
 
@@ -160,6 +222,7 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
     if (streamingTimeout) clearTimeout(streamingTimeout);
     setIsGenerating(false);
     setIsStreaming(false);
+    setStreamingPhase(null);
   }, []);
 
   const reset = useCallback(() => {
@@ -169,6 +232,8 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
     setGenerationError(null);
     setEnhancePrompt("");
     setIsStreaming(false);
+    setStreamingPhase(null);
+    streamRef.current = null;
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
@@ -184,6 +249,7 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
     generationError,
     enhancePrompt,
     isStreaming,
+    streamingPhase, // New: expose current phase for UI indicators
     setEnhancePrompt,
     updateCode,
     generate,

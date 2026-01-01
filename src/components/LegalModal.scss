@@ -59,7 +59,6 @@
   align-items: center;
   justify-content: space-between;
   padding-bottom: calc(var(--spacing-unit) * 1.5);
-  border-bottom: 1px solid var(--color-border);
 }
 
 .legal-title {
@@ -107,7 +106,6 @@
   display: flex;
   gap: 6px;
   padding: calc(var(--spacing-unit) * 1.5) 0;
-  border-bottom: 1px solid var(--color-border);
 }
 
 .legal-nav__link {
@@ -143,7 +141,6 @@
   flex-direction: column;
   gap: calc(var(--spacing-unit) * 1.5);
   padding-bottom: calc(var(--spacing-unit) * 2);
-  border-bottom: 1px solid var(--color-border);
 
   &:last-child {
     border-bottom: none;

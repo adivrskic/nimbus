@@ -176,24 +176,15 @@ function Footer({ onLegalClick, onRoadmapClick, onSupportClick }) {
             <style>{`
               @keyframes emojiRain {
                 0% {
-                  opacity: 0;
-                  transform: translate3d(0, 0, 0) scale(0.4);
+                  opacity: 0.5;
+                  transform: translate3d(0, 0, 0) scale(0.5);
                 }
-                20% {
+                90% {
                   opacity: 1;
-                  transform: translate3d(0, 20px, 0) scale(0.8);
-                }
-                60% {
-                  opacity: 1;
-                  transform: translate3d(${
-                    Math.random() * 20 - 10
-                  }px, 100px, 0) scale(1);
                 }
                 100% {
                   opacity: 0;
-                  transform: translate3d(${
-                    Math.random() * 30 - 15
-                  }px, 200px, 0) scale(0.7);
+                  transform: translate3d(0, 200px, 0) scale(1);
                 }
               }
             `}</style>
