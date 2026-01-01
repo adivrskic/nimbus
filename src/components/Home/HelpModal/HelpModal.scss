@@ -40,7 +40,6 @@
   align-items: center;
   justify-content: space-between;
   padding-bottom: 12px;
-  border-bottom: 1px solid var(--color-border);
 }
 
 .help-title {
@@ -78,7 +77,6 @@
 .help-section {
   margin-bottom: 16px;
   padding: 12px 0;
-  border-bottom: 1px solid var(--color-border);
 
   &:last-child {
     border-bottom: none;

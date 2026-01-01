@@ -15,6 +15,7 @@ import {
   Settings,
   RefreshCw,
   ChevronDown,
+  FolderOpen,
   Copy,
   PanelsTopLeft,
 } from "lucide-react";
@@ -244,7 +245,7 @@ function ProjectsModal({
       >
         <div className="projects-header">
           <span className="projects-title">
-            <PanelsTopLeft size={16} />
+            <FolderOpen size={16} />
             <span>Projects</span>
           </span>
           <button className="projects-close" onClick={closeModal}>

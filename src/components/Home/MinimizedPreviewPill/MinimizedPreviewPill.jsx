@@ -13,8 +13,7 @@ function MinimizedPreviewPill({ onExpand, onDiscard }) {
       transition={{ duration: 0.2 }}
     >
       <button className="minimized-preview-pill__main" onClick={onExpand}>
-        <span>Generated Site</span>
-        <Maximize2 size={12} />
+        <span>Customize Generated Site</span>
       </button>
     </motion.div>
   );

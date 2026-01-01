@@ -6,7 +6,6 @@ import {
   ChevronDown,
   Coins,
   FolderOpen,
-  CreditCard,
   Sun,
   Moon,
   SunMoon, // For auto mode
@@ -16,7 +15,6 @@ import { useProject } from "../contexts/ProjectContext";
 import AuthModal from "./AuthModal";
 import TokenPurchaseModal from "./TokenPurchaseModal";
 import ProjectsModal from "./ProjectsModal";
-import BillingModal from "./BillingModal";
 import { useTheme } from "../contexts/ThemeContext";
 import "./Header.scss";
 

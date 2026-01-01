@@ -92,14 +92,6 @@ function PreviewModal({
             </button>
           </div>
 
-          {/* Streaming indicator */}
-          {isStreaming && (
-            <div className="preview-modal__streaming-indicator">
-              <Loader2 size={12} className="spin" />
-              <span>Streaming...</span>
-            </div>
-          )}
-
           <div className="preview-modal__actions">
             <button
               className="preview-modal__action-btn"
