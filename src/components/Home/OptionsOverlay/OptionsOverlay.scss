@@ -12,38 +12,6 @@
   -webkit-backdrop-filter: var(--glass-blur);
 }
 
-// Intro Animation
-.options-intro {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 1400px;
-  z-index: 10;
-
-  &__pills {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    width: 100%;
-    justify-content: center;
-    transform-origin: center;
-  }
-
-  &__pill {
-    padding: 12px 20px;
-    background: var(--color-surface-elevated);
-    border: 1px solid var(--color-border);
-    border-radius: 999px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    font-family: var(--font-family-base, sans-serif);
-    color: var(--color-text-secondary);
-    box-shadow: var(--shadow-md);
-  }
-}
-
 // Main Content
 .options-content {
   display: flex;
@@ -82,7 +50,6 @@
 
 .options-subtitle {
   font-size: 0.675rem;
-  // font-family: var(--font-family-base, sans-serif);
   color: var(--color-text-tertiary);
 }
 
@@ -680,10 +647,6 @@
 
   .options-grid {
     grid-template-columns: repeat(2, 1fr);
-  }
-
-  .options-intro__pills {
-    // max-width: 90vw;
   }
 }
 

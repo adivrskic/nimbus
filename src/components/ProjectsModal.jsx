@@ -20,6 +20,7 @@ import {
   PanelsTopLeft,
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
+import { useProject } from "../contexts/ProjectContext";
 import { supabase } from "../lib/supabaseClient";
 import useModalAnimation from "../hooks/useModalAnimation";
 import "./ProjectsModal.scss";
@@ -32,13 +33,13 @@ function ProjectsModal({
   onDomainSetup,
 }) {
   const { user } = useAuth();
+  const { projects, isLoading, fetchProjects, removeProjectFromCache } =
+    useProject();
   const { shouldRender, isVisible, closeModal } = useModalAnimation(
     isOpen,
     onClose
   );
 
-  const [projects, setProjects] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [deletingId, setDeletingId] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -47,11 +48,12 @@ function ProjectsModal({
   const [expandedProject, setExpandedProject] = useState(null);
   const [copied, setCopied] = useState(null);
 
+  // Fetch projects when modal opens (uses cache if available)
   useEffect(() => {
     if (isOpen && user) {
       fetchProjects();
     }
-  }, [isOpen, user]);
+  }, [isOpen, user, fetchProjects]);
 
   // Clear delete error when modal closes
   useEffect(() => {
@@ -60,24 +62,6 @@ function ProjectsModal({
       setDeletingId(null);
     }
   }, [isOpen]);
-
-  const fetchProjects = async () => {
-    setIsLoading(true);
-    try {
-      const { data, error } = await supabase.functions.invoke("get-projects", {
-        body: {},
-      });
-
-      if (error) throw error;
-
-      setProjects(data.projects || []);
-    } catch (err) {
-      console.error("Error fetching projects:", err);
-      setProjects([]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleEdit = async (project) => {
     setLoadingAction({ id: project.id, type: "edit" });
@@ -146,11 +130,10 @@ function ProjectsModal({
       // Check for warnings (partial failures)
       if (data.warnings && data.warnings.length > 0) {
         console.warn("Delete completed with warnings:", data.warnings);
-        // You could show a toast notification here if desired
       }
 
-      // Remove from local state
-      setProjects((prev) => prev.filter((p) => p.id !== projectId));
+      // Remove from cache
+      removeProjectFromCache(projectId);
       setDeletingId(null);
     } catch (err) {
       console.error("Delete error:", err);
@@ -344,12 +327,12 @@ function ProjectsModal({
                         <Calendar size={10} />
                         {formatDate(project.updated_at)}
                       </span>
-                      {project.is_deployed && (
+                      {/* {project.is_deployed && (
                         <span className="project-status live">Live</span>
-                      )}
-                      {hasSubscription(project) && (
+                      )} */}
+                      {/* {hasSubscription(project) && (
                         <span className="project-status subscribed">Pro</span>
-                      )}
+                      )} */}
                     </div>
                   </div>
 
@@ -439,7 +422,7 @@ function ProjectsModal({
                 </div>
 
                 {/* Expanded section for deployed projects */}
-                {project.is_deployed && expandedProject === project.id && (
+                {/* {project.is_deployed && expandedProject === project.id && (
                   <div className="project-expanded">
                     <div className="project-domains">
                       <div className="project-domain-section">
@@ -500,8 +483,8 @@ function ProjectsModal({
                           </div>
                         </div>
                       )}
-                    </div>
-                    {/* 
+                    </div> */}
+                {/* 
                     <div className="project-domain-actions">
                       {project.custom_domain ? (
                         <button
@@ -530,8 +513,8 @@ function ProjectsModal({
                         Redeploy
                       </button>
                     </div> */}
-                  </div>
-                )}
+                {/* </div>
+                )} */}
               </div>
             ))
           )}

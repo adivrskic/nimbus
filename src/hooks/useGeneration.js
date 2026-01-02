@@ -81,14 +81,14 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
               // This loop just drives the async iteration
             }
 
-            // Stream complete - get the normalized HTML (styles moved to head)
-            const normalizedHtml = streamResult.getNormalizedHtml();
-            setGeneratedCode(normalizedHtml);
+            // Stream complete - get the final HTML (no normalization needed with inline styles)
+            const finalHtml = streamResult.getFullHtml();
+            setGeneratedCode(finalHtml);
             setIsStreaming(false);
             setStreamingPhase("complete");
 
-            onSuccess?.({ code: normalizedHtml, isStreaming: true });
-            return { code: normalizedHtml, isStreaming: true };
+            onSuccess?.({ code: finalHtml, isStreaming: true });
+            return { code: finalHtml, isStreaming: true };
           }
         }
 
@@ -166,14 +166,14 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
             if (abortControllerRef.current?.signal.aborted) break;
           }
 
-          const normalizedHtml = streamResult.getNormalizedHtml();
-          setGeneratedCode(normalizedHtml);
+          const finalHtml = streamResult.getFullHtml();
+          setGeneratedCode(finalHtml);
           setEnhancePrompt("");
           setIsStreaming(false);
           setStreamingPhase("complete");
 
-          onSuccess?.({ code: normalizedHtml, isStreaming: true });
-          return { code: normalizedHtml, isStreaming: true };
+          onSuccess?.({ code: finalHtml, isStreaming: true });
+          return { code: finalHtml, isStreaming: true };
         }
 
         // Fallback to non-streaming

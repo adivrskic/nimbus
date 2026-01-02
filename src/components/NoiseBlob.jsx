@@ -22,6 +22,12 @@ const isMobileOrPortrait = () => {
   );
 };
 
+// Generate random value within range
+const randomInRange = (min, max) => Math.random() * (max - min) + min;
+
+// Generate random integer within range
+const randomIntInRange = (min, max) => Math.floor(randomInRange(min, max + 1));
+
 const noiseGLSL = `
 vec4 permute(vec4 x){return mod(((x*34.0)+1.0)*x, 289.0);}
 float permute(float x){return floor(mod(((x*34.0)+1.0)*x, 289.0));}
@@ -106,14 +112,14 @@ export default function NoiseBlob({
   emissiveColor: emissiveColorProp,
   backgroundColor: backgroundColorProp,
 
-  // Other props
-  shininess = 600,
+  // Other props - these will be randomized if not provided
+  shininess: shininessProp,
   wireframe = false,
-  speed = 0.12,
-  noiseScale = 0.475,
-  noiseAmplitude = 0.45,
-  baseScale = 3.5,
-  detail = 100,
+  speed: speedProp,
+  noiseScale: noiseScaleProp,
+  noiseAmplitude: noiseAmplitudeProp,
+  baseScale: baseScaleProp,
+  detail: detailProp,
   cameraDistance = 10,
   fov = 70,
   enableControls = false,
@@ -121,9 +127,9 @@ export default function NoiseBlob({
   autoRotate = false,
   autoRotateSpeed = 2,
   ambientIntensity = 1,
-  directionalIntensity = 0.5,
-  hemisphereIntensity = 0.375,
-  mobileScaleMultiplier = 0.67,
+  directionalIntensity: directionalIntensityProp,
+  hemisphereIntensity: hemisphereIntensityProp,
+  mobileScaleMultiplier: mobileScaleMultiplierProp,
   mobileCameraYOffset = 6,
   className = "",
   style = {},
@@ -139,6 +145,35 @@ export default function NoiseBlob({
   const meshRef = useRef(null);
   const uniformsRef = useRef(null);
   const [initialized, setInitialized] = useState(false);
+
+  // Generate randomized values once on mount
+  const randomizedProps = useMemo(
+    () => ({
+      shininess: shininessProp ?? randomInRange(400, 800),
+      speed: speedProp ?? randomInRange(0.04, 0.22),
+      noiseScale: noiseScaleProp ?? randomInRange(0.125, 0.875),
+      noiseAmplitude: noiseAmplitudeProp ?? randomInRange(0.1, 0.75),
+      baseScale: baseScaleProp ?? randomInRange(2.5, 4.5),
+      detail: detailProp ?? randomIntInRange(80, 200),
+      directionalIntensity: directionalIntensityProp ?? randomInRange(0.2, 0.7),
+      hemisphereIntensity: hemisphereIntensityProp ?? randomInRange(0.125, 0.5),
+      mobileScaleMultiplier:
+        mobileScaleMultiplierProp ?? randomInRange(0.4, 0.75),
+    }),
+    []
+  ); // Empty deps = only run once on mount
+
+  const {
+    shininess,
+    speed,
+    noiseScale,
+    noiseAmplitude,
+    baseScale,
+    detail,
+    directionalIntensity,
+    hemisphereIntensity,
+    mobileScaleMultiplier,
+  } = randomizedProps;
 
   // Memoize colors based on theme to prevent unnecessary recalculations
   const colors = useMemo(
