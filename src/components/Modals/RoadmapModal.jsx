@@ -79,62 +79,73 @@ function RoadmapModal({ isOpen, onClose }) {
         className={`roadmap-content ${isOpen ? "active" : ""}`}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="roadmap-header">
-          <div className="roadmap-title">
-            <Calendar size={16} />
-            <span>Roadmap</span>
-          </div>
-          <button className="roadmap-close" onClick={onClose}>
-            <X size={16} />
-          </button>
-        </div>
-
-        <div className="roadmap-subtitle">
-          What we're building and what's coming next.
-        </div>
-
-        <div className="roadmap-legend">
-          <div className="legend-item">
-            <span className="legend-dot legend-dot--completed"></span>
-            <span>Complete</span>
-          </div>
-          <div className="legend-item">
-            <span className="legend-dot legend-dot--in-progress"></span>
-            <span>In Progress</span>
-          </div>
-          <div className="legend-item">
-            <span className="legend-dot legend-dot--planned"></span>
-            <span>Planned</span>
-          </div>
-        </div>
-
-        <div className="roadmap-items">
-          {roadmapItems.map((item, index) => (
-            <div
-              key={index}
-              className={`roadmap-item roadmap-item--${item.status}`}
-            >
-              <div className="roadmap-item__icon">
-                {item.status === "completed" && <CheckCircle size={14} />}
-                {item.status === "in-progress" && <Clock size={14} />}
-                {item.status === "planned" && <Circle size={14} />}
-              </div>
-              <div className="roadmap-item__content">
-                <h4 className="roadmap-item__title">{item.title}</h4>
-                <p className="roadmap-item__description">{item.description}</p>
-              </div>
+        {/* Fixed header section */}
+        <div className="roadmap-header-section">
+          <div className="roadmap-header">
+            <div className="roadmap-title">
+              <Calendar size={16} />
+              <span>Roadmap</span>
             </div>
-          ))}
+            <button className="roadmap-close" onClick={onClose}>
+              <X size={16} />
+            </button>
+          </div>
+
+          <div className="roadmap-subtitle">
+            What we're building and what's coming next.
+          </div>
+
+          <div className="roadmap-legend">
+            <div className="legend-item">
+              <span className="legend-dot legend-dot--completed"></span>
+              <span>Complete</span>
+            </div>
+            <div className="legend-item">
+              <span className="legend-dot legend-dot--in-progress"></span>
+              <span>In Progress</span>
+            </div>
+            <div className="legend-item">
+              <span className="legend-dot legend-dot--planned"></span>
+              <span>Planned</span>
+            </div>
+          </div>
         </div>
 
-        <div className="roadmap-contact">
-          <h5 className="roadmap-contact__title">Suggest a feature</h5>
-          <p className="roadmap-contact__text">
-            Email{" "}
-            <a href="mailto:hello@nimbus.com" className="roadmap-contact__link">
-              hello@nimbus.com
-            </a>
-          </p>
+        {/* Scrollable body section */}
+        <div className="roadmap-body">
+          <div className="roadmap-items">
+            {roadmapItems.map((item, index) => (
+              <div
+                key={index}
+                className={`roadmap-item roadmap-item--${item.status}`}
+              >
+                <div className="roadmap-item__icon">
+                  {item.status === "completed" && <CheckCircle size={14} />}
+                  {item.status === "in-progress" && <Clock size={14} />}
+                  {item.status === "planned" && <Circle size={14} />}
+                </div>
+                <div className="roadmap-item__content">
+                  <h4 className="roadmap-item__title">{item.title}</h4>
+                  <p className="roadmap-item__description">
+                    {item.description}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="roadmap-contact">
+            <h5 className="roadmap-contact__title">Suggest a feature</h5>
+            <p className="roadmap-contact__text">
+              Email{" "}
+              <a
+                href="mailto:hello@nimbus.com"
+                className="roadmap-contact__link"
+              >
+                hello@nimbus.com
+              </a>
+            </p>
+          </div>
         </div>
       </div>
     </div>

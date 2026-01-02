@@ -108,21 +108,25 @@ function LegalModal({ isOpen, onClose }) {
         className={`legal-content ${isOpen ? "active" : ""}`}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="legal-header">
-          <div className="legal-title">
-            <Scale size={16} />
-            <span>Legal</span>
+        {/* Fixed header section */}
+        <div className="legal-header-section">
+          <div className="legal-header">
+            <div className="legal-title">
+              <Scale size={16} />
+              <span>Legal</span>
+            </div>
+            <button className="legal-close" onClick={onClose}>
+              <X size={16} />
+            </button>
           </div>
-          <button className="legal-close" onClick={onClose}>
-            <X size={16} />
-          </button>
+
+          <div className="legal-subtitle">
+            Terms, privacy, and policies for using Nimbus.
+          </div>
+          <div className="legal-meta">Updated {lastUpdated}</div>
         </div>
 
-        <div className="legal-subtitle">
-          Terms, privacy, and policies for using Nimbus.
-        </div>
-        <div className="legal-meta">Updated {lastUpdated}</div>
-
+        {/* Scrollable body section */}
         <div className="legal-body">
           <section id="terms" className="legal-section">
             <div className="legal-section__header">

@@ -93,57 +93,63 @@ function SupportModal({ isOpen, onClose }) {
         className={`support-content ${isOpen ? "active" : ""}`}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="support-header">
-          <div className="support-title">
-            <HelpCircle size={16} />
-            <span>Support</span>
+        {/* Fixed header section */}
+        <div className="support-header-section">
+          <div className="support-header">
+            <div className="support-title">
+              <HelpCircle size={16} />
+              <span>Support</span>
+            </div>
+            <button className="support-close" onClick={onClose}>
+              <X size={16} />
+            </button>
           </div>
-          <button className="support-close" onClick={onClose}>
-            <X size={16} />
-          </button>
+
+          <div className="support-subtitle">
+            How to use your downloaded files and get help.
+          </div>
         </div>
 
-        <div className="support-subtitle">
-          How to use your downloaded files and get help.
-        </div>
-
-        <div className="support-section">
-          <div className="support-section__header">
-            <Download size={14} />
-            <h3 className="support-section__title">Getting Started</h3>
-          </div>
-          <div className="support-steps">
-            {steps.map((step) => (
-              <div key={step.number} className="support-step">
-                <div className="support-step__number">{step.number}</div>
-                <div className="support-step__content">
-                  <h4 className="support-step__title">{step.title}</h4>
-                  <p className="support-step__description">{step.content}</p>
+        {/* Scrollable body section */}
+        <div className="support-body">
+          <div className="support-section">
+            <div className="support-section__header">
+              <Download size={14} />
+              <h3 className="support-section__title">Getting Started</h3>
+            </div>
+            <div className="support-steps">
+              {steps.map((step) => (
+                <div key={step.number} className="support-step">
+                  <div className="support-step__number">{step.number}</div>
+                  <div className="support-step__content">
+                    <h4 className="support-step__title">{step.title}</h4>
+                    <p className="support-step__description">{step.content}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
 
-        <div className="support-section">
-          <div className="support-section__header">
-            <HelpCircle size={14} />
-            <h3 className="support-section__title">FAQ</h3>
+          <div className="support-section">
+            <div className="support-section__header">
+              <HelpCircle size={14} />
+              <h3 className="support-section__title">FAQ</h3>
+            </div>
+            <SupportAccordion items={faqItems} />
           </div>
-          <SupportAccordion items={faqItems} />
-        </div>
 
-        <div className="support-contact">
-          <h4 className="support-contact__title">Need more help?</h4>
-          <p className="support-contact__text">
-            Email{" "}
-            <a
-              href="mailto:support@nimbus.com"
-              className="support-contact__link"
-            >
-              support@nimbus.com
-            </a>
-          </p>
+          <div className="support-contact">
+            <h4 className="support-contact__title">Need more help?</h4>
+            <p className="support-contact__text">
+              Email{" "}
+              <a
+                href="mailto:support@nimbus.com"
+                className="support-contact__link"
+              >
+                support@nimbus.com
+              </a>
+            </p>
+          </div>
         </div>
       </div>
     </div>
