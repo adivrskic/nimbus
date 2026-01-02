@@ -24,6 +24,11 @@ function RoadmapModal({ isOpen, onClose }) {
       title: "Code Export",
       description: "Download clean, production-ready code",
     },
+    {
+      status: "completed",
+      title: "AI Revisions",
+      description: "Refine your site with follow-up prompts",
+    },
     // In Progress
     {
       status: "in-progress",
@@ -35,21 +40,16 @@ function RoadmapModal({ isOpen, onClose }) {
       title: "Advanced Customization",
       description: "Fine-tune colors, fonts, spacing & layouts",
     },
+    {
+      status: "in-progress",
+      title: "Multi-Page Sites",
+      description: "Generate full websites with navigation",
+    },
     // Planned
     {
       status: "planned",
       title: "CMS Integration",
       description: "Connect to Sanity, Contentful, or Strapi",
-    },
-    {
-      status: "planned",
-      title: "AI Revisions",
-      description: "Refine your site with follow-up prompts",
-    },
-    {
-      status: "planned",
-      title: "Multi-Page Sites",
-      description: "Generate full websites with navigation",
     },
     {
       status: "planned",

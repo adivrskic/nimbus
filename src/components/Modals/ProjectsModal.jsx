@@ -310,9 +310,9 @@ function ProjectsModal({
                       <span>{getProjectName(project)}</span>
                     </div>
                     <div className="project-meta">
-                      <span className="project-type">
+                      {/* <span className="project-type">
                         {project.template_type || project.style_preset}
-                      </span>
+                      </span> */}
                       <span className="project-date">
                         <Calendar size={10} />
                         {formatDate(project.updated_at)}

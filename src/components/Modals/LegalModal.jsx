@@ -123,25 +123,6 @@ function LegalModal({ isOpen, onClose }) {
         </div>
         <div className="legal-meta">Updated {lastUpdated}</div>
 
-        <nav className="legal-nav">
-          <a href="#terms" className="legal-nav__link">
-            <FileText size={12} />
-            Terms
-          </a>
-          <a href="#privacy" className="legal-nav__link">
-            <Shield size={12} />
-            Privacy
-          </a>
-          <a href="#copyright" className="legal-nav__link">
-            <AlertCircle size={12} />
-            Copyright
-          </a>
-          <a href="#refund" className="legal-nav__link">
-            <CreditCard size={12} />
-            Refunds
-          </a>
-        </nav>
-
         <div className="legal-body">
           <section id="terms" className="legal-section">
             <div className="legal-section__header">
