@@ -46,7 +46,12 @@ function Home() {
   const { user, isAuthenticated, userTokens, refreshTokens } = useAuth();
 
   // Project context (for editing/deploying)
-  const { pendingProject, pendingAction, clearPendingProject } = useProject();
+  const {
+    pendingProject,
+    pendingAction,
+    clearPendingProject,
+    updateProjectInCache,
+  } = useProject();
 
   // UI state management
   const {
@@ -372,6 +377,7 @@ function Home() {
       }
 
       setSaveSuccess(true);
+      updateProjectInCache(result);
     } catch (error) {
       console.error("Failed to save project:", error);
     } finally {
@@ -386,6 +392,7 @@ function Home() {
     persistentOptions,
     currentProjectId,
     generateName,
+    updateProjectInCache,
   ]);
 
   const handlePersistentChange = useCallback(

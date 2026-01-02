@@ -1,4 +1,4 @@
-// components/GeneratedPreview.jsx - Streaming optimized with smooth auto-scroll
+// components/GeneratedPreview.jsx - Streaming with inline styles (simple scroll down)
 import { useState, useRef, useEffect, useCallback } from "react";
 import {
   Monitor,
@@ -11,21 +11,14 @@ import {
 } from "lucide-react";
 import "./GeneratedPreview.scss";
 
-function GeneratedPreview({
-  html,
-  onClose,
-  isStreaming = false,
-  streamingPhase = null,
-}) {
+function GeneratedPreview({ html, onClose, isStreaming = false }) {
   const [viewMode, setViewMode] = useState("desktop");
   const [isFullscreen, setIsFullscreen] = useState(false);
   const iframeRef = useRef(null);
   const containerRef = useRef(null);
   const lastHtmlRef = useRef("");
   const lastScrollHeightRef = useRef(0);
-  const lastPhaseRef = useRef(null);
-  const scrollRafRef = useRef(null);
-  const lastScrollTimeRef = useRef(0);
+  const scrollTimeoutRef = useRef(null);
 
   const getFrameWidth = () => {
     switch (viewMode) {
@@ -49,52 +42,6 @@ function GeneratedPreview({
     }
   };
 
-  // Detect phase from HTML content if not provided via prop
-  const detectPhase = useCallback((content) => {
-    if (!content) return "head";
-    if (content.includes("STYLES_START") || content.includes("<style"))
-      return "styles";
-    if (content.includes("<body")) return "body";
-    return "head";
-  }, []);
-
-  // Throttled scroll function to prevent stuttering
-  const throttledScroll = useCallback(
-    (iframe, targetY, behavior = "smooth") => {
-      const now = Date.now();
-      const minInterval = 200; // Minimum ms between scroll calls
-
-      if (now - lastScrollTimeRef.current < minInterval) {
-        return; // Skip this scroll call
-      }
-
-      lastScrollTimeRef.current = now;
-
-      // Cancel any pending RAF
-      if (scrollRafRef.current) {
-        cancelAnimationFrame(scrollRafRef.current);
-      }
-
-      // Delay scroll slightly to let doc.write render settle
-      setTimeout(() => {
-        scrollRafRef.current = requestAnimationFrame(() => {
-          try {
-            iframe.contentWindow?.scrollTo({
-              top: targetY,
-              behavior,
-            });
-          } catch (e) {
-            // Ignore cross-origin errors
-          }
-        });
-      }, 16); // One frame delay
-    },
-    []
-  );
-
-  // Track styles scroll position separately (not affected by doc.write)
-  const stylesScrollPosRef = useRef(0);
-
   // Update iframe content using document.write - no flash!
   useEffect(() => {
     if (!html || !iframeRef.current) return;
@@ -112,100 +59,71 @@ function GeneratedPreview({
         doc.write(html);
         doc.close();
 
-        // Auto-scroll during streaming
+        // Auto-scroll during streaming - content is already styled with inline styles
         if (isStreaming) {
-          const currentPhase = streamingPhase || detectPhase(html);
-          const previousPhase = lastPhaseRef.current;
-
-          // Phase transition: body → styles - scroll to top
-          if (currentPhase === "styles" && previousPhase !== "styles") {
-            stylesScrollPosRef.current = 0;
-            lastPhaseRef.current = currentPhase;
-
-            // Delay scroll to let document render
-            setTimeout(() => {
-              try {
-                iframe.contentWindow?.scrollTo({ top: 0, behavior: "instant" });
-              } catch (e) {}
-            }, 50);
-            return;
+          // Clear any pending scroll
+          if (scrollTimeoutRef.current) {
+            clearTimeout(scrollTimeoutRef.current);
           }
 
-          // During body phase - scroll down as content grows
-          if (currentPhase === "body") {
-            setTimeout(() => {
-              try {
-                const body = doc.body;
-                if (body) {
-                  const newScrollHeight = body.scrollHeight;
+          // Delay scroll slightly to let render complete
+          scrollTimeoutRef.current = setTimeout(() => {
+            try {
+              const body = doc.body;
+              if (body) {
+                const newScrollHeight = body.scrollHeight;
 
-                  // Only scroll if content has grown significantly
-                  if (newScrollHeight > lastScrollHeightRef.current + 50) {
-                    lastScrollHeightRef.current = newScrollHeight;
-                    throttledScroll(iframe, newScrollHeight);
-                  }
+                // Only scroll if content has grown (100px threshold to reduce scroll frequency)
+                if (newScrollHeight > lastScrollHeightRef.current + 100) {
+                  lastScrollHeightRef.current = newScrollHeight;
+
+                  iframe.contentWindow?.scrollTo({
+                    top: newScrollHeight,
+                    behavior: "smooth",
+                  });
                 }
-              } catch (e) {}
-            }, 16);
-          }
-
-          // During styles phase - scroll down gradually
-          if (currentPhase === "styles" && previousPhase === "styles") {
-            setTimeout(() => {
-              try {
-                const viewportHeight = iframe.contentWindow?.innerHeight || 600;
-                const scrollHeight = doc.body?.scrollHeight || 0;
-                const maxScroll = Math.max(0, scrollHeight - viewportHeight);
-
-                // Increment by 3% of viewport
-                const increment = viewportHeight * 0.03;
-                stylesScrollPosRef.current = Math.min(
-                  stylesScrollPosRef.current + increment,
-                  maxScroll
-                );
-
-                throttledScroll(iframe, stylesScrollPosRef.current);
-              } catch (e) {}
-            }, 50);
-          }
-
-          lastPhaseRef.current = currentPhase;
+              }
+            } catch (e) {
+              // Ignore cross-origin errors
+            }
+          }, 100);
         }
       }
     } catch (e) {
       // Fallback to srcdoc if document.write fails
       iframe.srcdoc = html;
     }
-  }, [html, isStreaming, streamingPhase, detectPhase, throttledScroll]);
+  }, [html, isStreaming]);
 
   // Scroll to top when streaming completes
   useEffect(() => {
-    if (!isStreaming && lastPhaseRef.current && iframeRef.current) {
-      // Small delay to let final render complete
+    if (!isStreaming && lastHtmlRef.current && iframeRef.current) {
+      // Clear any pending scroll
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+
+      // Delay to let final render complete
       const timer = setTimeout(() => {
         try {
-          const iframe = iframeRef.current;
-          iframe?.contentWindow?.scrollTo({
+          iframeRef.current?.contentWindow?.scrollTo({
             top: 0,
             behavior: "smooth",
           });
         } catch (e) {}
 
-        // Reset refs
         lastScrollHeightRef.current = 0;
-        lastPhaseRef.current = null;
-        stylesScrollPosRef.current = 0;
       }, 500);
 
       return () => clearTimeout(timer);
     }
   }, [isStreaming]);
 
-  // Cleanup RAF on unmount
+  // Cleanup on unmount
   useEffect(() => {
     return () => {
-      if (scrollRafRef.current) {
-        cancelAnimationFrame(scrollRafRef.current);
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
       }
     };
   }, []);
@@ -215,8 +133,6 @@ function GeneratedPreview({
     if (!html && iframeRef.current) {
       lastHtmlRef.current = "";
       lastScrollHeightRef.current = 0;
-      lastPhaseRef.current = null;
-      stylesScrollPosRef.current = 0;
       try {
         const doc =
           iframeRef.current.contentDocument ||
@@ -252,7 +168,7 @@ function GeneratedPreview({
       }
     }
     setIsFullscreen(!isFullscreen);
-  }, [isFullscreen, setIsFullscreen]);
+  }, [isFullscreen]);
 
   useEffect(() => {
     const handleFullscreenChange = () => {
@@ -371,7 +287,7 @@ function GeneratedPreview({
               <span></span>
               <span></span>
             </div>
-            <span>Rendering live...</span>
+            <span>Generating...</span>
           </div>
         </div>
       )}
