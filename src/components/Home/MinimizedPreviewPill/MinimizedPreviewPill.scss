@@ -3,7 +3,8 @@
 .minimized-preview-pill {
   display: flex;
   align-items: center;
-  gap: 4px;
+  flex-direction: column;
+  gap: 12px;
   margin-top: 16px;
   z-index: 1;
   position: absolute;
@@ -20,13 +21,33 @@
     font-size: 0.8125rem;
     font-weight: 500;
     font-family: var(--font-family-base, sans-serif);
-    color: var(--color-text-primary);
+    color: var(--color-text-secondary);
     cursor: pointer;
     transition: var(--transition-base);
     box-shadow: var(--shadow-lg);
 
     &:hover {
       background: var(--color-surface-elevated);
+    }
+  }
+
+  p {
+    font-weight: 400;
+  }
+
+  &__link {
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    font: inherit;
+    color: var(--color-text-tertiary);
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: color var(--transition-base);
+
+    &:hover {
+      color: var(--color-text-primary);
     }
   }
 

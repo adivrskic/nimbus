@@ -21,6 +21,7 @@ import {
   calculateTokenCost,
   getTokenBreakdown,
 } from "../utils/tokenCalculator";
+import { downloadZip } from "../utils/downloadZip";
 
 // Components
 import {
@@ -35,6 +36,7 @@ import TokensModal from "../components/TokenPurchaseModal";
 import DeployModal from "../components/DeployModal";
 import HelpModal from "../components/Home/HelpModal";
 import LegalModal from "../components/LegalModal";
+import ProjectsModal from "../components/ProjectsModal";
 import { generateWebsite } from "../utils/generateWebsite";
 import { supabase } from "../lib/supabaseClient";
 
@@ -51,6 +53,8 @@ function Home() {
     pendingAction,
     clearPendingProject,
     updateProjectInCache,
+    editProject,
+    deployProject,
   } = useProject();
 
   // UI state management
@@ -93,6 +97,11 @@ function Home() {
     minimizePreview,
     restorePreview,
   } = useHomeState();
+
+  // Projects modal state
+  const [showProjects, setShowProjects] = useState(false);
+  const openProjects = useCallback(() => setShowProjects(true), []);
+  const closeProjects = useCallback(() => setShowProjects(false), []);
 
   // Selection state management
   const {
@@ -201,6 +210,8 @@ function Home() {
       closeDeploy();
     } else if (showLegal) {
       closeLegal();
+    } else if (showProjects) {
+      closeProjects();
     }
   });
 
@@ -313,17 +324,6 @@ function Home() {
     [handleGenerate]
   );
 
-  const handleDownload = useCallback(() => {
-    if (!generatedCode) return;
-    const blob = new Blob([generatedCode], { type: "text/html" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "website.html";
-    a.click();
-    URL.revokeObjectURL(url);
-  }, [generatedCode]);
-
   const generateName = useCallback((promptText) => {
     if (!promptText) return "Untitled Project";
     const truncated = promptText.slice(0, 50);
@@ -331,6 +331,12 @@ function Home() {
     const name = lastSpace > 20 ? truncated.slice(0, lastSpace) : truncated;
     return name + (promptText.length > 50 ? "..." : "");
   }, []);
+
+  const handleDownload = useCallback(() => {
+    if (!generatedCode) return;
+    const projectName = generateName(prompt) || "website";
+    downloadZip(generatedCode, projectName);
+  }, [generatedCode, prompt, generateName]);
 
   const handleSave = useCallback(async () => {
     if (!generatedCode || !isAuthenticated || !user) return;
@@ -412,6 +418,24 @@ function Home() {
     [openOptions]
   );
 
+  // Handle project edit from ProjectsModal
+  const handleEditProject = useCallback(
+    (project) => {
+      closeProjects();
+      editProject(project);
+    },
+    [closeProjects, editProject]
+  );
+
+  // Handle project deploy from ProjectsModal
+  const handleDeployProject = useCallback(
+    (project) => {
+      closeProjects();
+      deployProject(project);
+    },
+    [closeProjects, deployProject]
+  );
+
   return (
     <div className="home">
       <div className="home__container">
@@ -469,6 +493,7 @@ function Home() {
             <MinimizedPreviewPill
               onExpand={restorePreview}
               onDiscard={resetGeneration}
+              onOpenProjects={openProjects}
             />
           )}
         </AnimatePresence>
@@ -550,6 +575,17 @@ function Home() {
 
       <AnimatePresence>
         {showLegal && <LegalModal isOpen={showLegal} onClose={closeLegal} />}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showProjects && (
+          <ProjectsModal
+            isOpen={showProjects}
+            onClose={closeProjects}
+            onEditProject={handleEditProject}
+            onDeployProject={handleDeployProject}
+          />
+        )}
       </AnimatePresence>
     </div>
   );
