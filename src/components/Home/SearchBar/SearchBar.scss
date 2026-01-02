@@ -20,6 +20,12 @@
       transform: none;
     }
 
+    .search-bar__char-counter {
+      bottom: 52px;
+      right: 12px;
+      left: auto;
+    }
+
     .search-bar__help-btn,
     .search-bar__gear-btn {
       width: auto;
@@ -65,6 +71,10 @@
     .search-bar__pills-expanded {
       bottom: 48px;
     }
+
+    .search-bar__char-counter {
+      bottom: 48px;
+    }
   }
 
   &--generating {
@@ -79,6 +89,10 @@
 
     .search-bar__truncate-overlay {
       display: flex;
+    }
+
+    .search-bar__char-counter {
+      display: none;
     }
 
     .search-bar__right {
@@ -180,6 +194,54 @@
     max-width: 100%;
   }
 
+  &__char-counter {
+    position: absolute;
+    bottom: -24px;
+    right: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.6875rem;
+    font-family: var(--font-family-base, sans-serif);
+    color: var(--color-text-tertiary);
+    z-index: 5;
+    pointer-events: none;
+
+    &--warning {
+      .search-bar__char-message {
+        color: #f59e0b;
+      }
+
+      .search-bar__char-count {
+        color: #f59e0b;
+      }
+    }
+
+    &--error {
+      .search-bar__char-message {
+        color: #ef4444;
+      }
+
+      .search-bar__char-count {
+        color: #ef4444;
+      }
+    }
+
+    &--valid {
+      .search-bar__char-count {
+        color: var(--color-text-tertiary);
+      }
+    }
+  }
+
+  &__char-message {
+    font-weight: 500;
+  }
+
+  &__char-count {
+    font-variant-numeric: tabular-nums;
+  }
+
   &__input {
     width: 100%;
     min-height: 54px;
@@ -205,6 +267,10 @@
       outline: none;
       box-shadow: var(--shadow-lg);
       border-color: var(--color-border-hover);
+    }
+
+    &--error {
+      box-shadow: var(--shadow-md), 0 0 0 2px rgba(239, 68, 68, 0.3);
     }
   }
 
@@ -491,6 +557,13 @@
         font-size: 16px;
       }
 
+      .search-bar__char-counter {
+        bottom: auto;
+        top: 100%;
+        margin-top: 6px;
+        right: 12px;
+      }
+
       .search-bar__typewriter-overlay {
         align-items: flex-start;
         padding-top: 14px;
@@ -546,6 +619,12 @@
         display: none;
       }
 
+      .search-bar__char-counter {
+        bottom: 52px;
+        right: 12px;
+        left: auto;
+      }
+
       &.has-minimized-preview {
         .search-bar__input {
           min-height: calc(100vh - 65px - 40px - 60px);
@@ -555,6 +634,10 @@
 
         .search-bar__pills-expanded {
           bottom: 40px;
+        }
+
+        .search-bar__char-counter {
+          bottom: 44px;
         }
       }
 
@@ -624,6 +707,10 @@
 
       .search-bar__truncate-text {
         font-size: 16px;
+      }
+
+      .search-bar__char-counter {
+        display: none;
       }
 
       .search-bar__right {
@@ -698,6 +785,10 @@
       .search-bar__btn-text {
         display: none;
       }
+    }
+
+    .search-bar__char-counter {
+      font-size: 0.625rem;
     }
   }
 }
