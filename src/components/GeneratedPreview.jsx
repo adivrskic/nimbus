@@ -128,7 +128,7 @@ function GeneratedPreview({ html, onClose, isStreaming = false }) {
     };
   }, []);
 
-  // Reset iframe when html becomes empty (new generation starting)
+  // Reset iframe when html becomes empty (new generation starting) - keep white/empty
   useEffect(() => {
     if (!html && iframeRef.current) {
       lastHtmlRef.current = "";
@@ -140,13 +140,13 @@ function GeneratedPreview({ html, onClose, isStreaming = false }) {
         if (doc) {
           doc.open();
           doc.write(
-            "<!DOCTYPE html><html><head><style>body{background:#1a1a2e;}</style></head><body></body></html>"
+            "<!DOCTYPE html><html><head><style>body{margin:0;background:#fff;}</style></head><body></body></html>"
           );
           doc.close();
         }
       } catch (e) {
         iframeRef.current.srcdoc =
-          "<!DOCTYPE html><html><head><style>body{background:#1a1a2e;}</style></head><body></body></html>";
+          "<!DOCTYPE html><html><head><style>body{margin:0;background:#fff;}</style></head><body></body></html>";
       }
     }
   }, [html]);
