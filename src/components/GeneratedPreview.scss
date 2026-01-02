@@ -28,6 +28,7 @@
   justify-content: space-between;
   padding: 12px 16px;
   border-bottom: 1px solid var(--color-border);
+  background-color: var(--color-surface);
 }
 
 .preview-devices {
@@ -161,7 +162,7 @@
   height: 100%;
   min-height: 500px;
   background: #fff;
-  border-radius: var(--radius-lg);
+  // border--radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
   overflow: hidden;
   transition: max-width var(--transition-base),
@@ -259,8 +260,6 @@
   }
 
   .preview-frame {
-    border-radius: var(--radius-md);
-
     &--tablet,
     &--mobile {
       border-width: 4px;
