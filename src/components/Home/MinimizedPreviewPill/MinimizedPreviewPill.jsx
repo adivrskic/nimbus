@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { Maximize2, X } from "lucide-react";
 import "./MinimizedPreviewPill.scss";
 
-function MinimizedPreviewPill({ onExpand, onDiscard }) {
+function MinimizedPreviewPill({ onExpand, onDiscard, onOpenProjects }) {
   return (
     <motion.div
       className="minimized-preview-pill"
@@ -14,6 +14,9 @@ function MinimizedPreviewPill({ onExpand, onDiscard }) {
     >
       <button className="minimized-preview-pill__main" onClick={onExpand}>
         <span>Customize Generated Site</span>
+      </button>
+      <button className="minimized-preview-pill__link" onClick={onOpenProjects}>
+        View Projects
       </button>
     </motion.div>
   );
