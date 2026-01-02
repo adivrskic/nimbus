@@ -37,7 +37,10 @@ function TokenOverlay({
         animate="visible"
         exit="exit"
       >
-        <motion.div className="token-overlay__header" variants={tokenItemVariants}>
+        <motion.div
+          className="token-overlay__header"
+          variants={tokenItemVariants}
+        >
           <Coins size={18} />
           <span className="token-overlay__total">{tokenCost} tokens</span>
         </motion.div>
@@ -79,8 +82,6 @@ function TokenOverlay({
             className="token-overlay__buy-btn"
             onClick={onBuyTokens}
             variants={tokenItemVariants}
-            whileHover={{ scale: 1.01 }}
-            whileTap={{ scale: 0.99 }}
           >
             Get More Tokens
           </motion.button>

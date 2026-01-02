@@ -1,5 +1,3 @@
-// components/Home/OptionsOverlay/OptionsOverlay.scss
-
 .options-overlay {
   position: fixed;
   inset: 0;
@@ -12,7 +10,6 @@
   -webkit-backdrop-filter: var(--glass-blur);
 }
 
-// Main Content
 .options-content {
   display: flex;
   flex-direction: column;
@@ -23,7 +20,6 @@
   border-radius: var(--radius-lg);
 }
 
-// Header
 .options-header {
   display: flex;
   align-items: center;
@@ -72,7 +68,6 @@
   }
 }
 
-// Filter Tabs
 .options-filters {
   display: flex;
   gap: 4px;
@@ -112,7 +107,6 @@
   }
 }
 
-// Body
 .options-body {
   display: flex;
   gap: 24px;
@@ -120,7 +114,6 @@
   min-height: 0;
 }
 
-// Brand Section with collapsible header
 .options-brand {
   width: 220px;
   flex-shrink: 0;
@@ -232,7 +225,6 @@
   }
 }
 
-// Design Section with collapsible header
 .options-design {
   flex: 1;
   overflow-y: auto;
@@ -241,7 +233,7 @@
   flex-direction: column;
 
   &__header {
-    display: none; // Hidden by default, shown on mobile
+    display: none;
   }
 
   &__content {
@@ -275,7 +267,6 @@
   }
 }
 
-// Options Grid
 .options-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));

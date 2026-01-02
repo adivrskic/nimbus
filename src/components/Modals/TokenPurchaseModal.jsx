@@ -1,49 +1,47 @@
 import { useState } from "react";
 import { X, Coins, Check, Loader2 } from "lucide-react";
-import { useAuth } from "../contexts/AuthContext";
-import { supabase } from "../lib/supabaseClient";
-import useModalAnimation from "../hooks/useModalAnimation";
+import { useAuth } from "../../contexts/AuthContext";
+import { supabase } from "../../lib/supabaseClient";
+import useModalAnimation from "../../hooks/useModalAnimation";
 import "./TokenPurchaseModal.scss";
-
 const TOKEN_PACKAGES = [
   {
     id: "starter",
     tokens: 50,
     bonus: 0,
-    price: 1.99,
-    perToken: "$0.040",
+    price: 2.99,
+    perToken: "$0.060",
     numGensRange: "a few",
   },
   {
     id: "popular",
     tokens: 150,
     bonus: 15,
-    price: 4.99,
-    perToken: "$0.030",
+    price: 6.99,
+    perToken: "$0.042",
     popular: true,
     savings: "10% bonus",
     numGensRange: "a bunch of",
   },
   {
     id: "pro",
-    tokens: 400,
-    bonus: 100,
-    price: 9.99,
-    perToken: "$0.020",
-    savings: "25% bonus",
+    tokens: 350,
+    bonus: 75,
+    price: 14.99,
+    perToken: "$0.035",
+    savings: "21% bonus",
     numGensRange: "a whole lot of",
   },
   {
     id: "agency",
-    tokens: 1000,
-    bonus: 400,
-    price: 19.99,
-    perToken: "$0.014",
-    savings: "40% bonus",
+    tokens: 800,
+    bonus: 250,
+    price: 29.99,
+    perToken: "$0.029",
+    savings: "31% bonus",
     numGensRange: "a ludicrous amount of",
   },
 ];
-
 function TokenPurchaseModal({ isOpen, onClose }) {
   const { user, profile } = useAuth();
   const { shouldRender, isVisible, closeModal } = useModalAnimation(

@@ -32,11 +32,10 @@ const SearchBar = forwardRef(
       onOptionsClick,
       onHelpClick,
       onGenerate,
-      // New props for pills
       activeCategories = [],
       onPillClick,
       onResetPill,
-      hasMinimizedPreview = false, // New prop
+      hasMinimizedPreview = false,
     },
     ref
   ) => {
@@ -44,29 +43,22 @@ const SearchBar = forwardRef(
     const hasActiveOptions = activeCategories.length > 0;
     const preventBlurRef = useRef(false);
 
-    // Determine if we should show expanded state (not generating and user expanded)
     const showExpandedState = isExpanded && !isGenerating;
 
-    // Handle blur - only minimize if clicking outside the search bar
     const handleBlur = useCallback(
       (e) => {
-        // If we're preventing blur (clicking internal button), skip
         if (preventBlurRef.current) {
           preventBlurRef.current = false;
           return;
         }
-        // Check if the related target (where focus is going) is within our container
         if (containerRef.current?.contains(e.relatedTarget)) {
-          // Clicking within the search bar - don't minimize
           return;
         }
-        // Clicking outside - call the original onBlur
         onBlur?.(e);
       },
       [onBlur]
     );
 
-    // Prevent blur when clicking internal buttons
     const handleButtonMouseDown = useCallback((e) => {
       preventBlurRef.current = true;
     }, []);
@@ -79,7 +71,7 @@ const SearchBar = forwardRef(
         } ${isGenerating ? "search-bar--generating" : ""} ${
           hasMinimizedPreview ? "has-minimized-preview" : ""
         }`}
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
       >
@@ -104,7 +96,12 @@ const SearchBar = forwardRef(
             </div>
           )}
 
-          {/* Expanded Pills - shown inside textarea when expanded */}
+          {!showExpandedState && !showTypewriter && value && (
+            <div className="search-bar__truncate-overlay">
+              <span className="search-bar__truncate-text">{value}</span>
+            </div>
+          )}
+
           <AnimatePresence>
             {showExpandedState && hasActiveOptions && (
               <motion.div
@@ -123,9 +120,9 @@ const SearchBar = forwardRef(
                       onMouseDown={handleButtonMouseDown}
                       role="button"
                       tabIndex={0}
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.8 }}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
                       transition={{ duration: 0.15 }}
                     >
                       {Icon && <Icon size={12} />}
@@ -156,13 +153,12 @@ const SearchBar = forwardRef(
         </div>
 
         <div className="search-bar__right">
-          {/* Collapsed Pills Count - shown when not expanded but has options */}
           <AnimatePresence>
             {!showExpandedState && hasActiveOptions && (
               <motion.button
-                initial={{ opacity: 0, scale: 0.8, width: 0 }}
-                animate={{ opacity: 1, scale: 1, width: "auto" }}
-                exit={{ opacity: 0, scale: 0.8, width: 0 }}
+                initial={{ opacity: 0, width: 0 }}
+                animate={{ opacity: 1, width: "auto" }}
+                exit={{ opacity: 0, width: 0 }}
                 transition={{ duration: 0.2 }}
                 className="search-bar__options-count"
                 onClick={onOptionsClick}
@@ -177,9 +173,9 @@ const SearchBar = forwardRef(
           <AnimatePresence>
             {(value.trim() || isExpanded) && (
               <motion.button
-                initial={{ opacity: 0, scale: 0.8, width: 0 }}
-                animate={{ opacity: 1, scale: 1, width: "auto" }}
-                exit={{ opacity: 0, scale: 0.8, width: 0 }}
+                initial={{ opacity: 0, width: 0 }}
+                animate={{ opacity: 1, width: "auto" }}
+                exit={{ opacity: 0, width: 0 }}
                 transition={{ duration: 0.2 }}
                 className={`search-bar__token-btn ${
                   showTokenOverlay ? "active" : ""

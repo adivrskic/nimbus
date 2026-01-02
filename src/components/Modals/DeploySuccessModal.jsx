@@ -10,7 +10,7 @@ import {
   Rocket,
   PartyPopper,
 } from "lucide-react";
-import useModalAnimation from "../hooks/useModalAnimation";
+import useModalAnimation from "../../hooks/useModalAnimation";
 import "./DeploySuccessModal.scss";
 
 function DeploySuccessModal({

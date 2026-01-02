@@ -11,9 +11,9 @@ import ScrollToTop from "./components/ScrollToTop";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { ProjectProvider } from "./contexts/ProjectContext";
-import LegalModal from "./components/LegalModal";
-import RoadmapModal from "./components/RoadmapModal";
-import SupportModal from "./components/SupportModal";
+import LegalModal from "./components/Modals/LegalModal";
+import RoadmapModal from "./components/Modals/RoadmapModal";
+import SupportModal from "./components/Modals/SupportModal";
 import {
   GenerationProvider,
   useGenerationState,
@@ -99,7 +99,7 @@ function AppContent() {
   const [showLegal, setShowLegal] = useState(false);
   const [showRoadmap, setShowRoadmap] = useState(false);
   const [showSupport, setShowSupport] = useState(false);
-  const { theme } = useTheme(); // Get theme from context
+  const { theme } = useTheme();
 
   useEffect(() => {
     if (location.hash.includes("access_token")) {

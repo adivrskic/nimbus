@@ -12,9 +12,9 @@ import {
   Zap,
   Settings,
 } from "lucide-react";
-import { useAuth } from "../contexts/AuthContext";
-import { supabase } from "../lib/supabaseClient";
-import useModalAnimation from "../hooks/useModalAnimation";
+import { useAuth } from "../../contexts/AuthContext";
+import { supabase } from "../../lib/supabaseClient";
+import useModalAnimation from "../../hooks/useModalAnimation";
 import "./DeployModal.scss";
 
 const DEPLOY_PRICE = 5;

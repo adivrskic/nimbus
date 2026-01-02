@@ -7,7 +7,6 @@ import { useAuth } from "../contexts/AuthContext";
 import { useProject } from "../contexts/ProjectContext";
 
 import useTypewriter from "../hooks/useTypewriter";
-import useGenerationTimer from "../hooks/useGenerationTimer";
 import { useEscapeKey } from "../hooks/useKeyboardShortcuts";
 import useSelections from "../hooks/useSelections";
 import useHomeState from "../hooks/useHomeState";
@@ -31,12 +30,12 @@ import {
   PreviewModal,
   MinimizedPreviewPill,
 } from "../components/Home";
-import AuthModal from "../components/AuthModal";
-import TokensModal from "../components/TokenPurchaseModal";
-import DeployModal from "../components/DeployModal";
+import AuthModal from "../components/Modals/AuthModal";
+import TokensModal from "../components/Modals/TokenPurchaseModal";
+import DeployModal from "../components/Modals/DeployModal";
 import HelpModal from "../components/Home/HelpModal";
-import LegalModal from "../components/LegalModal";
-import ProjectsModal from "../components/ProjectsModal";
+import LegalModal from "../components/Modals/LegalModal";
+import ProjectsModal from "../components/Modals/ProjectsModal";
 import { generateWebsite } from "../utils/generateWebsite";
 import { supabase } from "../lib/supabaseClient";
 
@@ -153,12 +152,6 @@ function Home() {
     typingSpeed: 50,
     erasingSpeed: 30,
     pauseDuration: 2000,
-  });
-
-  // Generation timer
-  const { elapsedTime, getEstimatedTimeText } = useGenerationTimer({
-    isGenerating,
-    estimatedTime: 20,
   });
 
   // Token calculations
@@ -481,12 +474,6 @@ function Home() {
             )}
           </AnimatePresence>
         </div>
-
-        {isGenerating && (
-          <div className="home__status">
-            <span className="home__status-text">{getEstimatedTimeText()}</span>
-          </div>
-        )}
 
         <AnimatePresence>
           {previewMinimized && (

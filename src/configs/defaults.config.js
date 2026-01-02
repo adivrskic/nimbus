@@ -1,5 +1,3 @@
-// configs/defaults.config.js - Default values and example prompts
-
 export const EXAMPLE_PROMPTS = [
   "A modern portfolio site for a photographer with a dark theme...",
   "Landing page for an AI startup with gradient backgrounds...",
@@ -30,7 +28,7 @@ export const DEFAULT_PERSISTENT_OPTIONS = {
     brandName: "",
     tagline: "",
   },
-  images: [], // Array of image URLs or objects
+  images: [],
   links: {
     termsOfService: "",
     privacyPolicy: "",
@@ -39,18 +37,12 @@ export const DEFAULT_PERSISTENT_OPTIONS = {
   },
 };
 
-/**
- * Initialize selections with default values based on OPTIONS
- * @param {Object} OPTIONS - The OPTIONS configuration object
- * @returns {Object} Initial selections state
- */
 export const getInitialSelections = (OPTIONS) => {
   const initial = {};
   Object.entries(OPTIONS).forEach(([key, opt]) => {
     if (opt.multi) {
       initial[key] = [];
     } else if (opt.isColorPicker) {
-      // Initialize with default values
       initial[key] = {};
       opt.fields.forEach((field) => {
         initial[key][field.key] = field.default;

@@ -12,9 +12,9 @@ import {
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { useProject } from "../contexts/ProjectContext";
-import AuthModal from "./AuthModal";
-import TokenPurchaseModal from "./TokenPurchaseModal";
-import ProjectsModal from "./ProjectsModal";
+import AuthModal from "./Modals/AuthModal";
+import TokenPurchaseModal from "./Modals/TokenPurchaseModal";
+import ProjectsModal from "./Modals/ProjectsModal";
 import { useTheme } from "../contexts/ThemeContext";
 import "./Header.scss";
 

@@ -1,5 +1,3 @@
-// configs/categories.config.js - Category definitions and groupings
-
 export const CATEGORIES = [
   // Structure & Layout
   "template",
@@ -169,11 +167,6 @@ export const CATEGORY_GROUPS = {
   ],
 };
 
-/**
- * Get filtered categories based on active filter
- * @param {string} filter - The active filter key
- * @returns {string[]} Filtered category keys
- */
 export const getFilteredCategories = (filter) => {
   const baseCategories = CATEGORIES.filter(
     (cat) => cat !== "persistent" && cat !== "customColors"
