@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { X, Loader, ExternalLink, CreditCard } from "lucide-react";
-import { useAuth } from "../contexts/AuthContext";
-import useModalAnimation from "../hooks/useModalAnimation";
+import { useAuth } from "../../contexts/AuthContext";
+import useModalAnimation from "../../hooks/useModalAnimation";
 import "./BillingModal.scss";
 
 function BillingModal({ isOpen, onClose }) {

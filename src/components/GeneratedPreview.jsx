@@ -277,20 +277,6 @@ function GeneratedPreview({ html, onClose, isStreaming = false }) {
           />
         </div>
       </div>
-
-      {/* Streaming overlay */}
-      {isStreaming && (
-        <div className="preview-streaming-overlay">
-          <div className="preview-streaming-indicator">
-            <div className="streaming-dots">
-              <span></span>
-              <span></span>
-              <span></span>
-            </div>
-            <span>Generating...</span>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

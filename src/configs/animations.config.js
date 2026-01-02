@@ -1,5 +1,3 @@
-// configs/animations.config.js - Framer Motion animation variants
-
 export const overlayVariants = {
   hidden: { opacity: 0 },
   visible: {

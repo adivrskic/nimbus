@@ -7,9 +7,9 @@ function MinimizedPreviewPill({ onExpand, onDiscard, onOpenProjects }) {
   return (
     <motion.div
       className="minimized-preview-pill"
-      initial={{ opacity: 0, y: -10, scale: 0.95 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, y: -10, scale: 0.95 }}
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -10 }}
       transition={{ duration: 0.2 }}
     >
       <button className="minimized-preview-pill__main" onClick={onExpand}>

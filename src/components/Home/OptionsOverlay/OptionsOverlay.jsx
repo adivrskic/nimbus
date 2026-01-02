@@ -27,11 +27,9 @@ function OptionsOverlay({
   const [activeOption, setActiveOption] = useState(null);
   const [categoryFilter, setCategoryFilter] = useState("");
 
-  // State for collapsible sections on mobile
   const [isBrandExpanded, setIsBrandExpanded] = useState(true);
   const [isDesignExpanded, setIsDesignExpanded] = useState(true);
 
-  // Reset state when closing
   useEffect(() => {
     if (!isOpen) {
       setCategoryFilter("");
@@ -56,12 +54,10 @@ function OptionsOverlay({
 
     const opt = OPTIONS[optionKey];
 
-    // Special handling for palette selection
     if (optionKey === "palette" && value === "Custom") {
-      return; // Stay on the palette section for custom colors
+      return;
     }
 
-    // Close overlay after single selection (not multi)
     if (!opt.multi) {
       setTimeout(() => {
         setActiveOption(null);
@@ -86,12 +82,11 @@ function OptionsOverlay({
       <motion.div
         className="options-content"
         onClick={(e) => e.stopPropagation()}
-        initial={{ opacity: 0, scale: 0.98, y: 4 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.98, y: 4 }}
+        initial={{ opacity: 0, y: 4 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: 4 }}
         transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
       >
-        {/* Header */}
         <div className="options-header">
           <div className="options-header__left">
             <span className="options-title">
@@ -109,7 +104,6 @@ function OptionsOverlay({
           </button>
         </div>
 
-        {/* Filter Tabs */}
         <div className="options-filters">
           {["", "layout", "visual", "content", "components", "technical"].map(
             (filter) => (
@@ -126,9 +120,7 @@ function OptionsOverlay({
           )}
         </div>
 
-        {/* Body */}
         <div className="options-body">
-          {/* Left: Brand Info */}
           <div className="options-brand">
             <div
               className="options-brand__header"
@@ -215,7 +207,6 @@ function OptionsOverlay({
             </div>
           </div>
 
-          {/* Right: Design Options */}
           <div className="options-design">
             <div
               className="options-design__header"
@@ -342,7 +333,6 @@ function OptionsOverlay({
                       })}
                     </div>
 
-                    {/* Custom Colors Editor */}
                     {activeOption === "palette" &&
                       selections.palette === "Custom" && (
                         <div className="options-custom-colors">

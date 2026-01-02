@@ -148,7 +148,6 @@ function HelpModal({ isOpen, onClose }) {
         animate="visible"
         exit="exit"
       >
-        {/* Header */}
         <div className="help-header">
           <div className="help-title">
             <HelpCircle size={20} />
@@ -159,7 +158,6 @@ function HelpModal({ isOpen, onClose }) {
           </button>
         </div>
 
-        {/* Sections */}
         <div className="help-body">
           {HELP_SECTIONS.map((section, index) => {
             const Icon = section.icon;
@@ -186,9 +184,8 @@ function HelpModal({ isOpen, onClose }) {
             );
           })}
 
-          {/* Tips */}
           <div className="help-tips">
-            <h4 className="help-tips__title">Pro Tips</h4>
+            <h4 className="help-tips__title">Tips</h4>
             {TIPS.map((tip, index) => (
               <div key={index} className="help-tip">
                 <Lightbulb size={14} />

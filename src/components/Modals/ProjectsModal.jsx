@@ -1,28 +1,18 @@
 import { useState, useEffect } from "react";
 import {
   X,
-  Search,
   Calendar,
   Edit3,
   Trash2,
-  ExternalLink,
-  Rocket,
   Loader2,
   FileCode,
-  Globe,
   AlertTriangle,
-  Check,
-  Settings,
-  RefreshCw,
-  ChevronDown,
   FolderOpen,
-  Copy,
-  PanelsTopLeft,
 } from "lucide-react";
-import { useAuth } from "../contexts/AuthContext";
-import { useProject } from "../contexts/ProjectContext";
-import { supabase } from "../lib/supabaseClient";
-import useModalAnimation from "../hooks/useModalAnimation";
+import { useAuth } from "../../contexts/AuthContext";
+import { useProject } from "../../contexts/ProjectContext";
+import { supabase } from "../../lib/supabaseClient";
+import useModalAnimation from "../../hooks/useModalAnimation";
 import "./ProjectsModal.scss";
 
 function ProjectsModal({

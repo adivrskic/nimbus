@@ -1,4 +1,3 @@
-// configs/options.config.js - All customization options definitions
 import {
   Layout,
   Paintbrush,

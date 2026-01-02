@@ -1,10 +1,5 @@
-// utils/promptBuilder.js - Build full generation prompt from selections
-// This should produce prompts that align with the edge function's system prompt
 import { OPTIONS } from "../configs/options.config";
 
-/**
- * Creative variation prompts - randomly selected to encourage unique outputs
- */
 const CREATIVE_BOOSTERS = [
   "Avoid generic layouts - create something memorable that stands out from typical templates.",
   "Add at least one unexpected design element that creates visual interest.",
@@ -28,17 +23,11 @@ const TYPOGRAPHY_VARIATIONS = [
   "Make headlines genuinely impactful - don't be afraid of large type.",
 ];
 
-/**
- * Get random items from an array
- */
 const getRandomItems = (arr, count = 1) => {
   const shuffled = [...arr].sort(() => 0.5 - Math.random());
   return shuffled.slice(0, count);
 };
 
-/**
- * Multi-page template definitions
- */
 const MULTI_PAGE_STRUCTURES = {
   "Multi Page": {
     pages: ["index.html", "about.html", "services.html", "contact.html"],
@@ -67,9 +56,6 @@ const MULTI_PAGE_STRUCTURES = {
   },
 };
 
-/**
- * Check if template requires multi-page output
- */
 const isMultiPage = (template) => {
   return [
     "Multi Page",
@@ -80,9 +66,6 @@ const isMultiPage = (template) => {
   ].includes(template);
 };
 
-/**
- * Implementation notes for complex options
- */
 const IMPLEMENTATION_NOTES = {
   heroStyle: {
     "Video Background": "Use CSS animated gradient or placeholder video",
@@ -106,9 +89,6 @@ const IMPLEMENTATION_NOTES = {
   },
 };
 
-/**
- * Get the prompt text for a selection key
- */
 const getPromptText = (key, selections) => {
   const opt = OPTIONS[key];
   if (!opt) return null;
@@ -128,9 +108,6 @@ const getPromptText = (key, selections) => {
   return choice?.prompt || selections[key];
 };
 
-/**
- * Create a labeled line for the prompt with optional implementation note
- */
 const addLine = (label, key, selections) => {
   const value = selections[key];
   if (
@@ -144,7 +121,6 @@ const addLine = (label, key, selections) => {
 
   const text = getPromptText(key, selections) || value;
 
-  // Add implementation note if available
   let note = "";
   if (IMPLEMENTATION_NOTES[key]?.[value]) {
     note = ` (${IMPLEMENTATION_NOTES[key][value]})`;
@@ -153,9 +129,6 @@ const addLine = (label, key, selections) => {
   return `- ${label}: ${text}${note}`;
 };
 
-/**
- * Build the full prompt from user input and selections
- */
 export function buildFullPrompt(
   userPrompt,
   selections,
@@ -166,7 +139,6 @@ export function buildFullPrompt(
   const multiPage = isMultiPage(template);
   const pageStructure = MULTI_PAGE_STRUCTURES[template];
 
-  // Get creative boosters for variation
   const creativeBooster = getRandomItems(CREATIVE_BOOSTERS, 2);
   const layoutBooster = getRandomItems(LAYOUT_VARIATIONS, 1);
   const typographyBooster = getRandomItems(TYPOGRAPHY_VARIATIONS, 1);
@@ -174,9 +146,6 @@ export function buildFullPrompt(
   const templateText = getPromptText("template", selections);
   const templateLine = templateText ? `a ${templateText}` : "a";
 
-  // ============================================
-  // STRUCTURE & LAYOUT
-  // ============================================
   const structureSpecs = [
     addLine("Navigation", "navigation", s),
     addLine("Layout", "layout", s),
@@ -185,9 +154,6 @@ export function buildFullPrompt(
     addLine("Density/Spacing", "density", s),
   ].filter(Boolean);
 
-  // ============================================
-  // VISUAL STYLE
-  // ============================================
   const visualStyleSpecs = [
     addLine("Style", "style", s),
     addLine("Inspiration", "inspiration", s),
@@ -203,18 +169,12 @@ export function buildFullPrompt(
     addLine("Hover Effects", "hoverEffects", s),
   ].filter(Boolean);
 
-  // ============================================
-  // TYPOGRAPHY
-  // ============================================
   const typographySpecs = [
     addLine("Font Family", "font", s),
     addLine("Typography Scale", "typographyScale", s),
     addLine("Heading Style", "headingStyle", s),
   ].filter(Boolean);
 
-  // ============================================
-  // COMPONENTS
-  // ============================================
   const componentSpecs = [
     addLine("Hero Style", "heroStyle", s),
     addLine("Button Style", "buttonStyle", s),
@@ -226,9 +186,6 @@ export function buildFullPrompt(
     addLine("Carousel Style", "carouselStyle", s),
   ].filter(Boolean);
 
-  // ============================================
-  // CONTENT BLOCKS
-  // ============================================
   const contentBlockSpecs = [
     addLine("Testimonial Style", "testimonialStyle", s),
     addLine("Pricing Style", "pricingStyle", s),
@@ -240,9 +197,6 @@ export function buildFullPrompt(
     addLine("CTA Section Style", "ctaSectionStyle", s),
   ].filter(Boolean);
 
-  // ============================================
-  // EFFECTS & MOTION
-  // ============================================
   const effectsSpecs = [
     addLine("Animation Level", "animation", s),
     addLine("Interaction Style", "interaction", s),
@@ -250,27 +204,18 @@ export function buildFullPrompt(
     addLine("Loading Style", "loadingStyle", s),
   ].filter(Boolean);
 
-  // ============================================
-  // SPACING & BORDERS
-  // ============================================
   const spacingSpecs = [
     addLine("Spacing Scale", "spacingScale", s),
     addLine("Divider Style", "dividerStyle", s),
     addLine("Border Width", "borderWidth", s),
   ].filter(Boolean);
 
-  // ============================================
-  // MEDIA
-  // ============================================
   const mediaSpecs = [
     addLine("Images", "images", s),
     addLine("Media Handling", "mediaHandling", s),
     addLine("Code Block Style", "codeBlockStyle", s),
   ].filter(Boolean);
 
-  // ============================================
-  // CONTENT & BRAND
-  // ============================================
   const contentSpecs = [
     addLine("Brand Voice/Tone", "tone", s),
     addLine("Brand Personality", "brandPersonality", s),
@@ -283,9 +228,6 @@ export function buildFullPrompt(
     addLine("Social Proof", "socialProof", s),
   ].filter(Boolean);
 
-  // ============================================
-  // SECTIONS
-  // ============================================
   const sectionsText =
     s.sections && s.sections.length > 0
       ? s.sections
@@ -299,9 +241,6 @@ export function buildFullPrompt(
           .join("\n")
       : null;
 
-  // ============================================
-  // STICKY/UI ELEMENTS
-  // ============================================
   const stickyText =
     s.stickyElements && s.stickyElements.length > 0
       ? s.stickyElements
@@ -315,9 +254,6 @@ export function buildFullPrompt(
           .join("\n")
       : null;
 
-  // ============================================
-  // TECHNICAL
-  // ============================================
   const techSpecs = [
     addLine("CSS Framework", "framework", s),
     addLine("Accessibility Level", "accessibility", s),
@@ -327,26 +263,16 @@ export function buildFullPrompt(
     addLine("Responsive Approach", "responsiveApproach", s),
   ].filter(Boolean);
 
-  // ============================================
-  // FEATURES
-  // ============================================
   const featureSpecs = [
     addLine("Dark Mode Toggle", "darkModeToggle", s),
     addLine("Cookie Banner", "cookieBanner", s),
     addLine("Social Sharing", "socialSharing", s),
   ].filter(Boolean);
 
-  // ============================================
-  // AI CONTROLS
-  // ============================================
   const creativityLevel = s.creativity || "Balanced";
 
-  // ============================================
-  // BUILD PROMPT
-  // ============================================
   let promptParts = [];
 
-  // Multi-page vs single-page intro
   if (multiPage && pageStructure) {
     promptParts.push(
       `Create ${templateLine} website with MULTIPLE HTML FILES.`,
@@ -367,15 +293,11 @@ export function buildFullPrompt(
 
   promptParts.push(`USER DESCRIPTION: ${userPrompt}`);
 
-  // Add persistent content if available
   const persistentParts = buildPersistentContentParts(persistentOptions);
   if (persistentParts.length > 0) {
     promptParts.push("", "BRAND & CONTENT:", ...persistentParts);
   }
 
-  // ============================================
-  // CREATIVE DIRECTION (Key for unique outputs)
-  // ============================================
   promptParts.push(
     "",
     "🎨 CREATIVE DIRECTION (IMPORTANT):",
@@ -384,7 +306,6 @@ export function buildFullPrompt(
     ...typographyBooster.map((b) => `- ${b}`)
   );
 
-  // Creativity-level specific guidance
   if (creativityLevel === "Conservative") {
     promptParts.push(
       "- Stay within proven design patterns, but execute them exceptionally well.",
@@ -402,7 +323,6 @@ export function buildFullPrompt(
     );
   }
 
-  // Add specification sections
   if (structureSpecs.length > 0) {
     promptParts.push("", "STRUCTURE & LAYOUT:", ...structureSpecs);
   }
@@ -459,13 +379,12 @@ export function buildFullPrompt(
     promptParts.push("", "TECHNICAL REQUIREMENTS:", ...techSpecs);
   }
 
-  // Final output requirements
   if (multiPage) {
     promptParts.push(
       "",
       `OUTPUT REQUIREMENTS:
 1. Return COMPLETE HTML files for each page with embedded CSS and JavaScript
-2. Use consistent styling, navigation, and branding across ALL pages
+2. Use consistent mobile responsive styling, navigation, and branding across ALL pages
 3. Include working navigation links between pages
 4. Each page must be fully responsive (mobile, tablet, desktop)
 5. Use semantic HTML5 elements throughout
@@ -500,9 +419,6 @@ Return ONLY the HTML code, no explanations.`
   return promptParts.join("\n");
 }
 
-/**
- * Build persistent content parts for the prompt
- */
 function buildPersistentContentParts(persistentOptions) {
   if (!persistentOptions) return [];
 
@@ -527,7 +443,6 @@ function buildPersistentContentParts(persistentOptions) {
 
   const persistentParts = [];
 
-  // Branding
   if (
     persistentOptions.branding?.brandName ||
     persistentOptions.branding?.tagline ||
@@ -543,7 +458,6 @@ function buildPersistentContentParts(persistentOptions) {
       persistentParts.push(`- Logo URL: ${persistentOptions.branding.logoUrl}`);
   }
 
-  // Social Media
   if (persistentOptions.socialMedia) {
     const socialLinks = Object.entries(persistentOptions.socialMedia)
       .filter(([_, url]) => url && url.trim())
@@ -554,7 +468,6 @@ function buildPersistentContentParts(persistentOptions) {
     }
   }
 
-  // Contact Info
   if (persistentOptions.contactInfo) {
     const contactInfo = [];
     if (persistentOptions.contactInfo.email?.trim())
@@ -571,7 +484,6 @@ function buildPersistentContentParts(persistentOptions) {
     }
   }
 
-  // Important Links
   if (persistentOptions.links) {
     const links = Object.entries(persistentOptions.links)
       .filter(([_, url]) => url && url.trim())
@@ -582,7 +494,6 @@ function buildPersistentContentParts(persistentOptions) {
     }
   }
 
-  // Images
   if (persistentOptions.images?.length > 0) {
     persistentParts.push("", "Provided Images:");
     persistentOptions.images.forEach((img, i) => {
@@ -595,16 +506,10 @@ function buildPersistentContentParts(persistentOptions) {
   return persistentParts;
 }
 
-/**
- * Check if the current template selection requires multi-page output
- */
 export function isMultiPageTemplate(template) {
   return isMultiPage(template);
 }
 
-/**
- * Get page structure for a multi-page template
- */
 export function getMultiPageStructure(template) {
   return MULTI_PAGE_STRUCTURES[template] || null;
 }

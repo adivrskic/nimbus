@@ -1,5 +1,3 @@
-// BillingModal.scss - Minimal style using design system
-
 .billing-overlay {
   position: fixed;
   inset: 0;
@@ -135,7 +133,7 @@
   font-size: 0.875rem;
   font-weight: 600;
   font-family: var(--font-family-base, sans-serif);
-  color: var(--color-text-inverse);
+  color: var(--color-background);
   cursor: pointer;
   transition: var(--transition-base);
 

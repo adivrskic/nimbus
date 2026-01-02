@@ -1,5 +1,3 @@
-// configs/index.js - Central export for all configuration
-
 export { OPTIONS, default as options } from "./options.config";
 export {
   CATEGORIES,
@@ -25,4 +23,3 @@ export {
   DEFAULT_PERSISTENT_OPTIONS,
   getInitialSelections,
 } from "./defaults.config";
-export { INTRO_LABELS } from "./introLabels.config";

@@ -17,8 +17,8 @@ import {
   Zap,
   CheckCircle,
 } from "lucide-react";
-import { supabase } from "../lib/supabaseClient";
-import useModalAnimation from "../hooks/useModalAnimation";
+import { supabase } from "../../lib/supabaseClient";
+import useModalAnimation from "../../hooks/useModalAnimation";
 import "./CustomDomainModal.scss";
 
 const SUPPORTED_PROVIDERS = [
