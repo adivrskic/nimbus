@@ -151,8 +151,8 @@ function Footer({ onLegalClick, onRoadmapClick, onSupportClick }) {
               className="footer__icon"
               strokeWidth={1.5}
               style={{
-                transform: isRaining ? "translateY(-8px)" : "none",
-                transition: "transform 0.3s ease",
+                transform: isRaining ? "translateY(-12px)" : "none",
+                transition: "transform 0.4s ease",
               }}
             />
 

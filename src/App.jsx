@@ -28,7 +28,6 @@ const Home = lazy(() => import("./pages/Home"));
 const PageLoader = () => {
   const { isAuthenticated } = useAuth();
 
-  // Calculate top position based on authentication status
   const topPosition = isAuthenticated ? "var(--header-height, 64px)" : "53px";
 
   return (

@@ -197,9 +197,7 @@ function PreviewModal({
       exit="exit"
     >
       <motion.div
-        className={`preview-modal__container ${
-          isStreaming ? "preview-modal__container--streaming" : ""
-        }`}
+        className="preview-modal__container"
         onClick={(e) => e.stopPropagation()}
         variants={previewContentVariants}
         initial="hidden"
@@ -285,25 +283,44 @@ function PreviewModal({
               </pre>
             </div>
           ) : (
-            <GeneratedPreview html={html} isStreaming={isStreaming} />
+            <div
+              className={`preview-frame ${
+                isStreaming ? "preview-frame--streaming" : ""
+              }`}
+            >
+              <div className="preview-frame__content">
+                <GeneratedPreview html={html} isStreaming={isStreaming} />
+              </div>
+            </div>
           )}
         </div>
+      </motion.div>
 
-        {/* Streaming Info Modal */}
-        <AnimatePresence>
-          {isStreaming && showStreamingModal && (
+      {/* Streaming Info Modal - Outside container, fixed overlay */}
+      <AnimatePresence>
+        {isStreaming && showStreamingModal && (
+          <motion.div
+            className="preview-modal__streaming-modal"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={(e) => e.stopPropagation()}
+          >
             <motion.div
-              className="preview-modal__streaming-modal"
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="preview-modal__streaming-modal-content"
+              initial={{ opacity: 0, scale: 0.96, y: 8 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              transition={{ type: "spring", duration: 0.4 }}
+              exit={{ opacity: 0, scale: 0.96, y: 8 }}
+              transition={{ type: "spring", duration: 0.4, delay: 0.05 }}
             >
               <div className="preview-modal__streaming-modal-header">
                 <div className="preview-modal__streaming-modal-icon">
                   <Loader2 size={20} className="spin" />
                 </div>
-                <span>Generating Your Website</span>
+                <span className="preview-modal__streaming-modal-title">
+                  Generating Your Website
+                </span>
                 <button
                   className="preview-modal__streaming-modal-close"
                   onClick={() => setShowStreamingModal(false)}
@@ -312,20 +329,14 @@ function PreviewModal({
                   <X size={14} />
                 </button>
               </div>
-              <div className="preview-modal__streaming-modal-content">
-                <p>
-                  Your website is being generated in real-time. You can watch
-                  the progress in the preview below.
-                </p>
-                <div className="preview-modal__streaming-modal-tips">
-                  <div className="preview-modal__streaming-modal-tip">
-                    <Check size={14} />
-                    <span>You can close this preview window</span>
-                  </div>
-                  <div className="preview-modal__streaming-modal-tip warning">
-                    <Info size={14} />
-                    <span>Don't close the browser tab or exit</span>
-                  </div>
+              <p>
+                Please be patient as your website is being generated in
+                real-time. You can close this or click Watch Generation to view.
+              </p>
+              <div className="preview-modal__streaming-modal-tips">
+                <div className="preview-modal__streaming-modal-tip warning">
+                  <Info size={14} />
+                  <span>Don't close the browser tab</span>
                 </div>
               </div>
               <button
@@ -335,9 +346,9 @@ function PreviewModal({
                 Watch Generation
               </button>
             </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }
