@@ -379,6 +379,12 @@ export function buildFullPrompt(
     promptParts.push("", "TECHNICAL REQUIREMENTS:", ...techSpecs);
   }
 
+  // Build functional links requirements based on provided data
+  const functionalLinksRequirements = buildFunctionalLinksRequirements(
+    persistentOptions,
+    multiPage
+  );
+
   if (multiPage) {
     promptParts.push(
       "",
@@ -394,6 +400,8 @@ export function buildFullPrompt(
 
 Use placeholder images from https://picsum.photos/[width]/[height]
 Use Google Fonts for typography
+
+${functionalLinksRequirements}
 
 Return ONLY the HTML code for all pages, no explanations.`
     );
@@ -412,11 +420,163 @@ Return ONLY the HTML code for all pages, no explanations.`
 Use placeholder images from https://picsum.photos/[width]/[height]
 Use Google Fonts for typography
 
+${functionalLinksRequirements}
+
 Return ONLY the HTML code, no explanations.`
     );
   }
 
   return promptParts.join("\n");
+}
+
+/**
+ * Build requirements for functional links based on provided persistent options
+ */
+function buildFunctionalLinksRequirements(persistentOptions, multiPage) {
+  const requirements = ["", "⚠️ CRITICAL - ALL LINKS MUST BE FUNCTIONAL:"];
+
+  // Navigation links
+  if (multiPage) {
+    requirements.push(
+      "- Navigation: Use actual page filenames (about.html, services.html, contact.html, etc.)",
+      "- All nav links must point to real pages in the site"
+    );
+  } else {
+    requirements.push(
+      "- Navigation: Use anchor links (#section-id) that scroll to the corresponding section",
+      "- Every nav item MUST have a matching section with that ID",
+      "- Add smooth scrolling behavior with scroll-behavior: smooth on html/body"
+    );
+  }
+
+  // Contact info
+  const hasEmail = persistentOptions?.contactInfo?.email?.trim();
+  const hasPhone = persistentOptions?.contactInfo?.phone?.trim();
+  const hasFormEndpoint =
+    persistentOptions?.contactInfo?.contactFormEndpoint?.trim();
+
+  if (hasEmail || hasPhone || hasFormEndpoint) {
+    requirements.push("", "Contact Links:");
+
+    if (hasEmail) {
+      requirements.push(
+        `- Email: Use mailto:${persistentOptions.contactInfo.email} for ALL email links`,
+        `- Display email as clickable link: <a href="mailto:${persistentOptions.contactInfo.email}">${persistentOptions.contactInfo.email}</a>`
+      );
+    } else {
+      requirements.push(
+        '- Email: If showing email, use mailto: protocol (e.g., <a href="mailto:contact@example.com">)'
+      );
+    }
+
+    if (hasPhone) {
+      // Clean phone number for tel: link (remove spaces, dashes, parentheses)
+      const cleanPhone = persistentOptions.contactInfo.phone.replace(
+        /[\s\-\(\)\.]/g,
+        ""
+      );
+      requirements.push(
+        `- Phone: Use tel:${cleanPhone} for ALL phone links`,
+        `- Display phone as clickable link: <a href="tel:${cleanPhone}">${persistentOptions.contactInfo.phone}</a>`
+      );
+    } else {
+      requirements.push(
+        '- Phone: If showing phone, use tel: protocol (e.g., <a href="tel:+1234567890">)'
+      );
+    }
+
+    if (hasFormEndpoint) {
+      requirements.push(
+        `- Form: Set form action="${persistentOptions.contactInfo.contactFormEndpoint}" method="POST"`,
+        "- Include proper name attributes on all form inputs"
+      );
+    } else if (hasEmail) {
+      requirements.push(
+        `- Form: Use action="mailto:${persistentOptions.contactInfo.email}" method="POST" enctype="text/plain"`,
+        '- Or use formsubmit.co: action="https://formsubmit.co/${persistentOptions.contactInfo.email}"'
+      );
+    }
+  } else {
+    requirements.push(
+      "",
+      "Contact Links (use proper protocols):",
+      '- Email links: <a href="mailto:email@example.com">',
+      '- Phone links: <a href="tel:+1234567890">',
+      "- Forms: Include action attribute pointing to form handler or mailto:"
+    );
+  }
+
+  // Social media links
+  const socialMedia = persistentOptions?.socialMedia;
+  const hasSocialLinks =
+    socialMedia && Object.values(socialMedia).some((url) => url?.trim());
+
+  if (hasSocialLinks) {
+    requirements.push("", "Social Media Links (USE THESE EXACT URLs):");
+
+    const socialPlatforms = {
+      twitter: "Twitter/X",
+      facebook: "Facebook",
+      instagram: "Instagram",
+      linkedin: "LinkedIn",
+      youtube: "YouTube",
+      tiktok: "TikTok",
+      github: "GitHub",
+      discord: "Discord",
+      pinterest: "Pinterest",
+      threads: "Threads",
+    };
+
+    Object.entries(socialMedia).forEach(([platform, url]) => {
+      if (url?.trim()) {
+        const platformName = socialPlatforms[platform] || platform;
+        requirements.push(
+          `- ${platformName}: <a href="${url}" target="_blank" rel="noopener noreferrer">`
+        );
+      }
+    });
+
+    requirements.push(
+      '- All social links MUST open in new tab (target="_blank")',
+      '- Include rel="noopener noreferrer" for security'
+    );
+  } else {
+    requirements.push(
+      "",
+      "Social Media Links:",
+      "- Use # as placeholder href if no real URL provided",
+      '- Add target="_blank" rel="noopener noreferrer" for external links'
+    );
+  }
+
+  // Other links
+  const links = persistentOptions?.links;
+  const hasOtherLinks =
+    links && Object.values(links).some((url) => url?.trim());
+
+  if (hasOtherLinks) {
+    requirements.push("", "Additional Links (USE THESE EXACT URLs):");
+
+    Object.entries(links).forEach(([linkType, url]) => {
+      if (url?.trim()) {
+        requirements.push(`- ${linkType}: href="${url}"`);
+      }
+    });
+  }
+
+  // General link requirements
+  requirements.push(
+    "",
+    "General Link Rules:",
+    "- NO dead links - every <a> tag must have a valid href",
+    '- NO href="#" unless it\'s a placeholder with click handler',
+    '- External links: target="_blank" rel="noopener noreferrer"',
+    "- Internal links: Use relative paths or anchor IDs",
+    "- Buttons that look like links should be actual <a> tags when navigating",
+    "- CTA buttons should link to contact section (#contact) or contact page"
+  );
+
+  return requirements.join("\n");
 }
 
 function buildPersistentContentParts(persistentOptions) {
@@ -464,23 +624,35 @@ function buildPersistentContentParts(persistentOptions) {
       .map(([platform, url]) => `- ${platform}: ${url}`);
 
     if (socialLinks.length > 0) {
-      persistentParts.push("", "Social Media:", ...socialLinks);
+      persistentParts.push(
+        "",
+        "Social Media (USE THESE EXACT URLs):",
+        ...socialLinks
+      );
     }
   }
 
   if (persistentOptions.contactInfo) {
     const contactInfo = [];
     if (persistentOptions.contactInfo.email?.trim())
-      contactInfo.push(`- Email: ${persistentOptions.contactInfo.email}`);
+      contactInfo.push(
+        `- Email: ${persistentOptions.contactInfo.email} (use mailto: link)`
+      );
     if (persistentOptions.contactInfo.phone?.trim())
-      contactInfo.push(`- Phone: ${persistentOptions.contactInfo.phone}`);
+      contactInfo.push(
+        `- Phone: ${persistentOptions.contactInfo.phone} (use tel: link)`
+      );
     if (persistentOptions.contactInfo.contactFormEndpoint?.trim())
       contactInfo.push(
-        `- Form Endpoint: ${persistentOptions.contactInfo.contactFormEndpoint}`
+        `- Form Endpoint: ${persistentOptions.contactInfo.contactFormEndpoint} (use as form action)`
       );
 
     if (contactInfo.length > 0) {
-      persistentParts.push("", "Contact:", ...contactInfo);
+      persistentParts.push(
+        "",
+        "Contact (MAKE THESE CLICKABLE):",
+        ...contactInfo
+      );
     }
   }
 
@@ -490,7 +662,7 @@ function buildPersistentContentParts(persistentOptions) {
       .map(([linkType, url]) => `- ${linkType}: ${url}`);
 
     if (links.length > 0) {
-      persistentParts.push("", "Links:", ...links);
+      persistentParts.push("", "Links (USE THESE EXACT URLs):", ...links);
     }
   }
 
