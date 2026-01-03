@@ -603,35 +603,48 @@ function buildPersistentContentParts(persistentOptions) {
 
   const persistentParts = [];
 
+  // Brand Identity
   if (
     persistentOptions.branding?.brandName ||
     persistentOptions.branding?.tagline ||
     persistentOptions.branding?.logoUrl
   ) {
+    persistentParts.push("Brand Identity:");
     if (persistentOptions.branding.brandName)
       persistentParts.push(
-        `- Brand Name: ${persistentOptions.branding.brandName}`
+        `- Brand Name: "${persistentOptions.branding.brandName}" - use this exact name throughout`
       );
     if (persistentOptions.branding.tagline)
-      persistentParts.push(`- Tagline: ${persistentOptions.branding.tagline}`);
+      persistentParts.push(
+        `- Tagline: "${persistentOptions.branding.tagline}" - use in hero or header`
+      );
     if (persistentOptions.branding.logoUrl)
       persistentParts.push(`- Logo URL: ${persistentOptions.branding.logoUrl}`);
   }
 
-  if (persistentOptions.socialMedia) {
-    const socialLinks = Object.entries(persistentOptions.socialMedia)
-      .filter(([_, url]) => url && url.trim())
-      .map(([platform, url]) => `- ${platform}: ${url}`);
+  // Business Information (NEW)
+  if (
+    persistentOptions.business?.description ||
+    persistentOptions.business?.location ||
+    persistentOptions.business?.yearEstablished
+  ) {
+    persistentParts.push("", "Business Information:");
 
-    if (socialLinks.length > 0) {
+    if (persistentOptions.business.description?.trim())
       persistentParts.push(
-        "",
-        "Social Media (USE THESE EXACT URLs):",
-        ...socialLinks
+        `- Description: "${persistentOptions.business.description}" - use to inform copy and messaging`
       );
-    }
+    if (persistentOptions.business.location?.trim())
+      persistentParts.push(
+        `- Location: ${persistentOptions.business.location} - can use in footer or contact section`
+      );
+    if (persistentOptions.business.yearEstablished?.trim())
+      persistentParts.push(
+        `- Established: ${persistentOptions.business.yearEstablished} - can use "Since ${persistentOptions.business.yearEstablished}" for credibility`
+      );
   }
 
+  // Contact Information
   if (persistentOptions.contactInfo) {
     const contactInfo = [];
     if (persistentOptions.contactInfo.email?.trim())
@@ -642,6 +655,8 @@ function buildPersistentContentParts(persistentOptions) {
       contactInfo.push(
         `- Phone: ${persistentOptions.contactInfo.phone} (use tel: link)`
       );
+    if (persistentOptions.contactInfo.address?.trim())
+      contactInfo.push(`- Address: ${persistentOptions.contactInfo.address}`);
     if (persistentOptions.contactInfo.contactFormEndpoint?.trim())
       contactInfo.push(
         `- Form Endpoint: ${persistentOptions.contactInfo.contactFormEndpoint} (use as form action)`
@@ -656,6 +671,39 @@ function buildPersistentContentParts(persistentOptions) {
     }
   }
 
+  // Social Media
+  if (persistentOptions.socialMedia) {
+    const socialLinks = Object.entries(persistentOptions.socialMedia)
+      .filter(([_, url]) => url && url.trim())
+      .map(([platform, url]) => `- ${platform}: ${url}`);
+
+    if (socialLinks.length > 0) {
+      persistentParts.push(
+        "",
+        "Social Media (USE THESE EXACT URLs):",
+        ...socialLinks
+      );
+    }
+  }
+
+  // Content Preferences (NEW)
+  if (
+    persistentOptions.content?.primaryCta ||
+    persistentOptions.content?.copyrightText
+  ) {
+    persistentParts.push("", "Content Preferences:");
+
+    if (persistentOptions.content.primaryCta?.trim())
+      persistentParts.push(
+        `- Primary CTA: Use "${persistentOptions.content.primaryCta}" as the main call-to-action button text`
+      );
+    if (persistentOptions.content.copyrightText?.trim())
+      persistentParts.push(
+        `- Footer Copyright: ${persistentOptions.content.copyrightText}`
+      );
+  }
+
+  // Other Links
   if (persistentOptions.links) {
     const links = Object.entries(persistentOptions.links)
       .filter(([_, url]) => url && url.trim())
@@ -666,6 +714,7 @@ function buildPersistentContentParts(persistentOptions) {
     }
   }
 
+  // Provided Images
   if (persistentOptions.images?.length > 0) {
     persistentParts.push("", "Provided Images:");
     persistentOptions.images.forEach((img, i) => {

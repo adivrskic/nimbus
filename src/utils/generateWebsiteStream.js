@@ -1,3 +1,4 @@
+// utils/generateWebsiteStream.js - Updated to pass persistentOptions
 import { supabase } from "../lib/supabaseClient";
 
 /**
@@ -7,6 +8,7 @@ import { supabase } from "../lib/supabaseClient";
  * @param {Object} params
  * @param {string} params.prompt - The generation prompt
  * @param {Object} params.customization - Customization options (may include isRefinement, previousHtml)
+ * @param {Object} params.persistentOptions - Persistent options (brand, contact, business info)
  * @param {AbortSignal} params.signal - AbortController signal for cancellation
  * @param {Function} params.onChunk - Optional callback for each chunk (raw)
  * @param {Function} params.onProgress - Optional callback with { phase, content } for UI updates
@@ -15,6 +17,7 @@ import { supabase } from "../lib/supabaseClient";
 export async function generateWebsiteStream({
   prompt,
   customization = {},
+  persistentOptions = {},
   signal,
   onChunk,
   onProgress,
@@ -37,6 +40,7 @@ export async function generateWebsiteStream({
       body: JSON.stringify({
         prompt,
         customization: restCustomization,
+        persistentOptions, // NEW: Pass persistent options
         isRefinement: isRefinement || false,
         previousHtml: previousHtml || null,
         stream: true,

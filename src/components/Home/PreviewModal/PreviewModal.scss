@@ -116,26 +116,6 @@
     }
   }
 
-  &__deploy-btn {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 14px;
-    background: var(--color-accent);
-    border: none;
-    border-radius: var(--radius-md);
-    font-size: 0.8125rem;
-    font-weight: 600;
-    font-family: var(--font-family-base, sans-serif);
-    color: var(--color-background);
-    cursor: pointer;
-    transition: var(--transition-base);
-
-    &:hover {
-      background: var(--color-accent-hover);
-    }
-  }
-
   &__close-btn {
     display: flex;
     align-items: center;
@@ -161,14 +141,9 @@
     flex: 1;
     min-width: 0;
     display: block;
-    background-color: var(--color-surface);
-    padding: 4px 6px;
-    border-radius: 999px;
 
     .preview-modal__enhance {
       padding: 0;
-      border: none;
-      background: transparent;
     }
 
     .preview-modal__token-overlay {
@@ -181,10 +156,11 @@
   // Mobile enhance wrapper - shown below header
   &__enhance-mobile {
     display: none;
+    padding: 10px 12px;
     border-bottom: 1px solid var(--color-border);
 
     .preview-modal__enhance {
-      border-top: none;
+      padding: 0;
     }
   }
 
@@ -193,13 +169,6 @@
     overflow: hidden;
     display: flex;
     flex-direction: column;
-
-    // Hide preview toolbar on mobile
-    .preview-toolbar {
-      @media (max-width: 768px) {
-        display: none;
-      }
-    }
   }
 
   &__code {
@@ -222,40 +191,85 @@
     }
   }
 
+  // ==========================================
+  // ENHANCE SECTION - SearchBar-style layout
+  // ==========================================
   &__enhance {
     position: relative;
     display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 12px 16px;
-    background: var(--color-surface);
+    flex-direction: column;
   }
 
-  &__enhance-wrapper {
-    flex: 1;
-    min-width: 0;
+  &__enhance-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 6px 6px 14px;
+    background: var(--color-background);
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    transition: var(--transition-base);
+
+    &:hover {
+      border-color: var(--color-border-hover);
+    }
+
+    &.focused {
+      border-color: var(--color-border-hover);
+      background: var(--color-surface);
+      box-shadow: var(--shadow-sm);
+    }
+
+    &.has-input {
+      .preview-modal__enhance-submit {
+        background: var(--color-accent);
+        color: var(--color-background);
+
+        &:hover:not(:disabled) {
+          background: var(--color-accent-hover);
+        }
+      }
+    }
+  }
+
+  &__enhance-feedback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-radius: 50%;
+    color: var(--color-text-tertiary);
+    cursor: pointer;
+    transition: var(--transition-base);
+
+    &:hover {
+      background: var(--color-accent-light);
+      color: var(--color-text-secondary);
+    }
+
+    &:active {
+      transform: scale(0.95);
+    }
   }
 
   &__enhance-input {
-    width: 100%;
-    padding: 8px 14px;
-    background: var(--color-background);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
-    font-size: 0.8125rem;
+    flex: 1;
+    min-width: 0;
+    padding: 6px 0;
+    background: transparent;
+    border: none;
+    font-size: 0.875rem;
     font-family: var(--font-family-base, sans-serif);
     color: var(--color-text-primary);
-    transition: var(--transition-base);
+    outline: none;
 
     &::placeholder {
       color: var(--color-text-tertiary);
-    }
-
-    &:focus {
-      outline: none;
-      background: var(--color-surface);
-      border-color: var(--color-border-hover);
-      box-shadow: var(--shadow-md);
     }
 
     &:disabled {
@@ -271,16 +285,15 @@
     flex-shrink: 0;
   }
 
-  &__token-btn {
+  &__enhance-token {
     display: flex;
     align-items: center;
-    height: 36px;
     gap: 4px;
-    padding: 8px 12px;
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
+    padding: 6px 10px;
+    background: var(--color-accent-light);
+    border: none;
     border-radius: 999px;
-    font-size: 0.8125rem;
+    font-size: 0.75rem;
     font-weight: 600;
     font-family: var(--font-family-base, sans-serif);
     color: var(--color-text-tertiary);
@@ -289,28 +302,28 @@
 
     &:hover,
     &.active {
-      background: var(--color-accent-light);
+      background: var(--color-border);
       color: var(--color-accent);
-      box-shadow: var(--shadow-md);
+    }
+
+    svg {
+      flex-shrink: 0;
     }
   }
 
-  &__submit-btn {
+  &__enhance-submit {
     display: flex;
     align-items: center;
     justify-content: center;
     width: 36px;
     height: 36px;
-    background: var(--color-accent);
+    flex-shrink: 0;
+    background: var(--color-accent-light);
     border: none;
     border-radius: 999px;
-    color: var(--color-background);
+    color: var(--color-text-tertiary);
     cursor: pointer;
     transition: var(--transition-base);
-
-    &:hover:not(:disabled) {
-      background: var(--color-accent-hover);
-    }
 
     &:disabled {
       opacity: 0.5;
@@ -322,10 +335,13 @@
     }
   }
 
+  // ==========================================
+  // TOKEN OVERLAY
+  // ==========================================
   &__token-overlay {
     position: absolute;
     bottom: calc(100% + 8px);
-    right: 12px;
+    right: 0;
     z-index: 100;
     display: flex;
     flex-direction: column;
@@ -419,7 +435,9 @@
     }
   }
 
-  // Streaming Info Modal - consistent with AuthModal/HelpOverlay
+  // ==========================================
+  // STREAMING MODAL
+  // ==========================================
   &__streaming-modal {
     position: fixed;
     inset: 0;
@@ -462,9 +480,9 @@
     justify-content: center;
     width: 36px;
     height: 36px;
-    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    background: var(--color-accent);
     border-radius: 10px;
-    color: white;
+    color: var(--color-background);
 
     .spin {
       animation: spin 1s linear infinite;
@@ -528,7 +546,7 @@
   &__streaming-modal-btn {
     width: 100%;
     padding: 12px;
-    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    background: var(--color-accent);
     border: none;
     border-radius: var(--radius-lg);
     font-size: 0.875rem;
@@ -540,12 +558,97 @@
 
     &:hover {
       opacity: 0.9;
-      transform: translateY(-1px);
+    }
+  }
+
+  // ==========================================
+  // FILE SELECTOR (Multi-page)
+  // ==========================================
+  &__file-selector {
+    position: relative;
+    margin-left: 8px;
+  }
+
+  &__file-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: var(--color-accent-light);
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    color: var(--color-text-secondary);
+    font-size: 0.75rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition-base);
+
+    &:hover {
+      background: var(--color-surface-elevated);
+      border-color: var(--color-border-hover);
+      color: var(--color-text-primary);
+    }
+
+    svg:last-child {
+      opacity: 0.5;
+    }
+  }
+
+  &__file-dropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    min-width: 180px;
+    background: var(--color-surface-elevated);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+    z-index: 100;
+  }
+
+  &__file-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 10px 12px;
+    background: transparent;
+    border: none;
+    color: var(--color-text-secondary);
+    font-size: 0.8125rem;
+    text-align: left;
+    cursor: pointer;
+    transition: var(--transition-fast);
+
+    &:hover {
+      background: var(--color-accent-light);
+      color: var(--color-text-primary);
+    }
+
+    &.active {
+      background: var(--color-accent-light);
+      color: var(--color-text-primary);
+    }
+
+    svg:first-child {
+      opacity: 0.5;
+    }
+
+    svg:last-child {
+      margin-left: auto;
+      color: var(--color-accent);
+    }
+
+    span {
+      flex: 1;
     }
   }
 }
 
-// Preview frame with streaming glow effect
+// ==========================================
+// PREVIEW FRAME
+// ==========================================
 .preview-frame {
   position: relative;
   flex: 1;
@@ -555,11 +658,9 @@
   background: #fff;
 
   &--streaming {
-    // Create space for the glow
     margin: 8px;
     border-radius: var(--radius-lg);
 
-    // Gradient border glow
     &::before {
       content: "";
       position: absolute;
@@ -577,7 +678,6 @@
       animation: gradient-spin 3s linear infinite;
     }
 
-    // Blurred glow effect behind
     &::after {
       content: "";
       position: absolute;
@@ -613,7 +713,9 @@
   }
 }
 
-// Mobile responsive
+// ==========================================
+// MOBILE RESPONSIVE
+// ==========================================
 @media (max-width: 768px) {
   .preview-modal {
     padding: 0;
@@ -631,7 +733,6 @@
       border: none;
     }
 
-    // Hide desktop enhance, show mobile
     &__enhance-desktop {
       display: none;
     }
@@ -651,25 +752,33 @@
       gap: 4px;
     }
 
-    &__action-btn span,
-    &__deploy-btn span {
+    &__action-btn span {
       display: none;
     }
 
-    &__action-btn,
-    &__deploy-btn {
+    &__action-btn {
       padding: 8px;
       gap: 0;
-    }
-
-    &__enhance {
-      padding: 10px 12px;
     }
 
     &__token-overlay {
       left: 12px;
       right: 12px;
       min-width: auto;
+    }
+
+    &__file-selector {
+      margin-left: 0;
+      margin-top: 8px;
+    }
+
+    &__file-btn {
+      width: 100%;
+      justify-content: space-between;
+    }
+
+    &__file-dropdown {
+      width: 100%;
     }
 
     &__streaming-modal-content {
@@ -693,14 +802,11 @@
 
 @media (min-width: 769px) {
   .preview-modal {
-    &__tab {
-      span {
-        display: inline;
-      }
+    &__tab span {
+      display: inline;
     }
 
-    &__action-btn span,
-    &__deploy-btn span {
+    &__action-btn span {
       display: inline;
     }
   }
@@ -722,7 +828,6 @@
     }
 
     &__action-btn,
-    &__deploy-btn,
     &__close-btn {
       width: 32px;
       height: 32px;
@@ -734,32 +839,41 @@
     }
 
     &__close-btn {
-      margin-left: 0px;
+      margin-left: 0;
     }
 
-    &__enhance {
-      padding: 8px 10px;
-      gap: 6px;
+    &__enhance-container {
+      padding: 4px 4px 4px 12px;
     }
 
     &__enhance-input {
-      padding: 8px 12px;
-      font-size: 0.75rem;
+      padding: 4px 0;
+      font-size: 0.8125rem;
     }
 
-    &__token-btn {
-      height: 34px;
-      padding: 6px 10px;
-      font-size: 0.75rem;
+    &__enhance-feedback {
+      width: 28px;
+      height: 28px;
 
-      span {
-        font-size: 0.75rem;
+      svg {
+        width: 14px;
+        height: 14px;
       }
     }
 
-    &__submit-btn {
-      width: 34px;
-      height: 34px;
+    &__enhance-token {
+      padding: 4px 8px;
+      font-size: 0.6875rem;
+
+      svg {
+        width: 12px;
+        height: 12px;
+      }
+    }
+
+    &__enhance-submit {
+      width: 32px;
+      height: 32px;
 
       svg {
         width: 14px;
@@ -814,6 +928,9 @@
   }
 }
 
+// ==========================================
+// ANIMATIONS
+// ==========================================
 @keyframes spin {
   to {
     transform: rotate(360deg);

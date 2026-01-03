@@ -141,7 +141,7 @@ function Home() {
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [currentProjectId, setCurrentProjectId] = useState(null);
-
+  const [lastRequest, setLastRequest] = useState(null);
   // Show enhance token overlay state
   const [showEnhanceTokenOverlay, setShowEnhanceTokenOverlay] = useState(false);
 
@@ -266,13 +266,16 @@ function Home() {
       return;
     }
 
+    setLastRequest({
+      type: "initial",
+      prompt: prompt.trim(),
+    });
+
     setCurrentProjectId(null);
     setSaveSuccess(false);
-
-    // OPEN PREVIEW IMMEDIATELY for live streaming
     openPreview();
 
-    generate(prompt, selections, persistentOptions, user, true);
+    generate(prompt, selections, persistentOptions, user, true); // Already correct
   }, [
     prompt,
     isGenerating,
@@ -295,13 +298,23 @@ function Home() {
       return;
     }
 
-    enhance(prompt, selections, user);
+    // Capture the enhance prompt BEFORE it gets cleared
+    const submittedEnhancePrompt = enhancePrompt.trim();
+
+    // Set lastRequest when enhancement starts
+    setLastRequest({
+      type: "enhancement",
+      prompt: submittedEnhancePrompt,
+    });
+
+    enhance(prompt, selections, persistentOptions, user); // Added persistentOptions
   }, [
     enhancePrompt,
     isGenerating,
     isAuthenticated,
     prompt,
     selections,
+    persistentOptions, // Added to dependencies
     user,
     enhance,
     openAuth,
@@ -481,6 +494,7 @@ function Home() {
               onExpand={restorePreview}
               onDiscard={resetGeneration}
               onOpenProjects={openProjects}
+              isGenerating={isGenerating}
             />
           )}
         </AnimatePresence>
@@ -531,6 +545,9 @@ function Home() {
             onBuyTokens={openTokens}
             isStreaming={isStreaming}
             streamingPhase={streamingPhase}
+            selections={selections}
+            originalPrompt={prompt}
+            lastRequest={lastRequest}
           />
         )}
       </AnimatePresence>
@@ -541,7 +558,11 @@ function Home() {
 
       <AnimatePresence>
         {showTokens && (
-          <TokensModal isOpen={showTokens} onClose={closeTokens} />
+          <TokensModal
+            isOpen={showTokens}
+            onClose={closeTokens}
+            onOpenAuth={openAuth}
+          />
         )}
       </AnimatePresence>
 

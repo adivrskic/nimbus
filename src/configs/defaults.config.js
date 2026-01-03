@@ -8,33 +8,56 @@ export const EXAMPLE_PROMPTS = [
 ];
 
 export const DEFAULT_PERSISTENT_OPTIONS = {
-  socialMedia: {
-    facebook: "",
-    twitter: "",
-    instagram: "",
-    linkedIn: "",
-    github: "",
-    dribbble: "",
+  // Brand identity
+  branding: {
+    brandName: "",
+    tagline: "",
+    logoUrl: "",
+    faviconUrl: "",
   },
+
+  // Business information (NEW)
+  business: {
+    description: "", // Short description of what they do
+    location: "", // City, region, or "Remote"
+    yearEstablished: "", // e.g., "2015" - adds credibility
+  },
+
+  // Contact information
   contactInfo: {
     email: "",
     phone: "",
     address: "",
     contactFormEndpoint: "",
   },
-  branding: {
-    logoUrl: "",
-    faviconUrl: "",
-    brandName: "",
-    tagline: "",
+
+  // Social media links
+  socialMedia: {
+    twitter: "",
+    instagram: "",
+    linkedIn: "",
+    facebook: "",
+    github: "",
+    youtube: "",
+    tiktok: "",
   },
-  images: [],
+
+  // Content preferences (NEW)
+  content: {
+    primaryCta: "", // e.g., "Get Started", "Book Now", "Contact Us"
+    copyrightText: "", // e.g., "© 2024 Company Name"
+  },
+
+  // Important links
   links: {
     termsOfService: "",
     privacyPolicy: "",
     pricingPage: "",
     blog: "",
   },
+
+  // User-provided images
+  images: [],
 };
 
 export const getInitialSelections = (OPTIONS) => {

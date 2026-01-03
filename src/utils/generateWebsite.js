@@ -1,11 +1,12 @@
-// utils/generateWebsite.js
+// utils/generateWebsite.js - Updated to pass persistentOptions
 import { supabase } from "../lib/supabaseClient";
 
 /**
  * Calls the Supabase Edge Function to generate a website
  * @param {Object} params
  * @param {string} params.prompt - The generation prompt
- * @param {Object} params.selections - Customization options
+ * @param {Object} params.selections - Customization options (design choices)
+ * @param {Object} params.persistentOptions - Persistent options (brand, contact, business info)
  * @param {boolean} params.isRefinement - Whether this is a refinement/enhancement
  * @param {string} params.existingCode - Previous HTML for refinements
  * @returns {Promise<{code: string, tokensUsed: number, tokensRemaining: number}>}
@@ -13,6 +14,7 @@ import { supabase } from "../lib/supabaseClient";
 export async function generateWebsite({
   prompt,
   selections = {},
+  persistentOptions = {},
   isRefinement = false,
   existingCode = null,
 }) {
@@ -23,6 +25,7 @@ export async function generateWebsite({
         body: {
           prompt,
           customization: selections,
+          persistentOptions, // NEW: Pass persistent options
           isRefinement,
           previousHtml: existingCode,
         },
