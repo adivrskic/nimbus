@@ -1,5 +1,5 @@
 // components/Home/SearchBar/SearchBar.jsx - Main search input component
-import { forwardRef, useRef, useCallback } from "react";
+import { forwardRef, useRef, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Coins,
@@ -11,6 +11,9 @@ import {
 } from "lucide-react";
 import { Loader2 } from "lucide-react";
 import "./SearchBar.scss";
+
+const MIN_CHARS = 20;
+const MAX_CHARS = 1000;
 
 const SearchBar = forwardRef(
   (
@@ -45,6 +48,27 @@ const SearchBar = forwardRef(
 
     const showExpandedState = isExpanded && !isGenerating;
 
+    // Character count validation
+    const charCount = value.length;
+    const isUnderMin = charCount > 0 && charCount < MIN_CHARS;
+    const isOverMax = charCount > MAX_CHARS;
+    const isValidLength = charCount >= MIN_CHARS && charCount <= MAX_CHARS;
+    const charsRemaining = MIN_CHARS - charCount;
+    const charsOver = charCount - MAX_CHARS;
+
+    // Determine if submit should be disabled
+    const canSubmit = value.trim().length > 0 && isValidLength && !isGenerating;
+
+    // Character counter display logic
+    const showCharCounter = useMemo(() => {
+      // Always show when expanded
+      if (showExpandedState) return true;
+      // Show when approaching limits
+      if (charCount > 0 && charCount < MIN_CHARS + 10) return true;
+      if (charCount > MAX_CHARS - 100) return true;
+      return false;
+    }, [showExpandedState, charCount]);
+
     const handleBlur = useCallback(
       (e) => {
         if (preventBlurRef.current) {
@@ -63,6 +87,30 @@ const SearchBar = forwardRef(
       preventBlurRef.current = true;
     }, []);
 
+    // Handle onChange with max limit
+    const handleChange = useCallback(
+      (e) => {
+        const newValue = e.target.value;
+        // Allow typing but warn when over - don't hard block
+        onChange?.(e);
+      },
+      [onChange]
+    );
+
+    // Handle keydown - prevent submit if invalid
+    const handleKeyDown = useCallback(
+      (e) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+          if (!canSubmit) {
+            e.preventDefault();
+            return;
+          }
+        }
+        onKeyDown?.(e);
+      },
+      [onKeyDown, canSubmit]
+    );
+
     return (
       <motion.div
         ref={containerRef}
@@ -79,12 +127,14 @@ const SearchBar = forwardRef(
           <textarea
             ref={ref}
             value={value}
-            onChange={onChange}
-            onKeyDown={onKeyDown}
+            onChange={handleChange}
+            onKeyDown={handleKeyDown}
             onFocus={onFocus}
             onBlur={handleBlur}
             placeholder={showTypewriter ? "" : placeholder}
-            className="search-bar__input"
+            className={`search-bar__input ${
+              isOverMax ? "search-bar__input--error" : ""
+            }`}
             rows={1}
           />
           {showTypewriter && (
@@ -101,6 +151,38 @@ const SearchBar = forwardRef(
               <span className="search-bar__truncate-text">{value}</span>
             </div>
           )}
+
+          {/* Character counter */}
+          <AnimatePresence>
+            {showCharCounter && charCount > 0 && (
+              <motion.div
+                className={`search-bar__char-counter ${
+                  isUnderMin ? "search-bar__char-counter--warning" : ""
+                } ${isOverMax ? "search-bar__char-counter--error" : ""} ${
+                  isValidLength ? "search-bar__char-counter--valid" : ""
+                }`}
+                initial={{ opacity: 0, y: 5 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 5 }}
+                transition={{ duration: 0.15 }}
+              >
+                {isUnderMin && (
+                  <span className="search-bar__char-message">
+                    {charsRemaining} more character
+                    {charsRemaining !== 1 ? "s" : ""} needed
+                  </span>
+                )}
+                {isOverMax && (
+                  <span className="search-bar__char-message">
+                    {charsOver} character{charsOver !== 1 ? "s" : ""} over limit
+                  </span>
+                )}
+                <span className="search-bar__char-count">
+                  {charCount.toLocaleString()}/{MAX_CHARS.toLocaleString()}
+                </span>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           <AnimatePresence>
             {showExpandedState && hasActiveOptions && (
@@ -218,7 +300,14 @@ const SearchBar = forwardRef(
             }`}
             onClick={onGenerate}
             onMouseDown={handleButtonMouseDown}
-            disabled={isGenerating || !value.trim()}
+            disabled={!canSubmit}
+            title={
+              isUnderMin
+                ? `Need at least ${MIN_CHARS} characters`
+                : isOverMax
+                ? `Exceeds ${MAX_CHARS} character limit`
+                : ""
+            }
           >
             {isGenerating ? (
               <Loader2 size={16} className="spin" />
@@ -237,4 +326,6 @@ const SearchBar = forwardRef(
 
 SearchBar.displayName = "SearchBar";
 
+// Export constants for use in other components
+export { MIN_CHARS, MAX_CHARS };
 export default SearchBar;

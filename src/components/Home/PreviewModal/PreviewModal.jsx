@@ -1,20 +1,23 @@
-// components/Home/PreviewModal/PreviewModal.jsx - Streaming support added
-import { useState, useRef, useEffect } from "react";
+// components/Home/PreviewModal/PreviewModal.jsx - With actions inside input
+import { useState, useRef, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Eye,
   Code as Code2,
   Download,
   Save,
-  Rocket,
   X,
   Check,
   Sparkles,
   Coins,
   Loader2,
   Info,
+  MessageSquareMore,
+  FileText,
+  ChevronDown,
 } from "lucide-react";
 import GeneratedPreview from "../../GeneratedPreview";
+import FeedbackModal from "../../Modals/FeedbackModal";
 import {
   previewOverlayVariants,
   previewContentVariants,
@@ -23,9 +26,31 @@ import {
 } from "../../../configs/animations.config";
 import "./PreviewModal.scss";
 
+// Parse multi-page HTML if it contains file markers
+function parseMultiPageHtml(html) {
+  if (!html) return null;
+
+  const filePattern = /<!--\s*(?:=+\s*)?FILE:\s*(\S+\.html)\s*(?:=+\s*)?-->/gi;
+  const parts = html.split(filePattern);
+
+  if (parts.length <= 1) return null;
+
+  const files = {};
+  for (let i = 1; i < parts.length; i += 2) {
+    const filename = parts[i]?.trim();
+    const content = parts[i + 1]?.trim();
+    if (filename && content) {
+      files[filename] = content;
+    }
+  }
+
+  return Object.keys(files).length > 0 ? files : null;
+}
+
 function PreviewModal({
   isOpen,
   html,
+  files: propFiles,
   onClose,
   onMinimize,
   onDownload,
@@ -46,10 +71,45 @@ function PreviewModal({
   tokenBalance,
   onBuyTokens,
   isStreaming = false,
+  selections = {},
+  originalPrompt = "",
+  // lastRequest tracks the most recently SUBMITTED request (not current input)
+  // { type: 'initial' | 'enhancement', prompt: string }
+  lastRequest = null,
 }) {
   const [showCode, setShowCode] = useState(false);
   const [showStreamingModal, setShowStreamingModal] = useState(false);
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+  const [activeFile, setActiveFile] = useState("index.html");
+  const [showFileDropdown, setShowFileDropdown] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
   const enhanceInputRef = useRef(null);
+
+  // Parse files from HTML or use provided files object
+  const files = useMemo(() => {
+    if (propFiles && Object.keys(propFiles).length > 0) {
+      return propFiles;
+    }
+    return parseMultiPageHtml(html);
+  }, [html, propFiles]);
+
+  const isMultiPage = files && Object.keys(files).length > 1;
+  const fileList = files ? Object.keys(files) : [];
+
+  // Get current file content
+  const currentHtml = useMemo(() => {
+    if (isMultiPage && files[activeFile]) {
+      return files[activeFile];
+    }
+    return html;
+  }, [isMultiPage, files, activeFile, html]);
+
+  // Reset active file when files change
+  useEffect(() => {
+    if (isMultiPage && !files[activeFile]) {
+      setActiveFile(fileList[0] || "index.html");
+    }
+  }, [files, activeFile, isMultiPage, fileList]);
 
   // Show streaming modal when streaming starts
   useEffect(() => {
@@ -67,54 +127,81 @@ function PreviewModal({
 
   if (!isOpen) return null;
 
+  const hasInput = enhancePrompt.trim().length > 0;
+
   const enhanceSection = (
     <div className="preview-modal__enhance">
-      <div className="preview-modal__enhance-wrapper">
+      <div
+        className={`preview-modal__enhance-container ${
+          isFocused ? "focused" : ""
+        } ${hasInput ? "has-input" : ""}`}
+      >
+        {/* Feedback button - left side */}
+        {currentHtml && !isGenerating && !isStreaming && (
+          <motion.button
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.15 }}
+            className="preview-modal__enhance-feedback"
+            onClick={() => setShowFeedbackModal(true)}
+            title="Give feedback"
+          >
+            <MessageSquareMore size={16} />
+          </motion.button>
+        )}
+
         <input
           ref={enhanceInputRef}
           type="text"
           value={enhancePrompt}
           onChange={(e) => onEnhancePromptChange(e.target.value)}
           onKeyDown={(e) => {
-            if (e.key === "Enter" && !isGenerating) onEnhance();
+            if (e.key === "Enter" && !isGenerating && hasInput) onEnhance();
           }}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
           placeholder="Describe changes..."
           className="preview-modal__enhance-input"
           disabled={isGenerating || isStreaming}
         />
-      </div>
-      <div className="preview-modal__enhance-actions">
-        <AnimatePresence>
-          {enhancePrompt.trim() && (
-            <motion.button
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.15 }}
-              className={`preview-modal__token-btn ${
-                showEnhanceTokenOverlay ? "active" : ""
-              }`}
-              onClick={onToggleEnhanceTokenOverlay}
-              disabled={isStreaming}
-            >
-              <Coins size={14} />
-              <span>-{enhanceTokenCost}</span>
-            </motion.button>
-          )}
-        </AnimatePresence>
-        <motion.button
-          className="preview-modal__submit-btn"
-          onClick={onEnhance}
-          disabled={isGenerating || isStreaming || !enhancePrompt.trim()}
-        >
-          {isGenerating ? (
-            <Loader2 size={16} className="spin" />
-          ) : (
-            <Sparkles size={16} />
-          )}
-        </motion.button>
+
+        {/* Actions - right side inside input */}
+        <div className="preview-modal__enhance-actions">
+          <AnimatePresence>
+            {hasInput && (
+              <motion.button
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                transition={{ duration: 0.15 }}
+                className={`preview-modal__enhance-token ${
+                  showEnhanceTokenOverlay ? "active" : ""
+                }`}
+                onClick={onToggleEnhanceTokenOverlay}
+                disabled={isStreaming}
+              >
+                <Coins size={14} />
+                <span>{enhanceTokenCost}</span>
+              </motion.button>
+            )}
+          </AnimatePresence>
+
+          <motion.button
+            className="preview-modal__enhance-submit"
+            onClick={onEnhance}
+            disabled={isGenerating || isStreaming || !hasInput}
+            whileTap={{ scale: 0.95 }}
+          >
+            {isGenerating ? (
+              <Loader2 size={16} className="spin" />
+            ) : (
+              <Sparkles size={16} />
+            )}
+          </motion.button>
+        </div>
       </div>
 
+      {/* Token overlay */}
       <AnimatePresence>
         {showEnhanceTokenOverlay && (
           <motion.div
@@ -220,6 +307,49 @@ function PreviewModal({
               <Code2 size={14} />
               <span>Code</span>
             </button>
+
+            {/* Multi-page file selector */}
+            {isMultiPage && (
+              <div className="preview-modal__file-selector">
+                <button
+                  className="preview-modal__file-btn"
+                  onClick={() => setShowFileDropdown(!showFileDropdown)}
+                >
+                  <FileText size={14} />
+                  <span>{activeFile}</span>
+                  <ChevronDown size={12} />
+                </button>
+
+                <AnimatePresence>
+                  {showFileDropdown && (
+                    <motion.div
+                      className="preview-modal__file-dropdown"
+                      initial={{ opacity: 0, y: -8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -8 }}
+                      transition={{ duration: 0.15 }}
+                    >
+                      {fileList.map((filename) => (
+                        <button
+                          key={filename}
+                          className={`preview-modal__file-option ${
+                            activeFile === filename ? "active" : ""
+                          }`}
+                          onClick={() => {
+                            setActiveFile(filename);
+                            setShowFileDropdown(false);
+                          }}
+                        >
+                          <FileText size={12} />
+                          <span>{filename}</span>
+                          {activeFile === filename && <Check size={12} />}
+                        </button>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            )}
           </div>
 
           {/* Enhance section in header - desktop only */}
@@ -230,10 +360,10 @@ function PreviewModal({
               className="preview-modal__action-btn"
               onClick={onDownload}
               title="Download HTML"
-              disabled={isStreaming || !html}
+              disabled={isStreaming || !currentHtml}
             >
               <Download size={14} />
-              <span>Download</span>
+              <span>{isMultiPage ? "Download All" : "Download"}</span>
             </button>
 
             <button
@@ -241,7 +371,7 @@ function PreviewModal({
                 saveSuccess ? "success" : ""
               }`}
               onClick={onSave}
-              disabled={isSaving || isStreaming || !html}
+              disabled={isSaving || isStreaming || !currentHtml}
               title="Save to Projects"
             >
               {isSaving ? (
@@ -279,7 +409,7 @@ function PreviewModal({
           {showCode ? (
             <div className="preview-modal__code">
               <pre>
-                <code>{html}</code>
+                <code>{currentHtml}</code>
               </pre>
             </div>
           ) : (
@@ -289,14 +419,17 @@ function PreviewModal({
               }`}
             >
               <div className="preview-frame__content">
-                <GeneratedPreview html={html} isStreaming={isStreaming} />
+                <GeneratedPreview
+                  html={currentHtml}
+                  isStreaming={isStreaming}
+                />
               </div>
             </div>
           )}
         </div>
       </motion.div>
 
-      {/* Streaming Info Modal - Outside container, fixed overlay */}
+      {/* Streaming Info Modal */}
       <AnimatePresence>
         {isStreaming && showStreamingModal && (
           <motion.div
@@ -347,6 +480,20 @@ function PreviewModal({
               </button>
             </motion.div>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Feedback Modal */}
+      <AnimatePresence>
+        {showFeedbackModal && (
+          <FeedbackModal
+            isOpen={showFeedbackModal}
+            onClose={() => setShowFeedbackModal(false)}
+            lastRequest={lastRequest}
+            selections={selections}
+            generatedCode={currentHtml}
+            originalPrompt={originalPrompt}
+          />
         )}
       </AnimatePresence>
     </motion.div>

@@ -1,5 +1,5 @@
-// components/Home/OptionsOverlay/OptionsOverlay.jsx - Main customization modal
-import { useState, useEffect } from "react";
+// components/Home/OptionsOverlay/OptionsOverlay.jsx - Optimized with local state
+import { useState, useEffect, useRef, memo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   X,
@@ -8,11 +8,161 @@ import {
   Check,
   Settings,
   ChevronDown,
+  AlertCircle,
 } from "lucide-react";
 import { OPTIONS, getFilteredCategories } from "../../../configs";
 
 import "./OptionsOverlay.scss";
 
+// ============================================
+// VALIDATORS
+// ============================================
+const validators = {
+  email: (v) => {
+    if (!v) return null;
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) ? null : "Invalid email";
+  },
+  phone: (v) => {
+    if (!v) return null;
+    const digits = v.replace(/\D/g, "");
+    return digits.length >= 7 && digits.length <= 15 ? null : "Invalid phone";
+  },
+  url: (v) => {
+    if (!v) return null;
+    try {
+      const url = new URL(v);
+      return ["http:", "https:"].includes(url.protocol) ? null : "Invalid URL";
+    } catch {
+      return "Invalid URL";
+    }
+  },
+  year: (v) => {
+    if (!v) return null;
+    const year = parseInt(v, 10);
+    const now = new Date().getFullYear();
+    return year >= 1800 && year <= now ? null : `Must be 1800-${now}`;
+  },
+  maxLen: (max) => (v) => v && v.length > max ? `Max ${max} chars` : null,
+  minLen: (min) => (v) => v && v.length < min ? `Min ${min} chars` : null,
+  brandName: (v) => {
+    if (!v) return null;
+    if (v.length < 2) return "Min 2 chars";
+    if (v.length > 50) return "Max 50 chars";
+    return null;
+  },
+};
+
+// Field config: [validator, inputType, placeholder, inputFilter]
+const FIELDS = {
+  "branding.brandName": [validators.brandName, "text", "Brand name"],
+  "branding.tagline": [validators.maxLen(100), "text", "Tagline"],
+  "business.description": [
+    validators.maxLen(300),
+    "text",
+    "Short business description",
+  ],
+  "business.location": [
+    validators.maxLen(100),
+    "text",
+    "Location (city, region)",
+  ],
+  "business.yearEstablished": [
+    validators.year,
+    "text",
+    "Year established",
+    /^[0-9]*$/,
+  ],
+  "contactInfo.email": [validators.email, "email", "Email"],
+  "contactInfo.phone": [validators.phone, "tel", "Phone", /^[0-9+\-\s()]*$/],
+  "contactInfo.address": [validators.maxLen(200), "text", "Address"],
+  "socialMedia.twitter": [validators.url, "url", "Twitter URL"],
+  "socialMedia.instagram": [validators.url, "url", "Instagram URL"],
+  "socialMedia.linkedIn": [validators.url, "url", "LinkedIn URL"],
+  "socialMedia.facebook": [validators.url, "url", "Facebook URL"],
+  "content.primaryCta": [
+    validators.maxLen(30),
+    "text",
+    "Primary CTA (e.g., Get Started)",
+  ],
+  "content.copyrightText": [validators.maxLen(100), "text", "Copyright text"],
+};
+
+// ============================================
+// OPTIMIZED INPUT COMPONENT (memoized, local state)
+// ============================================
+const OptimizedInput = memo(function OptimizedInput({
+  fieldKey,
+  initialValue,
+  onCommit,
+  className = "",
+}) {
+  const config = FIELDS[fieldKey];
+  if (!config) return null;
+
+  const [validator, type, placeholder, inputFilter] = config;
+  const [value, setValue] = useState(initialValue || "");
+  const [error, setError] = useState(null);
+  const [touched, setTouched] = useState(false);
+
+  // Sync with parent when initialValue changes (e.g., modal reopens)
+  useEffect(() => {
+    setValue(initialValue || "");
+    setError(null);
+    setTouched(false);
+  }, [initialValue]);
+
+  const handleChange = (e) => {
+    let newValue = e.target.value;
+
+    // Apply input filter if exists (for phone, year)
+    if (inputFilter && newValue && !inputFilter.test(newValue)) {
+      return; // Reject invalid characters
+    }
+
+    setValue(newValue);
+
+    // Clear error while typing if it was showing
+    if (touched && error) {
+      setError(validator(newValue));
+    }
+  };
+
+  const handleBlur = () => {
+    setTouched(true);
+    const validationError = validator(value);
+    setError(validationError);
+
+    // Only commit to parent on blur (not on every keystroke)
+    onCommit(fieldKey, value);
+  };
+
+  return (
+    <div
+      className={`options-input-wrapper ${
+        error ? "has-error" : ""
+      } ${className}`}
+    >
+      <input
+        type={type}
+        value={value}
+        onChange={handleChange}
+        onBlur={handleBlur}
+        placeholder={placeholder}
+        className={`options-input ${error ? "options-input--error" : ""}`}
+      />
+      {error && (
+        <div className="options-input-error">
+          <AlertCircle size={10} />
+          <span>{error}</span>
+        </div>
+      )}
+    </div>
+  );
+});
+
+// ============================================
+// MAIN COMPONENT
+// ============================================
 function OptionsOverlay({
   isOpen,
   onClose,
@@ -26,10 +176,10 @@ function OptionsOverlay({
 }) {
   const [activeOption, setActiveOption] = useState(null);
   const [categoryFilter, setCategoryFilter] = useState("");
-
   const [isBrandExpanded, setIsBrandExpanded] = useState(true);
   const [isDesignExpanded, setIsDesignExpanded] = useState(true);
 
+  // Reset state when modal closes
   useEffect(() => {
     if (!isOpen) {
       setCategoryFilter("");
@@ -39,29 +189,29 @@ function OptionsOverlay({
     }
   }, [isOpen]);
 
+  // Commit handler - updates parent state
+  const handleCommit = (fieldKey, value) => {
+    const [category, field] = fieldKey.split(".");
+    onPersistentChange(category, field, value);
+  };
+
+  // Get initial value for a field
+  const getInitialValue = (fieldKey) => {
+    const [category, field] = fieldKey.split(".");
+    return persistentOptions[category]?.[field] || "";
+  };
+
   if (!isOpen) return null;
 
-  const goToCategories = () => {
-    setActiveOption(null);
-  };
-
-  const selectCategory = (id) => {
-    setActiveOption(id);
-  };
+  const goToCategories = () => setActiveOption(null);
+  const selectCategory = (id) => setActiveOption(id);
 
   const handleSelect = (optionKey, value) => {
     onSelect(optionKey, value);
-
+    if (optionKey === "palette" && value === "Custom") return;
     const opt = OPTIONS[optionKey];
-
-    if (optionKey === "palette" && value === "Custom") {
-      return;
-    }
-
     if (!opt.multi) {
-      setTimeout(() => {
-        setActiveOption(null);
-      }, 120);
+      setTimeout(() => setActiveOption(null), 120);
     }
   };
 
@@ -121,14 +271,15 @@ function OptionsOverlay({
         </div>
 
         <div className="options-body">
-          <div className="options-brand">
+          {/* Brand & Business Section */}
+          <div className="options-section">
             <div
-              className="options-brand__header"
+              className="options-section__header"
               onClick={() => setIsBrandExpanded(!isBrandExpanded)}
             >
-              <div className="options-brand__title">Brand & Contact</div>
+              <div className="options-section__title">Brand & Business</div>
               <button
-                className={`options-brand__toggle ${
+                className={`options-section__toggle ${
                   !isBrandExpanded ? "collapsed" : ""
                 }`}
               >
@@ -137,84 +288,120 @@ function OptionsOverlay({
             </div>
 
             <div
-              className={`options-brand__content ${
+              className={`options-section__content ${
                 isBrandExpanded ? "expanded" : "collapsed"
               }`}
             >
-              <div className="options-brand__row">
-                <input
-                  type="text"
-                  value={persistentOptions.branding.brandName}
-                  onChange={(e) =>
-                    onPersistentChange("branding", "brandName", e.target.value)
-                  }
-                  placeholder="Brand name"
-                  className="options-input"
-                />
-                <input
-                  type="text"
-                  value={persistentOptions.branding.tagline}
-                  onChange={(e) =>
-                    onPersistentChange("branding", "tagline", e.target.value)
-                  }
-                  placeholder="Tagline"
-                  className="options-input"
-                />
+              {/* Identity */}
+              <div className="options-section__group">
+                <div className="options-section__group-title">Identity</div>
+                <div className="options-section__row">
+                  <OptimizedInput
+                    fieldKey="branding.brandName"
+                    initialValue={getInitialValue("branding.brandName")}
+                    onCommit={handleCommit}
+                  />
+                  <OptimizedInput
+                    fieldKey="branding.tagline"
+                    initialValue={getInitialValue("branding.tagline")}
+                    onCommit={handleCommit}
+                  />
+                </div>
+                <div className="options-section__row">
+                  <OptimizedInput
+                    fieldKey="business.description"
+                    initialValue={getInitialValue("business.description")}
+                    onCommit={handleCommit}
+                    className="options-input-wrapper--full"
+                  />
+                </div>
+                <div className="options-section__row">
+                  <OptimizedInput
+                    fieldKey="business.location"
+                    initialValue={getInitialValue("business.location")}
+                    onCommit={handleCommit}
+                  />
+                  <OptimizedInput
+                    fieldKey="business.yearEstablished"
+                    initialValue={getInitialValue("business.yearEstablished")}
+                    onCommit={handleCommit}
+                    className="options-input-wrapper--small"
+                  />
+                </div>
               </div>
 
-              <div className="options-brand__row">
-                <input
-                  type="email"
-                  value={persistentOptions.contactInfo.email}
-                  onChange={(e) =>
-                    onPersistentChange("contactInfo", "email", e.target.value)
-                  }
-                  placeholder="Email"
-                  className="options-input"
-                />
-                <input
-                  type="tel"
-                  value={persistentOptions.contactInfo.phone}
-                  onChange={(e) =>
-                    onPersistentChange("contactInfo", "phone", e.target.value)
-                  }
-                  placeholder="Phone"
-                  className="options-input"
-                />
+              {/* Contact */}
+              <div className="options-section__group">
+                <div className="options-section__group-title">Contact</div>
+                <div className="options-section__row">
+                  <OptimizedInput
+                    fieldKey="contactInfo.email"
+                    initialValue={getInitialValue("contactInfo.email")}
+                    onCommit={handleCommit}
+                  />
+                  <OptimizedInput
+                    fieldKey="contactInfo.phone"
+                    initialValue={getInitialValue("contactInfo.phone")}
+                    onCommit={handleCommit}
+                  />
+                </div>
+                <div className="options-section__row">
+                  <OptimizedInput
+                    fieldKey="contactInfo.address"
+                    initialValue={getInitialValue("contactInfo.address")}
+                    onCommit={handleCommit}
+                    className="options-input-wrapper--full"
+                  />
+                </div>
               </div>
 
-              <div className="options-brand__title">Social</div>
-              <div className="options-brand__social">
-                {Object.entries(persistentOptions.socialMedia)
-                  .slice(0, 4)
-                  .map(([platform, url]) => (
-                    <input
-                      key={platform}
-                      type="url"
-                      value={url}
-                      onChange={(e) =>
-                        onPersistentChange(
-                          "socialMedia",
-                          platform,
-                          e.target.value
-                        )
-                      }
-                      placeholder={platform}
-                      className="options-input"
-                    />
-                  ))}
+              {/* Social */}
+              <div className="options-section__group">
+                <div className="options-section__group-title">Social</div>
+                <div className="options-section__row options-section__row--grid">
+                  {["twitter", "instagram", "linkedIn", "facebook"].map(
+                    (platform) => (
+                      <OptimizedInput
+                        key={platform}
+                        fieldKey={`socialMedia.${platform}`}
+                        initialValue={getInitialValue(
+                          `socialMedia.${platform}`
+                        )}
+                        onCommit={handleCommit}
+                      />
+                    )
+                  )}
+                </div>
+              </div>
+
+              {/* Content */}
+              <div className="options-section__group">
+                <div className="options-section__group-title">Content</div>
+                <div className="options-section__row">
+                  <OptimizedInput
+                    fieldKey="content.primaryCta"
+                    initialValue={getInitialValue("content.primaryCta")}
+                    onCommit={handleCommit}
+                  />
+                  <OptimizedInput
+                    fieldKey="content.copyrightText"
+                    initialValue={getInitialValue("content.copyrightText")}
+                    onCommit={handleCommit}
+                  />
+                </div>
               </div>
             </div>
           </div>
 
-          <div className="options-design">
+          {/* Design Options Section */}
+          <div className="options-section">
             <div
-              className="options-design__header"
+              className="options-section__header"
               onClick={() => setIsDesignExpanded(!isDesignExpanded)}
             >
-              <div className="options-design__title">Design Options</div>
+              <div className="options-section__title">Design Options</div>
               <button
-                className={`options-design__toggle ${
+                className={`options-section__toggle ${
                   !isDesignExpanded ? "collapsed" : ""
                 }`}
               >
@@ -223,7 +410,7 @@ function OptionsOverlay({
             </div>
 
             <div
-              className={`options-design__content ${
+              className={`options-section__content ${
                 isDesignExpanded ? "expanded" : "collapsed"
               }`}
             >

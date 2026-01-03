@@ -1,35 +1,65 @@
-// hooks/useGeneration.js - Streaming optimized with body-first rendering
+// hooks/useGeneration.js - Streaming optimized with caching
+// IMPORTANT: Hook order must match original exactly, new hooks added at end of each group
 import { useState, useCallback, useRef, useEffect } from "react";
 import { buildFullPrompt } from "../utils/promptBuilder";
 import { generateDemo } from "../utils/demoGenerator";
 import { generateWebsiteStream } from "../utils/generateWebsiteStream";
 import { useGenerationState } from "../contexts/GenerationContext";
 
+// Cache utility - create stub if not available yet
+// Once you add generationCache.js, change this to: import generationCache from "../utils/generationCache";
+const generationCache = {
+  get: () => null,
+  set: () => {},
+  clear: () => {},
+  shouldUse: () => false,
+};
+
 let streamingTimeout = null;
 
 export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
+  // ========================================
+  // useState hooks (MUST be in this order)
+  // ========================================
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedCode, setGeneratedCode] = useState(null);
   const [generationError, setGenerationError] = useState(null);
   const [enhancePrompt, setEnhancePrompt] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
-  const [streamingPhase, setStreamingPhase] = useState(null); // 'head' | 'body' | 'styles' | 'scripts' | 'complete'
+  const [streamingPhase, setStreamingPhase] = useState(null);
+  // NEW hooks added at END of useState group
+  const [generatedFiles, setGeneratedFiles] = useState(null);
+  const [fromCache, setFromCache] = useState(false);
 
+  // ========================================
+  // Context hook (MUST be after useState, before useRef)
+  // ========================================
   const { setIsGenerating: setGlobalGenerating } = useGenerationState();
+
+  // ========================================
+  // useRef hooks (MUST be in this order)
+  // ========================================
   const generationRef = useRef(null);
   const abortControllerRef = useRef(null);
-  const streamRef = useRef(null); // Keep reference to stream for getNormalizedHtml
+  const streamRef = useRef(null);
+  // NEW ref added at END of useRef group
+  const lastGenerationRef = useRef(null);
 
+  // ========================================
+  // useEffect hooks
+  // ========================================
   useEffect(() => {
     setGlobalGenerating(isGenerating);
   }, [isGenerating, setGlobalGenerating]);
 
-  // Debounced update for streaming - faster for better UX
+  // ========================================
+  // useCallback hooks (MUST be in this order)
+  // ========================================
   const debouncedSetCode = useCallback((html) => {
     if (streamingTimeout) clearTimeout(streamingTimeout);
     streamingTimeout = setTimeout(() => {
       setGeneratedCode(html);
-    }, 50); // Even faster updates for smoother streaming
+    }, 50);
   }, []);
 
   const generate = useCallback(
@@ -41,11 +71,42 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
         abortControllerRef.current.abort();
       }
 
+      // Store generation params for cache invalidation
+      lastGenerationRef.current = { prompt, selections, persistentOptions };
+
+      // Check cache first (before any network call)
+      if (generationCache.shouldUse(false)) {
+        const cached = generationCache.get(
+          prompt,
+          selections,
+          persistentOptions
+        );
+        if (cached) {
+          console.log("[Generation] Using cached result");
+          setGeneratedCode(cached.html);
+          setGeneratedFiles(cached.files);
+          setFromCache(true);
+          onSuccess?.({
+            code: cached.html,
+            files: cached.files,
+            fromCache: true,
+            tokensUsed: 0,
+          });
+          return {
+            code: cached.html,
+            files: cached.files,
+            fromCache: true,
+          };
+        }
+      }
+
       setIsGenerating(true);
       setGenerationError(null);
       setIsStreaming(streaming);
       setStreamingPhase("head");
-      setGeneratedCode(""); // Clear previous
+      setGeneratedCode("");
+      setGeneratedFiles(null);
+      setFromCache(false);
       generationRef.current = Date.now();
       abortControllerRef.current = new AbortController();
 
@@ -60,35 +121,39 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
           const streamResult = await generateWebsiteStream({
             prompt: fullPrompt,
             customization: selections,
+            persistentOptions,
             isRefinement: false,
             signal: abortControllerRef.current.signal,
-            // Progress callback for phase updates
             onProgress: ({ phase, content }) => {
               setStreamingPhase(phase);
-              // Update code on each progress (debounced)
               debouncedSetCode(content);
             },
           });
 
-          // Store stream reference for later normalization
           streamRef.current = streamResult;
 
           if (streamResult.chunks) {
-            // Consume the stream
             for await (const chunk of streamResult.chunks()) {
               if (abortControllerRef.current?.signal.aborted) break;
-              // Chunks are already handled by onProgress callback
-              // This loop just drives the async iteration
             }
 
-            // Stream complete - get the final HTML (no normalization needed with inline styles)
             const finalHtml = streamResult.getFullHtml();
+            const files = streamResult.getFiles?.() || null;
+
             setGeneratedCode(finalHtml);
+            setGeneratedFiles(files);
             setIsStreaming(false);
             setStreamingPhase("complete");
 
-            onSuccess?.({ code: finalHtml, isStreaming: true });
-            return { code: finalHtml, isStreaming: true };
+            // Cache the result
+            generationCache.set(prompt, selections, persistentOptions, {
+              html: finalHtml,
+              files,
+              tokensUsed: streamResult.tokensUsed,
+            });
+
+            onSuccess?.({ code: finalHtml, files, isStreaming: true });
+            return { code: finalHtml, files, isStreaming: true };
           }
         }
 
@@ -97,12 +162,25 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
           const result = await supabaseGenerate({
             prompt: fullPrompt,
             selections,
+            persistentOptions,
             isRefinement: false,
             existingCode: null,
           });
+
           if (result?.code || result?.html) {
             const code = result.code || result.html;
+            const files = result.files || null;
+
             setGeneratedCode(code);
+            setGeneratedFiles(files);
+
+            // Cache it
+            generationCache.set(prompt, selections, persistentOptions, {
+              html: code,
+              files,
+              tokensUsed: result.tokensUsed,
+            });
+
             onSuccess?.(result);
             return result;
           }
@@ -129,10 +207,9 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
   );
 
   const enhance = useCallback(
-    async (originalPrompt, selections, user) => {
+    async (originalPrompt, selections, persistentOptions, user) => {
       if (!enhancePrompt.trim() || !generatedCode || isGenerating) return;
 
-      // Cancel previous
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
       }
@@ -141,10 +218,10 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
       setGenerationError(null);
       setIsStreaming(true);
       setStreamingPhase("head");
+      setFromCache(false);
       abortControllerRef.current = new AbortController();
 
       try {
-        // Use streaming for enhance too
         const streamResult = await generateWebsiteStream({
           prompt: enhancePrompt,
           customization: {
@@ -152,6 +229,7 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
             isRefinement: true,
             previousHtml: generatedCode,
           },
+          persistentOptions,
           signal: abortControllerRef.current.signal,
           onProgress: ({ phase, content }) => {
             setStreamingPhase(phase);
@@ -172,6 +250,15 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
           setIsStreaming(false);
           setStreamingPhase("complete");
 
+          // Invalidate old cache since content changed
+          if (lastGenerationRef.current) {
+            generationCache.clear(
+              lastGenerationRef.current.prompt,
+              lastGenerationRef.current.selections,
+              lastGenerationRef.current.persistentOptions
+            );
+          }
+
           onSuccess?.({ code: finalHtml, isStreaming: true });
           return { code: finalHtml, isStreaming: true };
         }
@@ -181,6 +268,7 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
           const result = await supabaseGenerate({
             prompt: enhancePrompt,
             selections: selections || {},
+            persistentOptions,
             isRefinement: true,
             existingCode: generatedCode,
           });
@@ -229,11 +317,14 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
     if (streamingTimeout) clearTimeout(streamingTimeout);
     setIsGenerating(false);
     setGeneratedCode(null);
+    setGeneratedFiles(null);
     setGenerationError(null);
     setEnhancePrompt("");
     setIsStreaming(false);
     setStreamingPhase(null);
+    setFromCache(false);
     streamRef.current = null;
+    lastGenerationRef.current = null;
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
@@ -243,17 +334,29 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
     setGeneratedCode(code);
   }, []);
 
+  // NEW callback added at END of useCallback group
+  const regenerate = useCallback(
+    async (prompt, selections, persistentOptions, user, streaming = true) => {
+      generationCache.clear(prompt, selections, persistentOptions);
+      return generate(prompt, selections, persistentOptions, user, streaming);
+    },
+    [generate]
+  );
+
   return {
     isGenerating,
     generatedCode,
+    generatedFiles,
     generationError,
     enhancePrompt,
     isStreaming,
-    streamingPhase, // New: expose current phase for UI indicators
+    streamingPhase,
+    fromCache,
     setEnhancePrompt,
     updateCode,
     generate,
     enhance,
+    regenerate,
     cancel,
     reset,
   };

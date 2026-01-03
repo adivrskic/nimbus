@@ -71,9 +71,6 @@
 .options-filters {
   display: flex;
   gap: 4px;
-  margin-bottom: 20px;
-  padding-bottom: 16px;
-  overflow-x: auto;
 
   &::-webkit-scrollbar {
     display: none;
@@ -108,9 +105,9 @@
 }
 
 .options-body {
-  display: flex;
-  gap: 24px;
-  flex: 1;
+  display: grid;
+  grid-template-columns: 400px 1fr;
+  gap: 12px;
   min-height: 0;
 }
 
@@ -202,7 +199,7 @@
   padding: 10px 12px;
   background: var(--color-surface-elevated);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+  border-radius: 999px;
   font-size: 0.75rem;
   font-family: var(--font-family-base, sans-serif);
   color: var(--color-text-primary);
@@ -284,6 +281,7 @@
   cursor: pointer;
   transition: var(--transition-base);
   text-align: left;
+  height: 40px;
 
   &:hover {
     background: var(--color-surface);
@@ -566,7 +564,7 @@
   }
 
   .options-body {
-    flex-direction: column;
+    grid-template-columns: 1fr;
   }
 
   .options-brand {
@@ -639,13 +637,13 @@
   .options-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+
+  .options-section__toggle {
+    display: flex !important;
+  }
 }
 
 @media (max-width: 480px) {
-  .options-grid {
-    grid-template-columns: 1fr;
-  }
-
   .options-filters {
     gap: 6px;
   }
@@ -653,5 +651,232 @@
   .options-filter {
     padding: 6px 10px;
     font-size: 0.6875rem;
+  }
+}
+/* Add these styles to OptionsOverlay.scss */
+/* These replace/update the .options-brand and .options-design styles with a unified .options-section pattern */
+
+.options-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 0;
+    cursor: pointer;
+    user-select: none;
+
+    &:hover {
+      .options-section__title {
+        color: var(--color-text-primary);
+      }
+    }
+  }
+
+  &__title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    font-family: var(--font-family-base, sans-serif);
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    transition: color var(--transition-fast);
+  }
+
+  &__toggle {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    background: transparent;
+    border: none;
+    color: var(--color-text-tertiary);
+    cursor: pointer;
+    transition: transform var(--transition-fast);
+
+    &.collapsed {
+      transform: rotate(-90deg);
+    }
+  }
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    overflow: hidden;
+    transition: max-height var(--transition-base),
+      opacity var(--transition-base);
+
+    &.expanded {
+      max-height: 2000px;
+      opacity: 1;
+    }
+
+    &.collapsed {
+      max-height: 0;
+      opacity: 0;
+      pointer-events: none;
+    }
+  }
+
+  &__group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  &__group-title {
+    font-size: 0.6875rem;
+    font-weight: 500;
+    font-family: var(--font-family-base, sans-serif);
+    color: var(--color-text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    padding-bottom: 4px;
+  }
+
+  &__row {
+    display: flex;
+    gap: 8px;
+
+    &--grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+  }
+}
+
+.options-input {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 14px;
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: 0.8125rem;
+  font-family: var(--font-family-base, sans-serif);
+  color: var(--color-text-primary);
+  transition: var(--transition-base);
+
+  &::placeholder {
+    color: var(--color-text-tertiary);
+  }
+
+  &:focus {
+    outline: none;
+    border-color: var(--color-border-hover);
+    box-shadow: var(--shadow-sm);
+  }
+
+  &--full {
+    flex: 1 1 100%;
+  }
+
+  &--small {
+    flex: 0 0 120px;
+    max-width: 120px;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+  .options-section {
+    &__row {
+      flex-direction: column;
+
+      &--grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  }
+
+  .options-input {
+    &--small {
+      flex: 1;
+      max-width: none;
+    }
+  }
+}
+/* ============================================
+   ADD TO OptionsOverlay.scss - Validation & Input styles
+   ============================================ */
+
+// Input wrapper
+.options-input-wrapper {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+
+  &--full {
+    flex: 1 1 100%;
+  }
+
+  &--small {
+    flex: 0 0 140px;
+    max-width: 140px;
+  }
+
+  &.has-error .options-input {
+    border-color: #ef4444;
+    background: rgba(239, 68, 68, 0.04);
+
+    &:focus {
+      border-color: #ef4444;
+      box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.1);
+    }
+  }
+}
+
+.options-input {
+  width: 100%;
+  padding: 10px 12px;
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: 0.8125rem;
+  font-family: var(--font-family-base, sans-serif);
+  color: var(--color-text-primary);
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+
+  &::placeholder {
+    color: var(--color-text-tertiary);
+  }
+
+  &:focus {
+    outline: none;
+    border-color: var(--color-border-hover);
+    background: var(--color-surface);
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.1);
+  }
+
+  &--error {
+    border-color: #ef4444;
+  }
+}
+
+.options-input-error {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+  font-size: 0.625rem;
+  color: #ef4444;
+  line-height: 1;
+
+  svg {
+    flex-shrink: 0;
+  }
+}
+
+// Mobile adjustments
+@media (max-width: 640px) {
+  .options-input-wrapper--small {
+    flex: 1;
+    max-width: none;
   }
 }

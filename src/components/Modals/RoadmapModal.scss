@@ -263,13 +263,13 @@
   }
 
   .roadmap-header-section {
-    padding: calc(var(--spacing-unit) * 2.5);
+    padding: calc(var(--spacing-unit) * 2.5) 0;
     padding-bottom: calc(var(--spacing-unit) * 1.5);
     gap: var(--spacing-unit);
   }
 
   .roadmap-body {
-    padding: calc(var(--spacing-unit) * 1.5) calc(var(--spacing-unit) * 2.5);
+    padding: calc(var(--spacing-unit) * 1.5) 0;
   }
 
   .roadmap-legend {

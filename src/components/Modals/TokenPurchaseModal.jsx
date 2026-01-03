@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { X, Coins, Check, Loader2 } from "lucide-react";
+import { X, Coins, Check, Loader2, LogIn } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
 import { supabase } from "../../lib/supabaseClient";
 import useModalAnimation from "../../hooks/useModalAnimation";
 import "./TokenPurchaseModal.scss";
+
 const TOKEN_PACKAGES = [
   {
     id: "starter",
@@ -42,8 +43,9 @@ const TOKEN_PACKAGES = [
     numGensRange: "a ludicrous amount of",
   },
 ];
-function TokenPurchaseModal({ isOpen, onClose }) {
-  const { user, profile } = useAuth();
+
+function TokenPurchaseModal({ isOpen, onClose, onOpenAuth }) {
+  const { user, profile, isAuthenticated } = useAuth();
   const { shouldRender, isVisible, closeModal } = useModalAnimation(
     isOpen,
     onClose
@@ -86,6 +88,18 @@ function TokenPurchaseModal({ isOpen, onClose }) {
     }
   };
 
+  const handleLoginClick = () => {
+    // Close this modal first
+    onClose();
+
+    // Open auth modal after a brief delay for animation
+    if (onOpenAuth) {
+      setTimeout(() => {
+        onOpenAuth();
+      }, 200);
+    }
+  };
+
   if (!shouldRender) return null;
 
   const selectedPkg = TOKEN_PACKAGES.find((p) => p.id === selectedPackage);
@@ -110,7 +124,7 @@ function TokenPurchaseModal({ isOpen, onClose }) {
           </button>
         </div>
 
-        {profile?.tokens !== undefined && (
+        {isAuthenticated && profile?.tokens !== undefined && (
           <div className="tokens-balance">
             <span>Current balance</span>
             <span>{profile.tokens} tokens</span>
@@ -138,9 +152,6 @@ function TokenPurchaseModal({ isOpen, onClose }) {
                   </span>
                 </div>
                 <div className="token-option__right">
-                  {/* {pkg.savings && (
-                    <span className="token-option__badge">{pkg.savings}</span>
-                  )} */}
                   {pkg.popular && (
                     <span className="token-option__badge token-option__badge--popular">
                       Popular
@@ -160,17 +171,27 @@ function TokenPurchaseModal({ isOpen, onClose }) {
 
         {error && <div className="tokens-error">{error}</div>}
 
-        <button
-          className="tokens-btn"
-          onClick={handlePurchase}
-          disabled={isProcessing}
-        >
-          {isProcessing ? (
-            <Loader2 size={14} className="spinning" />
-          ) : (
-            `Buy ${totalTokens} tokens for $${selectedPkg?.price}`
-          )}
-        </button>
+        {isAuthenticated ? (
+          <button
+            className="tokens-btn"
+            onClick={handlePurchase}
+            disabled={isProcessing}
+          >
+            {isProcessing ? (
+              <Loader2 size={14} className="spinning" />
+            ) : (
+              `Buy ${totalTokens} tokens for $${selectedPkg?.price}`
+            )}
+          </button>
+        ) : (
+          <button
+            className="tokens-btn tokens-btn--login"
+            onClick={handleLoginClick}
+          >
+            <LogIn size={14} />
+            <span>Log in to purchase tokens</span>
+          </button>
+        )}
 
         <div className="tokens-note">
           Secured by Stripe • Tokens never expire

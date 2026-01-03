@@ -73,7 +73,7 @@
     }
 
     .search-bar__char-counter {
-      bottom: 48px;
+      bottom: -21px;
     }
   }
 
@@ -574,7 +574,6 @@
         background-color: var(--color-surface-glass, rgba(255, 255, 255, 0.1));
         backdrop-filter: var(--glass-blur);
         -webkit-backdrop-filter: var(--glass-blur);
-        border: 1px solid var(--color-border);
         border-top: none;
         border-radius: 0 0 var(--radius-lg) var(--radius-lg);
         margin-top: -1px;
@@ -627,17 +626,13 @@
 
       &.has-minimized-preview {
         .search-bar__input {
-          min-height: calc(100vh - 65px - 40px - 60px);
+          min-height: calc(100vh - 65px - 60px - 60px);
           padding-bottom: 4rem;
-          margin-top: 10px;
+          margin-top: -20px;
         }
 
         .search-bar__pills-expanded {
           bottom: 40px;
-        }
-
-        .search-bar__char-counter {
-          bottom: 44px;
         }
       }
 
