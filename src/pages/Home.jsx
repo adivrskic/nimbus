@@ -12,6 +12,7 @@ import useSelections from "../hooks/useSelections";
 import useHomeState from "../hooks/useHomeState";
 import useGeneration from "../hooks/useGeneration";
 
+import { track } from "../lib/analytics";
 // Configs
 import { EXAMPLE_PROMPTS } from "../configs/defaults.config";
 
@@ -144,7 +145,7 @@ function Home() {
   const [lastRequest, setLastRequest] = useState(null);
   // Show enhance token overlay state
   const [showEnhanceTokenOverlay, setShowEnhanceTokenOverlay] = useState(false);
-
+  const [legalSection, setLegalSection] = useState(null);
   // Typewriter effect for placeholder
   const { text: typewriterText } = useTypewriter({
     prompts: EXAMPLE_PROMPTS,
@@ -187,6 +188,16 @@ function Home() {
     [enhancePrompt]
   );
 
+  const handleOpenLegal = (section) => {
+    setLegalSection(section);
+    openLegal();
+  };
+
+  const handleCloseLegal = () => {
+    closeLegal();
+    setLegalSection(null);
+  };
+
   // Escape key handler
   useEscapeKey(() => {
     if (showPreview) {
@@ -202,7 +213,7 @@ function Home() {
     } else if (showDeploy) {
       closeDeploy();
     } else if (showLegal) {
-      closeLegal();
+      handleCloseLegal();
     } else if (showProjects) {
       closeProjects();
     }
@@ -266,6 +277,10 @@ function Home() {
       return;
     }
 
+    track("generate", {
+      prompt: prompt.trim(),
+    });
+
     setLastRequest({
       type: "initial",
       prompt: prompt.trim(),
@@ -275,7 +290,7 @@ function Home() {
     setSaveSuccess(false);
     openPreview();
 
-    generate(prompt, selections, persistentOptions, user, true); // Already correct
+    generate(prompt, selections, persistentOptions, user, true);
   }, [
     prompt,
     isGenerating,
@@ -297,6 +312,10 @@ function Home() {
       openAuth();
       return;
     }
+
+    track("enhance", {
+      prompt: enhancePrompt.trim(),
+    });
 
     // Capture the enhance prompt BEFORE it gets cleared
     const submittedEnhancePrompt = enhancePrompt.trim();
@@ -340,12 +359,18 @@ function Home() {
 
   const handleDownload = useCallback(() => {
     if (!generatedCode) return;
+    track("download", {
+      generatedCode,
+      projectName,
+    });
     const projectName = generateName(prompt) || "website";
     downloadZip(generatedCode, projectName);
   }, [generatedCode, prompt, generateName]);
 
   const handleSave = useCallback(async () => {
     if (!generatedCode || !isAuthenticated || !user) return;
+
+    track("save");
 
     setIsSaving(true);
     setSaveSuccess(false);
@@ -427,6 +452,7 @@ function Home() {
   // Handle project edit from ProjectsModal
   const handleEditProject = useCallback(
     (project) => {
+      track("edit-project");
       closeProjects();
       editProject(project);
     },
@@ -553,7 +579,13 @@ function Home() {
       </AnimatePresence>
 
       <AnimatePresence>
-        {showAuth && <AuthModal isOpen={showAuth} onClose={closeAuth} />}
+        {showAuth && (
+          <AuthModal
+            isOpen={showAuth}
+            onClose={closeAuth}
+            onOpenLegal={handleOpenLegal}
+          />
+        )}
       </AnimatePresence>
 
       <AnimatePresence>
@@ -582,7 +614,13 @@ function Home() {
       </AnimatePresence>
 
       <AnimatePresence>
-        {showLegal && <LegalModal isOpen={showLegal} onClose={closeLegal} />}
+        {showLegal && (
+          <LegalModal
+            isOpen={showLegal}
+            onClose={handleCloseLegal}
+            initialSection={legalSection}
+          />
+        )}
       </AnimatePresence>
 
       <AnimatePresence>

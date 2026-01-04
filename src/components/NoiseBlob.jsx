@@ -153,7 +153,7 @@ export default function NoiseBlob({
       speed: speedProp ?? randomInRange(0.04, 0.22),
       noiseScale: noiseScaleProp ?? randomInRange(0.125, 0.875),
       noiseAmplitude: noiseAmplitudeProp ?? randomInRange(0.1, 0.75),
-      baseScale: baseScaleProp ?? randomInRange(2.5, 4.5),
+      baseScale: baseScaleProp ?? randomInRange(2.5, 4.1),
       detail: detailProp ?? randomIntInRange(80, 200),
       directionalIntensity: directionalIntensityProp ?? randomInRange(0.2, 0.7),
       hemisphereIntensity: hemisphereIntensityProp ?? randomInRange(0.125, 0.5),

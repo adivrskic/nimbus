@@ -8,13 +8,16 @@ import {
   FolderOpen,
   Sun,
   Moon,
-  SunMoon, // For auto mode
+  SunMoon,
 } from "lucide-react";
+import { track } from "../lib/analytics";
+
 import { useAuth } from "../contexts/AuthContext";
 import { useProject } from "../contexts/ProjectContext";
 import AuthModal from "./Modals/AuthModal";
 import TokenPurchaseModal from "./Modals/TokenPurchaseModal";
 import ProjectsModal from "./Modals/ProjectsModal";
+import LegalModal from "./Modals/LegalModal";
 import { useTheme } from "../contexts/ThemeContext";
 import "./Header.scss";
 
@@ -44,6 +47,10 @@ function Header() {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isPageLoading, setIsPageLoading] = useState(false);
+
+  // Legal modal state
+  const [isLegalModalOpen, setIsLegalModalOpen] = useState(false);
+  const [legalSection, setLegalSection] = useState(null);
 
   const userMenuRef = useRef(null);
   const userTokens = profile?.tokens || 0;
@@ -100,6 +107,7 @@ function Header() {
   }, [isUserMenuOpen]);
 
   const handleLogout = async () => {
+    track("logout");
     setIsUserMenuOpen(false);
     setIsAccountModalOpen(false);
     setIsLoggingOut(true);
@@ -119,6 +127,17 @@ function Header() {
   const handleForgotPassword = () => {
     setIsAuthModalOpen(false);
     setIsForgotPasswordOpen(true);
+  };
+
+  // Legal modal handlers
+  const handleOpenLegal = (section) => {
+    setLegalSection(section);
+    setIsLegalModalOpen(true);
+  };
+
+  const handleCloseLegal = () => {
+    setIsLegalModalOpen(false);
+    setLegalSection(null);
   };
 
   const getUserDisplayName = () => {
@@ -150,7 +169,6 @@ function Header() {
     return authIsLoading;
   };
 
-  // Get the appropriate theme icon
   const getThemeIcon = () => {
     switch (theme) {
       case "dark":
@@ -162,7 +180,6 @@ function Header() {
     }
   };
 
-  // Get theme label for accessibility
   const getThemeLabel = () => {
     switch (theme) {
       case "dark":
@@ -174,13 +191,10 @@ function Header() {
     }
   };
 
-  // Handle theme toggle with a smooth transition
   const handleThemeToggle = () => {
-    // Add a quick fade effect
+    track("theme-toggle");
     document.documentElement.style.transition = "background-color 0.3s ease";
     toggleTheme();
-
-    // Remove transition after animation completes
     setTimeout(() => {
       document.documentElement.style.transition = "";
     }, 300);
@@ -188,7 +202,6 @@ function Header() {
 
   return (
     <>
-      {/* Blur backdrop - covers everything below header when dropdown is open */}
       <div
         className={`header-backdrop ${isUserMenuOpen ? "active" : ""}`}
         onClick={() => setIsUserMenuOpen(false)}
@@ -274,17 +287,6 @@ function Header() {
                             Projects
                           </button>
 
-                          {/* <button
-                            className="dropdown__item"
-                            onClick={() => {
-                              setIsUserMenuOpen(false);
-                              setIsBillingModalOpen(true);
-                            }}
-                          >
-                            <CreditCard size={14} />
-                            Billing
-                          </button> */}
-
                           <button
                             className="dropdown__item dropdown__item--danger"
                             onClick={handleLogout}
@@ -343,11 +345,13 @@ function Header() {
         onClose={handleCloseAuthModal}
         onAuthSuccess={handleAuthSuccess}
         onForgotPassword={handleForgotPassword}
+        onOpenLegal={handleOpenLegal}
       />
 
       <TokenPurchaseModal
         isOpen={isTokenModalOpen}
         onClose={() => setIsTokenModalOpen(false)}
+        onOpenAuth={() => setIsAuthModalOpen(true)}
       />
 
       <ProjectsModal
@@ -363,10 +367,11 @@ function Header() {
         }}
       />
 
-      {/* <BillingModal
-        isOpen={isBillingModalOpen}
-        onClose={() => setIsBillingModalOpen(false)}
-      /> */}
+      <LegalModal
+        isOpen={isLegalModalOpen}
+        onClose={handleCloseLegal}
+        initialSection={legalSection}
+      />
     </>
   );
 }

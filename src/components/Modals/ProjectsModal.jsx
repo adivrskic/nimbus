@@ -13,6 +13,8 @@ import { useAuth } from "../../contexts/AuthContext";
 import { useProject } from "../../contexts/ProjectContext";
 import { supabase } from "../../lib/supabaseClient";
 import useModalAnimation from "../../hooks/useModalAnimation";
+import { track } from "../../lib/analytics";
+
 import "./ProjectsModal.scss";
 
 function ProjectsModal({
@@ -107,6 +109,10 @@ function ProjectsModal({
     setIsDeleting(true);
     setDeleteError(null);
 
+    track("delete", {
+      projectId,
+    });
+
     try {
       const { data, error } = await supabase.functions.invoke(
         "delete-project",
@@ -139,6 +145,9 @@ function ProjectsModal({
   };
 
   const toggleExpand = (projectId) => {
+    track("expand-project", {
+      projectId,
+    });
     setExpandedProject(expandedProject === projectId ? null : projectId);
   };
 

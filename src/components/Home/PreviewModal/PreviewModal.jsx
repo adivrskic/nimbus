@@ -16,6 +16,7 @@ import {
   FileText,
   ChevronDown,
 } from "lucide-react";
+import { track } from "../../../lib/analytics";
 import GeneratedPreview from "../../GeneratedPreview";
 import FeedbackModal from "../../Modals/FeedbackModal";
 import {

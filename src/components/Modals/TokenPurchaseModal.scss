@@ -21,8 +21,8 @@
   flex-direction: column;
   gap: 12px;
   padding: 24px;
-  width: 400px;
-  max-width: 95vw;
+  width: 420px;
+  max-width: 97.5vw;
   background: transparent;
   opacity: 0;
   transform: scale(0.98) translateY(4px);
@@ -222,6 +222,17 @@
 
 .spinning {
   animation: spin 1s linear infinite;
+}
+
+.tokens-btn--login {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  svg {
+    flex-shrink: 0;
+  }
 }
 
 @keyframes spin {
