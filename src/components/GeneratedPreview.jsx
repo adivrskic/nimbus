@@ -9,6 +9,7 @@ import {
   Minimize2,
   X,
 } from "lucide-react";
+import { track } from "../lib/analytics";
 import "./GeneratedPreview.scss";
 
 function GeneratedPreview({ html, onClose, isStreaming = false }) {
@@ -154,6 +155,11 @@ function GeneratedPreview({ html, onClose, isStreaming = false }) {
   const toggleFullscreen = useCallback(() => {
     if (!containerRef.current) return;
 
+    track("fullscreen", {
+      blob,
+      url,
+    });
+
     if (!isFullscreen) {
       if (containerRef.current.requestFullscreen) {
         containerRef.current.requestFullscreen();
@@ -189,8 +195,13 @@ function GeneratedPreview({ html, onClose, isStreaming = false }) {
 
   const openInNewTab = useCallback(() => {
     if (!html) return;
+
     const blob = new Blob([html], { type: "text/html" });
     const url = URL.createObjectURL(blob);
+    track("open-in-new-tab", {
+      blob,
+      url,
+    });
     window.open(url, "_blank", "noopener,noreferrer");
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }, [html]);

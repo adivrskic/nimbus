@@ -1,6 +1,7 @@
 // hooks/useHomeState.js - Manages all UI state for Home page
 import { useState, useCallback, useRef } from "react";
 import { DEFAULT_PERSISTENT_OPTIONS } from "../configs/defaults.config";
+import { track } from "../lib/analytics";
 
 /**
  * Hook for managing Home page UI state
@@ -56,6 +57,7 @@ export function useHomeState() {
 
   // Modal handlers
   const openOptions = useCallback(() => {
+    track("customize");
     setShowOptions(true);
     setOptionsIntroComplete(false);
   }, []);
@@ -66,6 +68,7 @@ export function useHomeState() {
   }, []);
 
   const openHelp = useCallback(() => {
+    track("help");
     setShowHelp(true);
   }, []);
 
@@ -130,6 +133,7 @@ export function useHomeState() {
   }, []);
 
   const restorePreview = useCallback(() => {
+    track("restore-preview");
     setShowPreview(true);
     setPreviewMinimized(false);
   }, []);

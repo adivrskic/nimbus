@@ -11,7 +11,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { OPTIONS, getFilteredCategories } from "../../../configs";
-
+import { track } from "../../../lib/analytics";
 import "./OptionsOverlay.scss";
 
 // ============================================
@@ -52,39 +52,94 @@ const validators = {
   },
 };
 
-// Field config: [validator, inputType, placeholder, inputFilter]
+// Field config: [validator, inputType, label, placeholder, inputFilter]
 const FIELDS = {
-  "branding.brandName": [validators.brandName, "text", "Brand name"],
-  "branding.tagline": [validators.maxLen(100), "text", "Tagline"],
+  "branding.brandName": [
+    validators.brandName,
+    "text",
+    "Brand Name",
+    "e.g., Acme Inc",
+  ],
+  "branding.tagline": [
+    validators.maxLen(100),
+    "text",
+    "Tagline",
+    "e.g., Innovation delivered",
+  ],
   "business.description": [
     validators.maxLen(300),
     "text",
-    "Short business description",
+    "Description",
+    "Brief description of your business",
   ],
   "business.location": [
     validators.maxLen(100),
     "text",
-    "Location (city, region)",
+    "Location",
+    "e.g., San Francisco, CA",
   ],
   "business.yearEstablished": [
     validators.year,
     "text",
-    "Year established",
+    "Year Est.",
+    "e.g., 2020",
     /^[0-9]*$/,
   ],
-  "contactInfo.email": [validators.email, "email", "Email"],
-  "contactInfo.phone": [validators.phone, "tel", "Phone", /^[0-9+\-\s()]*$/],
-  "contactInfo.address": [validators.maxLen(200), "text", "Address"],
-  "socialMedia.twitter": [validators.url, "url", "Twitter URL"],
-  "socialMedia.instagram": [validators.url, "url", "Instagram URL"],
-  "socialMedia.linkedIn": [validators.url, "url", "LinkedIn URL"],
-  "socialMedia.facebook": [validators.url, "url", "Facebook URL"],
+  "contactInfo.email": [
+    validators.email,
+    "email",
+    "Email",
+    "contact@example.com",
+  ],
+  "contactInfo.phone": [
+    validators.phone,
+    "tel",
+    "Phone",
+    "+1 (555) 123-4567",
+    /^[0-9+\-\s()]*$/,
+  ],
+  "contactInfo.address": [
+    validators.maxLen(200),
+    "text",
+    "Address",
+    "123 Main St, City, State",
+  ],
+  "socialMedia.twitter": [
+    validators.url,
+    "url",
+    "Twitter",
+    "https://twitter.com/...",
+  ],
+  "socialMedia.instagram": [
+    validators.url,
+    "url",
+    "Instagram",
+    "https://instagram.com/...",
+  ],
+  "socialMedia.linkedIn": [
+    validators.url,
+    "url",
+    "LinkedIn",
+    "https://linkedin.com/...",
+  ],
+  "socialMedia.facebook": [
+    validators.url,
+    "url",
+    "Facebook",
+    "https://facebook.com/...",
+  ],
   "content.primaryCta": [
     validators.maxLen(30),
     "text",
-    "Primary CTA (e.g., Get Started)",
+    "Primary CTA",
+    "e.g., Get Started",
   ],
-  "content.copyrightText": [validators.maxLen(100), "text", "Copyright text"],
+  "content.copyrightText": [
+    validators.maxLen(100),
+    "text",
+    "Copyright",
+    "e.g., © 2025 Company",
+  ],
 };
 
 // ============================================
@@ -99,7 +154,7 @@ const OptimizedInput = memo(function OptimizedInput({
   const config = FIELDS[fieldKey];
   if (!config) return null;
 
-  const [validator, type, placeholder, inputFilter] = config;
+  const [validator, type, label, placeholder, inputFilter] = config;
   const [value, setValue] = useState(initialValue || "");
   const [error, setError] = useState(null);
   const [touched, setTouched] = useState(false);
@@ -142,6 +197,7 @@ const OptimizedInput = memo(function OptimizedInput({
         error ? "has-error" : ""
       } ${className}`}
     >
+      <label className="options-input-label">{label}</label>
       <input
         type={type}
         value={value}
@@ -208,6 +264,10 @@ function OptionsOverlay({
 
   const handleSelect = (optionKey, value) => {
     onSelect(optionKey, value);
+    track("option-select", {
+      optionKey,
+      value,
+    });
     if (optionKey === "palette" && value === "Custom") return;
     const opt = OPTIONS[optionKey];
     if (!opt.multi) {

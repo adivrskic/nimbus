@@ -3,6 +3,7 @@ import { X, Coins, Check, Loader2, LogIn } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
 import { supabase } from "../../lib/supabaseClient";
 import useModalAnimation from "../../hooks/useModalAnimation";
+import { track } from "../../lib/analytics";
 import "./TokenPurchaseModal.scss";
 
 const TOKEN_PACKAGES = [
@@ -58,6 +59,10 @@ function TokenPurchaseModal({ isOpen, onClose, onOpenAuth }) {
   const handlePurchase = async () => {
     const pkg = TOKEN_PACKAGES.find((p) => p.id === selectedPackage);
     if (!pkg) return;
+
+    track("token-purchase", {
+      package: pkg,
+    });
 
     setIsProcessing(true);
     setError(null);

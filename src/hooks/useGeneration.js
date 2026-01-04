@@ -5,15 +5,7 @@ import { buildFullPrompt } from "../utils/promptBuilder";
 import { generateDemo } from "../utils/demoGenerator";
 import { generateWebsiteStream } from "../utils/generateWebsiteStream";
 import { useGenerationState } from "../contexts/GenerationContext";
-
-// Cache utility - create stub if not available yet
-// Once you add generationCache.js, change this to: import generationCache from "../utils/generationCache";
-const generationCache = {
-  get: () => null,
-  set: () => {},
-  clear: () => {},
-  shouldUse: () => false,
-};
+import generationCache from "../utils/generationCache";
 
 let streamingTimeout = null;
 

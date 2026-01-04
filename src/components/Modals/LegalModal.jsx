@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   FileText,
   Shield,
@@ -42,8 +42,23 @@ function Accordion({ items }) {
   );
 }
 
-function LegalModal({ isOpen, onClose }) {
+function LegalModal({ isOpen, onClose, initialSection = null }) {
   const lastUpdated = "December 11, 2023";
+  const bodyRef = useRef(null);
+
+  // Scroll to section when modal opens with initialSection
+  useEffect(() => {
+    if (isOpen && initialSection && bodyRef.current) {
+      // Small delay to ensure modal is rendered
+      const timer = setTimeout(() => {
+        const section = bodyRef.current.querySelector(`#${initialSection}`);
+        if (section) {
+          section.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen, initialSection]);
 
   const termsItems = [
     {
@@ -127,7 +142,7 @@ function LegalModal({ isOpen, onClose }) {
         </div>
 
         {/* Scrollable body section */}
-        <div className="legal-body">
+        <div className="legal-body" ref={bodyRef}>
           <section id="terms" className="legal-section">
             <div className="legal-section__header">
               <FileText size={14} />
