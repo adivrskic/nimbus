@@ -8,30 +8,16 @@
   background: var(--glass-background);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
-  opacity: 0;
-  transition: opacity var(--transition-fast);
-
-  &.active {
-    opacity: 1;
-  }
 }
 
 .tokens-content {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding: 24px;
+  padding: 12px;
   width: 420px;
   max-width: 97.5vw;
   background: transparent;
-  opacity: 0;
-  transform: scale(0.98) translateY(4px);
-  transition: opacity var(--transition-base), transform var(--transition-base);
-
-  &.active {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
 }
 
 .tokens-header {
@@ -103,7 +89,8 @@
   border-radius: 999px;
   color: var(--color-text-secondary);
   cursor: pointer;
-  transition: var(--transition-base);
+  transition: background var(--transition-fast),
+    border-color var(--transition-fast);
 
   &:hover {
     background: var(--color-accent-light);
@@ -201,8 +188,7 @@
   font-weight: 600;
   color: var(--color-background);
   cursor: pointer;
-  transition: background var(--transition-base),
-    transform var(--transition-fast);
+  transition: background var(--transition-fast);
 
   &:hover:not(:disabled) {
     background: var(--color-accent-hover);
@@ -211,6 +197,17 @@
   &:disabled {
     opacity: 0.6;
     cursor: not-allowed;
+  }
+
+  &--login {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    svg {
+      flex-shrink: 0;
+    }
   }
 }
 
@@ -222,17 +219,6 @@
 
 .spinning {
   animation: spin 1s linear infinite;
-}
-
-.tokens-btn--login {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-
-  svg {
-    flex-shrink: 0;
-  }
 }
 
 @keyframes spin {

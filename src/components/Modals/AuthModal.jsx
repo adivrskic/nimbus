@@ -1,18 +1,18 @@
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { X, Loader2 } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
-import useModalAnimation from "../../hooks/useModalAnimation";
+import {
+  overlayVariants,
+  authModalContentVariants,
+  authModalItemVariants,
+} from "../../configs/animations.config";
 import { track } from "../../lib/analytics";
 
 import "./AuthModal.scss";
 
 function AuthModal({ isOpen, onClose, onAuthSuccess, onOpenLegal }) {
   const { signInWithGoogle, signInWithGitHub, signInWithApple } = useAuth();
-
-  const { shouldRender, isVisible, closeModal } = useModalAnimation(
-    isOpen,
-    onClose
-  );
 
   const [isLoading, setIsLoading] = useState(false);
   const [loadingProvider, setLoadingProvider] = useState(null);
@@ -43,7 +43,7 @@ function AuthModal({ isOpen, onClose, onAuthSuccess, onOpenLegal }) {
   const handleClose = () => {
     if (!isLoading) {
       setError("");
-      closeModal();
+      onClose();
     }
   };
 
@@ -57,31 +57,46 @@ function AuthModal({ isOpen, onClose, onAuthSuccess, onOpenLegal }) {
     }, 150);
   };
 
-  if (!shouldRender) return null;
+  if (!isOpen) return null;
 
   return (
-    <div
-      className={`auth-overlay ${isVisible ? "active" : ""}`}
+    <motion.div
+      className="auth-overlay"
       onClick={handleClose}
+      variants={overlayVariants}
+      initial="hidden"
+      animate="visible"
+      exit="exit"
     >
-      <div
-        className={`auth-content ${isVisible ? "active" : ""}`}
+      <motion.div
+        className="auth-content"
         onClick={(e) => e.stopPropagation()}
+        variants={authModalContentVariants}
+        initial="hidden"
+        animate="visible"
+        exit="exit"
       >
-        <div className="auth-header">
+        <motion.div className="auth-header" variants={authModalItemVariants}>
           <span className="auth-title">Sign in to create</span>
           <button className="auth-close" onClick={handleClose}>
             <X size={16} />
           </button>
-        </div>
+        </motion.div>
 
-        {error && <div className="auth-error">{error}</div>}
+        {error && (
+          <motion.div className="auth-error" variants={authModalItemVariants}>
+            {error}
+          </motion.div>
+        )}
 
         <div className="auth-providers">
-          <button
+          <motion.button
             className="auth-provider"
             onClick={() => handleOAuthSignIn("Google", signInWithGoogle)}
             disabled={isLoading}
+            variants={authModalItemVariants}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
           >
             {loadingProvider === "Google" ? (
               <Loader2 size={16} className="spinning" />
@@ -106,12 +121,15 @@ function AuthModal({ isOpen, onClose, onAuthSuccess, onOpenLegal }) {
               </svg>
             )}
             <span>Google</span>
-          </button>
+          </motion.button>
 
-          <button
+          <motion.button
             className="auth-provider"
             onClick={() => handleOAuthSignIn("GitHub", signInWithGitHub)}
             disabled={isLoading}
+            variants={authModalItemVariants}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
           >
             {loadingProvider === "GitHub" ? (
               <Loader2 size={16} className="spinning" />
@@ -121,10 +139,10 @@ function AuthModal({ isOpen, onClose, onAuthSuccess, onOpenLegal }) {
               </svg>
             )}
             <span>GitHub</span>
-          </button>
+          </motion.button>
         </div>
 
-        <div className="auth-footer">
+        <motion.div className="auth-footer" variants={authModalItemVariants}>
           By continuing, you agree to our{" "}
           <button
             type="button"
@@ -141,9 +159,9 @@ function AuthModal({ isOpen, onClose, onAuthSuccess, onOpenLegal }) {
           >
             Privacy
           </button>
-        </div>
-      </div>
-    </div>
+        </motion.div>
+      </motion.div>
+    </motion.div>
   );
 }
 

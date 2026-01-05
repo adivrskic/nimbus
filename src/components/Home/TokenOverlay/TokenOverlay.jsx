@@ -45,7 +45,7 @@ function TokenOverlay({
           <span className="token-overlay__total">{tokenCost} tokens</span>
         </motion.div>
 
-        <motion.div className="token-overlay__breakdown">
+        <div className="token-overlay__breakdown">
           {breakdown.map((item, i) => (
             <motion.div
               key={i}
@@ -61,7 +61,7 @@ function TokenOverlay({
               </span>
             </motion.div>
           ))}
-        </motion.div>
+        </div>
 
         {isAuthenticated && (
           <motion.div
@@ -82,6 +82,8 @@ function TokenOverlay({
             className="token-overlay__buy-btn"
             onClick={onBuyTokens}
             variants={tokenItemVariants}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
           >
             Get More Tokens
           </motion.button>

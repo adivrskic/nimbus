@@ -11,7 +11,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { OPTIONS, getFilteredCategories } from "../../../configs";
-import { track } from "../../../lib/analytics";
+
 import "./OptionsOverlay.scss";
 
 // ============================================
@@ -138,7 +138,7 @@ const FIELDS = {
     validators.maxLen(100),
     "text",
     "Copyright",
-    "e.g., © 2025 Company",
+    "e.g., Â© 2025 Company",
   ],
 };
 
@@ -264,10 +264,6 @@ function OptionsOverlay({
 
   const handleSelect = (optionKey, value) => {
     onSelect(optionKey, value);
-    track("option-select", {
-      optionKey,
-      value,
-    });
     if (optionKey === "palette" && value === "Custom") return;
     const opt = OPTIONS[optionKey];
     if (!opt.multi) {
@@ -331,128 +327,6 @@ function OptionsOverlay({
         </div>
 
         <div className="options-body">
-          {/* Brand & Business Section */}
-          <div className="options-section">
-            <div
-              className="options-section__header"
-              onClick={() => setIsBrandExpanded(!isBrandExpanded)}
-            >
-              <div className="options-section__title">Brand & Business</div>
-              <button
-                className={`options-section__toggle ${
-                  !isBrandExpanded ? "collapsed" : ""
-                }`}
-              >
-                <ChevronDown size={16} />
-              </button>
-            </div>
-
-            <div
-              className={`options-section__content ${
-                isBrandExpanded ? "expanded" : "collapsed"
-              }`}
-            >
-              {/* Identity */}
-              <div className="options-section__group">
-                <div className="options-section__group-title">Identity</div>
-                <div className="options-section__row">
-                  <OptimizedInput
-                    fieldKey="branding.brandName"
-                    initialValue={getInitialValue("branding.brandName")}
-                    onCommit={handleCommit}
-                  />
-                  <OptimizedInput
-                    fieldKey="branding.tagline"
-                    initialValue={getInitialValue("branding.tagline")}
-                    onCommit={handleCommit}
-                  />
-                </div>
-                <div className="options-section__row">
-                  <OptimizedInput
-                    fieldKey="business.description"
-                    initialValue={getInitialValue("business.description")}
-                    onCommit={handleCommit}
-                    className="options-input-wrapper--full"
-                  />
-                </div>
-                <div className="options-section__row">
-                  <OptimizedInput
-                    fieldKey="business.location"
-                    initialValue={getInitialValue("business.location")}
-                    onCommit={handleCommit}
-                  />
-                  <OptimizedInput
-                    fieldKey="business.yearEstablished"
-                    initialValue={getInitialValue("business.yearEstablished")}
-                    onCommit={handleCommit}
-                    className="options-input-wrapper--small"
-                  />
-                </div>
-              </div>
-
-              {/* Contact */}
-              <div className="options-section__group">
-                <div className="options-section__group-title">Contact</div>
-                <div className="options-section__row">
-                  <OptimizedInput
-                    fieldKey="contactInfo.email"
-                    initialValue={getInitialValue("contactInfo.email")}
-                    onCommit={handleCommit}
-                  />
-                  <OptimizedInput
-                    fieldKey="contactInfo.phone"
-                    initialValue={getInitialValue("contactInfo.phone")}
-                    onCommit={handleCommit}
-                  />
-                </div>
-                <div className="options-section__row">
-                  <OptimizedInput
-                    fieldKey="contactInfo.address"
-                    initialValue={getInitialValue("contactInfo.address")}
-                    onCommit={handleCommit}
-                    className="options-input-wrapper--full"
-                  />
-                </div>
-              </div>
-
-              {/* Social */}
-              <div className="options-section__group">
-                <div className="options-section__group-title">Social</div>
-                <div className="options-section__row options-section__row--grid">
-                  {["twitter", "instagram", "linkedIn", "facebook"].map(
-                    (platform) => (
-                      <OptimizedInput
-                        key={platform}
-                        fieldKey={`socialMedia.${platform}`}
-                        initialValue={getInitialValue(
-                          `socialMedia.${platform}`
-                        )}
-                        onCommit={handleCommit}
-                      />
-                    )
-                  )}
-                </div>
-              </div>
-
-              {/* Content */}
-              <div className="options-section__group">
-                <div className="options-section__group-title">Content</div>
-                <div className="options-section__row">
-                  <OptimizedInput
-                    fieldKey="content.primaryCta"
-                    initialValue={getInitialValue("content.primaryCta")}
-                    onCommit={handleCommit}
-                  />
-                  <OptimizedInput
-                    fieldKey="content.copyrightText"
-                    initialValue={getInitialValue("content.copyrightText")}
-                    onCommit={handleCommit}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
           {/* Design Options Section */}
           <div className="options-section">
             <div
@@ -621,6 +495,127 @@ function OptionsOverlay({
                   </motion.div>
                 )}
               </AnimatePresence>
+            </div>
+          </div>
+          {/* Brand & Business Section */}
+          <div className="options-section">
+            <div
+              className="options-section__header"
+              onClick={() => setIsBrandExpanded(!isBrandExpanded)}
+            >
+              <div className="options-section__title">Brand & Business</div>
+              <button
+                className={`options-section__toggle ${
+                  !isBrandExpanded ? "collapsed" : ""
+                }`}
+              >
+                <ChevronDown size={16} />
+              </button>
+            </div>
+
+            <div
+              className={`options-section__content ${
+                isBrandExpanded ? "expanded" : "collapsed"
+              }`}
+            >
+              {/* Identity */}
+              <div className="options-section__group">
+                <div className="options-section__group-title">Identity</div>
+                <div className="options-section__row">
+                  <OptimizedInput
+                    fieldKey="branding.brandName"
+                    initialValue={getInitialValue("branding.brandName")}
+                    onCommit={handleCommit}
+                  />
+                  <OptimizedInput
+                    fieldKey="branding.tagline"
+                    initialValue={getInitialValue("branding.tagline")}
+                    onCommit={handleCommit}
+                  />
+                </div>
+                <div className="options-section__row">
+                  <OptimizedInput
+                    fieldKey="business.description"
+                    initialValue={getInitialValue("business.description")}
+                    onCommit={handleCommit}
+                    className="options-input-wrapper--full"
+                  />
+                </div>
+                <div className="options-section__row">
+                  <OptimizedInput
+                    fieldKey="business.location"
+                    initialValue={getInitialValue("business.location")}
+                    onCommit={handleCommit}
+                  />
+                  <OptimizedInput
+                    fieldKey="business.yearEstablished"
+                    initialValue={getInitialValue("business.yearEstablished")}
+                    onCommit={handleCommit}
+                    className="options-input-wrapper--small"
+                  />
+                </div>
+              </div>
+
+              {/* Contact */}
+              <div className="options-section__group">
+                <div className="options-section__group-title">Contact</div>
+                <div className="options-section__row">
+                  <OptimizedInput
+                    fieldKey="contactInfo.email"
+                    initialValue={getInitialValue("contactInfo.email")}
+                    onCommit={handleCommit}
+                  />
+                  <OptimizedInput
+                    fieldKey="contactInfo.phone"
+                    initialValue={getInitialValue("contactInfo.phone")}
+                    onCommit={handleCommit}
+                  />
+                </div>
+                <div className="options-section__row">
+                  <OptimizedInput
+                    fieldKey="contactInfo.address"
+                    initialValue={getInitialValue("contactInfo.address")}
+                    onCommit={handleCommit}
+                    className="options-input-wrapper--full"
+                  />
+                </div>
+              </div>
+
+              {/* Social */}
+              <div className="options-section__group">
+                <div className="options-section__group-title">Social</div>
+                <div className="options-section__row options-section__row--grid">
+                  {["twitter", "instagram", "linkedIn", "facebook"].map(
+                    (platform) => (
+                      <OptimizedInput
+                        key={platform}
+                        fieldKey={`socialMedia.${platform}`}
+                        initialValue={getInitialValue(
+                          `socialMedia.${platform}`
+                        )}
+                        onCommit={handleCommit}
+                      />
+                    )
+                  )}
+                </div>
+              </div>
+
+              {/* Content */}
+              <div className="options-section__group">
+                <div className="options-section__group-title">Content</div>
+                <div className="options-section__row">
+                  <OptimizedInput
+                    fieldKey="content.primaryCta"
+                    initialValue={getInitialValue("content.primaryCta")}
+                    onCommit={handleCommit}
+                  />
+                  <OptimizedInput
+                    fieldKey="content.copyrightText"
+                    initialValue={getInitialValue("content.copyrightText")}
+                    onCommit={handleCommit}
+                  />
+                </div>
+              </div>
             </div>
           </div>
         </div>

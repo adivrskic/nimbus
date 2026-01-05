@@ -15,7 +15,8 @@ import {
 } from "lucide-react";
 import {
   overlayVariants,
-  contentVariants,
+  helpContentVariants,
+  helpItemVariants,
 } from "../../../configs/animations.config";
 import "./HelpModal.scss";
 
@@ -145,13 +146,13 @@ function HelpModal({ isOpen, onClose }) {
       <motion.div
         className="help-content"
         onClick={(e) => e.stopPropagation()}
-        variants={contentVariants}
+        variants={helpContentVariants}
         initial="hidden"
         animate="visible"
         exit="exit"
       >
         {/* Fixed header section */}
-        <div className="help-header-section">
+        <motion.div className="help-header-section" variants={helpItemVariants}>
           <div className="help-header">
             <div className="help-title">
               <HelpCircle size={20} />
@@ -161,19 +162,17 @@ function HelpModal({ isOpen, onClose }) {
               <X size={16} />
             </button>
           </div>
-        </div>
+        </motion.div>
 
         {/* Scrollable body section */}
         <div className="help-body">
-          {HELP_SECTIONS.map((section, index) => {
+          {HELP_SECTIONS.map((section) => {
             const Icon = section.icon;
             return (
               <motion.div
                 key={section.title}
                 className="help-section"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.04 }}
+                variants={helpItemVariants}
               >
                 <div className="help-section__title">
                   <div className="help-icon">
@@ -190,7 +189,7 @@ function HelpModal({ isOpen, onClose }) {
             );
           })}
 
-          <div className="help-tips">
+          <motion.div className="help-tips" variants={helpItemVariants}>
             <h4 className="help-tips__title">
               <Lightbulb size={16} />
               <span>Quick Tips</span>
@@ -202,7 +201,7 @@ function HelpModal({ isOpen, onClose }) {
                 </li>
               ))}
             </ul>
-          </div>
+          </motion.div>
         </div>
       </motion.div>
     </motion.div>

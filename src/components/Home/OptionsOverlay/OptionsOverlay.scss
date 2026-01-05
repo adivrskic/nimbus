@@ -555,106 +555,9 @@
   }
 }
 
-// Responsive
-@media (max-width: 768px) {
-  .options-content {
-    max-width: 100%;
-    padding: 16px;
-  }
-
-  .options-body {
-    grid-template-columns: 1fr;
-  }
-
-  .options-brand {
-    width: 100%;
-    padding-right: 0;
-    padding-bottom: 16px;
-    border-right: none;
-
-    // Show header on mobile
-    &__header {
-      display: flex;
-    }
-
-    &__content {
-      &.collapsed {
-        height: 0;
-        margin-bottom: 0;
-      }
-
-      &.expanded {
-        height: auto;
-        margin-bottom: 16px;
-      }
-    }
-  }
-
-  .options-design {
-    // Show header on mobile
-    &__header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      cursor: pointer;
-      margin-bottom: 12px;
-      padding-bottom: 8px;
-      padding-right: 0;
-
-      .options-design__toggle {
-        width: 20px;
-        height: 20px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: transparent;
-        border: none;
-        color: var(--color-text-tertiary);
-        cursor: pointer;
-        transition: var(--transition-base);
-
-        svg {
-          transition: transform var(--transition-base);
-        }
-
-        &.collapsed svg {
-          transform: rotate(-90deg);
-        }
-      }
-    }
-
-    &__title {
-      font-size: 0.6875rem;
-      font-weight: 600;
-      font-family: var(--font-family-base, sans-serif);
-      color: var(--color-text-tertiary);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-  }
-
-  .options-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .options-section__toggle {
-    display: flex !important;
-  }
-}
-
-@media (max-width: 480px) {
-  .options-filters {
-    gap: 6px;
-  }
-
-  .options-filter {
-    padding: 6px 10px;
-    font-size: 0.6875rem;
-  }
-}
-/* Add these styles to OptionsOverlay.scss */
-/* These replace/update the .options-brand and .options-design styles with a unified .options-section pattern */
-
+// ============================================
+// SECTION STYLES
+// ============================================
 .options-section {
   display: flex;
   flex-direction: column;
@@ -665,14 +568,6 @@
     align-items: center;
     justify-content: space-between;
     padding: 12px 0;
-    cursor: pointer;
-    user-select: none;
-
-    &:hover {
-      .options-section__title {
-        color: var(--color-text-primary);
-      }
-    }
   }
 
   &__title {
@@ -682,43 +577,30 @@
     color: var(--color-text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    transition: color var(--transition-fast);
   }
 
+  // Hidden everywhere
   &__toggle {
     display: none;
-    align-items: center;
-    justify-content: center;
-    width: 24px;
-    height: 24px;
-    background: transparent;
-    border: none;
-    color: var(--color-text-tertiary);
-    cursor: pointer;
-    transition: transform var(--transition-fast);
-
-    &.collapsed {
-      transform: rotate(-90deg);
-    }
   }
 
   &__content {
     display: flex;
     flex-direction: column;
     gap: 16px;
-    overflow: hidden;
-    transition: max-height var(--transition-base),
-      opacity var(--transition-base);
+    overflow-y: auto;
 
-    &.expanded {
-      max-height: 2000px;
-      opacity: 1;
+    &::-webkit-scrollbar {
+      width: 4px;
     }
 
-    &.collapsed {
-      max-height: 0;
-      opacity: 0;
-      pointer-events: none;
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: var(--color-border);
+      border-radius: 2px;
     }
   }
 
@@ -750,62 +632,9 @@
   }
 }
 
-.options-input {
-  flex: 1;
-  min-width: 0;
-  padding: 10px 14px;
-  background: var(--color-surface-elevated);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  font-size: 0.8125rem;
-  font-family: var(--font-family-base, sans-serif);
-  color: var(--color-text-primary);
-  transition: var(--transition-base);
-
-  &::placeholder {
-    color: var(--color-text-tertiary);
-  }
-
-  &:focus {
-    outline: none;
-    border-color: var(--color-border-hover);
-    box-shadow: var(--shadow-sm);
-  }
-
-  &--full {
-    flex: 1 1 100%;
-  }
-
-  &--small {
-    flex: 0 0 120px;
-    max-width: 120px;
-  }
-}
-
-/* Responsive adjustments */
-@media (max-width: 480px) {
-  .options-section {
-    &__row {
-      flex-direction: column;
-
-      &--grid {
-        grid-template-columns: 1fr;
-      }
-    }
-  }
-
-  .options-input {
-    &--small {
-      flex: 1;
-      max-width: none;
-    }
-  }
-}
-/* ============================================
-   ADD TO OptionsOverlay.scss - Validation & Input styles
-   ============================================ */
-
-// Input wrapper
+// ============================================
+// INPUT WRAPPER & VALIDATION
+// ============================================
 .options-input-wrapper {
   position: relative;
   flex: 1;
@@ -882,10 +711,90 @@
   }
 }
 
-// Mobile adjustments
-@media (max-width: 640px) {
+// ============================================
+// MOBILE - 50% height scrollable sections
+// ============================================
+@media (max-width: 768px) {
+  .options-content {
+    max-width: 100%;
+    padding: 16px;
+    gap: 16px;
+  }
+
+  .options-body {
+    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .options-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .options-section {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-bottom: 1px solid var(--color-border);
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    &__header {
+      flex-shrink: 0;
+      padding: 12px 0;
+    }
+
+    &__content {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 12px;
+    }
+
+    &__row {
+      flex-direction: column;
+      gap: 10px;
+
+      &--grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+    }
+  }
+
   .options-input-wrapper--small {
     flex: 1;
     max-width: none;
+  }
+
+  // Prevent iOS zoom on input focus
+  .options-input {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .options-filters {
+    gap: 6px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .options-filter {
+    padding: 6px 10px;
+    font-size: 0.6875rem;
+  }
+
+  .options-section__row--grid {
+    grid-template-columns: 1fr;
   }
 }
