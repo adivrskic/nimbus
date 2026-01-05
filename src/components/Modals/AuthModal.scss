@@ -10,13 +10,7 @@
   background: var(--color-overlay-background, var(--glass-background));
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
-  opacity: 0;
-  transition: opacity var(--transition-fast);
   padding: 1rem;
-
-  &.active {
-    opacity: 1;
-  }
 }
 
 .auth-content {
@@ -26,15 +20,6 @@
   padding: 24px;
   min-width: 260px;
   max-width: 90vw;
-  opacity: 0;
-  transform: scale(0.98) translateY(4px);
-  transition: opacity var(--transition-base) cubic-bezier(0.16, 1, 0.3, 1),
-    transform var(--transition-base) cubic-bezier(0.16, 1, 0.3, 1);
-
-  &.active {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
 }
 
 .auth-header {
@@ -62,7 +47,7 @@
   border-radius: 50%;
   color: var(--color-text-secondary);
   cursor: pointer;
-  transition: var(--transition-base);
+  transition: background var(--transition-fast), color var(--transition-fast);
 
   &:hover {
     background: var(--color-border);
@@ -100,7 +85,8 @@
   font-family: var(--font-family-base, sans-serif);
   color: var(--color-text-primary);
   cursor: pointer;
-  transition: var(--transition-base);
+  transition: background var(--transition-fast),
+    border-color var(--transition-fast), box-shadow var(--transition-fast);
 
   &:hover:not(:disabled) {
     background: var(--color-surface);
@@ -141,29 +127,6 @@
   }
 }
 
-.spinning {
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (max-width: 480px) {
-  .auth-content {
-    min-width: 240px;
-    padding: 20px;
-  }
-}
-/* ============================================
-   ADD TO AuthModal.scss - Footer link styles
-   ============================================ */
-
 .auth-footer__link {
   background: none;
   border: none;
@@ -184,5 +147,25 @@
   &:focus {
     outline: none;
     color: var(--color-accent, #6366f1);
+  }
+}
+
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 480px) {
+  .auth-content {
+    min-width: 240px;
+    padding: 20px;
   }
 }

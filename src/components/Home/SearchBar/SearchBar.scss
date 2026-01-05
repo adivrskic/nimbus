@@ -21,7 +21,7 @@
     }
 
     .search-bar__char-counter {
-      bottom: 52px;
+      bottom: -20px;
       right: 12px;
       left: auto;
     }
@@ -619,7 +619,7 @@
       }
 
       .search-bar__char-counter {
-        bottom: 52px;
+        bottom: -20px;
         right: 12px;
         left: auto;
       }
@@ -676,9 +676,7 @@
       }
 
       .search-bar__pills-expanded {
-        bottom: 48px;
-        left: 8px;
-        right: 8px;
+        bottom: 86px;
       }
     }
 
