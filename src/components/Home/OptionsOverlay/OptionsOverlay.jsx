@@ -1,5 +1,5 @@
-// components/Home/OptionsOverlay/OptionsOverlay.jsx - Optimized with local state
-import { useState, useEffect, useRef, memo } from "react";
+// components/Home/OptionsOverlay/OptionsOverlay.jsx - Updated with accordion status
+import { useState, useEffect, useRef, memo, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   X,
@@ -9,6 +9,9 @@ import {
   Settings,
   ChevronDown,
   AlertCircle,
+  CheckCircle,
+  Circle,
+  Edit2,
 } from "lucide-react";
 import { OPTIONS, getFilteredCategories } from "../../../configs";
 
@@ -138,7 +141,7 @@ const FIELDS = {
     validators.maxLen(100),
     "text",
     "Copyright",
-    "e.g., Â© 2025 Company",
+    "e.g., © 2025 Company",
   ],
 };
 
@@ -204,7 +207,9 @@ const OptimizedInput = memo(function OptimizedInput({
         onChange={handleChange}
         onBlur={handleBlur}
         placeholder={placeholder}
-        className={`options-input ${error ? "options-input--error" : ""}`}
+        className={`options-input ${error ? "options-input--error" : ""} ${
+          value ? "options-input--filled" : ""
+        }`}
       />
       {error && (
         <div className="options-input-error">
@@ -232,18 +237,89 @@ function OptionsOverlay({
 }) {
   const [activeOption, setActiveOption] = useState(null);
   const [categoryFilter, setCategoryFilter] = useState("");
-  const [isBrandExpanded, setIsBrandExpanded] = useState(true);
   const [isDesignExpanded, setIsDesignExpanded] = useState(true);
+  const [expandedBrandSections, setExpandedBrandSections] = useState({
+    identity: true,
+    contact: true,
+    social: true,
+    content: true,
+  });
 
   // Reset state when modal closes
   useEffect(() => {
     if (!isOpen) {
       setCategoryFilter("");
       setActiveOption(null);
-      setIsBrandExpanded(true);
       setIsDesignExpanded(true);
+      setExpandedBrandSections({
+        identity: true,
+        contact: true,
+        social: true,
+        content: true,
+      });
     }
   }, [isOpen]);
+
+  // Calculate fill status for brand sections
+  const brandSectionStatus = useMemo(() => {
+    const getFieldValue = (category, field) =>
+      persistentOptions[category]?.[field] || "";
+
+    const isFilled = (category, field) => {
+      const value = getFieldValue(category, field);
+      return value && value.trim().length > 0;
+    };
+
+    return {
+      identity: {
+        filled: [
+          isFilled("branding", "brandName"),
+          isFilled("branding", "tagline"),
+          isFilled("business", "description"),
+          isFilled("business", "location"),
+          isFilled("business", "yearEstablished"),
+        ].filter(Boolean).length,
+        total: 5,
+      },
+      contact: {
+        filled: [
+          isFilled("contactInfo", "email"),
+          isFilled("contactInfo", "phone"),
+          isFilled("contactInfo", "address"),
+        ].filter(Boolean).length,
+        total: 3,
+      },
+      social: {
+        filled: [
+          isFilled("socialMedia", "twitter"),
+          isFilled("socialMedia", "instagram"),
+          isFilled("socialMedia", "linkedIn"),
+          isFilled("socialMedia", "facebook"),
+        ].filter(Boolean).length,
+        total: 4,
+      },
+      content: {
+        filled: [
+          isFilled("content", "primaryCta"),
+          isFilled("content", "copyrightText"),
+        ].filter(Boolean).length,
+        total: 2,
+      },
+    };
+  }, [persistentOptions]);
+
+  // Calculate overall brand completion
+  const overallBrandStatus = useMemo(() => {
+    const totalFilled = Object.values(brandSectionStatus).reduce(
+      (sum, section) => sum + section.filled,
+      0
+    );
+    const totalFields = Object.values(brandSectionStatus).reduce(
+      (sum, section) => sum + section.total,
+      0
+    );
+    return { filled: totalFilled, total: totalFields };
+  }, [brandSectionStatus]);
 
   // Commit handler - updates parent state
   const handleCommit = (fieldKey, value) => {
@@ -255,6 +331,25 @@ function OptionsOverlay({
   const getInitialValue = (fieldKey) => {
     const [category, field] = fieldKey.split(".");
     return persistentOptions[category]?.[field] || "";
+  };
+
+  // Toggle brand section expansion
+  const toggleBrandSection = (section) => {
+    setExpandedBrandSections((prev) => ({
+      ...prev,
+      [section]: !prev[section],
+    }));
+  };
+
+  // Toggle all brand sections
+  const toggleAllBrandSections = () => {
+    const allExpanded = Object.values(expandedBrandSections).every(Boolean);
+    setExpandedBrandSections({
+      identity: !allExpanded,
+      contact: !allExpanded,
+      social: !allExpanded,
+      content: !allExpanded,
+    });
   };
 
   if (!isOpen) return null;
@@ -333,11 +428,20 @@ function OptionsOverlay({
               className="options-section__header"
               onClick={() => setIsDesignExpanded(!isDesignExpanded)}
             >
-              <div className="options-section__title">Design Options</div>
+              <div className="options-section__title">
+                Design Options
+                <span className="options-section__status">
+                  {selectedCount} set
+                </span>
+              </div>
               <button
                 className={`options-section__toggle ${
                   !isDesignExpanded ? "collapsed" : ""
                 }`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsDesignExpanded(!isDesignExpanded);
+                }}
               >
                 <ChevronDown size={16} />
               </button>
@@ -497,123 +601,323 @@ function OptionsOverlay({
               </AnimatePresence>
             </div>
           </div>
-          {/* Brand & Business Section */}
+
+          {/* Brand & Business Section - Updated to Accordion */}
           <div className="options-section">
             <div
               className="options-section__header"
-              onClick={() => setIsBrandExpanded(!isBrandExpanded)}
+              onClick={() => toggleAllBrandSections()}
             >
-              <div className="options-section__title">Brand & Business</div>
+              <div className="options-section__title">
+                Brand & Business
+                <span className="options-section__status">
+                  {overallBrandStatus.filled}/{overallBrandStatus.total} filled
+                </span>
+              </div>
               <button
                 className={`options-section__toggle ${
-                  !isBrandExpanded ? "collapsed" : ""
+                  !Object.values(expandedBrandSections).every(Boolean)
+                    ? "collapsed"
+                    : ""
                 }`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleAllBrandSections();
+                }}
               >
                 <ChevronDown size={16} />
               </button>
             </div>
 
-            <div
-              className={`options-section__content ${
-                isBrandExpanded ? "expanded" : "collapsed"
-              }`}
-            >
-              {/* Identity */}
-              <div className="options-section__group">
-                <div className="options-section__group-title">Identity</div>
-                <div className="options-section__row">
-                  <OptimizedInput
-                    fieldKey="branding.brandName"
-                    initialValue={getInitialValue("branding.brandName")}
-                    onCommit={handleCommit}
-                  />
-                  <OptimizedInput
-                    fieldKey="branding.tagline"
-                    initialValue={getInitialValue("branding.tagline")}
-                    onCommit={handleCommit}
+            <div className="options-section__content expanded">
+              {/* Identity Accordion */}
+              <div className="options-accordion">
+                <div
+                  className="options-accordion__header"
+                  onClick={() => toggleBrandSection("identity")}
+                >
+                  <div className="options-accordion__title">
+                    <div className="options-accordion__title-main">
+                      Identity
+                      <span className="options-accordion__subtitle">
+                        Brand name, tagline, description
+                      </span>
+                    </div>
+                    <div className="options-accordion__status">
+                      {brandSectionStatus.identity.filled ===
+                      brandSectionStatus.identity.total ? (
+                        <CheckCircle
+                          size={12}
+                          className="options-accordion__status-icon--complete"
+                        />
+                      ) : brandSectionStatus.identity.filled > 0 ? (
+                        <Edit2
+                          size={12}
+                          className="options-accordion__status-icon--partial"
+                        />
+                      ) : (
+                        <Circle
+                          size={12}
+                          className="options-accordion__status-icon--empty"
+                        />
+                      )}
+                      <span className="options-accordion__status-text">
+                        {brandSectionStatus.identity.filled}/
+                        {brandSectionStatus.identity.total}
+                      </span>
+                    </div>
+                  </div>
+                  <ChevronDown
+                    size={14}
+                    className={`options-accordion__chevron ${
+                      !expandedBrandSections.identity ? "collapsed" : ""
+                    }`}
                   />
                 </div>
-                <div className="options-section__row">
-                  <OptimizedInput
-                    fieldKey="business.description"
-                    initialValue={getInitialValue("business.description")}
-                    onCommit={handleCommit}
-                    className="options-input-wrapper--full"
-                  />
-                </div>
-                <div className="options-section__row">
-                  <OptimizedInput
-                    fieldKey="business.location"
-                    initialValue={getInitialValue("business.location")}
-                    onCommit={handleCommit}
-                  />
-                  <OptimizedInput
-                    fieldKey="business.yearEstablished"
-                    initialValue={getInitialValue("business.yearEstablished")}
-                    onCommit={handleCommit}
-                    className="options-input-wrapper--small"
-                  />
+
+                <div
+                  className={`options-accordion__content ${
+                    expandedBrandSections.identity ? "expanded" : "collapsed"
+                  }`}
+                >
+                  <div className="options-section__row">
+                    <OptimizedInput
+                      fieldKey="branding.brandName"
+                      initialValue={getInitialValue("branding.brandName")}
+                      onCommit={handleCommit}
+                    />
+                    <OptimizedInput
+                      fieldKey="branding.tagline"
+                      initialValue={getInitialValue("branding.tagline")}
+                      onCommit={handleCommit}
+                    />
+                  </div>
+                  <div className="options-section__row">
+                    <OptimizedInput
+                      fieldKey="business.description"
+                      initialValue={getInitialValue("business.description")}
+                      onCommit={handleCommit}
+                      className="options-input-wrapper--full"
+                    />
+                  </div>
+                  <div className="options-section__row">
+                    <OptimizedInput
+                      fieldKey="business.location"
+                      initialValue={getInitialValue("business.location")}
+                      onCommit={handleCommit}
+                    />
+                    <OptimizedInput
+                      fieldKey="business.yearEstablished"
+                      initialValue={getInitialValue("business.yearEstablished")}
+                      onCommit={handleCommit}
+                      className="options-input-wrapper--small"
+                    />
+                  </div>
                 </div>
               </div>
 
-              {/* Contact */}
-              <div className="options-section__group">
-                <div className="options-section__group-title">Contact</div>
-                <div className="options-section__row">
-                  <OptimizedInput
-                    fieldKey="contactInfo.email"
-                    initialValue={getInitialValue("contactInfo.email")}
-                    onCommit={handleCommit}
-                  />
-                  <OptimizedInput
-                    fieldKey="contactInfo.phone"
-                    initialValue={getInitialValue("contactInfo.phone")}
-                    onCommit={handleCommit}
+              {/* Contact Accordion */}
+              <div className="options-accordion">
+                <div
+                  className="options-accordion__header"
+                  onClick={() => toggleBrandSection("contact")}
+                >
+                  <div className="options-accordion__title">
+                    <div className="options-accordion__title-main">
+                      Contact
+                      <span className="options-accordion__subtitle">
+                        Email, phone, address
+                      </span>
+                    </div>
+                    <div className="options-accordion__status">
+                      {brandSectionStatus.contact.filled ===
+                      brandSectionStatus.contact.total ? (
+                        <CheckCircle
+                          size={12}
+                          className="options-accordion__status-icon--complete"
+                        />
+                      ) : brandSectionStatus.contact.filled > 0 ? (
+                        <Edit2
+                          size={12}
+                          className="options-accordion__status-icon--partial"
+                        />
+                      ) : (
+                        <Circle
+                          size={12}
+                          className="options-accordion__status-icon--empty"
+                        />
+                      )}
+                      <span className="options-accordion__status-text">
+                        {brandSectionStatus.contact.filled}/
+                        {brandSectionStatus.contact.total}
+                      </span>
+                    </div>
+                  </div>
+                  <ChevronDown
+                    size={14}
+                    className={`options-accordion__chevron ${
+                      !expandedBrandSections.contact ? "collapsed" : ""
+                    }`}
                   />
                 </div>
-                <div className="options-section__row">
-                  <OptimizedInput
-                    fieldKey="contactInfo.address"
-                    initialValue={getInitialValue("contactInfo.address")}
-                    onCommit={handleCommit}
-                    className="options-input-wrapper--full"
-                  />
+
+                <div
+                  className={`options-accordion__content ${
+                    expandedBrandSections.contact ? "expanded" : "collapsed"
+                  }`}
+                >
+                  <div className="options-section__row">
+                    <OptimizedInput
+                      fieldKey="contactInfo.email"
+                      initialValue={getInitialValue("contactInfo.email")}
+                      onCommit={handleCommit}
+                    />
+                    <OptimizedInput
+                      fieldKey="contactInfo.phone"
+                      initialValue={getInitialValue("contactInfo.phone")}
+                      onCommit={handleCommit}
+                    />
+                  </div>
+                  <div className="options-section__row">
+                    <OptimizedInput
+                      fieldKey="contactInfo.address"
+                      initialValue={getInitialValue("contactInfo.address")}
+                      onCommit={handleCommit}
+                      className="options-input-wrapper--full"
+                    />
+                  </div>
                 </div>
               </div>
 
-              {/* Social */}
-              <div className="options-section__group">
-                <div className="options-section__group-title">Social</div>
-                <div className="options-section__row options-section__row--grid">
-                  {["twitter", "instagram", "linkedIn", "facebook"].map(
-                    (platform) => (
-                      <OptimizedInput
-                        key={platform}
-                        fieldKey={`socialMedia.${platform}`}
-                        initialValue={getInitialValue(
-                          `socialMedia.${platform}`
-                        )}
-                        onCommit={handleCommit}
-                      />
-                    )
-                  )}
+              {/* Social Accordion */}
+              <div className="options-accordion">
+                <div
+                  className="options-accordion__header"
+                  onClick={() => toggleBrandSection("social")}
+                >
+                  <div className="options-accordion__title">
+                    <div className="options-accordion__title-main">
+                      Social
+                      <span className="options-accordion__subtitle">
+                        Twitter, Instagram, LinkedIn, Facebook
+                      </span>
+                    </div>
+                    <div className="options-accordion__status">
+                      {brandSectionStatus.social.filled ===
+                      brandSectionStatus.social.total ? (
+                        <CheckCircle
+                          size={12}
+                          className="options-accordion__status-icon--complete"
+                        />
+                      ) : brandSectionStatus.social.filled > 0 ? (
+                        <Edit2
+                          size={12}
+                          className="options-accordion__status-icon--partial"
+                        />
+                      ) : (
+                        <Circle
+                          size={12}
+                          className="options-accordion__status-icon--empty"
+                        />
+                      )}
+                      <span className="options-accordion__status-text">
+                        {brandSectionStatus.social.filled}/
+                        {brandSectionStatus.social.total}
+                      </span>
+                    </div>
+                  </div>
+                  <ChevronDown
+                    size={14}
+                    className={`options-accordion__chevron ${
+                      !expandedBrandSections.social ? "collapsed" : ""
+                    }`}
+                  />
+                </div>
+
+                <div
+                  className={`options-accordion__content ${
+                    expandedBrandSections.social ? "expanded" : "collapsed"
+                  }`}
+                >
+                  <div className="options-section__row options-section__row--grid">
+                    {["twitter", "instagram", "linkedIn", "facebook"].map(
+                      (platform) => (
+                        <OptimizedInput
+                          key={platform}
+                          fieldKey={`socialMedia.${platform}`}
+                          initialValue={getInitialValue(
+                            `socialMedia.${platform}`
+                          )}
+                          onCommit={handleCommit}
+                        />
+                      )
+                    )}
+                  </div>
                 </div>
               </div>
 
-              {/* Content */}
-              <div className="options-section__group">
-                <div className="options-section__group-title">Content</div>
-                <div className="options-section__row">
-                  <OptimizedInput
-                    fieldKey="content.primaryCta"
-                    initialValue={getInitialValue("content.primaryCta")}
-                    onCommit={handleCommit}
+              {/* Content Accordion */}
+              <div className="options-accordion">
+                <div
+                  className="options-accordion__header"
+                  onClick={() => toggleBrandSection("content")}
+                >
+                  <div className="options-accordion__title">
+                    <div className="options-accordion__title-main">
+                      Content
+                      <span className="options-accordion__subtitle">
+                        CTAs, copyright text
+                      </span>
+                    </div>
+                    <div className="options-accordion__status">
+                      {brandSectionStatus.content.filled ===
+                      brandSectionStatus.content.total ? (
+                        <CheckCircle
+                          size={12}
+                          className="options-accordion__status-icon--complete"
+                        />
+                      ) : brandSectionStatus.content.filled > 0 ? (
+                        <Edit2
+                          size={12}
+                          className="options-accordion__status-icon--partial"
+                        />
+                      ) : (
+                        <Circle
+                          size={12}
+                          className="options-accordion__status-icon--empty"
+                        />
+                      )}
+                      <span className="options-accordion__status-text">
+                        {brandSectionStatus.content.filled}/
+                        {brandSectionStatus.content.total}
+                      </span>
+                    </div>
+                  </div>
+                  <ChevronDown
+                    size={14}
+                    className={`options-accordion__chevron ${
+                      !expandedBrandSections.content ? "collapsed" : ""
+                    }`}
                   />
-                  <OptimizedInput
-                    fieldKey="content.copyrightText"
-                    initialValue={getInitialValue("content.copyrightText")}
-                    onCommit={handleCommit}
-                  />
+                </div>
+
+                <div
+                  className={`options-accordion__content ${
+                    expandedBrandSections.content ? "expanded" : "collapsed"
+                  }`}
+                >
+                  <div className="options-section__row">
+                    <OptimizedInput
+                      fieldKey="content.primaryCta"
+                      initialValue={getInitialValue("content.primaryCta")}
+                      onCommit={handleCommit}
+                    />
+                    <OptimizedInput
+                      fieldKey="content.copyrightText"
+                      initialValue={getInitialValue("content.copyrightText")}
+                      onCommit={handleCommit}
+                    />
+                  </div>
                 </div>
               </div>
             </div>

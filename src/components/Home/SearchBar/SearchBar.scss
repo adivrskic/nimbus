@@ -717,7 +717,7 @@
         backdrop-filter: none;
         border-radius: 0;
         padding: 0;
-        gap: 4px;
+        gap: 8px;
       }
 
       .search-bar__typewriter-overlay {
@@ -753,7 +753,6 @@
 @media screen and (max-width: 400px) {
   .search-bar:not(.search-bar--expanded):not(.search-bar--generating) {
     .search-bar__right {
-      gap: 6px;
       padding: 8px 10px;
     }
 

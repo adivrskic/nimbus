@@ -1,11 +1,19 @@
-// hooks/useGeneration.js - Streaming optimized with caching
+// hooks/useGeneration.js - Streaming optimized with caching and multi-page support
 // IMPORTANT: Hook order must match original exactly, new hooks added at end of each group
 import { useState, useCallback, useRef, useEffect } from "react";
 import { buildFullPrompt } from "../utils/promptBuilder";
 import { generateDemo } from "../utils/demoGenerator";
 import { generateWebsiteStream } from "../utils/generateWebsiteStream";
 import { useGenerationState } from "../contexts/GenerationContext";
-import generationCache from "../utils/generationCache";
+
+// Cache utility - create stub if not available yet
+// Once you add generationCache.js, change this to: import generationCache from "../utils/generationCache";
+const generationCache = {
+  get: () => null,
+  set: () => {},
+  clear: () => {},
+  shouldUse: () => false,
+};
 
 let streamingTimeout = null;
 
@@ -116,9 +124,13 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
             persistentOptions,
             isRefinement: false,
             signal: abortControllerRef.current.signal,
-            onProgress: ({ phase, content }) => {
+            onProgress: ({ phase, content, files }) => {
               setStreamingPhase(phase);
               debouncedSetCode(content);
+              // Update files during streaming for real-time multi-page display
+              if (files) {
+                setGeneratedFiles(files);
+              }
             },
           });
 
@@ -130,7 +142,8 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
             }
 
             const finalHtml = streamResult.getFullHtml();
-            const files = streamResult.getFiles?.() || null;
+            // Get final parsed files
+            const files = streamResult.getFiles() || null;
 
             setGeneratedCode(finalHtml);
             setGeneratedFiles(files);
@@ -223,9 +236,12 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
           },
           persistentOptions,
           signal: abortControllerRef.current.signal,
-          onProgress: ({ phase, content }) => {
+          onProgress: ({ phase, content, files }) => {
             setStreamingPhase(phase);
             debouncedSetCode(content);
+            if (files) {
+              setGeneratedFiles(files);
+            }
           },
         });
 
@@ -237,7 +253,10 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
           }
 
           const finalHtml = streamResult.getFullHtml();
+          const files = streamResult.getFiles() || null;
+
           setGeneratedCode(finalHtml);
+          setGeneratedFiles(files);
           setEnhancePrompt("");
           setIsStreaming(false);
           setStreamingPhase("complete");
@@ -251,8 +270,8 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
             );
           }
 
-          onSuccess?.({ code: finalHtml, isStreaming: true });
-          return { code: finalHtml, isStreaming: true };
+          onSuccess?.({ code: finalHtml, files, isStreaming: true });
+          return { code: finalHtml, files, isStreaming: true };
         }
 
         // Fallback to non-streaming
@@ -267,7 +286,9 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
 
           if (result?.code || result?.html) {
             const code = result.code || result.html;
+            const files = result.files || null;
             setGeneratedCode(code);
+            setGeneratedFiles(files);
             setEnhancePrompt("");
             onSuccess?.(result);
             return result;

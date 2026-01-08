@@ -1,4 +1,4 @@
-// pages/Home/Home.jsx - Complete file with streaming support FIXED
+// pages/Home/Home.jsx - Complete file with streaming support and multi-page download fix
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { AnimatePresence } from "framer-motion";
 
@@ -12,7 +12,6 @@ import useSelections from "../hooks/useSelections";
 import useHomeState from "../hooks/useHomeState";
 import useGeneration from "../hooks/useGeneration";
 
-import { track } from "../lib/analytics";
 // Configs
 import { EXAMPLE_PROMPTS } from "../configs/defaults.config";
 
@@ -116,9 +115,11 @@ function Home() {
   } = useSelections();
 
   // Generation logic - STREAMING ENABLED
+  // Now also get generatedFiles for multi-page support
   const {
     isGenerating,
     generatedCode,
+    generatedFiles, // <-- ADD THIS for multi-page support
     generationError,
     enhancePrompt,
     setEnhancePrompt,
@@ -189,6 +190,7 @@ function Home() {
   );
 
   const handleOpenLegal = (section) => {
+    console.log("hello: ", section);
     setLegalSection(section);
     openLegal();
   };
@@ -277,10 +279,6 @@ function Home() {
       return;
     }
 
-    track("generate", {
-      prompt: prompt.trim(),
-    });
-
     setLastRequest({
       type: "initial",
       prompt: prompt.trim(),
@@ -313,10 +311,6 @@ function Home() {
       return;
     }
 
-    track("enhance", {
-      prompt: enhancePrompt.trim(),
-    });
-
     // Capture the enhance prompt BEFORE it gets cleared
     const submittedEnhancePrompt = enhancePrompt.trim();
 
@@ -326,14 +320,14 @@ function Home() {
       prompt: submittedEnhancePrompt,
     });
 
-    enhance(prompt, selections, persistentOptions, user); // Added persistentOptions
+    enhance(prompt, selections, persistentOptions, user);
   }, [
     enhancePrompt,
     isGenerating,
     isAuthenticated,
     prompt,
     selections,
-    persistentOptions, // Added to dependencies
+    persistentOptions,
     user,
     enhance,
     openAuth,
@@ -357,20 +351,16 @@ function Home() {
     return name + (promptText.length > 50 ? "..." : "");
   }, []);
 
+  // FIXED: Pass generatedFiles to downloadZip for multi-page support
   const handleDownload = useCallback(() => {
     if (!generatedCode) return;
-    track("download", {
-      generatedCode,
-      projectName,
-    });
     const projectName = generateName(prompt) || "website";
-    downloadZip(generatedCode, projectName);
-  }, [generatedCode, prompt, generateName]);
+    // Pass files object for multi-page sites, or null for single-page
+    downloadZip(generatedCode, projectName, generatedFiles);
+  }, [generatedCode, generatedFiles, prompt, generateName]);
 
   const handleSave = useCallback(async () => {
     if (!generatedCode || !isAuthenticated || !user) return;
-
-    track("save");
 
     setIsSaving(true);
     setSaveSuccess(false);
@@ -385,6 +375,8 @@ function Home() {
         customization: {
           selections,
           persistentOptions,
+          // Also save files for multi-page projects
+          files: generatedFiles,
         },
       };
 
@@ -422,6 +414,7 @@ function Home() {
     }
   }, [
     generatedCode,
+    generatedFiles,
     isAuthenticated,
     user,
     prompt,
@@ -452,7 +445,6 @@ function Home() {
   // Handle project edit from ProjectsModal
   const handleEditProject = useCallback(
     (project) => {
-      track("edit-project");
       closeProjects();
       editProject(project);
     },
@@ -542,12 +534,13 @@ function Home() {
         )}
       </AnimatePresence>
 
-      {/* FIXED: Show preview during generation + streaming */}
+      {/* FIXED: Show preview during generation + streaming, pass files prop */}
       <AnimatePresence>
         {showPreview && (isGenerating || generatedCode) && (
           <PreviewModal
             isOpen={showPreview}
             html={generatedCode || ""}
+            files={generatedFiles} // <-- ADD THIS for multi-page support
             onClose={closePreview}
             onMinimize={minimizePreview}
             onDownload={handleDownload}

@@ -1,4 +1,4 @@
-// components/Home/PreviewModal/PreviewModal.jsx - With actions inside input
+// components/Home/PreviewModal/PreviewModal.jsx - With floating page pill navigator (no arrows)
 import { useState, useRef, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -14,9 +14,8 @@ import {
   Info,
   MessageSquareMore,
   FileText,
-  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
-import { track } from "../../../lib/analytics";
 import GeneratedPreview from "../../GeneratedPreview";
 import FeedbackModal from "../../Modals/FeedbackModal";
 import {
@@ -48,6 +47,27 @@ function parseMultiPageHtml(html) {
   return Object.keys(files).length > 0 ? files : null;
 }
 
+// Get friendly page name from filename
+function getPageDisplayName(filename) {
+  const names = {
+    "index.html": "Home",
+    "about.html": "About",
+    "services.html": "Services",
+    "contact.html": "Contact",
+    "products.html": "Products",
+    "product-detail.html": "Product Detail",
+    "cart.html": "Cart",
+    "blog.html": "Blog",
+    "post.html": "Blog Post",
+    "dashboard.html": "Dashboard",
+    "settings.html": "Settings",
+    "getting-started.html": "Getting Started",
+    "api-reference.html": "API Reference",
+    "examples.html": "Examples",
+  };
+  return names[filename] || filename.replace(".html", "").replace(/-/g, " ");
+}
+
 function PreviewModal({
   isOpen,
   html,
@@ -74,17 +94,16 @@ function PreviewModal({
   isStreaming = false,
   selections = {},
   originalPrompt = "",
-  // lastRequest tracks the most recently SUBMITTED request (not current input)
-  // { type: 'initial' | 'enhancement', prompt: string }
   lastRequest = null,
 }) {
   const [showCode, setShowCode] = useState(false);
   const [showStreamingModal, setShowStreamingModal] = useState(false);
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [activeFile, setActiveFile] = useState("index.html");
-  const [showFileDropdown, setShowFileDropdown] = useState(false);
+  const [showPagePicker, setShowPagePicker] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const enhanceInputRef = useRef(null);
+  const pagePickerRef = useRef(null);
 
   // Parse files from HTML or use provided files object
   const files = useMemo(() => {
@@ -96,6 +115,7 @@ function PreviewModal({
 
   const isMultiPage = files && Object.keys(files).length > 1;
   const fileList = files ? Object.keys(files) : [];
+  const currentFileIndex = fileList.indexOf(activeFile);
 
   // Get current file content
   const currentHtml = useMemo(() => {
@@ -125,6 +145,21 @@ function PreviewModal({
       setShowStreamingModal(false);
     }
   }, [isStreaming]);
+
+  // Close page picker when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (pagePickerRef.current && !pagePickerRef.current.contains(e.target)) {
+        setShowPagePicker(false);
+      }
+    };
+
+    if (showPagePicker) {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () =>
+        document.removeEventListener("mousedown", handleClickOutside);
+    }
+  }, [showPagePicker]);
 
   if (!isOpen) return null;
 
@@ -252,7 +287,7 @@ function PreviewModal({
                 </span>
               </motion.div>
             )}
-            {(!isAuthenticated || userTokens < enhanceTokenCost) && (
+            {!tokenBalance.sufficient && (
               <motion.button
                 className="preview-modal__buy-btn"
                 onClick={() => {
@@ -308,49 +343,6 @@ function PreviewModal({
               <Code2 size={14} />
               <span>Code</span>
             </button>
-
-            {/* Multi-page file selector */}
-            {isMultiPage && (
-              <div className="preview-modal__file-selector">
-                <button
-                  className="preview-modal__file-btn"
-                  onClick={() => setShowFileDropdown(!showFileDropdown)}
-                >
-                  <FileText size={14} />
-                  <span>{activeFile}</span>
-                  <ChevronDown size={12} />
-                </button>
-
-                <AnimatePresence>
-                  {showFileDropdown && (
-                    <motion.div
-                      className="preview-modal__file-dropdown"
-                      initial={{ opacity: 0, y: -8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -8 }}
-                      transition={{ duration: 0.15 }}
-                    >
-                      {fileList.map((filename) => (
-                        <button
-                          key={filename}
-                          className={`preview-modal__file-option ${
-                            activeFile === filename ? "active" : ""
-                          }`}
-                          onClick={() => {
-                            setActiveFile(filename);
-                            setShowFileDropdown(false);
-                          }}
-                        >
-                          <FileText size={12} />
-                          <span>{filename}</span>
-                          {activeFile === filename && <Check size={12} />}
-                        </button>
-                      ))}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            )}
           </div>
 
           {/* Enhance section in header - desktop only */}
@@ -425,6 +417,68 @@ function PreviewModal({
                   isStreaming={isStreaming}
                 />
               </div>
+
+              {/* Floating Page Pill Navigator - Bottom Center */}
+              {isMultiPage && !isStreaming && (
+                <div className="page-pill" ref={pagePickerRef}>
+                  {/* Dropdown appears above the pill, centered */}
+                  <AnimatePresence>
+                    {showPagePicker && (
+                      <motion.div
+                        className="page-pill__dropdown"
+                        initial={{ opacity: 0, y: 8, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                        transition={{ duration: 0.15 }}
+                      >
+                        {fileList.map((filename, index) => (
+                          <button
+                            key={filename}
+                            className={`page-pill__dropdown-item ${
+                              activeFile === filename ? "active" : ""
+                            }`}
+                            onClick={() => {
+                              setActiveFile(filename);
+                              setShowPagePicker(false);
+                            }}
+                          >
+                            <span className="page-pill__dropdown-index">
+                              {index + 1}
+                            </span>
+                            <span className="page-pill__dropdown-name">
+                              {getPageDisplayName(filename)}
+                            </span>
+                            {activeFile === filename && <Check size={14} />}
+                          </button>
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
+                  {/* The pill button */}
+                  <button
+                    className={`page-pill__button ${
+                      showPagePicker ? "open" : ""
+                    }`}
+                    onClick={() => setShowPagePicker(!showPagePicker)}
+                    title="Select page"
+                  >
+                    <FileText size={14} />
+                    <span className="page-pill__name">
+                      {getPageDisplayName(activeFile)}
+                    </span>
+                    <span className="page-pill__count">
+                      {currentFileIndex + 1}/{fileList.length}
+                    </span>
+                    <ChevronUp
+                      size={14}
+                      className={`page-pill__chevron ${
+                        showPagePicker ? "open" : ""
+                      }`}
+                    />
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -467,6 +521,16 @@ function PreviewModal({
                 Please be patient as your website is being generated in
                 real-time. You can close this or click Watch Generation to view.
               </p>
+              {isMultiPage && (
+                <div className="preview-modal__streaming-modal-pages">
+                  <Info size={14} />
+                  <span>
+                    Generating{" "}
+                    {fileList.length > 0 ? fileList.length : "multiple"}{" "}
+                    pages...
+                  </span>
+                </div>
+              )}
               <div className="preview-modal__streaming-modal-tips">
                 <div className="preview-modal__streaming-modal-tip warning">
                   <Info size={14} />
