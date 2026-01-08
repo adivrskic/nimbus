@@ -19,6 +19,7 @@ export const CATEGORIES = [
   "corners",
   "shadowStyle",
   "hoverEffects",
+  "emojis",
 
   // Typography
   "font",
@@ -81,7 +82,6 @@ export const CATEGORIES = [
   "codeBlockStyle",
 
   // Technical
-  "framework",
   "accessibility",
   "seoLevel",
   "performanceLevel",
@@ -93,7 +93,6 @@ export const CATEGORIES = [
   "cookieBanner",
   "socialSharing",
   "stickyElements",
-  "errorPageStyle",
 
   // AI Controls
   "creativity",
@@ -126,6 +125,7 @@ export const CATEGORY_GROUPS = {
     "hoverEffects",
     "animation",
     "dividerStyle",
+    "emojis",
   ],
   content: [
     "tone",
@@ -156,7 +156,6 @@ export const CATEGORY_GROUPS = {
     "contactStyle",
   ],
   technical: [
-    "framework",
     "accessibility",
     "seoLevel",
     "performanceLevel",

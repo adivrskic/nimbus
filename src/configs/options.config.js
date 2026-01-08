@@ -52,6 +52,7 @@ import {
   Workflow,
   MousePointer,
   Sparkles,
+  Smile,
 } from "lucide-react";
 
 export const OPTIONS = {
@@ -697,6 +698,17 @@ export const OPTIONS = {
       { value: "CTA Button", prompt: "floating CTA button" },
       { value: "Chat Widget", prompt: "chat widget button" },
       { value: "Back to Top", prompt: "back to top button" },
+    ],
+  },
+  emojis: {
+    label: "Emojis",
+    subtitle: "Use of emojis",
+    icon: Smile,
+    multi: false,
+    promptKey: "emojis",
+    choices: [
+      { value: "Use", prompt: "include emojis in the website" },
+      { value: "Don't Use", prompt: "don't include emojis in the website" },
     ],
   },
   framework: {

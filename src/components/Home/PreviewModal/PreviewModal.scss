@@ -654,6 +654,7 @@
   flex-direction: column;
   overflow: hidden;
   background: #fff;
+  pointer-events: scroll;
 
   &--streaming {
     margin: 8px;
@@ -951,5 +952,519 @@
   }
   50% {
     opacity: 0.7;
+  }
+}
+/* Add these styles to PreviewModal.scss */
+
+/* Multi-page navigation bar - sits below header */
+.preview-modal__page-nav {
+  background: var(--surface-secondary, #f5f5f5);
+  border-bottom: 1px solid var(--border-color, rgba(0, 0, 0, 0.08));
+  padding: 8px 16px;
+
+  @media (prefers-color-scheme: dark) {
+    background: rgba(255, 255, 255, 0.03);
+    border-color: rgba(255, 255, 255, 0.08);
+  }
+}
+
+.preview-modal__page-nav-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  max-width: 100%;
+}
+
+.preview-modal__page-nav-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary, #666);
+  white-space: nowrap;
+
+  svg {
+    opacity: 0.7;
+  }
+}
+
+.preview-modal__page-count {
+  background: var(--surface-tertiary, rgba(0, 0, 0, 0.05));
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+
+  @media (prefers-color-scheme: dark) {
+    background: rgba(255, 255, 255, 0.08);
+  }
+}
+
+.preview-modal__page-nav-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.preview-modal__page-nav-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--text-primary, #333);
+  transition: all 0.15s ease;
+
+  &:hover:not(:disabled) {
+    background: var(--surface-tertiary, rgba(0, 0, 0, 0.05));
+  }
+
+  &:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    color: var(--text-primary, #fff);
+
+    &:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.08);
+    }
+  }
+}
+
+.preview-modal__page-selector {
+  position: relative;
+}
+
+.preview-modal__page-selector-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: var(--surface-primary, #fff);
+  border: 1px solid var(--border-color, rgba(0, 0, 0, 0.12));
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary, #333);
+  min-width: 180px;
+  transition: all 0.15s ease;
+
+  &:hover {
+    border-color: var(--border-hover, rgba(0, 0, 0, 0.2));
+    background: var(--surface-hover, #fafafa);
+  }
+
+  svg {
+    flex-shrink: 0;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.12);
+    color: var(--text-primary, #fff);
+
+    &:hover {
+      border-color: rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.08);
+    }
+  }
+}
+
+.preview-modal__page-selector-name {
+  flex: 1;
+  text-align: left;
+  font-weight: 500;
+}
+
+.preview-modal__page-selector-file {
+  font-size: 11px;
+  color: var(--text-tertiary, #999);
+  font-weight: 400;
+}
+
+.preview-modal__page-selector-chevron {
+  transition: transform 0.2s ease;
+  opacity: 0.5;
+
+  &.open {
+    transform: rotate(180deg);
+  }
+}
+
+.preview-modal__page-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  min-width: 240px;
+  background: var(--surface-primary, #fff);
+  border: 1px solid var(--border-color, rgba(0, 0, 0, 0.12));
+  border-radius: 10px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08);
+  padding: 6px;
+  z-index: 100;
+  max-height: 300px;
+  overflow-y: auto;
+
+  @media (prefers-color-scheme: dark) {
+    background: var(--surface-elevated, #1a1a1a);
+    border-color: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  }
+}
+
+.preview-modal__page-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text-primary, #333);
+  text-align: left;
+  transition: all 0.1s ease;
+
+  &:hover {
+    background: var(--surface-secondary, #f5f5f5);
+  }
+
+  &.active {
+    background: var(--accent-bg, rgba(99, 102, 241, 0.1));
+    color: var(--accent-color, #6366f1);
+
+    .preview-modal__page-dropdown-file {
+      color: var(--accent-color, #6366f1);
+      opacity: 0.7;
+    }
+  }
+
+  svg {
+    flex-shrink: 0;
+    opacity: 0.6;
+  }
+
+  svg:last-child {
+    margin-left: auto;
+    opacity: 1;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    color: var(--text-primary, #fff);
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    &.active {
+      background: rgba(99, 102, 241, 0.15);
+    }
+  }
+}
+
+.preview-modal__page-dropdown-index {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  background: var(--surface-tertiary, rgba(0, 0, 0, 0.05));
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary, #666);
+
+  @media (prefers-color-scheme: dark) {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-secondary, #aaa);
+  }
+}
+
+.preview-modal__page-dropdown-name {
+  flex: 1;
+  font-weight: 500;
+}
+
+.preview-modal__page-dropdown-file {
+  font-size: 11px;
+  color: var(--text-tertiary, #999);
+}
+
+/* Streaming modal page indicator */
+.preview-modal__streaming-modal-pages {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--accent-bg, rgba(99, 102, 241, 0.1));
+  border-radius: 8px;
+  font-size: 13px;
+  color: var(--accent-color, #6366f1);
+  margin-bottom: 12px;
+
+  svg {
+    flex-shrink: 0;
+  }
+}
+
+/* Container modifier for multi-page */
+.preview-modal__container--multi-page {
+  .preview-modal__body {
+    /* Account for the page nav bar height */
+    height: calc(
+      100% - 120px
+    ); /* Adjust based on your header + nav bar height */
+  }
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 640px) {
+  .preview-modal__page-nav {
+    padding: 6px 12px;
+  }
+
+  .preview-modal__page-nav-inner {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .preview-modal__page-nav-label {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .preview-modal__page-selector-btn {
+    min-width: 160px;
+    padding: 8px 10px;
+  }
+
+  .preview-modal__page-selector-file {
+    display: none;
+  }
+}
+
+/* Add these styles to PreviewModal.scss */
+
+/* ============================================
+   FLOATING PAGE PILL - Bottom Center
+   ============================================ */
+
+.page-pill {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.page-pill__button {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--spacing-unit) * 1);
+  padding: calc(var(--spacing-unit) * 1) calc(var(--spacing-unit) * 1.75);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 100px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  box-shadow: var(--shadow-lg);
+  transition: background var(--transition-fast),
+    border-color var(--transition-fast), box-shadow var(--transition-fast),
+    transform var(--transition-fast);
+
+  &:hover {
+    background: var(--color-surface);
+    border-color: var(--color-border-hover);
+    box-shadow: var(--shadow-xl);
+  }
+
+  &:active {
+    transform: scale(0.98);
+    box-shadow: var(--shadow-md);
+  }
+
+  &.open {
+    border-color: var(--color-border-hover);
+    box-shadow: var(--shadow-xl);
+  }
+
+  svg:first-child {
+    color: var(--color-text-secondary);
+    flex-shrink: 0;
+  }
+}
+
+.page-pill__name {
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+.page-pill__count {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-tertiary);
+  background: var(--color-accent-light);
+  padding: 2px 8px;
+  border-radius: 100px;
+}
+
+.page-pill__chevron {
+  color: var(--color-text-tertiary);
+  transition: transform var(--transition-fast);
+  flex-shrink: 0;
+
+  &.open {
+    transform: rotate(180deg);
+  }
+}
+
+/* Dropdown - appears above the pill, centered */
+.page-pill__dropdown {
+  position: absolute;
+  bottom: calc(100% + var(--spacing-unit));
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  min-width: 200px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: calc(var(--spacing-unit) * 0.75);
+  box-shadow: var(--shadow-xl);
+}
+
+.page-pill__dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--spacing-unit) * 1.25);
+  width: 100%;
+  padding: calc(var(--spacing-unit) * 1.25) calc(var(--spacing-unit) * 1.5);
+  border: none;
+  background: transparent;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--color-text-primary);
+  text-align: left;
+  transition: background var(--transition-fast);
+
+  &:hover {
+    background: var(--color-accent-light);
+  }
+
+  &.active {
+    background: var(--color-accent-light);
+
+    .page-pill__dropdown-index {
+      background: var(--color-accent);
+      color: var(--color-surface);
+    }
+
+    .page-pill__dropdown-name {
+      font-weight: 600;
+    }
+  }
+
+  svg:last-child {
+    margin-left: auto;
+    color: var(--color-text-secondary);
+  }
+}
+
+.page-pill__dropdown-index {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-elevated);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  flex-shrink: 0;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.page-pill__dropdown-name {
+  flex: 1;
+  font-weight: 500;
+}
+
+/* Streaming modal page indicator */
+.preview-modal__streaming-modal-pages {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--spacing-unit) * 1);
+  padding: calc(var(--spacing-unit) * 1.25) calc(var(--spacing-unit) * 1.75);
+  background: var(--color-accent-light);
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  margin-bottom: calc(var(--spacing-unit) * 1.5);
+
+  svg {
+    flex-shrink: 0;
+    color: var(--color-text-secondary);
+  }
+}
+
+/* Ensure preview-frame is positioned for absolute children */
+.preview-frame {
+  position: relative;
+}
+
+/* Mobile adjustments */
+@media (max-width: 480px) {
+  .page-pill {
+    bottom: calc(var(--spacing-unit) * 1.5);
+  }
+
+  .page-pill__button {
+    padding: calc(var(--spacing-unit) * 0.875) calc(var(--spacing-unit) * 1.25);
+    gap: calc(var(--spacing-unit) * 0.75);
+    font-size: 12px;
+  }
+
+  .page-pill__count {
+    font-size: 10px;
+    padding: 2px 6px;
+  }
+
+  .page-pill__dropdown {
+    min-width: 180px;
+    padding: calc(var(--spacing-unit) * 0.5);
+  }
+
+  .page-pill__dropdown-item {
+    padding: calc(var(--spacing-unit) * 1) calc(var(--spacing-unit) * 1.25);
+    font-size: 12px;
+    gap: calc(var(--spacing-unit) * 1);
+  }
+
+  .page-pill__dropdown-index {
+    width: 20px;
+    height: 20px;
+    font-size: 10px;
   }
 }
