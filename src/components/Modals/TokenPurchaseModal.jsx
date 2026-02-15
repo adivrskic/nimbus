@@ -9,7 +9,7 @@ import {
   tokensModalItemVariants,
 } from "../../configs/animations.config";
 import { track } from "../../lib/analytics";
-import "./TokenPurchaseModal.scss";
+import "./modals.scss";
 
 const TOKEN_PACKAGES = [
   {
@@ -111,7 +111,7 @@ function TokenPurchaseModal({ isOpen, onClose, onOpenAuth }) {
 
   return (
     <motion.div
-      className="tokens-overlay"
+      className="modal-overlay"
       onClick={onClose}
       variants={overlayVariants}
       initial="hidden"
@@ -119,22 +119,19 @@ function TokenPurchaseModal({ isOpen, onClose, onOpenAuth }) {
       exit="exit"
     >
       <motion.div
-        className="tokens-content"
+        className="modal-content"
         onClick={(e) => e.stopPropagation()}
         variants={tokensModalContentVariants}
         initial="hidden"
         animate="visible"
         exit="exit"
       >
-        <motion.div
-          className="tokens-header"
-          variants={tokensModalItemVariants}
-        >
-          <div className="tokens-title">
+        <motion.div className="modal-header" variants={tokensModalItemVariants}>
+          <div className="modal-title">
             <Coins size={16} />
             <span>Get Tokens</span>
           </div>
-          <button className="tokens-close" onClick={onClose}>
+          <button className="modal-close" onClick={onClose}>
             <X size={16} />
           </button>
         </motion.div>
@@ -192,7 +189,7 @@ function TokenPurchaseModal({ isOpen, onClose, onOpenAuth }) {
 
         {error && (
           <motion.div
-            className="tokens-error"
+            className="modal-error"
             variants={tokensModalItemVariants}
           >
             {error}
@@ -201,7 +198,7 @@ function TokenPurchaseModal({ isOpen, onClose, onOpenAuth }) {
 
         {isAuthenticated ? (
           <motion.button
-            className="tokens-btn"
+            className="modal-btn-primary modal-btn-primary--pill"
             onClick={handlePurchase}
             disabled={isProcessing}
             variants={tokensModalItemVariants}
@@ -216,7 +213,7 @@ function TokenPurchaseModal({ isOpen, onClose, onOpenAuth }) {
           </motion.button>
         ) : (
           <motion.button
-            className="tokens-btn tokens-btn--login"
+            className="modal-btn-primary modal-btn-primary--pill"
             onClick={handleLoginClick}
             variants={tokensModalItemVariants}
             whileHover={{ scale: 1.02 }}
@@ -227,7 +224,7 @@ function TokenPurchaseModal({ isOpen, onClose, onOpenAuth }) {
           </motion.button>
         )}
 
-        <motion.div className="tokens-note" variants={tokensModalItemVariants}>
+        <motion.div className="modal-note" variants={tokensModalItemVariants}>
           Secured by Stripe • Tokens never expire
         </motion.div>
       </motion.div>

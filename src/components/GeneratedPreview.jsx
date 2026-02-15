@@ -1,20 +1,14 @@
-// components/GeneratedPreview.jsx - Streaming with inline styles (simple scroll down)
+// components/GeneratedPreview.jsx - Stripped toolbar, viewMode controlled by parent
 import { useState, useRef, useEffect, useCallback } from "react";
-import {
-  Monitor,
-  Tablet,
-  Smartphone,
-  ExternalLink,
-  Maximize2,
-  Minimize2,
-  X,
-} from "lucide-react";
 import { track } from "../lib/analytics";
 import "./GeneratedPreview.scss";
 
-function GeneratedPreview({ html, onClose, isStreaming = false }) {
-  const [viewMode, setViewMode] = useState("desktop");
-  const [isFullscreen, setIsFullscreen] = useState(false);
+function GeneratedPreview({
+  html,
+  onClose,
+  isStreaming = false,
+  viewMode = "desktop",
+}) {
   const iframeRef = useRef(null);
   const containerRef = useRef(null);
   const lastHtmlRef = useRef("");
@@ -22,17 +16,6 @@ function GeneratedPreview({ html, onClose, isStreaming = false }) {
   const scrollTimeoutRef = useRef(null);
 
   const getFrameWidth = () => {
-    switch (viewMode) {
-      case "mobile":
-        return "375px";
-      case "tablet":
-        return "768px";
-      default:
-        return "100%";
-    }
-  };
-
-  const getViewportLabel = () => {
     switch (viewMode) {
       case "mobile":
         return "375px";
@@ -60,24 +43,19 @@ function GeneratedPreview({ html, onClose, isStreaming = false }) {
         doc.write(html);
         doc.close();
 
-        // Auto-scroll during streaming - content is already styled with inline styles
+        // Auto-scroll during streaming
         if (isStreaming) {
-          // Clear any pending scroll
           if (scrollTimeoutRef.current) {
             clearTimeout(scrollTimeoutRef.current);
           }
 
-          // Delay scroll slightly to let render complete
           scrollTimeoutRef.current = setTimeout(() => {
             try {
               const body = doc.body;
               if (body) {
                 const newScrollHeight = body.scrollHeight;
-
-                // Only scroll if content has grown (100px threshold to reduce scroll frequency)
                 if (newScrollHeight > lastScrollHeightRef.current + 100) {
                   lastScrollHeightRef.current = newScrollHeight;
-
                   iframe.contentWindow?.scrollTo({
                     top: newScrollHeight,
                     behavior: "smooth",
@@ -91,7 +69,6 @@ function GeneratedPreview({ html, onClose, isStreaming = false }) {
         }
       }
     } catch (e) {
-      // Fallback to srcdoc if document.write fails
       iframe.srcdoc = html;
     }
   }, [html, isStreaming]);
@@ -99,12 +76,10 @@ function GeneratedPreview({ html, onClose, isStreaming = false }) {
   // Scroll to top when streaming completes
   useEffect(() => {
     if (!isStreaming && lastHtmlRef.current && iframeRef.current) {
-      // Clear any pending scroll
       if (scrollTimeoutRef.current) {
         clearTimeout(scrollTimeoutRef.current);
       }
 
-      // Delay to let final render complete
       const timer = setTimeout(() => {
         try {
           iframeRef.current?.contentWindow?.scrollTo({
@@ -112,7 +87,6 @@ function GeneratedPreview({ html, onClose, isStreaming = false }) {
             behavior: "smooth",
           });
         } catch (e) {}
-
         lastScrollHeightRef.current = 0;
       }, 500);
 
@@ -129,7 +103,7 @@ function GeneratedPreview({ html, onClose, isStreaming = false }) {
     };
   }, []);
 
-  // Reset iframe when html becomes empty (new generation starting) - keep white/empty
+  // Reset iframe when html becomes empty
   useEffect(() => {
     if (!html && iframeRef.current) {
       lastHtmlRef.current = "";
@@ -152,126 +126,11 @@ function GeneratedPreview({ html, onClose, isStreaming = false }) {
     }
   }, [html]);
 
-  const toggleFullscreen = useCallback(() => {
-    if (!containerRef.current) return;
-
-    track("fullscreen", {
-      blob,
-      url,
-    });
-
-    if (!isFullscreen) {
-      if (containerRef.current.requestFullscreen) {
-        containerRef.current.requestFullscreen();
-      } else if (containerRef.current.webkitRequestFullscreen) {
-        containerRef.current.webkitRequestFullscreen();
-      }
-    } else {
-      if (document.exitFullscreen) {
-        document.exitFullscreen();
-      } else if (document.webkitExitFullscreen) {
-        document.webkitExitFullscreen();
-      }
-    }
-    setIsFullscreen(!isFullscreen);
-  }, [isFullscreen]);
-
-  useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
-
-    document.addEventListener("fullscreenchange", handleFullscreenChange);
-    document.addEventListener("webkitfullscreenchange", handleFullscreenChange);
-
-    return () => {
-      document.removeEventListener("fullscreenchange", handleFullscreenChange);
-      document.removeEventListener(
-        "webkitfullscreenchange",
-        handleFullscreenChange
-      );
-    };
-  }, []);
-
-  const openInNewTab = useCallback(() => {
-    if (!html) return;
-
-    const blob = new Blob([html], { type: "text/html" });
-    const url = URL.createObjectURL(blob);
-    track("open-in-new-tab", {
-      blob,
-      url,
-    });
-    window.open(url, "_blank", "noopener,noreferrer");
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-  }, [html]);
-
   return (
     <div
       ref={containerRef}
-      className={`preview ${isFullscreen ? "preview--fullscreen" : ""} ${
-        isStreaming ? "preview--streaming" : ""
-      }`}
+      className={`preview ${isStreaming ? "preview--streaming" : ""}`}
     >
-      <div className="preview-toolbar">
-        <div className="preview-devices">
-          <button
-            className={`preview-device ${
-              viewMode === "desktop" ? "active" : ""
-            }`}
-            onClick={() => setViewMode("desktop")}
-            title="Desktop"
-            disabled={isStreaming}
-          >
-            <Monitor size={14} />
-          </button>
-          <button
-            className={`preview-device ${
-              viewMode === "tablet" ? "active" : ""
-            }`}
-            onClick={() => setViewMode("tablet")}
-            title="Tablet"
-            disabled={isStreaming}
-          >
-            <Tablet size={14} />
-          </button>
-          <button
-            className={`preview-device ${
-              viewMode === "mobile" ? "active" : ""
-            }`}
-            onClick={() => setViewMode("mobile")}
-            title="Mobile"
-            disabled={isStreaming}
-          >
-            <Smartphone size={14} />
-          </button>
-          <span className="preview-viewport">{getViewportLabel()}</span>
-        </div>
-
-        <div className="preview-actions">
-          <button
-            className="preview-action"
-            onClick={openInNewTab}
-            title="Open in new tab"
-            disabled={isStreaming || !html}
-          >
-            <ExternalLink size={14} />
-          </button>
-          <button
-            className="preview-action"
-            onClick={toggleFullscreen}
-            title={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
-          >
-            {isFullscreen ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
-          </button>
-          {onClose && (
-            <button className="preview-close" onClick={onClose} title="Close">
-              <X size={14} />
-            </button>
-          )}
-        </div>
-      </div>
-
       <div className="preview-content">
         <div
           className={`preview-frame preview-frame--${viewMode}`}

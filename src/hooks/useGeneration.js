@@ -18,43 +18,27 @@ const generationCache = {
 let streamingTimeout = null;
 
 export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
-  // ========================================
-  // useState hooks (MUST be in this order)
-  // ========================================
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedCode, setGeneratedCode] = useState(null);
   const [generationError, setGenerationError] = useState(null);
   const [enhancePrompt, setEnhancePrompt] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
   const [streamingPhase, setStreamingPhase] = useState(null);
-  // NEW hooks added at END of useState group
   const [generatedFiles, setGeneratedFiles] = useState(null);
   const [fromCache, setFromCache] = useState(false);
+  const [isEnhancing, setIsEnhancing] = useState(false);
 
-  // ========================================
-  // Context hook (MUST be after useState, before useRef)
-  // ========================================
   const { setIsGenerating: setGlobalGenerating } = useGenerationState();
 
-  // ========================================
-  // useRef hooks (MUST be in this order)
-  // ========================================
   const generationRef = useRef(null);
   const abortControllerRef = useRef(null);
   const streamRef = useRef(null);
-  // NEW ref added at END of useRef group
   const lastGenerationRef = useRef(null);
 
-  // ========================================
-  // useEffect hooks
-  // ========================================
   useEffect(() => {
     setGlobalGenerating(isGenerating);
   }, [isGenerating, setGlobalGenerating]);
 
-  // ========================================
-  // useCallback hooks (MUST be in this order)
-  // ========================================
   const debouncedSetCode = useCallback((html) => {
     if (streamingTimeout) clearTimeout(streamingTimeout);
     streamingTimeout = setTimeout(() => {
@@ -66,15 +50,12 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
     async (prompt, selections, persistentOptions, user, streaming = true) => {
       if (!prompt.trim() || isGenerating) return;
 
-      // Cancel previous
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
       }
 
-      // Store generation params for cache invalidation
       lastGenerationRef.current = { prompt, selections, persistentOptions };
 
-      // Check cache first (before any network call)
       if (generationCache.shouldUse(false)) {
         const cached = generationCache.get(
           prompt,
@@ -127,7 +108,6 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
             onProgress: ({ phase, content, files }) => {
               setStreamingPhase(phase);
               debouncedSetCode(content);
-              // Update files during streaming for real-time multi-page display
               if (files) {
                 setGeneratedFiles(files);
               }
@@ -142,7 +122,6 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
             }
 
             const finalHtml = streamResult.getFullHtml();
-            // Get final parsed files
             const files = streamResult.getFiles() || null;
 
             setGeneratedCode(finalHtml);
@@ -150,7 +129,6 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
             setIsStreaming(false);
             setStreamingPhase("complete");
 
-            // Cache the result
             generationCache.set(prompt, selections, persistentOptions, {
               html: finalHtml,
               files,
@@ -162,7 +140,6 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
           }
         }
 
-        // Non-streaming fallback
         if (supabaseGenerate) {
           const result = await supabaseGenerate({
             prompt: fullPrompt,
@@ -219,10 +196,9 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
         abortControllerRef.current.abort();
       }
 
+      setIsEnhancing(true);
       setIsGenerating(true);
       setGenerationError(null);
-      setIsStreaming(true);
-      setStreamingPhase("head");
       setFromCache(false);
       abortControllerRef.current = new AbortController();
 
@@ -236,12 +212,8 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
           },
           persistentOptions,
           signal: abortControllerRef.current.signal,
-          onProgress: ({ phase, content, files }) => {
+          onProgress: ({ phase, files }) => {
             setStreamingPhase(phase);
-            debouncedSetCode(content);
-            if (files) {
-              setGeneratedFiles(files);
-            }
           },
         });
 
@@ -258,10 +230,8 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
           setGeneratedCode(finalHtml);
           setGeneratedFiles(files);
           setEnhancePrompt("");
-          setIsStreaming(false);
           setStreamingPhase("complete");
 
-          // Invalidate old cache since content changed
           if (lastGenerationRef.current) {
             generationCache.clear(
               lastGenerationRef.current.prompt,
@@ -274,7 +244,6 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
           return { code: finalHtml, files, isStreaming: true };
         }
 
-        // Fallback to non-streaming
         if (supabaseGenerate) {
           const result = await supabaseGenerate({
             prompt: enhancePrompt,
@@ -302,6 +271,7 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
       } finally {
         setIsGenerating(false);
         setIsStreaming(false);
+        setIsEnhancing(false);
         setStreamingPhase(null);
       }
     },
@@ -323,6 +293,7 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
     if (streamingTimeout) clearTimeout(streamingTimeout);
     setIsGenerating(false);
     setIsStreaming(false);
+    setIsEnhancing(false);
     setStreamingPhase(null);
   }, []);
 
@@ -334,6 +305,7 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
     setGenerationError(null);
     setEnhancePrompt("");
     setIsStreaming(false);
+    setIsEnhancing(false);
     setStreamingPhase(null);
     setFromCache(false);
     streamRef.current = null;
@@ -347,7 +319,6 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
     setGeneratedCode(code);
   }, []);
 
-  // NEW callback added at END of useCallback group
   const regenerate = useCallback(
     async (prompt, selections, persistentOptions, user, streaming = true) => {
       generationCache.clear(prompt, selections, persistentOptions);
@@ -363,6 +334,7 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
     generationError,
     enhancePrompt,
     isStreaming,
+    isEnhancing,
     streamingPhase,
     fromCache,
     setEnhancePrompt,

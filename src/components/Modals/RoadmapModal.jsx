@@ -1,5 +1,5 @@
 import { CheckCircle, Clock, Circle, X, Calendar } from "lucide-react";
-import "./RoadmapModal.scss";
+import "./modals.scss";
 
 function RoadmapModal({ isOpen, onClose }) {
   const roadmapItems = [
@@ -72,26 +72,26 @@ function RoadmapModal({ isOpen, onClose }) {
 
   return (
     <div
-      className={`roadmap-overlay ${isOpen ? "active" : ""}`}
+      className={`modal-overlay ${isOpen ? "active" : ""}`}
       onClick={onClose}
     >
       <div
-        className={`roadmap-content ${isOpen ? "active" : ""}`}
+        className={`modal-content modal-content--lg ${isOpen ? "active" : ""}`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Fixed header section */}
-        <div className="roadmap-header-section">
-          <div className="roadmap-header">
-            <div className="roadmap-title">
+        <div className="modal-header-section">
+          <div className="modal-header">
+            <div className="modal-title">
               <Calendar size={16} />
               <span>Roadmap</span>
             </div>
-            <button className="roadmap-close" onClick={onClose}>
+            <button className="modal-close" onClick={onClose}>
               <X size={16} />
             </button>
           </div>
 
-          <div className="roadmap-subtitle">
+          <div className="modal-subtitle">
             What we're building and what's coming next.
           </div>
 
@@ -112,7 +112,7 @@ function RoadmapModal({ isOpen, onClose }) {
         </div>
 
         {/* Scrollable body section */}
-        <div className="roadmap-body">
+        <div className="modal-body">
           <div className="roadmap-items">
             {roadmapItems.map((item, index) => (
               <div
@@ -134,14 +134,11 @@ function RoadmapModal({ isOpen, onClose }) {
             ))}
           </div>
 
-          <div className="roadmap-contact">
-            <h5 className="roadmap-contact__title">Suggest a feature</h5>
-            <p className="roadmap-contact__text">
+          <div className="modal-contact">
+            <h5 className="modal-contact__title">Suggest a feature</h5>
+            <p className="modal-contact__text">
               Email{" "}
-              <a
-                href="mailto:hello@nimbus.com"
-                className="roadmap-contact__link"
-              >
+              <a href="mailto:hello@nimbus.com" className="modal-contact__link">
                 hello@nimbus.com
               </a>
             </p>

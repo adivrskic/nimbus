@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import { supabase } from "../../lib/supabaseClient";
 import useModalAnimation from "../../hooks/useModalAnimation";
-import "./CustomDomainModal.scss";
+import "./modals.scss";
 
 const SUPPORTED_PROVIDERS = [
   "Cloudflare",
@@ -476,22 +476,24 @@ export default function CustomDomainModal({ isOpen, onClose, project }) {
 
   return (
     <div
-      className={`cdm-overlay ${isVisible ? "active" : ""}`}
+      className={`modal-overlay ${isVisible ? "active" : ""}`}
       onClick={closeModal}
     >
       <div
-        className={`cdm-content ${isVisible ? "active" : ""}`}
+        className={`modal-content modal-content--surface ${
+          isVisible ? "active" : ""
+        }`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Step 1: Enter Domain */}
         {step === 1 && (
           <>
-            <div className="cdm-header">
-              <span className="cdm-title">
+            <div className="modal-header">
+              <span className="modal-title">
                 <Globe size={16} />
                 Custom Domain
               </span>
-              <button className="cdm-close" onClick={closeModal}>
+              <button className="modal-close" onClick={closeModal}>
                 <X size={16} />
               </button>
             </div>
@@ -593,12 +595,12 @@ export default function CustomDomainModal({ isOpen, onClose, project }) {
               </span>
             </div>
 
-            <div className="cdm-nav">
-              <button className="cdm-btn-secondary" onClick={closeModal}>
+            <div className="modal-nav">
+              <button className="modal-btn-secondary" onClick={closeModal}>
                 Cancel
               </button>
               <button
-                className="cdm-btn-primary"
+                className="modal-btn-primary modal-btn-primary--inline"
                 onClick={() => setStep(2)}
                 disabled={!validation.canUse && !validation.confirmedOwnership}
               >
@@ -612,12 +614,12 @@ export default function CustomDomainModal({ isOpen, onClose, project }) {
         {/* Step 2: Configure DNS */}
         {step === 2 && (
           <>
-            <div className="cdm-header">
-              <span className="cdm-title">
+            <div className="modal-header">
+              <span className="modal-title">
                 <Settings size={16} />
                 Configure DNS
               </span>
-              <button className="cdm-close" onClick={() => setStep(1)}>
+              <button className="modal-close" onClick={() => setStep(1)}>
                 <ChevronLeft size={16} />
               </button>
             </div>
@@ -782,20 +784,20 @@ export default function CustomDomainModal({ isOpen, onClose, project }) {
               </div>
             )}
 
-            <div className="cdm-nav">
+            <div className="modal-nav">
               <button
-                className="cdm-btn-secondary"
+                className="modal-btn-secondary"
                 onClick={() => setStep(1)}
                 disabled={config.loading}
               >
                 <ChevronLeft size={14} />
                 Back
               </button>
-              <button className="cdm-btn-secondary" onClick={closeModal}>
+              <button className="modal-btn-secondary" onClick={closeModal}>
                 Skip for Now
               </button>
               <button
-                className="cdm-btn-primary"
+                className="modal-btn-primary modal-btn-primary--inline"
                 onClick={configureDomain}
                 disabled={
                   config.loading ||
@@ -826,16 +828,16 @@ export default function CustomDomainModal({ isOpen, onClose, project }) {
         {/* Step 3: Success / Status */}
         {step === 3 && (
           <>
-            <div className="cdm-header">
+            <div className="modal-header">
               <span
-                className={`cdm-title ${
-                  config.verified ? "cdm-title--success" : ""
+                className={`modal-title ${
+                  config.verified ? "modal-title--success" : ""
                 }`}
               >
                 {config.verified ? <Check size={16} /> : <Globe size={16} />}
                 {config.verified ? "Domain Active" : "Configuring..."}
               </span>
-              <button className="cdm-close" onClick={closeModal}>
+              <button className="modal-close" onClick={closeModal}>
                 <X size={16} />
               </button>
             </div>
@@ -882,12 +884,12 @@ export default function CustomDomainModal({ isOpen, onClose, project }) {
               </div>
             )}
 
-            <div className="cdm-nav">
-              <button className="cdm-btn-secondary" onClick={closeModal}>
+            <div className="modal-nav">
+              <button className="modal-btn-secondary" onClick={closeModal}>
                 Close
               </button>
               {!config.verified && (
-                <button className="cdm-btn-secondary" onClick={checkNow}>
+                <button className="modal-btn-secondary" onClick={checkNow}>
                   <RefreshCw size={14} />
                   Check Now
                 </button>
@@ -898,7 +900,7 @@ export default function CustomDomainModal({ isOpen, onClose, project }) {
                 }`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="cdm-btn-primary"
+                className="modal-btn-primary modal-btn-primary--inline"
               >
                 <ExternalLink size={14} />
                 Visit Site

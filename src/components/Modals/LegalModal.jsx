@@ -9,7 +9,7 @@ import {
   X,
   Scale,
 } from "lucide-react";
-import "./LegalModal.scss";
+import "./modals.scss";
 
 function Accordion({ items }) {
   const [openIndex, setOpenIndex] = useState(null);
@@ -19,22 +19,22 @@ function Accordion({ items }) {
   };
 
   return (
-    <div className="legal-accordion">
+    <div className="modal-accordion">
       {items.map((item, index) => (
-        <div key={index} className="legal-accordion__item">
+        <div key={index} className="modal-accordion__item">
           <button
-            className="legal-accordion__trigger"
+            className="modal-accordion__trigger"
             onClick={() => toggle(index)}
             aria-expanded={openIndex === index}
           >
-            <span className="legal-accordion__title">{item.title}</span>
-            <Plus className="legal-accordion__icon" size={14} />
+            <span className="modal-accordion__title">{item.title}</span>
+            <Plus className="modal-accordion__icon" size={14} />
           </button>
           <div
-            className="legal-accordion__content"
+            className="modal-accordion__content"
             aria-hidden={openIndex !== index}
           >
-            <div className="legal-accordion__body">{item.content}</div>
+            <div className="modal-accordion__body">{item.content}</div>
           </div>
         </div>
       ))}
@@ -116,55 +116,55 @@ function LegalModal({ isOpen, onClose, initialSection = null }) {
 
   return (
     <div
-      className={`legal-overlay ${isOpen ? "active" : ""}`}
+      className={`modal-overlay ${isOpen ? "active" : ""}`}
       onClick={onClose}
     >
       <div
-        className={`legal-content ${isOpen ? "active" : ""}`}
+        className={`modal-content modal-content--lg ${isOpen ? "active" : ""}`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Fixed header section */}
-        <div className="legal-header-section">
-          <div className="legal-header">
-            <div className="legal-title">
+        <div className="modal-header-section">
+          <div className="modal-header">
+            <div className="modal-title">
               <Scale size={16} />
               <span>Legal</span>
             </div>
-            <button className="legal-close" onClick={onClose}>
+            <button className="modal-close" onClick={onClose}>
               <X size={16} />
             </button>
           </div>
 
-          <div className="legal-subtitle">
+          <div className="modal-subtitle">
             Terms, privacy, and policies for using Nimbus.
           </div>
           <div className="legal-meta">Updated {lastUpdated}</div>
         </div>
 
         {/* Scrollable body section */}
-        <div className="legal-body" ref={bodyRef}>
-          <section id="terms" className="legal-section">
-            <div className="legal-section__header">
+        <div className="modal-body" ref={bodyRef}>
+          <section id="terms" className="modal-section">
+            <div className="modal-section__header">
               <FileText size={14} />
-              <h3 className="legal-section__title">Terms of Service</h3>
+              <h3 className="modal-section__title">Terms of Service</h3>
             </div>
             <Accordion items={termsItems} />
           </section>
 
-          <section id="privacy" className="legal-section">
-            <div className="legal-section__header">
+          <section id="privacy" className="modal-section">
+            <div className="modal-section__header">
               <Shield size={14} />
-              <h3 className="legal-section__title">Privacy Policy</h3>
+              <h3 className="modal-section__title">Privacy Policy</h3>
             </div>
             <Accordion items={privacyItems} />
           </section>
 
-          <section id="copyright" className="legal-section">
-            <div className="legal-section__header">
+          <section id="copyright" className="modal-section">
+            <div className="modal-section__header">
               <AlertCircle size={14} />
-              <h3 className="legal-section__title">Copyright & DMCA</h3>
+              <h3 className="modal-section__title">Copyright & DMCA</h3>
             </div>
-            <div className="legal-section__body">
+            <div className="modal-section__body">
               <p>
                 All content and templates are © {new Date().getFullYear()}{" "}
                 Nimbus or their respective owners.
@@ -176,12 +176,12 @@ function LegalModal({ isOpen, onClose, initialSection = null }) {
             </div>
           </section>
 
-          <section id="refund" className="legal-section">
-            <div className="legal-section__header">
+          <section id="refund" className="modal-section">
+            <div className="modal-section__header">
               <CreditCard size={14} />
-              <h3 className="legal-section__title">Refund Policy</h3>
+              <h3 className="modal-section__title">Refund Policy</h3>
             </div>
-            <div className="legal-section__body">
+            <div className="modal-section__body">
               <p>
                 Monthly subscriptions are non-refundable. You can cancel at any
                 time before the next billing cycle.
@@ -193,12 +193,12 @@ function LegalModal({ isOpen, onClose, initialSection = null }) {
             </div>
           </section>
 
-          <section id="contact" className="legal-section">
-            <div className="legal-section__header">
+          <section id="contact" className="modal-section">
+            <div className="modal-section__header">
               <Mail size={14} />
-              <h3 className="legal-section__title">Contact</h3>
+              <h3 className="modal-section__title">Contact</h3>
             </div>
-            <div className="legal-section__body">
+            <div className="modal-section__body">
               <p>For legal notices:</p>
               <a href="mailto:legal@nimbus.com" className="legal-email">
                 <Mail size={12} />

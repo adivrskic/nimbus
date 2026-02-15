@@ -1,12 +1,10 @@
-// GeneratedPreview.scss - Minimal style using design system variables
+// GeneratedPreview.scss - Toolbar removed, controlled by PreviewModal header
 
 .preview {
   display: flex;
   flex-direction: column;
   height: 100%;
   background: var(--color-background);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
 
   &--fullscreen {
     position: fixed;
@@ -22,138 +20,14 @@
   }
 }
 
-.preview-toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--color-border);
-  background-color: var(--color-surface);
-}
-
-.preview-devices {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.preview-device {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: 999px;
-  color: var(--color-text-tertiary);
-  cursor: pointer;
-  transition: var(--transition-base);
-
-  &:hover {
-    color: var(--color-text-secondary);
-    background: var(--color-accent-light);
-  }
-
-  &.active {
-    color: var(--color-text-primary);
-    background: var(--color-accent-light);
-    border-color: var(--color-border);
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    pointer-events: none;
-  }
-}
-
-.preview-viewport {
-  margin-left: 8px;
-  padding-left: 8px;
-  border-left: 1px solid var(--color-border);
-  font-size: 0.6875rem;
-  color: var(--color-text-tertiary);
-  font-weight: 500;
-}
-
-.preview-actions {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.preview-action {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  background: transparent;
-  border: 1px solid var(--color-border);
-  border-radius: 999px;
-  color: var(--color-text-tertiary);
-  cursor: pointer;
-  transition: var(--transition-base);
-
-  &:hover:not(:disabled) {
-    color: var(--color-text-primary);
-    background: var(--color-accent-light);
-    border-color: var(--color-border-hover);
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    pointer-events: none;
-  }
-}
-
-.preview-close {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  margin-left: 4px;
-  background: var(--color-accent-light);
-  border: none;
-  border-radius: 50%;
-  color: var(--color-text-secondary);
-  cursor: pointer;
-  transition: var(--transition-base);
-
-  &:hover {
-    background: var(--color-border);
-    color: var(--color-text-primary);
-  }
-}
-
 .preview-content {
   flex: 1;
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  padding: 24px;
+  padding: 0;
   overflow: auto;
-  background: radial-gradient(
-      circle at 50% 0%,
-      var(--color-accent-light) 0%,
-      transparent 50%
-    ),
-    repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 23px,
-      var(--color-border) 23px,
-      var(--color-border) 24px
-    ),
-    repeating-linear-gradient(
-      90deg,
-      transparent,
-      transparent 23px,
-      var(--color-border) 23px,
-      var(--color-border) 24px
-    );
-  background-size: 100% 100%, 24px 24px, 24px 24px;
+  background: var(--color-background);
 }
 
 .preview-frame {
@@ -162,7 +36,6 @@
   height: 100%;
   min-height: 500px;
   background: #fff;
-  // border--radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
   overflow: hidden;
   transition: max-width var(--transition-base),
@@ -170,12 +43,14 @@
 
   &--desktop {
     max-width: 100%;
+    box-shadow: none;
   }
 
   &--tablet {
     max-width: 768px;
     border-radius: var(--radius-xl);
     border: 6px solid var(--color-accent);
+    margin: 24px auto;
 
     .preview-notch {
       display: block;
@@ -186,6 +61,7 @@
     max-width: 375px;
     border-radius: 32px;
     border: 8px solid var(--color-accent);
+    margin: 24px auto;
 
     .preview-notch {
       display: block;
@@ -217,8 +93,30 @@
   background: #fff;
 
   &--streaming {
-    // Subtle indicator that content is still loading
     opacity: 0.98;
+  }
+}
+
+// Non-desktop grid background
+.preview-frame--tablet,
+.preview-frame--mobile {
+  & + .preview-content,
+  .preview-content & {
+    background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 23px,
+        var(--color-border) 23px,
+        var(--color-border) 24px
+      ),
+      repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 23px,
+        var(--color-border) 23px,
+        var(--color-border) 24px
+      );
+    background-size: 24px 24px;
   }
 }
 
@@ -256,22 +154,14 @@
 // Mobile responsive
 @media (max-width: 768px) {
   .preview-content {
-    padding: 12px;
+    padding: 0;
   }
 
   .preview-frame {
     &--tablet,
     &--mobile {
       border-width: 4px;
+      margin: 12px auto;
     }
-  }
-
-  .preview-viewport {
-    display: none;
-  }
-
-  .preview-toolbar {
-    display: none !important;
-    padding: 10px 12px;
   }
 }

@@ -15,7 +15,7 @@ import { supabase } from "../../lib/supabaseClient";
 import useModalAnimation from "../../hooks/useModalAnimation";
 import { track } from "../../lib/analytics";
 
-import "./ProjectsModal.scss";
+import "./modals.scss";
 
 function ProjectsModal({
   isOpen,
@@ -218,19 +218,21 @@ function ProjectsModal({
 
   return (
     <div
-      className={`projects-overlay ${isVisible ? "active" : ""}`}
+      className={`modal-overlay ${isVisible ? "active" : ""}`}
       onClick={closeModal}
     >
       <div
-        className={`projects-content ${isVisible ? "active" : ""}`}
+        className={`modal-content modal-content--surface ${
+          isVisible ? "active" : ""
+        }`}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="projects-header">
-          <span className="projects-title">
+        <div className="modal-header">
+          <span className="modal-title">
             <FolderOpen size={16} />
             <span>Projects</span>
           </span>
-          <button className="projects-close" onClick={closeModal}>
+          <button className="modal-close" onClick={closeModal}>
             <X size={16} />
           </button>
         </div>
@@ -319,19 +321,10 @@ function ProjectsModal({
                       <span>{getProjectName(project)}</span>
                     </div>
                     <div className="project-meta">
-                      {/* <span className="project-type">
-                        {project.template_type || project.style_preset}
-                      </span> */}
                       <span className="project-date">
                         <Calendar size={10} />
                         {formatDate(project.updated_at)}
                       </span>
-                      {/* {project.is_deployed && (
-                        <span className="project-status live">Live</span>
-                      )} */}
-                      {/* {hasSubscription(project) && (
-                        <span className="project-status subscribed">Pro</span>
-                      )} */}
                     </div>
                   </div>
 
@@ -354,58 +347,6 @@ function ProjectsModal({
                       )}
                     </button>
 
-                    {/* Deploy/Visit button */}
-                    {/* {project.is_deployed ? (
-                      <>
-                        <a
-                          href={getDeployedUrl(project)}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="action-btn"
-                          title="Visit"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <ExternalLink size={14} />
-                        </a>
-                        <button
-                          className="action-btn"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            toggleExpand(project.id);
-                          }}
-                          title="Manage"
-                        >
-                          <ChevronDown
-                            size={14}
-                            style={{
-                              transform:
-                                expandedProject === project.id
-                                  ? "rotate(180deg)"
-                                  : "rotate(0)",
-                              transition: "transform 0.2s",
-                            }}
-                          />
-                        </button>
-                      </>
-                    ) : (
-                      <button
-                        className="action-btn action-btn--primary"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeploy(project);
-                        }}
-                        disabled={loadingAction?.id === project.id}
-                        title="Deploy"
-                      >
-                        {loadingAction?.id === project.id &&
-                        loadingAction?.type === "deploy" ? (
-                          <Loader2 size={14} className="spinning" />
-                        ) : (
-                          <Rocket size={14} />
-                        )}
-                      </button>
-                    )} */}
-
                     {/* Delete button */}
                     <button
                       className="action-btn action-btn--danger"
@@ -419,101 +360,6 @@ function ProjectsModal({
                     </button>
                   </div>
                 </div>
-
-                {/* Expanded section for deployed projects */}
-                {/* {project.is_deployed && expandedProject === project.id && (
-                  <div className="project-expanded">
-                    <div className="project-domains">
-                      <div className="project-domain-section">
-                        <label>Current URL</label>
-                        <div className="project-url-row">
-                          <a
-                            href={getDeployedUrl(project)}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            {getDeployedUrl(project)?.replace("https://", "")}
-                          </a>
-                          <button
-                            className="copy-btn"
-                            onClick={() =>
-                              copyUrl(getDeployedUrl(project), project.id)
-                            }
-                          >
-                            {copied === project.id ? (
-                              <Check size={12} />
-                            ) : (
-                              <Copy size={12} />
-                            )}
-                          </button>
-                        </div>
-                      </div>
-
-                      {getDomainStatus(project) && (
-                        <div className="project-domain-section">
-                          <label>Domain Status</label>
-                          <div className="project-domain-status">
-                            <span
-                              className={`status-badge ${
-                                getDomainStatus(project).status
-                              }`}
-                            >
-                              {getDomainStatus(project).status === "active" && (
-                                <Check size={10} />
-                              )}
-                              {getDomainStatus(project).status ===
-                                "pending" && (
-                                <Loader2 size={10} className="spinning" />
-                              )}
-                              {getDomainStatus(project).status}
-                            </span>
-                          </div>
-                        </div>
-                      )}
-
-                      {hasSubscription(project) && (
-                        <div className="project-domain-section">
-                          <label>Subscription</label>
-                          <div className="project-subscription-status">
-                            <span className="status-badge active">
-                              <Check size={10} />
-                              Active
-                            </span>
-                          </div>
-                        </div>
-                      )}
-                    </div> */}
-                {/* 
-                    <div className="project-domain-actions">
-                      {project.custom_domain ? (
-                        <button
-                          className="domain-action-btn"
-                          onClick={() => handleDomain(project)}
-                        >
-                          <Settings size={14} />
-                          Manage Domain
-                        </button>
-                      ) : (
-                        <button
-                          className="domain-action-btn domain-action-btn--primary"
-                          onClick={() => handleDomain(project)}
-                        >
-                          <Globe size={14} />
-                          Add Custom Domain
-                        </button>
-                      )}
-
-                      <button
-                        className="domain-action-btn"
-                        onClick={() => handleDeploy(project)}
-                        title="Redeploy with changes"
-                      >
-                        <RefreshCw size={14} />
-                        Redeploy
-                      </button>
-                    </div> */}
-                {/* </div>
-                )} */}
               </div>
             ))
           )}
