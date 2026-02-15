@@ -12,7 +12,7 @@ import {
 import { useAuth } from "../../contexts/AuthContext";
 import useModalAnimation from "../../hooks/useModalAnimation";
 import { supabase } from "../../lib/supabaseClient";
-import "./FeedbackModal.scss";
+import "./modals.scss";
 
 function FeedbackModal({
   isOpen,
@@ -128,11 +128,11 @@ function FeedbackModal({
 
   return (
     <div
-      className={`feedback-overlay ${isVisible ? "active" : ""}`}
+      className={`modal-overlay ${isVisible ? "active" : ""}`}
       onClick={handleClose}
     >
       <div
-        className={`feedback-content ${isVisible ? "active" : ""}`}
+        className={`modal-content ${isVisible ? "active" : ""}`}
         onClick={(e) => e.stopPropagation()}
       >
         {isSubmitted ? (
@@ -145,15 +145,15 @@ function FeedbackModal({
           </div>
         ) : (
           <>
-            <div className="feedback-header">
-              <div className="feedback-title">
+            <div className="modal-header">
+              <div className="modal-title">
                 <MessageSquare size={16} />
                 <span>
                   {isInitialGeneration ? "Generation" : "Enhancement"} Feedback
                 </span>
               </div>
               <button
-                className="feedback-close"
+                className="modal-close"
                 onClick={handleClose}
                 disabled={isSubmitting}
               >
@@ -161,7 +161,7 @@ function FeedbackModal({
               </button>
             </div>
 
-            <div className="feedback-subtitle">
+            <div className="modal-subtitle">
               How was this {isInitialGeneration ? "generation" : "enhancement"}?
             </div>
 
@@ -243,10 +243,10 @@ function FeedbackModal({
                 <div className="feedback-char-count">{comment.length}/1000</div>
               </div>
 
-              {error && <div className="feedback-error">{error}</div>}
+              {error && <div className="modal-error">{error}</div>}
 
               <button
-                className="feedback-submit"
+                className="modal-btn-primary modal-btn-primary--pill"
                 onClick={handleSubmit}
                 disabled={isSubmitting || !rating}
               >
@@ -264,7 +264,7 @@ function FeedbackModal({
               </button>
 
               {!isAuthenticated && (
-                <p className="feedback-anonymous-note">
+                <p className="modal-note">
                   Submitting anonymously. Sign in to help us better understand
                   your feedback.
                 </p>

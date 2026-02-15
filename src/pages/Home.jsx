@@ -1,8 +1,6 @@
-// pages/Home/Home.jsx - Complete file with streaming support and multi-page download fix
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { AnimatePresence } from "framer-motion";
 
-// Contexts
 import { useAuth } from "../contexts/AuthContext";
 import { useProject } from "../contexts/ProjectContext";
 
@@ -12,17 +10,14 @@ import useSelections from "../hooks/useSelections";
 import useHomeState from "../hooks/useHomeState";
 import useGeneration from "../hooks/useGeneration";
 
-// Configs
 import { EXAMPLE_PROMPTS } from "../configs/defaults.config";
 
-// Utils
 import {
   calculateTokenCost,
   getTokenBreakdown,
 } from "../utils/tokenCalculator";
 import { downloadZip } from "../utils/downloadZip";
 
-// Components
 import {
   SearchBar,
   TokenOverlay,
@@ -32,21 +27,17 @@ import {
 } from "../components/Home";
 import AuthModal from "../components/Modals/AuthModal";
 import TokensModal from "../components/Modals/TokenPurchaseModal";
-import DeployModal from "../components/Modals/DeployModal";
 import HelpModal from "../components/Home/HelpModal";
 import LegalModal from "../components/Modals/LegalModal";
 import ProjectsModal from "../components/Modals/ProjectsModal";
 import { generateWebsite } from "../utils/generateWebsite";
 import { supabase } from "../lib/supabaseClient";
 
-// Styles
 import "./Home.scss";
 
 function Home() {
-  // Auth context
   const { user, isAuthenticated, userTokens, refreshTokens } = useAuth();
 
-  // Project context (for editing/deploying)
   const {
     pendingProject,
     pendingAction,
@@ -56,7 +47,6 @@ function Home() {
     deployProject,
   } = useProject();
 
-  // UI state management
   const {
     prompt,
     setPrompt,
@@ -97,12 +87,10 @@ function Home() {
     restorePreview,
   } = useHomeState();
 
-  // Projects modal state
   const [showProjects, setShowProjects] = useState(false);
   const openProjects = useCallback(() => setShowProjects(true), []);
   const closeProjects = useCallback(() => setShowProjects(false), []);
 
-  // Selection state management
   const {
     selections,
     hasSelection,
@@ -114,12 +102,10 @@ function Home() {
     hasCustomizations,
   } = useSelections();
 
-  // Generation logic - STREAMING ENABLED
-  // Now also get generatedFiles for multi-page support
   const {
     isGenerating,
     generatedCode,
-    generatedFiles, // <-- ADD THIS for multi-page support
+    generatedFiles,
     generationError,
     enhancePrompt,
     setEnhancePrompt,
@@ -128,6 +114,7 @@ function Home() {
     reset: resetGeneration,
     updateCode,
     isStreaming,
+    isEnhancing,
     streamingPhase,
   } = useGeneration({
     onSuccess: () => {
@@ -139,15 +126,12 @@ function Home() {
     supabaseGenerate: generateWebsite,
   });
 
-  // Save state
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [currentProjectId, setCurrentProjectId] = useState(null);
   const [lastRequest, setLastRequest] = useState(null);
-  // Show enhance token overlay state
   const [showEnhanceTokenOverlay, setShowEnhanceTokenOverlay] = useState(false);
   const [legalSection, setLegalSection] = useState(null);
-  // Typewriter effect for placeholder
   const { text: typewriterText } = useTypewriter({
     prompts: EXAMPLE_PROMPTS,
     enabled: !isExpanded && !prompt,
@@ -156,7 +140,6 @@ function Home() {
     pauseDuration: 2000,
   });
 
-  // Token calculations
   const tokenCostResult = useMemo(
     () => calculateTokenCost(prompt, selections),
     [prompt, selections]
@@ -177,7 +160,6 @@ function Home() {
     };
   }, [isAuthenticated, userTokens, tokenCost]);
 
-  // Enhance token calculations
   const enhanceTokenCostResult = useMemo(
     () => calculateTokenCost(enhancePrompt, {}, true),
     [enhancePrompt]
@@ -228,10 +210,6 @@ function Home() {
       setPrompt(projectPrompt);
 
       setCurrentProjectId(pendingProject.id);
-
-      if (pendingProject.customization) {
-        // If you have a way to restore selections, do it here
-      }
 
       if (pendingAction === "edit") {
         if (pendingProject.html_content) {
@@ -311,10 +289,8 @@ function Home() {
       return;
     }
 
-    // Capture the enhance prompt BEFORE it gets cleared
     const submittedEnhancePrompt = enhancePrompt.trim();
 
-    // Set lastRequest when enhancement starts
     setLastRequest({
       type: "enhancement",
       prompt: submittedEnhancePrompt,
@@ -351,11 +327,9 @@ function Home() {
     return name + (promptText.length > 50 ? "..." : "");
   }, []);
 
-  // FIXED: Pass generatedFiles to downloadZip for multi-page support
   const handleDownload = useCallback(() => {
     if (!generatedCode) return;
     const projectName = generateName(prompt) || "website";
-    // Pass files object for multi-page sites, or null for single-page
     downloadZip(generatedCode, projectName, generatedFiles);
   }, [generatedCode, generatedFiles, prompt, generateName]);
 
@@ -375,7 +349,6 @@ function Home() {
         customization: {
           selections,
           persistentOptions,
-          // Also save files for multi-page projects
           files: generatedFiles,
         },
       };
@@ -442,7 +415,6 @@ function Home() {
     [openOptions]
   );
 
-  // Handle project edit from ProjectsModal
   const handleEditProject = useCallback(
     (project) => {
       closeProjects();
@@ -451,7 +423,6 @@ function Home() {
     [closeProjects, editProject]
   );
 
-  // Handle project deploy from ProjectsModal
   const handleDeployProject = useCallback(
     (project) => {
       closeProjects();
@@ -486,7 +457,6 @@ function Home() {
             activeCategories={activeCategories}
             onPillClick={handlePillClick}
             onResetPill={resetSelection}
-            // Add prop to indicate minimized pill is present
             hasMinimizedPreview={previewMinimized}
           />
 
@@ -534,13 +504,12 @@ function Home() {
         )}
       </AnimatePresence>
 
-      {/* FIXED: Show preview during generation + streaming, pass files prop */}
       <AnimatePresence>
         {showPreview && (isGenerating || generatedCode) && (
           <PreviewModal
             isOpen={showPreview}
             html={generatedCode || ""}
-            files={generatedFiles} // <-- ADD THIS for multi-page support
+            files={generatedFiles}
             onClose={closePreview}
             onMinimize={minimizePreview}
             onDownload={handleDownload}
@@ -563,6 +532,7 @@ function Home() {
             tokenBalance={tokenBalance}
             onBuyTokens={openTokens}
             isStreaming={isStreaming}
+            isEnhancing={isEnhancing}
             streamingPhase={streamingPhase}
             selections={selections}
             originalPrompt={prompt}

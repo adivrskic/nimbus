@@ -9,7 +9,7 @@ import {
 } from "../../configs/animations.config";
 import { track } from "../../lib/analytics";
 
-import "./AuthModal.scss";
+import "./modals.scss";
 
 function AuthModal({ isOpen, onClose, onAuthSuccess, onOpenLegal }) {
   const { signInWithGoogle, signInWithGitHub, signInWithApple } = useAuth();
@@ -61,7 +61,7 @@ function AuthModal({ isOpen, onClose, onAuthSuccess, onOpenLegal }) {
 
   return (
     <motion.div
-      className="auth-overlay"
+      className="modal-overlay"
       onClick={handleClose}
       variants={overlayVariants}
       initial="hidden"
@@ -69,22 +69,22 @@ function AuthModal({ isOpen, onClose, onAuthSuccess, onOpenLegal }) {
       exit="exit"
     >
       <motion.div
-        className="auth-content"
+        className="modal-content modal-content--sm"
         onClick={(e) => e.stopPropagation()}
         variants={authModalContentVariants}
         initial="hidden"
         animate="visible"
         exit="exit"
       >
-        <motion.div className="auth-header" variants={authModalItemVariants}>
-          <span className="auth-title">Sign in to create</span>
-          <button className="auth-close" onClick={handleClose}>
+        <motion.div className="modal-header" variants={authModalItemVariants}>
+          <span className="modal-title">Sign in to create</span>
+          <button className="modal-close" onClick={handleClose}>
             <X size={16} />
           </button>
         </motion.div>
 
         {error && (
-          <motion.div className="auth-error" variants={authModalItemVariants}>
+          <motion.div className="modal-error" variants={authModalItemVariants}>
             {error}
           </motion.div>
         )}

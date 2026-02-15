@@ -15,10 +15,3 @@ export async function track(event, data = {}) {
     console.error("Analytics error:", e);
   }
 }
-
-// Usage examples:
-// track('generate', { prompt: 'landing page for bakery' })
-// track('enhance', { prompt: 'make it blue' })
-// track('download')
-// track('save')
-// track('deploy')

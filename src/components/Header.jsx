@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from "react";
-import { useLocation } from "react-router-dom";
 import {
   Cloudy,
   LogOut,
@@ -23,8 +22,6 @@ import "./Header.scss";
 
 function Header() {
   const { theme, toggleTheme } = useTheme();
-  const location = useLocation();
-  const isHomePage = location.pathname === "/";
 
   const { editProject, deployProject } = useProject();
   const {
@@ -39,16 +36,14 @@ function Header() {
   } = useAuth();
 
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
-  const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
+  const [, setIsForgotPasswordOpen] = useState(false);
+  const [, setIsAccountModalOpen] = useState(false);
   const [isTokenModalOpen, setIsTokenModalOpen] = useState(false);
   const [isProjectsModalOpen, setIsProjectsModalOpen] = useState(false);
-  const [isBillingModalOpen, setIsBillingModalOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isPageLoading, setIsPageLoading] = useState(false);
 
-  // Legal modal state
   const [isLegalModalOpen, setIsLegalModalOpen] = useState(false);
   const [legalSection, setLegalSection] = useState(null);
 
@@ -129,7 +124,6 @@ function Header() {
     setIsForgotPasswordOpen(true);
   };
 
-  // Legal modal handlers
   const handleOpenLegal = (section) => {
     setLegalSection(section);
     setIsLegalModalOpen(true);
@@ -210,12 +204,12 @@ function Header() {
       <header className="header">
         <div className="container">
           <div className="header__content">
-            <a href="/" className="header__logo">
+            <div className="header__logo">
               <span className="header__logo-icon">
                 <Cloudy size={32} />
               </span>
               <span className="header__logo-text">nimbus</span>
-            </a>
+            </div>
 
             <nav className="header__nav">
               {isAuthenticated ? (

@@ -40,7 +40,6 @@ const PageLoader = () => {
         pointerEvents: "none",
       }}
     >
-      {/* Loading bar stays at calculated position */}
       <div
         style={{
           position: "fixed",
@@ -62,7 +61,6 @@ const PageLoader = () => {
         />
       </div>
 
-      {/* Rest of container takes up full viewport */}
       <div
         style={{
           height: "100vh",

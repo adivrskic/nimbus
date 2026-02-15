@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { X, Loader, ExternalLink, CreditCard } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
 import useModalAnimation from "../../hooks/useModalAnimation";
-import "./BillingModal.scss";
+import "./modals.scss";
 
 function BillingModal({ isOpen, onClose }) {
   const { user, profile, supabase, isAuthenticated } = useAuth();
@@ -131,25 +131,27 @@ function BillingModal({ isOpen, onClose }) {
   return (
     <>
       <div
-        className={`billing-overlay ${isVisible ? "active" : ""}`}
+        className={`modal-overlay ${isVisible ? "active" : ""}`}
         onClick={onClose}
       >
         <div
-          className={`billing-content ${isVisible ? "active" : ""}`}
+          className={`modal-content modal-content--sm modal-content--surface modal-content--centered ${
+            isVisible ? "active" : ""
+          }`}
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="billing-header">
-            <span className="billing-title">
+          <div className="modal-header">
+            <span className="modal-title">
               <CreditCard size={16} />
               <span>Billing</span>
             </span>
-            <button className="billing-close" onClick={onClose}>
+            <button className="modal-close" onClick={onClose}>
               <X size={16} />
             </button>
           </div>
 
           {isLoading ? (
-            <div className="billing-loading">
+            <div className="modal-loading">
               <Loader size={16} className="spinning" />
             </div>
           ) : billingSummary ? (
@@ -177,13 +179,13 @@ function BillingModal({ isOpen, onClose }) {
             </div>
           ) : null}
 
-          <div className="billing-info">$5.00 per site per month</div>
+          <div className="modal-note">$5.00 per site per month</div>
 
           {profile?.stripe_customer_id && (
             <>
               {" "}
               <button
-                className="billing-btn"
+                className="modal-btn-primary"
                 onClick={handleOpenStripePortal}
                 disabled={isLoading}
               >
@@ -196,7 +198,7 @@ function BillingModal({ isOpen, onClose }) {
                   </>
                 )}
               </button>
-              <span className="billing-note">Billing managed by Stripe</span>
+              <span className="modal-note">Billing managed by Stripe</span>
             </>
           )}
         </div>

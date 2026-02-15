@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Download, HelpCircle, Plus, X } from "lucide-react";
-import "./SupportModal.scss";
+import "./modals.scss";
 
 function SupportAccordion({ items }) {
   const [openIndex, setOpenIndex] = useState(null);
@@ -10,22 +10,22 @@ function SupportAccordion({ items }) {
   };
 
   return (
-    <div className="support-accordion">
+    <div className="modal-accordion">
       {items.map((item, index) => (
-        <div key={index} className="support-accordion__item">
+        <div key={index} className="modal-accordion__item">
           <button
-            className="support-accordion__trigger"
+            className="modal-accordion__trigger"
             onClick={() => toggle(index)}
             aria-expanded={openIndex === index}
           >
-            <span className="support-accordion__title">{item.question}</span>
-            <Plus className="support-accordion__icon" size={14} />
+            <span className="modal-accordion__title">{item.question}</span>
+            <Plus className="modal-accordion__icon" size={14} />
           </button>
           <div
-            className="support-accordion__content"
+            className="modal-accordion__content"
             aria-hidden={openIndex !== index}
           >
-            <div className="support-accordion__body">{item.answer}</div>
+            <div className="modal-accordion__body">{item.answer}</div>
           </div>
         </div>
       ))}
@@ -86,36 +86,36 @@ function SupportModal({ isOpen, onClose }) {
 
   return (
     <div
-      className={`support-overlay ${isOpen ? "active" : ""}`}
+      className={`modal-overlay ${isOpen ? "active" : ""}`}
       onClick={onClose}
     >
       <div
-        className={`support-content ${isOpen ? "active" : ""}`}
+        className={`modal-content modal-content--lg ${isOpen ? "active" : ""}`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Fixed header section */}
-        <div className="support-header-section">
-          <div className="support-header">
-            <div className="support-title">
+        <div className="modal-header-section">
+          <div className="modal-header">
+            <div className="modal-title">
               <HelpCircle size={16} />
               <span>Support</span>
             </div>
-            <button className="support-close" onClick={onClose}>
+            <button className="modal-close" onClick={onClose}>
               <X size={16} />
             </button>
           </div>
 
-          <div className="support-subtitle">
+          <div className="modal-subtitle">
             How to use your downloaded files and get help.
           </div>
         </div>
 
         {/* Scrollable body section */}
-        <div className="support-body">
-          <div className="support-section">
-            <div className="support-section__header">
+        <div className="modal-body">
+          <div className="modal-section">
+            <div className="modal-section__header">
               <Download size={14} />
-              <h3 className="support-section__title">Getting Started</h3>
+              <h3 className="modal-section__title">Getting Started</h3>
             </div>
             <div className="support-steps">
               {steps.map((step) => (
@@ -130,21 +130,21 @@ function SupportModal({ isOpen, onClose }) {
             </div>
           </div>
 
-          <div className="support-section">
-            <div className="support-section__header">
+          <div className="modal-section">
+            <div className="modal-section__header">
               <HelpCircle size={14} />
-              <h3 className="support-section__title">FAQ</h3>
+              <h3 className="modal-section__title">FAQ</h3>
             </div>
             <SupportAccordion items={faqItems} />
           </div>
 
-          <div className="support-contact">
-            <h4 className="support-contact__title">Need more help?</h4>
-            <p className="support-contact__text">
+          <div className="modal-contact">
+            <h4 className="modal-contact__title">Need more help?</h4>
+            <p className="modal-contact__text">
               Email{" "}
               <a
                 href="mailto:support@nimbus.com"
-                className="support-contact__link"
+                className="modal-contact__link"
               >
                 support@nimbus.com
               </a>
