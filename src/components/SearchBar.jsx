@@ -1,6 +1,5 @@
 // components/Home/SearchBar/SearchBar.jsx - Main search input component
 import { forwardRef, useRef, useCallback, useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import {
   Coins,
   Settings,
@@ -112,16 +111,13 @@ const SearchBar = forwardRef(
     );
 
     return (
-      <motion.div
+      <div
         ref={containerRef}
         className={`search-bar ${
           showExpandedState ? "search-bar--expanded" : ""
         } ${isGenerating ? "search-bar--generating" : ""} ${
           hasMinimizedPreview ? "has-minimized-preview" : ""
         }`}
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
       >
         <div className="search-bar__input-wrapper">
           <textarea
@@ -153,125 +149,95 @@ const SearchBar = forwardRef(
           )}
 
           {/* Character counter */}
-          <AnimatePresence>
-            {showCharCounter && charCount > 0 && (
-              <motion.div
-                className={`search-bar__char-counter ${
-                  isUnderMin ? "search-bar__char-counter--warning" : ""
-                } ${isOverMax ? "search-bar__char-counter--error" : ""} ${
-                  isValidLength ? "search-bar__char-counter--valid" : ""
-                }`}
-                initial={{ opacity: 0, y: 5 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 5 }}
-                transition={{ duration: 0.15 }}
-              >
-                {isUnderMin && (
-                  <span className="search-bar__char-message">
-                    {charsRemaining} more character
-                    {charsRemaining !== 1 ? "s" : ""} needed
-                  </span>
-                )}
-                {isOverMax && (
-                  <span className="search-bar__char-message">
-                    {charsOver} character{charsOver !== 1 ? "s" : ""} over limit
-                  </span>
-                )}
-                <span className="search-bar__char-count">
-                  {charCount.toLocaleString()}/{MAX_CHARS.toLocaleString()}
+          {showCharCounter && charCount > 0 && (
+            <div
+              className={`search-bar__char-counter ${
+                isUnderMin ? "search-bar__char-counter--warning" : ""
+              } ${isOverMax ? "search-bar__char-counter--error" : ""} ${
+                isValidLength ? "search-bar__char-counter--valid" : ""
+              }`}
+            >
+              {isUnderMin && (
+                <span className="search-bar__char-message">
+                  {charsRemaining} more character
+                  {charsRemaining !== 1 ? "s" : ""} needed
                 </span>
-              </motion.div>
-            )}
-          </AnimatePresence>
+              )}
+              {isOverMax && (
+                <span className="search-bar__char-message">
+                  {charsOver} character{charsOver !== 1 ? "s" : ""} over limit
+                </span>
+              )}
+              <span className="search-bar__char-count">
+                {charCount.toLocaleString()}/{MAX_CHARS.toLocaleString()}
+              </span>
+            </div>
+          )}
 
-          <AnimatePresence>
-            {showExpandedState && hasActiveOptions && (
-              <motion.div
-                className="search-bar__pills-expanded"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 10 }}
-                transition={{ duration: 0.2 }}
-              >
-                {activeCategories.map(
-                  ({ category, label, value, icon: Icon }) => (
-                    <motion.div
-                      key={category}
-                      className="search-bar__pill"
-                      onClick={() => onPillClick?.(category)}
-                      onMouseDown={handleButtonMouseDown}
+          {showExpandedState && hasActiveOptions && (
+            <div className="search-bar__pills-expanded">
+              {activeCategories.map(
+                ({ category, label, value, icon: Icon }) => (
+                  <div
+                    key={category}
+                    className="search-bar__pill"
+                    onClick={() => onPillClick?.(category)}
+                    onMouseDown={handleButtonMouseDown}
+                    role="button"
+                    tabIndex={0}
+                  >
+                    {Icon && <Icon size={12} />}
+                    <span className="search-bar__pill-label">{label}:</span>
+                    <span className="search-bar__pill-value">{value}</span>
+                    <span
+                      className="search-bar__pill-remove"
                       role="button"
-                      tabIndex={0}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.15 }}
+                      tabIndex={-1}
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleButtonMouseDown(e);
+                      }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onResetPill?.(category);
+                      }}
                     >
-                      {Icon && <Icon size={12} />}
-                      <span className="search-bar__pill-label">{label}:</span>
-                      <span className="search-bar__pill-value">{value}</span>
-                      <span
-                        className="search-bar__pill-remove"
-                        role="button"
-                        tabIndex={-1}
-                        onMouseDown={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          handleButtonMouseDown(e);
-                        }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onResetPill?.(category);
-                        }}
-                      >
-                        <X size={10} />
-                      </span>
-                    </motion.div>
-                  )
-                )}
-              </motion.div>
-            )}
-          </AnimatePresence>
+                      <X size={10} />
+                    </span>
+                  </div>
+                )
+              )}
+            </div>
+          )}
         </div>
 
         <div className="search-bar__right">
-          <AnimatePresence>
-            {!showExpandedState && hasActiveOptions && (
-              <motion.button
-                initial={{ opacity: 0, width: 0 }}
-                animate={{ opacity: 1, width: "auto" }}
-                exit={{ opacity: 0, width: 0 }}
-                transition={{ duration: 0.2 }}
-                className="search-bar__options-count"
-                onClick={onOptionsClick}
-                onMouseDown={handleButtonMouseDown}
-              >
-                <SlidersHorizontal size={14} />
-                <span>{activeCategories.length}</span>
-              </motion.button>
-            )}
-          </AnimatePresence>
+          {!showExpandedState && hasActiveOptions && (
+            <button
+              className="search-bar__options-count"
+              onClick={onOptionsClick}
+              onMouseDown={handleButtonMouseDown}
+            >
+              <SlidersHorizontal size={14} />
+              <span>{activeCategories.length}</span>
+            </button>
+          )}
 
-          <AnimatePresence>
-            {(value.trim() || isExpanded) && (
-              <motion.button
-                initial={{ opacity: 0, width: 0 }}
-                animate={{ opacity: 1, width: "auto" }}
-                exit={{ opacity: 0, width: 0 }}
-                transition={{ duration: 0.2 }}
-                className={`search-bar__token-btn ${
-                  showTokenOverlay ? "active" : ""
-                }`}
-                onClick={onTokenClick}
-                onMouseDown={handleButtonMouseDown}
-              >
-                <Coins size={14} />
-                <span className="search-bar__btn-text">-{tokenCost}</span>
-              </motion.button>
-            )}
-          </AnimatePresence>
+          {(value.trim() || isExpanded) && (
+            <button
+              className={`search-bar__token-btn ${
+                showTokenOverlay ? "active" : ""
+              }`}
+              onClick={onTokenClick}
+              onMouseDown={handleButtonMouseDown}
+            >
+              <Coins size={14} />
+              <span className="search-bar__btn-text">-{tokenCost}</span>
+            </button>
+          )}
 
-          <motion.button
+          <button
             className={`search-bar__help-btn ${
               showExpandedState ? "search-bar__help-btn--expanded" : ""
             }`}
@@ -281,9 +247,9 @@ const SearchBar = forwardRef(
           >
             <HelpCircle size={18} />
             <span className="search-bar__btn-text">Help</span>
-          </motion.button>
+          </button>
 
-          <motion.button
+          <button
             className={`search-bar__gear-btn ${showOptions ? "active" : ""} ${
               showExpandedState ? "search-bar__gear-btn--expanded" : ""
             }`}
@@ -292,9 +258,9 @@ const SearchBar = forwardRef(
           >
             <Settings size={18} />
             <span className="search-bar__btn-text">Customize</span>
-          </motion.button>
+          </button>
 
-          <motion.button
+          <button
             className={`search-bar__submit ${
               showExpandedState ? "search-bar__submit--expanded" : ""
             }`}
@@ -317,9 +283,9 @@ const SearchBar = forwardRef(
             <span className="search-bar__btn-text">
               {isGenerating ? "Generating" : "Generate"}
             </span>
-          </motion.button>
+          </button>
         </div>
-      </motion.div>
+      </div>
     );
   }
 );

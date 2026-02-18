@@ -1,5 +1,4 @@
 // components/Home/MinimizedPreviewPill/MinimizedPreviewPill.jsx
-import { motion } from "framer-motion";
 import { Maximize2, X, Loader2 } from "lucide-react";
 import "./MinimizedPreviewPill.scss";
 
@@ -10,14 +9,10 @@ function MinimizedPreviewPill({
   isGenerating = false,
 }) {
   return (
-    <motion.div
+    <div
       className={`minimized-preview-pill ${
         isGenerating ? "minimized-preview-pill--generating" : ""
       }`}
-      initial={{ opacity: 0, y: -10 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -10 }}
-      transition={{ duration: 0.2 }}
     >
       <button className="minimized-preview-pill__main" onClick={onExpand}>
         {isGenerating ? (
@@ -37,7 +32,7 @@ function MinimizedPreviewPill({
           View Projects
         </button>
       )}
-    </motion.div>
+    </div>
   );
 }
 

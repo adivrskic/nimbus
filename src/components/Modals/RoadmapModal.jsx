@@ -1,6 +1,6 @@
 import { CheckCircle, Clock, Circle, X, Calendar } from "lucide-react";
-import "./modals.scss";
 
+import "../../styles/modals.scss";
 function RoadmapModal({ isOpen, onClose }) {
   const roadmapItems = [
     // Completed

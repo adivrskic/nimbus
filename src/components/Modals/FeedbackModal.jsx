@@ -12,8 +12,8 @@ import {
 import { useAuth } from "../../contexts/AuthContext";
 import useModalAnimation from "../../hooks/useModalAnimation";
 import { supabase } from "../../lib/supabaseClient";
-import "./modals.scss";
 
+import "../../styles/modals.scss";
 function FeedbackModal({
   isOpen,
   onClose,

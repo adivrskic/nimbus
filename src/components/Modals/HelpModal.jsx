@@ -12,7 +12,7 @@ import {
   Zap,
   HelpCircle,
 } from "lucide-react";
-import "./modals.scss";
+import "../../styles/modals.scss";
 
 const HELP_SECTIONS = [
   {

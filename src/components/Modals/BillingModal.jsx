@@ -2,8 +2,8 @@ import { useState, useEffect, useCallback } from "react";
 import { X, Loader, ExternalLink, CreditCard } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
 import useModalAnimation from "../../hooks/useModalAnimation";
-import "./modals.scss";
 
+import "../../styles/modals.scss";
 function BillingModal({ isOpen, onClose }) {
   const { user, profile, supabase, isAuthenticated } = useAuth();
   const { shouldRender, isVisible } = useModalAnimation(isOpen, 300);

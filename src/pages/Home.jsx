@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { AnimatePresence } from "framer-motion";
 
 import { useAuth } from "../contexts/AuthContext";
 import { useProject } from "../contexts/ProjectContext";
@@ -19,8 +18,8 @@ import {
 import { downloadZip } from "../utils/downloadZip";
 
 import SearchBar from "../components/SearchBar";
-import TokenOverlay from "../components/Modals/TokenOverlay";
-import OptionsOverlay from "../components/Modals/OptionsOverlay";
+import TokenModal from "../components/Modals/TokenModal";
+import OptionsModal from "../components/Modals/OptionsModal";
 import PreviewModal from "../components/Modals/PreviewModal";
 import MinimizedPreviewPill from "../components/MinimizedPreviewPill";
 import AuthModal from "../components/Modals/AuthModal";
@@ -458,142 +457,122 @@ function Home() {
             hasMinimizedPreview={previewMinimized}
           />
 
-          <AnimatePresence>
-            {showTokenOverlay && (
-              <TokenOverlay
-                isOpen={showTokenOverlay}
-                onClose={closeTokenOverlay}
-                tokenCost={tokenCost}
-                breakdown={tokenBreakdown}
-                userTokens={userTokens}
-                isAuthenticated={isAuthenticated}
-                tokenBalance={tokenBalance}
-                onBuyTokens={openTokens}
-              />
-            )}
-          </AnimatePresence>
-        </div>
-
-        <AnimatePresence>
-          {previewMinimized && (
-            <MinimizedPreviewPill
-              onExpand={restorePreview}
-              onDiscard={resetGeneration}
-              onOpenProjects={openProjects}
-              isGenerating={isGenerating}
+          {showTokenOverlay && (
+            <TokenModal
+              isOpen={showTokenOverlay}
+              onClose={closeTokenOverlay}
+              tokenCost={tokenCost}
+              breakdown={tokenBreakdown}
+              userTokens={userTokens}
+              isAuthenticated={isAuthenticated}
+              tokenBalance={tokenBalance}
+              onBuyTokens={openTokens}
             />
           )}
-        </AnimatePresence>
+        </div>
+
+        {previewMinimized && (
+          <MinimizedPreviewPill
+            onExpand={restorePreview}
+            onDiscard={resetGeneration}
+            onOpenProjects={openProjects}
+            isGenerating={isGenerating}
+          />
+        )}
       </div>
 
-      <AnimatePresence>
-        {showOptions && (
-          <OptionsOverlay
-            isOpen={showOptions}
-            onClose={closeOptions}
-            selections={selections}
-            onSelect={handleSelect}
-            onReset={resetSelection}
-            hasSelection={hasSelection}
-            getDisplayValue={getDisplayValue}
-            persistentOptions={persistentOptions}
-            onPersistentChange={handlePersistentChange}
-          />
-        )}
-      </AnimatePresence>
+      {showOptions && (
+        <OptionsModal
+          isOpen={showOptions}
+          onClose={closeOptions}
+          selections={selections}
+          onSelect={handleSelect}
+          onReset={resetSelection}
+          hasSelection={hasSelection}
+          getDisplayValue={getDisplayValue}
+          persistentOptions={persistentOptions}
+          onPersistentChange={handlePersistentChange}
+        />
+      )}
 
-      <AnimatePresence>
-        {showPreview && (isGenerating || generatedCode) && (
-          <PreviewModal
-            isOpen={showPreview}
-            html={generatedCode || ""}
-            files={generatedFiles}
-            onClose={closePreview}
-            onMinimize={minimizePreview}
-            onDownload={handleDownload}
-            onSave={handleSave}
-            onDeploy={openDeploy}
-            isSaving={isSaving}
-            saveSuccess={saveSuccess}
-            isGenerating={isGenerating}
-            enhancePrompt={enhancePrompt}
-            onEnhancePromptChange={setEnhancePrompt}
-            onEnhance={handleEnhance}
-            enhanceTokenCost={enhanceTokenCost}
-            enhanceBreakdown={enhanceBreakdown}
-            showEnhanceTokenOverlay={showEnhanceTokenOverlay}
-            onToggleEnhanceTokenOverlay={() =>
-              setShowEnhanceTokenOverlay((prev) => !prev)
-            }
-            isAuthenticated={isAuthenticated}
-            userTokens={userTokens}
-            tokenBalance={tokenBalance}
-            onBuyTokens={openTokens}
-            isStreaming={isStreaming}
-            isEnhancing={isEnhancing}
-            streamingPhase={streamingPhase}
-            selections={selections}
-            originalPrompt={prompt}
-            lastRequest={lastRequest}
-          />
-        )}
-      </AnimatePresence>
+      {showPreview && (isGenerating || generatedCode) && (
+        <PreviewModal
+          isOpen={showPreview}
+          html={generatedCode || ""}
+          files={generatedFiles}
+          onClose={closePreview}
+          onMinimize={minimizePreview}
+          onDownload={handleDownload}
+          onSave={handleSave}
+          onDeploy={openDeploy}
+          isSaving={isSaving}
+          saveSuccess={saveSuccess}
+          isGenerating={isGenerating}
+          enhancePrompt={enhancePrompt}
+          onEnhancePromptChange={setEnhancePrompt}
+          onEnhance={handleEnhance}
+          enhanceTokenCost={enhanceTokenCost}
+          enhanceBreakdown={enhanceBreakdown}
+          showEnhanceTokenOverlay={showEnhanceTokenOverlay}
+          onToggleEnhanceTokenOverlay={() =>
+            setShowEnhanceTokenOverlay((prev) => !prev)
+          }
+          isAuthenticated={isAuthenticated}
+          userTokens={userTokens}
+          tokenBalance={tokenBalance}
+          onBuyTokens={openTokens}
+          isStreaming={isStreaming}
+          isEnhancing={isEnhancing}
+          streamingPhase={streamingPhase}
+          selections={selections}
+          originalPrompt={prompt}
+          lastRequest={lastRequest}
+        />
+      )}
 
-      <AnimatePresence>
-        {showAuth && (
-          <AuthModal
-            isOpen={showAuth}
-            onClose={closeAuth}
-            onOpenLegal={handleOpenLegal}
-          />
-        )}
-      </AnimatePresence>
+      {showAuth && (
+        <AuthModal
+          isOpen={showAuth}
+          onClose={closeAuth}
+          onOpenLegal={handleOpenLegal}
+        />
+      )}
 
-      <AnimatePresence>
-        {showTokens && (
-          <TokensModal
-            isOpen={showTokens}
-            onClose={closeTokens}
-            onOpenAuth={openAuth}
-          />
-        )}
-      </AnimatePresence>
+      {showTokens && (
+        <TokensModal
+          isOpen={showTokens}
+          onClose={closeTokens}
+          onOpenAuth={openAuth}
+        />
+      )}
 
-      <AnimatePresence>
-        {showDeploy && (
-          <DeployModal
-            isOpen={showDeploy}
-            onClose={closeDeploy}
-            html={generatedCode}
-            prompt={prompt}
-          />
-        )}
-      </AnimatePresence>
+      {showDeploy && (
+        <DeployModal
+          isOpen={showDeploy}
+          onClose={closeDeploy}
+          html={generatedCode}
+          prompt={prompt}
+        />
+      )}
 
-      <AnimatePresence>
-        {showHelp && <HelpModal isOpen={showHelp} onClose={closeHelp} />}
-      </AnimatePresence>
+      {showHelp && <HelpModal isOpen={showHelp} onClose={closeHelp} />}
 
-      <AnimatePresence>
-        {showLegal && (
-          <LegalModal
-            isOpen={showLegal}
-            onClose={handleCloseLegal}
-            initialSection={legalSection}
-          />
-        )}
-      </AnimatePresence>
+      {showLegal && (
+        <LegalModal
+          isOpen={showLegal}
+          onClose={handleCloseLegal}
+          initialSection={legalSection}
+        />
+      )}
 
-      <AnimatePresence>
-        {showProjects && (
-          <ProjectsModal
-            isOpen={showProjects}
-            onClose={closeProjects}
-            onEditProject={handleEditProject}
-            onDeployProject={handleDeployProject}
-          />
-        )}
-      </AnimatePresence>
+      {showProjects && (
+        <ProjectsModal
+          isOpen={showProjects}
+          onClose={closeProjects}
+          onEditProject={handleEditProject}
+          onDeployProject={handleDeployProject}
+        />
+      )}
     </div>
   );
 }
