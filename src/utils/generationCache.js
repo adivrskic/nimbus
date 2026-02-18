@@ -1,23 +1,13 @@
-// utils/generationCache.js - Caching layer for generated websites
-// Uses both localStorage (for persistence) and in-memory (for speed)
-
 const CACHE_KEY_PREFIX = "gen_cache_";
 const CACHE_INDEX_KEY = "gen_cache_index";
-const MAX_CACHE_SIZE = 20; // Max number of cached generations
-const CACHE_TTL = 7 * 24 * 60 * 60 * 1000; // 7 days in ms
+const MAX_CACHE_SIZE = 20;
+const CACHE_TTL = 7 * 24 * 60 * 60 * 1000;
 
-// In-memory cache for fastest access
 const memoryCache = new Map();
 
-/**
- * Create a deterministic hash from prompt + selections
- * This ensures the same inputs always produce the same cache key
- */
 function createCacheKey(prompt, selections = {}, persistentOptions = {}) {
-  // Normalize and sort to ensure consistent hashing
   const normalizedPrompt = prompt.trim().toLowerCase();
 
-  // Only include non-null, non-empty selections
   const relevantSelections = {};
   Object.entries(selections).forEach(([key, value]) => {
     if (
@@ -30,7 +20,6 @@ function createCacheKey(prompt, selections = {}, persistentOptions = {}) {
     }
   });
 
-  // Include relevant persistent options (brand name, etc.)
   const relevantPersistent = {};
   if (persistentOptions.branding?.brandName) {
     relevantPersistent.brandName = persistentOptions.branding.brandName;
@@ -45,20 +34,16 @@ function createCacheKey(prompt, selections = {}, persistentOptions = {}) {
     o: relevantPersistent,
   });
 
-  // Simple hash function
   let hash = 0;
   for (let i = 0; i < dataToHash.length; i++) {
     const char = dataToHash.charCodeAt(i);
     hash = (hash << 5) - hash + char;
-    hash = hash & hash; // Convert to 32bit integer
+    hash = hash & hash;
   }
 
   return CACHE_KEY_PREFIX + Math.abs(hash).toString(36);
 }
 
-/**
- * Get cache index (list of cached items with metadata)
- */
 function getCacheIndex() {
   try {
     const index = localStorage.getItem(CACHE_INDEX_KEY);
@@ -68,9 +53,6 @@ function getCacheIndex() {
   }
 }
 
-/**
- * Update cache index
- */
 function updateCacheIndex(index) {
   try {
     localStorage.setItem(CACHE_INDEX_KEY, JSON.stringify(index));
@@ -79,18 +61,13 @@ function updateCacheIndex(index) {
   }
 }
 
-/**
- * Evict oldest entries if cache is too large
- */
 function evictOldEntries() {
   const index = getCacheIndex();
 
   if (index.length <= MAX_CACHE_SIZE) return;
 
-  // Sort by timestamp (oldest first)
   index.sort((a, b) => a.timestamp - b.timestamp);
 
-  // Remove oldest entries
   const toRemove = index.slice(0, index.length - MAX_CACHE_SIZE);
   toRemove.forEach((entry) => {
     try {
@@ -99,24 +76,16 @@ function evictOldEntries() {
     } catch {}
   });
 
-  // Update index
   const remaining = index.slice(index.length - MAX_CACHE_SIZE);
   updateCacheIndex(remaining);
 }
 
-/**
- * Check if a cached entry is still valid
- */
 function isEntryValid(entry) {
   if (!entry) return false;
   const age = Date.now() - entry.timestamp;
   return age < CACHE_TTL;
 }
 
-/**
- * Get cached generation if available
- * @returns {Object|null} Cached result or null
- */
 export function getCachedGeneration(
   prompt,
   selections = {},
@@ -124,7 +93,6 @@ export function getCachedGeneration(
 ) {
   const key = createCacheKey(prompt, selections, persistentOptions);
 
-  // Check memory cache first (fastest)
   if (memoryCache.has(key)) {
     const entry = memoryCache.get(key);
     if (isEntryValid(entry)) {
@@ -134,18 +102,15 @@ export function getCachedGeneration(
     memoryCache.delete(key);
   }
 
-  // Check localStorage
   try {
     const stored = localStorage.getItem(key);
     if (stored) {
       const entry = JSON.parse(stored);
       if (isEntryValid(entry)) {
-        // Restore to memory cache
         memoryCache.set(key, entry);
         console.log("[Cache] Storage hit:", key);
         return entry.data;
       }
-      // Expired - remove it
       localStorage.removeItem(key);
     }
   } catch (e) {
@@ -156,9 +121,6 @@ export function getCachedGeneration(
   return null;
 }
 
-/**
- * Store a generation in cache
- */
 export function cacheGeneration(
   prompt,
   selections = {},
@@ -176,14 +138,11 @@ export function cacheGeneration(
     },
   };
 
-  // Store in memory cache
   memoryCache.set(key, entry);
 
-  // Store in localStorage
   try {
     localStorage.setItem(key, JSON.stringify(entry));
 
-    // Update index
     const index = getCacheIndex();
     const existingIndex = index.findIndex((i) => i.key === key);
     if (existingIndex >= 0) {
@@ -193,7 +152,6 @@ export function cacheGeneration(
     }
     updateCacheIndex(index);
 
-    // Evict old entries if needed
     evictOldEntries();
 
     console.log("[Cache] Stored:", key);
@@ -202,9 +160,6 @@ export function cacheGeneration(
   }
 }
 
-/**
- * Clear a specific cache entry
- */
 export function clearCacheEntry(
   prompt,
   selections = {},
@@ -221,9 +176,6 @@ export function clearCacheEntry(
   } catch {}
 }
 
-/**
- * Clear all cached generations
- */
 export function clearAllCache() {
   memoryCache.clear();
 
@@ -240,9 +192,6 @@ export function clearAllCache() {
   console.log("[Cache] Cleared all");
 }
 
-/**
- * Get cache stats
- */
 export function getCacheStats() {
   const index = getCacheIndex();
   const validEntries = index.filter((entry) => {
@@ -262,10 +211,6 @@ export function getCacheStats() {
   };
 }
 
-/**
- * Check if we should use cache for this request
- * Refinements should NOT be cached as they depend on current state
- */
 export function shouldUseCache(isRefinement = false) {
   return !isRefinement;
 }

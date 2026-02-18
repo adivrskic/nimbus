@@ -1,12 +1,4 @@
-// utils/downloadZip.js - With multi-page support
 import JSZip from "jszip";
-
-/**
- * Generate and download a ZIP file with HTML and README
- * @param {string} htmlContent - The generated HTML (for single page)
- * @param {string} projectName - Name for the project
- * @param {Object} files - Optional files object for multi-page sites { "index.html": "...", "about.html": "..." }
- */
 export async function downloadZip(
   htmlContent,
   projectName = "website",
@@ -18,28 +10,22 @@ export async function downloadZip(
   const isMultiPage = files && Object.keys(files).length > 1;
 
   if (isMultiPage) {
-    // Add all HTML files for multi-page sites
     Object.entries(files).forEach(([filename, content]) => {
       zip.file(filename, content);
     });
   } else if (files && files["index.html"]) {
-    // Single file in files object
     zip.file("index.html", files["index.html"]);
   } else {
-    // Single HTML string
     zip.file("index.html", htmlContent);
   }
 
-  // Add README with deployment instructions
   const fileList = isMultiPage ? Object.keys(files) : ["index.html"];
   const readme = generateReadme(projectName, fileList, isMultiPage);
   zip.file("README.md", readme);
 
-  // Create images folder with a placeholder
   const imagesFolder = zip.folder("images");
   imagesFolder.file(".gitkeep", "# Place your images here\n");
 
-  // Generate and download
   const blob = await zip.generateAsync({ type: "blob" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
@@ -49,9 +35,6 @@ export async function downloadZip(
   URL.revokeObjectURL(url);
 }
 
-/**
- * Sanitize filename for download
- */
 function sanitizeFilename(name) {
   return (
     name
@@ -62,9 +45,6 @@ function sanitizeFilename(name) {
   );
 }
 
-/**
- * Generate README content with deployment instructions
- */
 function generateReadme(
   projectName,
   fileList = ["index.html"],
@@ -213,9 +193,6 @@ Built with Nimbus ✨
 `;
 }
 
-/**
- * Get description for a page based on filename
- */
 function getPageDescription(filename) {
   const descriptions = {
     "index.html": "Home page",

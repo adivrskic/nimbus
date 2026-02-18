@@ -18,16 +18,14 @@ import {
 } from "../utils/tokenCalculator";
 import { downloadZip } from "../utils/downloadZip";
 
-import {
-  SearchBar,
-  TokenOverlay,
-  OptionsOverlay,
-  PreviewModal,
-  MinimizedPreviewPill,
-} from "../components/Home";
+import SearchBar from "../components/SearchBar";
+import TokenOverlay from "../components/Modals/TokenOverlay";
+import OptionsOverlay from "../components/Modals/OptionsOverlay";
+import PreviewModal from "../components/Modals/PreviewModal";
+import MinimizedPreviewPill from "../components/MinimizedPreviewPill";
 import AuthModal from "../components/Modals/AuthModal";
 import TokensModal from "../components/Modals/TokenPurchaseModal";
-import HelpModal from "../components/Home/HelpModal";
+import HelpModal from "../components/Modals/HelpModal";
 import LegalModal from "../components/Modals/LegalModal";
 import ProjectsModal from "../components/Modals/ProjectsModal";
 import { generateWebsite } from "../utils/generateWebsite";

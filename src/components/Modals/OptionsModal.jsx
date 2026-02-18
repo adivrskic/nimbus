@@ -1,4 +1,4 @@
-// components/Home/OptionsOverlay/OptionsOverlay.jsx - Updated with accordion status
+// components/Home/OptionsModal/OptionsModal.jsx - Updated with accordion status
 import { useState, useEffect, useRef, memo, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -13,9 +13,9 @@ import {
   Circle,
   Edit2,
 } from "lucide-react";
-import { OPTIONS, getFilteredCategories } from "../../../configs";
+import { OPTIONS, getFilteredCategories } from "../../configs";
 
-import "./OptionsOverlay.scss";
+import "./modals.scss";
 
 // ============================================
 // VALIDATORS
@@ -224,7 +224,7 @@ const OptimizedInput = memo(function OptimizedInput({
 // ============================================
 // MAIN COMPONENT
 // ============================================
-function OptionsOverlay({
+function OptionsModal({
   isOpen,
   onClose,
   selections,
@@ -372,25 +372,19 @@ function OptionsOverlay({
   ).length;
 
   return (
-    <motion.div
-      className="options-overlay"
+    <div
+      className={`modal-overlay ${isOpen ? "active" : ""}`}
       onClick={onClose}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.2 }}
     >
-      <motion.div
-        className="options-content"
+      <div
+        className={`modal-content modal-content--options ${
+          isOpen ? "active" : ""
+        }`}
         onClick={(e) => e.stopPropagation()}
-        initial={{ opacity: 0, y: 4 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: 4 }}
-        transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
       >
         <div className="options-header">
           <div className="options-header__left">
-            <span className="options-title">
+            <span className="modal-title">
               <Settings />
               <span>Customize</span>
               <span className="options-subtitle">
@@ -400,7 +394,7 @@ function OptionsOverlay({
               </span>
             </span>
           </div>
-          <button className="options-close" onClick={onClose}>
+          <button className="modal-close" onClick={onClose}>
             <X size={16} />
           </button>
         </div>
@@ -923,9 +917,9 @@ function OptionsOverlay({
             </div>
           </div>
         </div>
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 }
 
-export default OptionsOverlay;
+export default OptionsModal;

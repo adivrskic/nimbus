@@ -22,23 +22,11 @@ export function ThemeProvider({ children }) {
     localStorage.setItem("theme", theme);
   }, [theme]);
 
-  // STYLE THEME (minimal, brutalist, gradient, elegant, retro)
-  const [selectedStyleTheme, setSelectedStyleTheme] = useState(() => {
-    return localStorage.getItem("styleTheme") || "minimal";
-  });
-
-  const setStyleTheme = (styleId) => {
-    setSelectedStyleTheme(styleId);
-    localStorage.setItem("styleTheme", styleId);
-  };
-
   return (
     <ThemeContext.Provider
       value={{
         theme,
         toggleTheme,
-        selectedStyleTheme,
-        setStyleTheme,
       }}
     >
       {children}

@@ -1,5 +1,4 @@
 // components/Home/HelpModal/HelpModal.jsx
-import { motion } from "framer-motion";
 import {
   X,
   Sparkles,
@@ -13,12 +12,7 @@ import {
   Zap,
   HelpCircle,
 } from "lucide-react";
-import {
-  overlayVariants,
-  helpContentVariants,
-  helpItemVariants,
-} from "../../../configs/animations.config";
-import "./HelpModal.scss";
+import "./modals.scss";
 
 const HELP_SECTIONS = [
   {
@@ -135,45 +129,37 @@ function HelpModal({ isOpen, onClose }) {
   if (!isOpen) return null;
 
   return (
-    <motion.div
-      className="help-overlay"
+    <div
+      className={`modal-overlay ${isOpen ? "active" : ""}`}
       onClick={onClose}
-      variants={overlayVariants}
-      initial="hidden"
-      animate="visible"
-      exit="exit"
     >
-      <motion.div
-        className="help-content"
+      <div
+        className={`modal-content modal-content--lg ${isOpen ? "active" : ""}`}
         onClick={(e) => e.stopPropagation()}
-        variants={helpContentVariants}
-        initial="hidden"
-        animate="visible"
-        exit="exit"
       >
         {/* Fixed header section */}
-        <motion.div className="help-header-section" variants={helpItemVariants}>
-          <div className="help-header">
-            <div className="help-title">
-              <HelpCircle size={20} />
+        <div className="modal-header-section">
+          <div className="modal-header">
+            <div className="modal-title">
+              <HelpCircle size={16} />
               <span>How to Use Nimbus</span>
             </div>
-            <button className="help-close" onClick={onClose} aria-label="Close">
+            <button
+              className="modal-close"
+              onClick={onClose}
+              aria-label="Close"
+            >
               <X size={16} />
             </button>
           </div>
-        </motion.div>
+        </div>
 
         {/* Scrollable body section */}
-        <div className="help-body">
+        <div className="modal-body">
           {HELP_SECTIONS.map((section) => {
             const Icon = section.icon;
             return (
-              <motion.div
-                key={section.title}
-                className="help-section"
-                variants={helpItemVariants}
-              >
+              <div key={section.title} className="help-section">
                 <div className="help-section__title">
                   <div className="help-icon">
                     <Icon size={16} />
@@ -185,11 +171,11 @@ function HelpModal({ isOpen, onClose }) {
                     <li key={idx}>{renderTextWithBold(item)}</li>
                   ))}
                 </ul>
-              </motion.div>
+              </div>
             );
           })}
 
-          <motion.div className="help-tips" variants={helpItemVariants}>
+          <div className="help-tips">
             <h4 className="help-tips__title">
               <Lightbulb size={16} />
               <span>Quick Tips</span>
@@ -201,10 +187,10 @@ function HelpModal({ isOpen, onClose }) {
                 </li>
               ))}
             </ul>
-          </motion.div>
+          </div>
         </div>
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 }
 
