@@ -1,4 +1,416 @@
 // =============================================================================
+// NEW SHARED MODAL BASE — Apple-Inspired
+// =============================================================================
+// Prepend this to the top of modals.scss. As each modal is migrated to use
+// these new classes, remove its per-modal legacy section.
+//
+// Naming convention:
+//   .modal-panel     → the card (replaces .modal-content + --surface + --centered)
+//   .modal-header    → reused (but children renamed to __title, __close)
+//   .modal-stack     → generic flex column for content groups
+//   .modal-row-btn   → universal pill row (auth providers, packages, items)
+//   .modal-btn       → primary action button
+//   .modal-alert     → inline error/warning/success
+//   .modal-footnote  → small bottom legal/info text
+//   .modal-desc      → subtitle/description
+//   .modal-kv        → key-value display row
+//   .modal-scroll    → scrollable body area
+//   .modal-section   → titled content block
+//   .modal-success   → centered success confirmation
+//   .modal-divider   → thin separator
+//   .modal-contact   → contact info card
+//   .modal-accordion → collapsible FAQ/terms
+// =============================================================================
+
+// ---------------------------------------------------------------------------
+// PANEL (the modal card)
+// ---------------------------------------------------------------------------
+// Replaces the combination of:
+//   .modal-content .modal-content--surface .modal-content--centered .modal-content--sm
+// with a single clean class.
+
+.modal-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px;
+  width: 420px;
+  max-width: 90vw;
+  max-height: 85vh;
+  overflow-y: auto;
+  background: var(--glass-background);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xl);
+  opacity: 0;
+  transform: scale(0.97) translateY(6px);
+  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+
+  &.active {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+
+  &--sm {
+    width: 360px;
+  }
+  &--lg {
+    width: 680px;
+    max-height: 75vh;
+    overflow-y: hidden;
+  }
+  &--full {
+    width: 100%;
+    max-width: 95vw;
+    height: 90dvh;
+    max-height: none;
+    padding: 16px;
+    overflow-y: hidden;
+  }
+
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: var(--color-border-hover);
+    border-radius: 2px;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// HEADER (reuses .modal-header but with new child naming)
+// ---------------------------------------------------------------------------
+
+.modal-header {
+  &__title {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    letter-spacing: -0.01em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    svg {
+      color: var(--color-text-secondary);
+    }
+  }
+
+  &__close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    background: var(--color-surface-elevated);
+    border: none;
+    border-radius: 50%;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.15s ease, color 0.15s ease;
+
+    &:hover {
+      background: var(--color-border);
+      color: var(--color-text-primary);
+    }
+    &:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// CONTENT BLOCKS
+// ---------------------------------------------------------------------------
+
+.modal-desc {
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--color-text-secondary);
+  margin: -4px 0 0;
+}
+
+.modal-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.modal-scroll {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 4px 0;
+
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: var(--color-border-hover);
+    border-radius: 2px;
+  }
+}
+
+.modal-divider {
+  height: 1px;
+  background: var(--color-border);
+  border: none;
+  margin: 4px 0;
+}
+
+// ---------------------------------------------------------------------------
+// ROW BUTTON (universal interactive pill row)
+// ---------------------------------------------------------------------------
+
+.modal-row-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 18px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s ease, border-color 0.15s ease;
+
+  &:hover:not(:disabled) {
+    background: var(--color-surface-elevated);
+    border-color: var(--color-border-hover);
+  }
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+  &.selected {
+    border-color: var(--color-border-hover);
+    background: var(--color-surface-elevated);
+  }
+  svg {
+    flex-shrink: 0;
+    color: var(--color-text-secondary);
+  }
+  span {
+    flex: 1;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// BUTTONS
+// ---------------------------------------------------------------------------
+
+.modal-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 20px;
+  background: var(--color-accent);
+  border: none;
+  border-radius: var(--radius-lg);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-background);
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.15s ease, opacity 0.15s ease;
+
+  &:hover:not(:disabled) {
+    background: var(--color-accent-hover);
+  }
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &--secondary {
+    background: transparent;
+    border: 1px solid var(--color-border);
+    color: var(--color-text-secondary);
+    &:hover:not(:disabled) {
+      background: var(--color-surface-elevated);
+      border-color: var(--color-border-hover);
+      color: var(--color-text-primary);
+    }
+  }
+
+  &--inline {
+    width: auto;
+    flex: 1;
+    padding: 10px 16px;
+  }
+}
+
+.modal-btn-row {
+  display: flex;
+  gap: 8px;
+}
+
+// ---------------------------------------------------------------------------
+// ALERTS
+// ---------------------------------------------------------------------------
+
+.modal-alert {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  font-size: 0.8125rem;
+  font-weight: 500;
+
+  svg {
+    flex-shrink: 0;
+  }
+  &--error {
+    background: rgba(239, 68, 68, 0.07);
+    color: #ef4444;
+  }
+  &--warning {
+    background: rgba(245, 158, 11, 0.07);
+    color: #f59e0b;
+  }
+  &--success {
+    background: rgba(16, 185, 129, 0.07);
+    color: #10b981;
+  }
+  &--info {
+    background: rgba(59, 130, 246, 0.07);
+    color: #3b82f6;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// FOOTNOTE & NOTE
+// ---------------------------------------------------------------------------
+
+.modal-footnote {
+  font-size: 0.6875rem;
+  color: var(--color-text-tertiary);
+  text-align: center;
+  line-height: 1.5;
+  margin: 0;
+
+  &__link {
+    background: none;
+    border: none;
+    padding: 0;
+    font: inherit;
+    color: var(--color-text-secondary);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    cursor: pointer;
+    transition: color 0.15s ease;
+    &:hover {
+      color: var(--color-text-primary);
+    }
+  }
+}
+
+// (keep existing .modal-note — already defined in your shared section)
+
+// ---------------------------------------------------------------------------
+// KEY-VALUE ROW
+// ---------------------------------------------------------------------------
+
+.modal-kv {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+  padding: 2px 0;
+
+  &__value {
+    font-weight: 600;
+    color: var(--color-text-primary);
+  }
+  &--total {
+    padding-top: 10px;
+    margin-top: 4px;
+    border-top: 1px solid var(--color-border);
+    font-weight: 600;
+    color: var(--color-text-primary);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// SUCCESS STATE
+// ---------------------------------------------------------------------------
+
+.modal-success {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+  text-align: center;
+  gap: 10px;
+
+  &__icon {
+    color: #10b981;
+    animation: successPop 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  &__title {
+    font-size: 1.0625rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin: 0;
+  }
+  &__message {
+    font-size: 0.8125rem;
+    color: var(--color-text-secondary);
+    margin: 0;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// RESPONSIVE — new panel
+// ---------------------------------------------------------------------------
+
+@media (max-width: 640px) {
+  .modal-panel {
+    padding: 20px;
+    &--sm {
+      min-width: 260px;
+    }
+    &--lg {
+      max-height: 90vh;
+    }
+  }
+  .modal-header__title {
+    font-size: 0.875rem;
+  }
+  .modal-btn-row {
+    flex-direction: column-reverse;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-panel {
+    padding: 18px;
+    border-radius: var(--radius-lg);
+  }
+}
+
+// =============================================================================
 // Modals — Unified Stylesheet
 // =============================================================================
 // Generic .modal-* classes handle shared layout, animation, and components.
@@ -494,85 +906,6 @@
   }
   .modal-nav {
     flex-direction: column-reverse;
-  }
-}
-
-// =============================================================================
-// 5. PER-MODAL OVERRIDES — only truly unique styles
-// =============================================================================
-
-// --- AuthModal ---------------------------------------------------------------
-.auth-providers {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-.auth-provider {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-  padding: 12px 16px;
-  background: var(--color-surface-elevated);
-  border: 1px solid var(--color-border);
-  border-radius: 999px;
-  font-size: 0.8125rem;
-  font-weight: 500;
-  font-family: var(--font-family-base, sans-serif);
-  color: var(--color-text-primary);
-  cursor: pointer;
-  transition: background var(--transition-fast),
-    border-color var(--transition-fast), box-shadow var(--transition-fast);
-  &:hover:not(:disabled) {
-    background: var(--color-surface);
-    border-color: var(--color-border-hover);
-    box-shadow: var(--shadow-md);
-  }
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-  svg {
-    flex-shrink: 0;
-  }
-  span {
-    flex: 1;
-    text-align: left;
-  }
-}
-.auth-footer {
-  padding-top: 12px;
-  font-size: 0.6875rem;
-  font-family: var(--font-family-base, sans-serif);
-  color: var(--color-text-tertiary);
-  text-align: center;
-  line-height: 1.5;
-  a {
-    color: var(--color-text-primary);
-    text-decoration: none;
-    &:hover {
-      text-decoration: underline;
-    }
-  }
-}
-.auth-footer__link {
-  background: none;
-  border: none;
-  padding: 0;
-  margin: 0;
-  font: inherit;
-  font-size: inherit;
-  color: var(--color-text-secondary);
-  text-decoration: underline;
-  text-underline-offset: 2px;
-  cursor: pointer;
-  transition: color 0.15s ease;
-  &:hover {
-    color: var(--color-text-primary);
-  }
-  &:focus {
-    outline: none;
-    color: var(--color-accent, #6366f1);
   }
 }
 

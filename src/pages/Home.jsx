@@ -21,12 +21,12 @@ import SearchBar from "../components/SearchBar";
 import TokenModal from "../components/Modals/TokenModal";
 import OptionsModal from "../components/Modals/OptionsModal";
 import PreviewModal from "../components/Modals/PreviewModal";
-import MinimizedPreviewPill from "../components/MinimizedPreviewPill";
 import AuthModal from "../components/Modals/AuthModal";
 import TokensModal from "../components/Modals/TokenPurchaseModal";
 import HelpModal from "../components/Modals/HelpModal";
 import LegalModal from "../components/Modals/LegalModal";
 import ProjectsModal from "../components/Modals/ProjectsModal";
+import { useGenerationState } from "../contexts/GenerationContext";
 import { generateWebsite } from "../utils/generateWebsite";
 import { supabase } from "../lib/supabaseClient";
 
@@ -84,6 +84,9 @@ function Home() {
     restorePreview,
   } = useHomeState();
 
+  const { showPreviewPill, hidePreviewPill, refreshColors } =
+    useGenerationState();
+
   const [showProjects, setShowProjects] = useState(false);
   const openProjects = useCallback(() => setShowProjects(true), []);
   const closeProjects = useCallback(() => setShowProjects(false), []);
@@ -129,6 +132,29 @@ function Home() {
   const [lastRequest, setLastRequest] = useState(null);
   const [showEnhanceTokenOverlay, setShowEnhanceTokenOverlay] = useState(false);
   const [legalSection, setLegalSection] = useState(null);
+
+  // Sync minimized preview state to context so Header can show the pill
+  useEffect(() => {
+    if (previewMinimized) {
+      showPreviewPill({ onRestore: restorePreview, isGenerating });
+    } else {
+      hidePreviewPill();
+    }
+  }, [
+    previewMinimized,
+    isGenerating,
+    restorePreview,
+    showPreviewPill,
+    hidePreviewPill,
+  ]);
+
+  // Fresh colors for each new generation
+  useEffect(() => {
+    if (isGenerating) {
+      refreshColors();
+    }
+  }, [isGenerating, refreshColors]);
+
   const { text: typewriterText } = useTypewriter({
     prompts: EXAMPLE_PROMPTS,
     enabled: !isExpanded && !prompt,
@@ -405,13 +431,6 @@ function Home() {
     [persistentOptions, updatePersistentOption]
   );
 
-  const handlePillClick = useCallback(
-    (category) => {
-      openOptions();
-    },
-    [openOptions]
-  );
-
   const handleEditProject = useCallback(
     (project) => {
       closeProjects();
@@ -452,9 +471,6 @@ function Home() {
             onHelpClick={openHelp}
             onGenerate={handleGenerate}
             activeCategories={activeCategories}
-            onPillClick={handlePillClick}
-            onResetPill={resetSelection}
-            hasMinimizedPreview={previewMinimized}
           />
 
           {showTokenOverlay && (
@@ -470,15 +486,6 @@ function Home() {
             />
           )}
         </div>
-
-        {previewMinimized && (
-          <MinimizedPreviewPill
-            onExpand={restorePreview}
-            onDiscard={resetGeneration}
-            onOpenProjects={openProjects}
-            isGenerating={isGenerating}
-          />
-        )}
       </div>
 
       {showOptions && (

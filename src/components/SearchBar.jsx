@@ -1,13 +1,6 @@
 // components/Home/SearchBar/SearchBar.jsx - Main search input component
 import { forwardRef, useRef, useCallback, useMemo } from "react";
-import {
-  Coins,
-  Settings,
-  Sparkles,
-  HelpCircle,
-  X,
-  SlidersHorizontal,
-} from "lucide-react";
+import { Coins, Settings, Sparkles, HelpCircle } from "lucide-react";
 import { Loader2 } from "lucide-react";
 import "./SearchBar.scss";
 
@@ -35,9 +28,6 @@ const SearchBar = forwardRef(
       onHelpClick,
       onGenerate,
       activeCategories = [],
-      onPillClick,
-      onResetPill,
-      hasMinimizedPreview = false,
     },
     ref
   ) => {
@@ -115,9 +105,7 @@ const SearchBar = forwardRef(
         ref={containerRef}
         className={`search-bar ${
           showExpandedState ? "search-bar--expanded" : ""
-        } ${isGenerating ? "search-bar--generating" : ""} ${
-          hasMinimizedPreview ? "has-minimized-preview" : ""
-        }`}
+        } ${isGenerating ? "search-bar--generating" : ""}`}
       >
         <div className="search-bar__input-wrapper">
           <textarea
@@ -173,57 +161,9 @@ const SearchBar = forwardRef(
               </span>
             </div>
           )}
-
-          {showExpandedState && hasActiveOptions && (
-            <div className="search-bar__pills-expanded">
-              {activeCategories.map(
-                ({ category, label, value, icon: Icon }) => (
-                  <div
-                    key={category}
-                    className="search-bar__pill"
-                    onClick={() => onPillClick?.(category)}
-                    onMouseDown={handleButtonMouseDown}
-                    role="button"
-                    tabIndex={0}
-                  >
-                    {Icon && <Icon size={12} />}
-                    <span className="search-bar__pill-label">{label}:</span>
-                    <span className="search-bar__pill-value">{value}</span>
-                    <span
-                      className="search-bar__pill-remove"
-                      role="button"
-                      tabIndex={-1}
-                      onMouseDown={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        handleButtonMouseDown(e);
-                      }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onResetPill?.(category);
-                      }}
-                    >
-                      <X size={10} />
-                    </span>
-                  </div>
-                )
-              )}
-            </div>
-          )}
         </div>
 
         <div className="search-bar__right">
-          {!showExpandedState && hasActiveOptions && (
-            <button
-              className="search-bar__options-count"
-              onClick={onOptionsClick}
-              onMouseDown={handleButtonMouseDown}
-            >
-              <SlidersHorizontal size={14} />
-              <span>{activeCategories.length}</span>
-            </button>
-          )}
-
           {(value.trim() || isExpanded) && (
             <button
               className={`search-bar__token-btn ${
@@ -257,7 +197,9 @@ const SearchBar = forwardRef(
             onMouseDown={handleButtonMouseDown}
           >
             <Settings size={18} />
-            <span className="search-bar__btn-text">Customize</span>
+            <span className="search-bar__btn-text">
+              Customize{hasActiveOptions ? ` (${activeCategories.length})` : ""}
+            </span>
           </button>
 
           <button

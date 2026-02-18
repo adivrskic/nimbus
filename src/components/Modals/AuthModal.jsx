@@ -61,23 +61,25 @@ function AuthModal({ isOpen, onClose, onAuthSuccess, onOpenLegal }) {
       onClick={handleClose}
     >
       <div
-        className={`modal-content modal-content--sm ${
-          isVisible ? "active" : ""
-        }`}
+        className={`modal-panel modal-panel--sm ${isVisible ? "active" : ""}`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="modal-header">
-          <span className="modal-title">Sign in to create</span>
-          <button className="modal-close" onClick={handleClose}>
-            <X size={16} />
+          <span className="modal-header__title">Sign in to start creating</span>
+          <button
+            className="modal-header__close"
+            onClick={handleClose}
+            aria-label="Close"
+          >
+            <X size={15} />
           </button>
         </div>
 
-        {error && <div className="modal-error">{error}</div>}
+        {error && <div className="modal-alert modal-alert--error">{error}</div>}
 
-        <div className="auth-providers">
+        <div className="modal-stack">
           <button
-            className="auth-provider"
+            className="modal-row-btn"
             onClick={() => handleOAuthSignIn("Google", signInWithGoogle)}
             disabled={isLoading}
           >
@@ -107,7 +109,7 @@ function AuthModal({ isOpen, onClose, onAuthSuccess, onOpenLegal }) {
           </button>
 
           <button
-            className="auth-provider"
+            className="modal-row-btn"
             onClick={() => handleOAuthSignIn("GitHub", signInWithGitHub)}
             disabled={isLoading}
           >
@@ -122,11 +124,11 @@ function AuthModal({ isOpen, onClose, onAuthSuccess, onOpenLegal }) {
           </button>
         </div>
 
-        <div className="auth-footer">
+        <p className="modal-footnote">
           By continuing, you agree to our{" "}
           <button
             type="button"
-            className="auth-footer__link"
+            className="modal-footnote__link"
             onClick={(e) => handleLegalClick(e, "terms")}
           >
             Terms
@@ -134,12 +136,12 @@ function AuthModal({ isOpen, onClose, onAuthSuccess, onOpenLegal }) {
           and{" "}
           <button
             type="button"
-            className="auth-footer__link"
+            className="modal-footnote__link"
             onClick={(e) => handleLegalClick(e, "privacy")}
           >
             Privacy
           </button>
-        </div>
+        </p>
       </div>
     </div>
   );

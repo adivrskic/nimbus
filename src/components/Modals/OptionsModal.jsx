@@ -399,19 +399,17 @@ function OptionsModal({
         </div>
 
         <div className="options-filters">
-          {["", "layout", "visual", "content", "components", "technical"].map(
-            (filter) => (
-              <button
-                key={filter || "all"}
-                className={`options-filter ${
-                  categoryFilter === filter ? "active" : ""
-                }`}
-                onClick={() => setCategoryFilter(filter)}
-              >
-                {filter || "All"}
-              </button>
-            )
-          )}
+          {["", "layout", "visual", "content", "technical"].map((filter) => (
+            <button
+              key={filter || "all"}
+              className={`options-filter ${
+                categoryFilter === filter ? "active" : ""
+              }`}
+              onClick={() => setCategoryFilter(filter)}
+            >
+              {filter || "All"}
+            </button>
+          ))}
         </div>
 
         <div className="options-body">
