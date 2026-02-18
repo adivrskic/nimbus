@@ -8,6 +8,7 @@ import {
   FileCode,
   AlertTriangle,
   FolderOpen,
+  ChevronRight,
 } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
 import { useProject } from "../../contexts/ProjectContext";
@@ -271,16 +272,6 @@ function ProjectsModal({
                       </>
                     ) : (
                       <>
-                        <div className="delete-warning">
-                          {project.is_deployed && (
-                            <span className="delete-info">
-                              <AlertTriangle size={12} />
-                              This will remove the live site
-                              {hasSubscription(project) &&
-                                " and cancel the subscription"}
-                            </span>
-                          )}
-                        </div>
                         <div className="delete-actions">
                           <button
                             className="delete-cancel"
@@ -311,9 +302,7 @@ function ProjectsModal({
 
                 <div
                   className="project-main"
-                  onClick={() =>
-                    project.is_deployed && toggleExpand(project.id)
-                  }
+                  onClick={() => handleEdit(project)}
                 >
                   <div className="project-info">
                     <div className="project-name">
@@ -329,24 +318,6 @@ function ProjectsModal({
                   </div>
 
                   <div className="project-actions">
-                    {/* Edit button */}
-                    <button
-                      className="action-btn"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleEdit(project);
-                      }}
-                      disabled={loadingAction?.id === project.id}
-                      title="Edit"
-                    >
-                      {loadingAction?.id === project.id &&
-                      loadingAction?.type === "edit" ? (
-                        <Loader2 size={14} className="spinning" />
-                      ) : (
-                        <Edit3 size={14} />
-                      )}
-                    </button>
-
                     {/* Delete button */}
                     <button
                       className="action-btn action-btn--danger"
@@ -360,6 +331,67 @@ function ProjectsModal({
                     </button>
                   </div>
                 </div>
+
+                {/* Expanded content */}
+                {expandedProject === project.id && (
+                  <div className="project-expanded">
+                    {getDeployedUrl(project) && (
+                      <div className="project-url">
+                        <span className="url-label">URL:</span>
+                        <div className="url-container">
+                          <a
+                            href={getDeployedUrl(project)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="url-value"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            {getDeployedUrl(project)}
+                          </a>
+                          <button
+                            className="copy-btn"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              copyUrl(getDeployedUrl(project), project.id);
+                            }}
+                            title="Copy URL"
+                          >
+                            {copied === project.id ? "Copied!" : "Copy"}
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="project-expanded-actions">
+                      <button
+                        className="action-btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeploy(project);
+                        }}
+                        disabled={loadingAction?.id === project.id}
+                        title="Deploy"
+                      >
+                        {loadingAction?.id === project.id &&
+                        loadingAction?.type === "deploy" ? (
+                          <Loader2 size={14} className="spinning" />
+                        ) : (
+                          "Deploy"
+                        )}
+                      </button>
+                      <button
+                        className="action-btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDomain(project);
+                        }}
+                        title="Domain Setup"
+                      >
+                        Domain
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             ))
           )}

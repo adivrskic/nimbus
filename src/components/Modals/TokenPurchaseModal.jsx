@@ -3,8 +3,9 @@ import { X, Coins, Check, Loader2, LogIn } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
 import { supabase } from "../../lib/supabaseClient";
 import { track } from "../../lib/analytics";
-
+import useModalAnimation from "../../hooks/useModalAnimation";
 import "../../styles/modals.scss";
+
 const TOKEN_PACKAGES = [
   {
     id: "starter",
@@ -46,6 +47,7 @@ const TOKEN_PACKAGES = [
 
 function TokenPurchaseModal({ isOpen, onClose, onOpenAuth }) {
   const { user, profile, isAuthenticated } = useAuth();
+  const { shouldRender, isVisible } = useModalAnimation(isOpen, 300);
 
   const [selectedPackage, setSelectedPackage] = useState("popular");
   const [isProcessing, setIsProcessing] = useState(false);
@@ -98,14 +100,22 @@ function TokenPurchaseModal({ isOpen, onClose, onOpenAuth }) {
     }
   };
 
-  if (!isOpen) return null;
+  if (!shouldRender) return null;
 
   const selectedPkg = TOKEN_PACKAGES.find((p) => p.id === selectedPackage);
   const totalTokens = selectedPkg ? selectedPkg.tokens + selectedPkg.bonus : 0;
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+    <div
+      className={`modal-overlay ${isVisible ? "active" : ""}`}
+      onClick={onClose}
+    >
+      <div
+        className={`modal-content modal-content--surface modal-content--centered ${
+          isVisible ? "active" : ""
+        }`}
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="modal-header">
           <div className="modal-title">
             <Coins size={16} />

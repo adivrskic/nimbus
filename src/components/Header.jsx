@@ -1,18 +1,19 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import {
   Cloudy,
   LogOut,
-  ChevronDown,
   Coins,
   FolderOpen,
   Sun,
   Moon,
   SunMoon,
+  Loader2,
 } from "lucide-react";
 import { track } from "../lib/analytics";
 
 import { useAuth } from "../contexts/AuthContext";
 import { useProject } from "../contexts/ProjectContext";
+import { useGenerationState } from "../contexts/GenerationContext";
 import AuthModal from "./Modals/AuthModal";
 import TokenPurchaseModal from "./Modals/TokenPurchaseModal";
 import ProjectsModal from "./Modals/ProjectsModal";
@@ -24,6 +25,7 @@ function Header() {
   const { theme, toggleTheme } = useTheme();
 
   const { editProject, deployProject } = useProject();
+  const { previewPill } = useGenerationState();
   const {
     user,
     profile,
@@ -37,17 +39,14 @@ function Header() {
 
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [, setIsForgotPasswordOpen] = useState(false);
-  const [, setIsAccountModalOpen] = useState(false);
   const [isTokenModalOpen, setIsTokenModalOpen] = useState(false);
   const [isProjectsModalOpen, setIsProjectsModalOpen] = useState(false);
-  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isPageLoading, setIsPageLoading] = useState(false);
 
   const [isLegalModalOpen, setIsLegalModalOpen] = useState(false);
   const [legalSection, setLegalSection] = useState(null);
 
-  const userMenuRef = useRef(null);
   const userTokens = profile?.tokens || 0;
 
   useEffect(() => {
@@ -81,30 +80,12 @@ function Header() {
       }
     }
     if (hash && hash.includes("type=recovery")) {
-      if (isAuthenticated) {
-        setIsAccountModalOpen(true);
-      }
+      // handled elsewhere
     }
   }, [isAuthenticated, refreshProfile]);
 
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
-        setIsUserMenuOpen(false);
-      }
-    };
-    if (isUserMenuOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [isUserMenuOpen]);
-
   const handleLogout = async () => {
     track("logout");
-    setIsUserMenuOpen(false);
-    setIsAccountModalOpen(false);
     setIsLoggingOut(true);
     await logout();
   };
@@ -132,29 +113,6 @@ function Header() {
   const handleCloseLegal = () => {
     setIsLegalModalOpen(false);
     setLegalSection(null);
-  };
-
-  const getUserDisplayName = () => {
-    if (profile?.full_name) return profile.full_name;
-    if (user?.user_metadata?.full_name) return user.user_metadata.full_name;
-    if (user?.email) return user.email.split("@")[0];
-    return "User";
-  };
-
-  const getUserInitials = () => {
-    if (profile?.full_name) {
-      const parts = profile.full_name.trim().split(" ");
-      if (parts.length === 1) {
-        return parts[0].charAt(0).toUpperCase();
-      }
-      return (
-        parts[0].charAt(0) + parts[parts.length - 1].charAt(0)
-      ).toUpperCase();
-    }
-    if (user?.email) {
-      return user.email.charAt(0).toUpperCase();
-    }
-    return "U";
   };
 
   const shouldShowLoading = () => {
@@ -196,11 +154,6 @@ function Header() {
 
   return (
     <>
-      <div
-        className={`header-backdrop ${isUserMenuOpen ? "active" : ""}`}
-        onClick={() => setIsUserMenuOpen(false)}
-      />
-
       <header className="header">
         <div className="container">
           <div className="header__content">
@@ -211,11 +164,50 @@ function Header() {
               <span className="header__logo-text">nimbus</span>
             </div>
 
+            <div className="header__center">
+              {previewPill?.visible && (
+                <button
+                  className={`header__preview-pill ${
+                    previewPill.isGenerating
+                      ? "header__preview-pill--generating"
+                      : ""
+                  }`}
+                  onClick={previewPill.onRestore}
+                >
+                  <span
+                    className="header__marble"
+                    style={{
+                      background: previewPill.colors
+                        ? `radial-gradient(circle at 35% 35%, ${previewPill.colors.c}, ${previewPill.colors.a} 50%, ${previewPill.colors.b})`
+                        : undefined,
+                    }}
+                  />
+                  <span className="header__preview-text">
+                    {previewPill.isGenerating
+                      ? "Generating..."
+                      : "View Generated Project"}
+                  </span>
+                  {previewPill.isGenerating && (
+                    <Loader2 size={13} className="header__preview-spinner" />
+                  )}
+                </button>
+              )}
+            </div>
+
             <nav className="header__nav">
+              <button
+                className="header__icon-btn"
+                onClick={handleThemeToggle}
+                aria-label={getThemeLabel()}
+                title={getThemeLabel()}
+              >
+                {getThemeIcon()}
+              </button>
+
               {isAuthenticated ? (
                 <>
                   <button
-                    className="header__tokens"
+                    className="header__pill"
                     onClick={() => setIsTokenModalOpen(true)}
                     title="Get more tokens"
                   >
@@ -223,111 +215,42 @@ function Header() {
                     <span>{userTokens}</span>
                   </button>
 
-                  <div className="header__user-menu" ref={userMenuRef}>
-                    <button
-                      className="header__user-button"
-                      onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                      disabled={isLoggingOut || authIsLoading}
-                    >
-                      <div className="user-avatar">{getUserInitials()}</div>
-                      <ChevronDown
-                        size={14}
-                        className={`chevron ${isUserMenuOpen ? "open" : ""}`}
-                      />
-                    </button>
+                  <button
+                    className="header__icon-btn"
+                    onClick={() => setIsProjectsModalOpen(true)}
+                    title="Projects"
+                  >
+                    <FolderOpen size={16} />
+                  </button>
 
-                    {isUserMenuOpen && (
-                      <div className="dropdown">
-                        <div className="dropdown__header">
-                          <div className="dropdown__header-left">
-                            <span className="dropdown__name">
-                              {getUserDisplayName()}
-                            </span>
-                            <span className="dropdown__email">
-                              {user?.email}
-                            </span>
-                          </div>
-                          <button
-                            className="dropdown__theme-toggle"
-                            onClick={handleThemeToggle}
-                            aria-label={getThemeLabel()}
-                            title={getThemeLabel()}
-                          >
-                            {getThemeIcon()}
-                          </button>
-                        </div>
-
-                        <div className="dropdown__tokens">
-                          <span>{userTokens} tokens</span>
-                          <button
-                            onClick={() => {
-                              setIsUserMenuOpen(false);
-                              setIsTokenModalOpen(true);
-                            }}
-                          >
-                            Get More
-                          </button>
-                        </div>
-
-                        <div className="dropdown__items">
-                          <button
-                            className="dropdown__item"
-                            onClick={() => {
-                              setIsUserMenuOpen(false);
-                              setIsProjectsModalOpen(true);
-                            }}
-                          >
-                            <FolderOpen size={14} />
-                            Projects
-                          </button>
-
-                          <button
-                            className="dropdown__item dropdown__item--danger"
-                            onClick={handleLogout}
-                            disabled={isLoggingOut || authIsLoading}
-                          >
-                            {isLoggingOut ? (
-                              <>
-                                <span className="spinner-small"></span>
-                                Signing Out...
-                              </>
-                            ) : (
-                              <>
-                                <LogOut size={14} />
-                                Sign Out
-                              </>
-                            )}
-                          </button>
-                        </div>
-                      </div>
+                  <button
+                    className="header__icon-btn header__icon-btn--danger"
+                    onClick={handleLogout}
+                    disabled={isLoggingOut || authIsLoading}
+                    title="Sign out"
+                  >
+                    {isLoggingOut ? (
+                      <span className="spinner-small" />
+                    ) : (
+                      <LogOut size={16} />
                     )}
-                  </div>
+                  </button>
                 </>
               ) : (
-                <>
-                  <button
-                    className="header__theme-toggle--mobile"
-                    onClick={handleThemeToggle}
-                    aria-label={getThemeLabel()}
-                    title={getThemeLabel()}
-                  >
-                    {getThemeIcon()}
-                  </button>
-                  <button
-                    className="btn btn-primary"
-                    onClick={() => setIsAuthModalOpen(true)}
-                    disabled={shouldShowLoading()}
-                  >
-                    {shouldShowLoading() ? (
-                      <span className="loading-indicator">
-                        <span className="spinner-small"></span>
-                        Loading...
-                      </span>
-                    ) : (
-                      "Get Started"
-                    )}
-                  </button>
-                </>
+                <button
+                  className="header__cta"
+                  onClick={() => setIsAuthModalOpen(true)}
+                  disabled={shouldShowLoading()}
+                >
+                  {shouldShowLoading() ? (
+                    <span className="loading-indicator">
+                      <span className="spinner-small" />
+                      Loading...
+                    </span>
+                  ) : (
+                    "Get Started"
+                  )}
+                </button>
               )}
             </nav>
           </div>

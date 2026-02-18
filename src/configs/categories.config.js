@@ -26,35 +26,6 @@ export const CATEGORIES = [
   "typographyScale",
   "headingStyle",
 
-  // Components
-  "heroStyle",
-  "buttonStyle",
-  "cardStyle",
-  "formStyle",
-  "iconStyle",
-  "badgeStyle",
-  "avatarStyle",
-  "tabStyle",
-  "accordionStyle",
-  "carouselStyle",
-  "notificationStyle",
-  "progressStyle",
-  "tableStyle",
-  "linkStyle",
-  "listStyle",
-  "emptyStates",
-
-  // Content Blocks
-  "testimonialStyle",
-  "pricingStyle",
-  "statsStyle",
-  "teamStyle",
-  "faqStyle",
-  "contactStyle",
-  "footerStyle",
-  "ctaSectionStyle",
-  "socialProof",
-
   // Content & Copy
   "tone",
   "copyLength",
@@ -73,7 +44,6 @@ export const CATEGORIES = [
 
   // Spacing & Borders
   "spacingScale",
-  "dividerStyle",
   "borderWidth",
 
   // Media
@@ -121,10 +91,8 @@ export const CATEGORY_GROUPS = {
     "gradientStyle",
     "backgroundPattern",
     "corners",
-    "shadowStyle",
     "hoverEffects",
     "animation",
-    "dividerStyle",
     "emojis",
   ],
   content: [
@@ -137,23 +105,6 @@ export const CATEGORY_GROUPS = {
     "industry",
     "audience",
     "socialProof",
-  ],
-  components: [
-    "buttonStyle",
-    "cardStyle",
-    "formStyle",
-    "iconStyle",
-    "badgeStyle",
-    "avatarStyle",
-    "tabStyle",
-    "accordionStyle",
-    "carouselStyle",
-    "testimonialStyle",
-    "pricingStyle",
-    "statsStyle",
-    "teamStyle",
-    "faqStyle",
-    "contactStyle",
   ],
   technical: [
     "accessibility",
