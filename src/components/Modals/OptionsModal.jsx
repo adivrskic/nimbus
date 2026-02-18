@@ -1,6 +1,5 @@
 // components/Home/OptionsModal/OptionsModal.jsx - Updated with accordion status
 import { useState, useEffect, useRef, memo, useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import {
   X,
   ChevronLeft,
@@ -15,7 +14,7 @@ import {
 } from "lucide-react";
 import { OPTIONS, getFilteredCategories } from "../../configs";
 
-import "./modals.scss";
+import "../../styles/modals.scss";
 
 // ============================================
 // VALIDATORS
@@ -446,153 +445,135 @@ function OptionsModal({
                 isDesignExpanded ? "expanded" : "collapsed"
               }`}
             >
-              <AnimatePresence mode="wait">
-                {!activeOption ? (
-                  <motion.div
-                    key="grid"
-                    className="options-grid"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.15 }}
-                  >
-                    {filteredCategories.map((catKey) => {
-                      const opt = OPTIONS[catKey];
-                      if (!opt) return null;
-                      const Icon = opt?.icon;
-                      const isSelected = hasSelection(catKey);
-                      const displayVal = getDisplayValue(catKey);
+              {/* Grid / Choices panel switch */}
+              {!activeOption ? (
+                <div className="options-grid">
+                  {filteredCategories.map((catKey) => {
+                    const opt = OPTIONS[catKey];
+                    if (!opt) return null;
+                    const Icon = opt?.icon;
+                    const isSelected = hasSelection(catKey);
+                    const displayVal = getDisplayValue(catKey);
 
-                      return (
-                        <motion.button
-                          key={catKey}
-                          className={`options-card ${
-                            isSelected ? "options-card--active" : ""
-                          }`}
-                          onClick={() => selectCategory(catKey)}
-                        >
-                          <div className="options-card__icon">
-                            {Icon && <Icon size={14} />}
-                          </div>
-                          <div className="options-card__info">
-                            <span className="options-card__label">
-                              {opt?.label}
-                            </span>
-                            {isSelected && displayVal && (
-                              <span className="options-card__value">
-                                {displayVal}
-                              </span>
-                            )}
-                          </div>
-                          <ChevronRight
-                            size={12}
-                            className="options-card__arrow"
-                          />
-                        </motion.button>
-                      );
-                    })}
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key="choices"
-                    className="options-choices"
-                    initial={{ opacity: 0, x: 10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -10 }}
-                    transition={{ duration: 0.15 }}
-                  >
-                    <div className="options-choices__header">
-                      <button className="options-back" onClick={goToCategories}>
-                        <ChevronLeft size={14} />
-                      </button>
-                      <div className="options-choices__title">
-                        <span>{OPTIONS[activeOption]?.label}</span>
-                        <span className="options-choices__subtitle">
-                          {OPTIONS[activeOption]?.subtitle}
-                        </span>
-                      </div>
-                      {hasSelection(activeOption) && (
-                        <button
-                          className="options-reset"
-                          onClick={() => onReset(activeOption)}
-                        >
-                          Reset
-                        </button>
-                      )}
-                    </div>
-
-                    <div className="options-choices__grid">
-                      {OPTIONS[activeOption]?.choices?.map((choice) => {
-                        const isMulti = OPTIONS[activeOption].multi;
-                        const isActive = isMulti
-                          ? selections[activeOption]?.includes(choice.value)
-                          : selections[activeOption] === choice.value;
-
-                        return (
-                          <button
-                            key={choice.value}
-                            className={`options-choice ${
-                              isActive ? "options-choice--active" : ""
-                            }`}
-                            onClick={() =>
-                              handleSelect(activeOption, choice.value)
-                            }
-                          >
-                            {choice.colors && (
-                              <div className="options-choice__colors">
-                                {choice.colors.map((color, i) => (
-                                  <span key={i} style={{ background: color }} />
-                                ))}
-                              </div>
-                            )}
-                            <span>{choice.value}</span>
-                            {isActive && <Check size={12} />}
-                          </button>
-                        );
-                      })}
-                    </div>
-
-                    {activeOption === "palette" &&
-                      selections.palette === "Custom" && (
-                        <div className="options-custom-colors">
-                          {OPTIONS.customColors.fields.map((field) => (
-                            <div
-                              key={field.key}
-                              className="options-color-field"
-                            >
-                              <span>{field.label}</span>
-                              <div className="options-color-picker">
-                                <input
-                                  type="color"
-                                  value={
-                                    selections.customColors?.[field.key] ||
-                                    field.default
-                                  }
-                                  onChange={(e) => {
-                                    onSelect("customColors", {
-                                      ...selections.customColors,
-                                      [field.key]: e.target.value,
-                                    });
-                                  }}
-                                />
-                                <span>
-                                  {selections.customColors?.[field.key] ||
-                                    field.default}
-                                </span>
-                              </div>
-                            </div>
-                          ))}
+                    return (
+                      <button
+                        key={catKey}
+                        className={`options-card ${
+                          isSelected ? "options-card--active" : ""
+                        }`}
+                        onClick={() => selectCategory(catKey)}
+                      >
+                        <div className="options-card__icon">
+                          {Icon && <Icon size={14} />}
                         </div>
-                      )}
-
-                    {OPTIONS[activeOption]?.multi && (
-                      <button className="options-done" onClick={goToCategories}>
-                        Done ({selections[activeOption]?.length || 0})
+                        <div className="options-card__info">
+                          <span className="options-card__label">
+                            {opt?.label}
+                          </span>
+                          {isSelected && displayVal && (
+                            <span className="options-card__value">
+                              {displayVal}
+                            </span>
+                          )}
+                        </div>
+                        <ChevronRight
+                          size={12}
+                          className="options-card__arrow"
+                        />
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="options-choices">
+                  <div className="options-choices__header">
+                    <button className="options-back" onClick={goToCategories}>
+                      <ChevronLeft size={14} />
+                    </button>
+                    <div className="options-choices__title">
+                      <span>{OPTIONS[activeOption]?.label}</span>
+                      <span className="options-choices__subtitle">
+                        {OPTIONS[activeOption]?.subtitle}
+                      </span>
+                    </div>
+                    {hasSelection(activeOption) && (
+                      <button
+                        className="options-reset"
+                        onClick={() => onReset(activeOption)}
+                      >
+                        Reset
                       </button>
                     )}
-                  </motion.div>
-                )}
-              </AnimatePresence>
+                  </div>
+
+                  <div className="options-choices__grid">
+                    {OPTIONS[activeOption]?.choices?.map((choice) => {
+                      const isMulti = OPTIONS[activeOption].multi;
+                      const isActive = isMulti
+                        ? selections[activeOption]?.includes(choice.value)
+                        : selections[activeOption] === choice.value;
+
+                      return (
+                        <button
+                          key={choice.value}
+                          className={`options-choice ${
+                            isActive ? "options-choice--active" : ""
+                          }`}
+                          onClick={() =>
+                            handleSelect(activeOption, choice.value)
+                          }
+                        >
+                          {choice.colors && (
+                            <div className="options-choice__colors">
+                              {choice.colors.map((color, i) => (
+                                <span key={i} style={{ background: color }} />
+                              ))}
+                            </div>
+                          )}
+                          <span>{choice.value}</span>
+                          {isActive && <Check size={12} />}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {activeOption === "palette" &&
+                    selections.palette === "Custom" && (
+                      <div className="options-custom-colors">
+                        {OPTIONS.customColors.fields.map((field) => (
+                          <div key={field.key} className="options-color-field">
+                            <span>{field.label}</span>
+                            <div className="options-color-picker">
+                              <input
+                                type="color"
+                                value={
+                                  selections.customColors?.[field.key] ||
+                                  field.default
+                                }
+                                onChange={(e) => {
+                                  onSelect("customColors", {
+                                    ...selections.customColors,
+                                    [field.key]: e.target.value,
+                                  });
+                                }}
+                              />
+                              <span>
+                                {selections.customColors?.[field.key] ||
+                                  field.default}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                  {OPTIONS[activeOption]?.multi && (
+                    <button className="options-done" onClick={goToCategories}>
+                      Done ({selections[activeOption]?.length || 0})
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 

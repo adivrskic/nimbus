@@ -1,6 +1,6 @@
 // components/Home/TokenModal/TokenModal.jsx
 import { Coins, AlertCircle, CheckCircle } from "lucide-react";
-import "./modals.scss";
+import "../../styles/modals.scss";
 
 function TokenModal({
   isOpen,

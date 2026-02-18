@@ -3,8 +3,8 @@ import { X, Coins, Check, Loader2, LogIn } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
 import { supabase } from "../../lib/supabaseClient";
 import { track } from "../../lib/analytics";
-import "./modals.scss";
 
+import "../../styles/modals.scss";
 const TOKEN_PACKAGES = [
   {
     id: "starter",

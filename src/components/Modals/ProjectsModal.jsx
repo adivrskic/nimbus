@@ -15,7 +15,7 @@ import { supabase } from "../../lib/supabaseClient";
 import useModalAnimation from "../../hooks/useModalAnimation";
 import { track } from "../../lib/analytics";
 
-import "./modals.scss";
+import "../../styles/modals.scss";
 
 function ProjectsModal({
   isOpen,

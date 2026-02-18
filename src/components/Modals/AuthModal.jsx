@@ -1,18 +1,14 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
 import { X, Loader2 } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
-import {
-  overlayVariants,
-  authModalContentVariants,
-  authModalItemVariants,
-} from "../../configs/animations.config";
+import useModalAnimation from "../../hooks/useModalAnimation";
 import { track } from "../../lib/analytics";
 
-import "./modals.scss";
+import "../../styles/modals.scss";
 
 function AuthModal({ isOpen, onClose, onAuthSuccess, onOpenLegal }) {
   const { signInWithGoogle, signInWithGitHub, signInWithApple } = useAuth();
+  const { shouldRender, isVisible } = useModalAnimation(isOpen, 300);
 
   const [isLoading, setIsLoading] = useState(false);
   const [loadingProvider, setLoadingProvider] = useState(null);
@@ -57,46 +53,33 @@ function AuthModal({ isOpen, onClose, onAuthSuccess, onOpenLegal }) {
     }, 150);
   };
 
-  if (!isOpen) return null;
+  if (!shouldRender) return null;
 
   return (
-    <motion.div
-      className="modal-overlay"
+    <div
+      className={`modal-overlay ${isVisible ? "active" : ""}`}
       onClick={handleClose}
-      variants={overlayVariants}
-      initial="hidden"
-      animate="visible"
-      exit="exit"
     >
-      <motion.div
-        className="modal-content modal-content--sm"
+      <div
+        className={`modal-content modal-content--sm ${
+          isVisible ? "active" : ""
+        }`}
         onClick={(e) => e.stopPropagation()}
-        variants={authModalContentVariants}
-        initial="hidden"
-        animate="visible"
-        exit="exit"
       >
-        <motion.div className="modal-header" variants={authModalItemVariants}>
+        <div className="modal-header">
           <span className="modal-title">Sign in to create</span>
           <button className="modal-close" onClick={handleClose}>
             <X size={16} />
           </button>
-        </motion.div>
+        </div>
 
-        {error && (
-          <motion.div className="modal-error" variants={authModalItemVariants}>
-            {error}
-          </motion.div>
-        )}
+        {error && <div className="modal-error">{error}</div>}
 
         <div className="auth-providers">
-          <motion.button
+          <button
             className="auth-provider"
             onClick={() => handleOAuthSignIn("Google", signInWithGoogle)}
             disabled={isLoading}
-            variants={authModalItemVariants}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
           >
             {loadingProvider === "Google" ? (
               <Loader2 size={16} className="spinning" />
@@ -121,15 +104,12 @@ function AuthModal({ isOpen, onClose, onAuthSuccess, onOpenLegal }) {
               </svg>
             )}
             <span>Google</span>
-          </motion.button>
+          </button>
 
-          <motion.button
+          <button
             className="auth-provider"
             onClick={() => handleOAuthSignIn("GitHub", signInWithGitHub)}
             disabled={isLoading}
-            variants={authModalItemVariants}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
           >
             {loadingProvider === "GitHub" ? (
               <Loader2 size={16} className="spinning" />
@@ -139,10 +119,10 @@ function AuthModal({ isOpen, onClose, onAuthSuccess, onOpenLegal }) {
               </svg>
             )}
             <span>GitHub</span>
-          </motion.button>
+          </button>
         </div>
 
-        <motion.div className="auth-footer" variants={authModalItemVariants}>
+        <div className="auth-footer">
           By continuing, you agree to our{" "}
           <button
             type="button"
@@ -159,9 +139,9 @@ function AuthModal({ isOpen, onClose, onAuthSuccess, onOpenLegal }) {
           >
             Privacy
           </button>
-        </motion.div>
-      </motion.div>
-    </motion.div>
+        </div>
+      </div>
+    </div>
   );
 }
 

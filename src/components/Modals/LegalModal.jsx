@@ -9,8 +9,8 @@ import {
   X,
   Scale,
 } from "lucide-react";
-import "./modals.scss";
 
+import "../../styles/modals.scss";
 function Accordion({ items }) {
   const [openIndex, setOpenIndex] = useState(null);
 

@@ -1,6 +1,5 @@
 // components/Home/PreviewModal/PreviewModal.jsx - Unified single-row toolbar
 import { useState, useRef, useEffect, useMemo, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import {
   Eye,
   Code as Code2,
@@ -23,11 +22,7 @@ import {
 } from "lucide-react";
 import GeneratedPreview from "../GeneratedPreview";
 import FeedbackModal from "./FeedbackModal";
-import {
-  tokenContentVariants,
-  tokenItemVariants,
-} from "../../configs/animations.config";
-import "./modals.scss";
+import "../../styles/modals.scss";
 
 // Parse multi-page HTML if it contains file markers
 function parseMultiPageHtml(html) {
@@ -277,38 +272,30 @@ function PreviewModal({
                     />
                   </button>
 
-                  <AnimatePresence>
-                    {showPagePicker && (
-                      <motion.div
-                        className="pm-header__page-dropdown"
-                        initial={{ opacity: 0, y: -4, scale: 0.97 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: -4, scale: 0.97 }}
-                        transition={{ duration: 0.12 }}
-                      >
-                        {fileList.map((filename, index) => (
-                          <button
-                            key={filename}
-                            className={`pm-header__page-option ${
-                              activeFile === filename ? "active" : ""
-                            }`}
-                            onClick={() => {
-                              setActiveFile(filename);
-                              setShowPagePicker(false);
-                            }}
-                          >
-                            <span className="pm-header__page-option-idx">
-                              {index + 1}
-                            </span>
-                            <span className="pm-header__page-option-name">
-                              {getPageDisplayName(filename)}
-                            </span>
-                            {activeFile === filename && <Check size={13} />}
-                          </button>
-                        ))}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                  {showPagePicker && (
+                    <div className="pm-header__page-dropdown">
+                      {fileList.map((filename, index) => (
+                        <button
+                          key={filename}
+                          className={`pm-header__page-option ${
+                            activeFile === filename ? "active" : ""
+                          }`}
+                          onClick={() => {
+                            setActiveFile(filename);
+                            setShowPagePicker(false);
+                          }}
+                        >
+                          <span className="pm-header__page-option-idx">
+                            {index + 1}
+                          </span>
+                          <span className="pm-header__page-option-name">
+                            {getPageDisplayName(filename)}
+                          </span>
+                          {activeFile === filename && <Check size={13} />}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </>
             )}
@@ -356,23 +343,17 @@ function PreviewModal({
             />
 
             <div className="pm-header__enhance-btns">
-              <AnimatePresence>
-                {hasInput && !isEnhancing && (
-                  <motion.button
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.8 }}
-                    transition={{ duration: 0.1 }}
-                    className={`pm-header__enhance-cost ${
-                      showEnhanceTokenOverlay ? "active" : ""
-                    }`}
-                    onClick={onToggleEnhanceTokenOverlay}
-                  >
-                    <Coins size={13} />
-                    <span>{enhanceTokenCost}</span>
-                  </motion.button>
-                )}
-              </AnimatePresence>
+              {hasInput && !isEnhancing && (
+                <button
+                  className={`pm-header__enhance-cost ${
+                    showEnhanceTokenOverlay ? "active" : ""
+                  }`}
+                  onClick={onToggleEnhanceTokenOverlay}
+                >
+                  <Coins size={13} />
+                  <span>{enhanceTokenCost}</span>
+                </button>
+              )}
 
               <button
                 className="pm-header__enhance-go"
@@ -390,70 +371,54 @@ function PreviewModal({
             </div>
 
             {/* Token overlay */}
-            <AnimatePresence>
-              {showEnhanceTokenOverlay && (
-                <motion.div
-                  className="pm-header__token-overlay"
-                  onClick={(e) => e.stopPropagation()}
-                  variants={tokenContentVariants}
-                  initial="hidden"
-                  animate="visible"
-                  exit="exit"
-                >
-                  <motion.div
-                    className="pm-header__token-head"
-                    variants={tokenItemVariants}
-                  >
-                    <Coins size={16} />
-                    <span>{enhanceTokenCost} tokens</span>
-                  </motion.div>
-                  <motion.div className="pm-header__token-items">
-                    {enhanceBreakdown.map((item, i) => (
-                      <motion.div
-                        key={i}
-                        className={`pm-header__token-row ${
-                          item.type === "discount" ? "discount" : ""
-                        }`}
-                        variants={tokenItemVariants}
-                      >
-                        <span>{item.label}</span>
-                        <span>
-                          {item.type === "discount" ? "-" : "+"}
-                          {item.cost}
-                        </span>
-                      </motion.div>
-                    ))}
-                  </motion.div>
-                  {isAuthenticated && (
-                    <motion.div
-                      className="pm-header__token-bal"
-                      variants={tokenItemVariants}
+            {showEnhanceTokenOverlay && (
+              <div
+                className="pm-header__token-overlay"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="pm-header__token-head">
+                  <Coins size={16} />
+                  <span>{enhanceTokenCost} tokens</span>
+                </div>
+                <div className="pm-header__token-items">
+                  {enhanceBreakdown.map((item, i) => (
+                    <div
+                      key={i}
+                      className={`pm-header__token-row ${
+                        item.type === "discount" ? "discount" : ""
+                      }`}
                     >
-                      <span>Your balance</span>
-                      <span
-                        className={`pm-header__balance pm-header__balance--${tokenBalance.status}`}
-                      >
-                        {userTokens} tokens
+                      <span>{item.label}</span>
+                      <span>
+                        {item.type === "discount" ? "-" : "+"}
+                        {item.cost}
                       </span>
-                    </motion.div>
-                  )}
-                  {!tokenBalance.sufficient && (
-                    <motion.button
-                      className="pm-header__token-buy"
-                      onClick={() => {
-                        onToggleEnhanceTokenOverlay();
-                        onBuyTokens();
-                      }}
-                      variants={tokenItemVariants}
-                      whileHover={{ scale: 1.01 }}
-                      whileTap={{ scale: 0.99 }}
+                    </div>
+                  ))}
+                </div>
+                {isAuthenticated && (
+                  <div className="pm-header__token-bal">
+                    <span>Your balance</span>
+                    <span
+                      className={`pm-header__balance pm-header__balance--${tokenBalance.status}`}
                     >
-                      Get More Tokens
-                    </motion.button>
-                  )}
-                </motion.div>
-              )}
-            </AnimatePresence>
+                      {userTokens} tokens
+                    </span>
+                  </div>
+                )}
+                {!tokenBalance.sufficient && (
+                  <button
+                    className="pm-header__token-buy"
+                    onClick={() => {
+                      onToggleEnhanceTokenOverlay();
+                      onBuyTokens();
+                    }}
+                  >
+                    Get More Tokens
+                  </button>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Right: Preview actions + File actions + Close */}
@@ -596,18 +561,16 @@ function PreviewModal({
         </div>
       </div>
 
-      <AnimatePresence>
-        {showFeedbackModal && (
-          <FeedbackModal
-            isOpen={showFeedbackModal}
-            onClose={() => setShowFeedbackModal(false)}
-            lastRequest={lastRequest}
-            selections={selections}
-            generatedCode={currentHtml}
-            originalPrompt={originalPrompt}
-          />
-        )}
-      </AnimatePresence>
+      {showFeedbackModal && (
+        <FeedbackModal
+          isOpen={showFeedbackModal}
+          onClose={() => setShowFeedbackModal(false)}
+          lastRequest={lastRequest}
+          selections={selections}
+          generatedCode={currentHtml}
+          originalPrompt={originalPrompt}
+        />
+      )}
     </div>
   );
 }

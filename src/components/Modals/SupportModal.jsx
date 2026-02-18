@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Download, HelpCircle, Plus, X } from "lucide-react";
-import "./modals.scss";
 
+import "../../styles/modals.scss";
 function SupportAccordion({ items }) {
   const [openIndex, setOpenIndex] = useState(null);
 
