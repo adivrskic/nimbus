@@ -1,13 +1,9 @@
 // hooks/useGeneration.js - Streaming optimized with caching and multi-page support
-// IMPORTANT: Hook order must match original exactly, new hooks added at end of each group
 import { useState, useCallback, useRef, useEffect } from "react";
 import { buildFullPrompt } from "../utils/promptBuilder";
-import { generateDemo } from "../utils/demoGenerator";
 import { generateWebsiteStream } from "../utils/generateWebsiteStream";
 import { useGenerationState } from "../contexts/GenerationContext";
 
-// Cache utility - create stub if not available yet
-// Once you add generationCache.js, change this to: import generationCache from "../utils/generationCache";
 const generationCache = {
   get: () => null,
   set: () => {},
@@ -168,16 +164,11 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
           }
         }
 
-        const demoHtml = generateDemo(prompt, selections);
-        setGeneratedCode(demoHtml);
-        onSuccess?.({ code: demoHtml });
         return { code: demoHtml };
       } catch (error) {
         if (error.name !== "AbortError") {
           setGenerationError(error.message);
           onError?.(error);
-          const demoHtml = generateDemo(prompt, selections);
-          setGeneratedCode(demoHtml);
         }
       } finally {
         setIsGenerating(false);

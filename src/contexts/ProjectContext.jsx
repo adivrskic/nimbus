@@ -11,9 +11,8 @@ const ProjectContext = createContext();
 
 export function ProjectProvider({ children }) {
   const [pendingProject, setPendingProject] = useState(null);
-  const [pendingAction, setPendingAction] = useState(null); // 'edit' | 'deploy'
+  const [pendingAction, setPendingAction] = useState(null);
 
-  // Cached projects state
   const [projects, setProjects] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const hasFetchedRef = useRef(false);
@@ -24,21 +23,13 @@ export function ProjectProvider({ children }) {
     setPendingAction("edit");
   }, []);
 
-  const deployProject = useCallback((project) => {
-    console.log("ProjectContext: deployProject called", project?.id);
-    setPendingProject(project);
-    setPendingAction("deploy");
-  }, []);
-
   const clearPendingProject = useCallback(() => {
     setPendingProject(null);
     setPendingAction(null);
   }, []);
 
-  // Fetch projects (only if not already fetched)
   const fetchProjects = useCallback(
     async (force = false) => {
-      // Skip if already fetched and not forcing refresh
       if (hasFetchedRef.current && !force) {
         return projects;
       }
@@ -68,17 +59,14 @@ export function ProjectProvider({ children }) {
     [projects]
   );
 
-  // Force refresh projects (call after saving)
   const refreshProjects = useCallback(async () => {
     return fetchProjects(true);
   }, [fetchProjects]);
 
-  // Remove a project from cache
   const removeProjectFromCache = useCallback((projectId) => {
     setProjects((prev) => prev.filter((p) => p.id !== projectId));
   }, []);
 
-  // Add or update a project in cache
   const updateProjectInCache = useCallback((project) => {
     setProjects((prev) => {
       const existing = prev.findIndex((p) => p.id === project.id);
@@ -94,13 +82,10 @@ export function ProjectProvider({ children }) {
   return (
     <ProjectContext.Provider
       value={{
-        // Existing
         pendingProject,
         pendingAction,
         editProject,
-        deployProject,
         clearPendingProject,
-        // New cached projects
         projects,
         isLoading,
         hasFetched: hasFetchedRef.current,

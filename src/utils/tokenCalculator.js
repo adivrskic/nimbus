@@ -1,15 +1,3 @@
-// shared/tokenCalculator.js
-// SINGLE SOURCE OF TRUTH - Use this for both frontend and backend
-// For Deno/Edge Function: copy this file or import via URL
-// For Frontend: import normally
-
-/**
- * Calculate token cost for website generation
- * @param {string} prompt - User's prompt text
- * @param {Object} selections - User's customization selections
- * @param {boolean} isRefinement - Whether this is a refinement request
- * @returns {{ cost: number, breakdown: Record<string, number>, estimate: string, wordCount: number }}
- */
 export function calculateTokenCost(
   prompt = "",
   selections = {},
@@ -17,14 +5,7 @@ export function calculateTokenCost(
 ) {
   const breakdown = {};
 
-  // ============================================
-  // BASE COST
-  // ============================================
   breakdown.base = 10;
-
-  // ============================================
-  // PROMPT COMPLEXITY
-  // ============================================
   const safePrompt = typeof prompt === "string" ? prompt : String(prompt ?? "");
   const wordCount = safePrompt
     .trim()
@@ -251,10 +232,6 @@ export function calculateTokenCost(
     Morphing: 2,
   };
   breakdown.hoverEffects = hoverEffectsCosts[selections.hoverEffects] ?? 0;
-
-  // ============================================
-  // TYPOGRAPHY
-  // ============================================
   const typographyScaleCosts = {
     Compact: 0,
     Default: 0,
@@ -278,9 +255,6 @@ export function calculateTokenCost(
   };
   breakdown.headingStyle = headingStyleCosts[selections.headingStyle] ?? 0;
 
-  // ============================================
-  // COMPONENTS
-  // ============================================
   const heroStyleCosts = {
     Centered: 0,
     Split: 1,
@@ -488,9 +462,6 @@ export function calculateTokenCost(
   };
   breakdown.emptyStates = emptyStatesCosts[selections.emptyStates] ?? 0;
 
-  // ============================================
-  // CONTENT BLOCKS
-  // ============================================
   const testimonialStyleCosts = {
     Cards: 0,
     Carousel: 1,
@@ -582,10 +553,6 @@ export function calculateTokenCost(
   };
   breakdown.ctaSectionStyle =
     ctaSectionStyleCosts[selections.ctaSectionStyle] ?? 0;
-
-  // ============================================
-  // EFFECTS & MOTION
-  // ============================================
   const animationCosts = {
     None: 0,
     Minimal: 0,
@@ -626,9 +593,6 @@ export function calculateTokenCost(
   };
   breakdown.loadingStyle = loadingStyleCosts[selections.loadingStyle] ?? 0;
 
-  // ============================================
-  // SPACING & BORDERS
-  // ============================================
   const spacingScaleCosts = {
     Tight: 1,
     Default: 0,
@@ -653,9 +617,6 @@ export function calculateTokenCost(
   };
   breakdown.dividerStyle = dividerStyleCosts[selections.dividerStyle] ?? 0;
 
-  // ============================================
-  // MEDIA
-  // ============================================
   const imageCosts = {
     Photography: 1,
     Stock: 1,
@@ -693,9 +654,6 @@ export function calculateTokenCost(
   breakdown.codeBlockStyle =
     codeBlockStyleCosts[selections.codeBlockStyle] ?? 0;
 
-  // ============================================
-  // TECHNICAL
-  // ============================================
   const frameworkCosts = {
     "Vanilla CSS": 0,
     "Tailwind Classes": 2,
@@ -725,9 +683,6 @@ export function calculateTokenCost(
   };
   breakdown.mobileMenu = mobileMenuCosts[selections.mobileMenu] ?? 0;
 
-  // ============================================
-  // FEATURES
-  // ============================================
   const darkModeToggleCosts = { None: 0, Header: 1, Footer: 1, System: 1 };
   breakdown.darkModeToggle =
     darkModeToggleCosts[selections.darkModeToggle] ?? 0;
@@ -764,15 +719,9 @@ export function calculateTokenCost(
   breakdown.errorPageStyle =
     errorPageStyleCosts[selections.errorPageStyle] ?? 0;
 
-  // ============================================
-  // AI CONTROLS
-  // ============================================
   const creativityCosts = { Conservative: 0, Balanced: 0, Experimental: 1 };
   breakdown.creativity = creativityCosts[selections.creativity] ?? 0;
 
-  // ============================================
-  // CALCULATE TOTAL
-  // ============================================
   const totalCost = Object.values(breakdown).reduce(
     (sum, cost) => sum + (cost || 0),
     0
@@ -794,9 +743,6 @@ export function calculateTokenCost(
   };
 }
 
-/**
- * Format breakdown for display
- */
 export function getBreakdownDisplay(breakdown) {
   const labels = {
     base: "Base generation",
@@ -902,13 +848,6 @@ export function formatTokenCost(cost) {
   return `${Math.ceil(cost)} tokens`;
 }
 
-/**
- * Convenience wrapper that calculates token cost and returns formatted breakdown
- * @param {Object} selections - The user's selections
- * @param {string} prompt - The user's prompt
- * @param {boolean} isRefinement - Whether this is a refinement/enhance request
- * @returns {Array} Formatted breakdown for display
- */
 export function getTokenBreakdown(
   selections,
   prompt = "",

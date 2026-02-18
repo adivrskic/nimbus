@@ -1,20 +1,12 @@
-// hooks/useSelections.js - Hook for managing customization selections
 import { useState, useMemo, useCallback } from "react";
 import { OPTIONS } from "../configs/options.config";
 import { getInitialSelections } from "../configs/defaults.config";
 
-/**
- * Hook for managing customization selections state
- * @returns {Object} Selection state and handlers
- */
 export function useSelections() {
   const [selections, setSelections] = useState(() =>
     getInitialSelections(OPTIONS)
   );
 
-  /**
-   * Check if a selection has a value
-   */
   const hasSelection = useCallback(
     (key) => {
       const opt = OPTIONS[key];
@@ -23,7 +15,6 @@ export function useSelections() {
       if (opt.multi) return selections[key]?.length > 0;
 
       if (opt.isColorPicker) {
-        // Only show as selected if palette is set to "Custom"
         return selections.palette === "Custom";
       }
 
@@ -32,9 +23,6 @@ export function useSelections() {
     [selections]
   );
 
-  /**
-   * Get display value for a selection
-   */
   const getDisplayValue = useCallback(
     (key) => {
       const opt = OPTIONS[key];
@@ -47,12 +35,10 @@ export function useSelections() {
         return `${count} selected`;
       }
 
-      // Handle custom colors specially
       if (key === "palette" && selections[key] === "Custom") {
         return "Custom Colors";
       }
 
-      // Handle customColors object - return null since it's not a displayable value
       if (key === "customColors") {
         return null;
       }
@@ -62,9 +48,6 @@ export function useSelections() {
     [selections]
   );
 
-  /**
-   * Handle selection of an option
-   */
   const handleSelect = useCallback((optionKey, value) => {
     const opt = OPTIONS[optionKey];
     if (opt.multi) {
@@ -79,12 +62,9 @@ export function useSelections() {
     }
   }, []);
 
-  /**
-   * Reset a selection to its default value
-   */
   const resetSelection = useCallback((key) => {
     const opt = OPTIONS[key];
-    if (!opt) return; // Guard against undefined options
+    if (!opt) return;
     if (opt.multi) {
       setSelections((prev) => ({ ...prev, [key]: [] }));
     } else {
@@ -92,16 +72,10 @@ export function useSelections() {
     }
   }, []);
 
-  /**
-   * Reset all selections to defaults
-   */
   const resetAll = useCallback(() => {
     setSelections(getInitialSelections(OPTIONS));
   }, []);
 
-  /**
-   * Get active categories with their display values
-   */
   const activeCategories = useMemo(() => {
     return Object.keys(OPTIONS)
       .filter((key) => {
@@ -110,16 +84,13 @@ export function useSelections() {
         return displayValue !== null && displayValue !== undefined;
       })
       .map((key) => ({
-        category: key, // Changed from 'key' to 'category' to match SearchBar expectations
+        category: key,
         label: OPTIONS[key].label,
         value: getDisplayValue(key),
-        icon: OPTIONS[key].icon, // Also include icon if available
+        icon: OPTIONS[key].icon,
       }));
   }, [hasSelection, getDisplayValue]);
 
-  /**
-   * Check if user has made any customizations
-   */
   const hasCustomizations = useMemo(() => {
     return Object.entries(selections).some(([key, value]) => {
       if (Array.isArray(value)) {

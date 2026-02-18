@@ -1,10 +1,5 @@
-// utils/generateWebsiteStream.js - With multi-page parsing support
 import { supabase } from "../lib/supabaseClient";
 
-/**
- * Parse multi-page HTML response with file markers
- * Handles both: <!-- FILE: name.html --> and <!-- ========== FILE: name.html ========== -->
- */
 function parseMultiPageResponse(html) {
   if (!html) return null;
 
@@ -18,11 +13,8 @@ function parseMultiPageResponse(html) {
     const filename = parts[i]?.trim();
     const content = parts[i + 1]?.trim();
     if (filename && content) {
-      // Clean up the content - remove any leading/trailing whitespace and ensure proper HTML
       let cleanContent = content.trim();
 
-      // If content doesn't start with <!DOCTYPE or <html, it might be incomplete
-      // But we still add it to allow incremental display during streaming
       files[filename] = cleanContent;
     }
   }
@@ -30,19 +22,6 @@ function parseMultiPageResponse(html) {
   return Object.keys(files).length > 0 ? files : null;
 }
 
-/**
- * Generates a website via streaming from the edge function
- * With inline styles, no normalization needed - content is styled as it streams
- *
- * @param {Object} params
- * @param {string} params.prompt - The generation prompt
- * @param {Object} params.customization - Customization options (may include isRefinement, previousHtml)
- * @param {Object} params.persistentOptions - Persistent options (brand, contact, business info)
- * @param {AbortSignal} params.signal - AbortController signal for cancellation
- * @param {Function} params.onChunk - Optional callback for each chunk (raw)
- * @param {Function} params.onProgress - Optional callback with { phase, content, files } for UI updates
- * @returns {Promise<{ chunks: AsyncGenerator, getFullHtml: Function, getFiles: Function }>}
- */
 export async function generateWebsiteStream({
   prompt,
   customization = {},
@@ -55,7 +34,6 @@ export async function generateWebsiteStream({
     data: { session },
   } = await supabase.auth.getSession();
 
-  // Extract refinement params from customization if present
   const { isRefinement, previousHtml, ...restCustomization } = customization;
 
   const response = await fetch(
@@ -85,12 +63,9 @@ export async function generateWebsiteStream({
   const reader = response.body.getReader();
   const decoder = new TextDecoder();
 
-  // Accumulator for full HTML
   let fullHtml = "";
-  // Parsed files for multi-page sites
   let parsedFiles = null;
 
-  // Phase detection - simplified since styles are inline
   let currentPhase = "head";
 
   const detectPhase = (content) => {
@@ -99,7 +74,6 @@ export async function generateWebsiteStream({
     return currentPhase;
   };
 
-  // Check for multi-page content and parse files
   const updateFiles = () => {
     const files = parseMultiPageResponse(fullHtml);
     if (files) {
@@ -109,9 +83,6 @@ export async function generateWebsiteStream({
   };
 
   return {
-    /**
-     * Async generator that yields chunks as they arrive
-     */
     async *chunks() {
       try {
         while (true) {
@@ -121,13 +92,10 @@ export async function generateWebsiteStream({
           const chunk = decoder.decode(value, { stream: true });
           fullHtml += chunk;
 
-          // Detect phase for progress reporting
           const phase = detectPhase(fullHtml);
 
-          // Update parsed files
           const files = updateFiles();
 
-          // Call optional callbacks
           if (onChunk) onChunk(chunk);
           if (onProgress) onProgress({ phase, content: fullHtml, files });
 
@@ -138,35 +106,20 @@ export async function generateWebsiteStream({
       }
     },
 
-    /**
-     * Get the full accumulated HTML (call after streaming completes)
-     * With inline styles, no normalization needed
-     */
     getFullHtml() {
       return fullHtml;
     },
 
-    /**
-     * Get parsed files for multi-page sites
-     * Returns null for single-page sites
-     */
     getFiles() {
-      // Final parse to ensure we have the complete files
       updateFiles();
       return parsedFiles;
     },
 
-    /**
-     * Check if this is a multi-page site
-     */
     isMultiPage() {
       updateFiles();
       return parsedFiles !== null && Object.keys(parsedFiles).length > 1;
     },
 
-    /**
-     * Reset the accumulator (useful if reusing the stream object)
-     */
     reset() {
       fullHtml = "";
       parsedFiles = null;

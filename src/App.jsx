@@ -7,7 +7,6 @@ import {
 import { useEffect, lazy, Suspense, useState } from "react";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
-import ScrollToTop from "./components/ScrollToTop";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { ProjectProvider } from "./contexts/ProjectContext";
@@ -24,69 +23,6 @@ import { useTheme } from "./contexts/ThemeContext";
 import "./styles/global.scss";
 
 const Home = lazy(() => import("./pages/Home"));
-
-const PageLoader = () => {
-  const { isAuthenticated } = useAuth();
-
-  const topPosition = isAuthenticated ? "var(--header-height, 64px)" : "53px";
-
-  return (
-    <div
-      style={{
-        width: "100%",
-        height: "100vh",
-        zIndex: 9999,
-        backgroundColor: "transparent",
-        pointerEvents: "none",
-      }}
-    >
-      <div
-        style={{
-          position: "fixed",
-          top: topPosition,
-          left: 0,
-          width: "100%",
-          height: "2px",
-          backgroundColor: "var(--color-accent)",
-          overflow: "hidden",
-        }}
-      >
-        <div
-          style={{
-            height: "100%",
-            backgroundColor: "var(--color-accent)",
-            animation: "loadingBar 1.5s ease-in-out infinite",
-            transformOrigin: "left",
-          }}
-        />
-      </div>
-
-      <div
-        style={{
-          height: "100vh",
-          width: "100%",
-          backgroundColor: "transparent",
-        }}
-      />
-      <style>{`
-        @keyframes loadingBar {
-          0% {
-            width: 0%;
-            margin-left: 0%;
-          }
-          50% {
-            width: 70%;
-            margin-left: 0%;
-          }
-          100% {
-            width: 100%;
-            margin-left: 0%;
-          }
-        }
-      `}</style>
-    </div>
-  );
-};
 
 function AppContent() {
   const location = useLocation();
@@ -108,7 +44,7 @@ function AppContent() {
     <>
       <Header />
       <NoiseBlob isGenerating={isGenerating} isDark={theme === "dark"} />
-      <Suspense fallback={<PageLoader />}>
+      <Suspense fallback={<div style={{ minHeight: "100vh" }} />}>
         <Routes>
           <Route path="/" element={<Home />} />
         </Routes>
@@ -149,7 +85,6 @@ function App() {
         <ThemeProvider>
           <ProjectProvider>
             <GenerationProvider>
-              <ScrollToTop />
               <div className="app">
                 <AppContent />
               </div>

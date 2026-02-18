@@ -21,15 +21,13 @@ import {
   Maximize2,
   Minimize2,
 } from "lucide-react";
-import GeneratedPreview from "../../GeneratedPreview";
-import FeedbackModal from "../../Modals/FeedbackModal";
+import GeneratedPreview from "../GeneratedPreview";
+import FeedbackModal from "./FeedbackModal";
 import {
-  previewOverlayVariants,
-  previewContentVariants,
   tokenContentVariants,
   tokenItemVariants,
-} from "../../../configs/animations.config";
-import "./PreviewModal.scss";
+} from "../../configs/animations.config";
+import "./modals.scss";
 
 // Parse multi-page HTML if it contains file markers
 function parseMultiPageHtml(html) {
@@ -188,27 +186,21 @@ function PreviewModal({
   const hasInput = enhancePrompt.trim().length > 0;
 
   return (
-    <motion.div
-      className="preview-modal"
+    <div
+      className={`modal-overlay modal-overlay--preview ${
+        isOpen ? "active" : ""
+      }`}
       onClick={() => {
         onClose();
         onMinimize();
       }}
-      variants={previewOverlayVariants}
-      initial="hidden"
-      animate="visible"
-      exit="exit"
     >
-      <motion.div
+      <div
         ref={containerRef}
-        className={`preview-modal__container ${
-          isFullscreen ? "preview-modal__container--fullscreen" : ""
-        }`}
+        className={`modal-content modal-content--preview ${
+          isFullscreen ? "modal-content--fullscreen" : ""
+        } ${isOpen ? "active" : ""}`}
         onClick={(e) => e.stopPropagation()}
-        variants={previewContentVariants}
-        initial="hidden"
-        animate="visible"
-        exit="exit"
       >
         {/* ===== UNIFIED HEADER ===== */}
         <div className="pm-header">
@@ -602,7 +594,7 @@ function PreviewModal({
             </div>
           )}
         </div>
-      </motion.div>
+      </div>
 
       <AnimatePresence>
         {showFeedbackModal && (
@@ -616,7 +608,7 @@ function PreviewModal({
           />
         )}
       </AnimatePresence>
-    </motion.div>
+    </div>
   );
 }
 

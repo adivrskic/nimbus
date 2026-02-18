@@ -1,13 +1,7 @@
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { X, Coins, Check, Loader2, LogIn } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
 import { supabase } from "../../lib/supabaseClient";
-import {
-  overlayVariants,
-  tokensModalContentVariants,
-  tokensModalItemVariants,
-} from "../../configs/animations.config";
 import { track } from "../../lib/analytics";
 import "./modals.scss";
 
@@ -110,23 +104,9 @@ function TokenPurchaseModal({ isOpen, onClose, onOpenAuth }) {
   const totalTokens = selectedPkg ? selectedPkg.tokens + selectedPkg.bonus : 0;
 
   return (
-    <motion.div
-      className="modal-overlay"
-      onClick={onClose}
-      variants={overlayVariants}
-      initial="hidden"
-      animate="visible"
-      exit="exit"
-    >
-      <motion.div
-        className="modal-content"
-        onClick={(e) => e.stopPropagation()}
-        variants={tokensModalContentVariants}
-        initial="hidden"
-        animate="visible"
-        exit="exit"
-      >
-        <motion.div className="modal-header" variants={tokensModalItemVariants}>
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-header">
           <div className="modal-title">
             <Coins size={16} />
             <span>Get Tokens</span>
@@ -134,31 +114,25 @@ function TokenPurchaseModal({ isOpen, onClose, onOpenAuth }) {
           <button className="modal-close" onClick={onClose}>
             <X size={16} />
           </button>
-        </motion.div>
+        </div>
 
         {isAuthenticated && profile?.tokens !== undefined && (
-          <motion.div
-            className="tokens-balance"
-            variants={tokensModalItemVariants}
-          >
+          <div className="tokens-balance">
             <span>Current balance</span>
             <span>{profile.tokens} tokens</span>
-          </motion.div>
+          </div>
         )}
 
         <div className="tokens-packages">
           {TOKEN_PACKAGES.map((pkg) => {
             const total = pkg.tokens + pkg.bonus;
             return (
-              <motion.button
+              <button
                 key={pkg.id}
                 className={`token-option ${
                   selectedPackage === pkg.id ? "selected" : ""
                 }`}
                 onClick={() => setSelectedPackage(pkg.id)}
-                variants={tokensModalItemVariants}
-                whileHover={{ scale: 1.01 }}
-                whileTap={{ scale: 0.99 }}
               >
                 <div className="token-option__left">
                   <span className="token-option__amount">{total} tokens</span>
@@ -182,53 +156,40 @@ function TokenPurchaseModal({ isOpen, onClose, onOpenAuth }) {
                     </span>
                   )}
                 </div>
-              </motion.button>
+              </button>
             );
           })}
         </div>
 
-        {error && (
-          <motion.div
-            className="modal-error"
-            variants={tokensModalItemVariants}
-          >
-            {error}
-          </motion.div>
-        )}
+        {error && <div className="modal-error">{error}</div>}
 
         {isAuthenticated ? (
-          <motion.button
+          <button
             className="modal-btn-primary modal-btn-primary--pill"
             onClick={handlePurchase}
             disabled={isProcessing}
-            variants={tokensModalItemVariants}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
           >
             {isProcessing ? (
               <Loader2 size={14} className="spinning" />
             ) : (
               `Buy ${totalTokens} tokens for $${selectedPkg?.price}`
             )}
-          </motion.button>
+          </button>
         ) : (
-          <motion.button
+          <button
             className="modal-btn-primary modal-btn-primary--pill"
             onClick={handleLoginClick}
-            variants={tokensModalItemVariants}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
           >
             <LogIn size={14} />
             <span>Log in to purchase tokens</span>
-          </motion.button>
+          </button>
         )}
 
-        <motion.div className="modal-note" variants={tokensModalItemVariants}>
+        <div className="modal-note">
           Secured by Stripe • Tokens never expire
-        </motion.div>
-      </motion.div>
-    </motion.div>
+        </div>
+      </div>
+    </div>
   );
 }
 

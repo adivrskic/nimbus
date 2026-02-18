@@ -379,7 +379,6 @@ export function buildFullPrompt(
     promptParts.push("", "TECHNICAL REQUIREMENTS:", ...techSpecs);
   }
 
-  // Build functional links requirements based on provided data
   const functionalLinksRequirements = buildFunctionalLinksRequirements(
     persistentOptions,
     multiPage
@@ -429,13 +428,9 @@ Return ONLY the HTML code, no explanations.`
   return promptParts.join("\n");
 }
 
-/**
- * Build requirements for functional links based on provided persistent options
- */
 function buildFunctionalLinksRequirements(persistentOptions, multiPage) {
   const requirements = ["", "⚠️ CRITICAL - ALL LINKS MUST BE FUNCTIONAL:"];
 
-  // Navigation links
   if (multiPage) {
     requirements.push(
       "- Navigation: Use actual page filenames (about.html, services.html, contact.html, etc.)",
@@ -449,7 +444,6 @@ function buildFunctionalLinksRequirements(persistentOptions, multiPage) {
     );
   }
 
-  // Contact info
   const hasEmail = persistentOptions?.contactInfo?.email?.trim();
   const hasPhone = persistentOptions?.contactInfo?.phone?.trim();
   const hasFormEndpoint =
@@ -470,7 +464,6 @@ function buildFunctionalLinksRequirements(persistentOptions, multiPage) {
     }
 
     if (hasPhone) {
-      // Clean phone number for tel: link (remove spaces, dashes, parentheses)
       const cleanPhone = persistentOptions.contactInfo.phone.replace(
         /[\s\-\(\)\.]/g,
         ""
@@ -506,7 +499,6 @@ function buildFunctionalLinksRequirements(persistentOptions, multiPage) {
     );
   }
 
-  // Social media links
   const socialMedia = persistentOptions?.socialMedia;
   const hasSocialLinks =
     socialMedia && Object.values(socialMedia).some((url) => url?.trim());
@@ -549,7 +541,6 @@ function buildFunctionalLinksRequirements(persistentOptions, multiPage) {
     );
   }
 
-  // Other links
   const links = persistentOptions?.links;
   const hasOtherLinks =
     links && Object.values(links).some((url) => url?.trim());
@@ -564,7 +555,6 @@ function buildFunctionalLinksRequirements(persistentOptions, multiPage) {
     });
   }
 
-  // General link requirements
   requirements.push(
     "",
     "General Link Rules:",
@@ -603,7 +593,6 @@ function buildPersistentContentParts(persistentOptions) {
 
   const persistentParts = [];
 
-  // Brand Identity
   if (
     persistentOptions.branding?.brandName ||
     persistentOptions.branding?.tagline ||
@@ -622,7 +611,6 @@ function buildPersistentContentParts(persistentOptions) {
       persistentParts.push(`- Logo URL: ${persistentOptions.branding.logoUrl}`);
   }
 
-  // Business Information (NEW)
   if (
     persistentOptions.business?.description ||
     persistentOptions.business?.location ||
@@ -644,7 +632,6 @@ function buildPersistentContentParts(persistentOptions) {
       );
   }
 
-  // Contact Information
   if (persistentOptions.contactInfo) {
     const contactInfo = [];
     if (persistentOptions.contactInfo.email?.trim())
@@ -671,7 +658,6 @@ function buildPersistentContentParts(persistentOptions) {
     }
   }
 
-  // Social Media
   if (persistentOptions.socialMedia) {
     const socialLinks = Object.entries(persistentOptions.socialMedia)
       .filter(([_, url]) => url && url.trim())
@@ -686,7 +672,6 @@ function buildPersistentContentParts(persistentOptions) {
     }
   }
 
-  // Content Preferences (NEW)
   if (
     persistentOptions.content?.primaryCta ||
     persistentOptions.content?.copyrightText
@@ -703,7 +688,6 @@ function buildPersistentContentParts(persistentOptions) {
       );
   }
 
-  // Other Links
   if (persistentOptions.links) {
     const links = Object.entries(persistentOptions.links)
       .filter(([_, url]) => url && url.trim())
@@ -714,7 +698,6 @@ function buildPersistentContentParts(persistentOptions) {
     }
   }
 
-  // Provided Images
   if (persistentOptions.images?.length > 0) {
     persistentParts.push("", "Provided Images:");
     persistentOptions.images.forEach((img, i) => {

@@ -1,24 +1,16 @@
-// hooks/useHomeState.js - Manages all UI state for Home page
 import { useState, useCallback, useRef } from "react";
 import { DEFAULT_PERSISTENT_OPTIONS } from "../configs/defaults.config";
 import { track } from "../lib/analytics";
 
-/**
- * Hook for managing Home page UI state
- * @returns {Object} UI state and handlers
- */
 export function useHomeState() {
-  // Input state
   const [prompt, setPrompt] = useState("");
   const [isExpanded, setIsExpanded] = useState(false);
   const inputRef = useRef(null);
 
-  // Persistent options for content (branding, social, contact, etc.)
   const [persistentOptions, setPersistentOptions] = useState(
     DEFAULT_PERSISTENT_OPTIONS
   );
 
-  // Modal states
   const [showOptions, setShowOptions] = useState(false);
   const [showTokenOverlay, setShowTokenOverlay] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
@@ -29,17 +21,14 @@ export function useHomeState() {
   const [showPreview, setShowPreview] = useState(false);
   const [previewMinimized, setPreviewMinimized] = useState(false);
 
-  // Options overlay state
   const [optionsIntroComplete, setOptionsIntroComplete] = useState(false);
   const [selectedOption, setSelectedOption] = useState(null);
   const [slideDirection, setSlideDirection] = useState(1);
 
-  // Focus input
   const focusInput = useCallback(() => {
     inputRef.current?.focus();
   }, []);
 
-  // Handle input expand/collapse
   const handleInputFocus = useCallback(() => {
     setIsExpanded(true);
   }, []);
@@ -50,12 +39,10 @@ export function useHomeState() {
     }
   }, [prompt]);
 
-  // Handle prompt change
   const handlePromptChange = useCallback((e) => {
     setPrompt(e.target.value);
   }, []);
 
-  // Modal handlers
   const openOptions = useCallback(() => {
     track("customize");
     setShowOptions(true);
@@ -116,7 +103,6 @@ export function useHomeState() {
     setShowTokenOverlay(false);
   }, []);
 
-  // Preview handlers
   const openPreview = useCallback(() => {
     setShowPreview(true);
     setPreviewMinimized(false);
@@ -138,7 +124,6 @@ export function useHomeState() {
     setPreviewMinimized(false);
   }, []);
 
-  // Options navigation
   const selectOption = useCallback(
     (optionKey) => {
       if (selectedOption) {
@@ -154,12 +139,10 @@ export function useHomeState() {
     setSelectedOption(null);
   }, []);
 
-  // Update persistent options
   const updatePersistentOption = useCallback((key, value) => {
     setPersistentOptions((prev) => ({ ...prev, [key]: value }));
   }, []);
 
-  // Reset all state
   const resetAll = useCallback(() => {
     setPrompt("");
     setIsExpanded(false);
@@ -171,7 +154,6 @@ export function useHomeState() {
   }, []);
 
   return {
-    // Input state
     prompt,
     setPrompt,
     isExpanded,
@@ -181,12 +163,10 @@ export function useHomeState() {
     handlePromptChange,
     focusInput,
 
-    // Persistent options
     persistentOptions,
     setPersistentOptions,
     updatePersistentOption,
 
-    // Modal states
     showOptions,
     showTokenOverlay,
     showAuth,
@@ -197,7 +177,6 @@ export function useHomeState() {
     showPreview,
     previewMinimized,
 
-    // Modal handlers
     openOptions,
     closeOptions,
     openHelp,
@@ -217,7 +196,6 @@ export function useHomeState() {
     minimizePreview,
     restorePreview,
 
-    // Options overlay state
     optionsIntroComplete,
     setOptionsIntroComplete,
     selectedOption,
@@ -227,7 +205,6 @@ export function useHomeState() {
     selectOption,
     goBackToCategories,
 
-    // Reset
     resetAll,
   };
 }

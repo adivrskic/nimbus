@@ -1,7 +1,7 @@
 // components/Home/ActivePills/ActivePills.jsx - Display active selection pills
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
-import { activePillVariants } from "../../../configs/animations.config";
+import { activePillVariants } from "../configs/animations.config";
 import "./ActivePills.scss";
 
 function ActivePills({ categories, onPillClick, onResetClick }) {

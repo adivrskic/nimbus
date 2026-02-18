@@ -143,7 +143,6 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // Refresh tokens from database
   const refreshTokens = async () => {
     if (!user?.id) return;
 
@@ -163,7 +162,6 @@ export function AuthProvider({ children }) {
       console.log("Tokens refreshed:", tokens);
       setUserTokens(tokens);
 
-      // Also update profile if it exists
       if (profile) {
         setProfile((prev) => ({ ...prev, tokens }));
       }
@@ -255,7 +253,6 @@ export function AuthProvider({ children }) {
             setUser(verificationData.user);
             await loadUserProfile(verificationData.user.id);
 
-            // Clean up URL
             window.history.replaceState(
               {},
               document.title,
@@ -263,7 +260,6 @@ export function AuthProvider({ children }) {
             );
           }
         } else if (session?.user) {
-          // Regular session exists
           setUser(session.user);
           await loadUserProfile(session.user.id);
         }
@@ -283,18 +279,15 @@ export function AuthProvider({ children }) {
 
     let authChangeTimeout = null;
     const handleAuthStateChange = async (event, session) => {
-      // Clear any pending auth change
       if (authChangeTimeout) {
         clearTimeout(authChangeTimeout);
       }
 
-      // Debounce auth state changes to prevent rapid updates
       authChangeTimeout = setTimeout(async () => {
         if (!active) return;
 
         console.log("Auth state change:", event, session?.user?.email);
 
-        // Only process if tab is visible
         if (!isTabVisibleRef.current) {
           console.log("Tab not visible, queuing auth state change");
           pendingAuthActionsRef.current.push({ event, session });
@@ -305,7 +298,6 @@ export function AuthProvider({ children }) {
         setLastAuthCheck(Date.now());
 
         if (event === "SIGNED_OUT" || event === "USER_DELETED") {
-          // Clear all state on sign out
           console.log("🔄 Auth state: SIGNED_OUT event detected");
           setUser(null);
           setProfile(null);
@@ -327,7 +319,6 @@ export function AuthProvider({ children }) {
             console.log("User updated");
           }
         } else {
-          // No session and not SIGNED_OUT event (initial state)
           console.log("🔄 Auth state: No active session");
           setUser(null);
           setProfile(null);
@@ -335,12 +326,11 @@ export function AuthProvider({ children }) {
         }
 
         setLoadingSafe(false);
-      }, 500); // 500ms debounce
+      }, 500);
     };
 
     authSubscription = supabase.auth.onAuthStateChange(handleAuthStateChange);
 
-    // Process pending auth actions when tab becomes visible
     const processPendingAuthActions = () => {
       if (pendingAuthActionsRef.current.length > 0 && isTabVisibleRef.current) {
         console.log(
@@ -350,7 +340,6 @@ export function AuthProvider({ children }) {
         const actions = [...pendingAuthActionsRef.current];
         pendingAuthActionsRef.current = [];
 
-        // Process the most recent auth action
         if (actions.length > 0) {
           const lastAction = actions[actions.length - 1];
           handleAuthStateChange(lastAction.event, lastAction.session);
@@ -358,7 +347,6 @@ export function AuthProvider({ children }) {
       }
     };
 
-    // Check session periodically (but less frequently)
     const checkSession = async () => {
       if (user && active && isTabVisibleRef.current) {
         const isValid = await validateSession();
@@ -371,7 +359,6 @@ export function AuthProvider({ children }) {
       }
     };
 
-    // Check session every 10 minutes (increased from 5)
     timeoutId = setInterval(checkSession, 10 * 60 * 1000);
 
     return () => {
@@ -384,22 +371,19 @@ export function AuthProvider({ children }) {
     };
   }, []);
 
-  // Process pending actions when tab becomes visible
   useEffect(() => {
     const handleVisibilityChange = () => {
       const isVisible = !document.hidden;
       isTabVisibleRef.current = isVisible;
 
       if (isVisible) {
-        // Tab became visible, process any pending auth actions
         setTimeout(() => {
           if (pendingAuthActionsRef.current.length > 0) {
             console.log("Tab visible, processing pending auth actions");
-            // Just refresh session instead of processing all pending actions
             refreshSession();
             pendingAuthActionsRef.current = [];
           }
-        }, 1000); // Delay to let everything stabilize
+        }, 1000);
       }
     };
 
@@ -410,12 +394,10 @@ export function AuthProvider({ children }) {
     };
   }, []);
 
-  // In your AuthContext - simplify loadUserProfile
   const loadUserProfile = async (userId) => {
     try {
       console.log("Loading profile for user:", userId);
 
-      // Simple profile fetch
       const { data, error } = await supabase
         .from("profiles")
         .select("*")
@@ -423,7 +405,6 @@ export function AuthProvider({ children }) {
         .single();
 
       if (error) {
-        // If profile doesn't exist, create it with minimal data
         if (error.code === "PGRST116") {
           console.log("Creating minimal profile...");
           return await createUserProfile(userId);
@@ -435,7 +416,6 @@ export function AuthProvider({ children }) {
       console.log("Profile loaded:", data);
       setProfile(data);
 
-      // Set tokens from profile
       setUserTokens(data?.tokens ?? 0);
 
       return data;
@@ -445,7 +425,6 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // Simplify createUserProfile
   const createUserProfile = async (userId) => {
     try {
       const { data: userData } = await supabase.auth.getUser();
@@ -456,7 +435,7 @@ export function AuthProvider({ children }) {
           id: userId,
           email: userData?.user?.email,
           full_name: userData?.user?.user_metadata?.full_name || null,
-          tokens: 100, // Default starting tokens for new users
+          tokens: 20,
         })
         .select()
         .single();
@@ -468,7 +447,7 @@ export function AuthProvider({ children }) {
 
       console.log("Profile created:", data);
       setProfile(data);
-      setUserTokens(data?.tokens ?? 100);
+      setUserTokens(data?.tokens ?? 20);
       return data;
     } catch (err) {
       console.error("Profile creation error:", err);
@@ -506,7 +485,6 @@ export function AuthProvider({ children }) {
       }
 
       if (data?.user && data.session) {
-        // Auto-confirmed (might happen in development)
         setUser(data.user);
         await loadUserProfile(data.user.id);
         return { success: true, user: data.user };
@@ -523,7 +501,6 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // Login with safe loading
   const login = async (email, password, rememberMe = false) => {
     try {
       setLoadingSafe(true);
@@ -543,7 +520,6 @@ export function AuthProvider({ children }) {
         setRememberedEmail(null);
       }
 
-      // Refresh the session to ensure consistency
       await refreshSession();
 
       return { success: true, user: data.user };
@@ -559,9 +535,6 @@ export function AuthProvider({ children }) {
       console.log("🚪 Starting logout...");
 
       setLoadingSafe(true);
-
-      // Clear all local state FIRST
-      console.log("Clearing local state...");
       setUser(null);
       setProfile(null);
       setUserTokens(0);
@@ -569,9 +542,7 @@ export function AuthProvider({ children }) {
       localStorage.removeItem("rememberedEmail");
       setJustVerifiedEmail(false);
 
-      // Clear any cached Supabase data
       if (typeof window !== "undefined") {
-        // Clear Supabase related localStorage
         Object.keys(localStorage).forEach((key) => {
           if (key.includes("supabase") || key.includes("sb-")) {
             localStorage.removeItem(key);
@@ -579,7 +550,6 @@ export function AuthProvider({ children }) {
         });
       }
 
-      // Sign out from Supabase with error handling
       console.log("Signing out from Supabase...");
       const { error } = await supabase.auth.signOut();
       if (error) {
@@ -588,16 +558,13 @@ export function AuthProvider({ children }) {
         console.log("Supabase session cleared");
       }
 
-      // Force a small delay to ensure Supabase cleans up
       await new Promise((resolve) => setTimeout(resolve, 300));
 
-      // Double-check session is cleared
       const {
         data: { session },
       } = await supabase.auth.getSession();
       if (session) {
         console.warn("Session still exists after logout, forcing cleanup");
-        // Force clear all auth storage
         if (typeof window !== "undefined") {
           localStorage.clear();
           sessionStorage.clear();
@@ -606,12 +573,10 @@ export function AuthProvider({ children }) {
 
       console.log("✅ Logout completed, reloading page...");
 
-      // Force hard reload to clear all React state and Supabase caches
       window.location.href = "/";
       window.location.reload();
     } catch (err) {
       console.error("Logout failed:", err);
-      // Still force refresh even on error
       window.location.href = "/";
     } finally {
       setLoadingSafe(false);
@@ -629,7 +594,6 @@ export function AuthProvider({ children }) {
       if (error) throw error;
       setProfile(data);
 
-      // Update tokens if they were part of the update
       if (data?.tokens !== undefined) {
         setUserTokens(data.tokens);
       }
@@ -644,7 +608,6 @@ export function AuthProvider({ children }) {
     try {
       console.log("Starting password update...");
 
-      // Start the update but don't wait for it to complete
       supabase.auth
         .updateUser({
           password: newPassword,
@@ -657,7 +620,6 @@ export function AuthProvider({ children }) {
           }
         });
 
-      // Wait just 1 second to show it started, then return success
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
       console.log("Password update initiated successfully");
@@ -671,7 +633,6 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // Reset password (sends email)
   const resetPassword = async (email) => {
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
@@ -684,7 +645,6 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // OAuth providers
   const signInWithGoogle = async () => {
     try {
       const { error } = await supabase.auth.signInWithOAuth({
@@ -711,7 +671,6 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // **Helper to set session from URL hash**
   const setSessionFromHash = async (hash) => {
     const params = Object.fromEntries(
       hash
@@ -729,7 +688,6 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // Clear the just verified flag
   const clearJustVerifiedFlag = () => {
     setJustVerifiedEmail(false);
   };
@@ -741,7 +699,7 @@ export function AuthProvider({ children }) {
     refreshTokens,
     rememberedEmail,
     isLoading,
-    isAuthenticated: !!user && !!user.id, // More strict check
+    isAuthenticated: !!user && !!user.id,
     justVerifiedEmail,
     clearJustVerifiedFlag,
     signup,
@@ -758,21 +716,10 @@ export function AuthProvider({ children }) {
     refreshSession,
     validateSession,
     lastAuthCheck,
-    // Expose safe loading setter for components
     setLoadingSafe,
     signInWithGitHub,
     signInWithGoogle,
   };
-
-  console.log("Auth context state:", {
-    user: user?.email,
-    profile: !!profile,
-    userTokens,
-    isLoading,
-    isAuthenticated: !!user,
-    justVerifiedEmail,
-    lastAuthCheck,
-  });
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
