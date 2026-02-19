@@ -1,5 +1,4 @@
-// components/GeneratedPreview.jsx - Stripped toolbar, viewMode controlled by parent
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useRef, useEffect } from "react";
 import { track } from "../lib/analytics";
 import "./GeneratedPreview.scss";
 
@@ -26,11 +25,9 @@ function GeneratedPreview({
     }
   };
 
-  // Update iframe content using document.write - no flash!
   useEffect(() => {
     if (!html || !iframeRef.current) return;
 
-    // Skip if content hasn't changed
     if (html === lastHtmlRef.current) return;
     lastHtmlRef.current = html;
 
@@ -43,7 +40,6 @@ function GeneratedPreview({
         doc.write(html);
         doc.close();
 
-        // Auto-scroll during streaming
         if (isStreaming) {
           if (scrollTimeoutRef.current) {
             clearTimeout(scrollTimeoutRef.current);
@@ -63,7 +59,7 @@ function GeneratedPreview({
                 }
               }
             } catch (e) {
-              // Ignore cross-origin errors
+              console.log(e);
             }
           }, 100);
         }
@@ -73,7 +69,6 @@ function GeneratedPreview({
     }
   }, [html, isStreaming]);
 
-  // Scroll to top when streaming completes
   useEffect(() => {
     if (!isStreaming && lastHtmlRef.current && iframeRef.current) {
       if (scrollTimeoutRef.current) {
@@ -94,7 +89,6 @@ function GeneratedPreview({
     }
   }, [isStreaming]);
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       if (scrollTimeoutRef.current) {
@@ -103,7 +97,6 @@ function GeneratedPreview({
     };
   }, []);
 
-  // Reset iframe when html becomes empty
   useEffect(() => {
     if (!html && iframeRef.current) {
       lastHtmlRef.current = "";

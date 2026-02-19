@@ -1,904 +1,662 @@
-// components/Home/OptionsModal/OptionsModal.jsx - Updated with accordion status
-import { useState, useEffect, useRef, memo, useMemo } from "react";
-import {
-  X,
-  ChevronLeft,
-  ChevronRight,
-  Check,
-  Settings,
-  ChevronDown,
-  AlertCircle,
-  CheckCircle,
-  Circle,
-  Edit2,
-} from "lucide-react";
-import { OPTIONS, getFilteredCategories } from "../../configs";
+import { useState } from "react";
 
-import "../../styles/modals.scss";
+const MOCK_CATEGORIES = [
+  {
+    key: "layout",
+    label: "Layout",
+    icon: "⊞",
+    group: "layout",
+    selected: true,
+    value: "Single Page",
+  },
+  {
+    key: "palette",
+    label: "Color Palette",
+    icon: "◐",
+    group: "visual",
+    selected: true,
+    value: "Ocean",
+  },
+  {
+    key: "typography",
+    label: "Typography",
+    icon: "Aa",
+    group: "visual",
+    selected: false,
+  },
+  {
+    key: "style",
+    label: "Visual Style",
+    icon: "◆",
+    group: "visual",
+    selected: false,
+  },
+  {
+    key: "animation",
+    label: "Animations",
+    icon: "↻",
+    group: "visual",
+    selected: false,
+  },
+  {
+    key: "sections",
+    label: "Sections",
+    icon: "☰",
+    group: "content",
+    selected: true,
+    value: "Hero, About, CTA",
+  },
+  {
+    key: "tone",
+    label: "Tone of Voice",
+    icon: "♪",
+    group: "content",
+    selected: false,
+  },
+  {
+    key: "imagery",
+    label: "Image Style",
+    icon: "▣",
+    group: "visual",
+    selected: false,
+  },
+  {
+    key: "nav",
+    label: "Navigation",
+    icon: "≡",
+    group: "components",
+    selected: false,
+  },
+  {
+    key: "footer",
+    label: "Footer Style",
+    icon: "▬",
+    group: "components",
+    selected: false,
+  },
+  {
+    key: "responsive",
+    label: "Responsive",
+    icon: "▢",
+    group: "technical",
+    selected: true,
+    value: "All Devices",
+  },
+  {
+    key: "framework",
+    label: "Framework",
+    icon: "⟨⟩",
+    group: "technical",
+    selected: false,
+  },
+];
 
-// ============================================
-// VALIDATORS
-// ============================================
-const validators = {
-  email: (v) => {
-    if (!v) return null;
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) ? null : "Invalid email";
-  },
-  phone: (v) => {
-    if (!v) return null;
-    const digits = v.replace(/\D/g, "");
-    return digits.length >= 7 && digits.length <= 15 ? null : "Invalid phone";
-  },
-  url: (v) => {
-    if (!v) return null;
-    try {
-      const url = new URL(v);
-      return ["http:", "https:"].includes(url.protocol) ? null : "Invalid URL";
-    } catch {
-      return "Invalid URL";
-    }
-  },
-  year: (v) => {
-    if (!v) return null;
-    const year = parseInt(v, 10);
-    const now = new Date().getFullYear();
-    return year >= 1800 && year <= now ? null : `Must be 1800-${now}`;
-  },
-  maxLen: (max) => (v) => v && v.length > max ? `Max ${max} chars` : null,
-  minLen: (min) => (v) => v && v.length < min ? `Min ${min} chars` : null,
-  brandName: (v) => {
-    if (!v) return null;
-    if (v.length < 2) return "Min 2 chars";
-    if (v.length > 50) return "Max 50 chars";
-    return null;
-  },
+const MOCK_CHOICES = [
+  "Single Page",
+  "Multi Page",
+  "Landing",
+  "Portfolio",
+  "Blog",
+  "SaaS",
+  "E-commerce",
+  "Dashboard",
+];
+
+const BRAND_FIELDS = {
+  identity: [
+    {
+      key: "branding.brandName",
+      label: "Brand Name",
+      placeholder: "e.g., Acme Inc",
+      half: true,
+    },
+    {
+      key: "branding.tagline",
+      label: "Tagline",
+      placeholder: "e.g., Innovation delivered",
+      half: true,
+    },
+    {
+      key: "business.description",
+      label: "Description",
+      placeholder: "Brief description of your business",
+      full: true,
+    },
+    {
+      key: "business.location",
+      label: "Location",
+      placeholder: "e.g., San Francisco, CA",
+      half: true,
+    },
+    {
+      key: "business.yearEstablished",
+      label: "Year Est.",
+      placeholder: "e.g., 2020",
+      small: true,
+    },
+  ],
+  contact: [
+    {
+      key: "contactInfo.email",
+      label: "Email",
+      placeholder: "contact@example.com",
+      half: true,
+    },
+    {
+      key: "contactInfo.phone",
+      label: "Phone",
+      placeholder: "+1 (555) 123-4567",
+      half: true,
+    },
+    {
+      key: "contactInfo.address",
+      label: "Address",
+      placeholder: "123 Main St, City, State",
+      full: true,
+    },
+  ],
+  social: [
+    {
+      key: "socialMedia.twitter",
+      label: "Twitter",
+      placeholder: "https://twitter.com/...",
+      half: true,
+    },
+    {
+      key: "socialMedia.instagram",
+      label: "Instagram",
+      placeholder: "https://instagram.com/...",
+      half: true,
+    },
+    {
+      key: "socialMedia.linkedIn",
+      label: "LinkedIn",
+      placeholder: "https://linkedin.com/...",
+      half: true,
+    },
+    {
+      key: "socialMedia.facebook",
+      label: "Facebook",
+      placeholder: "https://facebook.com/...",
+      half: true,
+    },
+  ],
+  content: [
+    {
+      key: "content.primaryCta",
+      label: "Primary CTA",
+      placeholder: "e.g., Get Started",
+      half: true,
+    },
+    {
+      key: "content.copyrightText",
+      label: "Copyright",
+      placeholder: "e.g., © 2025 Company",
+      half: true,
+    },
+  ],
 };
 
-// Field config: [validator, inputType, label, placeholder, inputFilter]
-const FIELDS = {
-  "branding.brandName": [
-    validators.brandName,
-    "text",
-    "Brand Name",
-    "e.g., Acme Inc",
-  ],
-  "branding.tagline": [
-    validators.maxLen(100),
-    "text",
-    "Tagline",
-    "e.g., Innovation delivered",
-  ],
-  "business.description": [
-    validators.maxLen(300),
-    "text",
-    "Description",
-    "Brief description of your business",
-  ],
-  "business.location": [
-    validators.maxLen(100),
-    "text",
-    "Location",
-    "e.g., San Francisco, CA",
-  ],
-  "business.yearEstablished": [
-    validators.year,
-    "text",
-    "Year Est.",
-    "e.g., 2020",
-    /^[0-9]*$/,
-  ],
-  "contactInfo.email": [
-    validators.email,
-    "email",
-    "Email",
-    "contact@example.com",
-  ],
-  "contactInfo.phone": [
-    validators.phone,
-    "tel",
-    "Phone",
-    "+1 (555) 123-4567",
-    /^[0-9+\-\s()]*$/,
-  ],
-  "contactInfo.address": [
-    validators.maxLen(200),
-    "text",
-    "Address",
-    "123 Main St, City, State",
-  ],
-  "socialMedia.twitter": [
-    validators.url,
-    "url",
-    "Twitter",
-    "https://twitter.com/...",
-  ],
-  "socialMedia.instagram": [
-    validators.url,
-    "url",
-    "Instagram",
-    "https://instagram.com/...",
-  ],
-  "socialMedia.linkedIn": [
-    validators.url,
-    "url",
-    "LinkedIn",
-    "https://linkedin.com/...",
-  ],
-  "socialMedia.facebook": [
-    validators.url,
-    "url",
-    "Facebook",
-    "https://facebook.com/...",
-  ],
-  "content.primaryCta": [
-    validators.maxLen(30),
-    "text",
-    "Primary CTA",
-    "e.g., Get Started",
-  ],
-  "content.copyrightText": [
-    validators.maxLen(100),
-    "text",
-    "Copyright",
-    "e.g., © 2025 Company",
-  ],
-};
-
-// ============================================
-// OPTIMIZED INPUT COMPONENT (memoized, local state)
-// ============================================
-const OptimizedInput = memo(function OptimizedInput({
-  fieldKey,
-  initialValue,
-  onCommit,
-  className = "",
-}) {
-  const config = FIELDS[fieldKey];
-  if (!config) return null;
-
-  const [validator, type, label, placeholder, inputFilter] = config;
-  const [value, setValue] = useState(initialValue || "");
-  const [error, setError] = useState(null);
-  const [touched, setTouched] = useState(false);
-
-  // Sync with parent when initialValue changes (e.g., modal reopens)
-  useEffect(() => {
-    setValue(initialValue || "");
-    setError(null);
-    setTouched(false);
-  }, [initialValue]);
-
-  const handleChange = (e) => {
-    let newValue = e.target.value;
-
-    // Apply input filter if exists (for phone, year)
-    if (inputFilter && newValue && !inputFilter.test(newValue)) {
-      return; // Reject invalid characters
-    }
-
-    setValue(newValue);
-
-    // Clear error while typing if it was showing
-    if (touched && error) {
-      setError(validator(newValue));
-    }
-  };
-
-  const handleBlur = () => {
-    setTouched(true);
-    const validationError = validator(value);
-    setError(validationError);
-
-    // Only commit to parent on blur (not on every keystroke)
-    onCommit(fieldKey, value);
-  };
-
-  return (
-    <div
-      className={`options-input-wrapper ${
-        error ? "has-error" : ""
-      } ${className}`}
-    >
-      <label className="options-input-label">{label}</label>
-      <input
-        type={type}
-        value={value}
-        onChange={handleChange}
-        onBlur={handleBlur}
-        placeholder={placeholder}
-        className={`options-input ${error ? "options-input--error" : ""} ${
-          value ? "options-input--filled" : ""
-        }`}
-      />
-      {error && (
-        <div className="options-input-error">
-          <AlertCircle size={10} />
-          <span>{error}</span>
-        </div>
-      )}
-    </div>
-  );
-});
-
-// ============================================
-// MAIN COMPONENT
-// ============================================
-function OptionsModal({
-  isOpen,
-  onClose,
-  selections,
-  onSelect,
-  onReset,
-  hasSelection,
-  getDisplayValue,
-  persistentOptions,
-  onPersistentChange,
-}) {
+export default function OptionsModalPreview() {
+  const [activeTab, setActiveTab] = useState("design");
   const [activeOption, setActiveOption] = useState(null);
-  const [categoryFilter, setCategoryFilter] = useState("");
-  const [isDesignExpanded, setIsDesignExpanded] = useState(true);
-  const [expandedBrandSections, setExpandedBrandSections] = useState({
-    identity: true,
-    contact: true,
-    social: true,
-    content: true,
-  });
+  const [filter, setFilter] = useState("");
+  const [selectedChoice, setSelectedChoice] = useState("Single Page");
+  const [brandValues, setBrandValues] = useState({});
 
-  // Reset state when modal closes
-  useEffect(() => {
-    if (!isOpen) {
-      setCategoryFilter("");
-      setActiveOption(null);
-      setIsDesignExpanded(true);
-      setExpandedBrandSections({
-        identity: true,
-        contact: true,
-        social: true,
-        content: true,
-      });
-    }
-  }, [isOpen]);
-
-  // Calculate fill status for brand sections
-  const brandSectionStatus = useMemo(() => {
-    const getFieldValue = (category, field) =>
-      persistentOptions[category]?.[field] || "";
-
-    const isFilled = (category, field) => {
-      const value = getFieldValue(category, field);
-      return value && value.trim().length > 0;
-    };
-
-    return {
-      identity: {
-        filled: [
-          isFilled("branding", "brandName"),
-          isFilled("branding", "tagline"),
-          isFilled("business", "description"),
-          isFilled("business", "location"),
-          isFilled("business", "yearEstablished"),
-        ].filter(Boolean).length,
-        total: 5,
-      },
-      contact: {
-        filled: [
-          isFilled("contactInfo", "email"),
-          isFilled("contactInfo", "phone"),
-          isFilled("contactInfo", "address"),
-        ].filter(Boolean).length,
-        total: 3,
-      },
-      social: {
-        filled: [
-          isFilled("socialMedia", "twitter"),
-          isFilled("socialMedia", "instagram"),
-          isFilled("socialMedia", "linkedIn"),
-          isFilled("socialMedia", "facebook"),
-        ].filter(Boolean).length,
-        total: 4,
-      },
-      content: {
-        filled: [
-          isFilled("content", "primaryCta"),
-          isFilled("content", "copyrightText"),
-        ].filter(Boolean).length,
-        total: 2,
-      },
-    };
-  }, [persistentOptions]);
-
-  // Calculate overall brand completion
-  const overallBrandStatus = useMemo(() => {
-    const totalFilled = Object.values(brandSectionStatus).reduce(
-      (sum, section) => sum + section.filled,
-      0
-    );
-    const totalFields = Object.values(brandSectionStatus).reduce(
-      (sum, section) => sum + section.total,
-      0
-    );
-    return { filled: totalFilled, total: totalFields };
-  }, [brandSectionStatus]);
-
-  // Commit handler - updates parent state
-  const handleCommit = (fieldKey, value) => {
-    const [category, field] = fieldKey.split(".");
-    onPersistentChange(category, field, value);
-  };
-
-  // Get initial value for a field
-  const getInitialValue = (fieldKey) => {
-    const [category, field] = fieldKey.split(".");
-    return persistentOptions[category]?.[field] || "";
-  };
-
-  // Toggle brand section expansion
-  const toggleBrandSection = (section) => {
-    setExpandedBrandSections((prev) => ({
-      ...prev,
-      [section]: !prev[section],
-    }));
-  };
-
-  // Toggle all brand sections
-  const toggleAllBrandSections = () => {
-    const allExpanded = Object.values(expandedBrandSections).every(Boolean);
-    setExpandedBrandSections({
-      identity: !allExpanded,
-      contact: !allExpanded,
-      social: !allExpanded,
-      content: !allExpanded,
-    });
-  };
-
-  if (!isOpen) return null;
-
-  const goToCategories = () => setActiveOption(null);
-  const selectCategory = (id) => setActiveOption(id);
-
-  const handleSelect = (optionKey, value) => {
-    onSelect(optionKey, value);
-    if (optionKey === "palette" && value === "Custom") return;
-    const opt = OPTIONS[optionKey];
-    if (!opt.multi) {
-      setTimeout(() => setActiveOption(null), 120);
-    }
-  };
-
-  const filteredCategories = getFilteredCategories(categoryFilter);
-  const selectedCount = Object.keys(selections).filter((k) =>
-    hasSelection(k)
-  ).length;
+  const filters = [
+    "",
+    "layout",
+    "visual",
+    "content",
+    "components",
+    "technical",
+  ];
+  const filtered = filter
+    ? MOCK_CATEGORIES.filter((c) => c.group === filter)
+    : MOCK_CATEGORIES;
+  const selectedCount = MOCK_CATEGORIES.filter((c) => c.selected).length;
 
   return (
     <div
-      className={`modal-overlay ${isOpen ? "active" : ""}`}
-      onClick={onClose}
+      style={{
+        width: "100%",
+        height: "100vh",
+        background: "#0c0c0e",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontFamily: "'Inter', -apple-system, sans-serif",
+      }}
     >
+      {/* Overlay */}
       <div
-        className={`modal-content modal-content--options ${
-          isOpen ? "active" : ""
-        }`}
-        onClick={(e) => e.stopPropagation()}
+        style={{
+          position: "fixed",
+          inset: 0,
+          background: "rgba(0,0,0,0.6)",
+          backdropFilter: "blur(4px)",
+        }}
+      />
+
+      {/* Modal */}
+      <div
+        style={{
+          position: "relative",
+          width: "95%",
+          maxWidth: 920,
+          height: "88vh",
+          background: "#141416",
+          borderRadius: 16,
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden",
+          gap: 0,
+        }}
       >
-        <div className="options-header">
-          <div className="options-header__left">
-            <span className="modal-title">
-              <Settings />
-              <span>Customize</span>
-              <span className="options-subtitle">
-                {activeOption
-                  ? OPTIONS[activeOption]?.label
-                  : `${selectedCount} options set`}
-              </span>
+        {/* Header */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: "18px 22px 0",
+            flexShrink: 0,
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <span style={{ color: "#888", fontSize: 15 }}>⚙</span>
+            <span style={{ color: "#e0e0e0", fontSize: 14, fontWeight: 600 }}>
+              Customize
             </span>
           </div>
-          <button className="modal-close" onClick={onClose}>
-            <X size={16} />
+          <button
+            style={{
+              background: "none",
+              border: "none",
+              color: "#666",
+              cursor: "pointer",
+              fontSize: 18,
+              padding: 4,
+              lineHeight: 1,
+            }}
+          >
+            ×
           </button>
         </div>
 
-        <div className="options-filters">
-          {["", "layout", "visual", "content", "technical"].map((filter) => (
+        {/* Tabs */}
+        <div
+          style={{
+            display: "flex",
+            gap: 4,
+            padding: "14px 22px 0",
+            flexShrink: 0,
+          }}
+        >
+          {["design", "brand"].map((tab) => (
             <button
-              key={filter || "all"}
-              className={`options-filter ${
-                categoryFilter === filter ? "active" : ""
-              }`}
-              onClick={() => setCategoryFilter(filter)}
+              key={tab}
+              onClick={() => {
+                setActiveTab(tab);
+                setActiveOption(null);
+              }}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                padding: "7px 14px",
+                background: activeTab === tab ? "#fff" : "transparent",
+                border: "none",
+                borderRadius: 999,
+                fontSize: 13,
+                fontWeight: 500,
+                color: activeTab === tab ? "#111" : "#888",
+                cursor: "pointer",
+                transition: "all 0.15s",
+              }}
             >
-              {filter || "All"}
+              {tab === "design" ? "Design" : "Brand & Business"}
+              {tab === "design" && selectedCount > 0 && (
+                <span
+                  style={{
+                    fontSize: 10,
+                    fontWeight: 700,
+                    background:
+                      activeTab === tab
+                        ? "rgba(0,0,0,0.1)"
+                        : "rgba(255,255,255,0.08)",
+                    padding: "1px 6px",
+                    borderRadius: 999,
+                    color: activeTab === tab ? "#333" : "#aaa",
+                  }}
+                >
+                  {selectedCount}
+                </span>
+              )}
             </button>
           ))}
         </div>
 
-        <div className="options-body">
-          {/* Design Options Section */}
-          <div className="options-section">
-            <div
-              className="options-section__header"
-              onClick={() => setIsDesignExpanded(!isDesignExpanded)}
-            >
-              <div className="options-section__title">
-                Design Options
-                <span className="options-section__status">
-                  {selectedCount} set
-                </span>
+        {/* Body */}
+        <div
+          style={{
+            flex: 1,
+            minHeight: 0,
+            overflow: "hidden",
+            display: "flex",
+            flexDirection: "column",
+            padding: "16px 22px 22px",
+            gap: 14,
+          }}
+        >
+          {/* ======== DESIGN TAB ======== */}
+          {activeTab === "design" && !activeOption && (
+            <>
+              {/* Filters */}
+              <div style={{ display: "flex", gap: 3, flexShrink: 0 }}>
+                {filters.map((f) => (
+                  <button
+                    key={f || "all"}
+                    onClick={() => setFilter(f)}
+                    style={{
+                      padding: "5px 11px",
+                      background:
+                        filter === f ? "rgba(255,255,255,0.08)" : "transparent",
+                      border: "none",
+                      borderRadius: 999,
+                      fontSize: 12,
+                      fontWeight: 500,
+                      color: filter === f ? "#ddd" : "#666",
+                      cursor: "pointer",
+                      textTransform: "capitalize",
+                      transition: "all 0.15s",
+                    }}
+                  >
+                    {f || "All"}
+                  </button>
+                ))}
               </div>
-              <button
-                className={`options-section__toggle ${
-                  !isDesignExpanded ? "collapsed" : ""
-                }`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsDesignExpanded(!isDesignExpanded);
+
+              {/* Grid */}
+              <div
+                style={{
+                  flex: 1,
+                  overflowY: "auto",
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fill, minmax(170px, 1fr))",
+                  gap: 5,
+                  alignContent: "start",
                 }}
               >
-                <ChevronDown size={16} />
-              </button>
-            </div>
-
-            <div
-              className={`options-section__content ${
-                isDesignExpanded ? "expanded" : "collapsed"
-              }`}
-            >
-              {/* Grid / Choices panel switch */}
-              {!activeOption ? (
-                <div className="options-grid">
-                  {filteredCategories.map((catKey) => {
-                    const opt = OPTIONS[catKey];
-                    if (!opt) return null;
-                    const Icon = opt?.icon;
-                    const isSelected = hasSelection(catKey);
-                    const displayVal = getDisplayValue(catKey);
-
-                    return (
-                      <button
-                        key={catKey}
-                        className={`options-card ${
-                          isSelected ? "options-card--active" : ""
-                        }`}
-                        onClick={() => selectCategory(catKey)}
-                      >
-                        <div className="options-card__icon">
-                          {Icon && <Icon size={14} />}
-                        </div>
-                        <div className="options-card__info">
-                          <span className="options-card__label">
-                            {opt?.label}
-                          </span>
-                          {isSelected && displayVal && (
-                            <span className="options-card__value">
-                              {displayVal}
-                            </span>
-                          )}
-                        </div>
-                        <ChevronRight
-                          size={12}
-                          className="options-card__arrow"
-                        />
-                      </button>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="options-choices">
-                  <div className="options-choices__header">
-                    <button className="options-back" onClick={goToCategories}>
-                      <ChevronLeft size={14} />
-                    </button>
-                    <div className="options-choices__title">
-                      <span>{OPTIONS[activeOption]?.label}</span>
-                      <span className="options-choices__subtitle">
-                        {OPTIONS[activeOption]?.subtitle}
-                      </span>
+                {filtered.map((cat) => (
+                  <button
+                    key={cat.key}
+                    onClick={() => setActiveOption(cat.key)}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 10,
+                      padding: "6px 10px",
+                      background: cat.selected
+                        ? "rgba(99,102,241,0.08)"
+                        : "rgba(255,255,255,0.03)",
+                      border: "none",
+                      borderRadius: 10,
+                      cursor: "pointer",
+                      textAlign: "left",
+                      height: 42,
+                      transition: "background 0.15s",
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: 28,
+                        height: 28,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        background: cat.selected
+                          ? "rgba(99,102,241,0.2)"
+                          : "rgba(255,255,255,0.04)",
+                        borderRadius: 8,
+                        fontSize: 13,
+                        color: cat.selected ? "#818cf8" : "#888",
+                        flexShrink: 0,
+                      }}
+                    >
+                      {cat.icon}
                     </div>
-                    {hasSelection(activeOption) && (
-                      <button
-                        className="options-reset"
-                        onClick={() => onReset(activeOption)}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div
+                        style={{
+                          fontSize: 11.5,
+                          fontWeight: 600,
+                          color: "#e0e0e0",
+                        }}
                       >
-                        Reset
-                      </button>
-                    )}
-                  </div>
-
-                  <div className="options-choices__grid">
-                    {OPTIONS[activeOption]?.choices?.map((choice) => {
-                      const isMulti = OPTIONS[activeOption].multi;
-                      const isActive = isMulti
-                        ? selections[activeOption]?.includes(choice.value)
-                        : selections[activeOption] === choice.value;
-
-                      return (
-                        <button
-                          key={choice.value}
-                          className={`options-choice ${
-                            isActive ? "options-choice--active" : ""
-                          }`}
-                          onClick={() =>
-                            handleSelect(activeOption, choice.value)
-                          }
-                        >
-                          {choice.colors && (
-                            <div className="options-choice__colors">
-                              {choice.colors.map((color, i) => (
-                                <span key={i} style={{ background: color }} />
-                              ))}
-                            </div>
-                          )}
-                          <span>{choice.value}</span>
-                          {isActive && <Check size={12} />}
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  {activeOption === "palette" &&
-                    selections.palette === "Custom" && (
-                      <div className="options-custom-colors">
-                        {OPTIONS.customColors.fields.map((field) => (
-                          <div key={field.key} className="options-color-field">
-                            <span>{field.label}</span>
-                            <div className="options-color-picker">
-                              <input
-                                type="color"
-                                value={
-                                  selections.customColors?.[field.key] ||
-                                  field.default
-                                }
-                                onChange={(e) => {
-                                  onSelect("customColors", {
-                                    ...selections.customColors,
-                                    [field.key]: e.target.value,
-                                  });
-                                }}
-                              />
-                              <span>
-                                {selections.customColors?.[field.key] ||
-                                  field.default}
-                              </span>
-                            </div>
-                          </div>
-                        ))}
+                        {cat.label}
                       </div>
-                    )}
-
-                  {OPTIONS[activeOption]?.multi && (
-                    <button className="options-done" onClick={goToCategories}>
-                      Done ({selections[activeOption]?.length || 0})
-                    </button>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Brand & Business Section - Updated to Accordion */}
-          <div className="options-section">
-            <div
-              className="options-section__header"
-              onClick={() => toggleAllBrandSections()}
-            >
-              <div className="options-section__title">
-                Brand & Business
-                <span className="options-section__status">
-                  {overallBrandStatus.filled}/{overallBrandStatus.total} filled
-                </span>
+                      {cat.selected && cat.value && (
+                        <div
+                          style={{
+                            fontSize: 10.5,
+                            color: "#888",
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                          }}
+                        >
+                          {cat.value}
+                        </div>
+                      )}
+                    </div>
+                    <span style={{ color: "#444", fontSize: 11 }}>›</span>
+                  </button>
+                ))}
               </div>
-              <button
-                className={`options-section__toggle ${
-                  !Object.values(expandedBrandSections).every(Boolean)
-                    ? "collapsed"
-                    : ""
-                }`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  toggleAllBrandSections();
+            </>
+          )}
+
+          {/* Design drill-down */}
+          {activeTab === "design" && activeOption && (
+            <div
+              style={{
+                flex: 1,
+                display: "flex",
+                flexDirection: "column",
+                gap: 16,
+                overflowY: "auto",
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 10,
+                  flexShrink: 0,
                 }}
               >
-                <ChevronDown size={16} />
-              </button>
-            </div>
-
-            <div className="options-section__content expanded">
-              {/* Identity Accordion */}
-              <div className="options-accordion">
-                <div
-                  className="options-accordion__header"
-                  onClick={() => toggleBrandSection("identity")}
+                <button
+                  onClick={() => setActiveOption(null)}
+                  style={{
+                    width: 28,
+                    height: 28,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    background: "rgba(255,255,255,0.05)",
+                    border: "none",
+                    borderRadius: "50%",
+                    color: "#aaa",
+                    cursor: "pointer",
+                    fontSize: 14,
+                  }}
                 >
-                  <div className="options-accordion__title">
-                    <div className="options-accordion__title-main">
-                      Identity
-                      <span className="options-accordion__subtitle">
-                        Brand name, tagline, description
-                      </span>
-                    </div>
-                    <div className="options-accordion__status">
-                      {brandSectionStatus.identity.filled ===
-                      brandSectionStatus.identity.total ? (
-                        <CheckCircle
-                          size={12}
-                          className="options-accordion__status-icon--complete"
-                        />
-                      ) : brandSectionStatus.identity.filled > 0 ? (
-                        <Edit2
-                          size={12}
-                          className="options-accordion__status-icon--partial"
-                        />
-                      ) : (
-                        <Circle
-                          size={12}
-                          className="options-accordion__status-icon--empty"
-                        />
-                      )}
-                      <span className="options-accordion__status-text">
-                        {brandSectionStatus.identity.filled}/
-                        {brandSectionStatus.identity.total}
-                      </span>
-                    </div>
+                  ‹
+                </button>
+                <div style={{ flex: 1 }}>
+                  <div
+                    style={{ fontSize: 15, fontWeight: 600, color: "#e0e0e0" }}
+                  >
+                    {MOCK_CATEGORIES.find((c) => c.key === activeOption)?.label}
                   </div>
-                  <ChevronDown
-                    size={14}
-                    className={`options-accordion__chevron ${
-                      !expandedBrandSections.identity ? "collapsed" : ""
-                    }`}
-                  />
-                </div>
-
-                <div
-                  className={`options-accordion__content ${
-                    expandedBrandSections.identity ? "expanded" : "collapsed"
-                  }`}
-                >
-                  <div className="options-section__row">
-                    <OptimizedInput
-                      fieldKey="branding.brandName"
-                      initialValue={getInitialValue("branding.brandName")}
-                      onCommit={handleCommit}
-                    />
-                    <OptimizedInput
-                      fieldKey="branding.tagline"
-                      initialValue={getInitialValue("branding.tagline")}
-                      onCommit={handleCommit}
-                    />
-                  </div>
-                  <div className="options-section__row">
-                    <OptimizedInput
-                      fieldKey="business.description"
-                      initialValue={getInitialValue("business.description")}
-                      onCommit={handleCommit}
-                      className="options-input-wrapper--full"
-                    />
-                  </div>
-                  <div className="options-section__row">
-                    <OptimizedInput
-                      fieldKey="business.location"
-                      initialValue={getInitialValue("business.location")}
-                      onCommit={handleCommit}
-                    />
-                    <OptimizedInput
-                      fieldKey="business.yearEstablished"
-                      initialValue={getInitialValue("business.yearEstablished")}
-                      onCommit={handleCommit}
-                      className="options-input-wrapper--small"
-                    />
+                  <div style={{ fontSize: 11.5, color: "#666" }}>
+                    Choose one option
                   </div>
                 </div>
+                <button
+                  style={{
+                    padding: "5px 10px",
+                    background: "none",
+                    border: "none",
+                    fontSize: 11.5,
+                    color: "#666",
+                    cursor: "pointer",
+                  }}
+                >
+                  Reset
+                </button>
               </div>
 
-              {/* Contact Accordion */}
-              <div className="options-accordion">
-                <div
-                  className="options-accordion__header"
-                  onClick={() => toggleBrandSection("contact")}
-                >
-                  <div className="options-accordion__title">
-                    <div className="options-accordion__title-main">
-                      Contact
-                      <span className="options-accordion__subtitle">
-                        Email, phone, address
-                      </span>
-                    </div>
-                    <div className="options-accordion__status">
-                      {brandSectionStatus.contact.filled ===
-                      brandSectionStatus.contact.total ? (
-                        <CheckCircle
-                          size={12}
-                          className="options-accordion__status-icon--complete"
-                        />
-                      ) : brandSectionStatus.contact.filled > 0 ? (
-                        <Edit2
-                          size={12}
-                          className="options-accordion__status-icon--partial"
-                        />
-                      ) : (
-                        <Circle
-                          size={12}
-                          className="options-accordion__status-icon--empty"
-                        />
-                      )}
-                      <span className="options-accordion__status-text">
-                        {brandSectionStatus.contact.filled}/
-                        {brandSectionStatus.contact.total}
-                      </span>
-                    </div>
-                  </div>
-                  <ChevronDown
-                    size={14}
-                    className={`options-accordion__chevron ${
-                      !expandedBrandSections.contact ? "collapsed" : ""
-                    }`}
-                  />
-                </div>
-
-                <div
-                  className={`options-accordion__content ${
-                    expandedBrandSections.contact ? "expanded" : "collapsed"
-                  }`}
-                >
-                  <div className="options-section__row">
-                    <OptimizedInput
-                      fieldKey="contactInfo.email"
-                      initialValue={getInitialValue("contactInfo.email")}
-                      onCommit={handleCommit}
-                    />
-                    <OptimizedInput
-                      fieldKey="contactInfo.phone"
-                      initialValue={getInitialValue("contactInfo.phone")}
-                      onCommit={handleCommit}
-                    />
-                  </div>
-                  <div className="options-section__row">
-                    <OptimizedInput
-                      fieldKey="contactInfo.address"
-                      initialValue={getInitialValue("contactInfo.address")}
-                      onCommit={handleCommit}
-                      className="options-input-wrapper--full"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Social Accordion */}
-              <div className="options-accordion">
-                <div
-                  className="options-accordion__header"
-                  onClick={() => toggleBrandSection("social")}
-                >
-                  <div className="options-accordion__title">
-                    <div className="options-accordion__title-main">
-                      Social
-                      <span className="options-accordion__subtitle">
-                        Twitter, Instagram, LinkedIn, Facebook
-                      </span>
-                    </div>
-                    <div className="options-accordion__status">
-                      {brandSectionStatus.social.filled ===
-                      brandSectionStatus.social.total ? (
-                        <CheckCircle
-                          size={12}
-                          className="options-accordion__status-icon--complete"
-                        />
-                      ) : brandSectionStatus.social.filled > 0 ? (
-                        <Edit2
-                          size={12}
-                          className="options-accordion__status-icon--partial"
-                        />
-                      ) : (
-                        <Circle
-                          size={12}
-                          className="options-accordion__status-icon--empty"
-                        />
-                      )}
-                      <span className="options-accordion__status-text">
-                        {brandSectionStatus.social.filled}/
-                        {brandSectionStatus.social.total}
-                      </span>
-                    </div>
-                  </div>
-                  <ChevronDown
-                    size={14}
-                    className={`options-accordion__chevron ${
-                      !expandedBrandSections.social ? "collapsed" : ""
-                    }`}
-                  />
-                </div>
-
-                <div
-                  className={`options-accordion__content ${
-                    expandedBrandSections.social ? "expanded" : "collapsed"
-                  }`}
-                >
-                  <div className="options-section__row options-section__row--grid">
-                    {["twitter", "instagram", "linkedIn", "facebook"].map(
-                      (platform) => (
-                        <OptimizedInput
-                          key={platform}
-                          fieldKey={`socialMedia.${platform}`}
-                          initialValue={getInitialValue(
-                            `socialMedia.${platform}`
-                          )}
-                          onCommit={handleCommit}
-                        />
-                      )
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
+                {MOCK_CHOICES.map((choice) => (
+                  <button
+                    key={choice}
+                    onClick={() => setSelectedChoice(choice)}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 8,
+                      padding: "9px 14px",
+                      background:
+                        selectedChoice === choice
+                          ? "rgba(99,102,241,0.08)"
+                          : "rgba(255,255,255,0.03)",
+                      border: "none",
+                      borderRadius: 10,
+                      fontSize: 12.5,
+                      fontWeight: 500,
+                      color: "#e0e0e0",
+                      cursor: "pointer",
+                      transition: "background 0.15s",
+                    }}
+                  >
+                    <span>{choice}</span>
+                    {selectedChoice === choice && (
+                      <span style={{ color: "#818cf8", fontSize: 12 }}>✓</span>
                     )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Content Accordion */}
-              <div className="options-accordion">
-                <div
-                  className="options-accordion__header"
-                  onClick={() => toggleBrandSection("content")}
-                >
-                  <div className="options-accordion__title">
-                    <div className="options-accordion__title-main">
-                      Content
-                      <span className="options-accordion__subtitle">
-                        CTAs, copyright text
-                      </span>
-                    </div>
-                    <div className="options-accordion__status">
-                      {brandSectionStatus.content.filled ===
-                      brandSectionStatus.content.total ? (
-                        <CheckCircle
-                          size={12}
-                          className="options-accordion__status-icon--complete"
-                        />
-                      ) : brandSectionStatus.content.filled > 0 ? (
-                        <Edit2
-                          size={12}
-                          className="options-accordion__status-icon--partial"
-                        />
-                      ) : (
-                        <Circle
-                          size={12}
-                          className="options-accordion__status-icon--empty"
-                        />
-                      )}
-                      <span className="options-accordion__status-text">
-                        {brandSectionStatus.content.filled}/
-                        {brandSectionStatus.content.total}
-                      </span>
-                    </div>
-                  </div>
-                  <ChevronDown
-                    size={14}
-                    className={`options-accordion__chevron ${
-                      !expandedBrandSections.content ? "collapsed" : ""
-                    }`}
-                  />
-                </div>
-
-                <div
-                  className={`options-accordion__content ${
-                    expandedBrandSections.content ? "expanded" : "collapsed"
-                  }`}
-                >
-                  <div className="options-section__row">
-                    <OptimizedInput
-                      fieldKey="content.primaryCta"
-                      initialValue={getInitialValue("content.primaryCta")}
-                      onCommit={handleCommit}
-                    />
-                    <OptimizedInput
-                      fieldKey="content.copyrightText"
-                      initialValue={getInitialValue("content.copyrightText")}
-                      onCommit={handleCommit}
-                    />
-                  </div>
-                </div>
+                  </button>
+                ))}
               </div>
             </div>
-          </div>
+          )}
+
+          {/* ======== BRAND TAB ======== */}
+          {activeTab === "brand" && (
+            <div
+              style={{
+                flex: 1,
+                overflowY: "auto",
+                display: "flex",
+                flexDirection: "column",
+                gap: 28,
+                paddingRight: 4,
+              }}
+            >
+              {Object.entries(BRAND_FIELDS).map(([section, fields]) => (
+                <div
+                  key={section}
+                  style={{ display: "flex", flexDirection: "column", gap: 10 }}
+                >
+                  {/* Section label */}
+                  <div
+                    style={{
+                      fontSize: 11,
+                      fontWeight: 600,
+                      color: "#555",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.05em",
+                    }}
+                  >
+                    {section}
+                  </div>
+
+                  {/* Fields */}
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                    {fields.map((field) => (
+                      <div
+                        key={field.key}
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: 4,
+                          flex: field.full
+                            ? "1 1 100%"
+                            : field.small
+                            ? "0 0 110px"
+                            : "1 1 calc(50% - 4px)",
+                          minWidth: field.small ? 110 : 0,
+                          maxWidth: field.small ? 130 : "none",
+                        }}
+                      >
+                        <label
+                          style={{
+                            fontSize: 11,
+                            fontWeight: 500,
+                            color: "#777",
+                            letterSpacing: "0.01em",
+                          }}
+                        >
+                          {field.label}
+                        </label>
+                        <input
+                          type="text"
+                          placeholder={field.placeholder}
+                          value={brandValues[field.key] || ""}
+                          onChange={(e) =>
+                            setBrandValues((prev) => ({
+                              ...prev,
+                              [field.key]: e.target.value,
+                            }))
+                          }
+                          style={{
+                            width: "100%",
+                            padding: "9px 11px",
+                            background: brandValues[field.key]
+                              ? "rgba(255,255,255,0.05)"
+                              : "rgba(255,255,255,0.025)",
+                            border: "none",
+                            borderRadius: 10,
+                            fontSize: 13,
+                            fontFamily: "inherit",
+                            color: "#e0e0e0",
+                            outline: "none",
+                            transition: "background 0.15s, box-shadow 0.15s",
+                            boxSizing: "border-box",
+                          }}
+                          onFocus={(e) => {
+                            e.target.style.background =
+                              "rgba(255,255,255,0.06)";
+                            e.target.style.boxShadow =
+                              "0 0 0 2px rgba(99,102,241,0.12)";
+                          }}
+                          onBlur={(e) => {
+                            e.target.style.background = brandValues[field.key]
+                              ? "rgba(255,255,255,0.05)"
+                              : "rgba(255,255,255,0.025)";
+                            e.target.style.boxShadow = "none";
+                          }}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>
   );
 }
-
-export default OptionsModal;

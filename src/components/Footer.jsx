@@ -1,6 +1,7 @@
 import { Cloudy } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
+import { useModals } from "../contexts/ModalContext";
 import "./Footer.scss";
 
 const EMOJIS = [
@@ -36,9 +37,10 @@ const EMOJIS = [
   "🚀",
 ];
 
-function Footer({ onLegalClick, onRoadmapClick, onSupportClick }) {
+function Footer() {
   const location = useLocation();
   const isHomePage = location.pathname === "/";
+  const { openLegal, openRoadmap, openSupport } = useModals();
   const [isRaining, setIsRaining] = useState(false);
   const [currentEmoji, setCurrentEmoji] = useState("");
   const [drops, setDrops] = useState([]);
@@ -55,10 +57,8 @@ function Footer({ onLegalClick, onRoadmapClick, onSupportClick }) {
     const newEmoji = getRandomEmoji();
     setCurrentEmoji(newEmoji);
 
-    // Create initial drops
     createDrops(newEmoji);
 
-    // Continue creating drops while hovering
     intervalRef.current = setInterval(() => {
       createDrops(newEmoji);
     }, 150);
@@ -67,20 +67,20 @@ function Footer({ onLegalClick, onRoadmapClick, onSupportClick }) {
   const createDrops = (emoji) => {
     const newDrops = [];
     const ranges = [
-      { start: 0, width: 20 },
-      { start: 0, width: 20 },
+      { start: 5, width: 20 },
+      { start: 5, width: 20 },
       { start: 10, width: 20 },
-      { start: -10, width: 20 },
+      { start: -12, width: 20 },
       { start: 10, width: 20 },
-      { start: -10, width: 20 },
+      { start: -12, width: 20 },
       { start: 10, width: 20 },
     ];
 
     ranges.forEach((range, i) => {
       dropIdRef.current += 1;
       const x = range.start + Math.random() * range.width;
-      const duration = 1 + Math.random() * 0.1;
-      const delay = i * 5 + Math.random() * 0.2;
+      const duration = 1 + Math.random() * 0.2;
+      const delay = i * 5 + Math.random() * 0.25;
 
       newDrops.push({
         id: dropIdRef.current,
@@ -93,7 +93,6 @@ function Footer({ onLegalClick, onRoadmapClick, onSupportClick }) {
 
     setDrops((prev) => [...prev, ...newDrops]);
 
-    // Auto-remove drops after animation
     setTimeout(() => {
       setDrops((prev) =>
         prev.filter((d) => !newDrops.some((nd) => nd.id === d.id))
@@ -108,7 +107,6 @@ function Footer({ onLegalClick, onRoadmapClick, onSupportClick }) {
       intervalRef.current = null;
     }
 
-    // Clear emoji after delay
     setTimeout(() => {
       if (!isRaining) {
         setCurrentEmoji("");
@@ -172,7 +170,6 @@ function Footer({ onLegalClick, onRoadmapClick, onSupportClick }) {
               ))}
             </div>
 
-            {/* Add this to your CSS */}
             <style>{`
               @keyframes emojiRain {
                 0% {
@@ -194,7 +191,7 @@ function Footer({ onLegalClick, onRoadmapClick, onSupportClick }) {
             {isHomePage ? (
               <button
                 className="footer__link footer__link--btn"
-                onClick={onRoadmapClick}
+                onClick={openRoadmap}
               >
                 Roadmap
               </button>
@@ -207,7 +204,7 @@ function Footer({ onLegalClick, onRoadmapClick, onSupportClick }) {
             {isHomePage ? (
               <button
                 className="footer__link footer__link--btn"
-                onClick={onSupportClick}
+                onClick={openSupport}
               >
                 Support
               </button>
@@ -220,7 +217,7 @@ function Footer({ onLegalClick, onRoadmapClick, onSupportClick }) {
             {isHomePage ? (
               <button
                 className="footer__link footer__link--btn"
-                onClick={onLegalClick}
+                onClick={() => openLegal()}
               >
                 Terms & Legal
               </button>
