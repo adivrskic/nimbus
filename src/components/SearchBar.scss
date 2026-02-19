@@ -5,10 +5,11 @@
 
   &--expanded {
     .search-bar__input {
-      min-height: 75vh;
+      min-height: calc(100vh - 55px - 4rem);
       padding-top: 1rem;
       padding-right: 1rem;
       padding-bottom: 6rem;
+      margin-top: -3rem;
       border-radius: var(--radius-xl);
       font-size: 14px;
       color: var(--color-text-primary);

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { X, Coins, Check, Loader2, LogIn } from "lucide-react";
+import { X, Coins, Check, Loader2, LogIn, ShoppingCart } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
 import { supabase } from "../../lib/supabaseClient";
 import { track } from "../../lib/analytics";
@@ -111,92 +111,108 @@ function TokenPurchaseModal({ isOpen, onClose, onOpenAuth }) {
       onClick={onClose}
     >
       <div
-        className={`modal-content modal-content--surface modal-content--centered ${
+        className={`modal-content modal-content--lg ${
           isVisible ? "active" : ""
         }`}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="modal-header">
-          <div className="modal-title">
-            <Coins size={16} />
-            <span>Get Tokens</span>
+        {/* Fixed header section */}
+        <div className="modal-header-section">
+          <div className="modal-header">
+            <div className="modal-title">
+              <Coins size={16} />
+              <span>Get Tokens</span>
+            </div>
+            <button className="modal-close" onClick={onClose}>
+              <X size={16} />
+            </button>
           </div>
-          <button className="modal-close" onClick={onClose}>
-            <X size={16} />
-          </button>
+
+          <div className="modal-subtitle">
+            Purchase tokens to generate websites. Tokens never expire.
+          </div>
+
+          {isAuthenticated && profile?.tokens !== undefined && (
+            <div className="tokens-balance">
+              <span>Current balance</span>
+              <span>{profile.tokens} tokens</span>
+            </div>
+          )}
         </div>
 
-        {isAuthenticated && profile?.tokens !== undefined && (
-          <div className="tokens-balance">
-            <span>Current balance</span>
-            <span>{profile.tokens} tokens</span>
+        {/* Scrollable body section */}
+        <div className="modal-body">
+          <div className="modal-section">
+            <div className="modal-section__header">
+              <ShoppingCart size={14} />
+              <h3 className="modal-section__title">Choose a Package</h3>
+            </div>
+
+            <div className="tokens-packages">
+              {TOKEN_PACKAGES.map((pkg) => {
+                const total = pkg.tokens + pkg.bonus;
+                return (
+                  <button
+                    key={pkg.id}
+                    className={`token-option ${
+                      selectedPackage === pkg.id ? "selected" : ""
+                    }`}
+                    onClick={() => setSelectedPackage(pkg.id)}
+                  >
+                    <div className="token-option__left">
+                      <span className="token-option__amount">
+                        {total} tokens
+                      </span>
+                      <span className="token-option__rate">
+                        {pkg.perToken}/token
+                      </span>
+                      <span className="token-option__rate">
+                        Generate {pkg.numGensRange} websites
+                      </span>
+                    </div>
+                    <div className="token-option__right">
+                      {pkg.popular && (
+                        <span className="token-option__badge token-option__badge--popular">
+                          Popular
+                        </span>
+                      )}
+                      <span className="token-option__price">${pkg.price}</span>
+                      {selectedPackage === pkg.id && (
+                        <span className="token-option__check">
+                          <Check size={12} />
+                        </span>
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
           </div>
-        )}
 
-        <div className="tokens-packages">
-          {TOKEN_PACKAGES.map((pkg) => {
-            const total = pkg.tokens + pkg.bonus;
-            return (
-              <button
-                key={pkg.id}
-                className={`token-option ${
-                  selectedPackage === pkg.id ? "selected" : ""
-                }`}
-                onClick={() => setSelectedPackage(pkg.id)}
-              >
-                <div className="token-option__left">
-                  <span className="token-option__amount">{total} tokens</span>
-                  <span className="token-option__rate">
-                    {pkg.perToken}/token
-                  </span>
-                  <span className="token-option__rate">
-                    Generate {pkg.numGensRange} websites
-                  </span>
-                </div>
-                <div className="token-option__right">
-                  {pkg.popular && (
-                    <span className="token-option__badge token-option__badge--popular">
-                      Popular
-                    </span>
-                  )}
-                  <span className="token-option__price">${pkg.price}</span>
-                  {selectedPackage === pkg.id && (
-                    <span className="token-option__check">
-                      <Check size={12} />
-                    </span>
-                  )}
-                </div>
-              </button>
-            );
-          })}
-        </div>
+          {error && <div className="modal-error">{error}</div>}
 
-        {error && <div className="modal-error">{error}</div>}
+          {isAuthenticated ? (
+            <button
+              className="modal-btn-primary"
+              onClick={handlePurchase}
+              disabled={isProcessing}
+            >
+              {isProcessing ? (
+                <Loader2 size={14} className="spinning" />
+              ) : (
+                `Buy ${totalTokens} tokens for $${selectedPkg?.price}`
+              )}
+            </button>
+          ) : (
+            <button className="modal-btn-primary" onClick={handleLoginClick}>
+              <LogIn size={14} />
+              <span>Log in to purchase tokens</span>
+            </button>
+          )}
 
-        {isAuthenticated ? (
-          <button
-            className="modal-btn-primary modal-btn-primary--pill"
-            onClick={handlePurchase}
-            disabled={isProcessing}
-          >
-            {isProcessing ? (
-              <Loader2 size={14} className="spinning" />
-            ) : (
-              `Buy ${totalTokens} tokens for $${selectedPkg?.price}`
-            )}
-          </button>
-        ) : (
-          <button
-            className="modal-btn-primary modal-btn-primary--pill"
-            onClick={handleLoginClick}
-          >
-            <LogIn size={14} />
-            <span>Log in to purchase tokens</span>
-          </button>
-        )}
-
-        <div className="modal-note">
-          Secured by Stripe • Tokens never expire
+          <div className="modal-note">
+            Secured by Stripe • Tokens never expire
+          </div>
         </div>
       </div>
     </div>

@@ -1,7 +1,18 @@
-import { CheckCircle, Clock, Circle, X, Calendar } from "lucide-react";
+import { useState } from "react";
+import {
+  CheckCircle,
+  Clock,
+  Circle,
+  X,
+  Calendar,
+  ChevronDown,
+} from "lucide-react";
 
 import "../../styles/modals.scss";
+
 function RoadmapModal({ isOpen, onClose }) {
+  const [openSections, setOpenSections] = useState(["in-progress", "planned"]);
+
   const roadmapItems = [
     // Completed
     {
@@ -68,6 +79,33 @@ function RoadmapModal({ isOpen, onClose }) {
     },
   ];
 
+  const sections = [
+    {
+      key: "completed",
+      label: "Completed",
+      icon: <CheckCircle size={14} />,
+      items: roadmapItems.filter((i) => i.status === "completed"),
+    },
+    {
+      key: "in-progress",
+      label: "In Progress",
+      icon: <Clock size={14} />,
+      items: roadmapItems.filter((i) => i.status === "in-progress"),
+    },
+    {
+      key: "planned",
+      label: "Planned",
+      icon: <Circle size={14} />,
+      items: roadmapItems.filter((i) => i.status === "planned"),
+    },
+  ];
+
+  const toggleSection = (key) => {
+    setOpenSections((prev) =>
+      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
+    );
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -94,44 +132,80 @@ function RoadmapModal({ isOpen, onClose }) {
           <div className="modal-subtitle">
             What we're building and what's coming next.
           </div>
-
-          <div className="roadmap-legend">
-            <div className="legend-item">
-              <span className="legend-dot legend-dot--completed"></span>
-              <span>Complete</span>
-            </div>
-            <div className="legend-item">
-              <span className="legend-dot legend-dot--in-progress"></span>
-              <span>In Progress</span>
-            </div>
-            <div className="legend-item">
-              <span className="legend-dot legend-dot--planned"></span>
-              <span>Planned</span>
-            </div>
-          </div>
         </div>
 
         {/* Scrollable body section */}
         <div className="modal-body">
-          <div className="roadmap-items">
-            {roadmapItems.map((item, index) => (
-              <div
-                key={index}
-                className={`roadmap-item roadmap-item--${item.status}`}
-              >
-                <div className="roadmap-item__icon">
-                  {item.status === "completed" && <CheckCircle size={14} />}
-                  {item.status === "in-progress" && <Clock size={14} />}
-                  {item.status === "planned" && <Circle size={14} />}
+          <div className="roadmap-accordion">
+            {sections.map((section) => {
+              const isExpanded = openSections.includes(section.key);
+              return (
+                <div
+                  key={section.key}
+                  className={`roadmap-accordion__section roadmap-accordion__section--${section.key}`}
+                >
+                  <button
+                    className="roadmap-accordion__trigger"
+                    onClick={() => toggleSection(section.key)}
+                    aria-expanded={isExpanded}
+                  >
+                    <div className="roadmap-accordion__trigger-left">
+                      <span
+                        className={`roadmap-accordion__status-icon roadmap-accordion__status-icon--${section.key}`}
+                      >
+                        {section.icon}
+                      </span>
+                      <span className="roadmap-accordion__label">
+                        {section.label}
+                      </span>
+                      <span className="roadmap-accordion__count">
+                        {section.items.length}
+                      </span>
+                    </div>
+                    <ChevronDown
+                      size={14}
+                      className={`roadmap-accordion__chevron ${
+                        isExpanded ? "roadmap-accordion__chevron--open" : ""
+                      }`}
+                    />
+                  </button>
+
+                  <div
+                    className={`roadmap-accordion__content ${
+                      isExpanded ? "roadmap-accordion__content--open" : ""
+                    }`}
+                    aria-hidden={!isExpanded}
+                  >
+                    <div className="roadmap-accordion__items">
+                      {section.items.map((item, index) => (
+                        <div
+                          key={index}
+                          className={`roadmap-item roadmap-item--${item.status}`}
+                        >
+                          <div className="roadmap-item__icon">
+                            {item.status === "completed" && (
+                              <CheckCircle size={14} />
+                            )}
+                            {item.status === "in-progress" && (
+                              <Clock size={14} />
+                            )}
+                            {item.status === "planned" && <Circle size={14} />}
+                          </div>
+                          <div className="roadmap-item__content">
+                            <h4 className="roadmap-item__title">
+                              {item.title}
+                            </h4>
+                            <p className="roadmap-item__description">
+                              {item.description}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
-                <div className="roadmap-item__content">
-                  <h4 className="roadmap-item__title">{item.title}</h4>
-                  <p className="roadmap-item__description">
-                    {item.description}
-                  </p>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           <div className="modal-contact">

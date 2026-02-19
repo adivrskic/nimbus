@@ -1,416 +1,4 @@
 // =============================================================================
-// NEW SHARED MODAL BASE — Apple-Inspired
-// =============================================================================
-// Prepend this to the top of modals.scss. As each modal is migrated to use
-// these new classes, remove its per-modal legacy section.
-//
-// Naming convention:
-//   .modal-panel     → the card (replaces .modal-content + --surface + --centered)
-//   .modal-header    → reused (but children renamed to __title, __close)
-//   .modal-stack     → generic flex column for content groups
-//   .modal-row-btn   → universal pill row (auth providers, packages, items)
-//   .modal-btn       → primary action button
-//   .modal-alert     → inline error/warning/success
-//   .modal-footnote  → small bottom legal/info text
-//   .modal-desc      → subtitle/description
-//   .modal-kv        → key-value display row
-//   .modal-scroll    → scrollable body area
-//   .modal-section   → titled content block
-//   .modal-success   → centered success confirmation
-//   .modal-divider   → thin separator
-//   .modal-contact   → contact info card
-//   .modal-accordion → collapsible FAQ/terms
-// =============================================================================
-
-// ---------------------------------------------------------------------------
-// PANEL (the modal card)
-// ---------------------------------------------------------------------------
-// Replaces the combination of:
-//   .modal-content .modal-content--surface .modal-content--centered .modal-content--sm
-// with a single clean class.
-
-.modal-panel {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  padding: 24px;
-  width: 420px;
-  max-width: 90vw;
-  max-height: 85vh;
-  overflow-y: auto;
-  background: var(--glass-background);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-xl);
-  opacity: 0;
-  transform: scale(0.97) translateY(6px);
-  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1),
-    transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-
-  &.active {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-
-  &--sm {
-    width: 360px;
-  }
-  &--lg {
-    width: 680px;
-    max-height: 75vh;
-    overflow-y: hidden;
-  }
-  &--full {
-    width: 100%;
-    max-width: 95vw;
-    height: 90dvh;
-    max-height: none;
-    padding: 16px;
-    overflow-y: hidden;
-  }
-
-  &::-webkit-scrollbar {
-    width: 4px;
-  }
-  &::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  &::-webkit-scrollbar-thumb {
-    background: var(--color-border-hover);
-    border-radius: 2px;
-  }
-}
-
-// ---------------------------------------------------------------------------
-// HEADER (reuses .modal-header but with new child naming)
-// ---------------------------------------------------------------------------
-
-.modal-header {
-  &__title {
-    font-size: 0.9375rem;
-    font-weight: 600;
-    color: var(--color-text-primary);
-    letter-spacing: -0.01em;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-
-    svg {
-      color: var(--color-text-secondary);
-    }
-  }
-
-  &__close {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 28px;
-    height: 28px;
-    background: var(--color-surface-elevated);
-    border: none;
-    border-radius: 50%;
-    color: var(--color-text-secondary);
-    cursor: pointer;
-    flex-shrink: 0;
-    transition: background 0.15s ease, color 0.15s ease;
-
-    &:hover {
-      background: var(--color-border);
-      color: var(--color-text-primary);
-    }
-    &:disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
-    }
-  }
-}
-
-// ---------------------------------------------------------------------------
-// CONTENT BLOCKS
-// ---------------------------------------------------------------------------
-
-.modal-desc {
-  font-size: 0.8125rem;
-  line-height: 1.5;
-  color: var(--color-text-secondary);
-  margin: -4px 0 0;
-}
-
-.modal-stack {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.modal-scroll {
-  flex: 1;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  padding: 4px 0;
-
-  &::-webkit-scrollbar {
-    width: 4px;
-  }
-  &::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  &::-webkit-scrollbar-thumb {
-    background: var(--color-border-hover);
-    border-radius: 2px;
-  }
-}
-
-.modal-divider {
-  height: 1px;
-  background: var(--color-border);
-  border: none;
-  margin: 4px 0;
-}
-
-// ---------------------------------------------------------------------------
-// ROW BUTTON (universal interactive pill row)
-// ---------------------------------------------------------------------------
-
-.modal-row-btn {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-  padding: 12px 18px;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  font-size: 0.8125rem;
-  font-weight: 500;
-  color: var(--color-text-primary);
-  cursor: pointer;
-  text-align: left;
-  transition: background 0.15s ease, border-color 0.15s ease;
-
-  &:hover:not(:disabled) {
-    background: var(--color-surface-elevated);
-    border-color: var(--color-border-hover);
-  }
-  &:disabled {
-    opacity: 0.45;
-    cursor: not-allowed;
-  }
-  &.selected {
-    border-color: var(--color-border-hover);
-    background: var(--color-surface-elevated);
-  }
-  svg {
-    flex-shrink: 0;
-    color: var(--color-text-secondary);
-  }
-  span {
-    flex: 1;
-  }
-}
-
-// ---------------------------------------------------------------------------
-// BUTTONS
-// ---------------------------------------------------------------------------
-
-.modal-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  width: 100%;
-  padding: 12px 20px;
-  background: var(--color-accent);
-  border: none;
-  border-radius: var(--radius-lg);
-  font-size: 0.8125rem;
-  font-weight: 600;
-  color: var(--color-background);
-  cursor: pointer;
-  text-decoration: none;
-  transition: background 0.15s ease, opacity 0.15s ease;
-
-  &:hover:not(:disabled) {
-    background: var(--color-accent-hover);
-  }
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-
-  &--secondary {
-    background: transparent;
-    border: 1px solid var(--color-border);
-    color: var(--color-text-secondary);
-    &:hover:not(:disabled) {
-      background: var(--color-surface-elevated);
-      border-color: var(--color-border-hover);
-      color: var(--color-text-primary);
-    }
-  }
-
-  &--inline {
-    width: auto;
-    flex: 1;
-    padding: 10px 16px;
-  }
-}
-
-.modal-btn-row {
-  display: flex;
-  gap: 8px;
-}
-
-// ---------------------------------------------------------------------------
-// ALERTS
-// ---------------------------------------------------------------------------
-
-.modal-alert {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 14px;
-  border-radius: var(--radius-md);
-  font-size: 0.8125rem;
-  font-weight: 500;
-
-  svg {
-    flex-shrink: 0;
-  }
-  &--error {
-    background: rgba(239, 68, 68, 0.07);
-    color: #ef4444;
-  }
-  &--warning {
-    background: rgba(245, 158, 11, 0.07);
-    color: #f59e0b;
-  }
-  &--success {
-    background: rgba(16, 185, 129, 0.07);
-    color: #10b981;
-  }
-  &--info {
-    background: rgba(59, 130, 246, 0.07);
-    color: #3b82f6;
-  }
-}
-
-// ---------------------------------------------------------------------------
-// FOOTNOTE & NOTE
-// ---------------------------------------------------------------------------
-
-.modal-footnote {
-  font-size: 0.6875rem;
-  color: var(--color-text-tertiary);
-  text-align: center;
-  line-height: 1.5;
-  margin: 0;
-
-  &__link {
-    background: none;
-    border: none;
-    padding: 0;
-    font: inherit;
-    color: var(--color-text-secondary);
-    text-decoration: underline;
-    text-underline-offset: 2px;
-    cursor: pointer;
-    transition: color 0.15s ease;
-    &:hover {
-      color: var(--color-text-primary);
-    }
-  }
-}
-
-// (keep existing .modal-note — already defined in your shared section)
-
-// ---------------------------------------------------------------------------
-// KEY-VALUE ROW
-// ---------------------------------------------------------------------------
-
-.modal-kv {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 0.8125rem;
-  color: var(--color-text-secondary);
-  padding: 2px 0;
-
-  &__value {
-    font-weight: 600;
-    color: var(--color-text-primary);
-  }
-  &--total {
-    padding-top: 10px;
-    margin-top: 4px;
-    border-top: 1px solid var(--color-border);
-    font-weight: 600;
-    color: var(--color-text-primary);
-  }
-}
-
-// ---------------------------------------------------------------------------
-// SUCCESS STATE
-// ---------------------------------------------------------------------------
-
-.modal-success {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 40px 24px;
-  text-align: center;
-  gap: 10px;
-
-  &__icon {
-    color: #10b981;
-    animation: successPop 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-  &__title {
-    font-size: 1.0625rem;
-    font-weight: 600;
-    color: var(--color-text-primary);
-    margin: 0;
-  }
-  &__message {
-    font-size: 0.8125rem;
-    color: var(--color-text-secondary);
-    margin: 0;
-  }
-}
-
-// ---------------------------------------------------------------------------
-// RESPONSIVE — new panel
-// ---------------------------------------------------------------------------
-
-@media (max-width: 640px) {
-  .modal-panel {
-    padding: 20px;
-    &--sm {
-      min-width: 260px;
-    }
-    &--lg {
-      max-height: 90vh;
-    }
-  }
-  .modal-header__title {
-    font-size: 0.875rem;
-  }
-  .modal-btn-row {
-    flex-direction: column-reverse;
-  }
-}
-
-@media (max-width: 480px) {
-  .modal-panel {
-    padding: 18px;
-    border-radius: var(--radius-lg);
-  }
-}
-
-// =============================================================================
 // Modals — Unified Stylesheet
 // =============================================================================
 // Generic .modal-* classes handle shared layout, animation, and components.
@@ -906,6 +494,85 @@
   }
   .modal-nav {
     flex-direction: column-reverse;
+  }
+}
+
+// =============================================================================
+// 5. PER-MODAL OVERRIDES — only truly unique styles
+// =============================================================================
+
+// --- AuthModal ---------------------------------------------------------------
+.auth-providers {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.auth-provider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 16px;
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  font-family: var(--font-family-base, sans-serif);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: background var(--transition-fast),
+    border-color var(--transition-fast), box-shadow var(--transition-fast);
+  &:hover:not(:disabled) {
+    background: var(--color-surface);
+    border-color: var(--color-border-hover);
+    box-shadow: var(--shadow-md);
+  }
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  svg {
+    flex-shrink: 0;
+  }
+  span {
+    flex: 1;
+    text-align: left;
+  }
+}
+.auth-footer {
+  padding-top: 12px;
+  font-size: 0.6875rem;
+  font-family: var(--font-family-base, sans-serif);
+  color: var(--color-text-tertiary);
+  text-align: center;
+  line-height: 1.5;
+  a {
+    color: var(--color-text-primary);
+    text-decoration: none;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+.auth-footer__link {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  font-size: inherit;
+  color: var(--color-text-secondary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+  transition: color 0.15s ease;
+  &:hover {
+    color: var(--color-text-primary);
+  }
+  &:focus {
+    outline: none;
+    color: var(--color-accent, #6366f1);
   }
 }
 
@@ -1604,18 +1271,9 @@
 
 // --- ProjectsModal -----------------------------------------------------------
 .projects-list {
-  overflow-y: auto;
-  padding: 12px 8px 12px 0;
-  &::-webkit-scrollbar {
-    width: 4px;
-  }
-  &::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  &::-webkit-scrollbar-thumb {
-    background: var(--color-border-hover);
-    border-radius: 3px;
-  }
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 .projects-loading,
 .projects-empty {
@@ -1629,19 +1287,20 @@
 }
 .project-item {
   position: relative;
-  margin-bottom: 8px;
-  padding: 8px 24px;
-  background: transparent;
-  border: 1px solid var(--color-accent-light);
-  border-radius: 999px;
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
   color: var(--color-text-secondary);
   cursor: pointer;
-  transition: var(--transition-base);
+  overflow: hidden;
+  transition: background var(--transition-fast),
+    border-color var(--transition-fast);
   &:hover {
-    background: var(--color-accent-light);
+    background: var(--color-surface);
+    border-color: var(--color-border-hover);
   }
   &.expanded {
-    background: var(--color-accent-light);
+    background: var(--color-surface);
     border-color: var(--color-border-hover);
   }
   &.deleting .project-main {
@@ -1653,6 +1312,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  padding: 10px 16px;
 }
 .project-delete-confirm {
   position: absolute;
@@ -1675,7 +1335,7 @@
     color: #f59e0b;
     background: rgba(245, 158, 11, 0.1);
     padding: 6px 12px;
-    border-radius: 999px;
+    border-radius: var(--radius-md);
   }
   .delete-error {
     display: flex;
@@ -1685,7 +1345,7 @@
     color: #ef4444;
     background: rgba(239, 68, 68, 0.1);
     padding: 8px 12px;
-    border-radius: 999px;
+    border-radius: var(--radius-md);
   }
   .delete-actions {
     display: flex;
@@ -1703,7 +1363,7 @@
     cursor: pointer;
     transition: background var(--transition-fast);
     border: none;
-    border-radius: 999px;
+    border-radius: var(--radius-md);
   }
   .delete-cancel {
     background: var(--color-surface-elevated);
@@ -1731,6 +1391,7 @@
   margin-bottom: 4px;
   svg {
     color: var(--color-text-tertiary);
+    flex-shrink: 0;
   }
   span {
     font-size: 0.8125rem;
@@ -1783,7 +1444,7 @@
   height: 32px;
   background: var(--color-surface-elevated);
   border: 1px solid transparent;
-  border-radius: 999px;
+  border-radius: var(--radius-md);
   color: var(--color-text-tertiary);
   cursor: pointer;
   transition: background var(--transition-fast), color var(--transition-fast);
@@ -1804,7 +1465,7 @@
   }
 }
 .project-expanded {
-  padding: 12px 14px;
+  padding: 12px 16px;
   border-top: 1px solid var(--color-border);
   background: var(--color-surface);
 }
@@ -1816,61 +1477,135 @@
 }
 
 // --- RoadmapModal ------------------------------------------------------------
-.roadmap-legend {
-  display: flex;
-  gap: calc(var(--spacing-unit) * 1.5);
-  padding-bottom: calc(var(--spacing-unit) * 1.5);
-}
-.legend-item {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.6875rem;
-  color: var(--color-text-secondary);
-}
-.legend-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  &--completed {
-    background: #10b981;
-  }
-  &--in-progress {
-    background: #f59e0b;
-  }
-  &--planned {
-    background: var(--color-text-tertiary);
-  }
-}
-.roadmap-items {
+// --- Roadmap Accordion -------------------------------------------------------
+.roadmap-accordion {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
-.roadmap-item {
+
+.roadmap-accordion__section {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--color-surface-elevated);
+  transition: border-color var(--transition-fast);
+
+  &:hover {
+    border-color: var(--color-border-hover);
+  }
+}
+
+.roadmap-accordion__trigger {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 6px;
-  padding: 8px 24px;
+  width: 100%;
+  padding: 12px 16px;
   background: transparent;
-  border: 1px solid var(--color-accent-light);
-  border-radius: 999px;
-  color: var(--color-text-secondary);
+  border: none;
   cursor: pointer;
-  transition: var(--transition-base);
+  transition: background var(--transition-fast);
+
   &:hover {
     background: var(--color-surface);
-    border-color: var(--color-border-hover);
-    box-shadow: var(--shadow-md);
   }
 }
-.roadmap-item__icon {
+
+.roadmap-accordion__trigger-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.roadmap-accordion__status-icon {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 24px;
   height: 24px;
+  border-radius: 50%;
+  flex-shrink: 0;
+
+  &--completed {
+    color: #10b981;
+    background: rgba(16, 185, 129, 0.12);
+  }
+  &--in-progress {
+    color: #f59e0b;
+    background: rgba(245, 158, 11, 0.12);
+  }
+  &--planned {
+    color: var(--color-text-tertiary);
+    background: var(--color-accent-light);
+  }
+}
+
+.roadmap-accordion__label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.roadmap-accordion__count {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--color-text-tertiary);
+  background: var(--color-accent-light);
+  padding: 1px 7px;
+  border-radius: 999px;
+  line-height: 1.4;
+}
+
+.roadmap-accordion__chevron {
+  color: var(--color-text-tertiary);
+  transition: transform var(--transition-base);
+  flex-shrink: 0;
+
+  &--open {
+    transform: rotate(180deg);
+  }
+}
+
+.roadmap-accordion__content {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--transition-base) ease;
+
+  &--open {
+    grid-template-rows: 1fr;
+  }
+}
+
+.roadmap-accordion__items {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  background: var(--color-border);
+  border-top: 1px solid var(--color-border);
+}
+
+.roadmap-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  background: var(--color-surface-elevated);
+  color: var(--color-text-secondary);
+  transition: background var(--transition-fast);
+
+  &:hover {
+    background: var(--color-surface);
+  }
+}
+
+.roadmap-item__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
   flex-shrink: 0;
 }
@@ -1886,26 +1621,24 @@
   color: var(--color-text-tertiary);
   background: var(--color-accent-light);
 }
+
 .roadmap-item__content {
   flex: 1;
+  min-width: 0;
 }
+
 .roadmap-item__title {
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   font-weight: 600;
   color: var(--color-text-primary);
-  margin: 0 0 2px 0;
-}
-.roadmap-item__description {
-  font-size: 0.8125rem;
-  line-height: 1.5;
-  color: var(--color-text-secondary);
   margin: 0;
 }
-@media (max-width: 640px) {
-  .roadmap-legend {
-    flex-wrap: wrap;
-    gap: var(--spacing-unit);
-  }
+
+.roadmap-item__description {
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--color-text-secondary);
+  margin: 2px 0 0;
 }
 
 // --- SupportModal ------------------------------------------------------------
@@ -1951,9 +1684,13 @@
 .tokens-balance {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   font-size: 0.8125rem;
   color: var(--color-text-secondary);
-  padding-bottom: 12px;
+  padding: 10px 14px;
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
   span:last-child {
     font-weight: 600;
     color: var(--color-text-primary);
@@ -1968,21 +1705,23 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 6px;
-  padding: 8px 24px;
-  background: transparent;
-  border: 1px solid var(--color-accent-light);
-  border-radius: 999px;
+  gap: 10px;
+  padding: 12px 16px;
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
   color: var(--color-text-secondary);
   cursor: pointer;
   transition: background var(--transition-fast),
     border-color var(--transition-fast);
   &:hover {
-    background: var(--color-accent-light);
+    background: var(--color-surface);
+    border-color: var(--color-border-hover);
   }
   &.selected {
-    background: var(--color-accent-light);
+    background: var(--color-surface);
     border-color: var(--color-border-hover);
+    box-shadow: var(--shadow-sm);
   }
   &__left {
     display: flex;
@@ -2010,7 +1749,7 @@
     gap: 8px;
   }
   &__badge {
-    padding: 3px 8px;
+    padding: 2px 8px;
     background: rgba(16, 185, 129, 0.1);
     border-radius: 999px;
     font-size: 0.625rem;
@@ -2019,7 +1758,7 @@
     text-transform: uppercase;
     letter-spacing: 0.02em;
     &--popular {
-      background: var(--color-border);
+      background: var(--color-accent-light);
       color: var(--color-text-secondary);
     }
   }
@@ -4073,54 +3812,23 @@
 }
 
 // --- TokenModal --------------------------------------------------------------
-.token-modal__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  padding-bottom: 12px;
-}
-
-.token-modal__header-title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-
-  svg {
-    color: var(--color-accent);
-  }
-}
-
-.token-modal__total {
-  font-size: 1.125rem;
-  font-weight: 700;
-  font-family: var(--font-family-base, sans-serif);
-  color: var(--color-text-primary);
-}
-
 .token-modal__breakdown {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 6px;
   width: 100%;
-}
-
-.token-modal__breakdown-title {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--color-text-primary);
-  margin: 0;
 }
 
 .token-modal__item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px 12px;
+  padding: 10px 14px;
   font-size: 0.8125rem;
   font-family: var(--font-family-base, sans-serif);
   color: var(--color-text-secondary);
-  background: var(--color-surface-secondary);
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
 
   span:last-child {
@@ -4128,7 +3836,7 @@
   }
 
   &.discount {
-    background: rgba(16, 185, 129, 0.1);
+    background: rgba(16, 185, 129, 0.08);
     border-color: rgba(16, 185, 129, 0.2);
     color: var(--color-success, #10b981);
 
@@ -4143,8 +3851,9 @@
   flex-direction: column;
   gap: 8px;
   width: 100%;
-  padding: 16px;
-  background: var(--color-surface-secondary);
+  padding: 14px 16px;
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
 }
 
@@ -4152,7 +3861,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   font-family: var(--font-family-base, sans-serif);
   color: var(--color-text-secondary);
 
@@ -4161,7 +3870,7 @@
   }
 
   &--remaining {
-    font-size: 0.9375rem;
+    font-size: 0.875rem;
     padding-top: 8px;
     margin-top: 4px;
     border-top: 1px solid var(--color-border);
@@ -4188,7 +3897,6 @@
 
 .token-modal__balance-cost {
   font-weight: 600;
-  color: var(--color-error, #ef4444);
 }
 
 .token-modal__balance-remaining {
@@ -4196,18 +3904,6 @@
   align-items: center;
   gap: 6px;
   font-weight: 700;
-
-  &--sufficient {
-    color: var(--color-success, #10b981);
-  }
-
-  &--warning {
-    color: var(--color-warning, #f59e0b);
-  }
-
-  &--insufficient {
-    color: var(--color-error, #ef4444);
-  }
 }
 
 .token-modal__balance-icon {
@@ -4233,7 +3929,7 @@
 }
 
 @media (max-width: 640px) {
-  .modal-content--sm .token-modal__header {
-    padding-bottom: 8px;
+  .modal-content--lg .token-modal__balance {
+    padding: 12px;
   }
 }
