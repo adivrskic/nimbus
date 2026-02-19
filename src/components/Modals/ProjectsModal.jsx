@@ -223,178 +223,189 @@ function ProjectsModal({
       onClick={closeModal}
     >
       <div
-        className={`modal-content modal-content--surface ${
+        className={`modal-content modal-content--lg ${
           isVisible ? "active" : ""
         }`}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="modal-header">
-          <span className="modal-title">
-            <FolderOpen size={16} />
-            <span>Projects</span>
-          </span>
-          <button className="modal-close" onClick={closeModal}>
-            <X size={16} />
-          </button>
+        {/* Fixed header section */}
+        <div className="modal-header-section">
+          <div className="modal-header">
+            <div className="modal-title">
+              <FolderOpen size={16} />
+              <span>Projects</span>
+            </div>
+            <button className="modal-close" onClick={closeModal}>
+              <X size={16} />
+            </button>
+          </div>
+
+          <div className="modal-subtitle">
+            Your saved projects. Click a project to continue editing.
+          </div>
         </div>
-        <div className="projects-list">
-          {isLoading ? (
-            <div className="projects-loading">
-              <Loader2 size={16} className="spinning" />
-            </div>
-          ) : filteredProjects.length === 0 ? (
-            <div className="projects-empty">
-              <span>No projects yet</span>
-            </div>
-          ) : (
-            filteredProjects.map((project) => (
-              <div
-                key={project.id}
-                className={`project-item ${
-                  deletingId === project.id ? "deleting" : ""
-                } ${expandedProject === project.id ? "expanded" : ""}`}
-              >
-                {/* Delete confirmation overlay */}
-                {deletingId === project.id && (
-                  <div className="project-delete-confirm">
-                    {deleteError ? (
-                      <>
-                        <div className="delete-error">
-                          <AlertTriangle size={14} />
-                          <span>{deleteError}</span>
-                        </div>
-                        <button
-                          className="delete-cancel"
-                          onClick={cancelDelete}
-                        >
-                          Close
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        <div className="delete-actions">
+
+        {/* Scrollable body section */}
+        <div className="modal-body">
+          <div className="projects-list">
+            {isLoading ? (
+              <div className="projects-loading">
+                <Loader2 size={16} className="spinning" />
+              </div>
+            ) : filteredProjects.length === 0 ? (
+              <div className="projects-empty">
+                <span>No projects yet</span>
+              </div>
+            ) : (
+              filteredProjects.map((project) => (
+                <div
+                  key={project.id}
+                  className={`project-item ${
+                    deletingId === project.id ? "deleting" : ""
+                  } ${expandedProject === project.id ? "expanded" : ""}`}
+                >
+                  {/* Delete confirmation overlay */}
+                  {deletingId === project.id && (
+                    <div className="project-delete-confirm">
+                      {deleteError ? (
+                        <>
+                          <div className="delete-error">
+                            <AlertTriangle size={14} />
+                            <span>{deleteError}</span>
+                          </div>
                           <button
                             className="delete-cancel"
                             onClick={cancelDelete}
-                            disabled={isDeleting}
                           >
-                            Cancel
+                            Close
                           </button>
-                          <button
-                            className="delete-confirm"
-                            onClick={() => confirmDelete(project.id)}
-                            disabled={isDeleting}
-                          >
-                            {isDeleting ? (
-                              <>
-                                <Loader2 size={12} className="spinning" />
-                                Deleting...
-                              </>
-                            ) : (
-                              "Delete"
-                            )}
-                          </button>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                )}
-
-                <div
-                  className="project-main"
-                  onClick={() => handleEdit(project)}
-                >
-                  <div className="project-info">
-                    <div className="project-name">
-                      <FileCode size={14} />
-                      <span>{getProjectName(project)}</span>
+                        </>
+                      ) : (
+                        <>
+                          <div className="delete-actions">
+                            <button
+                              className="delete-cancel"
+                              onClick={cancelDelete}
+                              disabled={isDeleting}
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              className="delete-confirm"
+                              onClick={() => confirmDelete(project.id)}
+                              disabled={isDeleting}
+                            >
+                              {isDeleting ? (
+                                <>
+                                  <Loader2 size={12} className="spinning" />
+                                  Deleting...
+                                </>
+                              ) : (
+                                "Delete"
+                              )}
+                            </button>
+                          </div>
+                        </>
+                      )}
                     </div>
-                    <div className="project-meta">
-                      <span className="project-date">
-                        <Calendar size={10} />
-                        {formatDate(project.updated_at)}
-                      </span>
-                    </div>
-                  </div>
+                  )}
 
-                  <div className="project-actions">
-                    {/* Delete button */}
-                    <button
-                      className="action-btn action-btn--danger"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDelete(project.id);
-                      }}
-                      title="Delete"
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                  </div>
-                </div>
-
-                {/* Expanded content */}
-                {expandedProject === project.id && (
-                  <div className="project-expanded">
-                    {getDeployedUrl(project) && (
-                      <div className="project-url">
-                        <span className="url-label">URL:</span>
-                        <div className="url-container">
-                          <a
-                            href={getDeployedUrl(project)}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="url-value"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            {getDeployedUrl(project)}
-                          </a>
-                          <button
-                            className="copy-btn"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              copyUrl(getDeployedUrl(project), project.id);
-                            }}
-                            title="Copy URL"
-                          >
-                            {copied === project.id ? "Copied!" : "Copy"}
-                          </button>
-                        </div>
+                  <div
+                    className="project-main"
+                    onClick={() => handleEdit(project)}
+                  >
+                    <div className="project-info">
+                      <div className="project-name">
+                        <FileCode size={14} />
+                        <span>{getProjectName(project)}</span>
                       </div>
-                    )}
+                      <div className="project-meta">
+                        <span className="project-date">
+                          <Calendar size={10} />
+                          {formatDate(project.updated_at)}
+                        </span>
+                      </div>
+                    </div>
 
-                    <div className="project-expanded-actions">
+                    <div className="project-actions">
+                      {/* Delete button */}
                       <button
-                        className="action-btn"
+                        className="action-btn action-btn--danger"
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleDeploy(project);
+                          handleDelete(project.id);
                         }}
-                        disabled={loadingAction?.id === project.id}
-                        title="Deploy"
+                        title="Delete"
                       >
-                        {loadingAction?.id === project.id &&
-                        loadingAction?.type === "deploy" ? (
-                          <Loader2 size={14} className="spinning" />
-                        ) : (
-                          "Deploy"
-                        )}
-                      </button>
-                      <button
-                        className="action-btn"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDomain(project);
-                        }}
-                        title="Domain Setup"
-                      >
-                        Domain
+                        <Trash2 size={14} />
                       </button>
                     </div>
                   </div>
-                )}
-              </div>
-            ))
-          )}
+
+                  {/* Expanded content */}
+                  {expandedProject === project.id && (
+                    <div className="project-expanded">
+                      {getDeployedUrl(project) && (
+                        <div className="project-url">
+                          <span className="url-label">URL:</span>
+                          <div className="url-container">
+                            <a
+                              href={getDeployedUrl(project)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="url-value"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              {getDeployedUrl(project)}
+                            </a>
+                            <button
+                              className="copy-btn"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                copyUrl(getDeployedUrl(project), project.id);
+                              }}
+                              title="Copy URL"
+                            >
+                              {copied === project.id ? "Copied!" : "Copy"}
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="project-expanded-actions">
+                        <button
+                          className="action-btn"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeploy(project);
+                          }}
+                          disabled={loadingAction?.id === project.id}
+                          title="Deploy"
+                        >
+                          {loadingAction?.id === project.id &&
+                          loadingAction?.type === "deploy" ? (
+                            <Loader2 size={14} className="spinning" />
+                          ) : (
+                            "Deploy"
+                          )}
+                        </button>
+                        <button
+                          className="action-btn"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDomain(project);
+                          }}
+                          title="Domain Setup"
+                        >
+                          Domain
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))
+            )}
+          </div>
         </div>
       </div>
     </div>

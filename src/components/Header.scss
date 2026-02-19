@@ -44,14 +44,17 @@
 .header__logo-icon {
   display: flex;
   align-items: center;
-  color: var(--color-text-primary);
+  color: var(--color-text-secondary);
+  opacity: 0.67;
 }
 
 .header__logo-text {
   font-size: 1.125rem;
   font-weight: 700;
   font-family: var(--font-family-base, sans-serif);
-  letter-spacing: -0.02em;
+  // letter-spacing: -0.02em;
+  margin-left: -8px;
+  margin-top: 14px;
   color: var(--color-text-primary);
 }
 
@@ -81,7 +84,6 @@
   &:hover {
     background: var(--color-accent-light);
     border-color: var(--color-border-hover);
-    box-shadow: var(--shadow-md);
   }
 
   &--generating {
