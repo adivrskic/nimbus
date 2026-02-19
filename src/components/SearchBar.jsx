@@ -37,7 +37,6 @@ const SearchBar = forwardRef(
 
     const showExpandedState = isExpanded && !isGenerating;
 
-    // Character count validation
     const charCount = value.length;
     const isUnderMin = charCount > 0 && charCount < MIN_CHARS;
     const isOverMax = charCount > MAX_CHARS;
@@ -45,14 +44,10 @@ const SearchBar = forwardRef(
     const charsRemaining = MIN_CHARS - charCount;
     const charsOver = charCount - MAX_CHARS;
 
-    // Determine if submit should be disabled
     const canSubmit = value.trim().length > 0 && isValidLength && !isGenerating;
 
-    // Character counter display logic
     const showCharCounter = useMemo(() => {
-      // Always show when expanded
       if (showExpandedState) return true;
-      // Show when approaching limits
       if (charCount > 0 && charCount < MIN_CHARS + 10) return true;
       if (charCount > MAX_CHARS - 100) return true;
       return false;
@@ -76,17 +71,14 @@ const SearchBar = forwardRef(
       preventBlurRef.current = true;
     }, []);
 
-    // Handle onChange with max limit
     const handleChange = useCallback(
       (e) => {
         const newValue = e.target.value;
-        // Allow typing but warn when over - don't hard block
         onChange?.(e);
       },
       [onChange]
     );
 
-    // Handle keydown - prevent submit if invalid
     const handleKeyDown = useCallback(
       (e) => {
         if (e.key === "Enter" && !e.shiftKey) {
@@ -136,7 +128,6 @@ const SearchBar = forwardRef(
             </div>
           )}
 
-          {/* Character counter */}
           {showCharCounter && charCount > 0 && (
             <div
               className={`search-bar__char-counter ${
@@ -234,6 +225,5 @@ const SearchBar = forwardRef(
 
 SearchBar.displayName = "SearchBar";
 
-// Export constants for use in other components
 export { MIN_CHARS, MAX_CHARS };
 export default SearchBar;

@@ -45,15 +45,15 @@
   display: flex;
   align-items: center;
   color: var(--color-text-secondary);
-  opacity: 0.67;
+  opacity: 0.5;
 }
 
 .header__logo-text {
-  font-size: 1.125rem;
-  font-weight: 700;
+  font-size: 1rem;
+  font-weight: 600;
   font-family: var(--font-family-base, sans-serif);
   // letter-spacing: -0.02em;
-  margin-left: -8px;
+  margin-left: -9px;
   margin-top: 14px;
   color: var(--color-text-primary);
 }

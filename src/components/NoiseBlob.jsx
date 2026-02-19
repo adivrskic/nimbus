@@ -22,10 +22,8 @@ const isMobileOrPortrait = () => {
   );
 };
 
-// Generate random value within range
 const randomInRange = (min, max) => Math.random() * (max - min) + min;
 
-// Generate random integer within range
 const randomIntInRange = (min, max) => Math.floor(randomInRange(min, max + 1));
 
 const noiseGLSL = `
@@ -104,15 +102,12 @@ float snoise(vec4 v){
 `;
 
 export default function NoiseBlob({
-  // Theme props
   isDark = false,
 
-  // Color props (can be overridden, but will default based on theme)
   color: colorProp,
   emissiveColor: emissiveColorProp,
   backgroundColor: backgroundColorProp,
 
-  // Other props - these will be randomized if not provided
   shininess: shininessProp,
   wireframe = false,
   speed: speedProp,
@@ -146,7 +141,6 @@ export default function NoiseBlob({
   const uniformsRef = useRef(null);
   const [initialized, setInitialized] = useState(false);
 
-  // Generate randomized values once on mount
   const randomizedProps = useMemo(
     () => ({
       shininess: shininessProp ?? randomInRange(400, 800),
@@ -161,7 +155,7 @@ export default function NoiseBlob({
         mobileScaleMultiplierProp ?? randomInRange(0.4, 0.75),
     }),
     []
-  ); // Empty deps = only run once on mount
+  );
 
   const {
     shininess,
@@ -175,7 +169,6 @@ export default function NoiseBlob({
     mobileScaleMultiplier,
   } = randomizedProps;
 
-  // Memoize colors based on theme to prevent unnecessary recalculations
   const colors = useMemo(
     () => ({
       light: {
@@ -192,7 +185,6 @@ export default function NoiseBlob({
     []
   );
 
-  // Compute colors based on theme
   const computedColors = useMemo(
     () => ({
       backgroundColor:
@@ -208,7 +200,6 @@ export default function NoiseBlob({
 
   const targetAmplitudeRef = useRef(noiseAmplitude);
 
-  // Handle isGenerating prop changes
   useEffect(() => {
     if (isGenerating) {
       targetAmplitudeRef.current = 0.8;
@@ -217,32 +208,27 @@ export default function NoiseBlob({
     }
   }, [isGenerating, noiseAmplitude]);
 
-  // Update colors when theme changes - THIS IS THE KEY FIX
   useEffect(() => {
     if (!sceneRef.current || !meshRef.current) return;
 
     const { backgroundColor, color, emissiveColor } = computedColors;
 
-    // Update scene background
     sceneRef.current.background = new Color(backgroundColor);
 
-    // Update material colors
     const material = meshRef.current.material;
     if (material) {
       material.color = new Color(color);
       material.emissive = new Color(emissiveColor).multiplyScalar(0.25);
       material.opacity = isDark ? 0.9 : 0.95;
       material.shininess = isDark ? 300 : shininess;
-      material.needsUpdate = true; // Force material update
+      material.needsUpdate = true;
     }
 
-    // Update renderer clear color
     if (rendererRef.current) {
       rendererRef.current.setClearColor(new Color(backgroundColor), 0);
     }
   }, [computedColors, isDark, shininess]);
 
-  // Main Three.js initialization
   useEffect(() => {
     if (!containerRef.current) return;
 
@@ -304,7 +290,6 @@ export default function NoiseBlob({
       };
       uniformsRef.current = uniforms;
 
-      // Lighting - adjust for theme
       const dirLightIntensity = isDark
         ? directionalIntensity * 0.7
         : directionalIntensity;
@@ -453,7 +438,6 @@ export default function NoiseBlob({
       }
     };
   }, [
-    // Only re-initialize on mount and when these props change
     detail,
     cameraDistance,
     fov,

@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 
 import { useAuth } from "../contexts/AuthContext";
 import { useProject } from "../contexts/ProjectContext";
+import { useModals } from "../contexts/ModalContext";
 
 import useTypewriter from "../hooks/useTypewriter";
 import { useEscapeKey } from "../hooks/useKeyboardShortcuts";
@@ -22,10 +23,12 @@ import TokenModal from "../components/Modals/TokenModal";
 import OptionsModal from "../components/Modals/OptionsModal";
 import PreviewModal from "../components/Modals/PreviewModal";
 import AuthModal from "../components/Modals/AuthModal";
-import TokensModal from "../components/Modals/TokenPurchaseModal";
+import TokenPurchaseModal from "../components/Modals/TokenPurchaseModal";
 import HelpModal from "../components/Modals/HelpModal";
 import LegalModal from "../components/Modals/LegalModal";
 import ProjectsModal from "../components/Modals/ProjectsModal";
+import RoadmapModal from "../components/Modals/RoadmapModal";
+import SupportModal from "../components/Modals/SupportModal";
 import { useGenerationState } from "../contexts/GenerationContext";
 import { generateWebsite } from "../utils/generateWebsite";
 import { supabase } from "../lib/supabaseClient";
@@ -44,6 +47,25 @@ function Home() {
     deployProject,
   } = useProject();
 
+  // Shared modals via context (Header, Footer, and Home all use these)
+  const {
+    modals,
+    legalSection,
+    openAuth,
+    closeAuth,
+    openTokenPurchase,
+    closeTokenPurchase,
+    openProjects,
+    closeProjects,
+    openLegal,
+    closeLegal,
+    openRoadmap,
+    closeRoadmap,
+    openSupport,
+    closeSupport,
+  } = useModals();
+
+  // Page-specific modals (only Home needs these)
   const {
     prompt,
     setPrompt,
@@ -57,25 +79,16 @@ function Home() {
     updatePersistentOption,
     showOptions,
     showTokenOverlay,
-    showAuth,
-    showTokens,
     showDeploy,
     showHelp,
-    showLegal,
     showPreview,
     previewMinimized,
     openOptions,
     closeOptions,
     openHelp,
     closeHelp,
-    openAuth,
-    closeAuth,
-    openTokens,
-    closeTokens,
     openDeploy,
     closeDeploy,
-    openLegal,
-    closeLegal,
     toggleTokenOverlay,
     closeTokenOverlay,
     openPreview,
@@ -86,10 +99,6 @@ function Home() {
 
   const { showPreviewPill, hidePreviewPill, refreshColors } =
     useGenerationState();
-
-  const [showProjects, setShowProjects] = useState(false);
-  const openProjects = useCallback(() => setShowProjects(true), []);
-  const closeProjects = useCallback(() => setShowProjects(false), []);
 
   const {
     selections,
@@ -131,7 +140,6 @@ function Home() {
   const [currentProjectId, setCurrentProjectId] = useState(null);
   const [lastRequest, setLastRequest] = useState(null);
   const [showEnhanceTokenOverlay, setShowEnhanceTokenOverlay] = useState(false);
-  const [legalSection, setLegalSection] = useState(null);
 
   // Sync minimized preview state to context so Header can show the pill
   useEffect(() => {
@@ -194,17 +202,6 @@ function Home() {
     [enhancePrompt]
   );
 
-  const handleOpenLegal = (section) => {
-    console.log("hello: ", section);
-    setLegalSection(section);
-    openLegal();
-  };
-
-  const handleCloseLegal = () => {
-    closeLegal();
-    setLegalSection(null);
-  };
-
   // Escape key handler
   useEscapeKey(() => {
     if (showPreview) {
@@ -213,16 +210,20 @@ function Home() {
       closeOptions();
     } else if (showHelp) {
       closeHelp();
-    } else if (showAuth) {
+    } else if (modals.auth) {
       closeAuth();
-    } else if (showTokens) {
-      closeTokens();
+    } else if (modals.tokenPurchase) {
+      closeTokenPurchase();
     } else if (showDeploy) {
       closeDeploy();
-    } else if (showLegal) {
-      handleCloseLegal();
-    } else if (showProjects) {
+    } else if (modals.legal) {
+      closeLegal();
+    } else if (modals.projects) {
       closeProjects();
+    } else if (modals.roadmap) {
+      closeRoadmap();
+    } else if (modals.support) {
+      closeSupport();
     }
   });
 
@@ -276,7 +277,7 @@ function Home() {
     }
 
     if (!tokenBalance.sufficient) {
-      openTokens();
+      openTokenPurchase();
       return;
     }
 
@@ -300,7 +301,7 @@ function Home() {
     user,
     generate,
     openAuth,
-    openTokens,
+    openTokenPurchase,
     openPreview,
   ]);
 
@@ -482,11 +483,13 @@ function Home() {
               userTokens={userTokens}
               isAuthenticated={isAuthenticated}
               tokenBalance={tokenBalance}
-              onBuyTokens={openTokens}
+              onBuyTokens={openTokenPurchase}
             />
           )}
         </div>
       </div>
+
+      {/* Page-specific modals */}
 
       {showOptions && (
         <OptionsModal
@@ -527,7 +530,7 @@ function Home() {
           isAuthenticated={isAuthenticated}
           userTokens={userTokens}
           tokenBalance={tokenBalance}
-          onBuyTokens={openTokens}
+          onBuyTokens={openTokenPurchase}
           isStreaming={isStreaming}
           isEnhancing={isEnhancing}
           streamingPhase={streamingPhase}
@@ -537,21 +540,7 @@ function Home() {
         />
       )}
 
-      {showAuth && (
-        <AuthModal
-          isOpen={showAuth}
-          onClose={closeAuth}
-          onOpenLegal={handleOpenLegal}
-        />
-      )}
-
-      {showTokens && (
-        <TokensModal
-          isOpen={showTokens}
-          onClose={closeTokens}
-          onOpenAuth={openAuth}
-        />
-      )}
+      {showHelp && <HelpModal isOpen={showHelp} onClose={closeHelp} />}
 
       {showDeploy && (
         <DeployModal
@@ -562,23 +551,47 @@ function Home() {
         />
       )}
 
-      {showHelp && <HelpModal isOpen={showHelp} onClose={closeHelp} />}
+      {/* Shared modals (triggered by Header, Footer, or Home) */}
 
-      {showLegal && (
-        <LegalModal
-          isOpen={showLegal}
-          onClose={handleCloseLegal}
-          initialSection={legalSection}
+      {modals.auth && (
+        <AuthModal
+          isOpen={modals.auth}
+          onClose={closeAuth}
+          onOpenLegal={openLegal}
         />
       )}
 
-      {showProjects && (
+      {modals.tokenPurchase && (
+        <TokenPurchaseModal
+          isOpen={modals.tokenPurchase}
+          onClose={closeTokenPurchase}
+          onOpenAuth={openAuth}
+        />
+      )}
+
+      {modals.projects && (
         <ProjectsModal
-          isOpen={showProjects}
+          isOpen={modals.projects}
           onClose={closeProjects}
           onEditProject={handleEditProject}
           onDeployProject={handleDeployProject}
         />
+      )}
+
+      {modals.legal && (
+        <LegalModal
+          isOpen={modals.legal}
+          onClose={closeLegal}
+          initialSection={legalSection}
+        />
+      )}
+
+      {modals.roadmap && (
+        <RoadmapModal isOpen={modals.roadmap} onClose={closeRoadmap} />
+      )}
+
+      {modals.support && (
+        <SupportModal isOpen={modals.support} onClose={closeSupport} />
       )}
     </div>
   );

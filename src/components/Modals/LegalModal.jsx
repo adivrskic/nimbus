@@ -67,7 +67,7 @@ function LegalModal({ isOpen, onClose, initialSection = null }) {
     },
     {
       title: "Service Description",
-      content: "Nimbus provides website customization and deployment services.",
+      content: "Nimbus provides website generation and customization services.",
     },
     {
       title: "User Accounts",
@@ -80,23 +80,19 @@ function LegalModal({ isOpen, onClose, initialSection = null }) {
     },
     {
       title: "Payment",
-      content: "$5 per site per month. Billing is monthly and non-refundable.",
-    },
-    {
-      title: "Deployment",
-      content: "We deploy to platforms like Vercel. You manage domains.",
+      content:
+        "Tokens can be purchased to generate more websites and add more customizations.",
     },
     {
       title: "Termination",
-      content: "We may suspend accounts for violations or non-payment.",
+      content: "We may suspend accounts for violations.",
     },
   ];
 
   const privacyItems = [
     {
       title: "Data Collection",
-      content:
-        "We collect account info, usage data, and payment info via Stripe.",
+      content: "We collect account info and usage data.",
     },
     {
       title: "Data Usage",
@@ -123,7 +119,6 @@ function LegalModal({ isOpen, onClose, initialSection = null }) {
         className={`modal-content modal-content--lg ${isOpen ? "active" : ""}`}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Fixed header section */}
         <div className="modal-header-section">
           <div className="modal-header">
             <div className="modal-title">
@@ -141,7 +136,6 @@ function LegalModal({ isOpen, onClose, initialSection = null }) {
           <div className="legal-meta">Updated {lastUpdated}</div>
         </div>
 
-        {/* Scrollable body section */}
         <div className="modal-body" ref={bodyRef}>
           <section id="terms" className="modal-section">
             <div className="modal-section__header">
@@ -182,14 +176,7 @@ function LegalModal({ isOpen, onClose, initialSection = null }) {
               <h3 className="modal-section__title">Refund Policy</h3>
             </div>
             <div className="modal-section__body">
-              <p>
-                Monthly subscriptions are non-refundable. You can cancel at any
-                time before the next billing cycle.
-              </p>
-              <p>
-                Annual plans may be refunded within 14 days of purchase if no
-                deployment has been made.
-              </p>
+              <p>No refunds can be issued for purchased but unused tokens.</p>
             </div>
           </section>
 
