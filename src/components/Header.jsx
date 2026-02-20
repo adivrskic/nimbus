@@ -173,7 +173,7 @@ function Header() {
                   onClick={openTokenPurchase}
                   title="Get more tokens"
                 >
-                  <Coins size={14} />
+                  <Coins size={18} />
                   <span>{userTokens}</span>
                 </button>
 
@@ -182,7 +182,7 @@ function Header() {
                   onClick={openProjects}
                   title="Projects"
                 >
-                  <FolderOpen size={16} />
+                  <FolderOpen size={18} />
                 </button>
 
                 <button
@@ -194,7 +194,7 @@ function Header() {
                   {isLoggingOut ? (
                     <span className="spinner-small" />
                   ) : (
-                    <LogOut size={16} />
+                    <LogOut size={18} />
                   )}
                 </button>
               </>
