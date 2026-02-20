@@ -36,7 +36,7 @@
   align-items: center;
   height: 40px;
   padding: 0 14px;
-  border-radius: 14px;
+  border-radius: 999px;
   background: var(--header-glass-bg);
   border: 1px solid var(--header-glass-border);
   backdrop-filter: blur(24px) saturate(180%);
@@ -86,11 +86,11 @@
 }
 
 .header__logo-text {
-  font-size: 1rem;
+  font-size: 0.875rem;
   font-weight: 600;
   font-family: var(--font-family-base, sans-serif);
   margin-left: -9px;
-  margin-top: 14px;
+  // margin-top: 11px;
   color: var(--color-text-primary);
 }
 
@@ -247,7 +247,7 @@
   width: 34px;
   height: 34px;
   background: transparent;
-  border: 1px solid transparent;
+  border: none;
   border-radius: 999px;
   color: var(--color-text-secondary);
   cursor: pointer;
@@ -255,9 +255,9 @@
     border-color var(--transition-fast);
 
   &:hover:not(:disabled) {
-    background: var(--color-accent-light);
+    // background: var(--color-accent-light);
     color: var(--color-text-primary);
-    border-color: var(--color-border);
+    // border-color: var(--color-border);
   }
 
   &:disabled {
@@ -267,7 +267,7 @@
 
   &--danger:hover:not(:disabled) {
     color: var(--color-error, #ef4444);
-    background: var(--color-error-background, rgba(239, 68, 68, 0.08));
+    // background: var(--color-error-background, rgba(239, 68, 68, 0.08));
     border-color: transparent;
   }
 }
@@ -295,7 +295,7 @@
   }
 
   &:hover {
-    background: var(--color-accent-light);
+    // background: var(--color-accent-light);
     color: var(--color-text-primary);
 
     svg {
