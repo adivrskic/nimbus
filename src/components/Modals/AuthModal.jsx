@@ -69,7 +69,7 @@ function AuthModal({ isOpen, onClose, onAuthSuccess, onOpenLegal }) {
           <div className="modal-header">
             <div className="modal-title">
               <LogIn size={16} />
-              <span>Sign in to create</span>
+              <span>Sign in to start creating</span>
             </div>
             <button className="modal-close" onClick={handleClose}>
               <X size={16} />
