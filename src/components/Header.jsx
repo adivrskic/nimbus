@@ -125,38 +125,41 @@ function Header() {
           </div>
         </div>
 
-        {/* Marble — fills remaining space, IS the orb */}
-        {isClickable ? (
-          <button
-            className="header__marble-wrapper header__marble-wrapper--clickable"
-            onClick={previewPill.onRestore}
-            title="View Generated Project"
-          >
-            <div className="header__marble-surface" style={marbleStyle} />
-          </button>
-        ) : (
-          <div
-            className={`header__marble-wrapper${
-              isGenerating ? " header__marble-wrapper--generating" : ""
-            }`}
-          >
-            <div
-              className={`header__marble-surface${
-                isGenerating ? " header__marble-surface--generating" : ""
-              }`}
-              style={marbleStyle}
-            />
-            {isGenerating && (
-              <Loader2 size={14} className="header__marble-spinner" />
-            )}
-          </div>
-        )}
-
         {/* Nav — glassmorphism section */}
         <div className="header__section header__section--nav">
           <nav className="header__nav">
             {isAuthenticated ? (
               <>
+                {isClickable ? (
+                  <button
+                    className="header__marble-wrapper header__marble-wrapper--clickable"
+                    onClick={previewPill.onRestore}
+                    title="View Generated Project"
+                  >
+                    <div
+                      className="header__marble-surface"
+                      style={marbleStyle}
+                    />
+                  </button>
+                ) : (
+                  <div
+                    className={`header__marble-wrapper${
+                      isGenerating ? " header__marble-wrapper--generating" : ""
+                    }`}
+                  >
+                    <div
+                      className={`header__marble-surface${
+                        isGenerating
+                          ? " header__marble-surface--generating"
+                          : ""
+                      }`}
+                      style={marbleStyle}
+                    />
+                    {isGenerating && (
+                      <Loader2 size={14} className="header__marble-spinner" />
+                    )}
+                  </div>
+                )}
                 <button
                   className="header__pill"
                   onClick={openTokenPurchase}
