@@ -69,7 +69,7 @@
   }
   &--options {
     width: 100%;
-    max-width: 95vw;
+    max-width: 920px;
     height: 90dvh;
     max-height: none;
     padding: 16px;
@@ -258,6 +258,7 @@
   flex-direction: column;
   gap: calc(var(--spacing-unit) * 1.5);
   padding: calc(var(--spacing-unit) * 3);
+  padding-right: 0;
   padding-bottom: calc(var(--spacing-unit) * 2);
 }
 
@@ -1669,6 +1670,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 10px;
+  border: none;
   padding: 12px 16px;
   background: var(--color-surface-elevated);
   border-radius: var(--radius-md);
@@ -1679,7 +1681,7 @@
     background: var(--color-surface);
   }
   &.selected {
-    background: var(--color-surface);
+    background: var(--color-border);
     box-shadow: var(--shadow-sm);
   }
   &__left {
@@ -1953,6 +1955,7 @@
 .options-filter {
   padding: 8px 14px;
   background: transparent;
+  border: none;
   border-radius: 999px;
   font-size: 0.75rem;
   font-weight: 500;
@@ -2067,6 +2070,7 @@
 .options-input {
   padding: 10px 12px;
   background: var(--color-surface-elevated);
+  border: none;
   border-radius: 999px;
   font-size: 0.75rem;
   font-family: var(--font-family-base, sans-serif);
@@ -2143,6 +2147,7 @@
   gap: 10px;
   padding: 6px 10px;
   background: var(--color-surface-elevated);
+  border: none;
   border-radius: 999px;
   cursor: pointer;
   transition: var(--transition-base);
@@ -2272,6 +2277,7 @@
 .options-reset {
   padding: 6px 10px;
   background: transparent;
+  border: none;
   border-radius: var(--radius-sm);
   font-size: 0.6875rem;
   font-weight: 500;
@@ -2291,6 +2297,7 @@
   gap: 8px;
   padding: 10px 14px;
   background: var(--color-surface-elevated);
+  border: none;
   border-radius: 999px;
   font-size: 0.75rem;
   font-weight: 500;
@@ -2583,6 +2590,7 @@
   width: 100%;
   padding: 8px 10px;
   background: var(--color-background);
+  border: none;
   border-radius: var(--radius-md);
   font-size: 0.8125rem;
   font-family: var(--font-family-base, sans-serif);
@@ -2869,7 +2877,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 8px 12px;
+  padding: 8px 0px;
   background: var(--color-surface);
   min-height: 52px;
 
@@ -2901,6 +2909,7 @@
     border-radius: 100px;
     font-size: 0.8125rem;
     font-weight: 600;
+    border: none;
     color: var(--color-text-tertiary);
     cursor: pointer;
     transition: var(--transition-fast);
@@ -2963,12 +2972,14 @@
   &__page-pill {
     position: relative;
     flex-shrink: 0;
+    border: none;
   }
 
   &__page-btn {
     display: flex;
     align-items: center;
     gap: 5px;
+    border: none;
     padding: 5px 10px;
     background: transparent;
     border-radius: 100px;
@@ -3351,6 +3362,10 @@
     }
   }
 
+  &__sep {
+    display: none;
+  }
+
   &__action-btn {
     display: flex;
     align-items: center;
@@ -3365,6 +3380,7 @@
     cursor: pointer;
     transition: var(--transition-fast);
     white-space: nowrap;
+    border: none;
 
     &:hover:not(:disabled) {
       background: var(--color-accent-light);
@@ -3408,7 +3424,7 @@
 
 .pm-mobile-enhance {
   display: none;
-  padding: 8px 12px;
+  padding: 0 0 8px 0;
 
   &__bar {
     display: flex;
@@ -3565,8 +3581,12 @@
 
   .pm-header {
     gap: 6px;
-    padding: 8px 10px;
+    padding: 8px 0px;
 
+    &__left {
+      flex: 1;
+      min-width: 0;
+    }
     &__tab span {
       display: none;
     }
@@ -3647,7 +3667,7 @@
 
 @media (max-width: 480px) {
   .pm-header {
-    padding: 6px 8px;
+    padding: 6px 0px;
     min-height: 44px;
 
     &__tab {
@@ -3771,30 +3791,15 @@
     font-size: 0.875rem;
     padding-top: 8px;
     margin-top: 4px;
-    color: var(--color-text-primary);
   }
 }
 
 .token-modal__balance-value {
   font-weight: 600;
-
-  &--sufficient {
-    color: var(--color-success, #10b981);
-  }
-
-  &--close,
-  &--moderate {
-    color: var(--color-warning, #f59e0b);
-  }
-
-  &--insufficient {
-    color: var(--color-error, #ef4444);
-  }
 }
 
 .token-modal__balance-cost {
   font-weight: 600;
-  color: var(--color-error, #ef4444);
 }
 
 .token-modal__balance-remaining {
@@ -3802,18 +3807,6 @@
   align-items: center;
   gap: 6px;
   font-weight: 700;
-
-  &--sufficient {
-    color: var(--color-success, #10b981);
-  }
-
-  &--warning {
-    color: var(--color-warning, #f59e0b);
-  }
-
-  &--insufficient {
-    color: var(--color-error, #ef4444);
-  }
 }
 
 .token-modal__balance-icon {

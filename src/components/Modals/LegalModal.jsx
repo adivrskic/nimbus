@@ -43,7 +43,7 @@ function Accordion({ items }) {
 }
 
 function LegalModal({ isOpen, onClose, initialSection = null }) {
-  const lastUpdated = "December 11, 2023";
+  const lastUpdated = "February 19, 2026";
   const bodyRef = useRef(null);
 
   // Scroll to section when modal opens with initialSection
@@ -191,11 +191,6 @@ function LegalModal({ isOpen, onClose, initialSection = null }) {
                 <Mail size={12} />
                 legal@nimbus.com
               </a>
-
-              <div className="legal-notice">
-                <strong>Note:</strong> This is informational, not legal advice.
-                Consult an attorney for specific needs.
-              </div>
             </div>
           </section>
         </div>
