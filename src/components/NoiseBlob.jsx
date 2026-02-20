@@ -152,7 +152,7 @@ export default function NoiseBlob({
       directionalIntensity: directionalIntensityProp ?? randomInRange(0.2, 0.7),
       hemisphereIntensity: hemisphereIntensityProp ?? randomInRange(0.125, 0.5),
       mobileScaleMultiplier:
-        mobileScaleMultiplierProp ?? randomInRange(0.4, 0.75),
+        mobileScaleMultiplierProp ?? randomInRange(0.7, 0.8),
     }),
     []
   );

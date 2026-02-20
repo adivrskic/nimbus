@@ -22,7 +22,7 @@ import "./styles/global.scss";
 
 const Home = lazy(() => import("./pages/Home"));
 
-function App() {
+function AppContent() {
   const location = useLocation();
   const { setSessionFromHash } = useAuth();
   const { isGenerating } = useGenerationState();
@@ -33,15 +33,30 @@ function App() {
       setSessionFromHash(location.hash);
     }
   }, [location, setSessionFromHash]);
+
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const verified = urlParams.get("verified");
-
     if (verified === "true") {
       window.history.replaceState({}, document.title, window.location.pathname);
     }
   }, []);
 
+  return (
+    <div className="app">
+      <Header />
+      <NoiseBlob isGenerating={isGenerating} isDark={theme === "dark"} />
+      <Suspense fallback={<div style={{ minHeight: "100vh" }} />}>
+        <Routes>
+          <Route path="/" element={<Home />} />
+        </Routes>
+      </Suspense>
+      <Footer />
+    </div>
+  );
+}
+
+function App() {
   return (
     <Router>
       <AuthProvider>
@@ -49,19 +64,7 @@ function App() {
           <ProjectProvider>
             <GenerationProvider>
               <ModalProvider>
-                <div className="app">
-                  <Header />
-                  <NoiseBlob
-                    isGenerating={isGenerating}
-                    isDark={theme === "dark"}
-                  />
-                  <Suspense fallback={<div style={{ minHeight: "100vh" }} />}>
-                    <Routes>
-                      <Route path="/" element={<Home />} />
-                    </Routes>
-                  </Suspense>
-                  <Footer />
-                </div>
+                <AppContent />
               </ModalProvider>
             </GenerationProvider>
           </ProjectProvider>
