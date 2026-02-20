@@ -9,7 +9,6 @@
       padding-top: 1rem;
       padding-right: 1rem;
       padding-bottom: 6rem;
-      margin-top: -3rem;
       border-radius: var(--radius-xl);
       font-size: 14px;
       color: var(--color-text-primary);
@@ -607,7 +606,7 @@
 
     &--expanded {
       .search-bar__input {
-        min-height: calc(100vh - 65px - 40px);
+        min-height: calc(100vh - 65px - 60px);
         border-radius: var(--radius-xl);
         padding: 1rem 1rem 6rem 1rem;
         font-size: 16px !important;
