@@ -39,36 +39,24 @@ function Header() {
 
   useEffect(() => {
     setIsPageLoading(true);
-    const timer = setTimeout(() => {
-      setIsPageLoading(false);
-    }, 2000);
+    const timer = setTimeout(() => setIsPageLoading(false), 2000);
     return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {
-    if (isAuthenticated && user && !profile) {
-      refreshProfile();
-    }
+    if (isAuthenticated && user && !profile) refreshProfile();
   }, [isAuthenticated, user, profile, refreshProfile]);
 
   useEffect(() => {
-    if (justVerifiedEmail && !isAuthenticated) {
-      openAuth();
-    }
+    if (justVerifiedEmail && !isAuthenticated) openAuth();
   }, [justVerifiedEmail, isAuthenticated, openAuth]);
 
   useEffect(() => {
     const hash = window.location.hash;
     if (hash && hash.includes("type=signup")) {
       window.history.replaceState(null, "", window.location.pathname);
-      if (!isAuthenticated) {
-        openAuth();
-      } else {
-        refreshProfile();
-      }
-    }
-    if (hash && hash.includes("type=recovery")) {
-      // handled elsewhere
+      if (!isAuthenticated) openAuth();
+      else refreshProfile();
     }
   }, [isAuthenticated, refreshProfile, openAuth]);
 
@@ -87,11 +75,11 @@ function Header() {
   const getThemeIcon = () => {
     switch (theme) {
       case "dark":
-        return <Moon size={16} />;
+        return <Moon className="header__nav-icon" />;
       case "light":
-        return <Sun size={16} />;
+        return <Sun className="header__nav-icon" />;
       default:
-        return <SunMoon size={16} />;
+        return <SunMoon className="header__nav-icon" />;
     }
   };
 
@@ -115,57 +103,58 @@ function Header() {
     }, 300);
   };
 
+  const marbleStyle = previewPill?.colors
+    ? {
+        background: `radial-gradient(circle at 35% 35%, ${previewPill.colors.c}, ${previewPill.colors.a} 50%, ${previewPill.colors.b})`,
+      }
+    : undefined;
+
+  const isClickable = previewPill?.visible && !previewPill?.isGenerating;
+  const isGenerating = previewPill?.visible && previewPill?.isGenerating;
+
   return (
     <header className="header">
-      <div className="container">
-        <div className="header__content">
+      <div className="header__inner">
+        {/* Logo — glassmorphism section */}
+        <div className="header__section header__section--logo">
           <div className="header__logo">
             <span className="header__logo-icon">
-              <Cloudy size={32} />
+              <Cloudy size={28} />
             </span>
             <span className="header__logo-text">nimbus</span>
           </div>
+        </div>
 
-          <div className="header__center">
-            {previewPill?.visible && (
-              <button
-                className={`header__preview-pill ${
-                  previewPill.isGenerating
-                    ? "header__preview-pill--generating"
-                    : ""
-                }`}
-                onClick={previewPill.onRestore}
-              >
-                <span
-                  className="header__marble"
-                  style={{
-                    background: previewPill.colors
-                      ? `radial-gradient(circle at 35% 35%, ${previewPill.colors.c}, ${previewPill.colors.a} 50%, ${previewPill.colors.b})`
-                      : undefined,
-                  }}
-                />
-                <span className="header__preview-text">
-                  {previewPill.isGenerating
-                    ? "Generating..."
-                    : "View Generated Project"}
-                </span>
-                {previewPill.isGenerating && (
-                  <Loader2 size={13} className="header__preview-spinner" />
-                )}
-              </button>
+        {/* Marble — fills remaining space, IS the orb */}
+        {isClickable ? (
+          <button
+            className="header__marble-wrapper header__marble-wrapper--clickable"
+            onClick={previewPill.onRestore}
+            title="View Generated Project"
+          >
+            <div className="header__marble-surface" style={marbleStyle} />
+          </button>
+        ) : (
+          <div
+            className={`header__marble-wrapper${
+              isGenerating ? " header__marble-wrapper--generating" : ""
+            }`}
+          >
+            <div
+              className={`header__marble-surface${
+                isGenerating ? " header__marble-surface--generating" : ""
+              }`}
+              style={marbleStyle}
+            />
+            {isGenerating && (
+              <Loader2 size={14} className="header__marble-spinner" />
             )}
           </div>
+        )}
 
+        {/* Nav — glassmorphism section */}
+        <div className="header__section header__section--nav">
           <nav className="header__nav">
-            <button
-              className="header__icon-btn"
-              onClick={handleThemeToggle}
-              aria-label={getThemeLabel()}
-              title={getThemeLabel()}
-            >
-              {getThemeIcon()}
-            </button>
-
             {isAuthenticated ? (
               <>
                 <button
@@ -173,7 +162,7 @@ function Header() {
                   onClick={openTokenPurchase}
                   title="Get more tokens"
                 >
-                  <Coins size={18} />
+                  <Coins className="header__nav-icon header__nav-icon--sm" />
                   <span>{userTokens}</span>
                 </button>
 
@@ -182,7 +171,16 @@ function Header() {
                   onClick={openProjects}
                   title="Projects"
                 >
-                  <FolderOpen size={18} />
+                  <FolderOpen className="header__nav-icon" />
+                </button>
+
+                <button
+                  className="header__icon-btn"
+                  onClick={handleThemeToggle}
+                  aria-label={getThemeLabel()}
+                  title={getThemeLabel()}
+                >
+                  {getThemeIcon()}
                 </button>
 
                 <button
@@ -194,25 +192,36 @@ function Header() {
                   {isLoggingOut ? (
                     <span className="spinner-small" />
                   ) : (
-                    <LogOut size={18} />
+                    <LogOut className="header__nav-icon" />
                   )}
                 </button>
               </>
             ) : (
-              <button
-                className="header__cta"
-                onClick={openAuth}
-                disabled={shouldShowLoading()}
-              >
-                {shouldShowLoading() ? (
-                  <span className="loading-indicator">
-                    <span className="spinner-small" />
-                    Loading...
-                  </span>
-                ) : (
-                  "Get Started"
-                )}
-              </button>
+              <>
+                <button
+                  className="header__icon-btn"
+                  onClick={handleThemeToggle}
+                  aria-label={getThemeLabel()}
+                  title={getThemeLabel()}
+                >
+                  {getThemeIcon()}
+                </button>
+
+                <button
+                  className="header__cta"
+                  onClick={openAuth}
+                  disabled={shouldShowLoading()}
+                >
+                  {shouldShowLoading() ? (
+                    <span className="loading-indicator">
+                      <span className="spinner-small" />
+                      Loading...
+                    </span>
+                  ) : (
+                    "Get Started"
+                  )}
+                </button>
+              </>
             )}
           </nav>
         </div>
