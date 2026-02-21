@@ -108,3 +108,115 @@
     }
   }
 }
+
+// =============================================================================
+// About Section — Add this above the existing .footer styles in styles2
+// =============================================================================
+
+.about {
+  position: relative;
+  z-index: 11;
+  padding: calc(var(--spacing-unit) * 8) 0;
+  background: var(--color-background);
+
+  @media (max-width: 768px) {
+    padding: calc(var(--spacing-unit) * 6) 0;
+  }
+}
+
+.about__content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  max-width: 640px;
+  margin: 0 auto;
+  gap: calc(var(--spacing-unit) * 3);
+}
+
+.about__heading {
+  font-size: clamp(1.25rem, 3vw, 1.75rem);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.about__description {
+  font-size: 0.875rem;
+  font-weight: 400;
+  line-height: 1.7;
+  color: var(--color-text-secondary);
+  max-width: 520px;
+}
+
+.about__features {
+  display: grid;
+  gap: calc(var(--spacing-unit) * 2);
+  width: 100%;
+  margin-top: calc(var(--spacing-unit) * 1);
+
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+    gap: calc(var(--spacing-unit) * 1.5);
+  }
+}
+
+.about__feature {
+  display: flex;
+  align-items: flex-start;
+  gap: calc(var(--spacing-unit) * 1.5);
+  padding: calc(var(--spacing-unit) * 2);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  text-align: left;
+  transition: border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+
+  &:hover {
+    border-color: var(--color-border-hover);
+    box-shadow: var(--shadow-sm);
+  }
+}
+
+.about__feature-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  background: var(--color-accent-light);
+  color: var(--color-text-primary);
+}
+
+.about__feature-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.about__feature-title {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  font-family: var(--font-family-base, sans-serif);
+}
+
+.about__feature-desc {
+  font-size: 0.75rem;
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--color-text-tertiary);
+  font-family: var(--font-family-base, sans-serif);
+}
+
+.about__pricing {
+  font-size: 0.8125rem;
+  font-weight: 400;
+  line-height: 1.6;
+  color: var(--color-text-tertiary);
+  max-width: 420px;
+}
