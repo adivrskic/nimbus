@@ -163,7 +163,7 @@
 .header__marble-surface {
   width: 100%;
   height: 100%;
-  border-radius: 14px;
+  border-radius: 999px;
   overflow: hidden;
 
   background: var(--marble-default-bg);
@@ -401,19 +401,11 @@
   .header__section {
     height: 38px;
     padding: 0 10px;
-    border-radius: 12px;
+    border-radius: 999px;
 
     &--nav {
       padding: 0 4px;
     }
-  }
-
-  .header__marble-wrapper {
-    height: 38px;
-  }
-
-  .header__marble-surface {
-    border-radius: 12px;
   }
 }
 
@@ -429,7 +421,7 @@
 
   .header__section {
     height: 36px;
-    border-radius: 11px;
+    border-radius: 999px;
 
     &--logo {
       padding: 0 10px;
@@ -452,14 +444,6 @@
   .header__logo-icon svg {
     width: 22px;
     height: 22px;
-  }
-
-  .header__marble-wrapper {
-    height: 36px;
-  }
-
-  .header__marble-surface {
-    border-radius: 11px;
   }
 
   // Icons 10% larger on mobile
