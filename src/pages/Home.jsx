@@ -143,13 +143,14 @@ function Home() {
 
   // Sync minimized preview state to context so Header can show the pill
   useEffect(() => {
-    if (previewMinimized) {
+    if (generatedCode && !showPreview) {
       showPreviewPill({ onRestore: restorePreview, isGenerating });
     } else {
       hidePreviewPill();
     }
   }, [
-    previewMinimized,
+    generatedCode,
+    showPreview,
     isGenerating,
     restorePreview,
     showPreviewPill,
