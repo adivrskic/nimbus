@@ -1,4 +1,4 @@
-import { Cloudy } from "lucide-react";
+import { Cloudy, Zap, Palette, Download, Globe } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
 import { useModals } from "../contexts/ModalContext";
@@ -133,103 +133,166 @@ function Footer() {
   };
 
   return (
-    <footer className="footer">
-      <div className="container">
-        <div className="footer__content">
-          <div
-            className="footer__cloud-container"
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
-            onTouchStart={handleTouchStart}
-            role="button"
-            tabIndex={0}
-          >
-            <Cloudy
-              size={64}
-              className="footer__icon"
-              strokeWidth={1.5}
-              style={{
-                transform: isRaining ? "translateY(-12px)" : "none",
-                transition: "transform 0.4s ease",
-              }}
-            />
+    <>
+      {/* About section — what nimbus does */}
+      <section className="about">
+        <div className="container">
+          <div className="about__content">
+            <h2 className="about__heading">Describe it. Generate it.</h2>
+            <p className="about__description">
+              Nimbus websites turns your ideas into fully built websites in
+              seconds. Just describe what you want in plain English, customize
+              with 60+ design options, and get production-ready code — no
+              templates, no drag-and-drop, no coding required.
+            </p>
 
-            <div className="footer__emoji-rain">
-              {drops.map((drop) => (
-                <span
-                  key={drop.id}
-                  className="footer__emoji-drop"
-                  style={{
-                    left: `${drop.x}px`,
-                    animation: `emojiRain ${drop.duration}s ease-out ${drop.delay}s forwards`,
-                    color: `hsl(${(Math.random() * 360) | 0}, 80%, 60%)`,
-                  }}
-                >
-                  {drop.emoji}
-                </span>
-              ))}
+            <div className="about__features">
+              <div className="about__feature">
+                <div className="about__feature-icon">
+                  <Zap size={18} />
+                </div>
+                <div className="about__feature-text">
+                  <span className="about__feature-title">AI-Powered</span>
+                  <span className="about__feature-desc">
+                    Generates unique, custom websites from a text prompt
+                  </span>
+                </div>
+              </div>
+
+              <div className="about__feature">
+                <div className="about__feature-icon">
+                  <Palette size={18} />
+                </div>
+                <div className="about__feature-text">
+                  <span className="about__feature-title">
+                    Fully Customizable
+                  </span>
+                  <span className="about__feature-desc">
+                    Style, layout, animations, typography — fine-tune everything
+                  </span>
+                </div>
+              </div>
+
+              <div className="about__feature">
+                <div className="about__feature-icon">
+                  <Download size={18} />
+                </div>
+                <div className="about__feature-text">
+                  <span className="about__feature-title">Download & Own</span>
+                  <span className="about__feature-desc">
+                    Export clean HTML/CSS/JS — your code, no lock-in
+                  </span>
+                </div>
+              </div>
             </div>
 
-            <style>{`
-              @keyframes emojiRain {
-                0% {
-                  opacity: 0.5;
-                  transform: translate3d(0, 0, 0) scale(0.5);
-                }
-                90% {
-                  opacity: 1;
-                }
-                100% {
-                  opacity: 0;
-                  transform: translate3d(0, 200px, 0) scale(1);
-                }
-              }
-            `}</style>
+            <p className="about__pricing">
+              Pay per generation with tokens — no subscriptions, no hidden fees.
+              Start free with tokens on signup.
+            </p>
           </div>
-
-          <nav className="footer__links">
-            {isHomePage ? (
-              <button
-                className="footer__link footer__link--btn"
-                onClick={openRoadmap}
-              >
-                Roadmap
-              </button>
-            ) : (
-              <Link to="/roadmap" className="footer__link">
-                Roadmap
-              </Link>
-            )}
-
-            {isHomePage ? (
-              <button
-                className="footer__link footer__link--btn"
-                onClick={openSupport}
-              >
-                Support
-              </button>
-            ) : (
-              <Link to="/support" className="footer__link">
-                Support
-              </Link>
-            )}
-
-            {isHomePage ? (
-              <button
-                className="footer__link footer__link--btn"
-                onClick={() => openLegal()}
-              >
-                Terms & Legal
-              </button>
-            ) : (
-              <Link to="/legal" className="footer__link">
-                Terms & Legal
-              </Link>
-            )}
-          </nav>
         </div>
-      </div>
-    </footer>
+      </section>
+
+      {/* Existing footer */}
+      <footer className="footer">
+        <div className="container">
+          <div className="footer__content">
+            <div
+              className="footer__cloud-container"
+              onMouseEnter={handleMouseEnter}
+              onMouseLeave={handleMouseLeave}
+              onTouchStart={handleTouchStart}
+              role="button"
+              tabIndex={0}
+            >
+              <Cloudy
+                size={64}
+                className="footer__icon"
+                strokeWidth={1.5}
+                style={{
+                  transform: isRaining ? "translateY(-12px)" : "none",
+                  transition: "transform 0.4s ease",
+                }}
+              />
+
+              <div className="footer__emoji-rain">
+                {drops.map((drop) => (
+                  <span
+                    key={drop.id}
+                    className="footer__emoji-drop"
+                    style={{
+                      left: `${drop.x}px`,
+                      animation: `emojiRain ${drop.duration}s ease-out ${drop.delay}s forwards`,
+                      color: `hsl(${(Math.random() * 360) | 0}, 80%, 60%)`,
+                    }}
+                  >
+                    {drop.emoji}
+                  </span>
+                ))}
+              </div>
+
+              <style>{`
+                @keyframes emojiRain {
+                  0% {
+                    opacity: 0.5;
+                    transform: translate3d(0, 0, 0) scale(0.5);
+                  }
+                  90% {
+                    opacity: 1;
+                  }
+                  100% {
+                    opacity: 0;
+                    transform: translate3d(0, 200px, 0) scale(1);
+                  }
+                }
+              `}</style>
+            </div>
+
+            <nav className="footer__links">
+              {isHomePage ? (
+                <button
+                  className="footer__link footer__link--btn"
+                  onClick={openRoadmap}
+                >
+                  Roadmap
+                </button>
+              ) : (
+                <Link to="/roadmap" className="footer__link">
+                  Roadmap
+                </Link>
+              )}
+
+              {isHomePage ? (
+                <button
+                  className="footer__link footer__link--btn"
+                  onClick={openSupport}
+                >
+                  Support
+                </button>
+              ) : (
+                <Link to="/support" className="footer__link">
+                  Support
+                </Link>
+              )}
+
+              {isHomePage ? (
+                <button
+                  className="footer__link footer__link--btn"
+                  onClick={() => openLegal()}
+                >
+                  Terms & Legal
+                </button>
+              ) : (
+                <Link to="/legal" className="footer__link">
+                  Terms & Legal
+                </Link>
+              )}
+            </nav>
+          </div>
+        </div>
+      </footer>
+    </>
   );
 }
 
