@@ -33,7 +33,6 @@ function ProjectsModal({
     onClose
   );
 
-  const [searchQuery, setSearchQuery] = useState("");
   const [deletingId, setDeletingId] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState(null);
@@ -158,11 +157,6 @@ function ProjectsModal({
     setTimeout(() => setCopied(null), 2000);
   };
 
-  const filteredProjects = projects.filter((project) => {
-    const name = project.name || project.customization?.prompt || "";
-    return name.toLowerCase().includes(searchQuery.toLowerCase());
-  });
-
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleDateString("en-US", {
@@ -252,12 +246,12 @@ function ProjectsModal({
               <div className="projects-loading">
                 <Loader2 size={16} className="spinning" />
               </div>
-            ) : filteredProjects.length === 0 ? (
+            ) : projects.length === 0 ? (
               <div className="projects-empty">
                 <span>No projects yet</span>
               </div>
             ) : (
-              filteredProjects.map((project) => (
+              projects.map((project) => (
                 <div
                   key={project.id}
                   className={`project-item ${

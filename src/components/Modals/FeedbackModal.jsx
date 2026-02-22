@@ -128,7 +128,9 @@ function FeedbackModal({
 
   return (
     <div
-      className={`modal-overlay ${isVisible ? "active" : ""}`}
+      className={`modal-overlay modal-overlay--feedback ${
+        isVisible ? "active" : ""
+      }`}
       onClick={handleClose}
     >
       <div

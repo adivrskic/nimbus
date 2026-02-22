@@ -13,11 +13,8 @@ export function useHomeState() {
 
   const [showOptions, setShowOptions] = useState(false);
   const [showTokenOverlay, setShowTokenOverlay] = useState(false);
-  const [showAuth, setShowAuth] = useState(false);
-  const [showTokens, setShowTokens] = useState(false);
   const [showDeploy, setShowDeploy] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
-  const [showLegal, setShowLegal] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [previewMinimized, setPreviewMinimized] = useState(false);
 
@@ -63,36 +60,12 @@ export function useHomeState() {
     setShowHelp(false);
   }, []);
 
-  const openAuth = useCallback(() => {
-    setShowAuth(true);
-  }, []);
-
-  const closeAuth = useCallback(() => {
-    setShowAuth(false);
-  }, []);
-
-  const openTokens = useCallback(() => {
-    setShowTokens(true);
-  }, []);
-
-  const closeTokens = useCallback(() => {
-    setShowTokens(false);
-  }, []);
-
   const openDeploy = useCallback(() => {
     setShowDeploy(true);
   }, []);
 
   const closeDeploy = useCallback(() => {
     setShowDeploy(false);
-  }, []);
-
-  const openLegal = useCallback(() => {
-    setShowLegal(true);
-  }, []);
-
-  const closeLegal = useCallback(() => {
-    setShowLegal(false);
   }, []);
 
   const toggleTokenOverlay = useCallback(() => {
@@ -169,11 +142,8 @@ export function useHomeState() {
 
     showOptions,
     showTokenOverlay,
-    showAuth,
-    showTokens,
     showDeploy,
     showHelp,
-    showLegal,
     showPreview,
     previewMinimized,
 
@@ -181,14 +151,8 @@ export function useHomeState() {
     closeOptions,
     openHelp,
     closeHelp,
-    openAuth,
-    closeAuth,
-    openTokens,
-    closeTokens,
     openDeploy,
     closeDeploy,
-    openLegal,
-    closeLegal,
     toggleTokenOverlay,
     closeTokenOverlay,
     openPreview,
