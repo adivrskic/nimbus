@@ -212,8 +212,11 @@ function RoadmapModal({ isOpen, onClose }) {
             <h5 className="modal-contact__title">Suggest a feature</h5>
             <p className="modal-contact__text">
               Email{" "}
-              <a href="mailto:hello@nimbus.com" className="modal-contact__link">
-                hello@nimbus.com
+              <a
+                href="mailto:hello@nimbuswebsites.com"
+                className="modal-contact__link"
+              >
+                hello@nimbuswebsites.com
               </a>
             </p>
           </div>

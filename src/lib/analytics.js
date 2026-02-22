@@ -1,17 +1,20 @@
 import { supabase } from "./supabaseClient";
 
-export async function track(event, data = {}) {
+/**
+ * Track an analytics event.
+ * @param {string} event - Event name
+ * @param {Object} data - Event data
+ * @param {string|null} userId - Optional user ID. Pass from context to avoid
+ *   an extra auth round-trip on every call. Falls back to null (anonymous).
+ */
+export async function track(event, data = {}, userId = null) {
   try {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
     await supabase.from("events").insert({
-      user_id: user?.id || null,
+      user_id: userId,
       event,
       data,
     });
   } catch (e) {
-    console.error("Analytics error:", e);
+    // Silently swallow — analytics should never break the app
   }
 }

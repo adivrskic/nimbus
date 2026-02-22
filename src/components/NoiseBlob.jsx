@@ -1,19 +1,9 @@
 import React, { useRef, useEffect, useState, useMemo } from "react";
-import {
-  AmbientLight,
-  Clock,
-  Color,
-  DirectionalLight,
-  HemisphereLight,
-  IcosahedronGeometry,
-  Mesh,
-  MeshPhongMaterial,
-  PerspectiveCamera,
-  Scene,
-  WebGLRenderer,
-} from "three";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-import { mergeVertices } from "three/examples/jsm/utils/BufferGeometryUtils";
+
+// Fix #26: Three.js (~500KB) is now loaded lazily via dynamic import() inside
+// the init effect. The module is cached in `threeModRef` so the color-update
+// effect can also use it without a second import. No functionality is lost —
+// the blob renders identically on desktop and mobile.
 
 const isMobileOrPortrait = () => {
   return (
@@ -139,6 +129,7 @@ export default function NoiseBlob({
   const cameraRef = useRef(null);
   const meshRef = useRef(null);
   const uniformsRef = useRef(null);
+  const threeModRef = useRef(null); // Cached Three.js module
   const [initialized, setInitialized] = useState(false);
 
   const randomizedProps = useMemo(
@@ -208,43 +199,68 @@ export default function NoiseBlob({
     }
   }, [isGenerating, noiseAmplitude]);
 
+  // ─── Color update effect (uses cached Three.js module) ───────────────
   useEffect(() => {
-    if (!sceneRef.current || !meshRef.current) return;
+    const THREE = threeModRef.current;
+    if (!THREE || !sceneRef.current || !meshRef.current) return;
 
     const { backgroundColor, color, emissiveColor } = computedColors;
 
-    sceneRef.current.background = new Color(backgroundColor);
+    sceneRef.current.background = new THREE.Color(backgroundColor);
 
     const material = meshRef.current.material;
     if (material) {
-      material.color = new Color(color);
-      material.emissive = new Color(emissiveColor).multiplyScalar(0.25);
+      material.color = new THREE.Color(color);
+      material.emissive = new THREE.Color(emissiveColor).multiplyScalar(0.25);
       material.opacity = isDark ? 0.9 : 0.95;
       material.shininess = isDark ? 300 : shininess;
       material.needsUpdate = true;
     }
 
     if (rendererRef.current) {
-      rendererRef.current.setClearColor(new Color(backgroundColor), 0);
+      rendererRef.current.setClearColor(new THREE.Color(backgroundColor), 0);
     }
   }, [computedColors, isDark, shininess]);
 
+  // ─── Main init effect — lazy-loads Three.js ──────────────────────────
   useEffect(() => {
     if (!containerRef.current) return;
 
     let initTimeout;
     let idleCallbackId;
 
-    const initThreeJS = () => {
+    const initThreeJS = async () => {
       if (cleanedUpRef.current || !containerRef.current) return;
+
+      // ── Lazy-load Three.js and utilities ──────────────────────────
+      let THREE, OrbitControls, mergeVertices;
+      try {
+        const [threeModule, controlsModule, utilsModule] = await Promise.all([
+          import("three"),
+          import("three/examples/jsm/controls/OrbitControls"),
+          import("three/examples/jsm/utils/BufferGeometryUtils"),
+        ]);
+        THREE = threeModule;
+        OrbitControls = controlsModule.OrbitControls;
+        mergeVertices = utilsModule.mergeVertices;
+      } catch (err) {
+        console.error("Failed to load Three.js:", err);
+        return;
+      }
+
+      // Bail if component unmounted while we were loading
+      if (cleanedUpRef.current || !containerRef.current) return;
+
+      // Cache for the color-update effect
+      threeModRef.current = THREE;
 
       const container = containerRef.current;
       container.innerHTML = "";
 
       const { backgroundColor, color, emissiveColor } = computedColors;
 
-      const scene = new Scene();
-      scene.background = new Color(backgroundColor);
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color(backgroundColor);
       sceneRef.current = scene;
 
       const mobile = isMobileOrPortrait();
@@ -253,7 +269,7 @@ export default function NoiseBlob({
         ? baseScale * mobileScaleMultiplier
         : baseScale;
 
-      const camera = new PerspectiveCamera(
+      const camera = new THREE.PerspectiveCamera(
         fov,
         container.clientWidth / container.clientHeight,
         1,
@@ -263,14 +279,14 @@ export default function NoiseBlob({
       camera.lookAt(0, 0, 0);
       cameraRef.current = camera;
 
-      const renderer = new WebGLRenderer({
+      const renderer = new THREE.WebGLRenderer({
         antialias: true,
         alpha: true,
         powerPreference: "high-performance",
       });
       renderer.setSize(container.clientWidth, container.clientHeight);
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-      renderer.setClearColor(new Color(backgroundColor), 0);
+      renderer.setClearColor(new THREE.Color(backgroundColor), 0);
       container.appendChild(renderer.domElement);
       rendererRef.current = renderer;
 
@@ -300,28 +316,28 @@ export default function NoiseBlob({
         ? ambientIntensity * 0.7
         : ambientIntensity;
 
-      const directionalLight = new DirectionalLight(
+      const directionalLight = new THREE.DirectionalLight(
         0xffffff,
         dirLightIntensity
       );
-      const hemisphereLight = new HemisphereLight(
+      const hemisphereLight = new THREE.HemisphereLight(
         0xffff00,
         0x0000ff,
         hemiLightIntensity
       );
-      const ambientLight = new AmbientLight(0xffffff, ambLightIntensity);
+      const ambientLight = new THREE.AmbientLight(0xffffff, ambLightIntensity);
 
       scene.add(directionalLight, hemisphereLight, ambientLight);
 
-      let geometry = new IcosahedronGeometry(1, detail);
+      let geometry = new THREE.IcosahedronGeometry(1, detail);
       geometry.deleteAttribute("normal");
       geometry.deleteAttribute("uv");
       geometry = mergeVertices(geometry);
       geometry.computeVertexNormals();
 
-      const material = new MeshPhongMaterial({
-        color: new Color(color),
-        emissive: new Color(emissiveColor).multiplyScalar(0.25),
+      const material = new THREE.MeshPhongMaterial({
+        color: new THREE.Color(color),
+        emissive: new THREE.Color(emissiveColor).multiplyScalar(0.25),
         shininess: isDark ? 300 : shininess,
         wireframe,
         transparent: true,
@@ -365,11 +381,11 @@ export default function NoiseBlob({
         },
       });
 
-      const mesh = new Mesh(geometry, material);
+      const mesh = new THREE.Mesh(geometry, material);
       scene.add(mesh);
       meshRef.current = mesh;
 
-      const clock = new Clock();
+      const clock = new THREE.Clock();
       let lastTime = 0;
 
       const animate = () => {

@@ -19,46 +19,55 @@ import {
   ExternalLink,
   Maximize2,
   Minimize2,
+  AlertCircle,
 } from "lucide-react";
 import GeneratedPreview from "../GeneratedPreview";
 import FeedbackModal from "./FeedbackModal";
+import {
+  parseMultiPageHtml,
+  getPageDisplayName,
+} from "../../utils/parseMultiPage";
 import "../../styles/modals.scss";
 
-// Parse multi-page HTML if it contains file markers
-function parseMultiPageHtml(html) {
-  if (!html) return null;
-  const filePattern = /<!--\s*(?:=+\s*)?FILE:\s*(\S+\.html)\s*(?:=+\s*)?-->/gi;
-  const parts = html.split(filePattern);
-  if (parts.length <= 1) return null;
-  const files = {};
-  for (let i = 1; i < parts.length; i += 2) {
-    const filename = parts[i]?.trim();
-    const content = parts[i + 1]?.trim();
-    if (filename && content) files[filename] = content;
-  }
-  return Object.keys(files).length > 0 ? files : null;
+// ─── Fix #17: Lightweight HTML syntax highlighter ───────────────────────────
+// Produces spans with class names for CSS coloring. No external dependency.
+function highlightHtml(code) {
+  if (!code) return "";
+  return (
+    code
+      // HTML comments
+      .replace(
+        /(&lt;!--[\s\S]*?--&gt;|<!--[\s\S]*?-->)/g,
+        '<span class="hl-comment">$1</span>'
+      )
+      // Tags (opening + closing)
+      .replace(
+        /(&lt;\/?|<\/?)([a-zA-Z][a-zA-Z0-9-]*)/g,
+        '$1<span class="hl-tag">$2</span>'
+      )
+      // Attribute names
+      .replace(/\s([a-zA-Z-]+)(=)/g, ' <span class="hl-attr">$1</span>$2')
+      // Strings (double and single quoted)
+      .replace(
+        /("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')/g,
+        '<span class="hl-string">$1</span>'
+      )
+  );
 }
 
-function getPageDisplayName(filename) {
-  const names = {
-    "index.html": "Home",
-    "about.html": "About",
-    "services.html": "Services",
-    "contact.html": "Contact",
-    "products.html": "Products",
-    "product-detail.html": "Product Detail",
-    "cart.html": "Cart",
-    "blog.html": "Blog",
-    "post.html": "Blog Post",
-    "dashboard.html": "Dashboard",
-    "settings.html": "Settings",
-    "getting-started.html": "Getting Started",
-    "api-reference.html": "API Reference",
-    "examples.html": "Examples",
-  };
-  return names[filename] || filename.replace(".html", "").replace(/-/g, " ");
-}
-
+/**
+ * Props shape:
+ *
+ *   isOpen, html, files, onClose, onMinimize, onDownload
+ *
+ *   saveProps:       { onSave, isSaving, saveSuccess }
+ *   enhanceProps:    { prompt, onChange, onEnhance, tokenCost, breakdown,
+ *                      showTokenOverlay, onToggleTokenOverlay }
+ *   tokenProps:      { isAuthenticated, userTokens, balance, onBuyTokens }
+ *   generationState: { isGenerating, isStreaming, isEnhancing, streamingPhase, error }
+ *
+ *   selections, originalPrompt, lastRequest   (for feedback modal)
+ */
 function PreviewModal({
   isOpen,
   html,
@@ -66,28 +75,38 @@ function PreviewModal({
   onClose,
   onMinimize,
   onDownload,
-  onSave,
-  onDeploy,
-  isSaving,
-  saveSuccess,
-  isGenerating,
-  enhancePrompt,
-  onEnhancePromptChange,
-  onEnhance,
-  enhanceTokenCost,
-  enhanceBreakdown,
-  showEnhanceTokenOverlay,
-  onToggleEnhanceTokenOverlay,
-  isAuthenticated,
-  userTokens,
-  tokenBalance,
-  onBuyTokens,
-  isStreaming = false,
-  isEnhancing = false,
+  saveProps = {},
+  enhanceProps = {},
+  tokenProps = {},
+  generationState = {},
   selections = {},
   originalPrompt = "",
   lastRequest = null,
 }) {
+  // Destructure grouped props
+  const { onSave, isSaving = false, saveSuccess = false } = saveProps;
+  const {
+    prompt: enhancePrompt = "",
+    onChange: onEnhancePromptChange,
+    onEnhance,
+    tokenCost: enhanceTokenCost = 0,
+    breakdown: enhanceBreakdown = [],
+    showTokenOverlay: showEnhanceTokenOverlay = false,
+    onToggleTokenOverlay: onToggleEnhanceTokenOverlay,
+  } = enhanceProps;
+  const {
+    isAuthenticated = false,
+    userTokens = 0,
+    balance: tokenBalance = {},
+    onBuyTokens,
+  } = tokenProps;
+  const {
+    isGenerating = false,
+    isStreaming = false,
+    isEnhancing = false,
+    error: generationError = null,
+  } = generationState;
+
   const [showCode, setShowCode] = useState(false);
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [activeFile, setActiveFile] = useState("index.html");
@@ -112,6 +131,17 @@ function PreviewModal({
     if (isMultiPage && files[activeFile]) return files[activeFile];
     return html;
   }, [isMultiPage, files, activeFile, html]);
+
+  // Fix #17: Memoised highlighted code
+  const highlightedCode = useMemo(() => {
+    if (!currentHtml) return "";
+    // Escape HTML entities first, then apply highlighting
+    const escaped = currentHtml
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+    return highlightHtml(escaped);
+  }, [currentHtml]);
 
   // Reset active file when files change
   useEffect(() => {
@@ -179,6 +209,12 @@ function PreviewModal({
   if (!isOpen) return null;
 
   const hasInput = enhancePrompt.trim().length > 0;
+  const hasContent = !!currentHtml;
+
+  // Fix #15/#16: Determine body state
+  const showError =
+    !isGenerating && !isStreaming && generationError && !hasContent;
+  const showLoading = isGenerating && !hasContent && !generationError;
 
   return (
     <div
@@ -190,6 +226,39 @@ function PreviewModal({
         onMinimize();
       }}
     >
+      {/* Fix #20: Override mobile CSS to show single enhance bar instead of duplicate */}
+      <style>{`
+        .pm-header__center--unified {
+          display: flex !important;
+        }
+        @media (max-width: 768px) {
+          .pm-header__center--unified {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            transform: translateY(100%);
+            border-top: 1px solid var(--color-border);
+            background: var(--color-surface);
+            border-radius: 0;
+            padding: 6px 10px;
+            z-index: 5;
+          }
+          .modal-content--preview {
+            padding-bottom: 44px;
+          }
+        }
+        /* Fix #17: Syntax highlight colors */
+        .hl-tag { color: #22863a; }
+        .hl-attr { color: #6f42c1; }
+        .hl-string { color: #032f62; }
+        .hl-comment { color: #6a737d; font-style: italic; }
+        [data-theme="dark"] .hl-tag { color: #7ee787; }
+        [data-theme="dark"] .hl-attr { color: #d2a8ff; }
+        [data-theme="dark"] .hl-string { color: #a5d6ff; }
+        [data-theme="dark"] .hl-comment { color: #8b949e; }
+      `}</style>
+
       <div
         ref={containerRef}
         className={`modal-content modal-content--preview ${
@@ -198,7 +267,7 @@ function PreviewModal({
         onClick={(e) => e.stopPropagation()}
       >
         {/* ===== UNIFIED HEADER ===== */}
-        <div className="pm-header">
+        <div className="pm-header" style={{ position: "relative" }}>
           {/* Left: Tabs + Devices + Page pill */}
           <div className="pm-header__left">
             <div className="pm-header__tabs">
@@ -301,13 +370,18 @@ function PreviewModal({
             )}
           </div>
 
-          {/* Center: Enhance input - always visible, fills remaining space */}
+          {/*
+            Fix #20: Single enhance bar — visible on all breakpoints.
+            The "pm-header__center--unified" class overrides the default
+            mobile `display:none` on pm-header__center and repositions
+            the bar below the header on small screens.
+          */}
           <div
-            className={`pm-header__center ${hasInput ? "has-input" : ""} ${
-              isEnhancing ? "enhancing" : ""
-            }`}
+            className={`pm-header__center pm-header__center--unified ${
+              hasInput ? "has-input" : ""
+            } ${isEnhancing ? "enhancing" : ""}`}
           >
-            {currentHtml && !isGenerating && !isStreaming && !isEnhancing && (
+            {hasContent && !isGenerating && !isStreaming && !isEnhancing && (
               <button
                 className="pm-header__enhance-fb"
                 onClick={() => setShowFeedbackModal(true)}
@@ -429,7 +503,7 @@ function PreviewModal({
                   className="pm-header__icon-btn"
                   onClick={openInNewTab}
                   title="Open in new tab"
-                  disabled={isStreaming || !currentHtml}
+                  disabled={isStreaming || !hasContent}
                 >
                   <ExternalLink size={14} />
                 </button>
@@ -452,7 +526,7 @@ function PreviewModal({
               className="pm-header__action-btn"
               onClick={onDownload}
               title="Download"
-              disabled={isStreaming || isEnhancing || !currentHtml}
+              disabled={isStreaming || isEnhancing || !hasContent}
             >
               <Download size={14} />
               <span>{isMultiPage ? "Download All" : "Download"}</span>
@@ -463,7 +537,7 @@ function PreviewModal({
                 saveSuccess ? "success" : ""
               }`}
               onClick={onSave}
-              disabled={isSaving || isStreaming || isEnhancing || !currentHtml}
+              disabled={isSaving || isStreaming || isEnhancing || !hasContent}
               title="Save"
             >
               {isSaving ? (
@@ -494,53 +568,103 @@ function PreviewModal({
           </div>
         </div>
 
-        {/* Mobile enhance bar */}
-        <div className="pm-mobile-enhance">
-          <div
-            className={`pm-mobile-enhance__bar ${hasInput ? "has-input" : ""} ${
-              isEnhancing ? "enhancing" : ""
-            }`}
-          >
-            {isEnhancing && (
-              <div className="pm-header__enhance-ind">
-                <Loader2 size={13} className="spin" />
-              </div>
-            )}
-            <input
-              type="text"
-              value={enhancePrompt}
-              onChange={(e) => onEnhancePromptChange(e.target.value)}
-              onKeyDown={(e) => {
-                if (
-                  e.key === "Enter" &&
-                  !isGenerating &&
-                  !isEnhancing &&
-                  hasInput
-                )
-                  onEnhance();
-              }}
-              placeholder={isEnhancing ? "Enhancing..." : "Describe changes..."}
-              disabled={isGenerating || isStreaming || isEnhancing}
-            />
-            <button
-              onClick={onEnhance}
-              disabled={isGenerating || isStreaming || isEnhancing || !hasInput}
-            >
-              {isEnhancing ? (
-                <Loader2 size={14} className="spin" />
-              ) : (
-                <Sparkles size={14} />
-              )}
-            </button>
-          </div>
-        </div>
+        {/* Fix #20: Removed duplicate pm-mobile-enhance section.
+            The single enhance bar above (pm-header__center--unified) now
+            repositions itself below the header on mobile via CSS. */}
 
         {/* Body */}
         <div className="preview-modal__body">
-          {showCode ? (
+          {/* Fix #15: Error state */}
+          {showError ? (
+            <div
+              style={{
+                flex: 1,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "12px",
+                padding: "48px 24px",
+                color: "var(--color-text-secondary)",
+                textAlign: "center",
+              }}
+            >
+              <AlertCircle
+                size={32}
+                style={{ color: "var(--color-error, #ef4444)", opacity: 0.8 }}
+              />
+              <p
+                style={{
+                  fontSize: "0.9375rem",
+                  fontWeight: 600,
+                  color: "var(--color-text-primary)",
+                }}
+              >
+                Generation failed
+              </p>
+              <p style={{ fontSize: "0.8125rem", maxWidth: "360px" }}>
+                {generationError}
+              </p>
+            </div>
+          ) : /* Fix #16: Loading / skeleton state */
+          showLoading ? (
+            <div
+              style={{
+                flex: 1,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "16px",
+                padding: "48px 24px",
+                color: "var(--color-text-secondary)",
+              }}
+            >
+              <Loader2
+                size={28}
+                className="spin"
+                style={{ color: "var(--color-text-tertiary)" }}
+              />
+              <p style={{ fontSize: "0.8125rem", fontWeight: 500 }}>
+                Generating your website&hellip;
+              </p>
+              {/* Skeleton lines */}
+              <div
+                style={{
+                  width: "100%",
+                  maxWidth: "480px",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "10px",
+                  marginTop: "8px",
+                }}
+              >
+                {[100, 85, 92, 60].map((w, i) => (
+                  <div
+                    key={i}
+                    style={{
+                      height: "12px",
+                      width: `${w}%`,
+                      borderRadius: "6px",
+                      background: "var(--color-surface-elevated)",
+                      animation: "pulse 1.5s ease-in-out infinite",
+                      animationDelay: `${i * 150}ms`,
+                    }}
+                  />
+                ))}
+              </div>
+              <style>{`
+                @keyframes pulse {
+                  0%, 100% { opacity: 0.4; }
+                  50% { opacity: 1; }
+                }
+              `}</style>
+            </div>
+          ) : showCode ? (
+            /* Fix #17: Syntax-highlighted code view */
             <div className="preview-modal__code">
               <pre>
-                <code>{currentHtml}</code>
+                <code dangerouslySetInnerHTML={{ __html: highlightedCode }} />
               </pre>
             </div>
           ) : (
@@ -553,6 +677,7 @@ function PreviewModal({
                 <GeneratedPreview
                   html={currentHtml}
                   isStreaming={isStreaming}
+                  isEnhancing={isEnhancing}
                   viewMode={viewMode}
                 />
               </div>

@@ -73,7 +73,6 @@ const SearchBar = forwardRef(
 
     const handleChange = useCallback(
       (e) => {
-        const newValue = e.target.value;
         onChange?.(e);
       },
       [onChange]

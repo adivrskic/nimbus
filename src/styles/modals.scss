@@ -24,6 +24,10 @@
   opacity: 0;
   transition: opacity var(--transition-fast);
 
+  &--feedback {
+    background-color: var(--color-background);
+  }
+
   &.active {
     opacity: 1;
   }
@@ -1127,6 +1131,7 @@
   font-family: var(--font-family-base, sans-serif);
   cursor: pointer;
   transition: var(--transition-base);
+  border: none;
   &:hover:not(:disabled) {
     background: var(--color-accent-light);
     color: var(--color-text-primary);
@@ -1679,9 +1684,7 @@
   color: var(--color-text-secondary);
   cursor: pointer;
   transition: background var(--transition-fast);
-  &:hover {
-    background: var(--color-surface);
-  }
+
   &.selected {
     background: var(--color-border);
     box-shadow: var(--shadow-sm);
@@ -3189,8 +3192,10 @@
   &__enhance-cost {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 3px;
-    padding: 5px 10px;
+    width: 46px;
+    height: 32px;
     background: var(--color-accent-light);
     border: none;
     border-radius: 999px;
@@ -3296,19 +3301,6 @@
 
   &__balance {
     font-weight: 600;
-    &--good,
-    &--sufficient {
-      color: #10b981;
-    }
-    &--warning,
-    &--close,
-    &--moderate {
-      color: #f59e0b;
-    }
-    &--critical,
-    &--insufficient {
-      color: #ef4444;
-    }
   }
 
   &__token-buy {

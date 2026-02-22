@@ -3,13 +3,16 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import { buildFullPrompt } from "../utils/promptBuilder";
 import { generateWebsiteStream } from "../utils/generateWebsiteStream";
 import { useGenerationState } from "../contexts/GenerationContext";
-
-const generationCache = {
-  get: () => null,
-  set: () => {},
-  clear: () => {},
-  shouldUse: () => false,
-};
+import {
+  getCachedGeneration,
+  cacheGeneration,
+  clearCacheEntry,
+  shouldUseCache,
+} from "../utils/generationCache";
+import {
+  isPatchResponse,
+  createIncrementalApplier,
+} from "../utils/patchParser";
 
 let streamingTimeout = null;
 
@@ -52,14 +55,13 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
 
       lastGenerationRef.current = { prompt, selections, persistentOptions };
 
-      if (generationCache.shouldUse(false)) {
-        const cached = generationCache.get(
+      if (shouldUseCache(false)) {
+        const cached = getCachedGeneration(
           prompt,
           selections,
           persistentOptions
         );
         if (cached) {
-          console.log("[Generation] Using cached result");
           setGeneratedCode(cached.html);
           setGeneratedFiles(cached.files);
           setFromCache(true);
@@ -125,7 +127,7 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
             setIsStreaming(false);
             setStreamingPhase("complete");
 
-            generationCache.set(prompt, selections, persistentOptions, {
+            cacheGeneration(prompt, selections, persistentOptions, {
               html: finalHtml,
               files,
               tokensUsed: streamResult.tokensUsed,
@@ -153,7 +155,7 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
             setGeneratedFiles(files);
 
             // Cache it
-            generationCache.set(prompt, selections, persistentOptions, {
+            cacheGeneration(prompt, selections, persistentOptions, {
               html: code,
               files,
               tokensUsed: result.tokensUsed,
@@ -164,7 +166,7 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
           }
         }
 
-        return { code: demoHtml };
+        return null;
       } catch (error) {
         if (error.name !== "AbortError") {
           setGenerationError(error.message);
@@ -191,7 +193,13 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
       setIsGenerating(true);
       setGenerationError(null);
       setFromCache(false);
+      setIsStreaming(true);
       abortControllerRef.current = new AbortController();
+
+      // Snapshot the current HTML as the base for patch application
+      const baseHtml = generatedCode;
+      let patchApplier = null; // Created lazily once we know it's a patch response
+      let detectedPatch = false;
 
       try {
         const streamResult = await generateWebsiteStream({
@@ -203,8 +211,33 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
           },
           persistentOptions,
           signal: abortControllerRef.current.signal,
-          onProgress: ({ phase, files }) => {
+          onProgress: ({ phase, content, files }) => {
             setStreamingPhase(phase);
+
+            if (!content) return;
+
+            // First time we have enough text, detect if it's a patch response
+            if (!detectedPatch && content.length > 20) {
+              if (isPatchResponse(content)) {
+                detectedPatch = true;
+                patchApplier = createIncrementalApplier(baseHtml);
+              }
+            }
+
+            if (detectedPatch && patchApplier) {
+              // Patch mode: apply completed ops incrementally to the base HTML
+              const { html, newOpsApplied } = patchApplier.update(content);
+              if (newOpsApplied) {
+                debouncedSetCode(html);
+              }
+            } else if (!detectedPatch && content.length > 20) {
+              // Full HTML mode (fallback): stream content directly
+              debouncedSetCode(content);
+            }
+
+            if (files) {
+              setGeneratedFiles(files);
+            }
           },
         });
 
@@ -215,7 +248,14 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
             if (abortControllerRef.current?.signal.aborted) break;
           }
 
-          const finalHtml = streamResult.getFullHtml();
+          let finalHtml;
+          if (detectedPatch && patchApplier) {
+            // Finalize: apply any remaining ops from the last chunk
+            finalHtml = patchApplier.finalize(streamResult.getFullHtml());
+          } else {
+            finalHtml = streamResult.getFullHtml();
+          }
+
           const files = streamResult.getFiles() || null;
 
           setGeneratedCode(finalHtml);
@@ -224,7 +264,7 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
           setStreamingPhase("complete");
 
           if (lastGenerationRef.current) {
-            generationCache.clear(
+            clearCacheEntry(
               lastGenerationRef.current.prompt,
               lastGenerationRef.current.selections,
               lastGenerationRef.current.persistentOptions
@@ -312,7 +352,7 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
 
   const regenerate = useCallback(
     async (prompt, selections, persistentOptions, user, streaming = true) => {
-      generationCache.clear(prompt, selections, persistentOptions);
+      clearCacheEntry(prompt, selections, persistentOptions);
       return generate(prompt, selections, persistentOptions, user, streaming);
     },
     [generate]
