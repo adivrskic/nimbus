@@ -7,7 +7,6 @@ import {
   Sun,
   Moon,
   SunMoon,
-  Loader2,
 } from "lucide-react";
 import { track } from "../lib/analytics";
 
@@ -33,15 +32,8 @@ function Header() {
   } = useAuth();
 
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const [isPageLoading, setIsPageLoading] = useState(false);
 
   const userTokens = profile?.tokens || 0;
-
-  useEffect(() => {
-    setIsPageLoading(true);
-    const timer = setTimeout(() => setIsPageLoading(false), 2000);
-    return () => clearTimeout(timer);
-  }, []);
 
   useEffect(() => {
     if (isAuthenticated && user && !profile) refreshProfile();
@@ -67,7 +59,6 @@ function Header() {
   };
 
   const shouldShowLoading = () => {
-    if (isPageLoading) return true;
     if (isAuthenticated) return false;
     return authIsLoading;
   };

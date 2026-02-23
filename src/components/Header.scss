@@ -144,11 +144,6 @@
       box-shadow: inset -3px -4px 8px rgba(0, 0, 0, 0.18),
         inset 3px 3px 6px rgba(255, 255, 255, 0.2),
         0 2px 12px rgba(0, 0, 0, 0.1);
-      transform: scale(1.005);
-    }
-
-    &:active .header__marble-surface {
-      transform: scale(0.998);
     }
   }
 

@@ -26,10 +26,18 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     const handleVisibilityChange = () => {
       isTabVisibleRef.current = !document.hidden;
+
+      if (!document.hidden && pendingAuthActionsRef.current.length > 0) {
+        setTimeout(() => {
+          if (pendingAuthActionsRef.current.length > 0) {
+            refreshSession();
+            pendingAuthActionsRef.current = [];
+          }
+        }, 1000);
+      }
     };
 
     document.addEventListener("visibilitychange", handleVisibilityChange);
-
     return () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
@@ -42,9 +50,6 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // Fix #4: Removed duplicate bare init useEffect that raced with the
-  // isInitializedRef-guarded initializeAuth below.
-
   const validateSession = async () => {
     try {
       const {
@@ -53,6 +58,7 @@ export function AuthProvider({ children }) {
       } = await supabase.auth.getSession();
 
       if (error || !session?.access_token) {
+        console.log("Invalid or expired session detected");
         setUser(null);
         setProfile(null);
         setUserTokens(0);
@@ -65,6 +71,7 @@ export function AuthProvider({ children }) {
       } = await supabase.auth.getUser();
 
       if (userError || !user) {
+        console.log("User verification failed:", userError);
         setUser(null);
         setProfile(null);
         setUserTokens(0);
@@ -91,6 +98,7 @@ export function AuthProvider({ children }) {
       } = await supabase.auth.getSession();
 
       if (error || !session) {
+        console.log("No valid session found");
         setUser(null);
         setProfile(null);
         setUserTokens(0);
@@ -102,9 +110,11 @@ export function AuthProvider({ children }) {
       } = await supabase.auth.getUser();
 
       if (user) {
+        console.log("Session refreshed for:", user.email);
         setUser(user);
         await loadUserProfile(user.id);
       } else {
+        console.log("No user found in session");
         setUser(null);
         setProfile(null);
         setUserTokens(0);
@@ -135,6 +145,7 @@ export function AuthProvider({ children }) {
       }
 
       const tokens = data?.tokens ?? 0;
+      console.log("Tokens refreshed:", tokens);
       setUserTokens(tokens);
 
       if (profile) {
@@ -164,41 +175,33 @@ export function AuthProvider({ children }) {
 
         setLoadingSafe(true);
 
-        const isValidSession = await validateSession();
-
-        if (!isValidSession) {
-          setUser(null);
-          setProfile(null);
-          setUserTokens(0);
-          if (active) {
-            setLoadingSafe(false);
-          }
-          return;
-        }
-
+        // Single getSession() call — this reads from local storage first (fast),
+        // then validates with the server if needed. No separate getUser() roundtrip.
         const {
           data: { session },
           error: sessionError,
         } = await supabase.auth.getSession();
 
+        if (sessionError) {
+          console.error("Session error:", sessionError);
+          setUser(null);
+          setProfile(null);
+          setUserTokens(0);
+          if (active) setLoadingSafe(false);
+          return;
+        }
+
         if (session && !session.access_token) {
-          console.warn(
-            "Invalid Supabase session detected — forcing logout cleanup."
-          );
+          console.warn("Invalid session detected — forcing cleanup.");
           await supabase.auth.signOut();
           setUser(null);
           setProfile(null);
           setUserTokens(0);
-          if (active) {
-            setLoadingSafe(false);
-          }
+          if (active) setLoadingSafe(false);
           return;
         }
 
-        if (sessionError) {
-          console.error("Session error:", sessionError);
-        }
-
+        // Check for email verification callback
         const urlParams = new URLSearchParams(window.location.search);
         const type = urlParams.get("type");
         const token = urlParams.get("token");
@@ -251,7 +254,10 @@ export function AuthProvider({ children }) {
       authChangeTimeout = setTimeout(async () => {
         if (!active) return;
 
+        console.log("Auth state change:", event, session?.user?.email);
+
         if (!isTabVisibleRef.current) {
+          console.log("Tab not visible, queuing auth state change");
           pendingAuthActionsRef.current.push({ event, session });
           return;
         }
@@ -260,35 +266,60 @@ export function AuthProvider({ children }) {
         setLastAuthCheck(Date.now());
 
         if (event === "SIGNED_OUT" || event === "USER_DELETED") {
+          console.log("🔄 Auth state: SIGNED_OUT event detected");
           setUser(null);
           setProfile(null);
           setUserTokens(0);
           setJustVerifiedEmail(false);
           localStorage.removeItem("rememberedEmail");
           setRememberedEmail(null);
+
+          console.log("✅ User signed out - state cleared");
         } else if (session?.user) {
+          console.log("🔄 Auth state: User session found");
           setUser(session.user);
           await loadUserProfile(session.user.id);
 
           if (event === "SIGNED_IN") {
+            console.log("User signed in successfully");
             setJustVerifiedEmail(false);
+          } else if (event === "USER_UPDATED") {
+            console.log("User updated");
           }
         } else {
+          console.log("🔄 Auth state: No active session");
           setUser(null);
           setProfile(null);
           setUserTokens(0);
         }
 
         setLoadingSafe(false);
-      }, 500);
+      }, 100);
     };
 
     authSubscription = supabase.auth.onAuthStateChange(handleAuthStateChange);
+
+    const processPendingAuthActions = () => {
+      if (pendingAuthActionsRef.current.length > 0 && isTabVisibleRef.current) {
+        console.log(
+          "Processing pending auth actions:",
+          pendingAuthActionsRef.current.length
+        );
+        const actions = [...pendingAuthActionsRef.current];
+        pendingAuthActionsRef.current = [];
+
+        if (actions.length > 0) {
+          const lastAction = actions[actions.length - 1];
+          handleAuthStateChange(lastAction.event, lastAction.session);
+        }
+      }
+    };
 
     const checkSession = async () => {
       if (user && active && isTabVisibleRef.current) {
         const isValid = await validateSession();
         if (!isValid) {
+          console.log("Periodic check: Session is invalid, clearing state");
           setUser(null);
           setProfile(null);
           setUserTokens(0);
@@ -300,6 +331,7 @@ export function AuthProvider({ children }) {
 
     return () => {
       active = false;
+      isInitializedRef.current = false; // Reset for strict mode remount
       if (authSubscription?.subscription) {
         authSubscription.subscription.unsubscribe();
       }
@@ -308,30 +340,10 @@ export function AuthProvider({ children }) {
     };
   }, []);
 
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      const isVisible = !document.hidden;
-      isTabVisibleRef.current = isVisible;
-
-      if (isVisible) {
-        setTimeout(() => {
-          if (pendingAuthActionsRef.current.length > 0) {
-            refreshSession();
-            pendingAuthActionsRef.current = [];
-          }
-        }, 1000);
-      }
-    };
-
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-
-    return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-    };
-  }, []);
-
   const loadUserProfile = async (userId) => {
     try {
+      console.log("Loading profile for user:", userId);
+
       const { data, error } = await supabase
         .from("profiles")
         .select("*")
@@ -340,13 +352,16 @@ export function AuthProvider({ children }) {
 
       if (error) {
         if (error.code === "PGRST116") {
+          console.log("Creating minimal profile...");
           return await createUserProfile(userId);
         }
         console.error("Profile load error:", error);
         return null;
       }
 
+      console.log("Profile loaded:", data);
       setProfile(data);
+
       setUserTokens(data?.tokens ?? 0);
 
       return data;
@@ -376,6 +391,7 @@ export function AuthProvider({ children }) {
         return null;
       }
 
+      console.log("Profile created:", data);
       setProfile(data);
       setUserTokens(data?.tokens ?? 20);
       return data;
@@ -387,6 +403,8 @@ export function AuthProvider({ children }) {
 
   const signup = async (email, password, fullName) => {
     try {
+      console.log("Starting signup for:", email);
+
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -400,6 +418,8 @@ export function AuthProvider({ children }) {
         console.error("Signup error:", error);
         throw error;
       }
+
+      console.log("Signup response:", data);
 
       if (data?.user && !data.session) {
         return {
@@ -458,6 +478,8 @@ export function AuthProvider({ children }) {
 
   const logout = async () => {
     try {
+      console.log("🚪 Starting logout...");
+
       setLoadingSafe(true);
       setUser(null);
       setProfile(null);
@@ -474,9 +496,12 @@ export function AuthProvider({ children }) {
         });
       }
 
+      console.log("Signing out from Supabase...");
       const { error } = await supabase.auth.signOut();
       if (error) {
         console.error("Supabase logout error:", error);
+      } else {
+        console.log("Supabase session cleared");
       }
 
       await new Promise((resolve) => setTimeout(resolve, 300));
@@ -491,6 +516,8 @@ export function AuthProvider({ children }) {
           sessionStorage.clear();
         }
       }
+
+      console.log("✅ Logout completed, reloading page...");
 
       window.location.href = "/";
       window.location.reload();
@@ -523,21 +550,25 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // Fix #10: Properly await the password update instead of fire-and-forget
   const updatePassword = async (newPassword) => {
     try {
-      const { error } = await supabase.auth.updateUser({
-        password: newPassword,
-      });
+      console.log("Starting password update...");
 
-      if (error) {
-        console.error("Password update error:", error);
-        return {
-          success: false,
-          error: error.message || "Failed to update password",
-        };
-      }
+      supabase.auth
+        .updateUser({
+          password: newPassword,
+        })
+        .then(({ error }) => {
+          if (error) {
+            console.error("Background password update error:", error);
+          } else {
+            console.log("Background password update completed");
+          }
+        });
 
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      console.log("Password update initiated successfully");
       return { success: true };
     } catch (e) {
       console.error("Update password exception:", e);
