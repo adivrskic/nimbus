@@ -52,6 +52,17 @@ export function parsePatchOps(text) {
   const ops = [];
   let m;
 
+  // REPLACE_VARS — swap just the :root custom properties (fastest for color changes)
+  const varsRe = /<!-- REPLACE_VARS -->([\s\S]*?)<!-- \/REPLACE_VARS -->/g;
+  while ((m = varsRe.exec(text)) !== null) {
+    ops.push({
+      type: "REPLACE_VARS",
+      content: m[1].trim(),
+      _idx: m.index,
+      _end: m.index + m[0].length,
+    });
+  }
+
   // REPLACE_STYLES — replaces ALL <style> blocks in <head>
   const stylesRe =
     /<!-- REPLACE_STYLES -->([\s\S]*?)<!-- \/REPLACE_STYLES -->/g;
@@ -137,6 +148,30 @@ export function applyPatchOps(baseHtml, ops) {
 
     for (const op of ops) {
       switch (op.type) {
+        case "REPLACE_VARS": {
+          // Swap just the :root { ... } block inside the first <style> tag.
+          // This is the fastest possible color change — no elements touched.
+          const style = doc.head.querySelector("style");
+          if (style) {
+            const rootBlockRe = /:root\s*\{[^}]*\}/s;
+            let newVars = op.content;
+            // If the content doesn't include :root wrapper, it's just the inner block
+            if (!newVars.includes(":root")) {
+              newVars = `:root {\n${newVars}\n}`;
+            }
+            if (rootBlockRe.test(style.textContent)) {
+              style.textContent = style.textContent.replace(
+                rootBlockRe,
+                newVars
+              );
+            } else {
+              // No existing :root — prepend it
+              style.textContent = newVars + "\n" + style.textContent;
+            }
+          }
+          break;
+        }
+
         case "REPLACE_STYLES": {
           // Replace all <style> blocks in <head> with the new one(s)
           const oldStyles = doc.head.querySelectorAll("style");
