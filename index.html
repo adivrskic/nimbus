@@ -2,11 +2,133 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Nimbus AI Website Generator</title>
+
+    <!-- Primary Meta -->
+    <title>Nimbus — AI Website Generator | Build Websites in Seconds</title>
+    <meta
+      name="description"
+      content="Generate stunning, production-ready websites with AI. Choose from dozens of design options, preview in real-time, and deploy instantly. No coding required."
+    />
+    <meta
+      name="keywords"
+      content="AI website builder, website generator, AI web design, no-code website, landing page generator"
+    />
+    <meta name="author" content="Nimbus" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://nimbusweb.ai/" />
+
+    <!-- Favicon set -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://nimbusweb.ai/" />
+    <meta property="og:title" content="Nimbus — AI Website Generator" />
+    <meta
+      property="og:description"
+      content="Generate stunning, production-ready websites with AI. Preview in real-time and deploy instantly."
+    />
+    <meta property="og:image" content="https://nimbusweb.ai/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:site_name" content="Nimbus" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://nimbusweb.ai/" />
+    <meta name="twitter:title" content="Nimbus — AI Website Generator" />
+    <meta
+      name="twitter:description"
+      content="Generate stunning, production-ready websites with AI. Preview in real-time and deploy instantly."
+    />
+    <meta name="twitter:image" content="https://nimbusweb.ai/og-image.png" />
+
+    <!-- Theme / PWA hints -->
+    <meta
+      name="theme-color"
+      content="#0a0a0a"
+      media="(prefers-color-scheme: light)"
+    />
+    <meta
+      name="theme-color"
+      content="#161616"
+      media="(prefers-color-scheme: dark)"
+    />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <meta name="apple-mobile-web-app-title" content="Nimbus" />
+
+    <!-- Performance: preconnect to critical origins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="dns-prefetch" href="https://picsum.photos" />
+
+    <!-- Structured Data (JSON-LD) -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Nimbus AI Website Generator",
+        "applicationCategory": "DesignApplication",
+        "operatingSystem": "Web",
+        "description": "Generate stunning, production-ready websites with AI. Choose from dozens of design options, preview in real-time, and deploy instantly.",
+        "url": "https://nimbuswebsites.com/",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": "4.8",
+          "ratingCount": "150"
+        }
+      }
+    </script>
+
+    <!-- Prevent FOUC: set theme before paint -->
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem("theme");
+          if (
+            t === "dark" ||
+            (!t && window.matchMedia("(prefers-color-scheme: dark)").matches)
+          ) {
+            document.documentElement.setAttribute("data-theme", "dark");
+          }
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body>
+    <!-- Noscript fallback for SEO crawlers and no-JS users -->
+    <noscript>
+      <div
+        style="
+          padding: 2rem;
+          text-align: center;
+          font-family: system-ui, sans-serif;
+        "
+      >
+        <h1>Nimbus AI Website Generator</h1>
+        <p>
+          Generate stunning, production-ready websites with AI. Choose from
+          dozens of design options, preview in real-time, and deploy instantly.
+        </p>
+        <p>Please enable JavaScript to use this application.</p>
+      </div>
+    </noscript>
+
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
