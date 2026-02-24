@@ -18,7 +18,6 @@ export function ProjectProvider({ children }) {
   const hasFetchedRef = useRef(false);
 
   const editProject = useCallback((project) => {
-    console.log("ProjectContext: editProject called", project?.id);
     setPendingProject(project);
     setPendingAction("edit");
   }, []);
