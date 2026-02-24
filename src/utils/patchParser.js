@@ -21,6 +21,11 @@
 //   - Changes appear instantly as each op completes (not after full doc)
 //   - No page flash or scroll reset
 //
+// Multi-page support:
+//   When the base HTML contains <!-- FILE: *.html --> markers, patch ops are
+//   applied to EVERY page individually so color/theme changes propagate across
+//   the entire site.
+//
 // Backward compatible: if response doesn't start with <!-- PATCH -->, it's
 // treated as full HTML and the existing flow takes over.
 
@@ -32,6 +37,49 @@
 export function isPatchResponse(text) {
   if (!text || text.length < 14) return false;
   return text.trimStart().startsWith("<!-- PATCH");
+}
+
+// ─── Multi-page helpers ─────────────────────────────────────────────────────
+
+const FILE_MARKER_RE = /<!--\s*(?:=+\s*)?FILE:\s*(\S+\.html)\s*(?:=+\s*)?-->/gi;
+
+/**
+ * Detect whether HTML contains multi-page FILE markers.
+ */
+function isMultiPageHtml(html) {
+  if (!html) return false;
+  FILE_MARKER_RE.lastIndex = 0;
+  return FILE_MARKER_RE.test(html);
+}
+
+/**
+ * Split multi-page HTML into { filename: pageHtml } map.
+ * Returns null for single-page HTML.
+ */
+function splitPages(html) {
+  if (!html) return null;
+  FILE_MARKER_RE.lastIndex = 0;
+  const parts = html.split(FILE_MARKER_RE);
+  if (parts.length <= 1) return null;
+
+  const files = {};
+  for (let i = 1; i < parts.length; i += 2) {
+    const filename = parts[i]?.trim();
+    const content = parts[i + 1]?.trim();
+    if (filename && content) {
+      files[filename] = content;
+    }
+  }
+  return Object.keys(files).length > 0 ? files : null;
+}
+
+/**
+ * Recombine a pages map back into multi-page HTML with FILE markers.
+ */
+function joinPages(files) {
+  return Object.entries(files)
+    .map(([filename, html]) => `<!-- FILE: ${filename} -->\n${html}`)
+    .join("\n\n");
 }
 
 // ─── Parsing ───────────────────────────────────────────────────────────────
@@ -136,26 +184,24 @@ export function parsePatchOps(text) {
 // ─── Application ───────────────────────────────────────────────────────────
 
 /**
- * Apply an array of patch operations to a base HTML string.
+ * Apply an array of patch operations to a single-page HTML string.
  * Returns the new complete HTML string.
  */
-export function applyPatchOps(baseHtml, ops) {
-  if (!ops || ops.length === 0) return baseHtml;
+export function applySinglePageOps(pageHtml, ops) {
+  if (!ops || ops.length === 0) return pageHtml;
 
   try {
     const parser = new DOMParser();
-    const doc = parser.parseFromString(baseHtml, "text/html");
+    const doc = parser.parseFromString(pageHtml, "text/html");
 
     for (const op of ops) {
       switch (op.type) {
         case "REPLACE_VARS": {
           // Swap just the :root { ... } block inside the first <style> tag.
-          // This is the fastest possible color change — no elements touched.
           const style = doc.head.querySelector("style");
           if (style) {
             const rootBlockRe = /:root\s*\{[^}]*\}/s;
             let newVars = op.content;
-            // If the content doesn't include :root wrapper, it's just the inner block
             if (!newVars.includes(":root")) {
               newVars = `:root {\n${newVars}\n}`;
             }
@@ -165,7 +211,6 @@ export function applyPatchOps(baseHtml, ops) {
                 newVars
               );
             } else {
-              // No existing :root — prepend it
               style.textContent = newVars + "\n" + style.textContent;
             }
           }
@@ -173,19 +218,15 @@ export function applyPatchOps(baseHtml, ops) {
         }
 
         case "REPLACE_STYLES": {
-          // Replace all <style> blocks in <head> with the new one(s)
           const oldStyles = doc.head.querySelectorAll("style");
-          // Remove all existing (except the very first responsive one we'll replace)
           oldStyles.forEach((s) => s.remove());
 
-          // Parse the new style content and append
           const tempDiv = doc.createElement("div");
           tempDiv.innerHTML = op.content;
           const newStyles = tempDiv.querySelectorAll("style");
           if (newStyles.length > 0) {
             newStyles.forEach((s) => doc.head.appendChild(s));
           } else {
-            // If content is raw CSS without <style> tags, wrap it
             const styleEl = doc.createElement("style");
             styleEl.textContent = op.content;
             doc.head.appendChild(styleEl);
@@ -228,7 +269,6 @@ export function applyPatchOps(baseHtml, ops) {
       }
     }
 
-    // Serialize back to full HTML string
     const doctype = doc.doctype
       ? new XMLSerializer().serializeToString(doc.doctype) + "\n"
       : "<!DOCTYPE html>\n";
@@ -236,8 +276,50 @@ export function applyPatchOps(baseHtml, ops) {
     return doctype + doc.documentElement.outerHTML;
   } catch (e) {
     console.error("[patchParser] Failed to apply ops:", e);
-    return baseHtml;
+    return pageHtml;
   }
+}
+
+/**
+ * Apply patch operations to HTML — automatically handles both single-page
+ * and multi-page (FILE-marker separated) content.
+ *
+ * For multi-page: global ops (REPLACE_VARS, REPLACE_STYLES) are applied to
+ * every page. Selector-based ops (REPLACE, INSERT_*, REMOVE) are applied to
+ * whichever page contains a matching element.
+ */
+export function applyPatchOps(baseHtml, ops) {
+  if (!ops || ops.length === 0) return baseHtml;
+
+  // ─── Single-page fast path ─────────────────────────────────
+  const pages = splitPages(baseHtml);
+  if (!pages) {
+    return applySinglePageOps(baseHtml, ops);
+  }
+
+  // ─── Multi-page: apply ops to every page ───────────────────
+  // Separate global ops (apply to ALL pages) from targeted ops
+  const globalOps = ops.filter(
+    (op) => op.type === "REPLACE_VARS" || op.type === "REPLACE_STYLES"
+  );
+  const targetedOps = ops.filter(
+    (op) => op.type !== "REPLACE_VARS" && op.type !== "REPLACE_STYLES"
+  );
+
+  const patchedPages = {};
+  for (const [filename, pageHtml] of Object.entries(pages)) {
+    // Always apply global ops to every page
+    let patched = applySinglePageOps(pageHtml, globalOps);
+
+    // Apply targeted ops — they'll no-op on pages that don't have the selector
+    if (targetedOps.length > 0) {
+      patched = applySinglePageOps(patched, targetedOps);
+    }
+
+    patchedPages[filename] = patched;
+  }
+
+  return joinPages(patchedPages);
 }
 
 // ─── Incremental streaming helper ──────────────────────────────────────────
