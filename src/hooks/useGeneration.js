@@ -13,6 +13,8 @@ import {
   createIncrementalApplier,
 } from "../utils/patchParser";
 
+let streamingTimeout = null;
+
 export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedCode, setGeneratedCode] = useState(null);
@@ -30,15 +32,14 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
   const abortControllerRef = useRef(null);
   const streamRef = useRef(null);
   const lastGenerationRef = useRef(null);
-  const streamingTimeoutRef = useRef(null); // Fix: was module-level, now per-instance
 
   useEffect(() => {
     setGlobalGenerating(isGenerating);
   }, [isGenerating, setGlobalGenerating]);
 
   const debouncedSetCode = useCallback((html) => {
-    if (streamingTimeoutRef.current) clearTimeout(streamingTimeoutRef.current);
-    streamingTimeoutRef.current = setTimeout(() => {
+    if (streamingTimeout) clearTimeout(streamingTimeout);
+    streamingTimeout = setTimeout(() => {
       setGeneratedCode(html);
     }, 50);
   }, []);
@@ -88,16 +89,14 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
       abortControllerRef.current = new AbortController();
 
       try {
-        // ─── P0 FIX: Send raw user prompt ───────────────────────────
-        // The edge function receives `customization` (selections) and
-        // `persistentOptions` separately and builds its own system-level
-        // prompt from them. Sending the expanded prompt here was causing
-        // every design spec to appear twice in the API call.
-        // ─────────────────────────────────────────────────────────────
+        // P0 FIX: Send raw user prompt. The edge function receives
+        // `customization` (selections) and `persistentOptions` separately
+        // and builds its own system prompt from them via buildDynamicPromptPart.
+        // Sending buildFullPrompt() here was duplicating every design spec.
 
         if (streaming) {
           const streamResult = await generateWebsiteStream({
-            prompt, // ← raw user prompt, not buildFullPrompt()
+            prompt,
             customization: selections,
             persistentOptions,
             isRefinement: false,
@@ -139,7 +138,7 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
 
         if (supabaseGenerate) {
           const result = await supabaseGenerate({
-            prompt, // ← raw user prompt
+            prompt,
             selections,
             persistentOptions,
             isRefinement: false,
@@ -153,6 +152,7 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
             setGeneratedCode(code);
             setGeneratedFiles(files);
 
+            // Cache it
             cacheGeneration(prompt, selections, persistentOptions, {
               html: code,
               files,
@@ -319,7 +319,7 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
-    if (streamingTimeoutRef.current) clearTimeout(streamingTimeoutRef.current);
+    if (streamingTimeout) clearTimeout(streamingTimeout);
     setIsGenerating(false);
     setIsStreaming(false);
     setIsEnhancing(false);
@@ -327,7 +327,7 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
   }, []);
 
   const reset = useCallback(() => {
-    if (streamingTimeoutRef.current) clearTimeout(streamingTimeoutRef.current);
+    if (streamingTimeout) clearTimeout(streamingTimeout);
     setIsGenerating(false);
     setGeneratedCode(null);
     setGeneratedFiles(null);
