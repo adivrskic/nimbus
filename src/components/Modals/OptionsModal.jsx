@@ -310,7 +310,11 @@ function OptionsModal({
               <div className="options-choices__header">
                 <button
                   className="options-back"
-                  onClick={() => setActiveOption(null)}
+                  onClick={() =>
+                    setActiveOption(
+                      activeOption === "customColors" ? "palette" : null
+                    )
+                  }
                 >
                   <ChevronLeft size={16} />
                 </button>
@@ -323,7 +327,19 @@ function OptionsModal({
                 {hasSelection(activeOption) && (
                   <button
                     className="options-reset"
-                    onClick={() => onReset(activeOption)}
+                    onClick={() => {
+                      onReset(activeOption);
+                      // Keep palette and customColors in sync
+                      if (activeOption === "customColors") {
+                        onReset("palette");
+                        setActiveOption(null);
+                      } else if (
+                        activeOption === "palette" &&
+                        selections.palette === "Custom"
+                      ) {
+                        onReset("customColors");
+                      }
+                    }}
                   >
                     <RotateCcw size={12} style={{ marginRight: 4 }} />
                     Reset
@@ -377,7 +393,16 @@ function OptionsModal({
                         className={`options-choice ${
                           isSelected ? "options-choice--active" : ""
                         }`}
-                        onClick={() => onSelect(activeOption, value)}
+                        onClick={() => {
+                          onSelect(activeOption, value);
+                          // Auto-open custom color picker when "Custom" palette is selected
+                          if (
+                            activeOption === "palette" &&
+                            value === "Custom"
+                          ) {
+                            setActiveOption("customColors");
+                          }
+                        }}
                       >
                         {/* Color swatches for palette choices */}
                         {choice.colors && (
