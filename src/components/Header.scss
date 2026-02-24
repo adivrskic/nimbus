@@ -1,9 +1,9 @@
 // =============================================================================
-// Header — Replace lines 280–620 in styles2
+// Header
 // =============================================================================
 
 // ---------------------------------------------------------------------------
-// Base — transparent background, no full-width bar
+// Base
 // ---------------------------------------------------------------------------
 
 .header {
@@ -30,22 +30,23 @@
 }
 
 // ---------------------------------------------------------------------------
-// Glassmorphism sections
+// Neumorphic sections (replaces glassmorphism)
 // ---------------------------------------------------------------------------
 
 .header__section {
   display: flex;
   align-items: center;
-  height: 40px;
+  height: 44px;
   padding: 0 14px;
   border-radius: 999px;
-  background: var(--header-glass-bg);
   border: none;
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
   flex-shrink: 0;
-  transition: background var(--transition-fast),
-    border-color var(--transition-fast);
+  transition: box-shadow 0.3s ease;
+
+  // Inset neumorphism — light mode
+  background: var(--color-background);
+  box-shadow: inset 2px 2px 6px rgba(0, 0, 0, 0.06),
+    inset -2px -2px 6px rgba(255, 255, 255, 0.6);
 
   &--logo {
     padding: 0 12px;
@@ -57,14 +58,13 @@
   }
 }
 
-:root {
-  --header-glass-bg: rgba(255, 255, 255, 0.55);
-  --header-glass-border: rgba(0, 0, 0, 0.06);
-}
-
+// Dark mode neumorphic override
 [data-theme="dark"] {
-  --header-glass-bg: rgba(30, 30, 32, 0.6);
-  --header-glass-border: rgba(255, 255, 255, 0.07);
+  .header__section {
+    background: var(--color-background);
+    box-shadow: inset 2px 2px 6px rgba(0, 0, 0, 0.4),
+      inset -2px -2px 6px rgba(255, 255, 255, 0.025);
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -113,7 +113,7 @@
 }
 
 // ---------------------------------------------------------------------------
-// Marble wrapper — fills remaining space, IS the orb
+// Marble wrapper
 // ---------------------------------------------------------------------------
 
 .header__marble-wrapper {
@@ -125,7 +125,6 @@
   display: flex;
   align-items: center;
 
-  // Reset button styles
   background: none;
   border: none;
   padding: 0;
@@ -421,13 +420,8 @@
     &--logo {
       padding: 0 10px;
     }
-
-    &--nav {
-      padding: 0 3px;
-    }
   }
 
-  // Logo text stays visible
   .header__logo-text {
     font-size: 0.875rem;
   }
@@ -441,7 +435,6 @@
     height: 22px;
   }
 
-  // Icons 10% larger on mobile
   .header__nav-icon {
     width: 17.6px;
     height: 17.6px;

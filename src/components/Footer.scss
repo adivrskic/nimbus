@@ -110,7 +110,7 @@
 }
 
 // =============================================================================
-// About Section — Add this above the existing .footer styles in styles2
+// About Section — Neumorphic Feature Cards
 // =============================================================================
 
 .about {
@@ -152,31 +152,36 @@
 
 .about__features {
   display: grid;
-  gap: calc(var(--spacing-unit) * 2);
+  gap: calc(var(--spacing-unit) * 2.5);
   width: 100%;
   margin-top: calc(var(--spacing-unit) * 1);
 
   @media (max-width: 480px) {
     grid-template-columns: 1fr;
-    gap: calc(var(--spacing-unit) * 1.5);
+    gap: calc(var(--spacing-unit) * 2);
   }
 }
 
+// ---------------------------------------------------------------------------
+// Inset neumorphic feature card
+// ---------------------------------------------------------------------------
 .about__feature {
   display: flex;
   align-items: flex-start;
   gap: calc(var(--spacing-unit) * 1.5);
-  padding: calc(var(--spacing-unit) * 2);
+  padding: calc(var(--spacing-unit) * 2.5);
   border-radius: var(--radius-lg);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
   text-align: left;
-  transition: border-color var(--transition-fast),
-    box-shadow var(--transition-fast);
+  transition: box-shadow 0.3s ease;
+
+  background: var(--color-background);
+  border: none;
+  box-shadow: inset 3px 3px 8px rgba(0, 0, 0, 0.06),
+    inset -3px -3px 8px rgba(255, 255, 255, 0.6);
 
   &:hover {
-    border-color: var(--color-border-hover);
-    box-shadow: var(--shadow-sm);
+    box-shadow: inset 4px 4px 10px rgba(0, 0, 0, 0.08),
+      inset -4px -4px 10px rgba(255, 255, 255, 0.7);
   }
 }
 
@@ -185,9 +190,9 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  width: 32px;
-  height: 32px;
-  border-radius: var(--radius-sm);
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
   background: var(--color-accent-light);
   color: var(--color-text-primary);
 }
@@ -195,7 +200,7 @@
 .about__feature-text {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
 }
 
 .about__feature-title {
@@ -219,4 +224,22 @@
   line-height: 1.6;
   color: var(--color-text-tertiary);
   max-width: 420px;
+}
+
+// ---------------------------------------------------------------------------
+// Dark-mode neumorphism overrides
+// On dark backgrounds the highlight shadow goes slightly lighter and the
+// dark shadow goes deeper. Surface matches --color-background (#161616).
+// ---------------------------------------------------------------------------
+[data-theme="dark"] {
+  .about__feature {
+    background: var(--color-background);
+    box-shadow: inset 3px 3px 8px rgba(0, 0, 0, 0.4),
+      inset -3px -3px 8px rgba(255, 255, 255, 0.025);
+
+    &:hover {
+      box-shadow: inset 4px 4px 10px rgba(0, 0, 0, 0.45),
+        inset -4px -4px 10px rgba(255, 255, 255, 0.03);
+    }
+  }
 }

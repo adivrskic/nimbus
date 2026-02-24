@@ -228,26 +228,6 @@ function PreviewModal({
     >
       {/* Fix #20: Override mobile CSS to show single enhance bar instead of duplicate */}
       <style>{`
-        .pm-header__center--unified {
-          display: flex !important;
-        }
-        @media (max-width: 768px) {
-          .pm-header__center--unified {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            transform: translateY(100%);
-            border-top: 1px solid var(--color-border);
-            background: var(--color-surface);
-            border-radius: 0;
-            padding: 6px 10px;
-            z-index: 5;
-          }
-          .modal-content--preview {
-            padding-bottom: 44px;
-          }
-        }
         /* Fix #17: Syntax highlight colors */
         .hl-tag { color: #22863a; }
         .hl-attr { color: #6f42c1; }

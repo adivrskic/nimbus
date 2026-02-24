@@ -3580,7 +3580,6 @@
     padding: 8px 0px;
 
     &__left {
-      flex: 1;
       min-width: 0;
     }
     &__tab span {
@@ -3597,9 +3596,6 @@
     }
     &__page-btn {
       padding: 4px 8px;
-    }
-    &__center {
-      display: none;
     }
     &__preview-actions {
       display: none;
