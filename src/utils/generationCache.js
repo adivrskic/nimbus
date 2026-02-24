@@ -96,7 +96,6 @@ export function getCachedGeneration(
   if (memoryCache.has(key)) {
     const entry = memoryCache.get(key);
     if (isEntryValid(entry)) {
-      console.log("[Cache] Memory hit:", key);
       return entry.data;
     }
     memoryCache.delete(key);
@@ -108,7 +107,6 @@ export function getCachedGeneration(
       const entry = JSON.parse(stored);
       if (isEntryValid(entry)) {
         memoryCache.set(key, entry);
-        console.log("[Cache] Storage hit:", key);
         return entry.data;
       }
       localStorage.removeItem(key);
@@ -117,7 +115,6 @@ export function getCachedGeneration(
     console.warn("Cache read error:", e);
   }
 
-  console.log("[Cache] Miss:", key);
   return null;
 }
 
@@ -153,8 +150,6 @@ export function cacheGeneration(
     updateCacheIndex(index);
 
     evictOldEntries();
-
-    console.log("[Cache] Stored:", key);
   } catch (e) {
     console.warn("Cache write error:", e);
   }
@@ -188,8 +183,6 @@ export function clearAllCache() {
     });
     localStorage.removeItem(CACHE_INDEX_KEY);
   } catch {}
-
-  console.log("[Cache] Cleared all");
 }
 
 export function getCacheStats() {

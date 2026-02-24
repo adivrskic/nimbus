@@ -1,6 +1,5 @@
 // hooks/useGeneration.js - Streaming optimized with caching and multi-page support
 import { useState, useCallback, useRef, useEffect } from "react";
-import { buildFullPrompt } from "../utils/promptBuilder";
 import { generateWebsiteStream } from "../utils/generateWebsiteStream";
 import { useGenerationState } from "../contexts/GenerationContext";
 import {
@@ -13,8 +12,6 @@ import {
   isPatchResponse,
   createIncrementalApplier,
 } from "../utils/patchParser";
-
-let streamingTimeout = null;
 
 export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
   const [isGenerating, setIsGenerating] = useState(false);
@@ -33,14 +30,15 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
   const abortControllerRef = useRef(null);
   const streamRef = useRef(null);
   const lastGenerationRef = useRef(null);
+  const streamingTimeoutRef = useRef(null); // Fix: was module-level, now per-instance
 
   useEffect(() => {
     setGlobalGenerating(isGenerating);
   }, [isGenerating, setGlobalGenerating]);
 
   const debouncedSetCode = useCallback((html) => {
-    if (streamingTimeout) clearTimeout(streamingTimeout);
-    streamingTimeout = setTimeout(() => {
+    if (streamingTimeoutRef.current) clearTimeout(streamingTimeoutRef.current);
+    streamingTimeoutRef.current = setTimeout(() => {
       setGeneratedCode(html);
     }, 50);
   }, []);
@@ -90,15 +88,16 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
       abortControllerRef.current = new AbortController();
 
       try {
-        const fullPrompt = buildFullPrompt(
-          prompt,
-          selections,
-          persistentOptions
-        );
+        // ─── P0 FIX: Send raw user prompt ───────────────────────────
+        // The edge function receives `customization` (selections) and
+        // `persistentOptions` separately and builds its own system-level
+        // prompt from them. Sending the expanded prompt here was causing
+        // every design spec to appear twice in the API call.
+        // ─────────────────────────────────────────────────────────────
 
         if (streaming) {
           const streamResult = await generateWebsiteStream({
-            prompt: fullPrompt,
+            prompt, // ← raw user prompt, not buildFullPrompt()
             customization: selections,
             persistentOptions,
             isRefinement: false,
@@ -140,7 +139,7 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
 
         if (supabaseGenerate) {
           const result = await supabaseGenerate({
-            prompt: fullPrompt,
+            prompt, // ← raw user prompt
             selections,
             persistentOptions,
             isRefinement: false,
@@ -154,7 +153,6 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
             setGeneratedCode(code);
             setGeneratedFiles(files);
 
-            // Cache it
             cacheGeneration(prompt, selections, persistentOptions, {
               html: code,
               files,
@@ -321,7 +319,7 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
-    if (streamingTimeout) clearTimeout(streamingTimeout);
+    if (streamingTimeoutRef.current) clearTimeout(streamingTimeoutRef.current);
     setIsGenerating(false);
     setIsStreaming(false);
     setIsEnhancing(false);
@@ -329,7 +327,7 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
   }, []);
 
   const reset = useCallback(() => {
-    if (streamingTimeout) clearTimeout(streamingTimeout);
+    if (streamingTimeoutRef.current) clearTimeout(streamingTimeoutRef.current);
     setIsGenerating(false);
     setGeneratedCode(null);
     setGeneratedFiles(null);
