@@ -14,12 +14,9 @@
       border-radius: var(--radius-xl);
       font-size: 14px;
       color: var(--color-text-primary);
-
+      border: none;
       // Neumorphic — expanded: subtle inset to feel like you're typing "into" a well
-      box-shadow: inset 2px 2px 6px rgba(0, 0, 0, 0.05),
-        inset -2px -2px 6px rgba(255, 255, 255, 0.6),
-        6px 6px 16px rgba(0, 0, 0, 0.05),
-        -6px -6px 16px rgba(255, 255, 255, 0.6);
+      box-shadow: inset 6px 6px 6px #dedee0, inset -6px -6px 6px #ffffff;
     }
 
     .search-bar__right {
@@ -95,8 +92,7 @@
       color: transparent;
 
       // Neumorphic — generating: pressed inward
-      box-shadow: inset 3px 3px 8px rgba(0, 0, 0, 0.06),
-        inset -3px -3px 8px rgba(255, 255, 255, 0.5);
+      box-shadow: inset 6px 6px 6px #dedee0, inset -6px -6px 6px #ffffff;
     }
 
     .search-bar__truncate-overlay {
@@ -276,22 +272,7 @@
     // Neumorphic surface — matches page background for the raised illusion
     background: var(--color-background);
     border: none;
-    box-shadow: 6px 6px 16px rgba(0, 0, 0, 0.06),
-      -6px -6px 16px rgba(255, 255, 255, 0.7),
-      inset 0 0 0 1px rgba(255, 255, 255, 0.25);
-
-    &:focus {
-      outline: none;
-      box-shadow: 8px 8px 20px rgba(0, 0, 0, 0.08),
-        -8px -8px 20px rgba(255, 255, 255, 0.8),
-        inset 0 0 0 1px rgba(255, 255, 255, 0.35);
-    }
-
-    &--error {
-      box-shadow: 6px 6px 16px rgba(0, 0, 0, 0.06),
-        -6px -6px 16px rgba(255, 255, 255, 0.7),
-        0 0 0 2px rgba(239, 68, 68, 0.3);
-    }
+    box-shadow: inset 6px 6px 6px #dedee0, inset -6px -6px 6px #ffffff;
   }
 
   // When not expanded, make textarea text transparent so truncate overlay shows
@@ -526,32 +507,7 @@
 [data-theme="dark"] {
   .search-bar__input {
     background: var(--color-background);
-    box-shadow: 6px 6px 16px rgba(0, 0, 0, 0.35),
-      -6px -6px 16px rgba(255, 255, 255, 0.025),
-      inset 0 0 0 1px rgba(255, 255, 255, 0.04);
-
-    &:focus {
-      box-shadow: 8px 8px 20px rgba(0, 0, 0, 0.4),
-        -8px -8px 20px rgba(255, 255, 255, 0.03),
-        inset 0 0 0 1px rgba(255, 255, 255, 0.06);
-    }
-
-    &--error {
-      box-shadow: 6px 6px 16px rgba(0, 0, 0, 0.35),
-        -6px -6px 16px rgba(255, 255, 255, 0.025),
-        0 0 0 2px rgba(239, 68, 68, 0.35);
-    }
-  }
-
-  .search-bar--expanded .search-bar__input {
-    box-shadow: inset 2px 2px 6px rgba(0, 0, 0, 0.35),
-      inset -2px -2px 6px rgba(255, 255, 255, 0.02),
-      6px 6px 16px rgba(0, 0, 0, 0.3), -6px -6px 16px rgba(255, 255, 255, 0.02);
-  }
-
-  .search-bar--generating .search-bar__input {
-    box-shadow: inset 3px 3px 8px rgba(0, 0, 0, 0.4),
-      inset -3px -3px 8px rgba(255, 255, 255, 0.02);
+    box-shadow: inset 9px 9px 18px #070707, inset -9px -9px 18px #1b1b1b;
   }
 }
 
