@@ -142,7 +142,7 @@ function HelpModal({ isOpen, onClose }) {
           <div className="modal-header">
             <div className="modal-title">
               <HelpCircle size={16} />
-              <span>How to Use Nimbus</span>
+              <span>How to Use Nimbus Websites</span>
             </div>
             <button
               className="modal-close"

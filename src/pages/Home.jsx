@@ -500,7 +500,6 @@ function Home() {
           lastRequest={lastRequest}
         />
       )}
-
       {showHelp && <HelpModal isOpen={showHelp} onClose={closeHelp} />}
 
       {/* Shared modals (triggered by Header, Footer, or Home) */}
