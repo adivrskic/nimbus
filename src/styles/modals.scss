@@ -44,15 +44,8 @@
   overflow-y: auto;
   background: transparent;
   border-radius: var(--radius-lg);
-  opacity: 0;
-  transform: scale(0.98) translateY(4px);
-  transition: opacity var(--transition-base) cubic-bezier(0.16, 1, 0.3, 1),
-    transform var(--transition-base) cubic-bezier(0.16, 1, 0.3, 1);
-
-  &.active {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
+  opacity: 1;
+  transform: scale(1) translateY(0);
 
   &--sm {
     width: auto;
@@ -1411,25 +1404,19 @@
   justify-content: center;
   width: 32px;
   height: 32px;
-  background: var(--color-surface-elevated);
   border-radius: var(--radius-md);
   color: var(--color-text-tertiary);
   cursor: pointer;
   border: none;
+  background: none;
   transition: background var(--transition-fast), color var(--transition-fast);
   &:hover {
-    background: var(--color-border);
     color: var(--color-text-primary);
   }
   &--primary {
-    background: var(--color-accent);
     color: var(--color-background);
-    &:hover {
-      background: var(--color-accent-hover);
-    }
   }
   &--danger:hover {
-    background: rgba(239, 68, 68, 0.08);
     color: #ef4444;
   }
 }
@@ -3741,7 +3728,8 @@
   gap: 8px;
   width: 100%;
   padding: 14px 16px;
-  background: var(--color-surface-elevated);
+  background: none;
+  box-shadow: var(--neumorphism-shadow-surface);
   border-radius: var(--radius-md);
 }
 
