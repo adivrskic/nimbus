@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 
 import { useAuth } from "../contexts/AuthContext";
 import { useProject } from "../contexts/ProjectContext";
@@ -143,6 +143,13 @@ function Home() {
     handleSave,
     handleDownload,
     resetProject,
+    versionHistory,
+    currentVersionId,
+    setCurrentVersionId,
+    recordEnhancement,
+    recordEnhancementResult,
+    loadVersionHistory,
+    getDisplayVersions,
   } = useProjectSave({
     user,
     isAuthenticated,
@@ -156,6 +163,14 @@ function Home() {
 
   const [lastRequest, setLastRequest] = useState(null);
   const [showEnhanceTokenOverlay, setShowEnhanceTokenOverlay] = useState(false);
+
+  // Track the current project data for version display
+  const [currentProjectData, setCurrentProjectData] = useState(null);
+
+  // Ref to snapshot HTML before enhancement
+  const preEnhanceHtmlRef = useRef(null);
+  const preEnhanceFilesRef = useRef(null);
+  const enhancePromptSnapshotRef = useRef(null);
 
   // Sync minimized preview state to context so Header can show the pill
   useEffect(() => {
@@ -179,6 +194,38 @@ function Home() {
       refreshColors();
     }
   }, [isGenerating, refreshColors]);
+
+  // Track when enhancement finishes to record version
+  const wasEnhancingRef = useRef(false);
+  useEffect(() => {
+    if (isEnhancing) {
+      wasEnhancingRef.current = true;
+    } else if (wasEnhancingRef.current && generatedCode) {
+      // Enhancement just finished
+      wasEnhancingRef.current = false;
+      if (preEnhanceHtmlRef.current && enhancePromptSnapshotRef.current) {
+        recordEnhancement(
+          enhancePromptSnapshotRef.current,
+          preEnhanceHtmlRef.current,
+          preEnhanceFilesRef.current
+        );
+        recordEnhancementResult(
+          enhancePromptSnapshotRef.current,
+          generatedCode,
+          generatedFiles
+        );
+        preEnhanceHtmlRef.current = null;
+        preEnhanceFilesRef.current = null;
+        enhancePromptSnapshotRef.current = null;
+      }
+    }
+  }, [
+    isEnhancing,
+    generatedCode,
+    generatedFiles,
+    recordEnhancement,
+    recordEnhancementResult,
+  ]);
 
   const { text: typewriterText } = useTypewriter({
     prompts: EXAMPLE_PROMPTS,
@@ -251,6 +298,8 @@ function Home() {
       setPrompt(projectPrompt);
 
       setCurrentProjectId(pendingProject.id);
+      setCurrentProjectData(pendingProject);
+      loadVersionHistory(pendingProject);
 
       if (pendingAction === "edit") {
         if (pendingProject.html_content) {
@@ -275,6 +324,7 @@ function Home() {
     updateCode,
     openPreview,
     openDeploy,
+    loadVersionHistory,
   ]);
 
   const handleGenerate = useCallback(() => {
@@ -296,6 +346,7 @@ function Home() {
     });
 
     resetProject();
+    setCurrentProjectData(null);
     openPreview();
 
     generate(prompt, selections, persistentOptions, user, true);
@@ -324,6 +375,11 @@ function Home() {
 
     const submittedEnhancePrompt = enhancePrompt.trim();
 
+    // Snapshot current state before enhancement
+    preEnhanceHtmlRef.current = generatedCode;
+    preEnhanceFilesRef.current = generatedFiles;
+    enhancePromptSnapshotRef.current = submittedEnhancePrompt;
+
     setLastRequest({
       type: "enhancement",
       prompt: submittedEnhancePrompt,
@@ -340,6 +396,8 @@ function Home() {
     user,
     enhance,
     openAuth,
+    generatedCode,
+    generatedFiles,
   ]);
 
   const handleKeyDown = useCallback(
@@ -377,6 +435,46 @@ function Home() {
     },
     [closeProjects, deployProject]
   );
+
+  // Handle viewing a specific version from ProjectsModal
+  const handleViewVersion = useCallback(
+    (version, project) => {
+      if (version.html_content) {
+        updateCode(version.html_content);
+        setPrompt(project.prompt || "");
+        setCurrentProjectId(project.id);
+        setCurrentProjectData(project);
+        loadVersionHistory(project);
+        setCurrentVersionId(version.id);
+        openPreview();
+      }
+    },
+    [
+      updateCode,
+      setPrompt,
+      setCurrentProjectId,
+      loadVersionHistory,
+      setCurrentVersionId,
+      openPreview,
+    ]
+  );
+
+  // Handle selecting a version from PreviewModal dropdown
+  const handleSelectPreviewVersion = useCallback(
+    (version) => {
+      if (version.html_content) {
+        updateCode(version.html_content);
+        setCurrentVersionId(version.id);
+      }
+    },
+    [updateCode, setCurrentVersionId]
+  );
+
+  // Build version list for PreviewModal
+  const previewVersions = useMemo(() => {
+    if (!currentProjectData && versionHistory.length === 0) return [];
+    return getDisplayVersions(currentProjectData);
+  }, [currentProjectData, versionHistory, getDisplayVersions]);
 
   // ---- Grouped props for PreviewModal (Fix #13) ----
 
@@ -424,6 +522,15 @@ function Home() {
       error: generationError,
     }),
     [isGenerating, isStreaming, isEnhancing, streamingPhase, generationError]
+  );
+
+  const previewVersionProps = useMemo(
+    () => ({
+      versions: previewVersions,
+      currentVersionId,
+      onSelectVersion: handleSelectPreviewVersion,
+    }),
+    [previewVersions, currentVersionId, handleSelectPreviewVersion]
   );
 
   return (
@@ -491,10 +598,27 @@ function Home() {
           onClose={closePreview}
           onMinimize={minimizePreview}
           onDownload={handleDownload}
-          saveProps={previewSaveProps}
-          enhanceProps={previewEnhanceProps}
-          tokenProps={previewTokenProps}
-          generationState={previewGenerationState}
+          onSave={handleSave}
+          onDeploy={openDeploy}
+          isSaving={isSaving}
+          saveSuccess={saveSuccess}
+          isGenerating={isGenerating}
+          enhancePrompt={enhancePrompt}
+          onEnhancePromptChange={setEnhancePrompt}
+          onEnhance={handleEnhance}
+          enhanceTokenCost={enhanceTokenCost}
+          enhanceBreakdown={enhanceBreakdown}
+          showEnhanceTokenOverlay={showEnhanceTokenOverlay}
+          onToggleEnhanceTokenOverlay={() =>
+            setShowEnhanceTokenOverlay((prev) => !prev)
+          }
+          isAuthenticated={isAuthenticated}
+          userTokens={userTokens}
+          tokenBalance={tokenBalance}
+          onBuyTokens={openTokenPurchase}
+          isStreaming={isStreaming}
+          isEnhancing={isEnhancing}
+          streamingPhase={streamingPhase}
           selections={selections}
           originalPrompt={prompt}
           lastRequest={lastRequest}
@@ -526,6 +650,7 @@ function Home() {
           onClose={closeProjects}
           onEditProject={handleEditProject}
           onDeployProject={handleDeployProject}
+          onViewVersion={handleViewVersion}
         />
       )}
 

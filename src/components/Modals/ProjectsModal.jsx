@@ -9,12 +9,14 @@ import {
   AlertTriangle,
   FolderOpen,
   ChevronRight,
+  History,
 } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
 import { useProject } from "../../contexts/ProjectContext";
 import { supabase } from "../../lib/supabaseClient";
 import useModalAnimation from "../../hooks/useModalAnimation";
 import { track } from "../../lib/analytics";
+import VersionHistoryModal from "./VersionHistoryModal";
 
 import "../../styles/modals.scss";
 
@@ -24,6 +26,7 @@ function ProjectsModal({
   onEditProject,
   onDeployProject,
   onDomainSetup,
+  onViewVersion,
 }) {
   const { user } = useAuth();
   const { projects, isLoading, fetchProjects, removeProjectFromCache } =
@@ -39,6 +42,7 @@ function ProjectsModal({
   const [loadingAction, setLoadingAction] = useState(null);
   const [expandedProject, setExpandedProject] = useState(null);
   const [copied, setCopied] = useState(null);
+  const [historyProject, setHistoryProject] = useState(null);
 
   // Fetch projects when modal opens (uses cache if available)
   useEffect(() => {
@@ -157,6 +161,36 @@ function ProjectsModal({
     setTimeout(() => setCopied(null), 2000);
   };
 
+  const handleOpenHistory = async (e, project) => {
+    e.stopPropagation();
+    // Fetch full project data for version history
+    try {
+      const { data, error } = await supabase
+        .from("projects")
+        .select("*")
+        .eq("id", project.id)
+        .single();
+
+      if (error) throw error;
+      setHistoryProject(data);
+    } catch (err) {
+      console.error("Error loading project for history:", err);
+      // Fallback to cached project data
+      setHistoryProject(project);
+    }
+  };
+
+  const handleSelectVersion = (version) => {
+    setHistoryProject(null);
+    onViewVersion?.(version, historyProject);
+    closeModal();
+  };
+
+  const getVersionCount = (project) => {
+    const history = project.customization?.versionHistory || [];
+    return history.length + 1; // +1 for initial version
+  };
+
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleDateString("en-US", {
@@ -212,197 +246,225 @@ function ProjectsModal({
   if (!shouldRender) return null;
 
   return (
-    <div
-      className={`modal-overlay ${isVisible ? "active" : ""}`}
-      onClick={closeModal}
-    >
+    <>
       <div
-        className={`modal-content modal-content--lg ${
-          isVisible ? "active" : ""
-        }`}
-        onClick={(e) => e.stopPropagation()}
+        className={`modal-overlay ${isVisible ? "active" : ""}`}
+        onClick={closeModal}
       >
-        {/* Fixed header section */}
-        <div className="modal-header-section">
-          <div className="modal-header">
-            <div className="modal-title">
-              <FolderOpen size={16} />
-              <span>Projects</span>
+        <div
+          className={`modal-content modal-content--lg ${
+            isVisible ? "active" : ""
+          }`}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Fixed header section */}
+          <div className="modal-header-section">
+            <div className="modal-header">
+              <div className="modal-title">
+                <FolderOpen size={16} />
+                <span>Projects</span>
+              </div>
+              <button className="modal-close" onClick={closeModal}>
+                <X size={16} />
+              </button>
             </div>
-            <button className="modal-close" onClick={closeModal}>
-              <X size={16} />
-            </button>
+
+            <div className="modal-subtitle">
+              Your saved projects. Click a project to continue editing.
+            </div>
           </div>
 
-          <div className="modal-subtitle">
-            Your saved projects. Click a project to continue editing.
-          </div>
-        </div>
-
-        {/* Scrollable body section */}
-        <div className="modal-body">
-          <div className="projects-list">
-            {isLoading ? (
-              <div className="projects-loading">
-                <Loader2 size={16} className="spinning" />
-              </div>
-            ) : projects.length === 0 ? (
-              <div className="projects-empty">
-                <span>No projects yet</span>
-              </div>
-            ) : (
-              projects.map((project) => (
-                <div
-                  key={project.id}
-                  className={`project-item ${
-                    deletingId === project.id ? "deleting" : ""
-                  } ${expandedProject === project.id ? "expanded" : ""}`}
-                >
-                  {/* Delete confirmation overlay */}
-                  {deletingId === project.id && (
-                    <div className="project-delete-confirm">
-                      {deleteError ? (
-                        <>
-                          <div className="delete-error">
-                            <AlertTriangle size={14} />
-                            <span>{deleteError}</span>
-                          </div>
-                          <button
-                            className="delete-cancel"
-                            onClick={cancelDelete}
-                          >
-                            Close
-                          </button>
-                        </>
-                      ) : (
-                        <>
-                          <div className="delete-actions">
+          {/* Scrollable body section */}
+          <div className="modal-body">
+            <div className="projects-list">
+              {isLoading ? (
+                <div className="projects-loading">
+                  <Loader2 size={16} className="spinning" />
+                </div>
+              ) : projects.length === 0 ? (
+                <div className="projects-empty">
+                  <span>No projects yet</span>
+                </div>
+              ) : (
+                projects.map((project) => (
+                  <div
+                    key={project.id}
+                    className={`project-item ${
+                      deletingId === project.id ? "deleting" : ""
+                    } ${expandedProject === project.id ? "expanded" : ""}`}
+                  >
+                    {/* Delete confirmation overlay */}
+                    {deletingId === project.id && (
+                      <div className="project-delete-confirm">
+                        {deleteError ? (
+                          <>
+                            <div className="delete-error">
+                              <AlertTriangle size={14} />
+                              <span>{deleteError}</span>
+                            </div>
                             <button
                               className="delete-cancel"
                               onClick={cancelDelete}
-                              disabled={isDeleting}
                             >
-                              Cancel
+                              Close
                             </button>
-                            <button
-                              className="delete-confirm"
-                              onClick={() => confirmDelete(project.id)}
-                              disabled={isDeleting}
-                            >
-                              {isDeleting ? (
-                                <>
-                                  <Loader2 size={12} className="spinning" />
-                                  Deleting...
-                                </>
-                              ) : (
-                                "Delete"
-                              )}
-                            </button>
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  )}
-
-                  <div
-                    className="project-main"
-                    onClick={() => handleEdit(project)}
-                  >
-                    <div className="project-info">
-                      <div className="project-name">
-                        <FileCode size={14} />
-                        <span>{getProjectName(project)}</span>
+                          </>
+                        ) : (
+                          <>
+                            <div className="delete-actions">
+                              <button
+                                className="delete-cancel"
+                                onClick={cancelDelete}
+                                disabled={isDeleting}
+                              >
+                                Cancel
+                              </button>
+                              <button
+                                className="delete-confirm"
+                                onClick={() => confirmDelete(project.id)}
+                                disabled={isDeleting}
+                              >
+                                {isDeleting ? (
+                                  <>
+                                    <Loader2 size={12} className="spinning" />
+                                    Deleting...
+                                  </>
+                                ) : (
+                                  "Delete"
+                                )}
+                              </button>
+                            </div>
+                          </>
+                        )}
                       </div>
-                      <div className="project-meta">
-                        <span className="project-date">
-                          <Calendar size={10} />
-                          <span> {formatDate(project.updated_at)}</span>
-                        </span>
-                      </div>
-                    </div>
+                    )}
 
-                    <div className="project-actions">
-                      {/* Delete button */}
-                      <button
-                        className="action-btn action-btn--danger"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDelete(project.id);
-                        }}
-                        title="Delete"
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Expanded content */}
-                  {expandedProject === project.id && (
-                    <div className="project-expanded">
-                      {getDeployedUrl(project) && (
-                        <div className="project-url">
-                          <span className="url-label">URL:</span>
-                          <div className="url-container">
-                            <a
-                              href={getDeployedUrl(project)}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="url-value"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              {getDeployedUrl(project)}
-                            </a>
-                            <button
-                              className="copy-btn"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                copyUrl(getDeployedUrl(project), project.id);
-                              }}
-                              title="Copy URL"
-                            >
-                              {copied === project.id ? "Copied!" : "Copy"}
-                            </button>
-                          </div>
+                    <div
+                      className="project-main"
+                      onClick={() => handleEdit(project)}
+                    >
+                      <div className="project-info">
+                        <div className="project-name">
+                          <FileCode size={14} />
+                          <span>{getProjectName(project)}</span>
                         </div>
-                      )}
-
-                      <div className="project-expanded-actions">
-                        <button
-                          className="action-btn"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeploy(project);
-                          }}
-                          disabled={loadingAction?.id === project.id}
-                          title="Deploy"
-                        >
-                          {loadingAction?.id === project.id &&
-                          loadingAction?.type === "deploy" ? (
-                            <Loader2 size={14} className="spinning" />
-                          ) : (
-                            "Deploy"
+                        <div className="project-meta">
+                          <span className="project-date">
+                            <Calendar size={10} />
+                            <span> {formatDate(project.updated_at)}</span>
+                          </span>
+                          {getVersionCount(project) > 1 && (
+                            <span className="project-version-badge">
+                              v{getVersionCount(project)}
+                            </span>
                           )}
-                        </button>
+                        </div>
+                      </div>
+
+                      <div className="project-actions">
+                        {/* Version history button */}
+                        {getVersionCount(project) > 1 && (
+                          <button
+                            className="action-btn action-btn--history"
+                            onClick={(e) => handleOpenHistory(e, project)}
+                            title="Version history"
+                          >
+                            <History size={14} />
+                          </button>
+                        )}
+
+                        {/* Delete button */}
                         <button
-                          className="action-btn"
+                          className="action-btn action-btn--danger"
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleDomain(project);
+                            handleDelete(project.id);
                           }}
-                          title="Domain Setup"
+                          title="Delete"
                         >
-                          Domain
+                          <Trash2 size={14} />
                         </button>
                       </div>
                     </div>
-                  )}
-                </div>
-              ))
-            )}
+
+                    {/* Expanded content */}
+                    {expandedProject === project.id && (
+                      <div className="project-expanded">
+                        {getDeployedUrl(project) && (
+                          <div className="project-url">
+                            <span className="url-label">URL:</span>
+                            <div className="url-container">
+                              <a
+                                href={getDeployedUrl(project)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="url-value"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                {getDeployedUrl(project)}
+                              </a>
+                              <button
+                                className="copy-btn"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  copyUrl(getDeployedUrl(project), project.id);
+                                }}
+                                title="Copy URL"
+                              >
+                                {copied === project.id ? "Copied!" : "Copy"}
+                              </button>
+                            </div>
+                          </div>
+                        )}
+
+                        <div className="project-expanded-actions">
+                          <button
+                            className="action-btn"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeploy(project);
+                            }}
+                            disabled={loadingAction?.id === project.id}
+                            title="Deploy"
+                          >
+                            {loadingAction?.id === project.id &&
+                            loadingAction?.type === "deploy" ? (
+                              <Loader2 size={14} className="spinning" />
+                            ) : (
+                              "Deploy"
+                            )}
+                          </button>
+                          <button
+                            className="action-btn"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDomain(project);
+                            }}
+                            title="Domain Setup"
+                          >
+                            Domain
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
           </div>
         </div>
       </div>
-    </div>
+
+      {/* Version History Modal */}
+      {historyProject && (
+        <VersionHistoryModal
+          isOpen={!!historyProject}
+          onClose={() => setHistoryProject(null)}
+          project={historyProject}
+          onSelectVersion={handleSelectVersion}
+        />
+      )}
+    </>
   );
 }
 

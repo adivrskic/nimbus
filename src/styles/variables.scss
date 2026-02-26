@@ -63,6 +63,8 @@
   --neumorphism-shadow: inset 6px 6px 12px #e3e3e3, inset -6px -6px 12px #ffffff;
   --neumorphism-shadow-surface: inset 9px 9px 18px #dbdbdb,
     inset -9px -9px 18px #f7f7f7;
+  --neumorphism-shadow-surface-selected: inset 5px 5px 12px #dbdbdb,
+    inset -5px -5px 12px #f7f7f7;
 }
 
 // Dark mode
@@ -110,6 +112,8 @@
   --neumorphism-shadow: inset 8px 8px 15px #080808, inset -8px -8px 15px #1a1a1a;
   --neumorphism-shadow-surface: inset 8px 8px 15px #090909,
     inset -8px -8px 15px #232323;
+  --neumorphism-shadow-surface-selected: inset 2px 2px 6px #090909,
+    inset -2px -2px 6px #232323;
 }
 
 // Typography
