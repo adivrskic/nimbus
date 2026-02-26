@@ -15,8 +15,9 @@
       font-size: 14px;
       color: var(--color-text-primary);
       border: none;
+      outline: none;
       // Neumorphic — expanded: subtle inset to feel like you're typing "into" a well
-      box-shadow: inset 6px 6px 6px #dedee0, inset -6px -6px 6px #ffffff;
+      box-shadow: var(--neumorphism-shadow);
     }
 
     .search-bar__right {

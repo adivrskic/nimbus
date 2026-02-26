@@ -316,7 +316,7 @@ function ProjectsModal({
                       <div className="project-meta">
                         <span className="project-date">
                           <Calendar size={10} />
-                          {formatDate(project.updated_at)}
+                          <span> {formatDate(project.updated_at)}</span>
                         </span>
                       </div>
                     </div>
