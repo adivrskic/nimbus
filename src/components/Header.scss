@@ -37,7 +37,7 @@
   display: flex;
   align-items: center;
   height: 44px;
-  padding: 0 14px;
+  padding: 0 18px;
   border-radius: 999px;
   background: var(--color-background);
   border: none;
@@ -47,26 +47,17 @@
   transition: box-shadow 0.3s ease;
 
   // Inset neumorphism — light mode
-  background: var(--color-background);
-  box-shadow: inset 2px 2px 6px rgba(0, 0, 0, 0.06),
-    inset -2px -2px 6px rgba(255, 255, 255, 0.6);
+  box-shadow: var(--neumorphism-shadow);
 
   &--logo {
-    padding: 0 12px;
     gap: 0;
-  }
-
-  &--nav {
-    padding: 0 6px;
   }
 }
 
 // Dark mode neumorphic override
 [data-theme="dark"] {
   .header__section {
-    background: var(--color-background);
-    box-shadow: inset 2px 2px 6px rgba(0, 0, 0, 0.4),
-      inset -2px -2px 6px rgba(255, 255, 255, 0.025);
+    box-shadow: var(--neumorphism-shadow);
   }
 }
 
@@ -95,6 +86,7 @@
   flex-direction: column;
   line-height: 1;
   margin-top: -2px;
+  gap: 1px;
 }
 
 .header__logo-text {
@@ -122,7 +114,7 @@
 .header__marble-wrapper {
   flex: 1;
   min-width: 0;
-  height: 34px;
+  height: 18px;
   position: relative;
   display: flex;
   align-items: center;
@@ -286,7 +278,7 @@
 .header__pill {
   display: inline-flex;
   align-items: center;
-  gap: 2px;
+  gap: 4px;
   height: 34px;
   padding: 0 6px;
   background: transparent;
