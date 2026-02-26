@@ -254,11 +254,9 @@
     resize: none;
     overflow: hidden;
     line-height: 1.5;
-    background-color: var(--color-surface-glass, rgba(255, 255, 255, 0.15));
-    backdrop-filter: var(--glass-blur);
-    -webkit-backdrop-filter: var(--glass-blur);
+    background-color: var(--color-background);
+    box-shadow: var(--neumorphism-shadow);
     border: none;
-    box-shadow: var(--shadow-md);
     -webkit-appearance: none;
     font-smooth: always;
     -webkit-font-smoothing: antialiased;

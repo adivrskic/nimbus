@@ -165,7 +165,10 @@ function LegalModal({ isOpen, onClose, initialSection = null }) {
               </p>
               <p>
                 For DMCA takedown requests, please contact{" "}
-                <a href="mailto:legal@nimbus.com">legal@nimbus.com</a>.
+                <a href="mailto:legal@nimbuswebsites.com">
+                  legal@nimbuswebsites.com
+                </a>
+                .
               </p>
             </div>
           </section>
@@ -187,9 +190,9 @@ function LegalModal({ isOpen, onClose, initialSection = null }) {
             </div>
             <div className="modal-section__body">
               <p>For legal notices:</p>
-              <a href="mailto:legal@nimbus.com" className="legal-email">
+              <a href="mailto:legal@nimbuswebsites.com" className="legal-email">
                 <Mail size={12} />
-                legal@nimbus.com
+                legal@nimbuswebsites.com
               </a>
             </div>
           </section>
