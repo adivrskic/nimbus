@@ -171,18 +171,10 @@
   gap: calc(var(--spacing-unit) * 1.5);
   padding: calc(var(--spacing-unit) * 2.5);
   border-radius: var(--radius-lg);
-  text-align: left;
-  transition: box-shadow 0.3s ease;
-
   background: var(--color-background);
+  box-shadow: var(--neumorphism-shadow);
   border: none;
-  box-shadow: inset 3px 3px 8px rgba(0, 0, 0, 0.06),
-    inset -3px -3px 8px rgba(255, 255, 255, 0.6);
-
-  &:hover {
-    box-shadow: inset 4px 4px 10px rgba(0, 0, 0, 0.08),
-      inset -4px -4px 10px rgba(255, 255, 255, 0.7);
-  }
+  text-align: left;
 }
 
 .about__feature-icon {

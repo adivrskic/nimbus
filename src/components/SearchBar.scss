@@ -265,6 +265,9 @@
     resize: none;
     overflow: hidden;
     line-height: 1.5;
+    background-color: var(--color-background);
+    box-shadow: var(--neumorphism-shadow);
+    border: none;
     -webkit-appearance: none;
     font-smooth: always;
     -webkit-font-smoothing: antialiased;

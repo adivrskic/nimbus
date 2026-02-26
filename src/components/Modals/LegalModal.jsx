@@ -165,7 +165,10 @@ function LegalModal({ isOpen, onClose, initialSection = null }) {
               </p>
               <p>
                 For DMCA takedown requests, please contact{" "}
-                <a href="mailto:legal@nimbus.com">legal@nimbus.com</a>.
+                <a href="mailto:legal@nimbuswebsites.com">
+                  legal@nimbuswebsites.com
+                </a>
+                .
               </p>
             </div>
           </section>
