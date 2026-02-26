@@ -7,7 +7,7 @@ import { track } from "../../lib/analytics";
 import "../../styles/modals.scss";
 
 function AuthModal({ isOpen, onClose, onAuthSuccess, onOpenLegal }) {
-  const { signInWithGoogle, signInWithGitHub, signInWithApple } = useAuth();
+  const { signInWithGoogle, signInWithGitHub } = useAuth();
   const { shouldRender, isVisible } = useModalAnimation(isOpen, 300);
 
   const [isLoading, setIsLoading] = useState(false);

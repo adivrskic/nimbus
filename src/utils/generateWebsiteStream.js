@@ -1,26 +1,5 @@
 import { supabase } from "../lib/supabaseClient";
-
-function parseMultiPageResponse(html) {
-  if (!html) return null;
-
-  const filePattern = /<!--\s*(?:=+\s*)?FILE:\s*(\S+\.html)\s*(?:=+\s*)?-->/gi;
-  const parts = html.split(filePattern);
-
-  if (parts.length <= 1) return null;
-
-  const files = {};
-  for (let i = 1; i < parts.length; i += 2) {
-    const filename = parts[i]?.trim();
-    const content = parts[i + 1]?.trim();
-    if (filename && content) {
-      let cleanContent = content.trim();
-
-      files[filename] = cleanContent;
-    }
-  }
-
-  return Object.keys(files).length > 0 ? files : null;
-}
+import { parseMultiPageHtml } from "./parseMultiPage";
 
 export async function generateWebsiteStream({
   prompt,
@@ -75,7 +54,7 @@ export async function generateWebsiteStream({
   };
 
   const updateFiles = () => {
-    const files = parseMultiPageResponse(fullHtml);
+    const files = parseMultiPageHtml(fullHtml);
     if (files) {
       parsedFiles = files;
     }
