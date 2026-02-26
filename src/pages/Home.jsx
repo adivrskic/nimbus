@@ -9,6 +9,7 @@ import { useEscapeKey } from "../hooks/useKeyboardShortcuts";
 import useSelections from "../hooks/useSelections";
 import useHomeState from "../hooks/useHomeState";
 import useGeneration from "../hooks/useGeneration";
+import useProjectSave from "../hooks/useProjectSave";
 
 import { EXAMPLE_PROMPTS } from "../configs/defaults.config";
 
@@ -16,7 +17,6 @@ import {
   calculateTokenCost,
   getTokenBreakdown,
 } from "../utils/tokenCalculator";
-import { downloadZip } from "../utils/downloadZip";
 
 import SearchBar from "../components/SearchBar";
 import TokenModal from "../components/Modals/TokenModal";
@@ -31,7 +31,6 @@ import RoadmapModal from "../components/Modals/RoadmapModal";
 import SupportModal from "../components/Modals/SupportModal";
 import { useGenerationState } from "../contexts/GenerationContext";
 import { generateWebsite } from "../utils/generateWebsite";
-import { supabase } from "../lib/supabaseClient";
 
 import "./Home.scss";
 
@@ -135,9 +134,26 @@ function Home() {
     supabaseGenerate: generateWebsite,
   });
 
-  const [isSaving, setIsSaving] = useState(false);
-  const [saveSuccess, setSaveSuccess] = useState(false);
-  const [currentProjectId, setCurrentProjectId] = useState(null);
+  // Fix #11: Save/download logic extracted into dedicated hook
+  const {
+    isSaving,
+    saveSuccess,
+    currentProjectId,
+    setCurrentProjectId,
+    handleSave,
+    handleDownload,
+    resetProject,
+  } = useProjectSave({
+    user,
+    isAuthenticated,
+    prompt,
+    selections,
+    persistentOptions,
+    generatedCode,
+    generatedFiles,
+    updateProjectInCache,
+  });
+
   const [lastRequest, setLastRequest] = useState(null);
   const [showEnhanceTokenOverlay, setShowEnhanceTokenOverlay] = useState(false);
 
@@ -254,20 +270,12 @@ function Home() {
     pendingProject,
     pendingAction,
     setPrompt,
+    setCurrentProjectId,
     clearPendingProject,
     updateCode,
     openPreview,
     openDeploy,
   ]);
-
-  useEffect(() => {
-    if (saveSuccess) {
-      const timer = setTimeout(() => {
-        setSaveSuccess(false);
-      }, 2000);
-      return () => clearTimeout(timer);
-    }
-  }, [saveSuccess]);
 
   const handleGenerate = useCallback(() => {
     if (!prompt.trim() || isGenerating) return;
@@ -287,8 +295,7 @@ function Home() {
       prompt: prompt.trim(),
     });
 
-    setCurrentProjectId(null);
-    setSaveSuccess(false);
+    resetProject();
     openPreview();
 
     generate(prompt, selections, persistentOptions, user, true);
@@ -304,6 +311,7 @@ function Home() {
     openAuth,
     openTokenPurchase,
     openPreview,
+    resetProject,
   ]);
 
   const handleEnhance = useCallback(() => {
@@ -344,85 +352,6 @@ function Home() {
     [handleGenerate]
   );
 
-  const generateName = useCallback((promptText) => {
-    if (!promptText) return "Untitled Project";
-    const truncated = promptText.slice(0, 50);
-    const lastSpace = truncated.lastIndexOf(" ");
-    const name = lastSpace > 20 ? truncated.slice(0, lastSpace) : truncated;
-    return name + (promptText.length > 50 ? "..." : "");
-  }, []);
-
-  const handleDownload = useCallback(() => {
-    if (!generatedCode) return;
-    const projectName = generateName(prompt) || "website";
-    downloadZip(generatedCode, projectName, generatedFiles);
-  }, [generatedCode, generatedFiles, prompt, generateName]);
-
-  const handleSave = useCallback(async () => {
-    if (!generatedCode || !isAuthenticated || !user) return;
-
-    setIsSaving(true);
-    setSaveSuccess(false);
-
-    try {
-      const projectData = {
-        user_id: user.id,
-        name: generateName(prompt),
-        description: prompt,
-        prompt: prompt,
-        html_content: generatedCode,
-        customization: {
-          selections,
-          persistentOptions,
-          files: generatedFiles,
-        },
-      };
-
-      let result;
-
-      if (currentProjectId) {
-        const { data, error } = await supabase
-          .from("projects")
-          .update(projectData)
-          .eq("id", currentProjectId)
-          .eq("user_id", user.id)
-          .select()
-          .single();
-
-        if (error) throw error;
-        result = data;
-      } else {
-        const { data, error } = await supabase
-          .from("projects")
-          .insert(projectData)
-          .select()
-          .single();
-
-        if (error) throw error;
-        result = data;
-        setCurrentProjectId(result.id);
-      }
-
-      setSaveSuccess(true);
-      updateProjectInCache(result);
-    } catch (error) {
-      console.error("Failed to save project:", error);
-    } finally {
-      setIsSaving(false);
-    }
-  }, [
-    generatedCode,
-    generatedFiles,
-    isAuthenticated,
-    user,
-    prompt,
-    selections,
-    persistentOptions,
-    currentProjectId,
-    generateName,
-    updateProjectInCache,
-  ]);
-
   const handlePersistentChange = useCallback(
     (category, field, value) => {
       updatePersistentOption(category, {
@@ -447,6 +376,54 @@ function Home() {
       deployProject(project);
     },
     [closeProjects, deployProject]
+  );
+
+  // ---- Grouped props for PreviewModal (Fix #13) ----
+
+  const previewSaveProps = useMemo(
+    () => ({ onSave: handleSave, isSaving, saveSuccess }),
+    [handleSave, isSaving, saveSuccess]
+  );
+
+  const previewEnhanceProps = useMemo(
+    () => ({
+      prompt: enhancePrompt,
+      onChange: setEnhancePrompt,
+      onEnhance: handleEnhance,
+      tokenCost: enhanceTokenCost,
+      breakdown: enhanceBreakdown,
+      showTokenOverlay: showEnhanceTokenOverlay,
+      onToggleTokenOverlay: () => setShowEnhanceTokenOverlay((prev) => !prev),
+    }),
+    [
+      enhancePrompt,
+      setEnhancePrompt,
+      handleEnhance,
+      enhanceTokenCost,
+      enhanceBreakdown,
+      showEnhanceTokenOverlay,
+    ]
+  );
+
+  const previewTokenProps = useMemo(
+    () => ({
+      isAuthenticated,
+      userTokens,
+      balance: tokenBalance,
+      onBuyTokens: openTokenPurchase,
+    }),
+    [isAuthenticated, userTokens, tokenBalance, openTokenPurchase]
+  );
+
+  const previewGenerationState = useMemo(
+    () => ({
+      isGenerating,
+      isStreaming,
+      isEnhancing,
+      streamingPhase,
+      error: generationError,
+    }),
+    [isGenerating, isStreaming, isEnhancing, streamingPhase, generationError]
   );
 
   return (
@@ -540,17 +517,7 @@ function Home() {
           lastRequest={lastRequest}
         />
       )}
-
       {showHelp && <HelpModal isOpen={showHelp} onClose={closeHelp} />}
-
-      {showDeploy && (
-        <DeployModal
-          isOpen={showDeploy}
-          onClose={closeDeploy}
-          html={generatedCode}
-          prompt={prompt}
-        />
-      )}
 
       {/* Shared modals (triggered by Header, Footer, or Home) */}
 

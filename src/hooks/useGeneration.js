@@ -1,17 +1,28 @@
 // hooks/useGeneration.js - Streaming optimized with caching and multi-page support
 import { useState, useCallback, useRef, useEffect } from "react";
-import { buildFullPrompt } from "../utils/promptBuilder";
 import { generateWebsiteStream } from "../utils/generateWebsiteStream";
 import { useGenerationState } from "../contexts/GenerationContext";
+import {
+  getCachedGeneration,
+  cacheGeneration,
+  clearCacheEntry,
+  shouldUseCache,
+} from "../utils/generationCache";
+import {
+  isPatchResponse,
+  createIncrementalApplier,
+} from "../utils/patchParser";
 
-const generationCache = {
-  get: () => null,
-  set: () => {},
-  clear: () => {},
-  shouldUse: () => false,
-};
+// Throttle interval for streaming updates (ms)
+const STREAM_THROTTLE_MS = 80;
 
-let streamingTimeout = null;
+// How often the for-await loop yields to the macrotask queue so React can render.
+// Without this, the loop processes all buffered chunks as microtasks and React
+// never gets a render cycle until the loop finishes → white screen until complete.
+const YIELD_INTERVAL_MS = 80;
+
+// Yield to macrotask queue — lets React flush batched state updates & render
+const yieldToRenderer = () => new Promise((r) => setTimeout(r, 0));
 
 export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
   const [isGenerating, setIsGenerating] = useState(false);
@@ -31,13 +42,55 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
   const streamRef = useRef(null);
   const lastGenerationRef = useRef(null);
 
+  // Throttle refs for streaming updates
+  const lastUpdateRef = useRef(0);
+  const pendingUpdateRef = useRef(null);
+  const throttleTimeoutRef = useRef(null);
+
   useEffect(() => {
     setGlobalGenerating(isGenerating);
   }, [isGenerating, setGlobalGenerating]);
 
+  // Throttled set code - fires immediately on first call, then at regular intervals
+  // This ensures progressive rendering during streaming instead of waiting for debounce
+  const throttledSetCode = useCallback((html) => {
+    const now = Date.now();
+    const elapsed = now - lastUpdateRef.current;
+
+    if (elapsed >= STREAM_THROTTLE_MS) {
+      // Enough time has passed, update immediately
+      lastUpdateRef.current = now;
+      setGeneratedCode(html);
+
+      // Clear any pending update
+      if (throttleTimeoutRef.current) {
+        clearTimeout(throttleTimeoutRef.current);
+        throttleTimeoutRef.current = null;
+      }
+      pendingUpdateRef.current = null;
+    } else {
+      // Store pending update and schedule it
+      pendingUpdateRef.current = html;
+
+      if (!throttleTimeoutRef.current) {
+        const remaining = STREAM_THROTTLE_MS - elapsed;
+        throttleTimeoutRef.current = setTimeout(() => {
+          throttleTimeoutRef.current = null;
+          if (pendingUpdateRef.current) {
+            lastUpdateRef.current = Date.now();
+            setGeneratedCode(pendingUpdateRef.current);
+            pendingUpdateRef.current = null;
+          }
+        }, remaining);
+      }
+    }
+  }, []);
+
+  // Debounced set code for enhancements (kept as-is per requirements)
+  const enhanceTimeoutRef = useRef(null);
   const debouncedSetCode = useCallback((html) => {
-    if (streamingTimeout) clearTimeout(streamingTimeout);
-    streamingTimeout = setTimeout(() => {
+    if (enhanceTimeoutRef.current) clearTimeout(enhanceTimeoutRef.current);
+    enhanceTimeoutRef.current = setTimeout(() => {
       setGeneratedCode(html);
     }, 50);
   }, []);
@@ -52,14 +105,13 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
 
       lastGenerationRef.current = { prompt, selections, persistentOptions };
 
-      if (generationCache.shouldUse(false)) {
-        const cached = generationCache.get(
+      if (shouldUseCache(false)) {
+        const cached = getCachedGeneration(
           prompt,
           selections,
           persistentOptions
         );
         if (cached) {
-          console.log("[Generation] Using cached result");
           setGeneratedCode(cached.html);
           setGeneratedFiles(cached.files);
           setFromCache(true);
@@ -88,22 +140,16 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
       abortControllerRef.current = new AbortController();
 
       try {
-        const fullPrompt = buildFullPrompt(
-          prompt,
-          selections,
-          persistentOptions
-        );
-
         if (streaming) {
           const streamResult = await generateWebsiteStream({
-            prompt: fullPrompt,
+            prompt,
             customization: selections,
             persistentOptions,
             isRefinement: false,
             signal: abortControllerRef.current.signal,
             onProgress: ({ phase, content, files }) => {
               setStreamingPhase(phase);
-              debouncedSetCode(content);
+              throttledSetCode(content);
               if (files) {
                 setGeneratedFiles(files);
               }
@@ -113,9 +159,34 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
           streamRef.current = streamResult;
 
           if (streamResult.chunks) {
+            // ── Consume chunks with periodic macrotask yields ──────────
+            // reader.read() can resolve as microtasks when data is buffered,
+            // meaning this loop runs chunk→chunk→chunk without ever letting
+            // the browser's macrotask queue execute. React renders live on
+            // the macrotask queue, so without yields the UI never updates
+            // until the loop finishes (white screen → full page).
+            //
+            // By yielding to setTimeout(0) every YIELD_INTERVAL_MS we let
+            // React flush its batched state updates and paint the current
+            // streamed HTML to the screen progressively.
+            let lastYield = performance.now();
+
             for await (const chunk of streamResult.chunks()) {
               if (abortControllerRef.current?.signal.aborted) break;
+
+              const now = performance.now();
+              if (now - lastYield >= YIELD_INTERVAL_MS) {
+                lastYield = now;
+                await yieldToRenderer();
+              }
             }
+
+            // Flush any pending throttled update before setting final state
+            if (throttleTimeoutRef.current) {
+              clearTimeout(throttleTimeoutRef.current);
+              throttleTimeoutRef.current = null;
+            }
+            pendingUpdateRef.current = null;
 
             const finalHtml = streamResult.getFullHtml();
             const files = streamResult.getFiles() || null;
@@ -125,7 +196,7 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
             setIsStreaming(false);
             setStreamingPhase("complete");
 
-            generationCache.set(prompt, selections, persistentOptions, {
+            cacheGeneration(prompt, selections, persistentOptions, {
               html: finalHtml,
               files,
               tokensUsed: streamResult.tokensUsed,
@@ -138,7 +209,7 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
 
         if (supabaseGenerate) {
           const result = await supabaseGenerate({
-            prompt: fullPrompt,
+            prompt,
             selections,
             persistentOptions,
             isRefinement: false,
@@ -153,7 +224,7 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
             setGeneratedFiles(files);
 
             // Cache it
-            generationCache.set(prompt, selections, persistentOptions, {
+            cacheGeneration(prompt, selections, persistentOptions, {
               html: code,
               files,
               tokensUsed: result.tokensUsed,
@@ -164,7 +235,7 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
           }
         }
 
-        return { code: demoHtml };
+        return null;
       } catch (error) {
         if (error.name !== "AbortError") {
           setGenerationError(error.message);
@@ -176,7 +247,7 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
         setStreamingPhase(null);
       }
     },
-    [isGenerating, supabaseGenerate, onSuccess, onError, debouncedSetCode]
+    [isGenerating, supabaseGenerate, onSuccess, onError, throttledSetCode]
   );
 
   const enhance = useCallback(
@@ -191,7 +262,13 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
       setIsGenerating(true);
       setGenerationError(null);
       setFromCache(false);
+      setIsStreaming(true);
       abortControllerRef.current = new AbortController();
+
+      // Snapshot the current HTML as the base for patch application
+      const baseHtml = generatedCode;
+      let patchApplier = null; // Created lazily once we know it's a patch response
+      let detectedPatch = false;
 
       try {
         const streamResult = await generateWebsiteStream({
@@ -203,19 +280,66 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
           },
           persistentOptions,
           signal: abortControllerRef.current.signal,
-          onProgress: ({ phase, files }) => {
+          onProgress: ({ phase, content, files }) => {
             setStreamingPhase(phase);
+
+            if (!content) return;
+
+            // First time we have enough text, detect if it's a patch response
+            if (!detectedPatch && content.length > 20) {
+              if (isPatchResponse(content)) {
+                detectedPatch = true;
+                patchApplier = createIncrementalApplier(baseHtml);
+              }
+            }
+
+            if (detectedPatch && patchApplier) {
+              // Patch mode: apply completed ops incrementally to the base HTML
+              const { html, newOpsApplied } = patchApplier.update(content);
+              if (newOpsApplied) {
+                debouncedSetCode(html);
+              }
+            } else if (!detectedPatch && content.length > 20) {
+              // Full HTML mode (fallback): stream content directly
+              debouncedSetCode(content);
+            }
+
+            if (files) {
+              setGeneratedFiles(files);
+            }
           },
         });
 
         streamRef.current = streamResult;
 
         if (streamResult.chunks) {
+          // Same yield pattern for enhancement streaming
+          let lastYield = performance.now();
+
           for await (const chunk of streamResult.chunks()) {
             if (abortControllerRef.current?.signal.aborted) break;
+
+            const now = performance.now();
+            if (now - lastYield >= YIELD_INTERVAL_MS) {
+              lastYield = now;
+              await yieldToRenderer();
+            }
           }
 
-          const finalHtml = streamResult.getFullHtml();
+          // Flush pending debounced update
+          if (enhanceTimeoutRef.current) {
+            clearTimeout(enhanceTimeoutRef.current);
+            enhanceTimeoutRef.current = null;
+          }
+
+          let finalHtml;
+          if (detectedPatch && patchApplier) {
+            // Finalize: apply any remaining ops from the last chunk
+            finalHtml = patchApplier.finalize(streamResult.getFullHtml());
+          } else {
+            finalHtml = streamResult.getFullHtml();
+          }
+
           const files = streamResult.getFiles() || null;
 
           setGeneratedCode(finalHtml);
@@ -224,7 +348,7 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
           setStreamingPhase("complete");
 
           if (lastGenerationRef.current) {
-            generationCache.clear(
+            clearCacheEntry(
               lastGenerationRef.current.prompt,
               lastGenerationRef.current.selections,
               lastGenerationRef.current.persistentOptions
@@ -281,7 +405,8 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
-    if (streamingTimeout) clearTimeout(streamingTimeout);
+    if (throttleTimeoutRef.current) clearTimeout(throttleTimeoutRef.current);
+    if (enhanceTimeoutRef.current) clearTimeout(enhanceTimeoutRef.current);
     setIsGenerating(false);
     setIsStreaming(false);
     setIsEnhancing(false);
@@ -289,7 +414,8 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
   }, []);
 
   const reset = useCallback(() => {
-    if (streamingTimeout) clearTimeout(streamingTimeout);
+    if (throttleTimeoutRef.current) clearTimeout(throttleTimeoutRef.current);
+    if (enhanceTimeoutRef.current) clearTimeout(enhanceTimeoutRef.current);
     setIsGenerating(false);
     setGeneratedCode(null);
     setGeneratedFiles(null);
@@ -301,6 +427,8 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
     setFromCache(false);
     streamRef.current = null;
     lastGenerationRef.current = null;
+    lastUpdateRef.current = 0;
+    pendingUpdateRef.current = null;
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
@@ -312,7 +440,7 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
 
   const regenerate = useCallback(
     async (prompt, selections, persistentOptions, user, streaming = true) => {
-      generationCache.clear(prompt, selections, persistentOptions);
+      clearCacheEntry(prompt, selections, persistentOptions);
       return generate(prompt, selections, persistentOptions, user, streaming);
     },
     [generate]
