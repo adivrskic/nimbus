@@ -20,6 +20,8 @@ import {
   Maximize2,
   Minimize2,
   AlertCircle,
+  History,
+  Clock,
 } from "lucide-react";
 import GeneratedPreview from "../GeneratedPreview";
 import FeedbackModal from "./FeedbackModal";
@@ -66,6 +68,8 @@ function highlightHtml(code) {
  *   tokenProps:      { isAuthenticated, userTokens, balance, onBuyTokens }
  *   generationState: { isGenerating, isStreaming, isEnhancing, streamingPhase, error }
  *
+ *   versionProps:    { versions, currentVersionId, onSelectVersion }
+ *
  *   selections, originalPrompt, lastRequest   (for feedback modal)
  */
 function PreviewModal({
@@ -79,6 +83,7 @@ function PreviewModal({
   enhanceProps = {},
   tokenProps = {},
   generationState = {},
+  versionProps = {},
   selections = {},
   originalPrompt = "",
   lastRequest = null,
@@ -106,15 +111,22 @@ function PreviewModal({
     isEnhancing = false,
     error: generationError = null,
   } = generationState;
+  const {
+    versions = [],
+    currentVersionId = null,
+    onSelectVersion,
+  } = versionProps;
 
   const [showCode, setShowCode] = useState(false);
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [activeFile, setActiveFile] = useState("index.html");
   const [showPagePicker, setShowPagePicker] = useState(false);
+  const [showVersionPicker, setShowVersionPicker] = useState(false);
   const [viewMode, setViewMode] = useState("desktop");
   const [isFullscreen, setIsFullscreen] = useState(false);
   const enhanceInputRef = useRef(null);
   const pagePickerRef = useRef(null);
+  const versionPickerRef = useRef(null);
   const containerRef = useRef(null);
 
   // Parse files
@@ -156,13 +168,19 @@ function PreviewModal({
       if (pagePickerRef.current && !pagePickerRef.current.contains(e.target)) {
         setShowPagePicker(false);
       }
+      if (
+        versionPickerRef.current &&
+        !versionPickerRef.current.contains(e.target)
+      ) {
+        setShowVersionPicker(false);
+      }
     };
-    if (showPagePicker) {
+    if (showPagePicker || showVersionPicker) {
       document.addEventListener("mousedown", handleClickOutside);
       return () =>
         document.removeEventListener("mousedown", handleClickOutside);
     }
-  }, [showPagePicker]);
+  }, [showPagePicker, showVersionPicker]);
 
   // Fullscreen handling
   useEffect(() => {
@@ -204,6 +222,33 @@ function PreviewModal({
       default:
         return "100%";
     }
+  };
+
+  const hasVersions = versions.length > 1;
+
+  const getCurrentVersionLabel = () => {
+    if (!hasVersions) return null;
+    if (!currentVersionId) return `v${versions.length}`;
+    const idx = versions.findIndex((v) => v.id === currentVersionId);
+    if (idx >= 0) return `v${versions.length - idx}`;
+    return `v${versions.length}`;
+  };
+
+  const formatVersionTime = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+
+    if (diffMins < 1) return "Just now";
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+    });
   };
 
   if (!isOpen) return null;
@@ -248,7 +293,7 @@ function PreviewModal({
       >
         {/* ===== UNIFIED HEADER ===== */}
         <div className="pm-header" style={{ position: "relative" }}>
-          {/* Left: Tabs + Devices + Page pill */}
+          {/* Left: Tabs + Devices + Page pill + Version pill */}
           <div className="pm-header__left">
             <div className="pm-header__tabs">
               <button
@@ -343,6 +388,76 @@ function PreviewModal({
                           {activeFile === filename && <Check size={13} />}
                         </button>
                       ))}
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
+
+            {/* Version picker pill */}
+            {hasVersions && !isStreaming && !isEnhancing && (
+              <>
+                <div className="pm-header__sep" />
+                <div className="pm-header__version-pill" ref={versionPickerRef}>
+                  <button
+                    className={`pm-header__version-btn ${
+                      showVersionPicker ? "open" : ""
+                    }`}
+                    onClick={() => setShowVersionPicker(!showVersionPicker)}
+                  >
+                    <History size={13} />
+                    <span className="pm-header__version-label">
+                      {getCurrentVersionLabel()}
+                    </span>
+                    <ChevronDown
+                      size={12}
+                      className={`pm-header__page-chevron ${
+                        showVersionPicker ? "open" : ""
+                      }`}
+                    />
+                  </button>
+
+                  {showVersionPicker && (
+                    <div className="pm-header__version-dropdown">
+                      <div className="pm-header__version-dropdown-title">
+                        Version History
+                      </div>
+                      {versions.map((version, index) => {
+                        const vNum = versions.length - index;
+                        const isActive =
+                          version.id === currentVersionId ||
+                          (!currentVersionId && index === 0);
+                        return (
+                          <button
+                            key={version.id}
+                            className={`pm-header__version-option ${
+                              isActive ? "active" : ""
+                            }`}
+                            onClick={() => {
+                              onSelectVersion?.(version);
+                              setShowVersionPicker(false);
+                            }}
+                          >
+                            <span className="pm-header__version-option-badge">
+                              v{vNum}
+                            </span>
+                            <div className="pm-header__version-option-info">
+                              <span className="pm-header__version-option-name">
+                                {version.isInitial
+                                  ? "Initial generation"
+                                  : version.label ||
+                                    version.prompt ||
+                                    "Enhancement"}
+                              </span>
+                              <span className="pm-header__version-option-time">
+                                <Clock size={9} />
+                                {formatVersionTime(version.timestamp)}
+                              </span>
+                            </div>
+                            {isActive && <Check size={13} />}
+                          </button>
+                        );
+                      })}
                     </div>
                   )}
                 </div>
