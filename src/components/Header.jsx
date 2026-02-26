@@ -135,10 +135,9 @@ function Header() {
                     onClick={previewPill.onRestore}
                     title="View Generated Project"
                   >
-                    <div
-                      className="header__marble-surface"
-                      style={marbleStyle}
-                    />
+                    <div className="header__marble-surface" style={marbleStyle}>
+                      View Generated Site
+                    </div>
                   </button>
                 )}
                 <button
