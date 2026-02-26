@@ -131,7 +131,7 @@ function Header() {
                     title="View Generated Project"
                   >
                     <div className="header__marble-surface" style={marbleStyle}>
-                      View Generated Site
+                      Generated Site
                     </div>
                   </button>
                 )}
