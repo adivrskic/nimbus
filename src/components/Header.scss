@@ -36,13 +36,13 @@
 .header__section {
   display: flex;
   align-items: center;
-  height: 40px;
+  height: 44px;
   padding: 0 14px;
   border-radius: 999px;
-  background: var(--header-glass-bg);
+  background: var(--color-background);
   border: none;
   backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  box-shadow: var(--neumorphism-shadow);
   flex-shrink: 0;
   transition: background var(--transition-fast),
     border-color var(--transition-fast);
@@ -91,7 +91,7 @@
   display: flex;
   flex-direction: column;
   line-height: 1;
-  margin-top: 2px;
+  margin-top: -2px;
 }
 
 .header__logo-text {

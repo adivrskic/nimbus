@@ -143,10 +143,10 @@ function SupportModal({ isOpen, onClose }) {
             <p className="modal-contact__text">
               Email{" "}
               <a
-                href="mailto:support@nimbus.com"
+                href="mailto:support@nimbuswebsites.com"
                 className="modal-contact__link"
               >
-                support@nimbus.com
+                support@nimbuswebsites.com
               </a>
             </p>
           </div>
