@@ -46,7 +46,6 @@ function Home() {
     deployProject,
   } = useProject();
 
-  // Shared modals via context (Header, Footer, and Home all use these)
   const {
     modals,
     legalSection,
@@ -64,7 +63,6 @@ function Home() {
     closeSupport,
   } = useModals();
 
-  // Page-specific modals (only Home needs these)
   const {
     prompt,
     setPrompt,
@@ -134,7 +132,6 @@ function Home() {
     supabaseGenerate: generateWebsite,
   });
 
-  // Fix #11: Save/download logic extracted into dedicated hook
   const {
     isSaving,
     saveSuccess,
@@ -163,16 +160,14 @@ function Home() {
 
   const [lastRequest, setLastRequest] = useState(null);
   const [showEnhanceTokenOverlay, setShowEnhanceTokenOverlay] = useState(false);
-
-  // Track the current project data for version display
   const [currentProjectData, setCurrentProjectData] = useState(null);
 
-  // Ref to snapshot HTML before enhancement
+  // Refs for snapshotting state before enhancement
   const preEnhanceHtmlRef = useRef(null);
   const preEnhanceFilesRef = useRef(null);
   const enhancePromptSnapshotRef = useRef(null);
 
-  // Sync minimized preview state to context so Header can show the pill
+  // ─── Preview pill sync ─────────────────────────────────────────────────
   useEffect(() => {
     if (generatedCode && !showPreview) {
       showPreviewPill({ onRestore: restorePreview, isGenerating });
@@ -188,20 +183,18 @@ function Home() {
     hidePreviewPill,
   ]);
 
-  // Fresh colors for each new generation
   useEffect(() => {
     if (isGenerating) {
       refreshColors();
     }
   }, [isGenerating, refreshColors]);
 
-  // Track when enhancement finishes to record version
+  // ─── Track enhancement completion to record versions ───────────────────
   const wasEnhancingRef = useRef(false);
   useEffect(() => {
     if (isEnhancing) {
       wasEnhancingRef.current = true;
     } else if (wasEnhancingRef.current && generatedCode) {
-      // Enhancement just finished
       wasEnhancingRef.current = false;
       if (preEnhanceHtmlRef.current && enhancePromptSnapshotRef.current) {
         recordEnhancement(
@@ -227,6 +220,7 @@ function Home() {
     recordEnhancementResult,
   ]);
 
+  // ─── Typewriter ────────────────────────────────────────────────────────
   const { text: typewriterText } = useTypewriter({
     prompts: EXAMPLE_PROMPTS,
     enabled: !isExpanded && !prompt,
@@ -235,6 +229,7 @@ function Home() {
     pauseDuration: 2000,
   });
 
+  // ─── Token calculations ────────────────────────────────────────────────
   const tokenCostResult = useMemo(
     () => calculateTokenCost(prompt, selections),
     [prompt, selections]
@@ -266,7 +261,7 @@ function Home() {
     [enhancePrompt]
   );
 
-  // Escape key handler
+  // ─── Escape key ────────────────────────────────────────────────────────
   useEscapeKey(() => {
     if (showPreview) {
       minimizePreview();
@@ -291,6 +286,7 @@ function Home() {
     }
   });
 
+  // ─── Pending project handling ──────────────────────────────────────────
   useEffect(() => {
     if (pendingProject && pendingAction) {
       const projectPrompt =
@@ -327,6 +323,7 @@ function Home() {
     loadVersionHistory,
   ]);
 
+  // ─── Generate ──────────────────────────────────────────────────────────
   const handleGenerate = useCallback(() => {
     if (!prompt.trim() || isGenerating) return;
 
@@ -365,6 +362,7 @@ function Home() {
     resetProject,
   ]);
 
+  // ─── Enhance ───────────────────────────────────────────────────────────
   const handleEnhance = useCallback(() => {
     if (!enhancePrompt.trim() || isGenerating) return;
 
@@ -420,6 +418,7 @@ function Home() {
     [persistentOptions, updatePersistentOption]
   );
 
+  // ─── Project actions ───────────────────────────────────────────────────
   const handleEditProject = useCallback(
     (project) => {
       closeProjects();
@@ -436,7 +435,7 @@ function Home() {
     [closeProjects, deployProject]
   );
 
-  // Handle viewing a specific version from ProjectsModal
+  // ─── Version handling ──────────────────────────────────────────────────
   const handleViewVersion = useCallback(
     (version, project) => {
       if (version.html_content) {
@@ -459,7 +458,6 @@ function Home() {
     ]
   );
 
-  // Handle selecting a version from PreviewModal dropdown
   const handleSelectPreviewVersion = useCallback(
     (version) => {
       if (version.html_content) {
@@ -476,61 +474,9 @@ function Home() {
     return getDisplayVersions(currentProjectData);
   }, [currentProjectData, versionHistory, getDisplayVersions]);
 
-  // ---- Grouped props for PreviewModal (Fix #13) ----
-
-  const previewSaveProps = useMemo(
-    () => ({ onSave: handleSave, isSaving, saveSuccess }),
-    [handleSave, isSaving, saveSuccess]
-  );
-
-  const previewEnhanceProps = useMemo(
-    () => ({
-      prompt: enhancePrompt,
-      onChange: setEnhancePrompt,
-      onEnhance: handleEnhance,
-      tokenCost: enhanceTokenCost,
-      breakdown: enhanceBreakdown,
-      showTokenOverlay: showEnhanceTokenOverlay,
-      onToggleTokenOverlay: () => setShowEnhanceTokenOverlay((prev) => !prev),
-    }),
-    [
-      enhancePrompt,
-      setEnhancePrompt,
-      handleEnhance,
-      enhanceTokenCost,
-      enhanceBreakdown,
-      showEnhanceTokenOverlay,
-    ]
-  );
-
-  const previewTokenProps = useMemo(
-    () => ({
-      isAuthenticated,
-      userTokens,
-      balance: tokenBalance,
-      onBuyTokens: openTokenPurchase,
-    }),
-    [isAuthenticated, userTokens, tokenBalance, openTokenPurchase]
-  );
-
-  const previewGenerationState = useMemo(
-    () => ({
-      isGenerating,
-      isStreaming,
-      isEnhancing,
-      streamingPhase,
-      error: generationError,
-    }),
-    [isGenerating, isStreaming, isEnhancing, streamingPhase, generationError]
-  );
-
-  const previewVersionProps = useMemo(
-    () => ({
-      versions: previewVersions,
-      currentVersionId,
-      onSelectVersion: handleSelectPreviewVersion,
-    }),
-    [previewVersions, currentVersionId, handleSelectPreviewVersion]
+  const handleToggleEnhanceTokenOverlay = useCallback(
+    () => setShowEnhanceTokenOverlay((prev) => !prev),
+    []
   );
 
   return (
@@ -598,27 +544,38 @@ function Home() {
           onClose={closePreview}
           onMinimize={minimizePreview}
           onDownload={handleDownload}
-          onSave={handleSave}
-          onDeploy={openDeploy}
-          isSaving={isSaving}
-          saveSuccess={saveSuccess}
-          isGenerating={isGenerating}
-          enhancePrompt={enhancePrompt}
           onEnhancePromptChange={setEnhancePrompt}
-          onEnhance={handleEnhance}
-          enhanceTokenCost={enhanceTokenCost}
-          enhanceBreakdown={enhanceBreakdown}
-          showEnhanceTokenOverlay={showEnhanceTokenOverlay}
-          onToggleEnhanceTokenOverlay={() =>
-            setShowEnhanceTokenOverlay((prev) => !prev)
-          }
-          isAuthenticated={isAuthenticated}
-          userTokens={userTokens}
-          tokenBalance={tokenBalance}
-          onBuyTokens={openTokenPurchase}
-          isStreaming={isStreaming}
-          isEnhancing={isEnhancing}
-          streamingPhase={streamingPhase}
+          saveProps={{
+            onSave: handleSave,
+            isSaving,
+            saveSuccess,
+          }}
+          enhanceProps={{
+            prompt: enhancePrompt,
+            onEnhance: handleEnhance,
+            tokenCost: enhanceTokenCost,
+            breakdown: enhanceBreakdown,
+            showTokenOverlay: showEnhanceTokenOverlay,
+            onToggleTokenOverlay: handleToggleEnhanceTokenOverlay,
+          }}
+          tokenProps={{
+            isAuthenticated,
+            userTokens,
+            balance: tokenBalance,
+            onBuyTokens: openTokenPurchase,
+          }}
+          generationState={{
+            isGenerating,
+            isStreaming,
+            isEnhancing,
+            streamingPhase,
+            error: generationError,
+          }}
+          versionProps={{
+            versions: previewVersions,
+            currentVersionId,
+            onSelectVersion: handleSelectPreviewVersion,
+          }}
           selections={selections}
           originalPrompt={prompt}
           lastRequest={lastRequest}
@@ -626,7 +583,7 @@ function Home() {
       )}
       {showHelp && <HelpModal isOpen={showHelp} onClose={closeHelp} />}
 
-      {/* Shared modals (triggered by Header, Footer, or Home) */}
+      {/* Shared modals */}
 
       {modals.auth && (
         <AuthModal

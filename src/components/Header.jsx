@@ -101,12 +101,7 @@ function Header() {
     : undefined;
 
   const isClickable =
-    previewPill &&
-    previewPill.visible &&
-    !previewPill.isGenerating &&
-    previewPill.onRestore;
-  const isGenerating =
-    previewPill && previewPill.visible && previewPill.isGenerating;
+    previewPill && previewPill.visible && previewPill.onRestore;
 
   return (
     <header className="header">

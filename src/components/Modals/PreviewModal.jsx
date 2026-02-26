@@ -87,12 +87,12 @@ function PreviewModal({
   selections = {},
   originalPrompt = "",
   lastRequest = null,
+  onEnhancePromptChange = null,
 }) {
   // Destructure grouped props
   const { onSave, isSaving = false, saveSuccess = false } = saveProps;
   const {
     prompt: enhancePrompt = "",
-    onChange: onEnhancePromptChange,
     onEnhance,
     tokenCost: enhanceTokenCost = 0,
     breakdown: enhanceBreakdown = [],
@@ -109,6 +109,7 @@ function PreviewModal({
     isGenerating = false,
     isStreaming = false,
     isEnhancing = false,
+    streamingPhase = null,
     error: generationError = null,
   } = generationState;
   const {
@@ -154,6 +155,15 @@ function PreviewModal({
       .replace(/>/g, "&gt;");
     return highlightHtml(escaped);
   }, [currentHtml]);
+
+  const showHeadMessage = useMemo(() => {
+    // Only during streaming, while phase is "head" and there's no <body> yet
+    return (
+      isStreaming &&
+      streamingPhase === "head" &&
+      (!currentHtml || !currentHtml.includes("<body"))
+    );
+  }, [isStreaming, streamingPhase, currentHtml]);
 
   // Reset active file when files change
   useEffect(() => {
@@ -769,6 +779,12 @@ function PreviewModal({
               } ${isEnhancing ? "preview-frame--enhancing" : ""}`}
             >
               <div className="preview-frame__content">
+                {showHeadMessage && (
+                  <div className="preview-head-message">
+                    <Loader2 size={24} className="spin" />
+                    <p>Acquiring metadata and styles...</p>
+                  </div>
+                )}
                 <GeneratedPreview
                   html={currentHtml}
                   isStreaming={isStreaming}
