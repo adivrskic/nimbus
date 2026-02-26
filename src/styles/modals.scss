@@ -4097,3 +4097,26 @@
     }
   }
 }
+.preview-head-message {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(var(--color-surface-rgb), 0.9);
+  backdrop-filter: blur(4px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: var(--color-text-secondary);
+  z-index: 10;
+  pointer-events: none; /* allow clicks to pass through to iframe if needed */
+  border-radius: inherit;
+}
+.preview-head-message p {
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin: 0;
+}

@@ -2,21 +2,11 @@ import { useRef, useEffect, useCallback } from "react";
 import "./GeneratedPreview.scss";
 
 // ─── Constants ─────────────────────────────────────────────────────────────
-const BLANK_DOC =
-  "<!DOCTYPE html><html><head><style>body{margin:0;background:#fff;}</style></head><body></body></html>";
-
-const STREAM_THROTTLE_MS = 200; // Max ~5 updates/sec during streaming
+const STREAM_THROTTLE_MS = 200;
 
 // ─── DOM Patching ──────────────────────────────────────────────────────────
-// During enhancement we already have a rendered page in the iframe. Instead of
-// replacing srcdoc (which tears down the entire document, causes a white flash,
-// resets scroll, and re-fetches every resource), we parse the incoming HTML and
-// surgically patch the live DOM:
-//   • <style> tags are updated in-place → color/font changes appear instantly
-//   • <body> innerHTML is swapped → structural changes apply without reload
-//   • Body/html attributes are synced → class/theme changes carry over
-//
-// Falls back to srcdoc if patching fails (e.g. iframe not ready yet).
+// Once the iframe has a live document, we patch it in-place rather than
+// tearing it down. This avoids the white flash caused by srcdoc writes.
 
 function patchIframeDOM(iframe, newHtml) {
   try {
@@ -27,54 +17,21 @@ function patchIframeDOM(iframe, newHtml) {
     const newDoc = parser.parseFromString(newHtml, "text/html");
     if (!newDoc?.body) return false;
 
-    // ── 1. Patch <style> tags in <head> ──────────────────────────────
-    const oldStyles = Array.from(doc.head.querySelectorAll("style"));
-    const newStyles = Array.from(newDoc.head.querySelectorAll("style"));
-
-    // Update existing styles in-place (no FOUC)
-    oldStyles.forEach((oldStyle, i) => {
-      if (newStyles[i]) {
-        if (oldStyle.textContent !== newStyles[i].textContent) {
-          oldStyle.textContent = newStyles[i].textContent;
-        }
-      } else {
-        oldStyle.remove(); // Removed in new version
-      }
-    });
-
-    // Append any new <style> tags
-    for (let i = oldStyles.length; i < newStyles.length; i++) {
-      doc.head.appendChild(doc.importNode(newStyles[i], true));
+    // ── 1. Patch <head> entirely ─────────────────────────────────────
+    // Replace the full head content so styles, links, meta, title all sync.
+    // This is simpler than diffing individual tags and handles streaming
+    // chunks where the head is still being built up.
+    if (doc.head.innerHTML !== newDoc.head.innerHTML) {
+      doc.head.innerHTML = newDoc.head.innerHTML;
     }
 
-    // ── 2. Sync <link> stylesheets ───────────────────────────────────
-    const oldLinks = Array.from(
-      doc.head.querySelectorAll('link[rel="stylesheet"]')
-    );
-    const newLinks = Array.from(
-      newDoc.head.querySelectorAll('link[rel="stylesheet"]')
-    );
-    const oldHrefs = new Set(oldLinks.map((l) => l.href));
-    const newHrefs = new Set(newLinks.map((l) => l.href));
-
-    // Remove links no longer present
-    oldLinks.forEach((link) => {
-      if (!newHrefs.has(link.href)) link.remove();
-    });
-    // Add new links
-    newLinks.forEach((link) => {
-      if (!oldHrefs.has(link.href)) {
-        doc.head.appendChild(doc.importNode(link, true));
-      }
-    });
-
-    // ── 3. Sync <html> attributes (e.g. lang, data-theme) ───────────
+    // ── 2. Sync <html> attributes (lang, data-theme, etc.) ──────────
     syncAttributes(doc.documentElement, newDoc.documentElement);
 
-    // ── 4. Sync <body> attributes (class, style, data-*) ────────────
+    // ── 3. Sync <body> attributes (class, style, data-*) ────────────
     syncAttributes(doc.body, newDoc.body);
 
-    // ── 5. Patch <body> content ──────────────────────────────────────
+    // ── 4. Patch <body> content ──────────────────────────────────────
     const newBodyHtml = newDoc.body.innerHTML;
     if (doc.body.innerHTML !== newBodyHtml) {
       doc.body.innerHTML = newBodyHtml;
@@ -87,13 +44,11 @@ function patchIframeDOM(iframe, newHtml) {
 }
 
 function syncAttributes(target, source) {
-  // Remove attributes not in source
   Array.from(target.attributes).forEach((attr) => {
     if (!source.hasAttribute(attr.name)) {
       target.removeAttribute(attr.name);
     }
   });
-  // Set/update attributes from source
   Array.from(source.attributes).forEach((attr) => {
     if (target.getAttribute(attr.name) !== attr.value) {
       target.setAttribute(attr.name, attr.value);
@@ -113,7 +68,6 @@ function GeneratedPreview({
   const iframeRef = useRef(null);
   const containerRef = useRef(null);
 
-  // Batching refs
   const pendingHtmlRef = useRef(null);
   const appliedHtmlRef = useRef("");
   const rafIdRef = useRef(null);
@@ -121,32 +75,58 @@ function GeneratedPreview({
   const scrollTimeoutRef = useRef(null);
   const lastScrollHeightRef = useRef(0);
 
-  // ─── Apply HTML to iframe (full replace via srcdoc) ──────────────────
-  const applyFull = useCallback((newHtml) => {
+  // Once true, the iframe has a live document we can patch into.
+  const readyRef = useRef(false);
+
+  // ─── Write the initial document into the iframe ──────────────────────
+  // Uses document.open/write/close which is synchronous — the document is
+  // immediately available for DOM patching on the very next call.
+  // This replaces srcdoc which is async and causes teardown flashes.
+  const writeDocument = useCallback((newHtml) => {
     const iframe = iframeRef.current;
-    if (!iframe || !newHtml) return;
-    if (newHtml === appliedHtmlRef.current) return;
+    if (!iframe) return;
 
-    appliedHtmlRef.current = newHtml;
-    iframe.srcdoc = newHtml;
-  }, []);
-
-  // ─── Apply HTML via DOM patch (enhancement path) ─────────────────────
-  const applyPatch = useCallback((newHtml) => {
-    const iframe = iframeRef.current;
-    if (!iframe || !newHtml) return;
-    if (newHtml === appliedHtmlRef.current) return;
-
-    appliedHtmlRef.current = newHtml;
-
-    // Try DOM patching first; fall back to srcdoc if it fails
-    const patched = patchIframeDOM(iframe, newHtml);
-    if (!patched) {
+    try {
+      const doc = iframe.contentDocument;
+      if (!doc) return;
+      doc.open();
+      doc.write(newHtml);
+      doc.close();
+      appliedHtmlRef.current = newHtml;
+      readyRef.current = true;
+    } catch (e) {
+      // Fallback: srcdoc (shouldn't happen with same-origin sandbox)
       iframe.srcdoc = newHtml;
+      appliedHtmlRef.current = newHtml;
+      // srcdoc is async so we can't mark ready immediately
+      readyRef.current = false;
     }
   }, []);
 
-  // ─── Scroll to bottom during initial generation streaming ────────────
+  // ─── Apply HTML: write if first time, patch if already have content ──
+  const applyHtml = useCallback(
+    (newHtml) => {
+      if (!newHtml) return;
+      if (newHtml === appliedHtmlRef.current) return;
+
+      if (!readyRef.current) {
+        // First write — seed the iframe document
+        writeDocument(newHtml);
+      } else {
+        // Subsequent writes — patch in place, no flash
+        const patched = patchIframeDOM(iframeRef.current, newHtml);
+        if (patched) {
+          appliedHtmlRef.current = newHtml;
+        } else {
+          // Patching failed (shouldn't happen normally) — re-seed
+          writeDocument(newHtml);
+        }
+      }
+    },
+    [writeDocument]
+  );
+
+  // ─── Scroll to bottom during initial generation ──────────────────────
   const scrollToBottom = useCallback(() => {
     if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
 
@@ -177,13 +157,8 @@ function GeneratedPreview({
     pendingHtmlRef.current = null;
     lastFlushRef.current = performance.now();
 
-    // Pick strategy based on whether we're enhancing
-    if (isEnhancing) {
-      applyPatch(pending);
-    } else {
-      applyFull(pending);
-    }
-  }, [applyFull, applyPatch, isEnhancing]);
+    applyHtml(pending);
+  }, [applyHtml]);
 
   // ─── Schedule a throttled flush ──────────────────────────────────────
   const scheduleFlush = useCallback(() => {
@@ -209,33 +184,37 @@ function GeneratedPreview({
     const streaming = isStreaming || isEnhancing;
 
     if (streaming) {
-      pendingHtmlRef.current = html;
-      scheduleFlush();
+      // --- First chunk? Apply immediately, bypass throttle ---
+      if (appliedHtmlRef.current === "") {
+        applyHtml(html);
+      } else {
+        pendingHtmlRef.current = html;
+        scheduleFlush();
+      }
 
-      // Only auto-scroll during initial generation, not enhancement
       if (!isEnhancing) {
         scrollToBottom();
       }
     } else {
-      // Final render — apply immediately
+      // Not streaming — version switch, loading saved project, etc.
       if (rafIdRef.current) {
         cancelAnimationFrame(rafIdRef.current);
         clearTimeout(rafIdRef.current);
         rafIdRef.current = null;
       }
       pendingHtmlRef.current = null;
-      applyFull(html);
+      applyHtml(html);
     }
   }, [
     html,
     isStreaming,
     isEnhancing,
-    applyFull,
+    applyHtml,
     scheduleFlush,
     scrollToBottom,
   ]);
 
-  // ─── When streaming ends, scroll to top (initial gen only) ───────────
+  // ─── When streaming ends, scroll to top ──────────────────────────────
   useEffect(() => {
     if (!isStreaming && !isEnhancing && appliedHtmlRef.current) {
       if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
@@ -259,7 +238,17 @@ function GeneratedPreview({
     if (!html && iframeRef.current) {
       appliedHtmlRef.current = "";
       lastScrollHeightRef.current = 0;
-      iframeRef.current.srcdoc = BLANK_DOC;
+      readyRef.current = false;
+      try {
+        const doc = iframeRef.current.contentDocument;
+        if (doc) {
+          doc.open();
+          doc.write(
+            "<!DOCTYPE html><html><head><style>body{margin:0;background:#fff;}</style></head><body></body></html>"
+          );
+          doc.close();
+        }
+      } catch (e) {}
     }
   }, [html]);
 
