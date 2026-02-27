@@ -24,6 +24,10 @@
   opacity: 0;
   transition: opacity var(--transition-fast);
 
+  &--preview {
+    z-index: 11000;
+  }
+
   &--feedback {
     background-color: var(--color-background);
   }
@@ -37,7 +41,6 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
-  padding: 24px;
   width: 420px;
   max-width: 90vw;
   max-height: 85vh;
@@ -52,8 +55,8 @@
     min-width: 260px;
   }
   &--lg {
-    width: 800px;
-    max-height: 85vh;
+    width: 900px;
+    max-height: calc(100% - 120px);
     overflow-y: hidden;
     transition: opacity var(--transition-slow), transform var(--transition-slow);
   }
@@ -66,12 +69,13 @@
   }
   &--options {
     width: 100%;
-    max-width: 920px;
-    height: 90dvh;
+    max-width: 1400px;
+    height: 100dvh;
     max-height: none;
     padding: 16px;
     gap: 24px;
     overflow-y: hidden;
+    margin-top: 140px;
   }
   &--preview {
     width: 100%;
@@ -252,9 +256,7 @@
   display: flex;
   flex-direction: column;
   gap: calc(var(--spacing-unit) * 1.5);
-  padding: calc(var(--spacing-unit) * 3);
-  // padding-right: 0;
-  padding-bottom: calc(var(--spacing-unit) * 2);
+  padding: 0;
 }
 
 .modal-body {
@@ -263,7 +265,7 @@
   display: flex;
   flex-direction: column;
   gap: calc(var(--spacing-unit) * 2);
-  padding: calc(var(--spacing-unit) * 2) calc(var(--spacing-unit) * 3);
+  padding: 0;
   &::-webkit-scrollbar {
     width: 4px;
   }
@@ -455,11 +457,6 @@
 @media (max-width: 640px) {
   .modal-content--sm {
     min-width: 240px;
-    padding: 20px;
-  }
-  .modal-content--lg {
-    min-width: 280px;
-    max-height: 100vh;
   }
   .modal-header-section {
     padding: calc(var(--spacing-unit) * 2.5) 0;
@@ -471,9 +468,6 @@
 }
 
 @media (max-width: 480px) {
-  .modal-content {
-    padding: 20px;
-  }
   .modal-nav {
     flex-direction: column-reverse;
   }

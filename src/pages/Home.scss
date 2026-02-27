@@ -19,8 +19,8 @@
   }
 
   &__search-section {
-    width: 100%;
-    max-width: 720px;
+    width: 720px;
+    max-width: calc(100% - 20px);
     position: relative;
     display: flex;
     flex-direction: column;
@@ -46,8 +46,6 @@
 
 @media (max-width: 768px) {
   .home {
-    padding: 1rem;
-
     &__container {
       max-width: 100%;
     }
