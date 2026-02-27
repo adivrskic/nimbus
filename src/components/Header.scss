@@ -156,10 +156,6 @@
     &:hover .header__marble-label {
       color: var(--color-text-primary);
     }
-
-    &:active {
-      transform: scale(0.97);
-    }
   }
 }
 
@@ -192,16 +188,12 @@
   padding: 4px 12px;
   margin: 1px;
   border-radius: 999px;
-  background: var(--color-background);
+  background: var(--color-surface-elevated);
   font-size: 0.6875rem;
   font-weight: 600;
   color: var(--color-text-secondary);
   white-space: nowrap;
   transition: color 0.2s ease, background 0.2s ease;
-}
-
-[data-theme="dark"] .header__marble-label {
-  background: var(--color-surface);
 }
 
 .header__marble-spinner {

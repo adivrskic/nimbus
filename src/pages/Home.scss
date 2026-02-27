@@ -16,6 +16,8 @@
     height: 100vh;
     position: fixed;
     top: 0;
+    z-index: 12;
+    pointer-events: none;
   }
 
   &__search-section {
@@ -26,6 +28,7 @@
     flex-direction: column;
     align-items: center;
     margin: auto;
+    pointer-events: all;
   }
 
   &__status {
