@@ -5,7 +5,7 @@ import { Loader2 } from "lucide-react";
 import "./SearchBar.scss";
 
 const MIN_CHARS = 20;
-const MAX_CHARS = 1000;
+const MAX_CHARS = 500;
 
 const SearchBar = forwardRef(
   (
