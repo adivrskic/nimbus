@@ -144,13 +144,6 @@ function VersionHistoryModal({ isOpen, onClose, project, onSelectVersion }) {
                         {formatDate(version.timestamp)}
                       </span>
                     </div>
-                    <div className="version-item__icon">
-                      {version.isInitial ? (
-                        <Sparkles size={13} />
-                      ) : (
-                        <Sparkles size={13} />
-                      )}
-                    </div>
                     <ChevronRight size={14} className="version-item__chevron" />
                   </button>
                 );

@@ -97,12 +97,6 @@ function Header({ modalActive: externalModalActive = false }) {
     }, 300);
   };
 
-  const marbleStyle = previewPill?.colors
-    ? {
-        background: `radial-gradient(circle at 35% 35%, ${previewPill.colors.c}, ${previewPill.colors.a} 50%, ${previewPill.colors.b})`,
-      }
-    : undefined;
-
   const isClickable =
     previewPill && previewPill.visible && previewPill.onRestore;
 
@@ -132,10 +126,14 @@ function Header({ modalActive: externalModalActive = false }) {
                     className="header__marble-wrapper header__marble-wrapper--clickable"
                     onClick={previewPill.onRestore}
                     title="View Generated Project"
+                    style={{
+                      "--glow-c": previewPill?.colors?.c,
+                      "--glow-a": previewPill?.colors?.a,
+                      "--glow-b": previewPill?.colors?.b,
+                    }}
                   >
-                    <div className="header__marble-surface" style={marbleStyle}>
-                      Generated Site
-                    </div>
+                    <span className="header__marble-glow" />
+                    <span className="header__marble-label">Generated Site</span>
                   </button>
                 )}
                 <button

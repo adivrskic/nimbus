@@ -43,10 +43,8 @@
   backdrop-filter: blur(24px) saturate(180%);
   box-shadow: var(--neumorphism-shadow);
   flex-shrink: 0;
-  transition: box-shadow 0.3s ease;
-
-  // Inset neumorphism — light mode
-  box-shadow: var(--neumorphism-shadow);
+  transition: background var(--transition-base),
+    box-shadow var(--transition-base);
 
   &--logo {
     gap: 0;
@@ -57,6 +55,17 @@
 [data-theme="dark"] {
   .header__section {
     box-shadow: var(--neumorphism-shadow);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Modal-active — elevated neumorphism matching modal backgrounds
+// ---------------------------------------------------------------------------
+
+.header--modal-active {
+  .header__section {
+    background: var(--color-surface-elevated);
+    box-shadow: var(--neumorphism-shadow-surface-elevated);
   }
 }
 
@@ -107,103 +116,92 @@
 }
 
 // ---------------------------------------------------------------------------
-// Marble wrapper
+// Marble wrapper — animated glowing gradient border
 // ---------------------------------------------------------------------------
 
-.header__marble-wrapper {
-  flex: 1;
-  min-width: 0;
-  height: 18px;
-  position: relative;
-  display: flex;
-  align-items: center;
+@keyframes marble-glow-spin {
+  0% {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
 
-  background: none;
-  border: none;
+.header__marble-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 26px;
   padding: 0;
-  margin: 0;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  cursor: default;
+  overflow: hidden;
+  isolation: isolate;
   font: inherit;
   outline: none;
+  margin: 0;
 
   &--clickable {
     cursor: pointer;
 
-    .header__marble-surface {
-      transition: box-shadow 0.3s ease, transform 0.2s ease;
+    &:hover .header__marble-glow {
+      opacity: 1;
+      filter: blur(5px);
     }
 
-    &:hover .header__marble-surface {
-      box-shadow: inset -3px -4px 8px rgba(0, 0, 0, 0.18),
-        inset 3px 3px 6px rgba(255, 255, 255, 0.2),
-        0 2px 12px rgba(0, 0, 0, 0.1);
+    &:hover .header__marble-label {
+      color: var(--color-text-primary);
     }
-  }
 
-  &--generating {
-    .header__marble-surface {
-      animation: marble-hue-shift 10s linear infinite,
-        marble-gen-pulse 2s ease-in-out infinite;
+    &:active {
+      transform: scale(0.97);
     }
   }
 }
 
-.header__marble-surface {
-  width: 100%;
-  height: 100%;
-  border-radius: 999px;
-  overflow: hidden;
-  padding: 0 8px;
-  display: flex;
+.header__marble-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 300%;
+  aspect-ratio: 1;
+  background: conic-gradient(
+    from 0deg,
+    var(--glow-c, #82e392),
+    var(--glow-a, #5893e4),
+    var(--glow-b, #d93a4e),
+    var(--glow-a, #5893e4),
+    var(--glow-c, #82e392)
+  );
+  opacity: 0.75;
+  animation: marble-glow-spin 3s linear infinite;
+  z-index: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease, filter 0.3s ease;
+}
+
+.header__marble-label {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
   align-items: center;
-  font-size: 10px;
-
-  background: var(--marble-default-bg);
-
-  box-shadow: inset -3px -4px 10px rgba(0, 0, 0, 0.12),
-    inset 3px 3px 8px rgba(255, 255, 255, 0.18), 0 1px 4px rgba(0, 0, 0, 0.06);
-
-  animation: marble-hue-shift 10s linear infinite;
-
-  transition: background 0.6s ease, box-shadow 0.3s ease;
+  padding: 4px 12px;
+  margin: 1.5px;
+  border-radius: 999px;
+  background: none;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  transition: color 0.2s ease, background 0.2s ease;
 }
 
-:root {
-  --marble-default-bg: linear-gradient(
-    135deg,
-    rgba(200, 210, 240, 0.4) 0%,
-    rgba(230, 200, 240, 0.3) 30%,
-    rgba(200, 235, 225, 0.3) 60%,
-    rgba(240, 220, 200, 0.25) 100%
-  );
-}
-
-[data-theme="dark"] {
-  --marble-default-bg: linear-gradient(
-    135deg,
-    rgba(60, 70, 120, 0.35) 0%,
-    rgba(90, 60, 110, 0.3) 30%,
-    rgba(50, 100, 90, 0.3) 60%,
-    rgba(110, 70, 50, 0.25) 100%
-  );
-}
-
-@keyframes marble-hue-shift {
-  0% {
-    filter: hue-rotate(0deg);
-  }
-  100% {
-    filter: hue-rotate(360deg);
-  }
-}
-
-@keyframes marble-gen-pulse {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.65;
-  }
+[data-theme="dark"] .header__marble-label {
+  background: var(--color-surface);
 }
 
 .header__marble-spinner {
@@ -480,13 +478,5 @@
 
   .header__pill span:not(svg) {
     font-size: 0.6875rem;
-  }
-}
-.header--modal-active {
-  .header__section {
-    background: var(--color-surface-elevated);
-    box-shadow: var(--neumorphism-shadow-surface-elevated);
-    transition: background var(--transition-base),
-      box-shadow var(--transition-base);
   }
 }
