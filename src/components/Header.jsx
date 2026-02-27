@@ -16,10 +16,10 @@ import { useModals } from "../contexts/ModalContext";
 import { useTheme } from "../contexts/ThemeContext";
 import "./Header.scss";
 
-function Header() {
+function Header({ modalActive: externalModalActive = false }) {
   const { theme, toggleTheme } = useTheme();
   const { previewPill } = useGenerationState();
-  const { openAuth, openTokenPurchase, openProjects } = useModals();
+  const { openAuth, openTokenPurchase, openProjects, modals } = useModals();
   const {
     user,
     profile,
@@ -30,6 +30,9 @@ function Header() {
     clearJustVerifiedFlag,
     isLoading: authIsLoading,
   } = useAuth();
+
+  const anyModalOpen =
+    externalModalActive || Object.values(modals).some(Boolean);
 
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
@@ -104,7 +107,7 @@ function Header() {
     previewPill && previewPill.visible && previewPill.onRestore;
 
   return (
-    <header className="header">
+    <header className={`header${anyModalOpen ? " header--modal-active" : ""}`}>
       <div className="header__inner">
         {/* Logo — glassmorphism section */}
         <div className="header__section header__section--logo">

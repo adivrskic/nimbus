@@ -484,7 +484,15 @@ function Home() {
 
   return (
     <div className="home">
-      <Header />
+      <Header
+        modalActive={
+          showOptions ||
+          showPreview ||
+          showHelp ||
+          showTokenOverlay ||
+          showDeploy
+        }
+      />
       <div className="home__container">
         <BackgroundWave />
         <div className="home__search-section">
