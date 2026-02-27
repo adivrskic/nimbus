@@ -11,6 +11,8 @@ import useHomeState from "../hooks/useHomeState";
 import useGeneration from "../hooks/useGeneration";
 import useProjectSave from "../hooks/useProjectSave";
 import BackgroundWave from "../components/BackgroundWave";
+import Footer from "../components/Footer";
+import Header from "../components/Header";
 
 import { EXAMPLE_PROMPTS } from "../configs/defaults.config";
 
@@ -482,6 +484,7 @@ function Home() {
 
   return (
     <div className="home">
+      <Header />
       <div className="home__container">
         <BackgroundWave />
         <div className="home__search-section">
@@ -628,6 +631,7 @@ function Home() {
       {modals.support && (
         <SupportModal isOpen={modals.support} onClose={closeSupport} />
       )}
+      <Footer />
     </div>
   );
 }
