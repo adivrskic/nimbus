@@ -50,7 +50,7 @@ const waveEffects = {
     maxSpeed: 0.016,
     scale: 0.725,
     noiseStrength: 1.2,
-    position: [0, 0, -1],
+    position: [0, 0, 0],
     rotation: [1, 0, 0.1],
   },
   services: {
