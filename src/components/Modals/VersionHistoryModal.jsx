@@ -93,9 +93,7 @@ function VersionHistoryModal({ isOpen, onClose, project, onSelectVersion }) {
       style={{ zIndex: 1100 }}
     >
       <div
-        className={`modal-content modal-content--sm ${
-          isVisible ? "active" : ""
-        }`}
+        className={`modal-content ${isVisible ? "active" : ""}`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="modal-header-section">

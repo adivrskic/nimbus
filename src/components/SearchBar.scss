@@ -7,7 +7,7 @@
 
   &--expanded {
     .search-bar__input {
-      min-height: calc(100vh - 240px);
+      min-height: 360px;
       padding-top: 1rem;
       padding-right: 1rem;
       padding-bottom: 6rem;
@@ -425,20 +425,15 @@
     gap: 4px;
     padding: 8px 12px;
     background: var(--color-surface-elevated);
-    border: 1px solid var(--color-border);
+    border: none;
     border-radius: 999px;
     color: var(--color-text-secondary);
     cursor: pointer;
     transition: var(--transition-base);
     font-family: var(--font-family-base, sans-serif);
-
-    &:hover,
-    &.active {
-      background: var(--color-accent-light);
-      border-color: var(--color-border-hover);
-      box-shadow: var(--shadow-sm);
+    &:hover {
+      color: var(--color-text-primary);
     }
-
     .search-bar__btn-text {
       display: inline;
       width: auto;
@@ -455,21 +450,13 @@
     align-items: center;
     justify-content: center;
     background: var(--color-surface-elevated);
-    border: 1px solid var(--color-border);
+    border: none;
     border-radius: 50%;
     color: var(--color-text-secondary);
     cursor: pointer;
     transition: var(--transition-base);
-
     &:hover {
-      background: var(--color-accent-light);
-      border-color: var(--color-border-hover);
-      box-shadow: var(--shadow-sm);
-    }
-
-    &.active {
-      background: var(--color-accent-light);
-      border-color: var(--color-border-hover);
+      color: var(--color-text-primary);
     }
   }
 

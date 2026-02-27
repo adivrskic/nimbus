@@ -79,7 +79,7 @@ function Footer() {
     ranges.forEach((range, i) => {
       dropIdRef.current += 1;
       const x = range.start + Math.random() * range.width;
-      const duration = 1 + Math.random() * 0.2;
+      const duration = 1 + Math.random() * 0.4;
       const delay = i * 5 + Math.random() * 0.25;
 
       newDrops.push({
@@ -97,7 +97,7 @@ function Footer() {
       setDrops((prev) =>
         prev.filter((d) => !newDrops.some((nd) => nd.id === d.id))
       );
-    }, 1000);
+    }, 2000);
   };
 
   const stopRain = () => {
@@ -111,7 +111,7 @@ function Footer() {
       if (!isRaining) {
         setCurrentEmoji("");
       }
-    }, 1000);
+    }, 2000);
   };
 
   useEffect(() => {
@@ -196,7 +196,7 @@ function Footer() {
 
       {/* Existing footer */}
       <footer className="footer">
-        <div className="container">
+        <div className="footer__container container">
           <div className="footer__content">
             <div
               className="footer__cloud-container"
@@ -243,7 +243,7 @@ function Footer() {
                   }
                   100% {
                     opacity: 0;
-                    transform: translate3d(0, 200px, 0) scale(1);
+                    transform: translate3d(0, 300px, 0) scale(1);
                   }
                 }
               `}</style>
