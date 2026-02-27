@@ -711,60 +711,6 @@ function PreviewModal({
                 {generationError}
               </p>
             </div>
-          ) : /* Fix #16: Loading / skeleton state */
-          showLoading ? (
-            <div
-              style={{
-                flex: 1,
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "16px",
-                padding: "48px 24px",
-                color: "var(--color-text-secondary)",
-              }}
-            >
-              <Loader2
-                size={28}
-                className="spin"
-                style={{ color: "var(--color-text-tertiary)" }}
-              />
-              <p style={{ fontSize: "0.8125rem", fontWeight: 500 }}>
-                Generating your website&hellip;
-              </p>
-              {/* Skeleton lines */}
-              <div
-                style={{
-                  width: "100%",
-                  maxWidth: "480px",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "10px",
-                  marginTop: "8px",
-                }}
-              >
-                {[100, 85, 92, 60].map((w, i) => (
-                  <div
-                    key={i}
-                    style={{
-                      height: "12px",
-                      width: `${w}%`,
-                      borderRadius: "6px",
-                      background: "var(--color-surface-elevated)",
-                      animation: "pulse 1.5s ease-in-out infinite",
-                      animationDelay: `${i * 150}ms`,
-                    }}
-                  />
-                ))}
-              </div>
-              <style>{`
-                @keyframes pulse {
-                  0%, 100% { opacity: 0.4; }
-                  50% { opacity: 1; }
-                }
-              `}</style>
-            </div>
           ) : showCode ? (
             /* Fix #17: Syntax-highlighted code view */
             <div className="preview-modal__code">
@@ -782,7 +728,7 @@ function PreviewModal({
                 {showHeadMessage && (
                   <div className="preview-head-message">
                     <Loader2 size={24} className="spin" />
-                    <p>Acquiring metadata and styles...</p>
+                    <p>Generating site metadata and styles...</p>
                   </div>
                 )}
                 <GeneratedPreview
