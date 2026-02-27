@@ -302,7 +302,7 @@ function PreviewModal({
         onClick={(e) => e.stopPropagation()}
       >
         {/* ===== UNIFIED HEADER ===== */}
-        <div className="pm-header" style={{ position: "relative" }}>
+        <div className="pm-header">
           {/* Left: Tabs + Devices + Page pill + Version pill */}
           <div className="pm-header__left">
             <div className="pm-header__tabs">

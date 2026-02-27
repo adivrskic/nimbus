@@ -190,9 +190,9 @@
   display: inline-flex;
   align-items: center;
   padding: 4px 12px;
-  margin: 1.5px;
+  margin: 1px;
   border-radius: 999px;
-  background: none;
+  background: var(--color-background);
   font-size: 0.6875rem;
   font-weight: 600;
   color: var(--color-text-secondary);

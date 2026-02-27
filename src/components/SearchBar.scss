@@ -7,7 +7,7 @@
 
   &--expanded {
     .search-bar__input {
-      min-height: calc(100vh - 55px - 4rem);
+      min-height: calc(100vh - 240px);
       padding-top: 1rem;
       padding-right: 1rem;
       padding-bottom: 6rem;
@@ -628,7 +628,6 @@
 
     &--expanded {
       .search-bar__input {
-        min-height: calc(100vh - 65px - 60px);
         border-radius: var(--radius-xl);
         padding: 1rem 1rem 6rem 1rem;
         font-size: 16px !important;
@@ -647,7 +646,6 @@
 
       &.has-minimized-preview {
         .search-bar__input {
-          min-height: calc(100vh - 65px - 60px - 60px);
           padding-bottom: 4rem;
           margin-top: -20px;
         }
