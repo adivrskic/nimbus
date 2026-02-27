@@ -4,7 +4,7 @@ import {
   Route,
   useLocation,
 } from "react-router-dom";
-import { useEffect, lazy, Suspense } from "react";
+import { useEffect, lazy, Suspense, useState } from "react";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import { ThemeProvider } from "./contexts/ThemeContext";
@@ -15,12 +15,23 @@ import {
   GenerationProvider,
   useGenerationState,
 } from "./contexts/GenerationContext";
-import NoiseBlob from "./components/NoiseBlob";
+import BackgroundWave from "./components/BackgroundWave";
 import { useTheme } from "./contexts/ThemeContext";
 
 import "./styles/global.scss";
 
 const Home = lazy(() => import("./pages/Home"));
+
+const waveOptions = [
+  "hero",
+  "cta-0",
+  "cta-1",
+  "cta-2",
+  "cta-3",
+  "portfolio",
+  "services",
+  "footer",
+];
 
 function AppContent() {
   const location = useLocation();
@@ -45,7 +56,7 @@ function AppContent() {
   return (
     <div className="app">
       <Header />
-      <NoiseBlob isGenerating={isGenerating} isDark={theme === "dark"} />
+      <BackgroundWave activeEffect="portfolio" progress={0} isWaveOn={true} />
       <Suspense fallback={<div style={{ minHeight: "100vh" }} />}>
         <Routes>
           <Route path="/" element={<Home />} />
