@@ -6,7 +6,7 @@
   z-index: 11;
   position: relative;
   overflow: visible;
-
+  width: 100%;
   @media (max-width: $breakpoint-md) {
     padding: calc(var(--spacing-unit) * 8) 0 calc(var(--spacing-unit) * 6);
   }
@@ -118,6 +118,7 @@
   z-index: 11;
   padding: calc(var(--spacing-unit) * 8) 0;
   background: var(--color-surface);
+  width: 100%;
   margin-top: 100vh;
   @media (max-width: 768px) {
     padding: calc(var(--spacing-unit) * 6) 0;
@@ -171,8 +172,8 @@
   gap: calc(var(--spacing-unit) * 1.5);
   padding: calc(var(--spacing-unit) * 2.5);
   border-radius: var(--radius-lg);
-  background: var(--color-background);
-  box-shadow: var(--neumorphism-shadow);
+  background: var(--color-surface);
+  box-shadow: var(--neumorphism-shadow-surface);
   border: none;
   text-align: left;
 }
@@ -215,22 +216,4 @@
   line-height: 1.6;
   color: var(--color-text-tertiary);
   max-width: 420px;
-}
-
-// ---------------------------------------------------------------------------
-// Dark-mode neumorphism overrides
-// On dark backgrounds the highlight shadow goes slightly lighter and the
-// dark shadow goes deeper. Surface matches --color-background (#161616).
-// ---------------------------------------------------------------------------
-[data-theme="dark"] {
-  .about__feature {
-    background: var(--color-background);
-    box-shadow: inset 3px 3px 8px rgba(0, 0, 0, 0.4),
-      inset -3px -3px 8px rgba(255, 255, 255, 0.025);
-
-    &:hover {
-      box-shadow: inset 4px 4px 10px rgba(0, 0, 0, 0.45),
-        inset -4px -4px 10px rgba(255, 255, 255, 0.03);
-    }
-  }
 }

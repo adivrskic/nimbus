@@ -5,8 +5,6 @@ import {
   useLocation,
 } from "react-router-dom";
 import { useEffect, lazy, Suspense, useState } from "react";
-import Header from "./components/Header";
-import Footer from "./components/Footer";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { ProjectProvider } from "./contexts/ProjectContext";
@@ -15,7 +13,6 @@ import {
   GenerationProvider,
   useGenerationState,
 } from "./contexts/GenerationContext";
-import BackgroundWave from "./components/BackgroundWave";
 import { useTheme } from "./contexts/ThemeContext";
 
 import "./styles/global.scss";
@@ -55,13 +52,11 @@ function AppContent() {
 
   return (
     <div className="app">
-      <Header />
       <Suspense fallback={<div style={{ minHeight: "100vh" }} />}>
         <Routes>
           <Route path="/" element={<Home />} />
         </Routes>
       </Suspense>
-      <Footer />
     </div>
   );
 }
