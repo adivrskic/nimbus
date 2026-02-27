@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect } from "react"; // ✅ added React
 import { Canvas, useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { SimplexNoise } from "three/examples/jsm/math/SimplexNoise";
@@ -47,12 +47,12 @@ const waveEffects = {
   },
   // Updated portfolio effect
   portfolio: {
-    speed: 0.01,
-    maxSpeed: 0.02,
+    speed: 0.008, // slightly slower
+    maxSpeed: 0.016,
     scale: 0.75,
-    noiseStrength: 1.5,
+    noiseStrength: 1.4, // reduced for smoother appearance
     position: [0, 0, -1],
-    rotation: [14, 0, 0],
+    rotation: [14, 0, 0], // 14 degrees in radians
   },
   services: {
     speed: 0.02,
@@ -118,15 +118,19 @@ const createParticleTexture = () => {
   return texture;
 };
 
-const ParticleWave = ({ isMenuOpen, activeEffect, progress, isWaveOn }) => {
+const ParticleWave = ({ isMenuOpen }) => {
   const meshRef = useRef();
   const materialRef = useRef();
   const simplex = new SimplexNoise();
   const time = useRef(0);
   const colorMap = useRef(new Map());
   const particleTexture = useRef(null);
-
+  const activeEffect = "portfolio";
+  const isWaveOn = true;
+  const progress = 0;
   const { theme } = useTheme();
+
+  console.log("hello);");
 
   const [size, setSize] = useState({
     width: window.innerWidth,
@@ -361,4 +365,4 @@ const BackgroundWave = ({ isMenuOpen, activeEffect, progress, isWaveOn }) => {
     </div>
   );
 };
-export default BackgroundWave;
+export default React.memo(BackgroundWave);

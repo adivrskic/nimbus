@@ -56,7 +56,6 @@ function AppContent() {
   return (
     <div className="app">
       <Header />
-      <BackgroundWave activeEffect="portfolio" progress={0} isWaveOn={true} />
       <Suspense fallback={<div style={{ minHeight: "100vh" }} />}>
         <Routes>
           <Route path="/" element={<Home />} />

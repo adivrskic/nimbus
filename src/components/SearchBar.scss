@@ -274,9 +274,7 @@
     -webkit-font-smoothing: antialiased;
 
     // Neumorphic surface — matches page background for the raised illusion
-    background: var(--color-background);
     border: none;
-    box-shadow: inset 6px 6px 6px #dedee0, inset -6px -6px 6px #ffffff;
   }
 
   // When not expanded, make textarea text transparent so truncate overlay shows
@@ -511,7 +509,6 @@
 [data-theme="dark"] {
   .search-bar__input {
     background: var(--color-background);
-    box-shadow: inset 9px 9px 18px #070707, inset -9px -9px 18px #1b1b1b;
   }
 }
 
