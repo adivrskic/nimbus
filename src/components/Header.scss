@@ -482,3 +482,11 @@
     font-size: 0.6875rem;
   }
 }
+.header--modal-active {
+  .header__section {
+    background: var(--color-surface-elevated);
+    box-shadow: var(--neumorphism-shadow-surface-elevated);
+    transition: background var(--transition-base),
+      box-shadow var(--transition-base);
+  }
+}
