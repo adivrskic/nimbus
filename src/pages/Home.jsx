@@ -10,6 +10,7 @@ import useSelections from "../hooks/useSelections";
 import useHomeState from "../hooks/useHomeState";
 import useGeneration from "../hooks/useGeneration";
 import useProjectSave from "../hooks/useProjectSave";
+import BackgroundWave from "../components/BackgroundWave";
 
 import { EXAMPLE_PROMPTS } from "../configs/defaults.config";
 
@@ -482,6 +483,7 @@ function Home() {
   return (
     <div className="home">
       <div className="home__container">
+        <BackgroundWave />
         <div className="home__search-section">
           <SearchBar
             ref={inputRef}
