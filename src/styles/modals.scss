@@ -145,13 +145,20 @@
   justify-content: center;
   width: 28px;
   height: 28px;
-  background: var(--color-surface);
+  background: var(--color-surface-elevated);
   box-shadow: var(--neumorphism-shadow-surface-elevated);
   border: none;
   border-radius: 50%;
   color: var(--color-text-secondary);
   cursor: pointer;
-  transition: background var(--transition-fast), color var(--transition-fast);
+  transition: background var(--transition-fast), color var(--transition-fast),
+    border-color var(--transition-fast);
+
+  &:hover {
+    background: var(--color-surface-elevated);
+    border-color: var(--color-border-hover);
+    color: var(--color-text-primary);
+  }
 
   &:disabled {
     opacity: 0.5;
@@ -1922,25 +1929,28 @@
 .options-filter {
   padding: 8px 14px;
   background: transparent;
-  border: none;
+  border: 1px solid transparent;
   border-radius: 999px;
   font-size: 0.75rem;
   font-weight: 500;
   font-family: var(--font-family-base, sans-serif);
-  color: var(--color-text-secondary);
+  color: var(--color-text-tertiary);
   cursor: pointer;
   transition: var(--transition-base);
   white-space: nowrap;
   text-transform: capitalize;
 
   &:hover {
-    background: var(--color-accent-light);
+    background: var(--color-surface);
+    border-color: var(--color-border);
     color: var(--color-text-primary);
   }
 
   &.active {
     background: var(--color-accent);
+    border-color: var(--color-accent);
     color: var(--color-background);
+    font-weight: 600;
   }
 }
 
@@ -2034,15 +2044,19 @@
   }
 }
 
+// =============================================================================
+// OPTIONS INPUT — Base style (flat, minimal for design tab contexts)
+// =============================================================================
 .options-input {
   padding: 10px 12px;
-  box-shadow: var(--neumorphism-shadow-surface-elevated);
-  border: none;
-  border-radius: 999px;
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
   font-size: 0.75rem;
   font-family: var(--font-family-base, sans-serif);
   color: var(--color-text-primary);
   transition: var(--transition-base);
+  box-shadow: none;
 
   &::placeholder {
     color: var(--color-text-tertiary);
@@ -2050,13 +2064,53 @@
 
   &:focus {
     outline: none;
+    border-color: var(--color-border-hover);
     background: var(--color-surface);
-    box-shadow: var(--shadow-md);
+    box-shadow: var(--shadow-sm);
   }
 
   &--small {
     padding: 8px 10px;
     font-size: 0.6875rem;
+  }
+
+  &--filled {
+    background: var(--color-surface);
+    border-color: var(--color-border-hover);
+  }
+}
+
+// =============================================================================
+// BRAND TAB — Neumorphism inputs (only applied within brand tab context)
+// =============================================================================
+.options-section__group {
+  .options-input {
+    background: none;
+    border: none;
+    border-radius: 999px;
+    box-shadow: var(--neumorphism-shadow-surface-elevated);
+    padding: 11px 14px;
+    font-size: 0.8125rem;
+
+    &::placeholder {
+      color: var(--color-text-tertiary);
+      font-size: 0.75rem;
+    }
+
+    &:hover {
+      box-shadow: var(--neumorphism-shadow-surface-selected);
+    }
+
+    &:focus {
+      outline: none;
+      background: var(--color-surface);
+      box-shadow: var(--shadow-md), 0 0 0 2px var(--color-border);
+    }
+
+    &--filled {
+      background: var(--color-surface);
+      font-weight: 500;
+    }
   }
 }
 
@@ -2108,13 +2162,16 @@
   gap: 6px;
 }
 
+// =============================================================================
+// OPTIONS CARD — Design tab category cards (flat, clear hierarchy)
+// =============================================================================
 .options-card {
   display: flex;
   align-items: center;
   gap: 10px;
   padding: 6px 10px;
-  background: var(--color-surface-elevated);
-  border: none;
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
   border-radius: 999px;
   cursor: pointer;
   transition: var(--transition-base);
@@ -2122,16 +2179,24 @@
   height: 40px;
 
   &:hover {
+    border-color: var(--color-border-hover);
     background: var(--color-surface);
-    box-shadow: var(--shadow-md);
+    box-shadow: var(--shadow-sm);
+    transform: translateY(-1px);
 
     .options-card__arrow {
       opacity: 1;
     }
   }
 
+  &:active {
+    transform: translateY(0);
+    box-shadow: none;
+  }
+
   &--active {
     background: var(--color-accent-light);
+    border-color: var(--color-border-hover);
 
     .options-card__icon {
       background: var(--color-accent);
@@ -2145,7 +2210,7 @@
     justify-content: center;
     width: 28px;
     height: 28px;
-    background: var(--color-accent-light);
+    background: var(--color-surface-elevated);
     border-radius: 999px;
     color: var(--color-text-secondary);
     flex-shrink: 0;
@@ -2228,15 +2293,16 @@
   justify-content: center;
   width: 28px;
   height: 28px;
-  background: var(--color-accent-light);
-  border: none;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: 50%;
   color: var(--color-text-secondary);
   cursor: pointer;
   transition: var(--transition-base);
 
   &:hover {
-    background: var(--color-border);
+    background: var(--color-surface-elevated);
+    border-color: var(--color-border-hover);
     color: var(--color-text-primary);
   }
 }
@@ -2258,13 +2324,16 @@
   }
 }
 
+// =============================================================================
+// OPTIONS CHOICE — Drill-down selection buttons (clear interactive affordance)
+// =============================================================================
 .options-choice {
   display: flex;
   align-items: center;
   gap: 8px;
   padding: 10px 14px;
-  background: var(--color-surface-elevated);
-  border: none;
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
   border-radius: 999px;
   font-size: 0.75rem;
   font-weight: 500;
@@ -2274,15 +2343,30 @@
   transition: var(--transition-base);
 
   &:hover {
+    border-color: var(--color-border-hover);
     background: var(--color-surface);
-    box-shadow: var(--shadow-md);
+    box-shadow: var(--shadow-sm);
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
+    box-shadow: none;
   }
 
   &--active {
-    background: var(--color-accent-light);
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    color: var(--color-background);
 
     svg {
-      color: var(--color-accent);
+      color: var(--color-background);
+    }
+
+    &:hover {
+      background: var(--color-accent-hover);
+      border-color: var(--color-accent-hover);
+      box-shadow: none;
     }
   }
 
@@ -2325,12 +2409,14 @@
   align-items: center;
   gap: 6px;
   padding: 4px 10px 4px 4px;
-  background: var(--color-surface-elevated);
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
   border-radius: 999px;
   cursor: pointer;
   transition: var(--transition-base);
 
   &:hover {
+    border-color: var(--color-border-hover);
   }
 
   input[type="color"] {
@@ -2551,35 +2637,6 @@
   font-weight: 500;
   color: var(--color-text-secondary);
   letter-spacing: 0.01em;
-}
-
-.options-input {
-  width: 100%;
-  background: none;
-  border: none;
-  border-radius: var(--radius-md);
-  font-size: 0.8125rem;
-  font-family: var(--font-family-base, sans-serif);
-  color: var(--color-text-primary);
-  transition: box-shadow 0.15s, background 0.15s;
-
-  &::placeholder {
-    color: var(--color-text-tertiary);
-    font-size: 0.75rem;
-  }
-
-  &:focus {
-    outline: none;
-    background: var(--color-surface);
-    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.1);
-  }
-
-  &--error {
-  }
-
-  &--filled {
-    background: var(--color-surface);
-  }
 }
 
 .options-input-error {
@@ -3848,7 +3905,6 @@
 }
 // ============================================================
 // VERSION HISTORY STYLES
-// Append these to the end of modals.scss
 // ============================================================
 
 // ─── Version badge on project items ───────────────────────────
@@ -4150,7 +4206,7 @@
   gap: 12px;
   color: var(--color-text-secondary);
   z-index: 10;
-  pointer-events: none; /* allow clicks to pass through to iframe if needed */
+  pointer-events: none;
   border-radius: inherit;
 }
 .preview-head-message p {
