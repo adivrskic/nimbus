@@ -79,29 +79,33 @@
   }
   &--preview {
     position: relative;
-    width: 100%;
-    max-width: 100%;
-    height: 100vh;
-    height: 100dvh;
-    max-height: none;
+    width: calc(100% - 32px);
+    max-width: calc(100% - 32px);
+    height: calc(100dvh - 32px);
+    max-height: calc(100dvh - 32px);
     padding: 0;
     gap: 0;
-    border-radius: 0;
-    box-shadow: none;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-xl);
     overflow: hidden;
     background: var(--color-surface);
 
     &.modal-content--fullscreen {
       max-width: 100%;
+      width: 100%;
       height: 100vh;
+      height: 100dvh;
+      max-height: 100dvh;
       border-radius: 0;
       border: none;
+      box-shadow: none;
     }
   }
 }
 
 .modal-overlay--preview {
   padding: 0;
+  background: var(--color-background);
 }
 
 // ---------------------------------------------------------------------------
@@ -2896,25 +2900,112 @@
   }
 }
 
-// UNIFIED HEADER (pm-header) — Floating toolbar
+// UNIFIED HEADER (pm-header) — Floating toolbar with collapsible sections
 .pm-header {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 8px 12px;
-  background: rgba(var(--color-surface-rgb, 255, 255, 255), 0.82);
-  backdrop-filter: blur(16px) saturate(1.4);
-  -webkit-backdrop-filter: blur(16px) saturate(1.4);
-  min-height: 52px;
+  gap: 0;
+  padding: 6px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  backdrop-filter: blur(20px) saturate(1.6);
+  -webkit-backdrop-filter: blur(20px) saturate(1.6);
+  min-height: 48px;
   position: absolute;
-  top: 16px;
+  bottom: 12px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 100;
   border-radius: 999px;
-  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.04);
-  max-width: calc(100% - 48px);
-  width: calc(100% - 48px);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.03);
+  max-width: calc(100% - 32px);
+  width: auto;
+
+  // ── Section: collapsible toolbar group ──
+  // Each section is a pill-shaped group that can expand/collapse.
+  // Collapsed = just the trigger icon visible.
+  // Expanded = trigger + section content inline.
+  &__section {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    border-radius: 999px;
+    transition: background var(--transition-fast), gap var(--transition-fast);
+    position: relative;
+
+    &:not(:last-child) {
+      margin-right: 2px;
+    }
+
+    // Expanded section gets a subtle background pill
+    &.expanded {
+      background: var(--color-accent-light);
+      gap: 4px;
+      padding: 2px 4px 2px 2px;
+    }
+
+    // Collapsed hides the content
+    &.collapsed {
+      .pm-header__section-content {
+        max-width: 0;
+        opacity: 0;
+        overflow: hidden;
+        padding: 0;
+        pointer-events: none;
+      }
+    }
+  }
+
+  // Trigger button — always visible, toggles section
+  &__section-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    flex-shrink: 0;
+    background: transparent;
+    border: none;
+    border-radius: 999px;
+    color: var(--color-text-tertiary);
+    cursor: pointer;
+    transition: var(--transition-fast);
+    position: relative;
+
+    &:hover {
+      color: var(--color-text-primary);
+      background: var(--color-surface-elevated);
+    }
+
+    // Active dot indicator when section is collapsed but has active state
+    &.has-active::after {
+      content: "";
+      position: absolute;
+      bottom: 4px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--color-accent);
+    }
+
+    .expanded & {
+      color: var(--color-text-primary);
+    }
+  }
+
+  // Content area — inline items that show/hide
+  &__section-content {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    max-width: 600px;
+    opacity: 1;
+    overflow: hidden;
+    transition: max-width var(--transition-base), opacity var(--transition-fast),
+      padding var(--transition-fast);
+  }
 
   &__left {
     display: flex;
@@ -2928,6 +3019,7 @@
     height: 18px;
     background: var(--color-border);
     flex-shrink: 0;
+    margin: 0 4px;
   }
 
   &__tabs {
@@ -2952,12 +3044,12 @@
 
     &:hover {
       color: var(--color-text-secondary);
-      background: var(--color-accent-light);
+      background: var(--color-surface-elevated);
     }
 
     &.active {
       color: var(--color-text-primary);
-      background: var(--color-accent-light);
+      background: var(--color-surface-elevated);
     }
   }
 
@@ -2982,12 +3074,12 @@
 
     &:hover {
       color: var(--color-text-secondary);
-      background: var(--color-accent-light);
+      background: var(--color-surface-elevated);
     }
 
     &.active {
       color: var(--color-text-primary);
-      background: var(--color-accent-light);
+      background: var(--color-surface-elevated);
     }
 
     &:disabled {
@@ -3433,32 +3525,33 @@
     justify-content: center;
     width: 30px;
     height: 30px;
-    margin-left: 4px;
-    background: var(--color-accent-light);
-    border: none;
+    margin-left: 2px;
+    background: var(--color-surface-elevated);
+    border: 1px solid var(--color-border);
     border-radius: 50%;
     color: var(--color-text-secondary);
     cursor: pointer;
     transition: var(--transition-fast);
 
     &:hover {
-      background: var(--color-border);
+      background: var(--color-background);
+      border-color: var(--color-border-hover);
       color: var(--color-text-primary);
     }
   }
 }
 
-// Dark mode glass effect for floating header
+// Dark mode for floating header
 [data-theme="dark"] .pm-header {
-  background: rgba(var(--color-surface-rgb, 30, 30, 30), 0.78);
-  box-shadow: 0 2px 24px rgba(0, 0, 0, 0.25),
-    0 0 0 1px rgba(255, 255, 255, 0.06);
+  background: var(--color-surface);
+  border-color: var(--color-border);
+  box-shadow: 0 4px 32px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.04);
 }
 
 [data-theme="dark"] .pm-header__center--unified {
-  background: rgba(var(--color-surface-rgb, 30, 30, 30), 0.78);
-  box-shadow: 0 2px 24px rgba(0, 0, 0, 0.25),
-    0 0 0 1px rgba(255, 255, 255, 0.06);
+  background: var(--color-surface);
+  border-color: var(--color-border);
+  box-shadow: 0 4px 32px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.04);
 }
 
 .pm-mobile-enhance {
@@ -3610,17 +3703,21 @@
 @media (max-width: 768px) {
   .modal-overlay--preview {
     padding: 0;
+    background: var(--color-background);
   }
 
   .modal-content--preview {
+    width: 100%;
     max-width: 100%;
     height: 100%;
+    max-height: 100%;
     border-radius: 0;
+    box-shadow: none;
   }
 
   .pm-header {
-    gap: 6px;
-    padding: 8px 10px;
+    gap: 0;
+    padding: 5px;
     top: auto;
     bottom: 20px;
     border-radius: 999px;
@@ -3658,6 +3755,18 @@
     &__close-btn {
       margin-left: 0;
     }
+    &__sep {
+      margin: 0 2px;
+      height: 14px;
+    }
+
+    // Sections always collapsed to icons on mobile
+    &__section {
+      &.expanded {
+        padding: 2px;
+        gap: 2px;
+      }
+    }
 
     // Dropdowns open upward when header is at bottom
     &__page-dropdown {
@@ -3677,10 +3786,11 @@
       width: calc(100vw - 24px);
       max-width: 480px;
       border-radius: 999px;
-      box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.04);
-      background: rgba(var(--color-surface-rgb, 255, 255, 255), 0.82);
-      backdrop-filter: blur(16px) saturate(1.4);
-      -webkit-backdrop-filter: blur(16px) saturate(1.4);
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.03);
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      backdrop-filter: blur(20px) saturate(1.6);
+      -webkit-backdrop-filter: blur(20px) saturate(1.6);
     }
   }
 
@@ -3731,8 +3841,8 @@
 
 @media (max-width: 480px) {
   .pm-header {
-    padding: 6px 8px;
-    min-height: 44px;
+    padding: 4px;
+    min-height: 42px;
     bottom: 16px;
     max-width: calc(100% - 16px);
 
@@ -3744,11 +3854,16 @@
       }
     }
 
+    &__section-trigger {
+      width: 30px;
+      height: 30px;
+    }
+
     &__action-btn,
     &__close-btn,
     &__icon-btn {
-      width: 30px;
-      height: 30px;
+      width: 28px;
+      height: 28px;
       svg {
         width: 13px;
         height: 13px;
@@ -4108,11 +4223,6 @@
     &.active {
       background: var(--color-accent-light);
 
-      .pm-header__version-option-badge {
-        background: var(--color-accent, var(--color-surface-elevated));
-        color: #fff;
-      }
-
       .pm-header__version-option-name {
         font-weight: 600;
       }
@@ -4133,7 +4243,6 @@
     height: 22px;
     padding: 0 6px;
     border-radius: var(--radius-sm);
-    background: var(--color-surface-elevated);
     font-size: 0.625rem;
     font-weight: 700;
     color: var(--color-text-secondary);
