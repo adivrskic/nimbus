@@ -148,11 +148,6 @@
   &--clickable {
     cursor: pointer;
 
-    &:hover .header__marble-glow {
-      opacity: 1;
-      filter: blur(5px);
-    }
-
     &:hover .header__marble-label {
       color: var(--color-text-primary);
     }
@@ -188,7 +183,7 @@
   padding: 4px 12px;
   margin: 1px;
   border-radius: 999px;
-  background: var(--color-surface-elevated);
+  background: var(--color-surface);
   font-size: 0.6875rem;
   font-weight: 600;
   color: var(--color-text-secondary);

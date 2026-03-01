@@ -228,11 +228,14 @@ export function useProjectSave({
     []
   );
 
-  const handleDownload = useCallback(() => {
-    if (!generatedCode) return;
-    const projectName = generateName(prompt) || "website";
-    downloadZip(generatedCode, projectName, generatedFiles);
-  }, [generatedCode, generatedFiles, prompt]);
+  const handleDownload = useCallback(
+    (format = "html") => {
+      if (!generatedCode) return;
+      const projectName = generateName(prompt) || "website";
+      downloadZip(generatedCode, projectName, generatedFiles, format);
+    },
+    [generatedCode, generatedFiles, prompt]
+  );
 
   /**
    * Load version history from a project (when editing an existing project).

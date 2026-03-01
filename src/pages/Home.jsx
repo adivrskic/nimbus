@@ -557,6 +557,7 @@ function Home() {
           onClose={closePreview}
           onMinimize={minimizePreview}
           onDownload={handleDownload}
+          onCodeChange={updateCode}
           onEnhancePromptChange={setEnhancePrompt}
           saveProps={{
             onSave: handleSave,

@@ -22,7 +22,13 @@ import {
   AlertCircle,
   History,
   Clock,
-  Cloudy,
+  CloudSun,
+  Copy,
+  RotateCcw,
+  Globe,
+  Braces,
+  Hexagon,
+  Rocket,
 } from "lucide-react";
 import GeneratedPreview from "../GeneratedPreview";
 import FeedbackModal from "./FeedbackModal";
@@ -30,38 +36,50 @@ import {
   parseMultiPageHtml,
   getPageDisplayName,
 } from "../../utils/parseMultiPage";
+import { EXPORT_FORMATS } from "../../utils/exportScaffold";
 import "../../styles/modals.scss";
 
-// ─── Fix #17: Lightweight HTML syntax highlighter ───────────────────────────
-// Produces spans with class names for CSS coloring. No external dependency.
+// ─── Lightweight HTML syntax highlighter ─────────────────────────────────────
 function highlightHtml(code) {
   if (!code) return "";
-  return (
-    code
-      // HTML comments
-      .replace(
-        /(&lt;!--[\s\S]*?--&gt;|<!--[\s\S]*?-->)/g,
-        '<span class="hl-comment">$1</span>'
-      )
-      // Tags (opening + closing)
-      .replace(
-        /(&lt;\/?|<\/?)([a-zA-Z][a-zA-Z0-9-]*)/g,
-        '$1<span class="hl-tag">$2</span>'
-      )
-      // Attribute names
-      .replace(/\s([a-zA-Z-]+)(=)/g, ' <span class="hl-attr">$1</span>$2')
-      // Strings (double and single quoted)
-      .replace(
-        /("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')/g,
-        '<span class="hl-string">$1</span>'
-      )
-  );
+  return code
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    // HTML comments
+    .replace(
+      /(&lt;!--[\s\S]*?--&gt;)/g,
+      '<span class="hl-comment">$1</span>'
+    )
+    // Tags (opening + closing)
+    .replace(
+      /(&lt;\/??)([a-zA-Z][a-zA-Z0-9-]*)/g,
+      '$1<span class="hl-tag">$2</span>'
+    )
+    // Attribute names
+    .replace(
+      /\s([a-zA-Z\-:]+)(=)/g,
+      ' <span class="hl-attr">$1</span>$2'
+    )
+    // Quoted strings
+    .replace(
+      /("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')/g,
+      '<span class="hl-string">$1</span>'
+    );
 }
+
+// Format icon map
+const FORMAT_ICONS = {
+  html: Globe,
+  "vite-react": Braces,
+  nextjs: Hexagon,
+  astro: Rocket,
+};
 
 /**
  * Props shape:
  *
- *   isOpen, html, files, onClose, onMinimize, onDownload
+ *   isOpen, html, files, onClose, onMinimize, onDownload, onCodeChange
  *
  *   saveProps:       { onSave, isSaving, saveSuccess }
  *   enhanceProps:    { prompt, onChange, onEnhance, tokenCost, breakdown,
@@ -80,6 +98,7 @@ function PreviewModal({
   onClose,
   onMinimize,
   onDownload,
+  onCodeChange,
   saveProps = {},
   enhanceProps = {},
   tokenProps = {},
@@ -124,12 +143,35 @@ function PreviewModal({
   const [activeFile, setActiveFile] = useState("index.html");
   const [showPagePicker, setShowPagePicker] = useState(false);
   const [showVersionPicker, setShowVersionPicker] = useState(false);
+  const [showDownloadDialog, setShowDownloadDialog] = useState(false);
   const [viewMode, setViewMode] = useState("desktop");
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [copySuccess, setCopySuccess] = useState(false);
+  const [expandedSection, setExpandedSection] = useState(null);
+
+  // Code editing state
+  const [editedCode, setEditedCode] = useState(null); // null = not edited
+  const [isCodeDirty, setIsCodeDirty] = useState(false);
+  const debounceTimerRef = useRef(null);
+  const textareaRef = useRef(null);
+  const lineNumbersRef = useRef(null);
+  const highlightRef = useRef(null);
+
   const enhanceInputRef = useRef(null);
   const pagePickerRef = useRef(null);
   const versionPickerRef = useRef(null);
+  const downloadDialogRef = useRef(null);
   const containerRef = useRef(null);
+  const headerRef = useRef(null);
+
+  // Toggle a collapsible section — only one open at a time
+  const toggleSection = useCallback((section) => {
+    setExpandedSection((prev) => (prev === section ? null : section));
+    // Close any open dropdowns when switching sections
+    setShowPagePicker(false);
+    setShowVersionPicker(false);
+    setShowDownloadDialog(false);
+  }, []);
 
   // Parse files
   const files = useMemo(() => {
@@ -141,30 +183,40 @@ function PreviewModal({
   const fileList = files ? Object.keys(files) : [];
   const currentFileIndex = fileList.indexOf(activeFile);
 
-  const currentHtml = useMemo(() => {
+  // The "source of truth" HTML for the current file
+  const sourceHtml = useMemo(() => {
     if (isMultiPage && files[activeFile]) return files[activeFile];
     return html;
   }, [isMultiPage, files, activeFile, html]);
 
-  // Fix #17: Memoised highlighted code
+  // The displayed/editable code: either user-edited or source
+  const currentHtml = editedCode !== null ? editedCode : sourceHtml;
+
+  // Memoised highlighted code for the underlay
   const highlightedCode = useMemo(() => {
     if (!currentHtml) return "";
-    // Escape HTML entities first, then apply highlighting
-    const escaped = currentHtml
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;");
-    return highlightHtml(escaped);
+    return highlightHtml(currentHtml);
+  }, [currentHtml]);
+
+  // Line count for gutter
+  const lineCount = useMemo(() => {
+    if (!currentHtml) return 1;
+    return currentHtml.split("\n").length;
   }, [currentHtml]);
 
   const showHeadMessage = useMemo(() => {
-    // Only during streaming, while phase is "head" and there's no <body> yet
     return (
       isStreaming &&
       streamingPhase === "head" &&
       (!currentHtml || !currentHtml.includes("<body"))
     );
   }, [isStreaming, streamingPhase, currentHtml]);
+
+  // Reset edited code when source changes (new generation/version)
+  useEffect(() => {
+    setEditedCode(null);
+    setIsCodeDirty(false);
+  }, [sourceHtml]);
 
   // Reset active file when files change
   useEffect(() => {
@@ -173,7 +225,7 @@ function PreviewModal({
     }
   }, [files, activeFile, isMultiPage, fileList]);
 
-  // Close page picker on outside click
+  // Close dropdowns on outside click
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (pagePickerRef.current && !pagePickerRef.current.contains(e.target)) {
@@ -185,13 +237,19 @@ function PreviewModal({
       ) {
         setShowVersionPicker(false);
       }
+      if (
+        downloadDialogRef.current &&
+        !downloadDialogRef.current.contains(e.target)
+      ) {
+        setShowDownloadDialog(false);
+      }
     };
-    if (showPagePicker || showVersionPicker) {
+    if (showPagePicker || showVersionPicker || showDownloadDialog) {
       document.addEventListener("mousedown", handleClickOutside);
       return () =>
         document.removeEventListener("mousedown", handleClickOutside);
     }
-  }, [showPagePicker, showVersionPicker]);
+  }, [showPagePicker, showVersionPicker, showDownloadDialog]);
 
   // Fullscreen handling
   useEffect(() => {
@@ -202,6 +260,22 @@ function PreviewModal({
       document.removeEventListener("fullscreenchange", onChange);
       document.removeEventListener("webkitfullscreenchange", onChange);
     };
+  }, []);
+
+  // Sync line numbers + highlight underlay with textarea scroll
+  const handleCodeScroll = useCallback(() => {
+    const ta = textareaRef.current;
+    if (!ta) return;
+    const top = ta.scrollTop;
+    const left = ta.scrollLeft;
+    if (lineNumbersRef.current) {
+      const gutter = lineNumbersRef.current.querySelector('.code-editor__gutter');
+      if (gutter) gutter.style.transform = `translateY(-${top}px)`;
+    }
+    if (highlightRef.current) {
+      highlightRef.current.scrollTop = top;
+      highlightRef.current.scrollLeft = left;
+    }
   }, []);
 
   const toggleFullscreen = useCallback(() => {
@@ -223,6 +297,67 @@ function PreviewModal({
     window.open(url, "_blank", "noopener,noreferrer");
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }, [currentHtml]);
+
+  // Code editing handler with debounced preview sync
+  const handleCodeEdit = useCallback(
+    (e) => {
+      const newCode = e.target.value;
+      setEditedCode(newCode);
+      setIsCodeDirty(true);
+
+      // Debounced sync to preview
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+      debounceTimerRef.current = setTimeout(() => {
+        onCodeChange?.(newCode);
+      }, 500);
+    },
+    [onCodeChange]
+  );
+
+  // Reset code to AI-generated version
+  const handleResetCode = useCallback(() => {
+    setEditedCode(null);
+    setIsCodeDirty(false);
+    onCodeChange?.(sourceHtml);
+  }, [sourceHtml, onCodeChange]);
+
+  // Copy code to clipboard
+  const handleCopyCode = useCallback(async () => {
+    if (!currentHtml) return;
+    try {
+      await navigator.clipboard.writeText(currentHtml);
+      setCopySuccess(true);
+      setTimeout(() => setCopySuccess(false), 2000);
+    } catch {
+      // Fallback
+      const ta = document.createElement("textarea");
+      ta.value = currentHtml;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+      setCopySuccess(true);
+      setTimeout(() => setCopySuccess(false), 2000);
+    }
+  }, [currentHtml]);
+
+  // Handle tab key in textarea
+  const handleCodeKeyDown = useCallback((e) => {
+    if (e.key === "Tab") {
+      e.preventDefault();
+      const ta = e.target;
+      const start = ta.selectionStart;
+      const end = ta.selectionEnd;
+      const val = ta.value;
+      ta.value = val.substring(0, start) + "  " + val.substring(end);
+      ta.selectionStart = ta.selectionEnd = start + 2;
+      // Trigger change
+      const evt = new Event("input", { bubbles: true });
+      ta.dispatchEvent(evt);
+    }
+  }, []);
 
   const getViewportLabel = () => {
     switch (viewMode) {
@@ -267,10 +402,8 @@ function PreviewModal({
   const hasInput = enhancePrompt.trim().length > 0;
   const hasContent = !!currentHtml;
 
-  // Fix #15/#16: Determine body state
   const showError =
     !isGenerating && !isStreaming && generationError && !hasContent;
-  const showLoading = isGenerating && !hasContent && !generationError;
 
   return (
     <div
@@ -282,19 +415,6 @@ function PreviewModal({
         onMinimize();
       }}
     >
-      {/* Fix #20: Override mobile CSS to show single enhance bar instead of duplicate */}
-      <style>{`
-        /* Fix #17: Syntax highlight colors */
-        .hl-tag { color: #22863a; }
-        .hl-attr { color: #6f42c1; }
-        .hl-string { color: #032f62; }
-        .hl-comment { color: #6a737d; font-style: italic; }
-        [data-theme="dark"] .hl-tag { color: #7ee787; }
-        [data-theme="dark"] .hl-attr { color: #d2a8ff; }
-        [data-theme="dark"] .hl-string { color: #a5d6ff; }
-        [data-theme="dark"] .hl-comment { color: #8b949e; }
-      `}</style>
-
       <div
         ref={containerRef}
         className={`modal-content modal-content--preview ${
@@ -302,37 +422,47 @@ function PreviewModal({
         } ${isOpen ? "active" : ""}`}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* ===== UNIFIED HEADER ===== */}
-        <div className="pm-header">
-          {/* Brand icon */}
-          <div className="pm-header__brand">
-            <Cloudy size={20} />
+        {/* ===== FLOATING TOOLBAR ===== */}
+        <div className="pm-bar" ref={headerRef}>
+          {/* ── PINNED LEFT: Logo ── */}
+          <div className="pm-bar__brand">
+            <CloudSun size={16} />
           </div>
 
-          {/* Left: Tabs + Devices + Page pill + Version pill */}
-          <div className="pm-header__left">
-            <div className="pm-header__tabs">
-              <button
-                className={`pm-header__tab ${!showCode ? "active" : ""}`}
-                onClick={() => setShowCode(false)}
-              >
-                <Eye size={14} />
-                <span>Preview</span>
-              </button>
-              <button
-                className={`pm-header__tab ${showCode ? "active" : ""}`}
-                onClick={() => setShowCode(true)}
-              >
-                <Code2 size={14} />
-                <span>Code</span>
-              </button>
-            </div>
+          {/* ── SECTION: View (tabs, devices/code tools) ── */}
+          <div className={`pm-bar__section ${expandedSection === "view" ? "expanded" : "collapsed"}`}>
+            <button
+              className={`pm-bar__trigger ${expandedSection === "view" ? "active" : ""}`}
+              onClick={() => toggleSection("view")}
+              title="View options"
+            >
+              {showCode ? <Code2 size={15} /> : <Eye size={15} />}
+            </button>
+            <div className="pm-bar__section-body">
+              {/* Preview / Code tabs */}
+              <div className="pm-bar__tabs">
+                <button
+                  className={`pm-bar__tab ${!showCode ? "active" : ""}`}
+                  onClick={() => setShowCode(false)}
+                >
+                  <Eye size={13} />
+                  <span>Preview</span>
+                </button>
+                <button
+                  className={`pm-bar__tab ${showCode ? "active" : ""}`}
+                  onClick={() => setShowCode(true)}
+                >
+                  <Code2 size={13} />
+                  <span>Code</span>
+                  {isCodeDirty && <span className="pm-bar__dot" />}
+                </button>
+              </div>
 
-            {!showCode && (
-              <>
-                <div className="pm-header__sep" />
+              <div className="pm-bar__sep" />
 
-                <div className="pm-header__devices">
+              {/* Preview mode: device toggles */}
+              {!showCode && (
+                <div className="pm-bar__devices">
                   {[
                     { mode: "desktop", Icon: Monitor, label: "Desktop" },
                     { mode: "tablet", Icon: Tablet, label: "Tablet" },
@@ -340,161 +470,136 @@ function PreviewModal({
                   ].map(({ mode, Icon, label }) => (
                     <button
                       key={mode}
-                      className={`pm-header__device ${
-                        viewMode === mode ? "active" : ""
-                      }`}
+                      className={`pm-bar__device ${viewMode === mode ? "active" : ""}`}
                       onClick={() => setViewMode(mode)}
                       title={label}
                       disabled={isStreaming}
                     >
-                      <Icon size={14} />
+                      <Icon size={13} />
                     </button>
                   ))}
-                  <span className="pm-header__viewport">
-                    {getViewportLabel()}
-                  </span>
                 </div>
-              </>
-            )}
+              )}
 
-            {isMultiPage && !isStreaming && (
-              <>
-                <div className="pm-header__sep" />
-                <div className="pm-header__page-pill" ref={pagePickerRef}>
+              {/* Code mode: copy/reset tools */}
+              {showCode && (
+                <div className="pm-bar__code-tools">
                   <button
-                    className={`pm-header__page-btn ${
-                      showPagePicker ? "open" : ""
-                    }`}
-                    onClick={() => setShowPagePicker(!showPagePicker)}
+                    className={`pm-bar__tool-btn ${copySuccess ? "success" : ""}`}
+                    onClick={handleCopyCode}
+                    title="Copy code"
+                    disabled={!hasContent}
                   >
-                    <FileText size={13} />
-                    <span className="pm-header__page-name">
-                      {getPageDisplayName(activeFile)}
-                    </span>
-                    <span className="pm-header__page-count">
-                      {currentFileIndex + 1}/{fileList.length}
-                    </span>
-                    <ChevronDown
-                      size={12}
-                      className={`pm-header__page-chevron ${
-                        showPagePicker ? "open" : ""
-                      }`}
-                    />
+                    {copySuccess ? <Check size={12} /> : <Copy size={12} />}
+                    <span>{copySuccess ? "Copied" : "Copy"}</span>
                   </button>
-
-                  {showPagePicker && (
-                    <div className="pm-header__page-dropdown">
-                      {fileList.map((filename, index) => (
-                        <button
-                          key={filename}
-                          className={`pm-header__page-option ${
-                            activeFile === filename ? "active" : ""
-                          }`}
-                          onClick={() => {
-                            setActiveFile(filename);
-                            setShowPagePicker(false);
-                          }}
-                        >
-                          <span className="pm-header__page-option-idx">
-                            {index + 1}
-                          </span>
-                          <span className="pm-header__page-option-name">
-                            {getPageDisplayName(filename)}
-                          </span>
-                          {activeFile === filename && <Check size={13} />}
-                        </button>
-                      ))}
-                    </div>
+                  {isCodeDirty && (
+                    <button className="pm-bar__tool-btn" onClick={handleResetCode} title="Reset">
+                      <RotateCcw size={12} />
+                      <span>Reset</span>
+                    </button>
                   )}
                 </div>
-              </>
-            )}
-
-            {/* Version picker pill */}
-            {hasVersions && !isStreaming && !isEnhancing && (
-              <>
-                <div className="pm-header__sep" />
-                <div className="pm-header__version-pill" ref={versionPickerRef}>
-                  <button
-                    className={`pm-header__version-btn ${
-                      showVersionPicker ? "open" : ""
-                    }`}
-                    onClick={() => setShowVersionPicker(!showVersionPicker)}
-                  >
-                    <History size={13} />
-                    <span className="pm-header__version-label">
-                      {getCurrentVersionLabel()}
-                    </span>
-                    <ChevronDown
-                      size={12}
-                      className={`pm-header__page-chevron ${
-                        showVersionPicker ? "open" : ""
-                      }`}
-                    />
-                  </button>
-
-                  {showVersionPicker && (
-                    <div className="pm-header__version-dropdown">
-                      <div className="pm-header__version-dropdown-title">
-                        Version History
-                      </div>
-                      {versions.map((version, index) => {
-                        const vNum = versions.length - index;
-                        const isActive =
-                          version.id === currentVersionId ||
-                          (!currentVersionId && index === 0);
-                        return (
-                          <button
-                            key={version.id}
-                            className={`pm-header__version-option ${
-                              isActive ? "active" : ""
-                            }`}
-                            onClick={() => {
-                              onSelectVersion?.(version);
-                              setShowVersionPicker(false);
-                            }}
-                          >
-                            <span className="pm-header__version-option-badge">
-                              v{vNum}
-                            </span>
-                            <div className="pm-header__version-option-info">
-                              <span className="pm-header__version-option-name">
-                                {version.isInitial
-                                  ? "Initial generation"
-                                  : version.label ||
-                                    version.prompt ||
-                                    "Enhancement"}
-                              </span>
-                              <span className="pm-header__version-option-time">
-                                <Clock size={9} />
-                                {formatVersionTime(version.timestamp)}
-                              </span>
-                            </div>
-                            {isActive && <Check size={13} />}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-              </>
-            )}
+              )}
+            </div>
           </div>
 
-          {/*
-            Fix #20: Single enhance bar — visible on all breakpoints.
-            The "pm-header__center--unified" class overrides the default
-            mobile `display:none` on pm-header__center and repositions
-            the bar below the header on small screens.
-          */}
+          {/* ── SECTION: Pages (only multi-page) ── */}
+          {isMultiPage && !isStreaming && (
+            <div className={`pm-bar__section ${expandedSection === "pages" ? "expanded" : "collapsed"}`}>
+              <button
+                className={`pm-bar__trigger ${expandedSection === "pages" ? "active" : ""}`}
+                onClick={() => toggleSection("pages")}
+                title="Pages"
+              >
+                <FileText size={15} />
+              </button>
+              <div className="pm-bar__section-body" ref={pagePickerRef}>
+                <button
+                  className={`pm-bar__pill-btn ${showPagePicker ? "open" : ""}`}
+                  onClick={() => setShowPagePicker(!showPagePicker)}
+                >
+                  <span>{getPageDisplayName(activeFile)}</span>
+                  <span className="pm-bar__pill-count">{currentFileIndex + 1}/{fileList.length}</span>
+                  <ChevronDown size={11} className={`pm-bar__chevron ${showPagePicker ? "open" : ""}`} />
+                </button>
+
+                {showPagePicker && (
+                  <div className="pm-bar__dropdown">
+                    {fileList.map((filename, index) => (
+                      <button
+                        key={filename}
+                        className={`pm-bar__dropdown-item ${activeFile === filename ? "active" : ""}`}
+                        onClick={() => { setActiveFile(filename); setShowPagePicker(false); }}
+                      >
+                        <span className="pm-bar__dropdown-idx">{index + 1}</span>
+                        <span className="pm-bar__dropdown-label">{getPageDisplayName(filename)}</span>
+                        {activeFile === filename && <Check size={12} />}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* ── SECTION: Version ── */}
+          {hasVersions && !isStreaming && !isEnhancing && (
+            <div className={`pm-bar__section ${expandedSection === "version" ? "expanded" : "collapsed"}`}>
+              <button
+                className={`pm-bar__trigger ${expandedSection === "version" ? "active" : ""}`}
+                onClick={() => toggleSection("version")}
+                title="Version history"
+              >
+                <History size={15} />
+              </button>
+              <div className="pm-bar__section-body" ref={versionPickerRef}>
+                <button
+                  className={`pm-bar__pill-btn ${showVersionPicker ? "open" : ""}`}
+                  onClick={() => setShowVersionPicker(!showVersionPicker)}
+                >
+                  <span>{getCurrentVersionLabel()}</span>
+                  <ChevronDown size={11} className={`pm-bar__chevron ${showVersionPicker ? "open" : ""}`} />
+                </button>
+
+                {showVersionPicker && (
+                  <div className="pm-bar__dropdown pm-bar__dropdown--versions">
+                    <div className="pm-bar__dropdown-title">Version History</div>
+                    {versions.map((version, index) => {
+                      const vNum = versions.length - index;
+                      const isActive = version.id === currentVersionId || (!currentVersionId && index === 0);
+                      return (
+                        <button
+                          key={version.id}
+                          className={`pm-bar__dropdown-item ${isActive ? "active" : ""}`}
+                          onClick={() => { onSelectVersion?.(version); setShowVersionPicker(false); }}
+                        >
+                          <span className="pm-bar__dropdown-badge">v{vNum}</span>
+                          <div className="pm-bar__dropdown-info">
+                            <span className="pm-bar__dropdown-label">
+                              {version.isInitial ? "Initial generation" : version.label || version.prompt || "Enhancement"}
+                            </span>
+                            <span className="pm-bar__dropdown-time">
+                              <Clock size={9} />{formatVersionTime(version.timestamp)}
+                            </span>
+                          </div>
+                          {isActive && <Check size={12} />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* ── PINNED CENTER: Enhance bar ── */}
           <div
-            className={`pm-header__center pm-header__center--unified ${
-              hasInput ? "has-input" : ""
-            } ${isEnhancing ? "enhancing" : ""}`}
+            className={`pm-bar__enhance ${hasInput ? "has-input" : ""} ${isEnhancing ? "enhancing" : ""}`}
           >
             {hasContent && !isGenerating && !isStreaming && !isEnhancing && (
               <button
-                className="pm-header__enhance-fb"
+                className="pm-bar__enhance-fb"
                 onClick={() => setShowFeedbackModal(true)}
                 title="Give feedback"
               >
@@ -503,7 +608,7 @@ function PreviewModal({
             )}
 
             {isEnhancing && (
-              <div className="pm-header__enhance-ind">
+              <div className="pm-bar__enhance-ind">
                 <Loader2 size={13} className="spin" />
               </div>
             )}
@@ -514,91 +619,56 @@ function PreviewModal({
               value={enhancePrompt}
               onChange={(e) => onEnhancePromptChange(e.target.value)}
               onKeyDown={(e) => {
-                if (
-                  e.key === "Enter" &&
-                  !isGenerating &&
-                  !isEnhancing &&
-                  hasInput
-                )
-                  onEnhance();
+                if (e.key === "Enter" && !isGenerating && !isEnhancing && hasInput) onEnhance();
               }}
               placeholder={isEnhancing ? "Enhancing..." : "Describe changes..."}
-              className="pm-header__enhance-input"
+              className="pm-bar__enhance-input"
               disabled={isGenerating || isStreaming || isEnhancing}
             />
 
-            <div className="pm-header__enhance-btns">
+            <div className="pm-bar__enhance-btns">
               {hasInput && !isEnhancing && (
                 <button
-                  className={`pm-header__enhance-cost ${
-                    showEnhanceTokenOverlay ? "active" : ""
-                  }`}
+                  className={`pm-bar__enhance-cost ${showEnhanceTokenOverlay ? "active" : ""}`}
                   onClick={onToggleEnhanceTokenOverlay}
                 >
                   <Coins size={13} />
                   <span>{enhanceTokenCost}</span>
                 </button>
               )}
-
               <button
-                className="pm-header__enhance-go"
+                className="pm-bar__enhance-go"
                 onClick={onEnhance}
-                disabled={
-                  isGenerating || isStreaming || isEnhancing || !hasInput
-                }
+                disabled={isGenerating || isStreaming || isEnhancing || !hasInput}
               >
-                {isEnhancing ? (
-                  <Loader2 size={14} className="spin" />
-                ) : (
-                  <Sparkles size={14} />
-                )}
+                {isEnhancing ? <Loader2 size={14} className="spin" /> : <Sparkles size={14} />}
               </button>
             </div>
 
             {/* Token overlay */}
             {showEnhanceTokenOverlay && (
-              <div
-                className="pm-header__token-overlay"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <div className="pm-header__token-head">
-                  <Coins size={16} />
-                  <span>{enhanceTokenCost} tokens</span>
+              <div className="pm-bar__token-overlay" onClick={(e) => e.stopPropagation()}>
+                <div className="pm-bar__token-head">
+                  <Coins size={16} /><span>{enhanceTokenCost} tokens</span>
                 </div>
-                <div className="pm-header__token-items">
+                <div className="pm-bar__token-items">
                   {enhanceBreakdown.map((item, i) => (
-                    <div
-                      key={i}
-                      className={`pm-header__token-row ${
-                        item.type === "discount" ? "discount" : ""
-                      }`}
-                    >
+                    <div key={i} className={`pm-bar__token-row ${item.type === "discount" ? "discount" : ""}`}>
                       <span>{item.label}</span>
-                      <span>
-                        {item.type === "discount" ? "-" : "+"}
-                        {item.cost}
-                      </span>
+                      <span>{item.type === "discount" ? "-" : "+"}{item.cost}</span>
                     </div>
                   ))}
                 </div>
                 {isAuthenticated && (
-                  <div className="pm-header__token-bal">
+                  <div className="pm-bar__token-bal">
                     <span>Your balance</span>
-                    <span
-                      className={`pm-header__balance pm-header__balance--${tokenBalance.status}`}
-                    >
+                    <span className={`pm-bar__balance pm-bar__balance--${tokenBalance.status}`}>
                       {userTokens} tokens
                     </span>
                   </div>
                 )}
                 {!tokenBalance.sufficient && (
-                  <button
-                    className="pm-header__token-buy"
-                    onClick={() => {
-                      onToggleEnhanceTokenOverlay();
-                      onBuyTokens();
-                    }}
-                  >
+                  <button className="pm-bar__token-buy" onClick={() => { onToggleEnhanceTokenOverlay(); onBuyTokens(); }}>
                     Get More Tokens
                   </button>
                 )}
@@ -606,88 +676,92 @@ function PreviewModal({
             )}
           </div>
 
-          {/* Right: Preview actions + File actions + Close */}
-          <div className="pm-header__right">
-            {!showCode && (
-              <div className="pm-header__preview-actions">
-                <button
-                  className="pm-header__icon-btn"
-                  onClick={openInNewTab}
-                  title="Open in new tab"
-                  disabled={isStreaming || !hasContent}
-                >
-                  <ExternalLink size={14} />
-                </button>
-                <button
-                  className="pm-header__icon-btn"
-                  onClick={toggleFullscreen}
-                  title={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
-                >
-                  {isFullscreen ? (
-                    <Minimize2 size={14} />
-                  ) : (
-                    <Maximize2 size={14} />
-                  )}
-                </button>
-                <div className="pm-header__sep" />
-              </div>
-            )}
-
+          {/* ── SECTION: Actions (download, save, new tab, fullscreen) ── */}
+          <div className={`pm-bar__section ${expandedSection === "actions" ? "expanded" : "collapsed"}`}>
             <button
-              className="pm-header__action-btn"
-              onClick={onDownload}
-              title="Download"
-              disabled={isStreaming || isEnhancing || !hasContent}
+              className={`pm-bar__trigger ${expandedSection === "actions" ? "active" : ""}`}
+              onClick={() => toggleSection("actions")}
+              title="Actions"
             >
-              <Download size={14} />
-              <span>{isMultiPage ? "Download All" : "Download"}</span>
+              <Download size={15} />
             </button>
-
-            <button
-              className={`pm-header__action-btn ${
-                saveSuccess ? "success" : ""
-              }`}
-              onClick={onSave}
-              disabled={isSaving || isStreaming || isEnhancing || !hasContent}
-              title="Save"
-            >
-              {isSaving ? (
-                <Loader2 size={14} className="spin" />
-              ) : saveSuccess ? (
+            <div className="pm-bar__section-body">
+              {!showCode && (
                 <>
-                  <Check size={14} />
-                  <span>Saved!</span>
-                </>
-              ) : (
-                <>
-                  <Save size={14} />
-                  <span>Save</span>
+                  <button className="pm-bar__tool-btn" onClick={openInNewTab} title="New tab" disabled={isStreaming || !hasContent}>
+                    <ExternalLink size={13} />
+                  </button>
+                  <button className="pm-bar__tool-btn" onClick={toggleFullscreen} title={isFullscreen ? "Exit fullscreen" : "Fullscreen"}>
+                    {isFullscreen ? <Minimize2 size={13} /> : <Maximize2 size={13} />}
+                  </button>
+                  <div className="pm-bar__sep" />
                 </>
               )}
-            </button>
 
-            <button
-              className="pm-header__close-btn"
-              onClick={() => {
-                onClose();
-                onMinimize();
-              }}
-              title="Minimize"
-            >
-              <X size={15} />
-            </button>
+              {/* Download with format picker */}
+              <div className="pm-bar__download-wrap" ref={downloadDialogRef}>
+                <button
+                  className="pm-bar__action-btn"
+                  onClick={() => setShowDownloadDialog(!showDownloadDialog)}
+                  disabled={isStreaming || isEnhancing || !hasContent}
+                >
+                  <Download size={13} />
+                  <span>Export</span>
+                  <ChevronDown size={10} />
+                </button>
+
+                {showDownloadDialog && (
+                  <div className="pm-bar__dropdown pm-bar__dropdown--export">
+                    <div className="pm-bar__dropdown-title">Export as</div>
+                    {EXPORT_FORMATS.map((fmt) => {
+                      const Icon = FORMAT_ICONS[fmt.id] || Globe;
+                      return (
+                        <button
+                          key={fmt.id}
+                          className="pm-bar__dropdown-item pm-bar__dropdown-item--export"
+                          onClick={() => { setShowDownloadDialog(false); onDownload(fmt.id); }}
+                        >
+                          <div className="pm-bar__dropdown-icon"><Icon size={15} /></div>
+                          <div className="pm-bar__dropdown-info">
+                            <span className="pm-bar__dropdown-label">{fmt.label}</span>
+                            <span className="pm-bar__dropdown-desc">{fmt.description}</span>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              <button
+                className={`pm-bar__action-btn ${saveSuccess ? "success" : ""}`}
+                onClick={onSave}
+                disabled={isSaving || isStreaming || isEnhancing || !hasContent}
+              >
+                {isSaving ? <Loader2 size={13} className="spin" /> : saveSuccess ? (
+                  <><Check size={13} /><span>Saved!</span></>
+                ) : (
+                  <><Save size={13} /><span>Save</span></>
+                )}
+              </button>
+            </div>
           </div>
-        </div>
 
-        {/* Fix #20: Removed duplicate pm-mobile-enhance section.
-            The single enhance bar above (pm-header__center--unified) now
-            repositions itself below the header on mobile via CSS. */}
+          {/* ── PINNED RIGHT: Close ── */}
+          <button
+            className="pm-bar__close"
+            onClick={() => { onClose(); onMinimize(); }}
+            title="Minimize"
+          >
+            <X size={15} />
+          </button>
+        </div>
 
         {/* Body */}
         <div className="preview-modal__body">
           {/* Bottom fade overlay for floating bar */}
           <div className="preview-modal__bottom-fade" />
-          {/* Fix #15: Error state */}
+
           {showError ? (
             <div
               style={{
@@ -720,11 +794,63 @@ function PreviewModal({
               </p>
             </div>
           ) : showCode ? (
-            /* Fix #17: Syntax-highlighted code view */
-            <div className="preview-modal__code">
-              <pre>
-                <code dangerouslySetInnerHTML={{ __html: highlightedCode }} />
-              </pre>
+            /* ===== EDITABLE CODE VIEW ===== */
+            <div className="code-editor">
+              {/* File tree sidebar for multi-page */}
+              {isMultiPage && (
+                <div className="code-editor__sidebar">
+                  <div className="code-editor__sidebar-title">Files</div>
+                  {fileList.map((filename) => (
+                    <button
+                      key={filename}
+                      className={`code-editor__file ${
+                        activeFile === filename ? "active" : ""
+                      }`}
+                      onClick={() => {
+                        setActiveFile(filename);
+                        setEditedCode(null);
+                        setIsCodeDirty(false);
+                      }}
+                    >
+                      <FileText size={12} />
+                      <span>{filename}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* Editor wrapper — textarea is the single scroll authority */}
+              <div className="code-editor__wrap">
+                {/* Gutter — positioned via transform to follow textarea scroll */}
+                <div className="code-editor__gutter-track" ref={lineNumbersRef}>
+                  <div className="code-editor__gutter">
+                    {Array.from({ length: lineCount }, (_, i) => (
+                      <div key={i + 1} className="code-editor__line-num">
+                        {i + 1}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Textarea — the real editable input, transparent text */}
+                <textarea
+                  ref={textareaRef}
+                  className="code-editor__textarea"
+                  value={currentHtml || ""}
+                  onChange={handleCodeEdit}
+                  onScroll={handleCodeScroll}
+                  onKeyDown={handleCodeKeyDown}
+                  spellCheck={false}
+                  disabled={isStreaming || isEnhancing}
+                />
+
+                {/* Highlighted underlay — renders colored tokens, scrolls with textarea */}
+                <div className="code-editor__highlight" ref={highlightRef}>
+                  <pre>
+                    <code dangerouslySetInnerHTML={{ __html: highlightedCode }} />
+                  </pre>
+                </div>
+              </div>
             </div>
           ) : (
             <div
