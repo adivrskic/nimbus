@@ -1,4 +1,19 @@
-import { Cloudy, Zap, Palette, Download, Globe } from "lucide-react";
+import {
+  Cloudy,
+  Zap,
+  Palette,
+  Download,
+  Globe,
+  BarChart3,
+  FileText,
+  Database,
+  Mail,
+  Sparkles,
+  Settings,
+  MousePointerClick,
+  ArrowRight,
+  Coins,
+} from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
 import { useModals } from "../contexts/ModalContext";
@@ -36,6 +51,635 @@ const EMOJIS = [
   "🎨",
   "🚀",
 ];
+
+const ADD_ONS = [
+  {
+    icon: BarChart3,
+    title: "Analytics",
+    description:
+      "Track visitors, page views, and engagement with a lightweight analytics dashboard — no third-party scripts required.",
+    tag: "3–5 tokens",
+    visual: "analytics",
+  },
+  {
+    icon: FileText,
+    title: "Blog Engine",
+    description:
+      "Add a fully styled blog with article listings, post pages, tags, and reading time — generated from your site's design language.",
+    tag: "8–12 tokens",
+    visual: "blog",
+  },
+  {
+    icon: Database,
+    title: "CMS Integration",
+    description:
+      "Connect your content to Sanity, Contentful, or a simple JSON-based CMS so anyone on your team can edit without touching code.",
+    tag: "8–12 tokens",
+    visual: "cms",
+  },
+  {
+    icon: Mail,
+    title: "Contact Form",
+    description:
+      "A working contact form wired to Formspree, Netlify Forms, or a serverless endpoint — with validation and success states baked in.",
+    tag: "5–8 tokens",
+    visual: "form",
+  },
+];
+
+const HOW_IT_WORKS = [
+  {
+    icon: Sparkles,
+    step: "01",
+    title: "Describe & Generate",
+    description:
+      "Write a plain-English prompt describing your site — industry, audience, vibe. Hit generate and get a fully built, responsive website in seconds.",
+  },
+  {
+    icon: Settings,
+    step: "02",
+    title: "Customize Everything",
+    description:
+      "Fine-tune with 60+ design controls — layout, typography, colors, animations, spacing, hero style, and more. Every option adjusts the AI output.",
+  },
+  {
+    icon: MousePointerClick,
+    step: "03",
+    title: "Enhance & Iterate",
+    description:
+      "Not perfect? Describe what to change and enhance. The AI modifies only what you ask — keeping the rest intact. Way cheaper than regenerating.",
+  },
+];
+
+// Miniature mockup SVGs for add-on cards
+function AddOnVisual({ type }) {
+  const sharedStyles = {
+    width: "100%",
+    height: "100%",
+    borderRadius: "var(--radius-md)",
+  };
+
+  if (type === "analytics") {
+    return (
+      <svg viewBox="0 0 280 180" fill="none" style={sharedStyles}>
+        <rect width="280" height="180" rx="8" fill="var(--color-background)" />
+        {/* Mini chart bars */}
+        <rect
+          x="32"
+          y="120"
+          width="24"
+          height="40"
+          rx="4"
+          fill="var(--color-border-hover)"
+          opacity="0.5"
+        />
+        <rect
+          x="64"
+          y="95"
+          width="24"
+          height="65"
+          rx="4"
+          fill="var(--color-border-hover)"
+          opacity="0.6"
+        />
+        <rect
+          x="96"
+          y="105"
+          width="24"
+          height="55"
+          rx="4"
+          fill="var(--color-border-hover)"
+          opacity="0.5"
+        />
+        <rect
+          x="128"
+          y="75"
+          width="24"
+          height="85"
+          rx="4"
+          fill="var(--color-border-hover)"
+          opacity="0.7"
+        />
+        <rect
+          x="160"
+          y="55"
+          width="24"
+          height="105"
+          rx="4"
+          fill="var(--color-text-tertiary)"
+          opacity="0.8"
+        />
+        <rect
+          x="192"
+          y="68"
+          width="24"
+          height="92"
+          rx="4"
+          fill="var(--color-border-hover)"
+          opacity="0.6"
+        />
+        <rect
+          x="224"
+          y="45"
+          width="24"
+          height="115"
+          rx="4"
+          fill="var(--color-text-secondary)"
+          opacity="0.7"
+        />
+        {/* Stat cards */}
+        <rect
+          x="32"
+          y="20"
+          width="72"
+          height="32"
+          rx="6"
+          fill="var(--color-surface-elevated)"
+        />
+        <rect
+          x="40"
+          y="28"
+          width="40"
+          height="6"
+          rx="2"
+          fill="var(--color-text-tertiary)"
+          opacity="0.5"
+        />
+        <rect
+          x="40"
+          y="38"
+          width="24"
+          height="8"
+          rx="2"
+          fill="var(--color-text-primary)"
+          opacity="0.6"
+        />
+        <rect
+          x="116"
+          y="20"
+          width="72"
+          height="32"
+          rx="6"
+          fill="var(--color-surface-elevated)"
+        />
+        <rect
+          x="124"
+          y="28"
+          width="36"
+          height="6"
+          rx="2"
+          fill="var(--color-text-tertiary)"
+          opacity="0.5"
+        />
+        <rect
+          x="124"
+          y="38"
+          width="28"
+          height="8"
+          rx="2"
+          fill="var(--color-text-primary)"
+          opacity="0.6"
+        />
+        <rect
+          x="200"
+          y="20"
+          width="48"
+          height="32"
+          rx="6"
+          fill="var(--color-surface-elevated)"
+        />
+        <rect
+          x="208"
+          y="28"
+          width="32"
+          height="6"
+          rx="2"
+          fill="var(--color-text-tertiary)"
+          opacity="0.5"
+        />
+        <rect
+          x="208"
+          y="38"
+          width="20"
+          height="8"
+          rx="2"
+          fill="var(--color-text-primary)"
+          opacity="0.6"
+        />
+      </svg>
+    );
+  }
+
+  if (type === "blog") {
+    return (
+      <svg viewBox="0 0 280 180" fill="none" style={sharedStyles}>
+        <rect width="280" height="180" rx="8" fill="var(--color-background)" />
+        {/* Blog post card 1 */}
+        <rect
+          x="20"
+          y="16"
+          width="116"
+          height="148"
+          rx="6"
+          fill="var(--color-surface-elevated)"
+        />
+        <rect
+          x="28"
+          y="24"
+          width="100"
+          height="56"
+          rx="4"
+          fill="var(--color-border-hover)"
+          opacity="0.4"
+        />
+        <rect
+          x="28"
+          y="88"
+          width="80"
+          height="6"
+          rx="2"
+          fill="var(--color-text-primary)"
+          opacity="0.6"
+        />
+        <rect
+          x="28"
+          y="100"
+          width="96"
+          height="4"
+          rx="2"
+          fill="var(--color-text-tertiary)"
+          opacity="0.4"
+        />
+        <rect
+          x="28"
+          y="108"
+          width="72"
+          height="4"
+          rx="2"
+          fill="var(--color-text-tertiary)"
+          opacity="0.4"
+        />
+        <rect
+          x="28"
+          y="124"
+          width="40"
+          height="14"
+          rx="7"
+          fill="var(--color-border-hover)"
+          opacity="0.5"
+        />
+        <rect
+          x="74"
+          y="124"
+          width="32"
+          height="14"
+          rx="7"
+          fill="var(--color-border-hover)"
+          opacity="0.3"
+        />
+        <rect
+          x="28"
+          y="146"
+          width="52"
+          height="4"
+          rx="2"
+          fill="var(--color-text-tertiary)"
+          opacity="0.3"
+        />
+        {/* Blog post card 2 */}
+        <rect
+          x="144"
+          y="16"
+          width="116"
+          height="148"
+          rx="6"
+          fill="var(--color-surface-elevated)"
+        />
+        <rect
+          x="152"
+          y="24"
+          width="100"
+          height="56"
+          rx="4"
+          fill="var(--color-border-hover)"
+          opacity="0.3"
+        />
+        <rect
+          x="152"
+          y="88"
+          width="72"
+          height="6"
+          rx="2"
+          fill="var(--color-text-primary)"
+          opacity="0.6"
+        />
+        <rect
+          x="152"
+          y="100"
+          width="88"
+          height="4"
+          rx="2"
+          fill="var(--color-text-tertiary)"
+          opacity="0.4"
+        />
+        <rect
+          x="152"
+          y="108"
+          width="64"
+          height="4"
+          rx="2"
+          fill="var(--color-text-tertiary)"
+          opacity="0.4"
+        />
+        <rect
+          x="152"
+          y="124"
+          width="44"
+          height="14"
+          rx="7"
+          fill="var(--color-border-hover)"
+          opacity="0.5"
+        />
+        <rect
+          x="152"
+          y="146"
+          width="48"
+          height="4"
+          rx="2"
+          fill="var(--color-text-tertiary)"
+          opacity="0.3"
+        />
+      </svg>
+    );
+  }
+
+  if (type === "cms") {
+    return (
+      <svg viewBox="0 0 280 180" fill="none" style={sharedStyles}>
+        <rect width="280" height="180" rx="8" fill="var(--color-background)" />
+        {/* Sidebar */}
+        <rect
+          x="12"
+          y="12"
+          width="64"
+          height="156"
+          rx="6"
+          fill="var(--color-surface-elevated)"
+        />
+        <rect
+          x="20"
+          y="24"
+          width="48"
+          height="6"
+          rx="2"
+          fill="var(--color-text-primary)"
+          opacity="0.5"
+        />
+        <rect
+          x="20"
+          y="40"
+          width="40"
+          height="5"
+          rx="2"
+          fill="var(--color-text-tertiary)"
+          opacity="0.4"
+        />
+        <rect
+          x="20"
+          y="52"
+          width="44"
+          height="5"
+          rx="2"
+          fill="var(--color-text-tertiary)"
+          opacity="0.6"
+        />
+        <rect
+          x="20"
+          y="64"
+          width="36"
+          height="5"
+          rx="2"
+          fill="var(--color-text-tertiary)"
+          opacity="0.4"
+        />
+        <rect
+          x="20"
+          y="76"
+          width="40"
+          height="5"
+          rx="2"
+          fill="var(--color-text-tertiary)"
+          opacity="0.4"
+        />
+        {/* Content editor area */}
+        <rect
+          x="84"
+          y="12"
+          width="184"
+          height="36"
+          rx="6"
+          fill="var(--color-surface-elevated)"
+        />
+        <rect
+          x="92"
+          y="22"
+          width="120"
+          height="8"
+          rx="3"
+          fill="var(--color-text-primary)"
+          opacity="0.5"
+        />
+        <rect
+          x="92"
+          y="34"
+          width="60"
+          height="5"
+          rx="2"
+          fill="var(--color-text-tertiary)"
+          opacity="0.3"
+        />
+        {/* Field rows */}
+        <rect
+          x="84"
+          y="56"
+          width="184"
+          height="28"
+          rx="5"
+          fill="var(--color-surface-elevated)"
+        />
+        <rect
+          x="92"
+          y="64"
+          width="48"
+          height="5"
+          rx="2"
+          fill="var(--color-text-tertiary)"
+          opacity="0.4"
+        />
+        <rect
+          x="150"
+          y="62"
+          width="108"
+          height="14"
+          rx="4"
+          fill="var(--color-background)"
+        />
+        <rect
+          x="84"
+          y="92"
+          width="184"
+          height="28"
+          rx="5"
+          fill="var(--color-surface-elevated)"
+        />
+        <rect
+          x="92"
+          y="100"
+          width="36"
+          height="5"
+          rx="2"
+          fill="var(--color-text-tertiary)"
+          opacity="0.4"
+        />
+        <rect
+          x="150"
+          y="98"
+          width="108"
+          height="14"
+          rx="4"
+          fill="var(--color-background)"
+        />
+        <rect
+          x="84"
+          y="128"
+          width="184"
+          height="40"
+          rx="5"
+          fill="var(--color-surface-elevated)"
+        />
+        <rect
+          x="92"
+          y="136"
+          width="44"
+          height="5"
+          rx="2"
+          fill="var(--color-text-tertiary)"
+          opacity="0.4"
+        />
+        <rect
+          x="150"
+          y="132"
+          width="108"
+          height="28"
+          rx="4"
+          fill="var(--color-background)"
+        />
+      </svg>
+    );
+  }
+
+  if (type === "form") {
+    return (
+      <svg viewBox="0 0 280 180" fill="none" style={sharedStyles}>
+        <rect width="280" height="180" rx="8" fill="var(--color-background)" />
+        {/* Form card */}
+        <rect
+          x="40"
+          y="16"
+          width="200"
+          height="148"
+          rx="8"
+          fill="var(--color-surface-elevated)"
+        />
+        <rect
+          x="56"
+          y="28"
+          width="100"
+          height="8"
+          rx="3"
+          fill="var(--color-text-primary)"
+          opacity="0.6"
+        />
+        <rect
+          x="56"
+          y="42"
+          width="140"
+          height="4"
+          rx="2"
+          fill="var(--color-text-tertiary)"
+          opacity="0.3"
+        />
+        {/* Name field */}
+        <rect
+          x="56"
+          y="58"
+          width="60"
+          height="5"
+          rx="2"
+          fill="var(--color-text-tertiary)"
+          opacity="0.5"
+        />
+        <rect
+          x="56"
+          y="67"
+          width="168"
+          height="16"
+          rx="4"
+          fill="var(--color-background)"
+        />
+        {/* Email field */}
+        <rect
+          x="56"
+          y="92"
+          width="40"
+          height="5"
+          rx="2"
+          fill="var(--color-text-tertiary)"
+          opacity="0.5"
+        />
+        <rect
+          x="56"
+          y="101"
+          width="168"
+          height="16"
+          rx="4"
+          fill="var(--color-background)"
+        />
+        {/* Message field */}
+        <rect
+          x="56"
+          y="126"
+          width="56"
+          height="5"
+          rx="2"
+          fill="var(--color-text-tertiary)"
+          opacity="0.5"
+        />
+        {/* Submit button */}
+        <rect
+          x="56"
+          y="138"
+          width="72"
+          height="18"
+          rx="9"
+          fill="var(--color-text-primary)"
+          opacity="0.7"
+        />
+        <rect
+          x="68"
+          y="144"
+          width="48"
+          height="5"
+          rx="2"
+          fill="var(--color-background)"
+          opacity="0.8"
+        />
+      </svg>
+    );
+  }
+
+  return null;
+}
 
 function Footer() {
   const location = useLocation();
@@ -79,7 +723,7 @@ function Footer() {
     ranges.forEach((range, i) => {
       dropIdRef.current += 1;
       const x = range.start + Math.random() * range.width;
-      const duration = 1 + Math.random() * 0.4;
+      const duration = 1 + Math.random() * 0.2;
       const delay = i * 5 + Math.random() * 0.25;
 
       newDrops.push({
@@ -97,7 +741,7 @@ function Footer() {
       setDrops((prev) =>
         prev.filter((d) => !newDrops.some((nd) => nd.id === d.id))
       );
-    }, 2000);
+    }, 1000);
   };
 
   const stopRain = () => {
@@ -111,7 +755,7 @@ function Footer() {
       if (!isRaining) {
         setCurrentEmoji("");
       }
-    }, 2000);
+    }, 1000);
   };
 
   useEffect(() => {
@@ -194,9 +838,403 @@ function Footer() {
         </div>
       </section>
 
+      {/* How It Works — 3-step showcase */}
+      <section className="showcase">
+        <div className="container">
+          <div className="showcase__header">
+            <span className="showcase__label">How it works</span>
+            <h2 className="showcase__heading">
+              From idea to website in three steps
+            </h2>
+            <p className="showcase__subheading">
+              No wireframes. No mockups. No back-and-forth with designers. Just
+              describe, customize, and ship.
+            </p>
+          </div>
+
+          <div className="showcase__steps">
+            {HOW_IT_WORKS.map((step, i) => (
+              <div className="showcase__step" key={i}>
+                <div className="showcase__step-number">{step.step}</div>
+                <div className="showcase__step-icon">
+                  <step.icon size={20} />
+                </div>
+                <h3 className="showcase__step-title">{step.title}</h3>
+                <p className="showcase__step-desc">{step.description}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Preview mockup */}
+          <div className="showcase__preview">
+            <div className="showcase__preview-window">
+              <div className="showcase__preview-toolbar">
+                <div className="showcase__preview-dots">
+                  <span />
+                  <span />
+                  <span />
+                </div>
+                <div className="showcase__preview-tab">
+                  <Globe size={10} />
+                  <span>preview</span>
+                </div>
+              </div>
+              <div className="showcase__preview-body">
+                {/* Abstract website mockup */}
+                <svg
+                  viewBox="0 0 560 320"
+                  fill="none"
+                  className="showcase__preview-svg"
+                >
+                  {/* Nav */}
+                  <rect
+                    x="0"
+                    y="0"
+                    width="560"
+                    height="36"
+                    fill="var(--color-surface-elevated)"
+                  />
+                  <rect
+                    x="16"
+                    y="12"
+                    width="60"
+                    height="10"
+                    rx="3"
+                    fill="var(--color-text-primary)"
+                    opacity="0.5"
+                  />
+                  <rect
+                    x="380"
+                    y="14"
+                    width="32"
+                    height="6"
+                    rx="2"
+                    fill="var(--color-text-tertiary)"
+                    opacity="0.4"
+                  />
+                  <rect
+                    x="422"
+                    y="14"
+                    width="28"
+                    height="6"
+                    rx="2"
+                    fill="var(--color-text-tertiary)"
+                    opacity="0.4"
+                  />
+                  <rect
+                    x="460"
+                    y="14"
+                    width="36"
+                    height="6"
+                    rx="2"
+                    fill="var(--color-text-tertiary)"
+                    opacity="0.4"
+                  />
+                  <rect
+                    x="506"
+                    y="10"
+                    width="40"
+                    height="16"
+                    rx="8"
+                    fill="var(--color-text-primary)"
+                    opacity="0.6"
+                  />
+
+                  {/* Hero */}
+                  <rect
+                    x="32"
+                    y="60"
+                    width="240"
+                    height="14"
+                    rx="4"
+                    fill="var(--color-text-primary)"
+                    opacity="0.6"
+                  />
+                  <rect
+                    x="32"
+                    y="82"
+                    width="180"
+                    height="10"
+                    rx="3"
+                    fill="var(--color-text-primary)"
+                    opacity="0.35"
+                  />
+                  <rect
+                    x="32"
+                    y="98"
+                    width="220"
+                    height="6"
+                    rx="2"
+                    fill="var(--color-text-tertiary)"
+                    opacity="0.3"
+                  />
+                  <rect
+                    x="32"
+                    y="108"
+                    width="180"
+                    height="6"
+                    rx="2"
+                    fill="var(--color-text-tertiary)"
+                    opacity="0.3"
+                  />
+                  <rect
+                    x="32"
+                    y="128"
+                    width="80"
+                    height="24"
+                    rx="12"
+                    fill="var(--color-text-primary)"
+                    opacity="0.55"
+                  />
+                  <rect
+                    x="120"
+                    y="128"
+                    width="64"
+                    height="24"
+                    rx="12"
+                    fill="var(--color-border-hover)"
+                    opacity="0.5"
+                  />
+
+                  {/* Hero image placeholder */}
+                  <rect
+                    x="340"
+                    y="48"
+                    width="200"
+                    height="120"
+                    rx="8"
+                    fill="var(--color-border-hover)"
+                    opacity="0.3"
+                  />
+                  <circle
+                    cx="440"
+                    cy="100"
+                    r="20"
+                    fill="var(--color-text-tertiary)"
+                    opacity="0.15"
+                  />
+
+                  {/* Feature cards */}
+                  <rect
+                    x="32"
+                    y="188"
+                    width="156"
+                    height="80"
+                    rx="6"
+                    fill="var(--color-surface-elevated)"
+                  />
+                  <rect
+                    x="44"
+                    y="200"
+                    width="20"
+                    height="20"
+                    rx="4"
+                    fill="var(--color-border-hover)"
+                    opacity="0.5"
+                  />
+                  <rect
+                    x="44"
+                    y="228"
+                    width="80"
+                    height="6"
+                    rx="2"
+                    fill="var(--color-text-primary)"
+                    opacity="0.5"
+                  />
+                  <rect
+                    x="44"
+                    y="240"
+                    width="120"
+                    height="4"
+                    rx="2"
+                    fill="var(--color-text-tertiary)"
+                    opacity="0.3"
+                  />
+                  <rect
+                    x="44"
+                    y="248"
+                    width="100"
+                    height="4"
+                    rx="2"
+                    fill="var(--color-text-tertiary)"
+                    opacity="0.3"
+                  />
+
+                  <rect
+                    x="202"
+                    y="188"
+                    width="156"
+                    height="80"
+                    rx="6"
+                    fill="var(--color-surface-elevated)"
+                  />
+                  <rect
+                    x="214"
+                    y="200"
+                    width="20"
+                    height="20"
+                    rx="4"
+                    fill="var(--color-border-hover)"
+                    opacity="0.5"
+                  />
+                  <rect
+                    x="214"
+                    y="228"
+                    width="72"
+                    height="6"
+                    rx="2"
+                    fill="var(--color-text-primary)"
+                    opacity="0.5"
+                  />
+                  <rect
+                    x="214"
+                    y="240"
+                    width="110"
+                    height="4"
+                    rx="2"
+                    fill="var(--color-text-tertiary)"
+                    opacity="0.3"
+                  />
+                  <rect
+                    x="214"
+                    y="248"
+                    width="88"
+                    height="4"
+                    rx="2"
+                    fill="var(--color-text-tertiary)"
+                    opacity="0.3"
+                  />
+
+                  <rect
+                    x="372"
+                    y="188"
+                    width="156"
+                    height="80"
+                    rx="6"
+                    fill="var(--color-surface-elevated)"
+                  />
+                  <rect
+                    x="384"
+                    y="200"
+                    width="20"
+                    height="20"
+                    rx="4"
+                    fill="var(--color-border-hover)"
+                    opacity="0.5"
+                  />
+                  <rect
+                    x="384"
+                    y="228"
+                    width="88"
+                    height="6"
+                    rx="2"
+                    fill="var(--color-text-primary)"
+                    opacity="0.5"
+                  />
+                  <rect
+                    x="384"
+                    y="240"
+                    width="116"
+                    height="4"
+                    rx="2"
+                    fill="var(--color-text-tertiary)"
+                    opacity="0.3"
+                  />
+                  <rect
+                    x="384"
+                    y="248"
+                    width="96"
+                    height="4"
+                    rx="2"
+                    fill="var(--color-text-tertiary)"
+                    opacity="0.3"
+                  />
+
+                  {/* Footer bar */}
+                  <rect
+                    x="0"
+                    y="290"
+                    width="560"
+                    height="30"
+                    fill="var(--color-surface-elevated)"
+                  />
+                  <rect
+                    x="32"
+                    y="302"
+                    width="60"
+                    height="5"
+                    rx="2"
+                    fill="var(--color-text-tertiary)"
+                    opacity="0.3"
+                  />
+                  <rect
+                    x="460"
+                    y="302"
+                    width="72"
+                    height="5"
+                    rx="2"
+                    fill="var(--color-text-tertiary)"
+                    opacity="0.3"
+                  />
+                </svg>
+              </div>
+            </div>
+            <p className="showcase__preview-caption">
+              Real-time preview with desktop, tablet, and mobile viewports —
+              what you see is what you ship.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Add-Ons section — 2-column cards */}
+      <section className="addons">
+        <div className="container">
+          <div className="addons__header">
+            <span className="addons__label">Add-ons</span>
+            <h2 className="addons__heading">
+              Supercharge your site after generation
+            </h2>
+            <p className="addons__subheading">
+              Bolt on analytics, a blog, CMS, or contact forms — each add-on is
+              a one-click token purchase that integrates directly into your
+              generated code.
+            </p>
+          </div>
+
+          <div className="addons__grid">
+            {ADD_ONS.map((addon, i) => (
+              <div className="addons__card" key={i}>
+                <div className="addons__card-visual">
+                  <AddOnVisual type={addon.visual} />
+                </div>
+                <div className="addons__card-body">
+                  <div className="addons__card-top">
+                    <div className="addons__card-icon">
+                      <addon.icon size={16} />
+                    </div>
+                    <span className="addons__card-tag">
+                      <Coins size={10} />
+                      {addon.tag}
+                    </span>
+                  </div>
+                  <h3 className="addons__card-title">{addon.title}</h3>
+                  <p className="addons__card-desc">{addon.description}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <p className="addons__note">
+            More add-ons coming soon — custom domains, auth scaffolding, PWA
+            support, e-commerce, and i18n.
+          </p>
+        </div>
+      </section>
+
       {/* Existing footer */}
       <footer className="footer">
-        <div className="footer__container container">
+        <div className="container">
           <div className="footer__content">
             <div
               className="footer__cloud-container"
@@ -243,7 +1281,7 @@ function Footer() {
                   }
                   100% {
                     opacity: 0;
-                    transform: translate3d(0, 300px, 0) scale(1);
+                    transform: translate3d(0, 200px, 0) scale(1);
                   }
                 }
               `}</style>
