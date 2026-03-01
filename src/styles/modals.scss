@@ -5370,12 +5370,51 @@
   box-shadow: 0 4px 32px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.04);
 }
 
+// Desktop: View + Actions always expanded, triggers hidden for those
+@media (min-width: 1025px) {
+  .pm-bar__section--view,
+  .pm-bar__section--actions {
+    // Always show body regardless of state
+    .pm-bar__section-body {
+      max-width: 500px !important;
+      opacity: 1 !important;
+      overflow: visible !important;
+      pointer-events: auto !important;
+    }
+    // Hide the trigger — sections are always expanded on desktop
+    > .pm-bar__trigger {
+      display: none;
+    }
+  }
+}
+
+// Tablet: everything collapsible, enhance inline
+@media (max-width: 1024px) and (min-width: 769px) {
+  .pm-bar {
+    gap: 1px;
+    &__tab span {
+      display: none;
+    }
+    &__action-btn span {
+      display: none;
+    }
+    &__action-btn {
+      padding: 5px 7px;
+    }
+  }
+}
+
+// Mobile: enhance bar docked below the bar
 @media (max-width: 768px) {
   .pm-bar {
     bottom: 16px;
     padding: 4px;
     max-width: calc(100% - 20px);
     gap: 1px;
+    // Allow wrapping so enhance goes to its own row
+    flex-wrap: wrap;
+    border-radius: 20px;
+
     &__brand {
       width: 28px;
       height: 28px;
@@ -5396,34 +5435,32 @@
     &__action-btn {
       padding: 5px 7px;
     }
+
+    // Enhance bar takes full width on its own row
     &__enhance {
-      position: absolute;
-      bottom: calc(100% + 8px);
-      left: 50%;
-      transform: translateX(-50%);
-      width: calc(100vw - 24px);
-      max-width: 440px;
-      border-radius: 999px;
-      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.03);
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      backdrop-filter: blur(20px) saturate(1.6);
+      order: 99;
+      flex: 0 0 100%;
+      margin-top: 4px;
+      border-top: 1px solid var(--color-border);
+      padding-top: 6px;
+      border-radius: 0 0 16px 16px;
     }
+
     &__dropdown {
       bottom: calc(100% + 8px);
     }
   }
 }
 
+// Small mobile: tighter
 @media (max-width: 480px) {
   .pm-bar {
     bottom: 12px;
     padding: 3px;
     max-width: calc(100% - 12px);
+    border-radius: 16px;
+
     &__brand {
-      display: none;
-    }
-    &__sep {
       display: none;
     }
     &__close {
@@ -5441,6 +5478,11 @@
     &__device {
       width: 24px;
       height: 24px;
+    }
+
+    &__enhance {
+      margin-top: 3px;
+      padding-top: 5px;
     }
   }
 }

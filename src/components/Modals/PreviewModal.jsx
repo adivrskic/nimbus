@@ -42,30 +42,26 @@ import "../../styles/modals.scss";
 // ─── Lightweight HTML syntax highlighter ─────────────────────────────────────
 function highlightHtml(code) {
   if (!code) return "";
-  return code
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    // HTML comments
-    .replace(
-      /(&lt;!--[\s\S]*?--&gt;)/g,
-      '<span class="hl-comment">$1</span>'
-    )
-    // Tags (opening + closing)
-    .replace(
-      /(&lt;\/??)([a-zA-Z][a-zA-Z0-9-]*)/g,
-      '$1<span class="hl-tag">$2</span>'
-    )
-    // Attribute names
-    .replace(
-      /\s([a-zA-Z\-:]+)(=)/g,
-      ' <span class="hl-attr">$1</span>$2'
-    )
-    // Quoted strings
-    .replace(
-      /("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')/g,
-      '<span class="hl-string">$1</span>'
-    );
+  return (
+    code
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      // HTML comments
+      .replace(/(&lt;!--[\s\S]*?--&gt;)/g, '<span class="hl-comment">$1</span>')
+      // Tags (opening + closing)
+      .replace(
+        /(&lt;\/??)([a-zA-Z][a-zA-Z0-9-]*)/g,
+        '$1<span class="hl-tag">$2</span>'
+      )
+      // Attribute names
+      .replace(/\s([a-zA-Z\-:]+)(=)/g, ' <span class="hl-attr">$1</span>$2')
+      // Quoted strings
+      .replace(
+        /("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')/g,
+        '<span class="hl-string">$1</span>'
+      )
+  );
 }
 
 // Format icon map
@@ -269,7 +265,9 @@ function PreviewModal({
     const top = ta.scrollTop;
     const left = ta.scrollLeft;
     if (lineNumbersRef.current) {
-      const gutter = lineNumbersRef.current.querySelector('.code-editor__gutter');
+      const gutter = lineNumbersRef.current.querySelector(
+        ".code-editor__gutter"
+      );
       if (gutter) gutter.style.transform = `translateY(-${top}px)`;
     }
     if (highlightRef.current) {
@@ -430,9 +428,15 @@ function PreviewModal({
           </div>
 
           {/* ── SECTION: View (tabs, devices/code tools) ── */}
-          <div className={`pm-bar__section ${expandedSection === "view" ? "expanded" : "collapsed"}`}>
+          <div
+            className={`pm-bar__section pm-bar__section--view ${
+              expandedSection === "view" ? "expanded" : "collapsed"
+            }`}
+          >
             <button
-              className={`pm-bar__trigger ${expandedSection === "view" ? "active" : ""}`}
+              className={`pm-bar__trigger ${
+                expandedSection === "view" ? "active" : ""
+              }`}
               onClick={() => toggleSection("view")}
               title="View options"
             >
@@ -470,7 +474,9 @@ function PreviewModal({
                   ].map(({ mode, Icon, label }) => (
                     <button
                       key={mode}
-                      className={`pm-bar__device ${viewMode === mode ? "active" : ""}`}
+                      className={`pm-bar__device ${
+                        viewMode === mode ? "active" : ""
+                      }`}
                       onClick={() => setViewMode(mode)}
                       title={label}
                       disabled={isStreaming}
@@ -485,7 +491,9 @@ function PreviewModal({
               {showCode && (
                 <div className="pm-bar__code-tools">
                   <button
-                    className={`pm-bar__tool-btn ${copySuccess ? "success" : ""}`}
+                    className={`pm-bar__tool-btn ${
+                      copySuccess ? "success" : ""
+                    }`}
                     onClick={handleCopyCode}
                     title="Copy code"
                     disabled={!hasContent}
@@ -494,7 +502,11 @@ function PreviewModal({
                     <span>{copySuccess ? "Copied" : "Copy"}</span>
                   </button>
                   {isCodeDirty && (
-                    <button className="pm-bar__tool-btn" onClick={handleResetCode} title="Reset">
+                    <button
+                      className="pm-bar__tool-btn"
+                      onClick={handleResetCode}
+                      title="Reset"
+                    >
                       <RotateCcw size={12} />
                       <span>Reset</span>
                     </button>
@@ -506,96 +518,143 @@ function PreviewModal({
 
           {/* ── SECTION: Pages (only multi-page) ── */}
           {isMultiPage && !isStreaming && (
-            <div className={`pm-bar__section ${expandedSection === "pages" ? "expanded" : "collapsed"}`}>
+            <div
+              className={`pm-bar__section ${
+                expandedSection === "pages" ? "expanded" : "collapsed"
+              }`}
+              ref={pagePickerRef}
+            >
               <button
-                className={`pm-bar__trigger ${expandedSection === "pages" ? "active" : ""}`}
+                className={`pm-bar__trigger ${
+                  expandedSection === "pages" ? "active" : ""
+                }`}
                 onClick={() => toggleSection("pages")}
                 title="Pages"
               >
                 <FileText size={15} />
               </button>
-              <div className="pm-bar__section-body" ref={pagePickerRef}>
+              <div className="pm-bar__section-body">
                 <button
                   className={`pm-bar__pill-btn ${showPagePicker ? "open" : ""}`}
                   onClick={() => setShowPagePicker(!showPagePicker)}
                 >
                   <span>{getPageDisplayName(activeFile)}</span>
-                  <span className="pm-bar__pill-count">{currentFileIndex + 1}/{fileList.length}</span>
-                  <ChevronDown size={11} className={`pm-bar__chevron ${showPagePicker ? "open" : ""}`} />
+                  <span className="pm-bar__pill-count">
+                    {currentFileIndex + 1}/{fileList.length}
+                  </span>
+                  <ChevronDown
+                    size={11}
+                    className={`pm-bar__chevron ${
+                      showPagePicker ? "open" : ""
+                    }`}
+                  />
                 </button>
-
-                {showPagePicker && (
-                  <div className="pm-bar__dropdown">
-                    {fileList.map((filename, index) => (
-                      <button
-                        key={filename}
-                        className={`pm-bar__dropdown-item ${activeFile === filename ? "active" : ""}`}
-                        onClick={() => { setActiveFile(filename); setShowPagePicker(false); }}
-                      >
-                        <span className="pm-bar__dropdown-idx">{index + 1}</span>
-                        <span className="pm-bar__dropdown-label">{getPageDisplayName(filename)}</span>
-                        {activeFile === filename && <Check size={12} />}
-                      </button>
-                    ))}
-                  </div>
-                )}
               </div>
+              {showPagePicker && (
+                <div className="pm-bar__dropdown">
+                  {fileList.map((filename, index) => (
+                    <button
+                      key={filename}
+                      className={`pm-bar__dropdown-item ${
+                        activeFile === filename ? "active" : ""
+                      }`}
+                      onClick={() => {
+                        setActiveFile(filename);
+                        setShowPagePicker(false);
+                      }}
+                    >
+                      <span className="pm-bar__dropdown-idx">{index + 1}</span>
+                      <span className="pm-bar__dropdown-label">
+                        {getPageDisplayName(filename)}
+                      </span>
+                      {activeFile === filename && <Check size={12} />}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
           {/* ── SECTION: Version ── */}
           {hasVersions && !isStreaming && !isEnhancing && (
-            <div className={`pm-bar__section ${expandedSection === "version" ? "expanded" : "collapsed"}`}>
+            <div
+              className={`pm-bar__section ${
+                expandedSection === "version" ? "expanded" : "collapsed"
+              }`}
+              ref={versionPickerRef}
+            >
               <button
-                className={`pm-bar__trigger ${expandedSection === "version" ? "active" : ""}`}
+                className={`pm-bar__trigger ${
+                  expandedSection === "version" ? "active" : ""
+                }`}
                 onClick={() => toggleSection("version")}
                 title="Version history"
               >
                 <History size={15} />
               </button>
-              <div className="pm-bar__section-body" ref={versionPickerRef}>
+              <div className="pm-bar__section-body">
                 <button
-                  className={`pm-bar__pill-btn ${showVersionPicker ? "open" : ""}`}
+                  className={`pm-bar__pill-btn ${
+                    showVersionPicker ? "open" : ""
+                  }`}
                   onClick={() => setShowVersionPicker(!showVersionPicker)}
                 >
                   <span>{getCurrentVersionLabel()}</span>
-                  <ChevronDown size={11} className={`pm-bar__chevron ${showVersionPicker ? "open" : ""}`} />
+                  <ChevronDown
+                    size={11}
+                    className={`pm-bar__chevron ${
+                      showVersionPicker ? "open" : ""
+                    }`}
+                  />
                 </button>
-
-                {showVersionPicker && (
-                  <div className="pm-bar__dropdown pm-bar__dropdown--versions">
-                    <div className="pm-bar__dropdown-title">Version History</div>
-                    {versions.map((version, index) => {
-                      const vNum = versions.length - index;
-                      const isActive = version.id === currentVersionId || (!currentVersionId && index === 0);
-                      return (
-                        <button
-                          key={version.id}
-                          className={`pm-bar__dropdown-item ${isActive ? "active" : ""}`}
-                          onClick={() => { onSelectVersion?.(version); setShowVersionPicker(false); }}
-                        >
-                          <span className="pm-bar__dropdown-badge">v{vNum}</span>
-                          <div className="pm-bar__dropdown-info">
-                            <span className="pm-bar__dropdown-label">
-                              {version.isInitial ? "Initial generation" : version.label || version.prompt || "Enhancement"}
-                            </span>
-                            <span className="pm-bar__dropdown-time">
-                              <Clock size={9} />{formatVersionTime(version.timestamp)}
-                            </span>
-                          </div>
-                          {isActive && <Check size={12} />}
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
               </div>
+              {showVersionPicker && (
+                <div className="pm-bar__dropdown pm-bar__dropdown--versions">
+                  <div className="pm-bar__dropdown-title">Version History</div>
+                  {versions.map((version, index) => {
+                    const vNum = versions.length - index;
+                    const isActive =
+                      version.id === currentVersionId ||
+                      (!currentVersionId && index === 0);
+                    return (
+                      <button
+                        key={version.id}
+                        className={`pm-bar__dropdown-item ${
+                          isActive ? "active" : ""
+                        }`}
+                        onClick={() => {
+                          onSelectVersion?.(version);
+                          setShowVersionPicker(false);
+                        }}
+                      >
+                        <span className="pm-bar__dropdown-badge">v{vNum}</span>
+                        <div className="pm-bar__dropdown-info">
+                          <span className="pm-bar__dropdown-label">
+                            {version.isInitial
+                              ? "Initial generation"
+                              : version.label ||
+                                version.prompt ||
+                                "Enhancement"}
+                          </span>
+                          <span className="pm-bar__dropdown-time">
+                            <Clock size={9} />
+                            {formatVersionTime(version.timestamp)}
+                          </span>
+                        </div>
+                        {isActive && <Check size={12} />}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           )}
 
           {/* ── PINNED CENTER: Enhance bar ── */}
           <div
-            className={`pm-bar__enhance ${hasInput ? "has-input" : ""} ${isEnhancing ? "enhancing" : ""}`}
+            className={`pm-bar__enhance ${hasInput ? "has-input" : ""} ${
+              isEnhancing ? "enhancing" : ""
+            }`}
           >
             {hasContent && !isGenerating && !isStreaming && !isEnhancing && (
               <button
@@ -619,7 +678,13 @@ function PreviewModal({
               value={enhancePrompt}
               onChange={(e) => onEnhancePromptChange(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === "Enter" && !isGenerating && !isEnhancing && hasInput) onEnhance();
+                if (
+                  e.key === "Enter" &&
+                  !isGenerating &&
+                  !isEnhancing &&
+                  hasInput
+                )
+                  onEnhance();
               }}
               placeholder={isEnhancing ? "Enhancing..." : "Describe changes..."}
               className="pm-bar__enhance-input"
@@ -629,7 +694,9 @@ function PreviewModal({
             <div className="pm-bar__enhance-btns">
               {hasInput && !isEnhancing && (
                 <button
-                  className={`pm-bar__enhance-cost ${showEnhanceTokenOverlay ? "active" : ""}`}
+                  className={`pm-bar__enhance-cost ${
+                    showEnhanceTokenOverlay ? "active" : ""
+                  }`}
                   onClick={onToggleEnhanceTokenOverlay}
                 >
                   <Coins size={13} />
@@ -639,36 +706,62 @@ function PreviewModal({
               <button
                 className="pm-bar__enhance-go"
                 onClick={onEnhance}
-                disabled={isGenerating || isStreaming || isEnhancing || !hasInput}
+                disabled={
+                  isGenerating || isStreaming || isEnhancing || !hasInput
+                }
               >
-                {isEnhancing ? <Loader2 size={14} className="spin" /> : <Sparkles size={14} />}
+                {isEnhancing ? (
+                  <Loader2 size={14} className="spin" />
+                ) : (
+                  <Sparkles size={14} />
+                )}
               </button>
             </div>
 
             {/* Token overlay */}
             {showEnhanceTokenOverlay && (
-              <div className="pm-bar__token-overlay" onClick={(e) => e.stopPropagation()}>
+              <div
+                className="pm-bar__token-overlay"
+                onClick={(e) => e.stopPropagation()}
+              >
                 <div className="pm-bar__token-head">
-                  <Coins size={16} /><span>{enhanceTokenCost} tokens</span>
+                  <Coins size={16} />
+                  <span>{enhanceTokenCost} tokens</span>
                 </div>
                 <div className="pm-bar__token-items">
                   {enhanceBreakdown.map((item, i) => (
-                    <div key={i} className={`pm-bar__token-row ${item.type === "discount" ? "discount" : ""}`}>
+                    <div
+                      key={i}
+                      className={`pm-bar__token-row ${
+                        item.type === "discount" ? "discount" : ""
+                      }`}
+                    >
                       <span>{item.label}</span>
-                      <span>{item.type === "discount" ? "-" : "+"}{item.cost}</span>
+                      <span>
+                        {item.type === "discount" ? "-" : "+"}
+                        {item.cost}
+                      </span>
                     </div>
                   ))}
                 </div>
                 {isAuthenticated && (
                   <div className="pm-bar__token-bal">
                     <span>Your balance</span>
-                    <span className={`pm-bar__balance pm-bar__balance--${tokenBalance.status}`}>
+                    <span
+                      className={`pm-bar__balance pm-bar__balance--${tokenBalance.status}`}
+                    >
                       {userTokens} tokens
                     </span>
                   </div>
                 )}
                 {!tokenBalance.sufficient && (
-                  <button className="pm-bar__token-buy" onClick={() => { onToggleEnhanceTokenOverlay(); onBuyTokens(); }}>
+                  <button
+                    className="pm-bar__token-buy"
+                    onClick={() => {
+                      onToggleEnhanceTokenOverlay();
+                      onBuyTokens();
+                    }}
+                  >
                     Get More Tokens
                   </button>
                 )}
@@ -677,9 +770,16 @@ function PreviewModal({
           </div>
 
           {/* ── SECTION: Actions (download, save, new tab, fullscreen) ── */}
-          <div className={`pm-bar__section ${expandedSection === "actions" ? "expanded" : "collapsed"}`}>
+          <div
+            className={`pm-bar__section pm-bar__section--actions ${
+              expandedSection === "actions" ? "expanded" : "collapsed"
+            }`}
+            ref={downloadDialogRef}
+          >
             <button
-              className={`pm-bar__trigger ${expandedSection === "actions" ? "active" : ""}`}
+              className={`pm-bar__trigger ${
+                expandedSection === "actions" ? "active" : ""
+              }`}
               onClick={() => toggleSection("actions")}
               title="Actions"
             >
@@ -688,69 +788,96 @@ function PreviewModal({
             <div className="pm-bar__section-body">
               {!showCode && (
                 <>
-                  <button className="pm-bar__tool-btn" onClick={openInNewTab} title="New tab" disabled={isStreaming || !hasContent}>
+                  <button
+                    className="pm-bar__tool-btn"
+                    onClick={openInNewTab}
+                    title="New tab"
+                    disabled={isStreaming || !hasContent}
+                  >
                     <ExternalLink size={13} />
                   </button>
-                  <button className="pm-bar__tool-btn" onClick={toggleFullscreen} title={isFullscreen ? "Exit fullscreen" : "Fullscreen"}>
-                    {isFullscreen ? <Minimize2 size={13} /> : <Maximize2 size={13} />}
+                  <button
+                    className="pm-bar__tool-btn"
+                    onClick={toggleFullscreen}
+                    title={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
+                  >
+                    {isFullscreen ? (
+                      <Minimize2 size={13} />
+                    ) : (
+                      <Maximize2 size={13} />
+                    )}
                   </button>
                   <div className="pm-bar__sep" />
                 </>
               )}
-
-              {/* Download with format picker */}
-              <div className="pm-bar__download-wrap" ref={downloadDialogRef}>
-                <button
-                  className="pm-bar__action-btn"
-                  onClick={() => setShowDownloadDialog(!showDownloadDialog)}
-                  disabled={isStreaming || isEnhancing || !hasContent}
-                >
-                  <Download size={13} />
-                  <span>Export</span>
-                  <ChevronDown size={10} />
-                </button>
-
-                {showDownloadDialog && (
-                  <div className="pm-bar__dropdown pm-bar__dropdown--export">
-                    <div className="pm-bar__dropdown-title">Export as</div>
-                    {EXPORT_FORMATS.map((fmt) => {
-                      const Icon = FORMAT_ICONS[fmt.id] || Globe;
-                      return (
-                        <button
-                          key={fmt.id}
-                          className="pm-bar__dropdown-item pm-bar__dropdown-item--export"
-                          onClick={() => { setShowDownloadDialog(false); onDownload(fmt.id); }}
-                        >
-                          <div className="pm-bar__dropdown-icon"><Icon size={15} /></div>
-                          <div className="pm-bar__dropdown-info">
-                            <span className="pm-bar__dropdown-label">{fmt.label}</span>
-                            <span className="pm-bar__dropdown-desc">{fmt.description}</span>
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-
+              <button
+                className="pm-bar__action-btn"
+                onClick={() => setShowDownloadDialog(!showDownloadDialog)}
+                disabled={isStreaming || isEnhancing || !hasContent}
+              >
+                <Download size={13} />
+                <span>Export</span>
+                <ChevronDown size={10} />
+              </button>
               <button
                 className={`pm-bar__action-btn ${saveSuccess ? "success" : ""}`}
                 onClick={onSave}
                 disabled={isSaving || isStreaming || isEnhancing || !hasContent}
               >
-                {isSaving ? <Loader2 size={13} className="spin" /> : saveSuccess ? (
-                  <><Check size={13} /><span>Saved!</span></>
+                {isSaving ? (
+                  <Loader2 size={13} className="spin" />
+                ) : saveSuccess ? (
+                  <>
+                    <Check size={13} />
+                    <span>Saved!</span>
+                  </>
                 ) : (
-                  <><Save size={13} /><span>Save</span></>
+                  <>
+                    <Save size={13} />
+                    <span>Save</span>
+                  </>
                 )}
               </button>
             </div>
+            {showDownloadDialog && (
+              <div className="pm-bar__dropdown pm-bar__dropdown--export">
+                <div className="pm-bar__dropdown-title">Export as</div>
+                {EXPORT_FORMATS.map((fmt) => {
+                  const Icon = FORMAT_ICONS[fmt.id] || Globe;
+                  return (
+                    <button
+                      key={fmt.id}
+                      className="pm-bar__dropdown-item pm-bar__dropdown-item--export"
+                      onClick={() => {
+                        setShowDownloadDialog(false);
+                        onDownload(fmt.id);
+                      }}
+                    >
+                      <div className="pm-bar__dropdown-icon">
+                        <Icon size={15} />
+                      </div>
+                      <div className="pm-bar__dropdown-info">
+                        <span className="pm-bar__dropdown-label">
+                          {fmt.label}
+                        </span>
+                        <span className="pm-bar__dropdown-desc">
+                          {fmt.description}
+                        </span>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           {/* ── PINNED RIGHT: Close ── */}
           <button
             className="pm-bar__close"
-            onClick={() => { onClose(); onMinimize(); }}
+            onClick={() => {
+              onClose();
+              onMinimize();
+            }}
             title="Minimize"
           >
             <X size={15} />
@@ -847,7 +974,9 @@ function PreviewModal({
                 {/* Highlighted underlay — renders colored tokens, scrolls with textarea */}
                 <div className="code-editor__highlight" ref={highlightRef}>
                   <pre>
-                    <code dangerouslySetInnerHTML={{ __html: highlightedCode }} />
+                    <code
+                      dangerouslySetInnerHTML={{ __html: highlightedCode }}
+                    />
                   </pre>
                 </div>
               </div>
