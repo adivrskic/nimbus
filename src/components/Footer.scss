@@ -240,6 +240,7 @@
   padding: calc(var(--spacing-unit) * 10) 0;
   background: var(--color-surface);
   width: 100%;
+  margin-top: 100vh;
 
   @media (max-width: 768px) {
     padding: calc(var(--spacing-unit) * 7) 0;
