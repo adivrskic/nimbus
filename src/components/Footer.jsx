@@ -779,7 +779,7 @@ function Footer() {
   return (
     <>
       {/* About section — what nimbus does */}
-      <section className="about">
+      {/* <section className="about">
         <div className="container">
           <div className="about__content">
             <h2 className="about__heading">Describe it. Generate it.</h2>
@@ -836,7 +836,7 @@ function Footer() {
             </p>
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* How It Works — 3-step showcase */}
       <section className="showcase">
