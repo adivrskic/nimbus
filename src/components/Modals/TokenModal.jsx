@@ -91,14 +91,14 @@ function TokenModal({
                   <span
                     className={`token-modal__balance-value token-modal__balance-value--${tokenBalance.status}`}
                   >
-                    {userTokens} tokens
+                    {userTokens}
                   </span>
                 </div>
 
                 <div className="token-modal__balance-row token-modal__balance-row--cost">
                   <span>Cost</span>
                   <span className="token-modal__balance-cost">
-                    -{tokenCost} tokens
+                    -{tokenCost}
                   </span>
                 </div>
 
@@ -113,7 +113,7 @@ function TokenModal({
                         : "token-modal__balance-remaining--sufficient"
                     }`}
                   >
-                    {remainingTokens} tokens
+                    {remainingTokens}
                     {!isSufficient && (
                       <AlertCircle
                         size={14}

@@ -22,6 +22,7 @@ import {
   AlertCircle,
   History,
   Clock,
+  Cloudy,
 } from "lucide-react";
 import GeneratedPreview from "../GeneratedPreview";
 import FeedbackModal from "./FeedbackModal";
@@ -303,6 +304,11 @@ function PreviewModal({
       >
         {/* ===== UNIFIED HEADER ===== */}
         <div className="pm-header">
+          {/* Brand icon */}
+          <div className="pm-header__brand">
+            <Cloudy size={20} />
+          </div>
+
           {/* Left: Tabs + Devices + Page pill + Version pill */}
           <div className="pm-header__left">
             <div className="pm-header__tabs">
@@ -679,6 +685,8 @@ function PreviewModal({
 
         {/* Body */}
         <div className="preview-modal__body">
+          {/* Bottom fade overlay for floating bar */}
+          <div className="preview-modal__bottom-fade" />
           {/* Fix #15: Error state */}
           {showError ? (
             <div
