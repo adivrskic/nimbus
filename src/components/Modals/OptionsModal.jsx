@@ -432,6 +432,7 @@ function OptionsModal({
                 flexDirection: "column",
                 gap: 28,
                 paddingRight: 4,
+                marginBottom: 100,
               }}
               className="modal-body"
             >

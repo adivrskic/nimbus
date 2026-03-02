@@ -42,7 +42,6 @@
   flex-direction: column;
   gap: 16px;
   width: 720px;
-  max-width: 90vw;
   max-height: 85vh;
   overflow-y: auto;
   background: transparent;
@@ -72,7 +71,6 @@
     max-width: 720px;
     height: 100dvh;
     max-height: none;
-    padding: 16px;
     gap: 24px;
     overflow-y: hidden;
     margin-top: 140px;
@@ -1774,9 +1772,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
-  background: var(--color-accent-light);
+  background: none;
   border-radius: var(--radius-sm);
   color: var(--color-accent);
   flex-shrink: 0;
@@ -2659,7 +2655,6 @@
 @media (max-width: 768px) {
   .modal-content--options {
     max-width: 100%;
-    padding: 16px;
     gap: 16px;
   }
 

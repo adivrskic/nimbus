@@ -840,7 +840,7 @@ function Footer() {
 
       {/* How It Works — 3-step showcase */}
       <section className="showcase">
-        <div className="container">
+        <div className=" container">
           <div className="showcase__header">
             <span className="showcase__label">How it works</span>
             <h2 className="showcase__heading">
@@ -1234,7 +1234,7 @@ function Footer() {
 
       {/* Existing footer */}
       <footer className="footer">
-        <div className="container">
+        <div className="footer__container container">
           <div className="footer__content">
             <div
               className="footer__cloud-container"
