@@ -171,39 +171,6 @@ export function clearCacheEntry(
   } catch {}
 }
 
-export function clearAllCache() {
-  memoryCache.clear();
-
-  try {
-    const index = getCacheIndex();
-    index.forEach((entry) => {
-      try {
-        localStorage.removeItem(entry.key);
-      } catch {}
-    });
-    localStorage.removeItem(CACHE_INDEX_KEY);
-  } catch {}
-}
-
-export function getCacheStats() {
-  const index = getCacheIndex();
-  const validEntries = index.filter((entry) => {
-    try {
-      const stored = localStorage.getItem(entry.key);
-      return stored && isEntryValid(JSON.parse(stored));
-    } catch {
-      return false;
-    }
-  });
-
-  return {
-    totalEntries: index.length,
-    validEntries: validEntries.length,
-    memoryEntries: memoryCache.size,
-    maxSize: MAX_CACHE_SIZE,
-  };
-}
-
 export function shouldUseCache(isRefinement = false) {
   return !isRefinement;
 }
@@ -212,7 +179,5 @@ export default {
   get: getCachedGeneration,
   set: cacheGeneration,
   clear: clearCacheEntry,
-  clearAll: clearAllCache,
-  stats: getCacheStats,
   shouldUse: shouldUseCache,
 };

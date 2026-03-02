@@ -205,7 +205,7 @@ const ParticleWave = ({ isMenuOpen }) => {
       <planeGeometry args={[planeWidth, planeHeight, 150, 150]} />
       <pointsMaterial
         ref={materialRef}
-        size={0.01}
+        size={0.02}
         color={theme === "light" ? "#333" : "#ccc"}
         sizeAttenuation
         transparent
