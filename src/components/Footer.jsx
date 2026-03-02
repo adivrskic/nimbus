@@ -93,21 +93,21 @@ const HOW_IT_WORKS = [
     step: "01",
     title: "Describe & Generate",
     description:
-      "Write a plain-English prompt describing your site — industry, audience, vibe. Hit generate and get a fully built, responsive website in seconds.",
+      "Write a plain-English prompt describing your site — industry, audience, vibe. Get a fully built, responsive website in seconds.",
   },
   {
     icon: Settings,
     step: "02",
     title: "Customize Everything",
     description:
-      "Fine-tune with 60+ design controls — layout, typography, colors, animations, spacing, hero style, and more. Every option adjusts the AI output.",
+      "Fine-tune with 60+ design controls — layout, typography, colors, animations, and more. Every option adjusts the output.",
   },
   {
     icon: MousePointerClick,
     step: "03",
     title: "Enhance & Iterate",
     description:
-      "Not perfect? Describe what to change and enhance. The AI modifies only what you ask — keeping the rest intact. Way cheaper than regenerating.",
+      "Not perfect? Describe what to enhance. The AI modifies only what you ask — keeping the rest intact.",
   },
 ];
 
@@ -842,7 +842,7 @@ function Footer() {
       <div className="showcase-addons-wrapper">
         {/* How It Works — 3-step showcase */}
         <section className="showcase">
-          <div className=" container">
+          <div className="footer__container container">
             <div className="showcase__header">
               <span className="showcase__label">How it works</span>
               <h2 className="showcase__heading">
@@ -1191,7 +1191,7 @@ function Footer() {
 
         {/* Add-Ons section — 2-column cards */}
         <section className="addons">
-          <div className="container">
+          <div className="footer__container container">
             <div className="addons__header">
               <span className="addons__label">Add-ons</span>
               <h2 className="addons__heading">

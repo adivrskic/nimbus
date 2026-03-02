@@ -177,7 +177,7 @@ const ParticleWave = ({ isMenuOpen }) => {
     // Smoothly interpolate position and rotation
     currentPosition.current.lerp(targetPosition, 0.04);
     currentRotation.current.x +=
-      (targetRotation.x - currentRotation.current.x) * 0.17;
+      (targetRotation.x - currentRotation.current.x) * 0.07;
     currentRotation.current.y +=
       (targetRotation.y - currentRotation.current.y) * 0.37;
     currentRotation.current.z +=
@@ -205,7 +205,7 @@ const ParticleWave = ({ isMenuOpen }) => {
       <planeGeometry args={[planeWidth, planeHeight, 150, 150]} />
       <pointsMaterial
         ref={materialRef}
-        size={0.02}
+        size={0.01}
         color={theme === "light" ? "#333" : "#ccc"}
         sizeAttenuation
         transparent
@@ -221,6 +221,7 @@ const ParticleWave = ({ isMenuOpen }) => {
 
 const BackgroundWave = ({ isMenuOpen }) => {
   const [isMobile, setIsMobile] = useState(false);
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -234,6 +235,10 @@ const BackgroundWave = ({ isMenuOpen }) => {
   return (
     <Canvas
       camera={{ position: [0, 2, 8], fov: 30 }}
+      onCreated={() => {
+        // Small delay so the first rendered frame is painted before we fade in
+        requestAnimationFrame(() => setLoaded(true));
+      }}
       style={{
         position: "absolute",
         top: 0,
@@ -241,6 +246,11 @@ const BackgroundWave = ({ isMenuOpen }) => {
         width: "100%",
         height: "100%",
         pointerEvents: "none",
+        opacity: loaded ? 1 : 0,
+        transform: loaded ? "scale(1.06)" : "scale(1)",
+        transition:
+          "opacity 2.8s cubic-bezier(0.16, 1, 0.3, 1), transform 3.4s cubic-bezier(0.16, 1, 0.3, 1)",
+        willChange: "opacity, transform",
       }}
       gl={{ alpha: true }}
     >

@@ -3440,7 +3440,6 @@
     }
 
     svg:last-child {
-      margin-left: auto;
       color: var(--color-accent);
     }
   }
@@ -4628,7 +4627,6 @@
     }
 
     svg:last-child {
-      margin-left: auto;
       color: var(--color-accent);
       flex-shrink: 0;
     }
@@ -4742,13 +4740,11 @@
   min-height: 46px;
   position: absolute;
   bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 16px;
+  right: 16px;
   z-index: 100;
-  border-radius: 999px;
+  border-radius: 16px;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.03);
-  max-width: calc(100% - 32px);
-  width: auto;
 
   &__brand {
     display: flex;
@@ -5066,7 +5062,6 @@
       font-weight: 600;
     }
     svg:last-child {
-      margin-left: auto;
       color: var(--color-accent);
       flex-shrink: 0;
     }
@@ -5387,6 +5382,8 @@
 @media (max-width: 1024px) and (min-width: 769px) {
   .pm-bar {
     gap: 1px;
+    left: 16px;
+    right: 16px;
     &__tab span {
       display: none;
     }
@@ -5403,12 +5400,13 @@
 @media (max-width: 768px) {
   .pm-bar {
     bottom: 16px;
+    left: 10px;
+    right: 10px;
     padding: 4px;
-    max-width: calc(100% - 20px);
     gap: 1px;
     // Allow wrapping so enhance goes to its own row
     flex-wrap: wrap;
-    border-radius: 20px;
+    border-radius: 16px;
 
     &__brand {
       width: 28px;
@@ -5451,9 +5449,10 @@
 @media (max-width: 480px) {
   .pm-bar {
     bottom: 12px;
+    left: 6px;
+    right: 6px;
     padding: 3px;
-    max-width: calc(100% - 12px);
-    border-radius: 16px;
+    border-radius: 14px;
 
     &__brand {
       display: none;

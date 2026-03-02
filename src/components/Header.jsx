@@ -133,7 +133,7 @@ function Header({ modalActive: externalModalActive = false }) {
                     }}
                   >
                     <span className="header__marble-glow" />
-                    <span className="header__marble-label">Generated Site</span>
+                    <span className="header__marble-label">View Site</span>
                   </button>
                 )}
                 <button
