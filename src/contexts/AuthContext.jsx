@@ -514,31 +514,6 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const updatePassword = async (newPassword) => {
-    try {
-      supabase.auth
-        .updateUser({
-          password: newPassword,
-        })
-        .then(({ error }) => {
-          if (error) {
-            console.error("Background password update error:", error);
-          } else {
-          }
-        });
-
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      return { success: true };
-    } catch (e) {
-      console.error("Update password exception:", e);
-      return {
-        success: false,
-        error: e.message || "Failed to update password",
-      };
-    }
-  };
-
   const resetPassword = async (email) => {
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
@@ -612,7 +587,6 @@ export function AuthProvider({ children }) {
     login,
     logout,
     updateProfile,
-    updatePassword,
     resetPassword,
     showResetPassword,
     setShowResetPassword,

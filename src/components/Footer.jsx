@@ -838,399 +838,403 @@ function Footer() {
         </div>
       </section> */}
 
-      {/* How It Works — 3-step showcase */}
-      <section className="showcase">
-        <div className=" container">
-          <div className="showcase__header">
-            <span className="showcase__label">How it works</span>
-            <h2 className="showcase__heading">
-              From idea to website in three steps
-            </h2>
-            <p className="showcase__subheading">
-              No wireframes. No mockups. No back-and-forth with designers. Just
-              describe, customize, and ship.
-            </p>
-          </div>
-
-          <div className="showcase__steps">
-            {HOW_IT_WORKS.map((step, i) => (
-              <div className="showcase__step" key={i}>
-                <div className="showcase__step-number">{step.step}</div>
-                <div className="showcase__step-icon">
-                  <step.icon size={20} />
-                </div>
-                <h3 className="showcase__step-title">{step.title}</h3>
-                <p className="showcase__step-desc">{step.description}</p>
-              </div>
-            ))}
-          </div>
-
-          {/* Preview mockup */}
-          <div className="showcase__preview">
-            <div className="showcase__preview-window">
-              <div className="showcase__preview-toolbar">
-                <div className="showcase__preview-dots">
-                  <span />
-                  <span />
-                  <span />
-                </div>
-                <div className="showcase__preview-tab">
-                  <Globe size={10} />
-                  <span>preview</span>
-                </div>
-              </div>
-              <div className="showcase__preview-body">
-                {/* Abstract website mockup */}
-                <svg
-                  viewBox="0 0 560 320"
-                  fill="none"
-                  className="showcase__preview-svg"
-                >
-                  {/* Nav */}
-                  <rect
-                    x="0"
-                    y="0"
-                    width="560"
-                    height="36"
-                    fill="var(--color-surface-elevated)"
-                  />
-                  <rect
-                    x="16"
-                    y="12"
-                    width="60"
-                    height="10"
-                    rx="3"
-                    fill="var(--color-text-primary)"
-                    opacity="0.5"
-                  />
-                  <rect
-                    x="380"
-                    y="14"
-                    width="32"
-                    height="6"
-                    rx="2"
-                    fill="var(--color-text-tertiary)"
-                    opacity="0.4"
-                  />
-                  <rect
-                    x="422"
-                    y="14"
-                    width="28"
-                    height="6"
-                    rx="2"
-                    fill="var(--color-text-tertiary)"
-                    opacity="0.4"
-                  />
-                  <rect
-                    x="460"
-                    y="14"
-                    width="36"
-                    height="6"
-                    rx="2"
-                    fill="var(--color-text-tertiary)"
-                    opacity="0.4"
-                  />
-                  <rect
-                    x="506"
-                    y="10"
-                    width="40"
-                    height="16"
-                    rx="8"
-                    fill="var(--color-text-primary)"
-                    opacity="0.6"
-                  />
-
-                  {/* Hero */}
-                  <rect
-                    x="32"
-                    y="60"
-                    width="240"
-                    height="14"
-                    rx="4"
-                    fill="var(--color-text-primary)"
-                    opacity="0.6"
-                  />
-                  <rect
-                    x="32"
-                    y="82"
-                    width="180"
-                    height="10"
-                    rx="3"
-                    fill="var(--color-text-primary)"
-                    opacity="0.35"
-                  />
-                  <rect
-                    x="32"
-                    y="98"
-                    width="220"
-                    height="6"
-                    rx="2"
-                    fill="var(--color-text-tertiary)"
-                    opacity="0.3"
-                  />
-                  <rect
-                    x="32"
-                    y="108"
-                    width="180"
-                    height="6"
-                    rx="2"
-                    fill="var(--color-text-tertiary)"
-                    opacity="0.3"
-                  />
-                  <rect
-                    x="32"
-                    y="128"
-                    width="80"
-                    height="24"
-                    rx="12"
-                    fill="var(--color-text-primary)"
-                    opacity="0.55"
-                  />
-                  <rect
-                    x="120"
-                    y="128"
-                    width="64"
-                    height="24"
-                    rx="12"
-                    fill="var(--color-border-hover)"
-                    opacity="0.5"
-                  />
-
-                  {/* Hero image placeholder */}
-                  <rect
-                    x="340"
-                    y="48"
-                    width="200"
-                    height="120"
-                    rx="8"
-                    fill="var(--color-border-hover)"
-                    opacity="0.3"
-                  />
-                  <circle
-                    cx="440"
-                    cy="100"
-                    r="20"
-                    fill="var(--color-text-tertiary)"
-                    opacity="0.15"
-                  />
-
-                  {/* Feature cards */}
-                  <rect
-                    x="32"
-                    y="188"
-                    width="156"
-                    height="80"
-                    rx="6"
-                    fill="var(--color-surface-elevated)"
-                  />
-                  <rect
-                    x="44"
-                    y="200"
-                    width="20"
-                    height="20"
-                    rx="4"
-                    fill="var(--color-border-hover)"
-                    opacity="0.5"
-                  />
-                  <rect
-                    x="44"
-                    y="228"
-                    width="80"
-                    height="6"
-                    rx="2"
-                    fill="var(--color-text-primary)"
-                    opacity="0.5"
-                  />
-                  <rect
-                    x="44"
-                    y="240"
-                    width="120"
-                    height="4"
-                    rx="2"
-                    fill="var(--color-text-tertiary)"
-                    opacity="0.3"
-                  />
-                  <rect
-                    x="44"
-                    y="248"
-                    width="100"
-                    height="4"
-                    rx="2"
-                    fill="var(--color-text-tertiary)"
-                    opacity="0.3"
-                  />
-
-                  <rect
-                    x="202"
-                    y="188"
-                    width="156"
-                    height="80"
-                    rx="6"
-                    fill="var(--color-surface-elevated)"
-                  />
-                  <rect
-                    x="214"
-                    y="200"
-                    width="20"
-                    height="20"
-                    rx="4"
-                    fill="var(--color-border-hover)"
-                    opacity="0.5"
-                  />
-                  <rect
-                    x="214"
-                    y="228"
-                    width="72"
-                    height="6"
-                    rx="2"
-                    fill="var(--color-text-primary)"
-                    opacity="0.5"
-                  />
-                  <rect
-                    x="214"
-                    y="240"
-                    width="110"
-                    height="4"
-                    rx="2"
-                    fill="var(--color-text-tertiary)"
-                    opacity="0.3"
-                  />
-                  <rect
-                    x="214"
-                    y="248"
-                    width="88"
-                    height="4"
-                    rx="2"
-                    fill="var(--color-text-tertiary)"
-                    opacity="0.3"
-                  />
-
-                  <rect
-                    x="372"
-                    y="188"
-                    width="156"
-                    height="80"
-                    rx="6"
-                    fill="var(--color-surface-elevated)"
-                  />
-                  <rect
-                    x="384"
-                    y="200"
-                    width="20"
-                    height="20"
-                    rx="4"
-                    fill="var(--color-border-hover)"
-                    opacity="0.5"
-                  />
-                  <rect
-                    x="384"
-                    y="228"
-                    width="88"
-                    height="6"
-                    rx="2"
-                    fill="var(--color-text-primary)"
-                    opacity="0.5"
-                  />
-                  <rect
-                    x="384"
-                    y="240"
-                    width="116"
-                    height="4"
-                    rx="2"
-                    fill="var(--color-text-tertiary)"
-                    opacity="0.3"
-                  />
-                  <rect
-                    x="384"
-                    y="248"
-                    width="96"
-                    height="4"
-                    rx="2"
-                    fill="var(--color-text-tertiary)"
-                    opacity="0.3"
-                  />
-
-                  {/* Footer bar */}
-                  <rect
-                    x="0"
-                    y="290"
-                    width="560"
-                    height="30"
-                    fill="var(--color-surface-elevated)"
-                  />
-                  <rect
-                    x="32"
-                    y="302"
-                    width="60"
-                    height="5"
-                    rx="2"
-                    fill="var(--color-text-tertiary)"
-                    opacity="0.3"
-                  />
-                  <rect
-                    x="460"
-                    y="302"
-                    width="72"
-                    height="5"
-                    rx="2"
-                    fill="var(--color-text-tertiary)"
-                    opacity="0.3"
-                  />
-                </svg>
-              </div>
+      {/* Showcase + Add-ons gradient wrapper */}
+      <div className="showcase-addons-wrapper">
+        {/* How It Works — 3-step showcase */}
+        <section className="showcase">
+          <div className=" container">
+            <div className="showcase__header">
+              <span className="showcase__label">How it works</span>
+              <h2 className="showcase__heading">
+                From idea to website in three steps
+              </h2>
+              <p className="showcase__subheading">
+                No wireframes. No mockups. No back-and-forth with designers.
+                Just describe, customize, and ship.
+              </p>
             </div>
-            <p className="showcase__preview-caption">
-              Real-time preview with desktop, tablet, and mobile viewports —
-              what you see is what you ship.
-            </p>
-          </div>
-        </div>
-      </section>
 
-      {/* Add-Ons section — 2-column cards */}
-      <section className="addons">
-        <div className="container">
-          <div className="addons__header">
-            <span className="addons__label">Add-ons</span>
-            <h2 className="addons__heading">
-              Supercharge your site after generation
-            </h2>
-            <p className="addons__subheading">
-              Bolt on analytics, a blog, CMS, or contact forms — each add-on is
-              a one-click token purchase that integrates directly into your
-              generated code.
-            </p>
-          </div>
-
-          <div className="addons__grid">
-            {ADD_ONS.map((addon, i) => (
-              <div className="addons__card" key={i}>
-                <div className="addons__card-visual">
-                  <AddOnVisual type={addon.visual} />
-                </div>
-                <div className="addons__card-body">
-                  <div className="addons__card-top">
-                    <div className="addons__card-icon">
-                      <addon.icon size={16} />
-                    </div>
-                    <span className="addons__card-tag">
-                      <Coins size={10} />
-                      {addon.tag}
-                    </span>
+            <div className="showcase__steps">
+              {HOW_IT_WORKS.map((step, i) => (
+                <div className="showcase__step" key={i}>
+                  <div className="showcase__step-number">{step.step}</div>
+                  <div className="showcase__step-icon">
+                    <step.icon size={20} />
                   </div>
-                  <h3 className="addons__card-title">{addon.title}</h3>
-                  <p className="addons__card-desc">{addon.description}</p>
+                  <h3 className="showcase__step-title">{step.title}</h3>
+                  <p className="showcase__step-desc">{step.description}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Preview mockup */}
+            <div className="showcase__preview">
+              <div className="showcase__preview-window">
+                <div className="showcase__preview-toolbar">
+                  <div className="showcase__preview-dots">
+                    <span />
+                    <span />
+                    <span />
+                  </div>
+                  <div className="showcase__preview-tab">
+                    <Globe size={10} />
+                    <span>preview</span>
+                  </div>
+                </div>
+                <div className="showcase__preview-body">
+                  {/* Abstract website mockup */}
+                  <svg
+                    viewBox="0 0 560 320"
+                    fill="none"
+                    className="showcase__preview-svg"
+                  >
+                    {/* Nav */}
+                    <rect
+                      x="0"
+                      y="0"
+                      width="560"
+                      height="36"
+                      fill="var(--color-surface-elevated)"
+                    />
+                    <rect
+                      x="16"
+                      y="12"
+                      width="60"
+                      height="10"
+                      rx="3"
+                      fill="var(--color-text-primary)"
+                      opacity="0.5"
+                    />
+                    <rect
+                      x="380"
+                      y="14"
+                      width="32"
+                      height="6"
+                      rx="2"
+                      fill="var(--color-text-tertiary)"
+                      opacity="0.4"
+                    />
+                    <rect
+                      x="422"
+                      y="14"
+                      width="28"
+                      height="6"
+                      rx="2"
+                      fill="var(--color-text-tertiary)"
+                      opacity="0.4"
+                    />
+                    <rect
+                      x="460"
+                      y="14"
+                      width="36"
+                      height="6"
+                      rx="2"
+                      fill="var(--color-text-tertiary)"
+                      opacity="0.4"
+                    />
+                    <rect
+                      x="506"
+                      y="10"
+                      width="40"
+                      height="16"
+                      rx="8"
+                      fill="var(--color-text-primary)"
+                      opacity="0.6"
+                    />
+
+                    {/* Hero */}
+                    <rect
+                      x="32"
+                      y="60"
+                      width="240"
+                      height="14"
+                      rx="4"
+                      fill="var(--color-text-primary)"
+                      opacity="0.6"
+                    />
+                    <rect
+                      x="32"
+                      y="82"
+                      width="180"
+                      height="10"
+                      rx="3"
+                      fill="var(--color-text-primary)"
+                      opacity="0.35"
+                    />
+                    <rect
+                      x="32"
+                      y="98"
+                      width="220"
+                      height="6"
+                      rx="2"
+                      fill="var(--color-text-tertiary)"
+                      opacity="0.3"
+                    />
+                    <rect
+                      x="32"
+                      y="108"
+                      width="180"
+                      height="6"
+                      rx="2"
+                      fill="var(--color-text-tertiary)"
+                      opacity="0.3"
+                    />
+                    <rect
+                      x="32"
+                      y="128"
+                      width="80"
+                      height="24"
+                      rx="12"
+                      fill="var(--color-text-primary)"
+                      opacity="0.55"
+                    />
+                    <rect
+                      x="120"
+                      y="128"
+                      width="64"
+                      height="24"
+                      rx="12"
+                      fill="var(--color-border-hover)"
+                      opacity="0.5"
+                    />
+
+                    {/* Hero image placeholder */}
+                    <rect
+                      x="340"
+                      y="48"
+                      width="200"
+                      height="120"
+                      rx="8"
+                      fill="var(--color-border-hover)"
+                      opacity="0.3"
+                    />
+                    <circle
+                      cx="440"
+                      cy="100"
+                      r="20"
+                      fill="var(--color-text-tertiary)"
+                      opacity="0.15"
+                    />
+
+                    {/* Feature cards */}
+                    <rect
+                      x="32"
+                      y="188"
+                      width="156"
+                      height="80"
+                      rx="6"
+                      fill="var(--color-surface-elevated)"
+                    />
+                    <rect
+                      x="44"
+                      y="200"
+                      width="20"
+                      height="20"
+                      rx="4"
+                      fill="var(--color-border-hover)"
+                      opacity="0.5"
+                    />
+                    <rect
+                      x="44"
+                      y="228"
+                      width="80"
+                      height="6"
+                      rx="2"
+                      fill="var(--color-text-primary)"
+                      opacity="0.5"
+                    />
+                    <rect
+                      x="44"
+                      y="240"
+                      width="120"
+                      height="4"
+                      rx="2"
+                      fill="var(--color-text-tertiary)"
+                      opacity="0.3"
+                    />
+                    <rect
+                      x="44"
+                      y="248"
+                      width="100"
+                      height="4"
+                      rx="2"
+                      fill="var(--color-text-tertiary)"
+                      opacity="0.3"
+                    />
+
+                    <rect
+                      x="202"
+                      y="188"
+                      width="156"
+                      height="80"
+                      rx="6"
+                      fill="var(--color-surface-elevated)"
+                    />
+                    <rect
+                      x="214"
+                      y="200"
+                      width="20"
+                      height="20"
+                      rx="4"
+                      fill="var(--color-border-hover)"
+                      opacity="0.5"
+                    />
+                    <rect
+                      x="214"
+                      y="228"
+                      width="72"
+                      height="6"
+                      rx="2"
+                      fill="var(--color-text-primary)"
+                      opacity="0.5"
+                    />
+                    <rect
+                      x="214"
+                      y="240"
+                      width="110"
+                      height="4"
+                      rx="2"
+                      fill="var(--color-text-tertiary)"
+                      opacity="0.3"
+                    />
+                    <rect
+                      x="214"
+                      y="248"
+                      width="88"
+                      height="4"
+                      rx="2"
+                      fill="var(--color-text-tertiary)"
+                      opacity="0.3"
+                    />
+
+                    <rect
+                      x="372"
+                      y="188"
+                      width="156"
+                      height="80"
+                      rx="6"
+                      fill="var(--color-surface-elevated)"
+                    />
+                    <rect
+                      x="384"
+                      y="200"
+                      width="20"
+                      height="20"
+                      rx="4"
+                      fill="var(--color-border-hover)"
+                      opacity="0.5"
+                    />
+                    <rect
+                      x="384"
+                      y="228"
+                      width="88"
+                      height="6"
+                      rx="2"
+                      fill="var(--color-text-primary)"
+                      opacity="0.5"
+                    />
+                    <rect
+                      x="384"
+                      y="240"
+                      width="116"
+                      height="4"
+                      rx="2"
+                      fill="var(--color-text-tertiary)"
+                      opacity="0.3"
+                    />
+                    <rect
+                      x="384"
+                      y="248"
+                      width="96"
+                      height="4"
+                      rx="2"
+                      fill="var(--color-text-tertiary)"
+                      opacity="0.3"
+                    />
+
+                    {/* Footer bar */}
+                    <rect
+                      x="0"
+                      y="290"
+                      width="560"
+                      height="30"
+                      fill="var(--color-surface-elevated)"
+                    />
+                    <rect
+                      x="32"
+                      y="302"
+                      width="60"
+                      height="5"
+                      rx="2"
+                      fill="var(--color-text-tertiary)"
+                      opacity="0.3"
+                    />
+                    <rect
+                      x="460"
+                      y="302"
+                      width="72"
+                      height="5"
+                      rx="2"
+                      fill="var(--color-text-tertiary)"
+                      opacity="0.3"
+                    />
+                  </svg>
                 </div>
               </div>
-            ))}
+              <p className="showcase__preview-caption">
+                Real-time preview with desktop, tablet, and mobile viewports —
+                what you see is what you ship.
+              </p>
+            </div>
           </div>
+        </section>
 
-          <p className="addons__note">
-            More add-ons coming soon — custom domains, auth scaffolding, PWA
-            support, e-commerce, and i18n.
-          </p>
-        </div>
-      </section>
+        {/* Add-Ons section — 2-column cards */}
+        <section className="addons">
+          <div className="container">
+            <div className="addons__header">
+              <span className="addons__label">Add-ons</span>
+              <h2 className="addons__heading">
+                Supercharge your site after generation
+              </h2>
+              <p className="addons__subheading">
+                Bolt on analytics, a blog, CMS, or contact forms — each add-on
+                is a one-click token purchase that integrates directly into your
+                generated code.
+              </p>
+            </div>
+
+            <div className="addons__grid">
+              {ADD_ONS.map((addon, i) => (
+                <div className="addons__card" key={i}>
+                  <div className="addons__card-visual">
+                    <AddOnVisual type={addon.visual} />
+                  </div>
+                  <div className="addons__card-body">
+                    <div className="addons__card-top">
+                      <div className="addons__card-icon">
+                        <addon.icon size={16} />
+                      </div>
+                      <span className="addons__card-tag">
+                        <Coins size={10} />
+                        {addon.tag}
+                      </span>
+                    </div>
+                    <h3 className="addons__card-title">{addon.title}</h3>
+                    <p className="addons__card-desc">{addon.description}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <p className="addons__note">
+              More add-ons coming soon — custom domains, auth scaffolding, PWA
+              support, e-commerce, and i18n.
+            </p>
+          </div>
+        </section>
+      </div>
+      {/* end .showcase-addons-wrapper */}
 
       {/* Existing footer */}
       <footer className="footer">

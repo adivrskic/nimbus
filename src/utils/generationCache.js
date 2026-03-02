@@ -34,14 +34,20 @@ function createCacheKey(prompt, selections = {}, persistentOptions = {}) {
     o: relevantPersistent,
   });
 
-  let hash = 0;
+  // FNV-1a inspired hash using two 32-bit halves to produce a 52-bit result.
+  // This avoids the collision risk of a single 32-bit hash and sidesteps the
+  // Math.abs(-2147483648) === -2147483648 edge case of the old DJB2 hash.
+  let h1 = 0x811c9dc5 >>> 0; // FNV offset basis
+  let h2 = 0x01000193 >>> 0;
   for (let i = 0; i < dataToHash.length; i++) {
-    const char = dataToHash.charCodeAt(i);
-    hash = (hash << 5) - hash + char;
-    hash = hash & hash;
+    const c = dataToHash.charCodeAt(i);
+    h1 = Math.imul(h1 ^ c, 0x01000193) >>> 0;
+    h2 = Math.imul(h2 ^ c, 0x01000193 + 0x10) >>> 0;
   }
+  // Combine into a safe positive integer (52-bit range via JS number precision)
+  const combined = (h1 >>> 0) * 0x100000 + (h2 >>> 12);
 
-  return CACHE_KEY_PREFIX + Math.abs(hash).toString(36);
+  return CACHE_KEY_PREFIX + combined.toString(36);
 }
 
 function getCacheIndex() {
@@ -171,6 +177,39 @@ export function clearCacheEntry(
   } catch {}
 }
 
+export function clearAllCache() {
+  memoryCache.clear();
+
+  try {
+    const index = getCacheIndex();
+    index.forEach((entry) => {
+      try {
+        localStorage.removeItem(entry.key);
+      } catch {}
+    });
+    localStorage.removeItem(CACHE_INDEX_KEY);
+  } catch {}
+}
+
+export function getCacheStats() {
+  const index = getCacheIndex();
+  const validEntries = index.filter((entry) => {
+    try {
+      const stored = localStorage.getItem(entry.key);
+      return stored && isEntryValid(JSON.parse(stored));
+    } catch {
+      return false;
+    }
+  });
+
+  return {
+    totalEntries: index.length,
+    validEntries: validEntries.length,
+    memoryEntries: memoryCache.size,
+    maxSize: MAX_CACHE_SIZE,
+  };
+}
+
 export function shouldUseCache(isRefinement = false) {
   return !isRefinement;
 }
@@ -179,5 +218,7 @@ export default {
   get: getCachedGeneration,
   set: cacheGeneration,
   clear: clearCacheEntry,
+  clearAll: clearAllCache,
+  stats: getCacheStats,
   shouldUse: shouldUseCache,
 };

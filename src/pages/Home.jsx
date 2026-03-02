@@ -264,6 +264,15 @@ function Home() {
     [enhancePrompt]
   );
 
+  const enhanceTokenBalance = useMemo(() => {
+    if (!isAuthenticated) return { status: "unknown", sufficient: false };
+    const sufficient = userTokens >= enhanceTokenCost;
+    return {
+      status: sufficient ? "good" : userTokens > 0 ? "warning" : "critical",
+      sufficient,
+    };
+  }, [isAuthenticated, userTokens, enhanceTokenCost]);
+
   // ─── Escape key ────────────────────────────────────────────────────────
   useEscapeKey(() => {
     if (showPreview) {
@@ -374,6 +383,11 @@ function Home() {
       return;
     }
 
+    if (!enhanceTokenBalance.sufficient) {
+      openTokenPurchase();
+      return;
+    }
+
     const submittedEnhancePrompt = enhancePrompt.trim();
 
     // Snapshot current state before enhancement
@@ -391,12 +405,14 @@ function Home() {
     enhancePrompt,
     isGenerating,
     isAuthenticated,
+    enhanceTokenBalance.sufficient,
     prompt,
     selections,
     persistentOptions,
     user,
     enhance,
     openAuth,
+    openTokenPurchase,
     generatedCode,
     generatedFiles,
   ]);

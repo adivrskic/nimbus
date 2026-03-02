@@ -113,30 +113,6 @@ export function getBreakdownDisplay(breakdown) {
     });
 }
 
-export function checkTokenBalance(available, required) {
-  const deficit = Math.max(0, required - available);
-  const percentage = required > 0 ? (available / required) * 100 : 100;
-
-  return {
-    sufficient: available >= required,
-    deficit,
-    percentage: Math.min(100, Math.max(0, percentage)),
-    status:
-      available >= required
-        ? "sufficient"
-        : percentage > 75
-        ? "close"
-        : percentage > 50
-        ? "moderate"
-        : "insufficient",
-  };
-}
-
-export function formatTokenCost(cost) {
-  if (cost === 1) return "1 token";
-  return `${Math.ceil(cost)} tokens`;
-}
-
 export function getTokenBreakdown(
   selections,
   prompt = "",
@@ -150,6 +126,4 @@ export default {
   calculateTokenCost,
   getBreakdownDisplay,
   getTokenBreakdown,
-  checkTokenBalance,
-  formatTokenCost,
 };

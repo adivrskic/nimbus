@@ -5,9 +5,15 @@
 //   - Client:  tokenCalculator.js (for UI cost preview)
 //   - Server:  edge function calculateTokenCost (for billing)
 //
-// If you add/change an option cost, update it HERE and both
-// consumers stay in sync automatically.
+// If you add/change an option cost, update it HERE and then
+// copy the changes to the edge function. Both files MUST share
+// the same COST_MAP_VERSION string — bump it on every change.
 // ═══════════════════════════════════════════════════════════════
+
+// Bump this version whenever COST_MAPS, CONDITIONAL_KEYS, or
+// BASE_COST / MIN / MAX values change. The edge function must
+// declare the same version string.
+export const COST_MAP_VERSION = "2025-03-02.1";
 
 export const BASE_COST = 12;
 export const REFINEMENT_MIN = 5;

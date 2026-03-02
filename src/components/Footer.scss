@@ -231,16 +231,42 @@
   max-width: 420px;
 }
 // =============================================================================
+// Showcase + Add-ons gradient wrapper
+// =============================================================================
+
+.showcase-addons-wrapper {
+  position: relative;
+  z-index: 12;
+  width: 100%;
+  margin-top: 100vh;
+  background: linear-gradient(
+    to bottom,
+    var(--color-background) 0%,
+    var(--color-surface) 50%,
+    var(--color-background) 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    black 5%,
+    black 95%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    black 5%,
+    black 95%,
+    transparent 100%
+  );
+}
+
+// =============================================================================
 // Showcase Section — How It Works + Preview Mockup
 // =============================================================================
 
 .showcase {
-  position: relative;
-  z-index: 12;
   padding: calc(var(--spacing-unit) * 10) 0;
-  background: var(--color-surface);
-  width: 100%;
-  margin-top: 100vh;
 
   @media (max-width: 768px) {
     padding: calc(var(--spacing-unit) * 7) 0;
@@ -443,11 +469,7 @@
 // =============================================================================
 
 .addons {
-  position: relative;
-  z-index: 12;
   padding: calc(var(--spacing-unit) * 10) 0;
-  background: var(--color-surface);
-  width: 100%;
 
   @media (max-width: 768px) {
     padding: calc(var(--spacing-unit) * 7) 0;
