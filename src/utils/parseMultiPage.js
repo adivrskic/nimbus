@@ -1,16 +1,3 @@
-/**
- * Parse multi-page HTML content that uses FILE markers.
- * Shared between PreviewModal and generateWebsiteStream.
- *
- * Expected format:
- *   <!-- FILE: index.html -->
- *   <html>...</html>
- *   <!-- FILE: about.html -->
- *   <html>...</html>
- *
- * @param {string} html - Raw HTML string potentially containing FILE markers
- * @returns {Object|null} Map of filename → content, or null if single-page
- */
 export function parseMultiPageHtml(html) {
   if (!html) return null;
 
@@ -31,11 +18,6 @@ export function parseMultiPageHtml(html) {
   return Object.keys(files).length > 0 ? files : null;
 }
 
-/**
- * Get a human-readable display name for a page filename.
- * @param {string} filename - e.g. "index.html", "about.html"
- * @returns {string} Display name
- */
 export function getPageDisplayName(filename) {
   const names = {
     "index.html": "Home",

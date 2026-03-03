@@ -14,7 +14,6 @@ const GenerationContext = createContext({
   hidePreviewPill: () => {},
 });
 
-// Generate a harmonious color palette from a random seed using golden ratio
 function generateMarbleColors() {
   const hue = Math.random() * 360;
   const golden = 137.508;

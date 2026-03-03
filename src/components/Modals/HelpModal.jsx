@@ -1,4 +1,3 @@
-// components/Home/HelpModal/HelpModal.jsx
 import {
   X,
   Sparkles,
@@ -114,7 +113,6 @@ const TIPS = [
   "Short but detailed descriptions yield the best base structures.",
 ];
 
-// Helper to render text with **bold** markers
 function renderTextWithBold(text) {
   const parts = text.split(/(\*\*[^*]+\*\*)/g);
   return parts.map((part, index) => {
@@ -137,7 +135,6 @@ function HelpModal({ isOpen, onClose }) {
         className={`modal-content modal-content--lg ${isOpen ? "active" : ""}`}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Fixed header section */}
         <div className="modal-header-section">
           <div className="modal-header">
             <div className="modal-title">
@@ -154,7 +151,6 @@ function HelpModal({ isOpen, onClose }) {
           </div>
         </div>
 
-        {/* Scrollable body section */}
         <div className="modal-body">
           {HELP_SECTIONS.map((section) => {
             const Icon = section.icon;

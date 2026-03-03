@@ -46,10 +46,8 @@ function LegalModal({ isOpen, onClose, initialSection = null }) {
   const lastUpdated = "February 19, 2026";
   const bodyRef = useRef(null);
 
-  // Scroll to section when modal opens with initialSection
   useEffect(() => {
     if (isOpen && initialSection && bodyRef.current) {
-      // Small delay to ensure modal is rendered
       const timer = setTimeout(() => {
         const section = bodyRef.current.querySelector(`#${initialSection}`);
         if (section) {

@@ -168,9 +168,6 @@ export function AuthProvider({ children }) {
         }
 
         setLoadingSafe(true);
-
-        // Single getSession() call — this reads from local storage first (fast),
-        // then validates with the server if needed. No separate getUser() roundtrip.
         const {
           data: { session },
           error: sessionError,

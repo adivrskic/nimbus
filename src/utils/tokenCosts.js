@@ -1,21 +1,9 @@
-// utils/tokenCosts.js
-// ═══════════════════════════════════════════════════════════════
-// SINGLE SOURCE OF TRUTH for all token cost maps.
-// Used by:
-//   - Client:  tokenCalculator.js (for UI cost preview)
-//   - Server:  edge function calculateTokenCost (for billing)
-//
-// If you add/change an option cost, update it HERE and both
-// consumers stay in sync automatically.
-// ═══════════════════════════════════════════════════════════════
-
 export const BASE_COST = 12;
 export const REFINEMENT_MIN = 5;
 export const REFINEMENT_MAX = 20;
 export const GENERATION_MIN = 8;
 export const GENERATION_MAX = 50;
 
-// Map of selectionKey → { optionValue: cost }
 export const COST_MAPS = {
   template: {
     "Landing Page": 0,
@@ -659,8 +647,6 @@ export const COST_MAPS = {
   },
 };
 
-// Keys where cost is conditional on the value being set (use `if (selections.key)`)
-// vs always looked up. These are the "content & brand" options that may be unset.
 export const CONDITIONAL_KEYS = [
   "inspiration",
   "tone",
@@ -676,7 +662,6 @@ export const CONDITIONAL_KEYS = [
   "emojis",
 ];
 
-// Human-readable labels for breakdown display
 export const BREAKDOWN_LABELS = {
   base: "Base generation",
   promptComplexity: "Prompt detail",
@@ -753,16 +738,14 @@ export const BREAKDOWN_LABELS = {
   microCopy: "Micro copy",
   responsiveApproach: "Responsive approach",
   emojis: "Emojis",
-  // Add-ons
   addon_analytics: "Analytics add-on",
   addon_forms: "Contact form add-on",
   addon_blog: "Blog engine add-on",
   addon_cms: "CMS integration add-on",
 };
 
-// Add-on cost map (keyed by addon id)
 export const ADDON_COSTS = {
-  analytics: 4,
+  analytics: 5,
   forms: 6,
   blog: 10,
   cms: 10,

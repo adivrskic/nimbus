@@ -9,32 +9,14 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { ProjectProvider } from "./contexts/ProjectContext";
 import { ModalProvider } from "./contexts/ModalContext";
-import {
-  GenerationProvider,
-  useGenerationState,
-} from "./contexts/GenerationContext";
-import { useTheme } from "./contexts/ThemeContext";
+import { GenerationProvider } from "./contexts/GenerationContext";
 
 import "./styles/global.scss";
 
 const Home = lazy(() => import("./pages/Home"));
-
-const waveOptions = [
-  "hero",
-  "cta-0",
-  "cta-1",
-  "cta-2",
-  "cta-3",
-  "portfolio",
-  "services",
-  "footer",
-];
-
 function AppContent() {
   const location = useLocation();
   const { setSessionFromHash } = useAuth();
-  const { isGenerating } = useGenerationState();
-  const { theme } = useTheme();
 
   useEffect(() => {
     if (location.hash.includes("access_token")) {

@@ -34,7 +34,6 @@ export function ModalProvider({ children }) {
     setModals((prev) => ({ ...prev, [name]: false }));
   }, []);
 
-  // Convenience helpers so consumers don't need to know the string keys
   const openAuth = useCallback(() => open("auth"), [open]);
   const closeAuth = useCallback(() => close("auth"), [close]);
 

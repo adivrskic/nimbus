@@ -16,7 +16,6 @@
       color: var(--color-text-primary);
       border: none;
       outline: none;
-      // Neumorphic — expanded: subtle inset to feel like you're typing "into" a well
       box-shadow: var(--neumorphism-shadow);
     }
 
@@ -92,7 +91,6 @@
       font-size: 16px;
       color: transparent;
 
-      // Neumorphic — generating: pressed inward
       box-shadow: inset 6px 6px 6px #dedee0, inset -6px -6px 6px #ffffff;
     }
 
@@ -251,9 +249,6 @@
     font-variant-numeric: tabular-nums;
   }
 
-  // ---------------------------------------------------------------------------
-  // Neumorphic input — the main visible "border" of the search bar
-  // ---------------------------------------------------------------------------
   &__input {
     width: 100%;
     min-height: 54px;
@@ -273,11 +268,9 @@
     font-smooth: always;
     -webkit-font-smoothing: antialiased;
 
-    // Neumorphic surface — matches page background for the raised illusion
     border: none;
   }
 
-  // When not expanded, make textarea text transparent so truncate overlay shows
   &:not(&--expanded) {
     .search-bar__input {
       color: transparent;
@@ -490,18 +483,12 @@
   }
 }
 
-// =============================================================================
-// Dark mode — neumorphic overrides
-// =============================================================================
 [data-theme="dark"] {
   .search-bar__input {
     background: var(--color-background);
   }
 }
 
-// =============================================================================
-// Animations
-// =============================================================================
 @keyframes blink {
   0%,
   100% {
@@ -518,9 +505,6 @@
   }
 }
 
-// =============================================================================
-// Mobile — ≤ 680px
-// =============================================================================
 @media screen and (max-width: 680px) {
   .search-bar {
     &:not(&--expanded):not(&--generating) {
@@ -583,7 +567,6 @@
         border-radius: 0 0 var(--radius-lg) var(--radius-lg);
         margin-top: -1px;
 
-        // Neumorphic continuation — bottom half of the split layout
         box-shadow: 6px 6px 16px rgba(0, 0, 0, 0.06),
           -6px -6px 16px rgba(255, 255, 255, 0.7);
       }
@@ -757,7 +740,6 @@
     }
   }
 
-  // Mobile dark mode neumorphic overrides for split layout
   [data-theme="dark"] {
     .search-bar:not(.search-bar--expanded):not(.search-bar--generating) {
       .search-bar__right {

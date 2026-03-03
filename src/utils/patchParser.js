@@ -1,61 +1,16 @@
-// utils/patchParser.js
-//
-// Patch-based refinement system. Instead of Claude regenerating the entire HTML
-// document on every enhancement, it outputs a lightweight set of operations:
-//
-//   <!-- PATCH -->
-//   <!-- REPLACE_STYLES -->
-//   <style>...updated CSS...</style>
-//   <!-- /REPLACE_STYLES -->
-//   <!-- REPLACE #about -->
-//   <section id="about" style="...">...updated content...</section>
-//   <!-- /REPLACE -->
-//   <!-- INSERT_AFTER #features -->
-//   <section id="testimonials" style="...">...new section...</section>
-//   <!-- /INSERT_AFTER -->
-//   <!-- REMOVE #old-cta -->
-//   <!-- /PATCH -->
-//
-// Benefits:
-//   - 70-90% fewer output tokens for typical edits
-//   - Changes appear instantly as each op completes (not after full doc)
-//   - No page flash or scroll reset
-//
-// Multi-page support:
-//   When the base HTML contains <!-- FILE: *.html --> markers, patch ops are
-//   applied to EVERY page individually so color/theme changes propagate across
-//   the entire site.
-//
-// Backward compatible: if response doesn't start with <!-- PATCH -->, it's
-// treated as full HTML and the existing flow takes over.
-
-// ─── Detection ─────────────────────────────────────────────────────────────
-
-/**
- * Returns true if the accumulated response text is a patch (not full HTML).
- */
 export function isPatchResponse(text) {
   if (!text || text.length < 14) return false;
   return text.trimStart().startsWith("<!-- PATCH");
 }
 
-// ─── Multi-page helpers ─────────────────────────────────────────────────────
-
 const FILE_MARKER_RE = /<!--\s*(?:=+\s*)?FILE:\s*(\S+\.html)\s*(?:=+\s*)?-->/gi;
 
-/**
- * Detect whether HTML contains multi-page FILE markers.
- */
 function isMultiPageHtml(html) {
   if (!html) return false;
   FILE_MARKER_RE.lastIndex = 0;
   return FILE_MARKER_RE.test(html);
 }
 
-/**
- * Split multi-page HTML into { filename: pageHtml } map.
- * Returns null for single-page HTML.
- */
 function splitPages(html) {
   if (!html) return null;
   FILE_MARKER_RE.lastIndex = 0;
@@ -73,34 +28,18 @@ function splitPages(html) {
   return Object.keys(files).length > 0 ? files : null;
 }
 
-/**
- * Recombine a pages map back into multi-page HTML with FILE markers.
- */
 function joinPages(files) {
   return Object.entries(files)
     .map(([filename, html]) => `<!-- FILE: ${filename} -->\n${html}`)
     .join("\n\n");
 }
 
-// ─── Parsing ───────────────────────────────────────────────────────────────
-
-/**
- * Parse all *completed* patch operations from the accumulated streaming text.
- * Only fully-closed operations are returned, so it's safe to call on every
- * streaming chunk — incomplete ops are simply skipped until their closing
- * marker arrives.
- *
- * Returns: Array<{ type, selector?, content?, _end }>
- *   _end is the character index where this op's closing marker ends,
- *   used to track which ops have already been applied.
- */
 export function parsePatchOps(text) {
   if (!isPatchResponse(text)) return [];
 
   const ops = [];
   let m;
 
-  // REPLACE_VARS — swap just the :root custom properties (fastest for color changes)
   const varsRe = /<!-- REPLACE_VARS -->([\s\S]*?)<!-- \/REPLACE_VARS -->/g;
   while ((m = varsRe.exec(text)) !== null) {
     ops.push({
@@ -111,7 +50,6 @@ export function parsePatchOps(text) {
     });
   }
 
-  // REPLACE_STYLES — replaces ALL <style> blocks in <head>
   const stylesRe =
     /<!-- REPLACE_STYLES -->([\s\S]*?)<!-- \/REPLACE_STYLES -->/g;
   while ((m = stylesRe.exec(text)) !== null) {
@@ -123,7 +61,6 @@ export function parsePatchOps(text) {
     });
   }
 
-  // REPLACE <selector> — replaces element matching CSS selector
   const replaceRe =
     /<!-- REPLACE ([^\s>]+(?:\s[^\s>]+)*?) -->([\s\S]*?)<!-- \/REPLACE -->/g;
   while ((m = replaceRe.exec(text)) !== null) {
@@ -136,7 +73,6 @@ export function parsePatchOps(text) {
     });
   }
 
-  // INSERT_AFTER <selector>
   const insertAfterRe =
     /<!-- INSERT_AFTER ([^\s>]+(?:\s[^\s>]+)*?) -->([\s\S]*?)<!-- \/INSERT_AFTER -->/g;
   while ((m = insertAfterRe.exec(text)) !== null) {
@@ -149,7 +85,6 @@ export function parsePatchOps(text) {
     });
   }
 
-  // INSERT_BEFORE <selector>
   const insertBeforeRe =
     /<!-- INSERT_BEFORE ([^\s>]+(?:\s[^\s>]+)*?) -->([\s\S]*?)<!-- \/INSERT_BEFORE -->/g;
   while ((m = insertBeforeRe.exec(text)) !== null) {
@@ -162,10 +97,8 @@ export function parsePatchOps(text) {
     });
   }
 
-  // REMOVE <selector> — self-closing, no content
   const removeRe = /<!-- REMOVE ([^\s>]+(?:\s[^\s>]+)*?) -->/g;
   while ((m = removeRe.exec(text)) !== null) {
-    // Skip if this is actually a closing tag like <!-- /REMOVE -->
     if (m[0].includes("/REMOVE")) continue;
     ops.push({
       type: "REMOVE",
@@ -175,18 +108,11 @@ export function parsePatchOps(text) {
     });
   }
 
-  // Sort by document order
   ops.sort((a, b) => a._idx - b._idx);
 
   return ops;
 }
 
-// ─── Application ───────────────────────────────────────────────────────────
-
-/**
- * Apply an array of patch operations to a single-page HTML string.
- * Returns the new complete HTML string.
- */
 export function applySinglePageOps(pageHtml, ops) {
   if (!ops || ops.length === 0) return pageHtml;
 
@@ -197,7 +123,6 @@ export function applySinglePageOps(pageHtml, ops) {
     for (const op of ops) {
       switch (op.type) {
         case "REPLACE_VARS": {
-          // Swap just the :root { ... } block inside the first <style> tag.
           const style = doc.head.querySelector("style");
           if (style) {
             const rootBlockRe = /:root\s*\{[^}]*\}/s;
@@ -280,25 +205,14 @@ export function applySinglePageOps(pageHtml, ops) {
   }
 }
 
-/**
- * Apply patch operations to HTML — automatically handles both single-page
- * and multi-page (FILE-marker separated) content.
- *
- * For multi-page: global ops (REPLACE_VARS, REPLACE_STYLES) are applied to
- * every page. Selector-based ops (REPLACE, INSERT_*, REMOVE) are applied to
- * whichever page contains a matching element.
- */
 export function applyPatchOps(baseHtml, ops) {
   if (!ops || ops.length === 0) return baseHtml;
 
-  // ─── Single-page fast path ─────────────────────────────────
   const pages = splitPages(baseHtml);
   if (!pages) {
     return applySinglePageOps(baseHtml, ops);
   }
 
-  // ─── Multi-page: apply ops to every page ───────────────────
-  // Separate global ops (apply to ALL pages) from targeted ops
   const globalOps = ops.filter(
     (op) => op.type === "REPLACE_VARS" || op.type === "REPLACE_STYLES"
   );
@@ -308,10 +222,8 @@ export function applyPatchOps(baseHtml, ops) {
 
   const patchedPages = {};
   for (const [filename, pageHtml] of Object.entries(pages)) {
-    // Always apply global ops to every page
     let patched = applySinglePageOps(pageHtml, globalOps);
 
-    // Apply targeted ops — they'll no-op on pages that don't have the selector
     if (targetedOps.length > 0) {
       patched = applySinglePageOps(patched, targetedOps);
     }
@@ -322,35 +234,15 @@ export function applyPatchOps(baseHtml, ops) {
   return joinPages(patchedPages);
 }
 
-// ─── Incremental streaming helper ──────────────────────────────────────────
-
-/**
- * Creates a stateful patch applier for use during streaming.
- *
- * Usage:
- *   const applier = createIncrementalApplier(baseHtml);
- *   // On each streaming chunk:
- *   const { html, newOpsApplied } = applier.update(accumulatedRawText);
- *   // html is always the latest patched result
- *   // newOpsApplied is true if new operations were applied this update
- *
- *   // When streaming ends:
- *   const finalHtml = applier.finalize(accumulatedRawText);
- */
 export function createIncrementalApplier(baseHtml) {
-  let appliedCount = 0; // How many ops we've already applied
+  let appliedCount = 0;
   let currentHtml = baseHtml;
 
   return {
-    /**
-     * Called on each streaming update with the full accumulated raw text.
-     * Parses any newly-completed ops and applies them incrementally.
-     */
     update(rawText) {
       const allOps = parsePatchOps(rawText);
 
       if (allOps.length > appliedCount) {
-        // New ops completed — apply only the new ones
         const newOps = allOps.slice(appliedCount);
         currentHtml = applyPatchOps(currentHtml, newOps);
         appliedCount = allOps.length;
@@ -360,10 +252,6 @@ export function createIncrementalApplier(baseHtml) {
       return { html: currentHtml, newOpsApplied: false };
     },
 
-    /**
-     * Called when streaming is complete. Does a final parse to catch any
-     * ops that might have completed in the last chunk.
-     */
     finalize(rawText) {
       const allOps = parsePatchOps(rawText);
       if (allOps.length > appliedCount) {
@@ -374,7 +262,6 @@ export function createIncrementalApplier(baseHtml) {
       return currentHtml;
     },
 
-    /** Get the current patched HTML without applying new ops */
     getCurrentHtml() {
       return currentHtml;
     },

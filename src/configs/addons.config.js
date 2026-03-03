@@ -1,48 +1,38 @@
-// configs/addons.config.js
-// ═══════════════════════════════════════════════════════════════
-// Add-on definitions. Each add-on enriches a generation with
-// additional functionality injected via specialized prompts.
-//
-// status: "available" | "coming_soon"
-// phase:  "pre"  — included as generation instructions (invisible add-ons)
-//         "post" — applied as a post-generation enhancement (visual add-ons)
-// ═══════════════════════════════════════════════════════════════
-
 export const ADDONS = [
   {
     id: "analytics",
     title: "Analytics",
     icon: "BarChart3",
-    cost: 4,
-    costLabel: "3–5 tokens",
-    phase: "post",
+    cost: 5,
+    costLabel: "5 tokens",
+    phase: "pre",
     status: "available",
     description:
-      "Lightweight visitor tracking with page views, referrers, and engagement events — wired to every link, button, and form on your site.",
+      "Privacy-friendly visitor tracking via Plausible — page views, referrers, UTM campaigns, and custom events on every button, link, and form. No cookies, no consent banner required.",
     howItWorks:
-      "Injects a Plausible or Umami tracking script into your site's <head>, attaches custom event attributes to existing interactive elements, and optionally generates a styled /analytics setup guide page matching your design.",
+      "Adds a single Plausible script tag to your <head> with a placeholder domain you swap out after deploying. Tags all CTAs, navigation links, and form submissions as custom event goals so you can see exactly what visitors click. Works immediately — just sign up for Plausible's free tier (or self-host) and replace the domain.",
   },
   {
     id: "forms",
     title: "Contact Form",
     icon: "Mail",
     cost: 6,
-    costLabel: "5–8 tokens",
+    costLabel: "6 tokens",
     phase: "post",
-    status: "available",
+    status: "coming_soon",
     description:
       "A fully styled, accessible contact form with validation, success/error states, and spam protection — wired to Formspree, Netlify Forms, or a custom endpoint.",
     howItWorks:
-      "Generates a responsive form component matching your site's typography, colors, and spacing. Includes client-side validation, honeypot fields, and a configurable action URL. Injects into an existing contact section or creates a new /contact page.",
+      "Generates a responsive form component matching your site's typography, colors, and spacing. Includes client-side validation, honeypot fields, and a configurable action URL. Injects into an existing contact section or creates a new one before the footer.",
   },
   {
     id: "blog",
     title: "Blog Engine",
     icon: "FileText",
     cost: 10,
-    costLabel: "8–12 tokens",
+    costLabel: "10 tokens",
     phase: "post",
-    status: "available",
+    status: "coming_soon",
     description:
       "A complete blog with index page, post template, tags, reading time, and 2–3 sample articles — all inheriting your site's design language.",
     howItWorks:
@@ -53,7 +43,7 @@ export const ADDONS = [
     title: "CMS Integration",
     icon: "Database",
     cost: 10,
-    costLabel: "8–12 tokens",
+    costLabel: "10 tokens",
     phase: "post",
     status: "coming_soon",
     description:
@@ -63,7 +53,6 @@ export const ADDONS = [
   },
 ];
 
-// Quick lookup helpers
 export const getAddon = (id) => ADDONS.find((a) => a.id === id);
 export const getAvailableAddons = () =>
   ADDONS.filter((a) => a.status === "available");

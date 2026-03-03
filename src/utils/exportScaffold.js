@@ -1,6 +1,3 @@
-// utils/exportScaffold.js
-// Generates project scaffolding for different export formats
-
 export const EXPORT_FORMATS = [
   {
     id: "html",
@@ -28,10 +25,6 @@ export const EXPORT_FORMATS = [
   },
 ];
 
-/**
- * Generate a full project file map for the given export format.
- * Returns { [filepath]: content } for every file in the ZIP.
- */
 export function generateScaffold(
   format,
   htmlContent,
@@ -63,8 +56,6 @@ function sanitizeName(name) {
   );
 }
 
-// ─── Static HTML (default) ──────────────────────────────────────────────────
-
 function scaffoldStaticHtml(htmlContent, files, name) {
   const output = {};
 
@@ -80,8 +71,6 @@ function scaffoldStaticHtml(htmlContent, files, name) {
   return output;
 }
 
-// ─── Vite + React ───────────────────────────────────────────────────────────
-
 function scaffoldViteReact(htmlContent, files, name) {
   const output = {};
   const pageFiles =
@@ -90,7 +79,6 @@ function scaffoldViteReact(htmlContent, files, name) {
       : { "index.html": htmlContent };
   const pageNames = Object.keys(pageFiles);
 
-  // package.json
   output["package.json"] = JSON.stringify(
     {
       name,
@@ -115,7 +103,6 @@ function scaffoldViteReact(htmlContent, files, name) {
     2
   );
 
-  // vite.config.js
   output["vite.config.js"] = `import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
@@ -124,7 +111,6 @@ export default defineConfig({
 })
 `;
 
-  // index.html (Vite entry)
   output["index.html"] = `<!DOCTYPE html>
 <html lang="en">
   <head>
@@ -139,7 +125,6 @@ export default defineConfig({
 </html>
 `;
 
-  // src/main.jsx
   output["src/main.jsx"] = `import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App'
@@ -151,7 +136,6 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 )
 `;
 
-  // Generate page components
   if (pageNames.length === 1) {
     output["src/App.jsx"] = `import Page from './pages/Index'
 
@@ -164,7 +148,6 @@ export default function App() {
       pageFiles[pageNames[0]]
     );
   } else {
-    // Multi-page: simple hash router
     const imports = pageNames
       .map((f, i) => {
         const compName = fileToComponentName(f);
@@ -220,8 +203,6 @@ ${routes}
   return output;
 }
 
-// ─── Next.js ────────────────────────────────────────────────────────────────
-
 function scaffoldNextJs(htmlContent, files, name) {
   const output = {};
   const pageFiles =
@@ -255,7 +236,6 @@ const nextConfig = {}
 export default nextConfig
 `;
 
-  // App router layout
   output["app/layout.js"] = `export const metadata = {
   title: '${name}',
   description: 'Generated with Nimbus',
@@ -270,7 +250,6 @@ export default function RootLayout({ children }) {
 }
 `;
 
-  // Pages
   if (pageNames.length === 1) {
     output["app/page.js"] = wrapHtmlAsNextPage(pageFiles[pageNames[0]]);
   } else {
@@ -291,8 +270,6 @@ export default function RootLayout({ children }) {
 
   return output;
 }
-
-// ─── Astro ──────────────────────────────────────────────────────────────────
 
 function scaffoldAstro(htmlContent, files, name) {
   const output = {};
@@ -331,7 +308,6 @@ export default defineConfig({})
     2
   );
 
-  // Pages — Astro can use raw HTML in .astro files
   pageNames.forEach((filename) => {
     const astroName = filename.replace(".html", ".astro");
     output[`src/pages/${astroName}`] = `---
@@ -350,8 +326,6 @@ ${pageFiles[filename]}
   return output;
 }
 
-// ─── Helpers ────────────────────────────────────────────────────────────────
-
 function fileToComponentName(filename) {
   const base = filename.replace(".html", "");
   return base
@@ -361,7 +335,6 @@ function fileToComponentName(filename) {
 }
 
 function wrapHtmlAsReactComponent(name, html) {
-  // Escape backticks and ${} in the HTML for template literal safety
   const escaped = html.replace(/`/g, "\\`").replace(/\$\{/g, "\\${");
   return `import { useRef, useEffect } from 'react'
 
@@ -433,7 +406,7 @@ ${fileList.map((f) => `- ${f}`).join("\n")}
 
 ---
 
-Built with Nimbus ✨
+Built with Nimbus Websites
 `;
 }
 
@@ -468,6 +441,6 @@ This project can be deployed to Vercel, Netlify, or any static hosting provider.
 
 ---
 
-Built with Nimbus ✨
+Built with Nimbus Websites
 `;
 }

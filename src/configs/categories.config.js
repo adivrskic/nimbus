@@ -1,5 +1,4 @@
 export const CATEGORIES = [
-  // Structure & Layout
   "template",
   "navigation",
   "layout",
@@ -8,7 +7,6 @@ export const CATEGORIES = [
   "hierarchy",
   "density",
 
-  // Visual Style
   "style",
   "inspiration",
   "palette",
@@ -21,12 +19,10 @@ export const CATEGORIES = [
   "hoverEffects",
   "emojis",
 
-  // Typography
   "font",
   "typographyScale",
   "headingStyle",
 
-  // Content & Copy
   "tone",
   "copyLength",
   "brandPersonality",
@@ -36,38 +32,31 @@ export const CATEGORIES = [
   "industry",
   "audience",
 
-  // Effects & Motion
   "animation",
   "interaction",
   "scrollBehavior",
   "loadingStyle",
 
-  // Spacing & Borders
   "spacingScale",
   "borderWidth",
 
-  // Media
   "images",
   "mediaHandling",
   "codeBlockStyle",
 
-  // Technical
   "accessibility",
   "seoLevel",
   "performanceLevel",
   "responsiveApproach",
   "mobileMenu",
 
-  // Features
   "darkModeToggle",
   "cookieBanner",
   "socialSharing",
   "stickyElements",
 
-  // AI Controls
   "creativity",
 
-  // Persistent / Brand Assets
   "persistent",
 ];
 

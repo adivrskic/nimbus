@@ -2,13 +2,11 @@ import { useState, useEffect } from "react";
 import {
   X,
   Calendar,
-  Edit3,
   Trash2,
   Loader2,
   FileCode,
   AlertTriangle,
   FolderOpen,
-  ChevronRight,
   History,
 } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
@@ -44,14 +42,12 @@ function ProjectsModal({
   const [copied, setCopied] = useState(null);
   const [historyProject, setHistoryProject] = useState(null);
 
-  // Fetch projects when modal opens (uses cache if available)
   useEffect(() => {
     if (isOpen && user) {
       fetchProjects();
     }
   }, [isOpen, user, fetchProjects]);
 
-  // Clear delete error when modal closes
   useEffect(() => {
     if (!isOpen) {
       setDeleteError(null);
@@ -127,12 +123,10 @@ function ProjectsModal({
 
       if (error) throw error;
 
-      // Check for warnings (partial failures)
       if (data.warnings && data.warnings.length > 0) {
         console.warn("Delete completed with warnings:", data.warnings);
       }
 
-      // Remove from cache
       removeProjectFromCache(projectId);
       setDeletingId(null);
     } catch (err) {
@@ -163,7 +157,6 @@ function ProjectsModal({
 
   const handleOpenHistory = async (e, project) => {
     e.stopPropagation();
-    // Fetch full project data for version history
     try {
       const { data, error } = await supabase
         .from("projects")
@@ -175,7 +168,6 @@ function ProjectsModal({
       setHistoryProject(data);
     } catch (err) {
       console.error("Error loading project for history:", err);
-      // Fallback to cached project data
       setHistoryProject(project);
     }
   };
@@ -188,7 +180,7 @@ function ProjectsModal({
 
   const getVersionCount = (project) => {
     const history = project.customization?.versionHistory || [];
-    return history.length + 1; // +1 for initial version
+    return history.length + 1;
   };
 
   const formatDate = (dateString) => {
@@ -239,10 +231,6 @@ function ProjectsModal({
     return null;
   };
 
-  const hasSubscription = (project) => {
-    return !!(project.stripe_subscription_id || project.subscription_id);
-  };
-
   if (!shouldRender) return null;
 
   return (
@@ -257,7 +245,6 @@ function ProjectsModal({
           }`}
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Fixed header section */}
           <div className="modal-header-section">
             <div className="modal-header">
               <div className="modal-title">
@@ -274,7 +261,6 @@ function ProjectsModal({
             </div>
           </div>
 
-          {/* Scrollable body section */}
           <div className="modal-body">
             <div className="projects-list">
               {isLoading ? (
@@ -293,7 +279,6 @@ function ProjectsModal({
                       deletingId === project.id ? "deleting" : ""
                     } ${expandedProject === project.id ? "expanded" : ""}`}
                   >
-                    {/* Delete confirmation overlay */}
                     {deletingId === project.id && (
                       <div className="project-delete-confirm">
                         {deleteError ? (
@@ -362,7 +347,6 @@ function ProjectsModal({
                       </div>
 
                       <div className="project-actions">
-                        {/* Version history button */}
                         {getVersionCount(project) > 1 && (
                           <button
                             className="action-btn action-btn--history"
@@ -373,7 +357,6 @@ function ProjectsModal({
                           </button>
                         )}
 
-                        {/* Delete button */}
                         <button
                           className="action-btn action-btn--danger"
                           onClick={(e) => {
@@ -387,7 +370,6 @@ function ProjectsModal({
                       </div>
                     </div>
 
-                    {/* Expanded content */}
                     {expandedProject === project.id && (
                       <div className="project-expanded">
                         {getDeployedUrl(project) && (
@@ -455,7 +437,6 @@ function ProjectsModal({
         </div>
       </div>
 
-      {/* Version History Modal */}
       {historyProject && (
         <VersionHistoryModal
           isOpen={!!historyProject}

@@ -5,46 +5,6 @@ import { SimplexNoise } from "three/examples/jsm/math/SimplexNoise";
 import { useTheme } from "../contexts/ThemeContext";
 
 const waveEffects = {
-  hero: {
-    speed: 0.02,
-    maxSpeed: 0.04,
-    scale: 0.67,
-    noiseStrength: 1.8,
-    position: [0, -1, 0],
-    rotation: [-Math.PI / 4, 0, -0.5],
-  },
-  "cta-0": {
-    speed: 0.02,
-    maxSpeed: 0.02,
-    scale: 1.125,
-    noiseStrength: 1.2,
-    position: [0, 0, 0],
-    rotation: [0.1, -1.2, 0],
-  },
-  "cta-1": {
-    speed: 0.03,
-    maxSpeed: 0.03,
-    scale: 0.67,
-    noiseStrength: 1.4,
-    position: [-1, -2.2, 0],
-    rotation: [-1, -2.1, 1],
-  },
-  "cta-2": {
-    speed: 0.02,
-    maxSpeed: 0.02,
-    scale: 1.125,
-    noiseStrength: 1.2,
-    position: [0, 0, 0],
-    rotation: [0.1, -1.2, 0],
-  },
-  "cta-3": {
-    speed: 0.03,
-    maxSpeed: 0.03,
-    scale: 0.67,
-    noiseStrength: 1.4,
-    position: [-1, -2.2, 0],
-    rotation: [-1, -2.1, 0],
-  },
   portfolio: {
     speed: 0.008,
     maxSpeed: 0.013,
@@ -52,24 +12,6 @@ const waveEffects = {
     noiseStrength: 1.6,
     position: [0, -0.2, 0],
     rotation: [1.5, 0, 0],
-  },
-  services: {
-    speed: 0.02,
-    maxSpeed: 0.3,
-    scale: 1,
-    noiseStrength: 1.1,
-    position: [0, 0, 0],
-    rotation: [Math.PI / 2, 0, -Math.PI / 2],
-  },
-  footer: {
-    speed: 0.04,
-    maxSpeed: 0.4,
-    scale: 2.1,
-    noiseStrength: 2,
-    position: [0, 0, 0],
-    rotation: [5, -3, -4],
-    baseSize: 0.085,
-    maxSize: 0.1,
   },
 };
 
@@ -144,7 +86,6 @@ const ParticleWave = ({ isMenuOpen }) => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Update target rotation when mobile state changes
   useEffect(() => {
     const newRotation =
       activeEffect === "portfolio" && isMobile
@@ -174,7 +115,6 @@ const ParticleWave = ({ isMenuOpen }) => {
     }
     pos.needsUpdate = true;
 
-    // Smoothly interpolate position and rotation
     currentPosition.current.lerp(targetPosition, 0.14);
     currentRotation.current.x +=
       (targetRotation.x - currentRotation.current.x) * 0.07;
@@ -190,7 +130,6 @@ const ParticleWave = ({ isMenuOpen }) => {
       currentRotation.current.z
     );
 
-    // Static base color
     const baseColor = new THREE.Color(theme === "light" ? "#333" : "#ccc");
     materialRef.current.color.set(baseColor);
     materialRef.current.size = isFooter ? baseSize : 0.01;
@@ -235,18 +174,16 @@ const BackgroundWave = ({ isMenuOpen }) => {
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  // After the intro CSS transition finishes, switch to instant-scroll mode
   useEffect(() => {
     if (!loaded) return;
     const timer = setTimeout(() => setIntroComplete(true), 3500);
     return () => clearTimeout(timer);
   }, [loaded]);
 
-  // Scroll-driven parallax: shift wave upward as page scrolls down
   useEffect(() => {
     if (!introComplete) return;
 
-    const maxShift = 80; // max vh to shift upward
+    const maxShift = 80;
 
     const onScroll = () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
@@ -263,7 +200,6 @@ const BackgroundWave = ({ isMenuOpen }) => {
       });
     };
 
-    // Set initial position
     onScroll();
 
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -279,7 +215,6 @@ const BackgroundWave = ({ isMenuOpen }) => {
       style={
         introComplete
           ? {
-              // Post-intro: no CSS transition so scroll updates are instant
               position: "absolute",
               top: "33%",
               left: 0,
@@ -291,7 +226,6 @@ const BackgroundWave = ({ isMenuOpen }) => {
               willChange: "transform",
             }
           : {
-              // Intro phase: CSS transition handles the fade-in + scale
               position: "absolute",
               top: "33%",
               left: 0,

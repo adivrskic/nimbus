@@ -103,7 +103,6 @@
   }
 }
 
-// Responsive adjustments
 @media (max-width: 640px) {
   .footer {
     padding: calc(var(--spacing-unit) * 8) 0 calc(var(--spacing-unit) * 4);
@@ -118,10 +117,6 @@
     }
   }
 }
-
-// =============================================================================
-// About Section — Neumorphic Feature Cards
-// =============================================================================
 
 .about {
   position: relative;
@@ -177,9 +172,6 @@
   }
 }
 
-// ---------------------------------------------------------------------------
-// Inset neumorphic feature card
-// ---------------------------------------------------------------------------
 .about__feature {
   display: flex;
   align-items: flex-start;
@@ -231,9 +223,6 @@
   color: var(--color-text-tertiary);
   max-width: 420px;
 }
-// =============================================================================
-// Showcase + Add-ons gradient wrapper
-// =============================================================================
 
 .showcase-addons-wrapper {
   position: relative;
@@ -261,10 +250,6 @@
     transparent 100%
   );
 }
-
-// =============================================================================
-// Showcase Section — How It Works + Preview Mockup
-// =============================================================================
 
 .showcase {
   padding: calc(var(--spacing-unit) * 10) 0;
@@ -308,7 +293,6 @@
     margin: 0 auto;
   }
 
-  // ── Three-step cards ──────────────────────────────────────────────────────
   &__steps {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -373,7 +357,6 @@
     font-family: var(--font-family-base, sans-serif);
   }
 
-  // ── Preview mockup ────────────────────────────────────────────────────────
   &__preview {
     max-width: 720px;
     margin: 0 auto;
@@ -466,10 +449,6 @@
   }
 }
 
-// =============================================================================
-// Add-Ons Section — 2-Column Visual Cards
-// =============================================================================
-
 .showcase-addons-wrapper .addons {
   padding: calc(var(--spacing-unit) * 10) 0;
 
@@ -512,7 +491,6 @@
     margin: 0 auto;
   }
 
-  // ── 2-column card grid ────────────────────────────────────────────────────
   &__grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -536,11 +514,6 @@
     overflow: hidden;
     transition: transform var(--transition-base),
       box-shadow var(--transition-base);
-
-    &:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--neumorphism-shadow-surface-elevated);
-    }
   }
 
   &__card-visual {

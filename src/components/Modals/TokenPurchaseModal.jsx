@@ -116,7 +116,6 @@ function TokenPurchaseModal({ isOpen, onClose, onOpenAuth }) {
         }`}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Fixed header section */}
         <div className="modal-header-section">
           <div className="modal-header">
             <div className="modal-title">
@@ -140,7 +139,6 @@ function TokenPurchaseModal({ isOpen, onClose, onOpenAuth }) {
           )}
         </div>
 
-        {/* Scrollable body section */}
         <div className="modal-body">
           <div className="modal-section">
             <div className="modal-section__header">

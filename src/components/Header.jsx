@@ -103,7 +103,6 @@ function Header({ modalActive: externalModalActive = false }) {
   return (
     <header className={`header${anyModalOpen ? " header--modal-active" : ""}`}>
       <div className="header__inner">
-        {/* Logo — glassmorphism section */}
         <div className="header__section header__section--logo">
           <div className="header__logo">
             <span className="header__logo-icon">
@@ -116,7 +115,6 @@ function Header({ modalActive: externalModalActive = false }) {
           </div>
         </div>
 
-        {/* Nav — glassmorphism section */}
         <div className="header__section header__section--nav">
           <nav className="header__nav">
             {isAuthenticated ? (

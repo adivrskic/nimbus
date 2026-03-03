@@ -18,10 +18,8 @@ export function calculateTokenCost(
 ) {
   const breakdown = {};
 
-  // Base cost
   breakdown.base = BASE_COST;
 
-  // Prompt complexity
   const safePrompt = typeof prompt === "string" ? prompt : String(prompt ?? "");
   const wordCount = safePrompt
     .trim()
@@ -33,7 +31,6 @@ export function calculateTokenCost(
   else if (wordCount <= 150) breakdown.promptComplexity = 3;
   else breakdown.promptComplexity = 5;
 
-  // Refinements use simplified cost
   if (isRefinement) {
     const totalCost = breakdown.base + breakdown.promptComplexity;
     const finalCost = Math.min(
@@ -49,12 +46,10 @@ export function calculateTokenCost(
     return { cost: finalCost, breakdown, estimate, wordCount };
   }
 
-  // Look up cost for each option from the shared cost maps
   for (const [key, costMap] of Object.entries(COST_MAPS)) {
     const isConditional = CONDITIONAL_KEYS.includes(key);
 
     if (isConditional) {
-      // Only add cost if the selection is explicitly set
       if (selections[key]) {
         breakdown[key] = costMap[selections[key]] ?? 0;
       }
@@ -63,32 +58,24 @@ export function calculateTokenCost(
     }
   }
 
-  // Special cases not covered by simple map lookups
-
-  // Custom colors
   if (selections.palette === "Custom") {
     breakdown.customColors = 2;
   }
-  // Dark mode
   if (selections.mode === "Dark") {
     breakdown.darkMode = 2;
   }
-  // Section count
   const sectionCount = (selections.sections || []).length;
   breakdown.sections =
     sectionCount > 4 ? Math.ceil((sectionCount - 4) * 0.75) : 0;
-  // Sticky elements
   const stickyCount = (selections.stickyElements || []).length;
   breakdown.stickyElements = stickyCount > 0 ? Math.min(stickyCount * 1, 3) : 0;
 
-  // Add-on costs
   for (const [addonId, isActive] of Object.entries(addons)) {
     if (isActive && ADDON_COSTS[addonId]) {
       breakdown[`addon_${addonId}`] = ADDON_COSTS[addonId];
     }
   }
 
-  // Calculate total
   const totalCost = Object.values(breakdown).reduce(
     (sum, cost) => sum + (cost || 0),
     0

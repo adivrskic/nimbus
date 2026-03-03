@@ -111,7 +111,6 @@ const HOW_IT_WORKS = [
   },
 ];
 
-// Miniature mockup SVGs for add-on cards
 function AddOnVisual({ type }) {
   const sharedStyles = {
     width: "100%",
@@ -123,7 +122,6 @@ function AddOnVisual({ type }) {
     return (
       <svg viewBox="0 0 280 180" fill="none" style={sharedStyles}>
         <rect width="280" height="180" rx="8" fill="var(--color-background)" />
-        {/* Mini chart bars */}
         <rect
           x="32"
           y="120"
@@ -778,69 +776,7 @@ function Footer() {
 
   return (
     <>
-      {/* About section — what nimbus does */}
-      {/* <section className="about">
-        <div className="container">
-          <div className="about__content">
-            <h2 className="about__heading">Describe it. Generate it.</h2>
-            <p className="about__description">
-              Nimbus websites turns your ideas into fully built websites in
-              seconds. Just describe what you want in plain English, customize
-              with 60+ design options, and get production-ready code — no
-              templates, no drag-and-drop, no coding required.
-            </p>
-
-            <div className="about__features">
-              <div className="about__feature">
-                <div className="about__feature-icon">
-                  <Zap size={18} />
-                </div>
-                <div className="about__feature-text">
-                  <span className="about__feature-title">AI-Powered</span>
-                  <span className="about__feature-desc">
-                    Generates unique, custom websites from a text prompt
-                  </span>
-                </div>
-              </div>
-
-              <div className="about__feature">
-                <div className="about__feature-icon">
-                  <Palette size={18} />
-                </div>
-                <div className="about__feature-text">
-                  <span className="about__feature-title">
-                    Fully Customizable
-                  </span>
-                  <span className="about__feature-desc">
-                    Style, layout, animations, typography — fine-tune everything
-                  </span>
-                </div>
-              </div>
-
-              <div className="about__feature">
-                <div className="about__feature-icon">
-                  <Download size={18} />
-                </div>
-                <div className="about__feature-text">
-                  <span className="about__feature-title">Download & Own</span>
-                  <span className="about__feature-desc">
-                    Export clean HTML/CSS/JS — your code, no lock-in
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <p className="about__pricing">
-              Pay per generation with tokens — no subscriptions, no hidden fees.
-              Start free with tokens on signup.
-            </p>
-          </div>
-        </div>
-      </section> */}
-
-      {/* Showcase + Add-ons gradient wrapper */}
       <div className="showcase-addons-wrapper">
-        {/* How It Works — 3-step showcase */}
         <section className="showcase">
           <div className="footer__container container">
             <div className="showcase__header">
@@ -867,7 +803,6 @@ function Footer() {
               ))}
             </div>
 
-            {/* Preview mockup */}
             <div className="showcase__preview">
               <div className="showcase__preview-window">
                 <div className="showcase__preview-toolbar">
@@ -882,13 +817,11 @@ function Footer() {
                   </div>
                 </div>
                 <div className="showcase__preview-body">
-                  {/* Abstract website mockup */}
                   <svg
                     viewBox="0 0 560 320"
                     fill="none"
                     className="showcase__preview-svg"
                   >
-                    {/* Nav */}
                     <rect
                       x="0"
                       y="0"
@@ -1152,7 +1085,6 @@ function Footer() {
                       opacity="0.3"
                     />
 
-                    {/* Footer bar */}
                     <rect
                       x="0"
                       y="290"
@@ -1189,14 +1121,11 @@ function Footer() {
           </div>
         </section>
 
-        {/* Add-Ons section — 2-column cards */}
         <section className="addons">
           <div className="footer__container container">
             <div className="addons__header">
               <span className="addons__label">Add-ons</span>
-              <h2 className="addons__heading">
-                Supercharge your site after generation
-              </h2>
+              <h2 className="addons__heading">Supercharge your website</h2>
               <p className="addons__subheading">
                 Bolt on analytics, a blog, CMS, or contact forms — each add-on
                 is a one-click token purchase that integrates directly into your
@@ -1234,9 +1163,7 @@ function Footer() {
           </div>
         </section>
       </div>
-      {/* end .showcase-addons-wrapper */}
 
-      {/* Existing footer */}
       <footer className="footer">
         <div className="footer__container container">
           <div className="footer__content">

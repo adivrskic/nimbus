@@ -8,7 +8,6 @@ export const EXAMPLE_PROMPTS = [
 ];
 
 export const DEFAULT_PERSISTENT_OPTIONS = {
-  // Brand identity
   branding: {
     brandName: "",
     tagline: "",
@@ -16,14 +15,12 @@ export const DEFAULT_PERSISTENT_OPTIONS = {
     faviconUrl: "",
   },
 
-  // Business information (NEW)
   business: {
-    description: "", // Short description of what they do
-    location: "", // City, region, or "Remote"
-    yearEstablished: "", // e.g., "2015" - adds credibility
+    description: "",
+    location: "",
+    yearEstablished: "",
   },
 
-  // Contact information
   contactInfo: {
     email: "",
     phone: "",
@@ -31,7 +28,6 @@ export const DEFAULT_PERSISTENT_OPTIONS = {
     contactFormEndpoint: "",
   },
 
-  // Social media links
   socialMedia: {
     twitter: "",
     instagram: "",
@@ -42,13 +38,11 @@ export const DEFAULT_PERSISTENT_OPTIONS = {
     tiktok: "",
   },
 
-  // Content preferences (NEW)
   content: {
-    primaryCta: "", // e.g., "Get Started", "Book Now", "Contact Us"
-    copyrightText: "", // e.g., "© 2024 Company Name"
+    primaryCta: "",
+    copyrightText: "",
   },
 
-  // Important links
   links: {
     termsOfService: "",
     privacyPolicy: "",
@@ -56,7 +50,6 @@ export const DEFAULT_PERSISTENT_OPTIONS = {
     blog: "",
   },
 
-  // User-provided images
   images: [],
 };
 

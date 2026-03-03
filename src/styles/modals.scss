@@ -1997,6 +1997,11 @@
   }
 }
 
+.addons-modal__card-lock {
+  color: var(--color-text-tertiary);
+  opacity: 0.6;
+}
+
 .addons-modal__card-details {
   padding: 0 14px 14px;
   display: flex;

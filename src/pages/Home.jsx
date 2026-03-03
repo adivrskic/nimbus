@@ -1,14 +1,5 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
-import {
-  Plus,
-  X,
-  Coins,
-  Puzzle,
-  BarChart3,
-  Mail,
-  FileText,
-  Database,
-} from "lucide-react";
+import { Plus, X, BarChart3, Mail, FileText, Database } from "lucide-react";
 
 import { useAuth } from "../contexts/AuthContext";
 import { useProject } from "../contexts/ProjectContext";
@@ -183,12 +174,10 @@ function Home() {
   const [currentProjectData, setCurrentProjectData] = useState(null);
   const [selectedAddons, setSelectedAddons] = useState({});
 
-  // Refs for snapshotting state before enhancement
   const preEnhanceHtmlRef = useRef(null);
   const preEnhanceFilesRef = useRef(null);
   const enhancePromptSnapshotRef = useRef(null);
 
-  // ─── Preview pill sync ─────────────────────────────────────────────────
   useEffect(() => {
     if (generatedCode && !showPreview) {
       showPreviewPill({ onRestore: restorePreview, isGenerating });
@@ -210,7 +199,6 @@ function Home() {
     }
   }, [isGenerating, refreshColors]);
 
-  // ─── Track enhancement completion to record versions ───────────────────
   const wasEnhancingRef = useRef(false);
   useEffect(() => {
     if (isEnhancing) {
@@ -241,7 +229,6 @@ function Home() {
     recordEnhancementResult,
   ]);
 
-  // ─── Typewriter ────────────────────────────────────────────────────────
   const { text: typewriterText } = useTypewriter({
     prompts: EXAMPLE_PROMPTS,
     enabled: !isExpanded && !prompt,
@@ -250,7 +237,6 @@ function Home() {
     pauseDuration: 2000,
   });
 
-  // ─── Token calculations ────────────────────────────────────────────────
   const totalAddonCost = useMemo(
     () => getAddonCost(selectedAddons),
     [selectedAddons]
@@ -292,7 +278,6 @@ function Home() {
     [enhancePrompt]
   );
 
-  // ─── Escape key ────────────────────────────────────────────────────────
   useEscapeKey(() => {
     if (showPreview) {
       minimizePreview();
@@ -319,7 +304,6 @@ function Home() {
     }
   });
 
-  // ─── Pending project handling ──────────────────────────────────────────
   useEffect(() => {
     if (pendingProject && pendingAction) {
       const projectPrompt =
@@ -356,7 +340,6 @@ function Home() {
     loadVersionHistory,
   ]);
 
-  // ─── Generate ──────────────────────────────────────────────────────────
   const handleGenerate = useCallback(() => {
     if (!prompt.trim() || isGenerating) return;
 
@@ -396,7 +379,6 @@ function Home() {
     resetProject,
   ]);
 
-  // ─── Enhance ───────────────────────────────────────────────────────────
   const handleEnhance = useCallback(() => {
     if (!enhancePrompt.trim() || isGenerating) return;
 
@@ -407,7 +389,6 @@ function Home() {
 
     const submittedEnhancePrompt = enhancePrompt.trim();
 
-    // Snapshot current state before enhancement
     preEnhanceHtmlRef.current = generatedCode;
     preEnhanceFilesRef.current = generatedFiles;
     enhancePromptSnapshotRef.current = submittedEnhancePrompt;
@@ -452,7 +433,6 @@ function Home() {
     [persistentOptions, updatePersistentOption]
   );
 
-  // ─── Project actions ───────────────────────────────────────────────────
   const handleEditProject = useCallback(
     (project) => {
       closeProjects();
@@ -469,7 +449,6 @@ function Home() {
     [closeProjects, deployProject]
   );
 
-  // ─── Version handling ──────────────────────────────────────────────────
   const handleViewVersion = useCallback(
     (version, project) => {
       if (version.html_content) {
@@ -502,7 +481,6 @@ function Home() {
     [updateCode, setCurrentVersionId]
   );
 
-  // Build version list for PreviewModal
   const previewVersions = useMemo(() => {
     if (!currentProjectData && versionHistory.length === 0) return [];
     return getDisplayVersions(currentProjectData);
@@ -554,7 +532,6 @@ function Home() {
             activeCategories={activeCategories}
           />
 
-          {/* Add-ons trigger row */}
           <div className="addons-trigger">
             {selectedCount > 0 &&
               ADDONS.filter((a) => selectedAddons[a.id]).map((addon) => {
@@ -605,8 +582,6 @@ function Home() {
           )}
         </div>
       </div>
-
-      {/* Page-specific modals */}
 
       {showOptions && (
         <OptionsModal
@@ -679,8 +654,6 @@ function Home() {
           totalAddonCost={totalAddonCost}
         />
       )}
-
-      {/* Shared modals */}
 
       {modals.auth && (
         <AuthModal

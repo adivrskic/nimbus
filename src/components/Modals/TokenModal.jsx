@@ -33,7 +33,6 @@ function TokenModal({
         className={`modal-content modal-content--lg ${isOpen ? "active" : ""}`}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Fixed header section */}
         <div className="modal-header-section">
           <div className="modal-header">
             <div className="modal-title">
@@ -54,7 +53,6 @@ function TokenModal({
           </div>
         </div>
 
-        {/* Scrollable body section */}
         <div className="modal-body">
           <div className="modal-section">
             <div className="modal-section__header">

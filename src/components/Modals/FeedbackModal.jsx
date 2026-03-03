@@ -1,4 +1,3 @@
-// components/Modals/FeedbackModal/FeedbackModal.jsx
 import { useState } from "react";
 import {
   X,
@@ -17,7 +16,6 @@ import "../../styles/modals.scss";
 function FeedbackModal({
   isOpen,
   onClose,
-  // lastRequest: { type: 'initial' | 'enhancement', prompt: string }
   lastRequest,
   selections,
   generatedCode,
@@ -29,13 +27,12 @@ function FeedbackModal({
     onClose
   );
 
-  const [rating, setRating] = useState(null); // 'up' or 'down'
+  const [rating, setRating] = useState(null);
   const [comment, setComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [error, setError] = useState("");
 
-  // Determine what to show based on last request type
   const isInitialGeneration = lastRequest?.type === "initial";
   const requestPrompt = lastRequest?.prompt || originalPrompt || "";
 
@@ -72,7 +69,6 @@ function FeedbackModal({
 
       setIsSubmitted(true);
 
-      // Auto-close after success
       setTimeout(() => {
         handleClose();
       }, 1500);
@@ -94,7 +90,6 @@ function FeedbackModal({
     }
   };
 
-  // Format selections for display
   const getActiveSelections = () => {
     if (!selections) return [];
 
@@ -168,7 +163,6 @@ function FeedbackModal({
             </div>
 
             <div className="feedback-body">
-              {/* Request prompt display */}
               {requestPrompt && (
                 <div className="feedback-section">
                   <label className="feedback-label">
@@ -182,7 +176,6 @@ function FeedbackModal({
                 </div>
               )}
 
-              {/* Active selections display - only show for initial generations */}
               {isInitialGeneration && activeSelections.length > 0 && (
                 <div className="feedback-section">
                   <label className="feedback-label">Selected Options</label>
@@ -199,7 +192,6 @@ function FeedbackModal({
                 </div>
               )}
 
-              {/* Rating section */}
               <div className="feedback-section">
                 <label className="feedback-label">Rating</label>
                 <div className="feedback-rating">
@@ -228,7 +220,6 @@ function FeedbackModal({
                 </div>
               </div>
 
-              {/* Comment section */}
               <div className="feedback-section">
                 <label className="feedback-label">
                   Comments <span className="optional">(optional)</span>

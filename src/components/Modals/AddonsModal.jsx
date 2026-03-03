@@ -1,4 +1,3 @@
-// components/Modals/AddonsModal/AddonsModal.jsx
 import { useState, useCallback } from "react";
 import {
   Plus,
@@ -49,7 +48,6 @@ function AddonsModal({
         className={`modal-content modal-content--lg ${isOpen ? "active" : ""}`}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Fixed header section */}
         <div className="modal-header-section">
           <div className="modal-header">
             <div className="modal-title">
@@ -76,12 +74,11 @@ function AddonsModal({
           </div>
 
           <div className="modal-subtitle">
-            Extend your generated site with additional functionality. Add-on
-            costs are added to your base generation cost.
+            Extend your generated site with extra functionality. Add-on costs
+            are added to your base generation token cost.
           </div>
         </div>
 
-        {/* Scrollable body */}
         <div className="modal-body">
           {ADDONS.map((addon) => {
             const Icon = ICON_MAP[addon.icon];
@@ -96,11 +93,14 @@ function AddonsModal({
                   isSelected ? "addons-modal__card--selected" : ""
                 } ${isComingSoon ? "addons-modal__card--disabled" : ""}`}
               >
-                {/* Card header — click to expand */}
                 <button
                   className="addons-modal__card-trigger"
-                  onClick={() => setExpandedId(isExpanded ? null : addon.id)}
-                  aria-expanded={isExpanded}
+                  onClick={() => {
+                    if (isComingSoon) return;
+                    setExpandedId(isExpanded ? null : addon.id);
+                  }}
+                  aria-expanded={!isComingSoon && isExpanded}
+                  style={isComingSoon ? { cursor: "default" } : undefined}
                 >
                   <div
                     className={`addons-modal__card-icon ${
@@ -131,17 +131,20 @@ function AddonsModal({
                       <Coins size={11} />
                       {addon.costLabel}
                     </span>
-                    <ChevronDown
-                      size={13}
-                      className={`addons-modal__card-chevron ${
-                        isExpanded ? "open" : ""
-                      }`}
-                    />
+                    {isComingSoon ? (
+                      <Lock size={13} className="addons-modal__card-lock" />
+                    ) : (
+                      <ChevronDown
+                        size={13}
+                        className={`addons-modal__card-chevron ${
+                          isExpanded ? "open" : ""
+                        }`}
+                      />
+                    )}
                   </div>
                 </button>
 
-                {/* Expanded details */}
-                {isExpanded && (
+                {!isComingSoon && isExpanded && (
                   <div className="addons-modal__card-details">
                     <div className="addons-modal__card-how">
                       <span className="addons-modal__card-how-label">
@@ -152,20 +155,11 @@ function AddonsModal({
 
                     <button
                       className={`addons-modal__card-action ${
-                        isSelected
-                          ? "addons-modal__card-action--added"
-                          : isComingSoon
-                          ? "addons-modal__card-action--locked"
-                          : ""
+                        isSelected ? "addons-modal__card-action--added" : ""
                       }`}
-                      disabled={isComingSoon}
                       onClick={() => toggle(addon.id)}
                     >
-                      {isComingSoon ? (
-                        <>
-                          <Lock size={13} /> <span>Coming Soon</span>
-                        </>
-                      ) : isSelected ? (
+                      {isSelected ? (
                         <>
                           <Check size={13} />{" "}
                           <span>Added — click to remove</span>

@@ -1,4 +1,3 @@
-// hooks/useGeneration.js - Streaming optimized with caching and multi-page support
 import { useState, useCallback, useRef, useEffect } from "react";
 import { generateWebsiteStream } from "../utils/generateWebsiteStream";
 import { useGenerationState } from "../contexts/GenerationContext";
@@ -96,11 +95,6 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
       abortControllerRef.current = new AbortController();
 
       try {
-        // P0 FIX: Send raw user prompt. The edge function receives
-        // `customization` (selections) and `persistentOptions` separately
-        // and builds its own system prompt from them via buildDynamicPromptPart.
-        // Sending buildFullPrompt() here was duplicating every design spec.
-
         if (streaming) {
           const streamResult = await generateWebsiteStream({
             prompt,
@@ -161,7 +155,6 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
             setGeneratedCode(code);
             setGeneratedFiles(files);
 
-            // Cache it
             cacheGeneration(prompt, selections, persistentOptions, {
               html: code,
               files,
@@ -203,9 +196,8 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
       setIsStreaming(true);
       abortControllerRef.current = new AbortController();
 
-      // Snapshot the current HTML as the base for patch application
       const baseHtml = generatedCode;
-      let patchApplier = null; // Created lazily once we know it's a patch response
+      let patchApplier = null;
       let detectedPatch = false;
 
       try {
@@ -223,7 +215,6 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
 
             if (!content) return;
 
-            // First time we have enough text, detect if it's a patch response
             if (!detectedPatch && content.length > 20) {
               if (isPatchResponse(content)) {
                 detectedPatch = true;
@@ -232,13 +223,11 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
             }
 
             if (detectedPatch && patchApplier) {
-              // Patch mode: apply completed ops incrementally to the base HTML
               const { html, newOpsApplied } = patchApplier.update(content);
               if (newOpsApplied) {
                 debouncedSetCode(html);
               }
             } else if (!detectedPatch && content.length > 20) {
-              // Full HTML mode (fallback): stream content directly
               debouncedSetCode(content);
             }
 
@@ -257,7 +246,6 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
 
           let finalHtml;
           if (detectedPatch && patchApplier) {
-            // Finalize: apply any remaining ops from the last chunk
             finalHtml = patchApplier.finalize(streamResult.getFullHtml());
           } else {
             finalHtml = streamResult.getFullHtml();

@@ -1,4 +1,3 @@
-// components/Home/SearchBar/SearchBar.jsx - Main search input component
 import { forwardRef, useRef, useCallback, useMemo } from "react";
 import { Coins, Settings, Sparkles, HelpCircle } from "lucide-react";
 import { Loader2 } from "lucide-react";

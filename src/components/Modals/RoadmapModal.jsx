@@ -14,7 +14,6 @@ function RoadmapModal({ isOpen, onClose }) {
   const [openSections, setOpenSections] = useState(["in-progress", "planned"]);
 
   const roadmapItems = [
-    // Completed
     {
       status: "completed",
       title: "AI Site Generation",
@@ -40,7 +39,6 @@ function RoadmapModal({ isOpen, onClose }) {
       title: "AI Revisions",
       description: "Refine your site with follow-up prompts",
     },
-    // In Progress
     {
       status: "in-progress",
       title: "One-Click Deploy",
@@ -56,7 +54,6 @@ function RoadmapModal({ isOpen, onClose }) {
       title: "Multi-Page Sites",
       description: "Generate full websites with navigation",
     },
-    // Planned
     {
       status: "planned",
       title: "CMS Integration",
@@ -117,7 +114,6 @@ function RoadmapModal({ isOpen, onClose }) {
         className={`modal-content modal-content--lg ${isOpen ? "active" : ""}`}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Fixed header section */}
         <div className="modal-header-section">
           <div className="modal-header">
             <div className="modal-title">
@@ -134,7 +130,6 @@ function RoadmapModal({ isOpen, onClose }) {
           </div>
         </div>
 
-        {/* Scrollable body section */}
         <div className="modal-body">
           <div className="roadmap-accordion">
             {sections.map((section) => {

@@ -1,5 +1,3 @@
-// GeneratedPreview.scss - Toolbar removed, controlled by PreviewModal header
-
 .preview {
   display: flex;
   flex-direction: column;
@@ -97,7 +95,6 @@
   }
 }
 
-// Non-desktop grid background
 .preview-frame--tablet,
 .preview-frame--mobile {
   & + .preview-content,
@@ -120,7 +117,6 @@
   }
 }
 
-// Fullscreen
 .preview--fullscreen {
   .preview-content {
     padding: 32px;
@@ -142,7 +138,6 @@
   }
 }
 
-// Disable interactions during streaming
 .preview--streaming {
   .preview-device,
   .preview-action {
@@ -151,7 +146,6 @@
   }
 }
 
-// Mobile responsive
 @media (max-width: 768px) {
   .preview-content {
     padding: 0;

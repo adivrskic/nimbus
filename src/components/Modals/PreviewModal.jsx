@@ -1,4 +1,3 @@
-// components/Home/PreviewModal/PreviewModal.jsx - Unified single-row toolbar
 import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import {
   Eye,
@@ -39,32 +38,24 @@ import {
 import { EXPORT_FORMATS } from "../../utils/exportScaffold";
 import "../../styles/modals.scss";
 
-// ─── Lightweight HTML syntax highlighter ─────────────────────────────────────
 function highlightHtml(code) {
   if (!code) return "";
-  return (
-    code
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      // HTML comments
-      .replace(/(&lt;!--[\s\S]*?--&gt;)/g, '<span class="hl-comment">$1</span>')
-      // Tags (opening + closing)
-      .replace(
-        /(&lt;\/??)([a-zA-Z][a-zA-Z0-9-]*)/g,
-        '$1<span class="hl-tag">$2</span>'
-      )
-      // Attribute names
-      .replace(/\s([a-zA-Z\-:]+)(=)/g, ' <span class="hl-attr">$1</span>$2')
-      // Quoted strings
-      .replace(
-        /("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')/g,
-        '<span class="hl-string">$1</span>'
-      )
-  );
+  return code
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/(&lt;!--[\s\S]*?--&gt;)/g, '<span class="hl-comment">$1</span>')
+    .replace(
+      /(&lt;\/??)([a-zA-Z][a-zA-Z0-9-]*)/g,
+      '$1<span class="hl-tag">$2</span>'
+    )
+    .replace(/\s([a-zA-Z\-:]+)(=)/g, ' <span class="hl-attr">$1</span>$2')
+    .replace(
+      /("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')/g,
+      '<span class="hl-string">$1</span>'
+    );
 }
 
-// Format icon map
 const FORMAT_ICONS = {
   html: Globe,
   "vite-react": Braces,
@@ -72,21 +63,6 @@ const FORMAT_ICONS = {
   astro: Rocket,
 };
 
-/**
- * Props shape:
- *
- *   isOpen, html, files, onClose, onMinimize, onDownload, onCodeChange
- *
- *   saveProps:       { onSave, isSaving, saveSuccess }
- *   enhanceProps:    { prompt, onChange, onEnhance, tokenCost, breakdown,
- *                      showTokenOverlay, onToggleTokenOverlay }
- *   tokenProps:      { isAuthenticated, userTokens, balance, onBuyTokens }
- *   generationState: { isGenerating, isStreaming, isEnhancing, streamingPhase, error }
- *
- *   versionProps:    { versions, currentVersionId, onSelectVersion }
- *
- *   selections, originalPrompt, lastRequest   (for feedback modal)
- */
 function PreviewModal({
   isOpen,
   html,
@@ -105,7 +81,6 @@ function PreviewModal({
   lastRequest = null,
   onEnhancePromptChange = null,
 }) {
-  // Destructure grouped props
   const { onSave, isSaving = false, saveSuccess = false } = saveProps;
   const {
     prompt: enhancePrompt = "",
@@ -145,8 +120,7 @@ function PreviewModal({
   const [copySuccess, setCopySuccess] = useState(false);
   const [expandedSection, setExpandedSection] = useState(null);
 
-  // Code editing state
-  const [editedCode, setEditedCode] = useState(null); // null = not edited
+  const [editedCode, setEditedCode] = useState(null);
   const [isCodeDirty, setIsCodeDirty] = useState(false);
   const debounceTimerRef = useRef(null);
   const textareaRef = useRef(null);
@@ -160,16 +134,13 @@ function PreviewModal({
   const containerRef = useRef(null);
   const headerRef = useRef(null);
 
-  // Toggle a collapsible section — only one open at a time
   const toggleSection = useCallback((section) => {
     setExpandedSection((prev) => (prev === section ? null : section));
-    // Close any open dropdowns when switching sections
     setShowPagePicker(false);
     setShowVersionPicker(false);
     setShowDownloadDialog(false);
   }, []);
 
-  // Parse files
   const files = useMemo(() => {
     if (propFiles && Object.keys(propFiles).length > 0) return propFiles;
     return parseMultiPageHtml(html);
@@ -179,22 +150,18 @@ function PreviewModal({
   const fileList = files ? Object.keys(files) : [];
   const currentFileIndex = fileList.indexOf(activeFile);
 
-  // The "source of truth" HTML for the current file
   const sourceHtml = useMemo(() => {
     if (isMultiPage && files[activeFile]) return files[activeFile];
     return html;
   }, [isMultiPage, files, activeFile, html]);
 
-  // The displayed/editable code: either user-edited or source
   const currentHtml = editedCode !== null ? editedCode : sourceHtml;
 
-  // Memoised highlighted code for the underlay
   const highlightedCode = useMemo(() => {
     if (!currentHtml) return "";
     return highlightHtml(currentHtml);
   }, [currentHtml]);
 
-  // Line count for gutter
   const lineCount = useMemo(() => {
     if (!currentHtml) return 1;
     return currentHtml.split("\n").length;
@@ -208,20 +175,17 @@ function PreviewModal({
     );
   }, [isStreaming, streamingPhase, currentHtml]);
 
-  // Reset edited code when source changes (new generation/version)
   useEffect(() => {
     setEditedCode(null);
     setIsCodeDirty(false);
   }, [sourceHtml]);
 
-  // Reset active file when files change
   useEffect(() => {
     if (isMultiPage && !files[activeFile]) {
       setActiveFile(fileList[0] || "index.html");
     }
   }, [files, activeFile, isMultiPage, fileList]);
 
-  // Close dropdowns on outside click
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (pagePickerRef.current && !pagePickerRef.current.contains(e.target)) {
@@ -247,7 +211,6 @@ function PreviewModal({
     }
   }, [showPagePicker, showVersionPicker, showDownloadDialog]);
 
-  // Fullscreen handling
   useEffect(() => {
     const onChange = () => setIsFullscreen(!!document.fullscreenElement);
     document.addEventListener("fullscreenchange", onChange);
@@ -258,7 +221,6 @@ function PreviewModal({
     };
   }, []);
 
-  // Sync line numbers + highlight underlay with textarea scroll
   const handleCodeScroll = useCallback(() => {
     const ta = textareaRef.current;
     if (!ta) return;
@@ -296,14 +258,12 @@ function PreviewModal({
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }, [currentHtml]);
 
-  // Code editing handler with debounced preview sync
   const handleCodeEdit = useCallback(
     (e) => {
       const newCode = e.target.value;
       setEditedCode(newCode);
       setIsCodeDirty(true);
 
-      // Debounced sync to preview
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
       }
@@ -314,14 +274,12 @@ function PreviewModal({
     [onCodeChange]
   );
 
-  // Reset code to AI-generated version
   const handleResetCode = useCallback(() => {
     setEditedCode(null);
     setIsCodeDirty(false);
     onCodeChange?.(sourceHtml);
   }, [sourceHtml, onCodeChange]);
 
-  // Copy code to clipboard
   const handleCopyCode = useCallback(async () => {
     if (!currentHtml) return;
     try {
@@ -329,7 +287,6 @@ function PreviewModal({
       setCopySuccess(true);
       setTimeout(() => setCopySuccess(false), 2000);
     } catch {
-      // Fallback
       const ta = document.createElement("textarea");
       ta.value = currentHtml;
       document.body.appendChild(ta);
@@ -341,7 +298,6 @@ function PreviewModal({
     }
   }, [currentHtml]);
 
-  // Handle tab key in textarea
   const handleCodeKeyDown = useCallback((e) => {
     if (e.key === "Tab") {
       e.preventDefault();
@@ -351,7 +307,6 @@ function PreviewModal({
       const val = ta.value;
       ta.value = val.substring(0, start) + "  " + val.substring(end);
       ta.selectionStart = ta.selectionEnd = start + 2;
-      // Trigger change
       const evt = new Event("input", { bubbles: true });
       ta.dispatchEvent(evt);
     }
@@ -420,14 +375,11 @@ function PreviewModal({
         } ${isOpen ? "active" : ""}`}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* ===== FLOATING TOOLBAR ===== */}
         <div className="pm-bar" ref={headerRef}>
-          {/* ── PINNED LEFT: Logo ── */}
           <div className="pm-bar__brand">
             <Cloudy size={16} />
           </div>
 
-          {/* ── SECTION: View (tabs, devices/code tools) ── */}
           <div
             className={`pm-bar__section pm-bar__section--view ${
               expandedSection === "view" ? "expanded" : "collapsed"
@@ -443,7 +395,6 @@ function PreviewModal({
               {showCode ? <Code2 size={15} /> : <Eye size={15} />}
             </button>
             <div className="pm-bar__section-body">
-              {/* Preview / Code tabs */}
               <div className="pm-bar__tabs">
                 <button
                   className={`pm-bar__tab ${!showCode ? "active" : ""}`}
@@ -464,7 +415,6 @@ function PreviewModal({
 
               <div className="pm-bar__sep" />
 
-              {/* Preview mode: device toggles */}
               {!showCode && (
                 <div className="pm-bar__devices">
                   {[
@@ -487,7 +437,6 @@ function PreviewModal({
                 </div>
               )}
 
-              {/* Code mode: copy/reset tools */}
               {showCode && (
                 <div className="pm-bar__code-tools">
                   <button
@@ -516,7 +465,6 @@ function PreviewModal({
             </div>
           </div>
 
-          {/* ── SECTION: Pages (only multi-page) ── */}
           {isMultiPage && !isStreaming && (
             <div
               className={`pm-bar__section ${
@@ -575,7 +523,6 @@ function PreviewModal({
             </div>
           )}
 
-          {/* ── SECTION: Version ── */}
           {hasVersions && !isStreaming && !isEnhancing && (
             <div
               className={`pm-bar__section ${
@@ -650,7 +597,6 @@ function PreviewModal({
             </div>
           )}
 
-          {/* ── PINNED CENTER: Enhance bar ── */}
           <div
             className={`pm-bar__enhance ${hasInput ? "has-input" : ""} ${
               isEnhancing ? "enhancing" : ""
@@ -718,7 +664,6 @@ function PreviewModal({
               </button>
             </div>
 
-            {/* Token overlay */}
             {showEnhanceTokenOverlay && (
               <div
                 className="pm-bar__token-overlay"
@@ -769,7 +714,6 @@ function PreviewModal({
             )}
           </div>
 
-          {/* ── SECTION: Actions (download, save, new tab, fullscreen) ── */}
           <div
             className={`pm-bar__section pm-bar__section--actions ${
               expandedSection === "actions" ? "expanded" : "collapsed"
@@ -871,7 +815,6 @@ function PreviewModal({
             )}
           </div>
 
-          {/* ── PINNED RIGHT: Close ── */}
           <button
             className="pm-bar__close"
             onClick={() => {
@@ -884,9 +827,7 @@ function PreviewModal({
           </button>
         </div>
 
-        {/* Body */}
         <div className="preview-modal__body">
-          {/* Bottom fade overlay for floating bar */}
           <div className="preview-modal__bottom-fade" />
 
           {showError ? (
@@ -921,9 +862,7 @@ function PreviewModal({
               </p>
             </div>
           ) : showCode ? (
-            /* ===== EDITABLE CODE VIEW ===== */
             <div className="code-editor">
-              {/* File tree sidebar for multi-page */}
               {isMultiPage && (
                 <div className="code-editor__sidebar">
                   <div className="code-editor__sidebar-title">Files</div>
@@ -946,9 +885,7 @@ function PreviewModal({
                 </div>
               )}
 
-              {/* Editor wrapper — textarea is the single scroll authority */}
               <div className="code-editor__wrap">
-                {/* Gutter — positioned via transform to follow textarea scroll */}
                 <div className="code-editor__gutter-track" ref={lineNumbersRef}>
                   <div className="code-editor__gutter">
                     {Array.from({ length: lineCount }, (_, i) => (
@@ -959,7 +896,6 @@ function PreviewModal({
                   </div>
                 </div>
 
-                {/* Textarea — the real editable input, transparent text */}
                 <textarea
                   ref={textareaRef}
                   className="code-editor__textarea"
@@ -971,7 +907,6 @@ function PreviewModal({
                   disabled={isStreaming || isEnhancing}
                 />
 
-                {/* Highlighted underlay — renders colored tokens, scrolls with textarea */}
                 <div className="code-editor__highlight" ref={highlightRef}>
                   <pre>
                     <code

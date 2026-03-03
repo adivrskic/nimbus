@@ -29,12 +29,10 @@ function VersionHistoryModal({ isOpen, onClose, project, onSelectVersion }) {
     setIsLoading(true);
     try {
       const history = project.customization?.versionHistory || [];
-      // Sort newest first
       const sorted = [...history].sort(
         (a, b) => new Date(b.timestamp) - new Date(a.timestamp)
       );
 
-      // Always include the current/initial version as v1
       const allVersions = [
         ...sorted,
         {

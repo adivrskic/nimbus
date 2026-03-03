@@ -1,10 +1,7 @@
 import { useState } from "react";
 import { X, Settings, ChevronLeft, Check, RotateCcw } from "lucide-react";
 import { OPTIONS } from "../../configs/options.config";
-import {
-  CATEGORY_GROUPS,
-  getFilteredCategories,
-} from "../../configs/categories.config";
+import { getFilteredCategories } from "../../configs/categories.config";
 import useModalAnimation from "../../hooks/useModalAnimation";
 
 import "../../styles/modals.scss";
@@ -176,7 +173,6 @@ function OptionsModal({
         }`}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
         <div className="options-header">
           <div className="options-header__left">
             <div className="modal-title">
@@ -193,7 +189,6 @@ function OptionsModal({
           </button>
         </div>
 
-        {/* Tabs */}
         <div className="options-filters">
           {["design", "brand"].map((tab) => (
             <button
@@ -234,7 +229,6 @@ function OptionsModal({
           ))}
         </div>
 
-        {/* Body */}
         <div
           style={{
             flex: 1,
@@ -245,10 +239,8 @@ function OptionsModal({
             gap: 14,
           }}
         >
-          {/* ======== DESIGN TAB — Category Grid ======== */}
           {activeTab === "design" && !activeOption && (
             <>
-              {/* Sub-filters */}
               <div className="options-filters">
                 {FILTER_KEYS.map((f) => (
                   <button
@@ -261,7 +253,6 @@ function OptionsModal({
                 ))}
               </div>
 
-              {/* Grid */}
               <div
                 className="options-grid"
                 style={{
@@ -304,7 +295,6 @@ function OptionsModal({
             </>
           )}
 
-          {/* ======== DESIGN TAB — Drill-down choices ======== */}
           {activeTab === "design" && activeOption && activeOptConfig && (
             <div className="options-choices">
               <div className="options-choices__header">
@@ -422,7 +412,6 @@ function OptionsModal({
             </div>
           )}
 
-          {/* ======== BRAND TAB ======== */}
           {activeTab === "brand" && (
             <div
               style={{

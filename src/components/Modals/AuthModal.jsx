@@ -64,7 +64,6 @@ function AuthModal({ isOpen, onClose, onAuthSuccess, onOpenLegal }) {
         className={`modal-content ${isVisible ? "active" : ""}`}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Fixed header section */}
         <div className="modal-header-section">
           <div className="modal-header">
             <div className="modal-title">
@@ -81,7 +80,6 @@ function AuthModal({ isOpen, onClose, onAuthSuccess, onOpenLegal }) {
           </div>
         </div>
 
-        {/* Body section */}
         <div className="modal-body">
           {error && <div className="modal-error">{error}</div>}
 
