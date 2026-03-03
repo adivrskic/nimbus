@@ -5,15 +5,9 @@
 //   - Client:  tokenCalculator.js (for UI cost preview)
 //   - Server:  edge function calculateTokenCost (for billing)
 //
-// If you add/change an option cost, update it HERE and then
-// copy the changes to the edge function. Both files MUST share
-// the same COST_MAP_VERSION string — bump it on every change.
+// If you add/change an option cost, update it HERE and both
+// consumers stay in sync automatically.
 // ═══════════════════════════════════════════════════════════════
-
-// Bump this version whenever COST_MAPS, CONDITIONAL_KEYS, or
-// BASE_COST / MIN / MAX values change. The edge function must
-// declare the same version string.
-export const COST_MAP_VERSION = "2025-03-02.1";
 
 export const BASE_COST = 12;
 export const REFINEMENT_MIN = 5;
@@ -759,4 +753,17 @@ export const BREAKDOWN_LABELS = {
   microCopy: "Micro copy",
   responsiveApproach: "Responsive approach",
   emojis: "Emojis",
+  // Add-ons
+  addon_analytics: "Analytics add-on",
+  addon_forms: "Contact form add-on",
+  addon_blog: "Blog engine add-on",
+  addon_cms: "CMS integration add-on",
+};
+
+// Add-on cost map (keyed by addon id)
+export const ADDON_COSTS = {
+  analytics: 4,
+  forms: 6,
+  blog: 10,
+  cms: 10,
 };

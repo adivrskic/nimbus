@@ -22,6 +22,8 @@ import {
 } from "../utils/tokenCalculator";
 
 import SearchBar from "../components/SearchBar";
+import AddonsPanel from "../components/AddonsPanel";
+import { getAddonCost } from "../configs/addons.config";
 import TokenModal from "../components/Modals/TokenModal";
 import OptionsModal from "../components/Modals/OptionsModal";
 import PreviewModal from "../components/Modals/PreviewModal";
@@ -164,6 +166,7 @@ function Home() {
   const [lastRequest, setLastRequest] = useState(null);
   const [showEnhanceTokenOverlay, setShowEnhanceTokenOverlay] = useState(false);
   const [currentProjectData, setCurrentProjectData] = useState(null);
+  const [selectedAddons, setSelectedAddons] = useState({});
 
   // Refs for snapshotting state before enhancement
   const preEnhanceHtmlRef = useRef(null);
@@ -233,15 +236,20 @@ function Home() {
   });
 
   // ─── Token calculations ────────────────────────────────────────────────
+  const totalAddonCost = useMemo(
+    () => getAddonCost(selectedAddons),
+    [selectedAddons]
+  );
+
   const tokenCostResult = useMemo(
-    () => calculateTokenCost(prompt, selections),
-    [prompt, selections]
+    () => calculateTokenCost(prompt, selections, false, selectedAddons),
+    [prompt, selections, selectedAddons]
   );
   const tokenCost = tokenCostResult.cost;
 
   const tokenBreakdown = useMemo(
-    () => getTokenBreakdown(selections, prompt),
-    [selections, prompt]
+    () => getTokenBreakdown(selections, prompt, false, selectedAddons),
+    [selections, prompt, selectedAddons]
   );
 
   const tokenBalance = useMemo(() => {
@@ -263,15 +271,6 @@ function Home() {
     () => getTokenBreakdown({}, enhancePrompt, true),
     [enhancePrompt]
   );
-
-  const enhanceTokenBalance = useMemo(() => {
-    if (!isAuthenticated) return { status: "unknown", sufficient: false };
-    const sufficient = userTokens >= enhanceTokenCost;
-    return {
-      status: sufficient ? "good" : userTokens > 0 ? "warning" : "critical",
-      sufficient,
-    };
-  }, [isAuthenticated, userTokens, enhanceTokenCost]);
 
   // ─── Escape key ────────────────────────────────────────────────────────
   useEscapeKey(() => {
@@ -358,7 +357,7 @@ function Home() {
     setCurrentProjectData(null);
     openPreview();
 
-    generate(prompt, selections, persistentOptions, user, true);
+    generate(prompt, selections, persistentOptions, user, true, selectedAddons);
   }, [
     prompt,
     isGenerating,
@@ -366,6 +365,7 @@ function Home() {
     tokenBalance.sufficient,
     selections,
     persistentOptions,
+    selectedAddons,
     user,
     generate,
     openAuth,
@@ -380,11 +380,6 @@ function Home() {
 
     if (!isAuthenticated) {
       openAuth();
-      return;
-    }
-
-    if (!enhanceTokenBalance.sufficient) {
-      openTokenPurchase();
       return;
     }
 
@@ -405,14 +400,12 @@ function Home() {
     enhancePrompt,
     isGenerating,
     isAuthenticated,
-    enhanceTokenBalance.sufficient,
     prompt,
     selections,
     persistentOptions,
     user,
     enhance,
     openAuth,
-    openTokenPurchase,
     generatedCode,
     generatedFiles,
   ]);
@@ -498,6 +491,10 @@ function Home() {
     []
   );
 
+  const handleToggleAddon = useCallback((addonId) => {
+    setSelectedAddons((prev) => ({ ...prev, [addonId]: !prev[addonId] }));
+  }, []);
+
   return (
     <div className="home">
       <Header
@@ -532,6 +529,12 @@ function Home() {
             onHelpClick={openHelp}
             onGenerate={handleGenerate}
             activeCategories={activeCategories}
+          />
+
+          <AddonsPanel
+            selectedAddons={selectedAddons}
+            onToggleAddon={handleToggleAddon}
+            totalAddonCost={totalAddonCost}
           />
 
           {showTokenOverlay && (

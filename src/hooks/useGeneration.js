@@ -45,7 +45,14 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
   }, []);
 
   const generate = useCallback(
-    async (prompt, selections, persistentOptions, user, streaming = true) => {
+    async (
+      prompt,
+      selections,
+      persistentOptions,
+      user,
+      streaming = true,
+      addons = {}
+    ) => {
       if (!prompt.trim() || isGenerating) return;
 
       if (abortControllerRef.current) {
@@ -99,6 +106,7 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
             prompt,
             customization: selections,
             persistentOptions,
+            addons,
             isRefinement: false,
             signal: abortControllerRef.current.signal,
             onProgress: ({ phase, content, files }) => {
@@ -141,6 +149,7 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
             prompt,
             selections,
             persistentOptions,
+            addons,
             isRefinement: false,
             existingCode: null,
           });
@@ -349,9 +358,23 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
   }, []);
 
   const regenerate = useCallback(
-    async (prompt, selections, persistentOptions, user, streaming = true) => {
+    async (
+      prompt,
+      selections,
+      persistentOptions,
+      user,
+      streaming = true,
+      addons = {}
+    ) => {
       clearCacheEntry(prompt, selections, persistentOptions);
-      return generate(prompt, selections, persistentOptions, user, streaming);
+      return generate(
+        prompt,
+        selections,
+        persistentOptions,
+        user,
+        streaming,
+        addons
+      );
     },
     [generate]
   );

@@ -3,6 +3,7 @@ export async function generateWebsite({
   prompt,
   selections = {},
   persistentOptions = {},
+  addons = {},
   isRefinement = false,
   existingCode = null,
 }) {
@@ -14,6 +15,7 @@ export async function generateWebsite({
           prompt,
           customization: selections,
           persistentOptions,
+          addons,
           isRefinement,
           previousHtml: existingCode,
         },
