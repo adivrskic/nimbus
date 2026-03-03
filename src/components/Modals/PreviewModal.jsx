@@ -22,7 +22,7 @@ import {
   AlertCircle,
   History,
   Clock,
-  CloudSun,
+  Cloudy,
   Copy,
   RotateCcw,
   Globe,
@@ -424,7 +424,7 @@ function PreviewModal({
         <div className="pm-bar" ref={headerRef}>
           {/* ── PINNED LEFT: Logo ── */}
           <div className="pm-bar__brand">
-            <CloudSun size={16} />
+            <Cloudy size={16} />
           </div>
 
           {/* ── SECTION: View (tabs, devices/code tools) ── */}

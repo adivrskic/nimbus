@@ -47,11 +47,11 @@ const waveEffects = {
   },
   portfolio: {
     speed: 0.008,
-    maxSpeed: 0.016,
-    scale: 0.725,
-    noiseStrength: 1.2,
-    position: [0, 0, 0],
-    rotation: [1, 0, 0.1],
+    maxSpeed: 0.013,
+    scale: 0.675,
+    noiseStrength: 1.6,
+    position: [0, -0.2, 0],
+    rotation: [1.5, 0, 0],
   },
   services: {
     speed: 0.02,
@@ -175,7 +175,7 @@ const ParticleWave = ({ isMenuOpen }) => {
     pos.needsUpdate = true;
 
     // Smoothly interpolate position and rotation
-    currentPosition.current.lerp(targetPosition, 0.04);
+    currentPosition.current.lerp(targetPosition, 0.14);
     currentRotation.current.x +=
       (targetRotation.x - currentRotation.current.x) * 0.07;
     currentRotation.current.y +=
@@ -222,6 +222,9 @@ const ParticleWave = ({ isMenuOpen }) => {
 const BackgroundWave = ({ isMenuOpen }) => {
   const [isMobile, setIsMobile] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  const [introComplete, setIntroComplete] = useState(false);
+  const wrapRef = useRef(null);
+  const rafRef = useRef(null);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -232,30 +235,88 @@ const BackgroundWave = ({ isMenuOpen }) => {
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
+  // After the intro CSS transition finishes, switch to instant-scroll mode
+  useEffect(() => {
+    if (!loaded) return;
+    const timer = setTimeout(() => setIntroComplete(true), 3500);
+    return () => clearTimeout(timer);
+  }, [loaded]);
+
+  // Scroll-driven parallax: shift wave upward as page scrolls down
+  useEffect(() => {
+    if (!introComplete) return;
+
+    const maxShift = 80; // max vh to shift upward
+
+    const onScroll = () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      rafRef.current = requestAnimationFrame(() => {
+        const el = wrapRef.current;
+        if (!el) return;
+        const scrollY = window.scrollY;
+        const maxScroll =
+          document.documentElement.scrollHeight - window.innerHeight;
+        if (maxScroll <= 0) return;
+        const progress = Math.min(scrollY / maxScroll, 1);
+        const shift = progress * maxShift;
+        el.style.transform = `translateY(-${shift}vh) scale(1.06)`;
+      });
+    };
+
+    // Set initial position
+    onScroll();
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
+  }, [introComplete]);
+
   return (
-    <Canvas
-      camera={{ position: [0, 2, 8], fov: 30 }}
-      onCreated={() => {
-        // Small delay so the first rendered frame is painted before we fade in
-        requestAnimationFrame(() => setLoaded(true));
-      }}
-      style={{
-        position: "absolute",
-        top: "33%",
-        left: 0,
-        width: "100%",
-        height: "100%",
-        pointerEvents: "none",
-        opacity: loaded ? 1 : 0,
-        transform: loaded ? "scale(1.06)" : "scale(1)",
-        transition:
-          "opacity 2.8s cubic-bezier(0.16, 1, 0.3, 1), transform 3.4s cubic-bezier(0.16, 1, 0.3, 1)",
-        willChange: "opacity, transform",
-      }}
-      gl={{ alpha: true }}
+    <div
+      ref={wrapRef}
+      style={
+        introComplete
+          ? {
+              // Post-intro: no CSS transition so scroll updates are instant
+              position: "absolute",
+              top: "33%",
+              left: 0,
+              width: "100%",
+              height: "100%",
+              pointerEvents: "none",
+              opacity: 1,
+              transform: "scale(1.06)",
+              willChange: "transform",
+            }
+          : {
+              // Intro phase: CSS transition handles the fade-in + scale
+              position: "absolute",
+              top: "33%",
+              left: 0,
+              width: "100%",
+              height: "100%",
+              pointerEvents: "none",
+              opacity: loaded ? 1 : 0,
+              transform: loaded ? "scale(1.06)" : "scale(1)",
+              transition:
+                "opacity 2.8s cubic-bezier(0.16, 1, 0.3, 1), transform 3.4s cubic-bezier(0.16, 1, 0.3, 1)",
+              willChange: "opacity, transform",
+            }
+      }
     >
-      <ParticleWave isMenuOpen={isMenuOpen} />
-    </Canvas>
+      <Canvas
+        camera={{ position: [0, 2, 8], fov: 30 }}
+        onCreated={() => {
+          requestAnimationFrame(() => setLoaded(true));
+        }}
+        style={{ width: "100%", height: "100%" }}
+        gl={{ alpha: true }}
+      >
+        <ParticleWave isMenuOpen={isMenuOpen} />
+      </Canvas>
+    </div>
   );
 };
 

@@ -15,6 +15,7 @@ export function useHomeState() {
   const [showTokenOverlay, setShowTokenOverlay] = useState(false);
   const [showDeploy, setShowDeploy] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
+  const [showAddons, setShowAddons] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [previewMinimized, setPreviewMinimized] = useState(false);
 
@@ -58,6 +59,15 @@ export function useHomeState() {
 
   const closeHelp = useCallback(() => {
     setShowHelp(false);
+  }, []);
+
+  const openAddons = useCallback(() => {
+    track("addons");
+    setShowAddons(true);
+  }, []);
+
+  const closeAddons = useCallback(() => {
+    setShowAddons(false);
   }, []);
 
   const openDeploy = useCallback(() => {
@@ -122,6 +132,7 @@ export function useHomeState() {
     setPersistentOptions(DEFAULT_PERSISTENT_OPTIONS);
     setShowOptions(false);
     setShowTokenOverlay(false);
+    setShowAddons(false);
     setSelectedOption(null);
     setOptionsIntroComplete(false);
   }, []);
@@ -144,6 +155,7 @@ export function useHomeState() {
     showTokenOverlay,
     showDeploy,
     showHelp,
+    showAddons,
     showPreview,
     previewMinimized,
 
@@ -151,6 +163,8 @@ export function useHomeState() {
     closeOptions,
     openHelp,
     closeHelp,
+    openAddons,
+    closeAddons,
     openDeploy,
     closeDeploy,
     toggleTokenOverlay,

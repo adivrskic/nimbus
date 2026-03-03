@@ -1,4 +1,14 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import {
+  Plus,
+  X,
+  Coins,
+  Puzzle,
+  BarChart3,
+  Mail,
+  FileText,
+  Database,
+} from "lucide-react";
 
 import { useAuth } from "../contexts/AuthContext";
 import { useProject } from "../contexts/ProjectContext";
@@ -22,8 +32,8 @@ import {
 } from "../utils/tokenCalculator";
 
 import SearchBar from "../components/SearchBar";
-import AddonsPanel from "../components/AddonsPanel";
-import { getAddonCost } from "../configs/addons.config";
+import AddonsModal from "../components/Modals/AddonsModal";
+import { ADDONS, getAddonCost } from "../configs/addons.config";
 import TokenModal from "../components/Modals/TokenModal";
 import OptionsModal from "../components/Modals/OptionsModal";
 import PreviewModal from "../components/Modals/PreviewModal";
@@ -38,6 +48,8 @@ import { useGenerationState } from "../contexts/GenerationContext";
 import { generateWebsite } from "../utils/generateWebsite";
 
 import "./Home.scss";
+
+const ADDON_ICON_MAP = { BarChart3, Mail, FileText, Database };
 
 function Home() {
   const { user, isAuthenticated, userTokens, refreshTokens } = useAuth();
@@ -83,12 +95,15 @@ function Home() {
     showTokenOverlay,
     showDeploy,
     showHelp,
+    showAddons,
     showPreview,
     previewMinimized,
     openOptions,
     closeOptions,
     openHelp,
     closeHelp,
+    openAddons,
+    closeAddons,
     openDeploy,
     closeDeploy,
     toggleTokenOverlay,
@@ -241,6 +256,11 @@ function Home() {
     [selectedAddons]
   );
 
+  const selectedCount = useMemo(
+    () => Object.values(selectedAddons).filter(Boolean).length,
+    [selectedAddons]
+  );
+
   const tokenCostResult = useMemo(
     () => calculateTokenCost(prompt, selections, false, selectedAddons),
     [prompt, selections, selectedAddons]
@@ -280,6 +300,8 @@ function Home() {
       closeOptions();
     } else if (showHelp) {
       closeHelp();
+    } else if (showAddons) {
+      closeAddons();
     } else if (modals.auth) {
       closeAuth();
     } else if (modals.tokenPurchase) {
@@ -502,6 +524,7 @@ function Home() {
           showOptions ||
           showPreview ||
           showHelp ||
+          showAddons ||
           showTokenOverlay ||
           showDeploy
         }
@@ -531,11 +554,42 @@ function Home() {
             activeCategories={activeCategories}
           />
 
-          <AddonsPanel
-            selectedAddons={selectedAddons}
-            onToggleAddon={handleToggleAddon}
-            totalAddonCost={totalAddonCost}
-          />
+          {/* Add-ons trigger row */}
+          <div className="addons-trigger">
+            {selectedCount > 0 &&
+              ADDONS.filter((a) => selectedAddons[a.id]).map((addon) => {
+                const Icon = ADDON_ICON_MAP[addon.icon];
+                return (
+                  <div key={addon.id} className="addons-trigger__pill">
+                    {Icon && <Icon size={14} />}
+                    <span>{addon.title}</span>
+                    <span className="addons-trigger__pill-cost">
+                      +{addon.cost}
+                    </span>
+                    <button
+                      className="addons-trigger__pill-remove"
+                      onClick={() => handleToggleAddon(addon.id)}
+                    >
+                      <X size={12} />
+                    </button>
+                  </div>
+                );
+              })}
+            <button
+              className={`addons-trigger__btn ${
+                selectedCount > 0 ? "addons-trigger__btn--active" : ""
+              }`}
+              onClick={openAddons}
+            >
+              <Plus size={14} />
+              <span>Add-ons</span>
+              {selectedCount > 0 && (
+                <span className="addons-trigger__btn-count">
+                  {selectedCount}
+                </span>
+              )}
+            </button>
+          </div>
 
           {showTokenOverlay && (
             <TokenModal
@@ -615,6 +669,16 @@ function Home() {
         />
       )}
       {showHelp && <HelpModal isOpen={showHelp} onClose={closeHelp} />}
+
+      {showAddons && (
+        <AddonsModal
+          isOpen={showAddons}
+          onClose={closeAddons}
+          selectedAddons={selectedAddons}
+          onToggleAddon={handleToggleAddon}
+          totalAddonCost={totalAddonCost}
+        />
+      )}
 
       {/* Shared modals */}
 
