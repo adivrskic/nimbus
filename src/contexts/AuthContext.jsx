@@ -540,7 +540,10 @@ export function AuthProvider({ children }) {
     try {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "github",
-        options: { redirectTo: window.location.origin },
+        options: {
+          redirectTo: window.location.origin,
+          scopes: "public_repo",
+        },
       });
       if (error) throw error;
       return { success: true };

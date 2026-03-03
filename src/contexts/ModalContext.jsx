@@ -16,6 +16,7 @@ export function ModalProvider({ children }) {
     legal: false,
     roadmap: false,
     support: false,
+    githubImport: false,
   });
 
   const [legalSection, setLegalSection] = useState(null);
@@ -55,6 +56,9 @@ export function ModalProvider({ children }) {
   const openSupport = useCallback(() => open("support"), [open]);
   const closeSupport = useCallback(() => close("support"), [close]);
 
+  const openGitHubImport = useCallback(() => open("githubImport"), [open]);
+  const closeGitHubImport = useCallback(() => close("githubImport"), [close]);
+
   return (
     <ModalContext.Provider
       value={{
@@ -73,6 +77,8 @@ export function ModalProvider({ children }) {
         closeRoadmap,
         openSupport,
         closeSupport,
+        openGitHubImport,
+        closeGitHubImport,
       }}
     >
       {children}

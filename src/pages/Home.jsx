@@ -35,6 +35,7 @@ import LegalModal from "../components/Modals/LegalModal";
 import ProjectsModal from "../components/Modals/ProjectsModal";
 import RoadmapModal from "../components/Modals/RoadmapModal";
 import SupportModal from "../components/Modals/SupportModal";
+import GitHubImportModal from "../components/Modals/GitHubImportModal";
 import { useGenerationState } from "../contexts/GenerationContext";
 import { generateWebsite } from "../utils/generateWebsite";
 
@@ -69,6 +70,8 @@ function Home() {
     closeRoadmap,
     openSupport,
     closeSupport,
+    openGitHubImport,
+    closeGitHubImport,
   } = useModals();
 
   const {
@@ -173,7 +176,7 @@ function Home() {
   const [showEnhanceTokenOverlay, setShowEnhanceTokenOverlay] = useState(false);
   const [currentProjectData, setCurrentProjectData] = useState(null);
   const [selectedAddons, setSelectedAddons] = useState({});
-  const [addonConfig, setAddonConfig] = useState({});
+
   const preEnhanceHtmlRef = useRef(null);
   const preEnhanceFilesRef = useRef(null);
   const enhancePromptSnapshotRef = useRef(null);
@@ -301,6 +304,8 @@ function Home() {
       closeRoadmap();
     } else if (modals.support) {
       closeSupport();
+    } else if (modals.githubImport) {
+      closeGitHubImport();
     }
   });
 
@@ -361,15 +366,8 @@ function Home() {
     resetProject();
     setCurrentProjectData(null);
     openPreview();
-    generate(
-      prompt,
-      selections,
-      persistentOptions,
-      user,
-      true,
-      selectedAddons,
-      addonConfig
-    );
+
+    generate(prompt, selections, persistentOptions, user, true, selectedAddons);
   }, [
     prompt,
     isGenerating,
@@ -501,6 +499,31 @@ function Home() {
   const handleToggleAddon = useCallback((addonId) => {
     setSelectedAddons((prev) => ({ ...prev, [addonId]: !prev[addonId] }));
   }, []);
+
+  const handleGitHubImport = useCallback(
+    ({ repoName, files, primaryFile }) => {
+      const fileKeys = Object.keys(files);
+      const primaryHtml = files[primaryFile] || files[fileKeys[0]];
+
+      setPrompt(`Imported from GitHub: ${repoName}`);
+
+      resetProject();
+      setCurrentProjectData(null);
+
+      if (fileKeys.length === 1) {
+        updateCode(primaryHtml);
+      } else {
+        // Multi-file import — primary goes into generatedCode,
+        // the full file map is available for multi-page preview
+        updateCode(primaryHtml);
+        // If useGeneration exposes setGeneratedFiles, wire it here
+        // to enable multi-page tab switching in PreviewModal.
+      }
+
+      openPreview();
+    },
+    [setPrompt, resetProject, updateCode, openPreview]
+  );
 
   return (
     <div className="home">
@@ -659,8 +682,6 @@ function Home() {
           selectedAddons={selectedAddons}
           onToggleAddon={handleToggleAddon}
           totalAddonCost={totalAddonCost}
-          addonConfig={addonConfig}
-          onAddonConfigChange={setAddonConfig}
         />
       )}
 
@@ -704,6 +725,14 @@ function Home() {
 
       {modals.support && (
         <SupportModal isOpen={modals.support} onClose={closeSupport} />
+      )}
+
+      {modals.githubImport && (
+        <GitHubImportModal
+          isOpen={modals.githubImport}
+          onClose={closeGitHubImport}
+          onImport={handleGitHubImport}
+        />
       )}
       <Footer />
     </div>

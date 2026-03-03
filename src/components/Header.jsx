@@ -7,6 +7,7 @@ import {
   Sun,
   Moon,
   SunMoon,
+  Github,
 } from "lucide-react";
 import { track } from "../lib/analytics";
 
@@ -19,7 +20,13 @@ import "./Header.scss";
 function Header({ modalActive: externalModalActive = false }) {
   const { theme, toggleTheme } = useTheme();
   const { previewPill } = useGenerationState();
-  const { openAuth, openTokenPurchase, openProjects, modals } = useModals();
+  const {
+    openAuth,
+    openTokenPurchase,
+    openProjects,
+    openGitHubImport,
+    modals,
+  } = useModals();
   const {
     user,
     profile,
@@ -100,6 +107,10 @@ function Header({ modalActive: externalModalActive = false }) {
   const isClickable =
     previewPill && previewPill.visible && previewPill.onRestore;
 
+  const isGitHubUser =
+    user?.app_metadata?.provider === "github" ||
+    user?.app_metadata?.providers?.includes("github");
+
   return (
     <header className={`header${anyModalOpen ? " header--modal-active" : ""}`}>
       <div className="header__inner">
@@ -150,6 +161,19 @@ function Header({ modalActive: externalModalActive = false }) {
                 >
                   <FolderOpen className="header__nav-icon" />
                 </button>
+
+                {isGitHubUser && (
+                  <button
+                    className="header__icon-btn"
+                    onClick={() => {
+                      track("github-import-open");
+                      openGitHubImport();
+                    }}
+                    title="Import from GitHub"
+                  >
+                    <Github className="header__nav-icon" />
+                  </button>
+                )}
 
                 <button
                   className="header__icon-btn"
