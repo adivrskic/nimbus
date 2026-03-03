@@ -29,7 +29,7 @@ import "../../styles/modals.scss";
 
 const STEPS = { REPOS: "repos", FILES: "files", PREVIEW: "preview" };
 
-function GitHubImportModal({ isOpen, onClose, onImport }) {
+function GithubImportModal({ isOpen, onClose, onImport }) {
   const { user, supabase, signInWithGitHub } = useAuth();
   const { shouldRender, isVisible, closeModal } = useModalAnimation(
     isOpen,
@@ -565,4 +565,4 @@ function GitHubImportModal({ isOpen, onClose, onImport }) {
   );
 }
 
-export default GitHubImportModal;
+export default GithubImportModal;

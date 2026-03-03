@@ -35,7 +35,7 @@ import LegalModal from "../components/Modals/LegalModal";
 import ProjectsModal from "../components/Modals/ProjectsModal";
 import RoadmapModal from "../components/Modals/RoadmapModal";
 import SupportModal from "../components/Modals/SupportModal";
-import GitHubImportModal from "../components/Modals/GitHubImportModal";
+import GithubImportModal from "../components/Modals/GithubImportModal";
 import { useGenerationState } from "../contexts/GenerationContext";
 import { generateWebsite } from "../utils/generateWebsite";
 
@@ -728,7 +728,7 @@ function Home() {
       )}
 
       {modals.githubImport && (
-        <GitHubImportModal
+        <GithubImportModal
           isOpen={modals.githubImport}
           onClose={closeGitHubImport}
           onImport={handleGitHubImport}
