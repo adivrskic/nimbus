@@ -157,8 +157,6 @@
     border-color var(--transition-fast);
 
   &:hover {
-    background: var(--color-surface-elevated);
-    border-color: var(--color-border-hover);
     color: var(--color-text-primary);
   }
 
@@ -209,9 +207,7 @@
   transition: background var(--transition-base),
     transform var(--transition-fast);
   text-decoration: none;
-  &:hover:not(:disabled) {
-    background: var(--color-accent-hover);
-  }
+
   &:disabled {
     opacity: 0.6;
     cursor: not-allowed;
@@ -242,7 +238,6 @@
   cursor: pointer;
   transition: var(--transition-base);
   &:hover:not(:disabled) {
-    background: var(--color-accent-light);
     color: var(--color-text-primary);
   }
   &:disabled {
@@ -640,9 +635,7 @@
   cursor: pointer;
   white-space: nowrap;
   transition: var(--transition-base);
-  &:hover:not(:disabled) {
-    background: var(--color-accent-hover);
-  }
+
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
@@ -726,11 +719,8 @@
   color: var(--color-text-secondary);
   cursor: pointer;
   transition: var(--transition-base);
-  &:hover {
-    background: var(--color-accent-light);
-  }
+
   &.active {
-    background: var(--color-accent-light);
     color: var(--color-text-primary);
   }
 }
@@ -798,9 +788,7 @@
   color: var(--color-text-secondary);
   cursor: pointer;
   transition: var(--transition-base);
-  &:hover {
-    background: var(--color-accent-light);
-  }
+
   &.active {
     background: var(--color-accent);
     color: var(--color-background);
@@ -928,7 +916,6 @@
     cursor: pointer;
     transition: var(--transition-base);
     &:hover {
-      background: var(--color-accent-light);
       color: var(--color-text-primary);
     }
   }
@@ -1119,7 +1106,6 @@
   transition: var(--transition-base);
   border: none;
   &:hover:not(:disabled) {
-    background: var(--color-accent-light);
     color: var(--color-text-primary);
   }
   &:disabled {
@@ -1216,9 +1202,6 @@
   text-decoration: none;
   margin-top: var(--spacing-unit);
   transition: all var(--transition-fast);
-  &:hover {
-    background: var(--color-surface);
-  }
 }
 .legal-notice {
   display: flex;
@@ -1330,16 +1313,10 @@
   .delete-cancel {
     background: var(--color-surface-elevated);
     color: var(--color-text-secondary);
-    &:hover {
-      background: var(--color-border);
-    }
   }
   .delete-confirm {
     background: #ef4444;
     color: white;
-    &:hover {
-      background: #dc2626;
-    }
   }
 }
 .project-info {
@@ -1858,7 +1835,6 @@
   white-space: nowrap;
 
   &:hover {
-    background: var(--color-accent-light);
     color: var(--color-text-primary);
   }
 }
@@ -1911,10 +1887,6 @@
   font-family: inherit;
   color: inherit;
   transition: background var(--transition-fast);
-
-  &:hover {
-    background: var(--color-accent-light);
-  }
 }
 
 .addons-modal__card-icon {
@@ -2059,10 +2031,6 @@
   box-shadow: var(--shadow-md);
   transition: all var(--transition-fast);
 
-  &:hover:not(:disabled) {
-    background: var(--color-accent-hover);
-  }
-
   &--added {
     background: var(--color-surface-elevated);
     color: var(--color-text-secondary);
@@ -2088,7 +2056,7 @@
   justify-content: flex-end;
   gap: 8px;
   align-self: stretch;
-  margin-top: 10px;
+  margin: 8px 8px 0 0;
   flex-wrap: wrap;
 }
 
@@ -2122,7 +2090,6 @@
   transition: background var(--transition-fast), color var(--transition-fast);
 
   &:hover {
-    background: var(--color-surface-elevated);
     color: var(--color-text-primary);
   }
 }
@@ -2142,10 +2109,6 @@
   cursor: pointer;
   box-shadow: var(--neumorphism-shadow-surface-elevated);
   transition: all var(--transition-fast);
-
-  &:hover {
-    color: var(--color-text-primary);
-  }
 
   &--active {
     background: var(--color-accent);
@@ -2249,8 +2212,6 @@
   text-transform: capitalize;
 
   &:hover {
-    background: var(--color-surface);
-    border-color: var(--color-border);
     color: var(--color-text-primary);
   }
 
@@ -2487,11 +2448,6 @@
   height: 40px;
 
   &:hover {
-    border-color: var(--color-border-hover);
-    background: var(--color-surface);
-    box-shadow: var(--shadow-sm);
-    transform: translateY(-1px);
-
     .options-card__arrow {
       opacity: 1;
     }
@@ -2609,8 +2565,6 @@
   transition: var(--transition-base);
 
   &:hover {
-    background: var(--color-surface-elevated);
-    border-color: var(--color-border-hover);
     color: var(--color-text-primary);
   }
 }
@@ -2650,13 +2604,6 @@
   cursor: pointer;
   transition: var(--transition-base);
 
-  &:hover {
-    border-color: var(--color-border-hover);
-    background: var(--color-surface);
-    box-shadow: var(--shadow-sm);
-    transform: translateY(-1px);
-  }
-
   &:active {
     transform: translateY(0);
     box-shadow: none;
@@ -2669,12 +2616,6 @@
 
     svg {
       color: var(--color-background);
-    }
-
-    &:hover {
-      background: var(--color-accent-hover);
-      border-color: var(--color-accent-hover);
-      box-shadow: none;
     }
   }
 
@@ -2765,10 +2706,6 @@
   color: var(--color-background);
   cursor: pointer;
   transition: var(--transition-base);
-
-  &:hover {
-    background: var(--color-accent-hover);
-  }
 }
 
 @media (max-width: 1080px) {
@@ -2793,10 +2730,6 @@
     &:hover {
       .options-section__title {
         color: var(--color-text-primary);
-      }
-
-      .options-section__toggle {
-        background: var(--color-surface);
       }
     }
   }
@@ -2844,7 +2777,6 @@
     }
 
     &:hover {
-      background: var(--color-surface);
       color: var(--color-text-primary);
     }
   }
@@ -3048,9 +2980,6 @@
   margin-bottom: 8px;
   overflow: hidden;
 
-  &:hover {
-  }
-
   &:last-child {
     margin-bottom: 0;
   }
@@ -3063,10 +2992,6 @@
     cursor: pointer;
     transition: background-color var(--transition-base);
     user-select: none;
-
-    &:hover {
-      background-color: var(--color-surface);
-    }
   }
 
   &__title {
@@ -3263,7 +3188,6 @@
     transition: background var(--transition-fast), color var(--transition-fast);
 
     &:hover {
-      background: var(--color-accent-light);
       color: var(--color-text-primary);
     }
 
@@ -3524,10 +3448,8 @@
 
     &:hover {
       color: var(--color-text-primary);
-      background: var(--color-surface-elevated);
     }
 
-    // Active dot indicator when section is collapsed but has active state
     &.has-active::after {
       content: "";
       position: absolute;
@@ -3594,7 +3516,6 @@
 
     &:hover {
       color: var(--color-text-secondary);
-      background: var(--color-surface-elevated);
     }
 
     &.active {
@@ -3624,7 +3545,6 @@
 
     &:hover {
       color: var(--color-text-secondary);
-      background: var(--color-surface-elevated);
     }
 
     &.active {
@@ -3671,7 +3591,6 @@
 
     &:hover,
     &.open {
-      background: var(--color-accent-light);
       color: var(--color-text-primary);
     }
 
@@ -3729,10 +3648,6 @@
     color: var(--color-text-primary);
     text-align: left;
     transition: background 0.1s ease;
-
-    &:hover {
-      background: var(--color-accent-light);
-    }
 
     &.active {
       background: var(--color-accent-light);
@@ -3792,9 +3707,6 @@
       .pm-header__enhance-go {
         background: var(--color-accent);
         color: #fff;
-        &:hover:not(:disabled) {
-          background: var(--color-accent-hover);
-        }
       }
     }
 
@@ -3819,7 +3731,6 @@
     transition: var(--transition-fast);
 
     &:hover {
-      background: var(--color-accent-light);
       color: var(--color-text-secondary);
     }
   }
@@ -3880,7 +3791,6 @@
 
     &:hover,
     &.active {
-      background: var(--color-border);
       color: var(--color-accent);
     }
 
@@ -3987,10 +3897,6 @@
     color: #fff;
     cursor: pointer;
     transition: var(--transition-base);
-
-    &:hover {
-      background: var(--color-accent-hover);
-    }
   }
 
   &__right {
@@ -4021,7 +3927,6 @@
 
     &:hover:not(:disabled) {
       color: var(--color-text-primary);
-      background: var(--color-accent-light);
     }
 
     &:disabled {
@@ -4049,10 +3954,6 @@
     transition: var(--transition-fast);
     white-space: nowrap;
     border: none;
-
-    &:hover:not(:disabled) {
-      background: var(--color-accent-light);
-    }
 
     &:disabled {
       opacity: 0.5;
@@ -4084,8 +3985,6 @@
     transition: var(--transition-fast);
 
     &:hover {
-      background: var(--color-background);
-      border-color: var(--color-border-hover);
       color: var(--color-text-primary);
     }
   }
@@ -4125,7 +4024,6 @@
     white-space: nowrap;
 
     &:hover:not(:disabled) {
-      background: var(--color-accent-light);
       color: var(--color-text-primary);
     }
 
@@ -4194,10 +4092,6 @@
     font-family: inherit;
     text-align: left;
     transition: background 0.1s ease;
-
-    &:hover {
-      background: var(--color-accent-light);
-    }
   }
 
   &__download-option-icon {
@@ -4748,7 +4642,6 @@
 .action-btn--history {
   &:hover {
     color: var(--color-accent, var(--color-text-primary)) !important;
-    background: var(--color-accent-light);
   }
 }
 
@@ -4870,7 +4763,6 @@
 
     &:hover,
     &.open {
-      background: var(--color-accent-light);
       color: var(--color-text-primary);
     }
 
@@ -4922,10 +4814,6 @@
     color: var(--color-text-primary);
     text-align: left;
     transition: background 0.1s ease;
-
-    &:hover {
-      background: var(--color-accent-light);
-    }
 
     &.active {
       background: var(--color-accent-light);
@@ -5121,7 +5009,6 @@
     transition: color 0.15s ease, background 0.15s ease;
     &:hover {
       color: var(--color-text-primary);
-      background: var(--color-surface-elevated);
     }
     &.active {
       color: var(--color-accent, var(--color-text-primary));
@@ -5161,7 +5048,6 @@
     white-space: nowrap;
     &:hover {
       color: var(--color-text-secondary);
-      background: var(--color-surface-elevated);
     }
     &.active {
       color: var(--color-text-primary);
@@ -5198,7 +5084,6 @@
     border: none;
     &:hover {
       color: var(--color-text-secondary);
-      background: var(--color-surface-elevated);
     }
     &.active {
       color: var(--color-text-primary);
@@ -5232,7 +5117,6 @@
     transition: color 0.15s ease, background 0.15s ease;
     white-space: nowrap;
     &:hover:not(:disabled) {
-      background: var(--color-surface-elevated);
       color: var(--color-text-primary);
     }
     &:disabled {
@@ -5261,7 +5145,6 @@
     transition: background 0.15s ease, color 0.15s ease;
     &:hover,
     &.open {
-      background: var(--color-surface-elevated);
       color: var(--color-text-primary);
     }
   }
@@ -5297,7 +5180,6 @@
     white-space: nowrap;
     transition: color 0.15s ease, background 0.15s ease;
     &:hover:not(:disabled) {
-      background: var(--color-surface-elevated);
       color: var(--color-text-primary);
     }
     &:disabled {
@@ -5364,9 +5246,6 @@
     color: var(--color-text-primary);
     text-align: left;
     transition: background 0.1s ease;
-    &:hover {
-      background: var(--color-accent-light);
-    }
     &.active {
       background: var(--color-accent-light);
       font-weight: 600;
@@ -5466,9 +5345,6 @@
     &.has-input .pm-bar__enhance-go {
       background: var(--color-accent);
       color: #fff;
-      &:hover:not(:disabled) {
-        background: var(--color-accent-hover);
-      }
     }
     &.enhancing {
       animation: enhance-pulse 2s ease-in-out infinite;
@@ -5490,7 +5366,6 @@
     cursor: pointer;
     transition: background 0.15s ease, color 0.15s ease;
     &:hover {
-      background: var(--color-accent-light);
       color: var(--color-text-secondary);
     }
   }
@@ -5546,7 +5421,6 @@
     transition: background 0.15s ease, color 0.15s ease;
     &:hover,
     &.active {
-      background: var(--color-border);
       color: var(--color-accent);
     }
     svg {
@@ -5639,9 +5513,6 @@
     font-weight: 600;
     color: #fff;
     cursor: pointer;
-    &:hover {
-      background: var(--color-accent-hover);
-    }
   }
 
   // ── Close ──
@@ -5660,8 +5531,6 @@
     transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
     margin-left: 2px;
     &:hover {
-      background: var(--color-background);
-      border-color: var(--color-border-hover);
       color: var(--color-text-primary);
     }
   }

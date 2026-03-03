@@ -58,7 +58,7 @@ const ADD_ONS = [
     title: "Analytics",
     description:
       "Track visitors, page views, and engagement with a lightweight analytics dashboard — no third-party scripts required.",
-    tag: "3–5 tokens",
+    tag: "5 tokens",
     visual: "analytics",
   },
   {
@@ -66,7 +66,7 @@ const ADD_ONS = [
     title: "Blog Engine",
     description:
       "Add a fully styled blog with article listings, post pages, tags, and reading time — generated from your site's design language.",
-    tag: "8–12 tokens",
+    tag: "10 tokens",
     visual: "blog",
   },
   {
@@ -74,7 +74,7 @@ const ADD_ONS = [
     title: "CMS Integration",
     description:
       "Connect your content to Sanity, Contentful, or a simple JSON-based CMS so anyone on your team can edit without touching code.",
-    tag: "8–12 tokens",
+    tag: "10 tokens",
     visual: "cms",
   },
   {
@@ -82,7 +82,7 @@ const ADD_ONS = [
     title: "Contact Form",
     description:
       "A working contact form wired to Formspree, Netlify Forms, or a serverless endpoint — with validation and success states baked in.",
-    tag: "5–8 tokens",
+    tag: "6 tokens",
     visual: "form",
   },
 ];

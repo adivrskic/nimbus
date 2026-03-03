@@ -55,14 +55,6 @@ function AddonsModal({
               <span>Add-ons</span>
             </div>
             <div className="addons-modal__header-right">
-              {selectedCount > 0 && (
-                <span className="addons-modal__cost-summary">
-                  <Coins size={12} />
-                  <span>
-                    {selectedCount} selected · +{totalAddonCost} tokens
-                  </span>
-                </span>
-              )}
               <button
                 className="modal-close"
                 onClick={onClose}
