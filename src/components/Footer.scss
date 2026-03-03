@@ -314,8 +314,8 @@
     gap: calc(var(--spacing-unit) * 1.5);
     padding: calc(var(--spacing-unit) * 3);
     border-radius: var(--radius-lg);
-    background: var(--color-surface);
-    box-shadow: var(--neumorphism-shadow-surface);
+    background: var(--color-background);
+    box-shadow: var(--neumorphism-shadow);
 
     @media (max-width: 768px) {
       padding: calc(var(--spacing-unit) * 2.5);
@@ -373,8 +373,8 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 90%;
-    height: 90%;
+    width: 75%;
+    height: 75%;
     background: conic-gradient(
       from 0deg,
       #4a1e6b,
@@ -545,8 +545,8 @@
     display: flex;
     flex-direction: column;
     border-radius: var(--radius-lg);
-    background: var(--color-surface);
-    box-shadow: var(--neumorphism-shadow-surface);
+    background: var(--color-background);
+    box-shadow: var(--neumorphism-shadow);
     overflow: hidden;
     transition: transform var(--transition-base),
       box-shadow var(--transition-base);

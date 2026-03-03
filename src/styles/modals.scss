@@ -4685,3 +4685,397 @@
     padding: 12px;
   }
 }
+/* GITHUB IMPORT MODAL - append to modals.scss */
+
+.gh-import__back {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  border: none;
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.gh-import__back:hover {
+  background: var(--color-accent-light, rgba(99, 102, 241, 0.1));
+  color: var(--color-accent);
+}
+
+.gh-import__search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--color-border, rgba(128, 128, 128, 0.15));
+  background: var(--color-surface);
+  margin-bottom: 10px;
+  color: var(--color-text-tertiary);
+}
+
+.gh-import__search input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: var(--color-text-primary);
+  font-size: 0.8125rem;
+  font-family: inherit;
+  outline: none;
+}
+
+.gh-import__loading,
+.gh-import__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 40px 20px;
+  color: var(--color-text-tertiary);
+  font-size: 0.8125rem;
+}
+
+.gh-import__repo-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 400px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.gh-import__repo-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  width: 100%;
+}
+
+.gh-import__repo-item:hover {
+  background: var(--color-surface);
+}
+
+.gh-import__repo-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--color-surface);
+  color: var(--color-text-tertiary);
+  flex-shrink: 0;
+}
+
+.gh-import__repo-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.gh-import__repo-name {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gh-import__repo-desc {
+  font-size: 0.6875rem;
+  color: var(--color-text-tertiary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 2px;
+}
+
+.gh-import__repo-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  color: var(--color-text-tertiary);
+}
+
+.gh-import__repo-date {
+  font-size: 0.6875rem;
+}
+
+.gh-import__load-more {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px;
+  border: 1px dashed var(--color-border, rgba(128, 128, 128, 0.2));
+  border-radius: 10px;
+  background: transparent;
+  color: var(--color-text-tertiary);
+  font-size: 0.75rem;
+  font-family: inherit;
+  cursor: pointer;
+  margin-top: 4px;
+}
+
+.gh-import__load-more:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.gh-import__token-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 30px 20px;
+  text-align: center;
+  color: var(--color-text-secondary);
+}
+
+.gh-import__token-error-text strong {
+  display: block;
+  font-size: 0.875rem;
+  margin-bottom: 4px;
+  color: var(--color-text-primary);
+}
+
+.gh-import__token-error-text p {
+  font-size: 0.8125rem;
+  color: var(--color-text-tertiary);
+  margin: 0;
+}
+
+.gh-import__reconnect-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 10px;
+  border: none;
+  background: var(--color-text-primary);
+  color: var(--color-background);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.gh-import__reconnect-btn:hover {
+  opacity: 0.85;
+}
+
+.gh-import__warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: rgba(234, 179, 8, 0.08);
+  color: var(--color-text-secondary);
+  font-size: 0.75rem;
+  line-height: 1.4;
+  margin-bottom: 10px;
+}
+
+.gh-import__warning svg {
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: #eab308;
+}
+
+.gh-import__files-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 30px 20px;
+  text-align: center;
+  color: var(--color-text-tertiary);
+  font-size: 0.8125rem;
+}
+
+.gh-import__file-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 340px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.gh-import__file-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 8px;
+}
+
+.gh-import__file-item:hover {
+  background: var(--color-surface);
+}
+
+.gh-import__file-checkbox {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.gh-import__file-checkbox input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.gh-import__file-check-visual {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  border: 1.5px solid var(--color-border, rgba(128, 128, 128, 0.3));
+  background: var(--color-background);
+}
+
+input:checked + .gh-import__file-check-visual {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+input:checked + .gh-import__file-check-visual::after {
+  content: "";
+  display: block;
+  width: 5px;
+  height: 9px;
+  border: solid var(--color-background);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg) translate(-1px, -1px);
+}
+
+.gh-import__file-icon {
+  color: var(--color-text-tertiary);
+  flex-shrink: 0;
+}
+
+.gh-import__file-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.gh-import__file-path {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gh-import__file-size {
+  font-size: 0.6875rem;
+  color: var(--color-text-tertiary);
+  flex-shrink: 0;
+}
+
+.gh-import__file-preview-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: var(--color-text-tertiary);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.gh-import__file-preview-btn:hover {
+  background: var(--color-accent-light, rgba(99, 102, 241, 0.1));
+  color: var(--color-accent);
+}
+
+.gh-import__actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-border-subtle, rgba(128, 128, 128, 0.08));
+  margin-top: 8px;
+}
+
+.gh-import__actions-count {
+  font-size: 0.75rem;
+  color: var(--color-text-tertiary);
+}
+
+.gh-import__import-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 18px;
+  border-radius: 10px;
+  border: none;
+  background: var(--color-accent);
+  color: #fff;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.gh-import__import-btn:hover:not(:disabled) {
+  opacity: 0.88;
+}
+
+.gh-import__import-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.gh-import__preview-frame-wrapper {
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--color-border, rgba(128, 128, 128, 0.15));
+  height: 380px;
+}
+
+.gh-import__preview-frame {
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: #fff;
+}
+
+@media (max-width: 640px) {
+  .gh-import__repo-list {
+    max-height: 300px;
+  }
+  .gh-import__file-list {
+    max-height: 260px;
+  }
+  .gh-import__preview-frame-wrapper {
+    height: 280px;
+  }
+  .gh-import__repo-desc {
+    display: none;
+  }
+}
