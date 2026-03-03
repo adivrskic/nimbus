@@ -19,11 +19,56 @@ export const ADDONS = [
     cost: 6,
     costLabel: "6 tokens",
     phase: "post",
-    status: "coming_soon",
+    status: "available",
     description:
-      "A fully styled, accessible contact form with validation, success/error states, and spam protection — wired to Formspree, Netlify Forms, or a custom endpoint.",
+      "A fully styled, accessible contact form with validation, success/error states, and spam protection — wired to Netlify Forms, Formspree, or a custom endpoint.",
     howItWorks:
       "Generates a responsive form component matching your site's typography, colors, and spacing. Includes client-side validation, honeypot fields, and a configurable action URL. Injects into an existing contact section or creates a new one before the footer.",
+    configurable: true,
+    configFields: [
+      {
+        key: "formProvider",
+        label: "Form Provider",
+        type: "select",
+        default: "netlify",
+        options: [
+          { value: "netlify", label: "Netlify Forms" },
+          { value: "formspree", label: "Formspree" },
+          { value: "custom", label: "Custom Endpoint" },
+        ],
+      },
+      {
+        key: "formEndpoint",
+        label: "Endpoint URL",
+        type: "text",
+        placeholder: "https://formspree.io/f/your-id",
+        showWhen: { formProvider: ["formspree", "custom"] },
+      },
+      {
+        key: "formFields",
+        label: "Fields",
+        type: "select",
+        default: "standard",
+        options: [
+          { value: "minimal", label: "Name + Email + Message" },
+          { value: "standard", label: "Name + Email + Subject + Message" },
+          {
+            value: "full",
+            label: "Name + Email + Phone + Company + Subject + Message",
+          },
+        ],
+      },
+      {
+        key: "formSuccessBehavior",
+        label: "On Success",
+        type: "select",
+        default: "inline",
+        options: [
+          { value: "inline", label: "Show inline success message" },
+          { value: "redirect", label: "Redirect to thank-you page" },
+        ],
+      },
+    ],
   },
   {
     id: "blog",

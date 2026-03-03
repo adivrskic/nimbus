@@ -11,11 +11,78 @@ import {
   FileText,
   Database,
   Puzzle,
+  Settings,
 } from "lucide-react";
 import { ADDONS } from "../../configs/addons.config";
 import "../../styles/modals.scss";
 
 const ICON_MAP = { BarChart3, Mail, FileText, Database };
+
+function AddonConfigPanel({ addon, config = {}, onConfigChange }) {
+  if (!addon.configurable || !addon.configFields) return null;
+
+  const getValue = (field) =>
+    config[field.key] !== undefined ? config[field.key] : field.default || "";
+
+  const isFieldVisible = (field) => {
+    if (!field.showWhen) return true;
+    return Object.entries(field.showWhen).every(([depKey, allowedValues]) => {
+      const currentVal =
+        config[depKey] !== undefined
+          ? config[depKey]
+          : addon.configFields.find((f) => f.key === depKey)?.default;
+      return allowedValues.includes(currentVal);
+    });
+  };
+
+  return (
+    <div className="addons-modal__config">
+      <div className="addons-modal__config-label">
+        <Settings size={12} />
+        <span>Configuration</span>
+      </div>
+      <div className="addons-modal__config-fields">
+        {addon.configFields.map((field) => {
+          if (!isFieldVisible(field)) return null;
+          return (
+            <div key={field.key} className="addons-modal__config-field">
+              <label className="addons-modal__config-field-label">
+                {field.label}
+              </label>
+              {field.type === "select" ? (
+                <select
+                  className="addons-modal__config-select"
+                  value={getValue(field)}
+                  onChange={(e) => onConfigChange(field.key, e.target.value)}
+                >
+                  {field.options.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <input
+                  type="text"
+                  className="addons-modal__config-input"
+                  placeholder={field.placeholder || ""}
+                  value={getValue(field)}
+                  onChange={(e) => onConfigChange(field.key, e.target.value)}
+                />
+              )}
+            </div>
+          );
+        })}
+      </div>
+      {(config.formProvider === "netlify" || !config.formProvider) && (
+        <div className="addons-modal__config-hint">
+          Netlify Forms works automatically when deployed to Netlify — no
+          server-side code or third-party accounts needed.
+        </div>
+      )}
+    </div>
+  );
+}
 
 function AddonsModal({
   isOpen,
@@ -23,9 +90,10 @@ function AddonsModal({
   selectedAddons = {},
   onToggleAddon,
   totalAddonCost = 0,
+  addonConfig = {},
+  onAddonConfigChange,
 }) {
   const [expandedId, setExpandedId] = useState(null);
-
   const selectedCount = Object.values(selectedAddons).filter(Boolean).length;
 
   const toggle = useCallback(
@@ -35,6 +103,16 @@ function AddonsModal({
       onToggleAddon?.(id);
     },
     [onToggleAddon]
+  );
+
+  const handleConfigChange = useCallback(
+    (addonId, fieldKey, value) => {
+      onAddonConfigChange?.((prev) => ({
+        ...prev,
+        [addonId]: { ...(prev[addonId] || {}), [fieldKey]: value },
+      }));
+    },
+    [onAddonConfigChange]
   );
 
   if (!isOpen) return null;
@@ -64,7 +142,6 @@ function AddonsModal({
               </button>
             </div>
           </div>
-
           <div className="modal-subtitle">
             Extend your generated site with extra functionality. Add-on costs
             are added to your base generation token cost.
@@ -101,7 +178,6 @@ function AddonsModal({
                   >
                     {Icon && <Icon size={18} />}
                   </div>
-
                   <div className="addons-modal__card-info">
                     <div className="addons-modal__card-title-row">
                       <span className="addons-modal__card-title">
@@ -117,7 +193,6 @@ function AddonsModal({
                       {addon.description}
                     </p>
                   </div>
-
                   <div className="addons-modal__card-meta">
                     <span className="addons-modal__card-cost">
                       <Coins size={11} />
@@ -144,6 +219,16 @@ function AddonsModal({
                       </span>
                       {addon.howItWorks}
                     </div>
+
+                    {addon.configurable && isSelected && (
+                      <AddonConfigPanel
+                        addon={addon}
+                        config={addonConfig[addon.id] || {}}
+                        onConfigChange={(key, val) =>
+                          handleConfigChange(addon.id, key, val)
+                        }
+                      />
+                    )}
 
                     <button
                       className={`addons-modal__card-action ${

@@ -2048,7 +2048,82 @@
     cursor: not-allowed;
   }
 }
+.addons-modal__config {
+  padding: 12px 14px;
+  margin: 0 0 10px;
+  background: var(--color-surface-alt, var(--color-surface));
+  border-radius: 10px;
+  border: 1px solid var(--color-border-subtle, rgba(128, 128, 128, 0.1));
+}
 
+.addons-modal__config-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-secondary);
+  margin-bottom: 10px;
+}
+
+.addons-modal__config-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.addons-modal__config-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.addons-modal__config-field-label {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--color-text-tertiary);
+}
+
+.addons-modal__config-select,
+.addons-modal__config-input {
+  width: 100%;
+  padding: 7px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border, rgba(128, 128, 128, 0.15));
+  background: var(--color-background);
+  color: var(--color-text-primary);
+  font-size: 0.75rem;
+  font-family: inherit;
+  outline: none;
+
+  &:focus {
+    border-color: var(--color-accent);
+  }
+}
+
+.addons-modal__config-select {
+  appearance: none;
+  padding-right: 26px;
+  cursor: pointer;
+}
+
+.addons-modal__config-hint {
+  margin-top: 8px;
+  font-size: 0.6875rem;
+  color: var(--color-text-tertiary);
+  line-height: 1.4;
+  padding: 6px 8px;
+  background: var(--color-accent-light, rgba(99, 102, 241, 0.06));
+  border-radius: 6px;
+}
+
+@media (max-width: 640px) {
+  .addons-modal__config-fields {
+    grid-template-columns: 1fr;
+  }
+}
 // Trigger button below search bar
 .addons-trigger {
   display: flex;

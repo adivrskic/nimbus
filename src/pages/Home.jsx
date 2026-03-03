@@ -173,7 +173,7 @@ function Home() {
   const [showEnhanceTokenOverlay, setShowEnhanceTokenOverlay] = useState(false);
   const [currentProjectData, setCurrentProjectData] = useState(null);
   const [selectedAddons, setSelectedAddons] = useState({});
-
+  const [addonConfig, setAddonConfig] = useState({});
   const preEnhanceHtmlRef = useRef(null);
   const preEnhanceFilesRef = useRef(null);
   const enhancePromptSnapshotRef = useRef(null);
@@ -361,8 +361,15 @@ function Home() {
     resetProject();
     setCurrentProjectData(null);
     openPreview();
-
-    generate(prompt, selections, persistentOptions, user, true, selectedAddons);
+    generate(
+      prompt,
+      selections,
+      persistentOptions,
+      user,
+      true,
+      selectedAddons,
+      addonConfig
+    );
   }, [
     prompt,
     isGenerating,
@@ -652,6 +659,8 @@ function Home() {
           selectedAddons={selectedAddons}
           onToggleAddon={handleToggleAddon}
           totalAddonCost={totalAddonCost}
+          addonConfig={addonConfig}
+          onAddonConfigChange={setAddonConfig}
         />
       )}
 
