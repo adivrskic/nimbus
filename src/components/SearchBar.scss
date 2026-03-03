@@ -5,6 +5,10 @@
   width: 100%;
   transition: all var(--transition-base);
 
+  .search-bar__char-counter {
+    display: none;
+  }
+
   &--expanded {
     .search-bar__input {
       min-height: 360px;
@@ -26,6 +30,7 @@
     }
 
     .search-bar__char-counter {
+      display: inline;
       bottom: 50px;
       right: 12px;
       left: auto;

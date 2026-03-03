@@ -689,6 +689,40 @@ function Footer() {
   const intervalRef = useRef(null);
   const dropIdRef = useRef(0);
 
+  // Glow effect based on scroll position
+  const previewRef = useRef(null);
+  const [glowIntensity, setGlowIntensity] = useState(0);
+
+  useEffect(() => {
+    const updateGlow = () => {
+      if (!previewRef.current) return;
+
+      const rect = previewRef.current.getBoundingClientRect();
+      const viewportCenter = window.innerHeight / 2;
+      const elementCenter = rect.top + rect.height / 2;
+
+      // Distance from viewport center (in pixels)
+      const distance = Math.abs(elementCenter - viewportCenter);
+      const maxDistance = Math.max(window.innerHeight, rect.height) * 0.8; // falloff distance
+
+      // Intensity: 1 at center, 0 when far away
+      let intensity = 1 - Math.min(distance / maxDistance, 1);
+      // Ease the curve for a smoother feel
+      intensity = Math.pow(intensity, 1.5);
+
+      setGlowIntensity(intensity);
+    };
+
+    window.addEventListener("scroll", updateGlow);
+    window.addEventListener("resize", updateGlow);
+    updateGlow(); // initial
+
+    return () => {
+      window.removeEventListener("scroll", updateGlow);
+      window.removeEventListener("resize", updateGlow);
+    };
+  }, []);
+
   const getRandomEmoji = () =>
     EMOJIS[Math.floor(Math.random() * EMOJIS.length)];
 
@@ -803,7 +837,13 @@ function Footer() {
               ))}
             </div>
 
-            <div className="showcase__preview">
+            <div className="showcase__preview" ref={previewRef}>
+              {/* Glow element */}
+              <div
+                className="showcase__preview-glow"
+                style={{ opacity: glowIntensity }}
+              />
+
               <div className="showcase__preview-window">
                 <div className="showcase__preview-toolbar">
                   <div className="showcase__preview-dots">
