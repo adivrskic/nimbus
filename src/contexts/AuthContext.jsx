@@ -552,6 +552,23 @@ export function AuthProvider({ children }) {
     }
   };
 
+  const signInWithFacebook = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "facebook",
+        options: {
+          redirectTo: window.location.origin,
+          // You can request additional scopes if needed, e.g.:
+          // scopes: 'email,public_profile',
+        },
+      });
+      if (error) throw error;
+      return { success: true };
+    } catch (e) {
+      return { success: false, error: e.message };
+    }
+  };
+
   const setSessionFromHash = async (hash) => {
     const params = Object.fromEntries(
       hash
@@ -599,6 +616,7 @@ export function AuthProvider({ children }) {
     setLoadingSafe,
     signInWithGitHub,
     signInWithGoogle,
+    signInWithFacebook,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

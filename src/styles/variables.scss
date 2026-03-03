@@ -58,6 +58,7 @@
     inset -5px -5px 12px #f7f7f7;
   --neumorphism-shadow-surface-elevated: inset 7px 7px 14px #d6d6d9,
     inset -7px -7px 14px #ffffff;
+  --neumorphism-shadow-modal: 19px 19px 38px #b5b5b7, -19px -19px 38px #ffffff;
 }
 
 [data-theme="dark"] {
@@ -104,6 +105,7 @@
     inset -2px -2px 6px #232323;
   --neumorphism-shadow-surface-elevated: inset 8px 8px 23px #131313,
     inset -8px -8px 23px #292929;
+  --neumorphism-shadow-modal: 18px 18px 36px #151515, -18px -18px 36px #272727;
 }
 
 $font-family-base: -apple-system, BlinkMacSystemFont, "SF Pro Display",
