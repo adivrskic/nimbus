@@ -693,6 +693,27 @@ function Footer() {
   const previewRef = useRef(null);
   const [glowIntensity, setGlowIntensity] = useState(0);
 
+  const [previewAnimate, setPreviewAnimate] = useState(true);
+  const animationTimeoutRef = useRef(null);
+
+  useEffect(() => {
+    const startCycle = () => {
+      setPreviewAnimate(true);
+      animationTimeoutRef.current = setTimeout(() => {
+        setPreviewAnimate(false);
+        animationTimeoutRef.current = setTimeout(() => {
+          startCycle();
+        }, 500); // off duration (fade-out)
+      }, 5000); // on duration (pop-in + pause)
+    };
+    startCycle();
+    return () => {
+      if (animationTimeoutRef.current) {
+        clearTimeout(animationTimeoutRef.current);
+      }
+    };
+  }, []);
+
   useEffect(() => {
     const updateGlow = () => {
       if (!previewRef.current) return;
@@ -860,7 +881,9 @@ function Footer() {
                   <svg
                     viewBox="0 0 560 320"
                     fill="none"
-                    className="showcase__preview-svg"
+                    className={`showcase__preview-svg ${
+                      previewAnimate ? "animate-preview" : ""
+                    }`}
                   >
                     <rect
                       x="0"

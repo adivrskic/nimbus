@@ -631,3 +631,43 @@
     font-family: var(--font-family-base, sans-serif);
   }
 }
+.showcase__preview-svg {
+  rect,
+  circle {
+    opacity: 0;
+    transform: scale(0.9);
+    transform-origin: center;
+    transition: transform 0.5s ease;
+  }
+
+  &.animate-preview {
+    rect,
+    circle {
+      animation: popIn 2.5s ease forwards;
+    }
+
+    @for $i from 1 through 32 {
+      rect:nth-child(#{$i}),
+      circle:nth-child(#{$i}) {
+        animation-delay: #{$i * 0.05}s;
+      }
+    }
+  }
+}
+
+@keyframes popIn {
+  0% {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  75% {
+    opacity: 0.1;
+  }
+  90% {
+    opacity: 0.2;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}

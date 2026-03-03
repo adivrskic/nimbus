@@ -162,11 +162,13 @@
   aspect-ratio: 1;
   background: conic-gradient(
     from 0deg,
-    var(--glow-c, #82e392),
-    var(--glow-a, #5893e4),
-    var(--glow-b, #d93a4e),
-    var(--glow-a, #5893e4),
-    var(--glow-c, #82e392)
+    #4a1e6b,
+    #1b1038,
+    #3a0ca3,
+    #7209b7,
+    #f72585,
+    #4cc9f0,
+    #4a1e6b
   );
   opacity: 0.75;
   animation: marble-glow-spin 3s linear infinite;
