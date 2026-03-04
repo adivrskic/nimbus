@@ -1243,6 +1243,160 @@ function Footer() {
             </p>
           </div>
         </section>
+        <section className="showcase-gallery">
+          <div className="footer__container container">
+            <div className="showcase-gallery__header">
+              <h2 className="showcase-gallery__heading">
+                Real sites built with Nimbus
+              </h2>
+            </div>
+            <div className="showcase-gallery__grid">
+              {EXAMPLES.map((item, index) => (
+                <div className="showcase-gallery__card" key={index}>
+                  <div
+                    className={`showcase-gallery__image showcase-gallery__image--${item.image}`}
+                  >
+                    <svg
+                      viewBox="0 0 400 225"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      {/* Background */}
+                      <rect
+                        width="400"
+                        height="225"
+                        fill="var(--color-surface-elevated)"
+                      />
+                      {/* Decorative elements based on type */}
+                      {item.image === "portfolio" && (
+                        <>
+                          <rect
+                            x="50"
+                            y="40"
+                            width="80"
+                            height="20"
+                            rx="4"
+                            fill="var(--color-text-primary)"
+                            fillOpacity="0.5"
+                          />
+                          <rect
+                            x="50"
+                            y="70"
+                            width="180"
+                            height="10"
+                            rx="4"
+                            fill="var(--color-text-tertiary)"
+                            fillOpacity="0.3"
+                          />
+                          <rect
+                            x="50"
+                            y="90"
+                            width="150"
+                            height="10"
+                            rx="4"
+                            fill="var(--color-text-tertiary)"
+                            fillOpacity="0.3"
+                          />
+                          <circle
+                            cx="300"
+                            cy="80"
+                            r="40"
+                            fill="var(--color-accent-light)"
+                          />
+                        </>
+                      )}
+                      {item.image === "saas" && (
+                        <>
+                          <rect
+                            x="30"
+                            y="30"
+                            width="100"
+                            height="30"
+                            rx="6"
+                            fill="var(--color-accent-light)"
+                          />
+                          <rect
+                            x="150"
+                            y="30"
+                            width="80"
+                            height="30"
+                            rx="6"
+                            fill="var(--color-accent-light)"
+                            fillOpacity="0.7"
+                          />
+                          <rect
+                            x="250"
+                            y="30"
+                            width="60"
+                            height="30"
+                            rx="6"
+                            fill="var(--color-accent-light)"
+                            fillOpacity="0.5"
+                          />
+                          <rect
+                            x="30"
+                            y="80"
+                            width="340"
+                            height="80"
+                            rx="8"
+                            fill="var(--color-accent-light)"
+                            fillOpacity="0.4"
+                          />
+                        </>
+                      )}
+                      {item.image === "ecommerce" && (
+                        <>
+                          <rect
+                            x="30"
+                            y="30"
+                            width="100"
+                            height="100"
+                            rx="6"
+                            fill="var(--color-accent-light)"
+                            fillOpacity="0.5"
+                          />
+                          <rect
+                            x="150"
+                            y="30"
+                            width="100"
+                            height="100"
+                            rx="6"
+                            fill="var(--color-accent-light)"
+                            fillOpacity="0.5"
+                          />
+                          <rect
+                            x="270"
+                            y="30"
+                            width="100"
+                            height="100"
+                            rx="6"
+                            fill="var(--color-accent-light)"
+                            fillOpacity="0.5"
+                          />
+                          <rect
+                            x="30"
+                            y="150"
+                            width="340"
+                            height="20"
+                            rx="4"
+                            fill="var(--color-text-primary)"
+                            fillOpacity="0.3"
+                          />
+                        </>
+                      )}
+                    </svg>
+                  </div>
+                  <div className="showcase-gallery__content">
+                    <h3 className="showcase-gallery__title">{item.title}</h3>
+                    <p className="showcase-gallery__subtitle">
+                      {item.subtitle}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
       </div>
 
       <footer className="footer">
