@@ -1243,7 +1243,7 @@ function Footer() {
             </p>
           </div>
         </section>
-        <section className="showcase-gallery">
+        {/* <section className="showcase-gallery">
           <div className="footer__container container">
             <div className="showcase-gallery__header">
               <h2 className="showcase-gallery__heading">
@@ -1396,7 +1396,7 @@ function Footer() {
               ))}
             </div>
           </div>
-        </section>
+        </section> */}
       </div>
 
       <footer className="footer">
