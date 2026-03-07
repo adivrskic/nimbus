@@ -1,227 +1,117 @@
-import { forwardRef, useRef, useCallback, useMemo } from "react";
-import { Coins, Settings, Sparkles, HelpCircle } from "lucide-react";
-import { Loader2 } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { Sparkles, ArrowRight, RefreshCw } from "lucide-react";
+import { EXAMPLE_PROMPTS } from "../configs";
+import { track } from "../lib/analytics";
 import "./SearchBar.scss";
 
-const MIN_CHARS = 20;
-const MAX_CHARS = 500;
+function SearchBar({
+  value,
+  onChange,
+  onGenerate,
+  isGenerating = false,
+  disabled = false,
+  placeholder = "Describe the website you want to build...",
+}) {
+  const [isFocused, setIsFocused] = useState(false);
+  const textareaRef = useRef(null);
 
-const SearchBar = forwardRef(
-  (
-    {
-      value,
-      onChange,
-      onKeyDown,
-      onFocus,
-      onBlur,
-      placeholder,
-      typewriterText,
-      showTypewriter,
-      isExpanded,
-      isGenerating,
-      tokenCost,
-      showTokenOverlay,
-      onTokenClick,
-      showOptions,
-      onOptionsClick,
-      onHelpClick,
-      onGenerate,
-      activeCategories = [],
-    },
-    ref
-  ) => {
-    const containerRef = useRef(null);
-    const hasActiveOptions = activeCategories.length > 0;
-    const preventBlurRef = useRef(false);
+  const adjustHeight = () => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      textarea.style.height = "auto";
+      textarea.style.height = `${Math.min(textarea.scrollHeight, 200)}px`;
+    }
+  };
 
-    const showExpandedState = isExpanded && !isGenerating;
+  useEffect(() => {
+    adjustHeight();
+  }, [value]);
 
-    const charCount = value.length;
-    const isUnderMin = charCount > 0 && charCount < MIN_CHARS;
-    const isOverMax = charCount > MAX_CHARS;
-    const isValidLength = charCount >= MIN_CHARS && charCount <= MAX_CHARS;
-    const charsRemaining = MIN_CHARS - charCount;
-    const charsOver = charCount - MAX_CHARS;
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!value.trim() || isGenerating || disabled) return;
+    track("generate-submit", { prompt: value.trim() });
+    onGenerate();
+  };
 
-    const canSubmit = value.trim().length > 0 && isValidLength && !isGenerating;
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmit(e);
+    }
+  };
 
-    const showCharCounter = useMemo(() => {
-      if (showExpandedState) return true;
-      if (charCount > 0 && charCount < MIN_CHARS + 10) return true;
-      if (charCount > MAX_CHARS - 100) return true;
-      return false;
-    }, [showExpandedState, charCount]);
+  const handleExampleClick = (prompt) => {
+    track("example-prompt-click", { prompt });
+    onChange(prompt);
+    setTimeout(() => textareaRef.current?.focus(), 0);
+  };
 
-    const handleBlur = useCallback(
-      (e) => {
-        if (preventBlurRef.current) {
-          preventBlurRef.current = false;
-          return;
-        }
-        if (containerRef.current?.contains(e.relatedTarget)) {
-          return;
-        }
-        onBlur?.(e);
-      },
-      [onBlur]
-    );
+  const canSubmit = value.trim() && !isGenerating && !disabled;
 
-    const handleButtonMouseDown = useCallback((e) => {
-      preventBlurRef.current = true;
-    }, []);
-
-    const handleChange = useCallback(
-      (e) => {
-        onChange?.(e);
-      },
-      [onChange]
-    );
-
-    const handleKeyDown = useCallback(
-      (e) => {
-        if (e.key === "Enter" && !e.shiftKey) {
-          if (!canSubmit) {
-            e.preventDefault();
-            return;
-          }
-        }
-        onKeyDown?.(e);
-      },
-      [onKeyDown, canSubmit]
-    );
-
-    return (
-      <div
-        ref={containerRef}
-        className={`search-bar ${
-          showExpandedState ? "search-bar--expanded" : ""
-        } ${isGenerating ? "search-bar--generating" : ""}`}
-      >
-        <div className="search-bar__input-wrapper">
+  return (
+    <div className="search-bar">
+      <form onSubmit={handleSubmit} className="search-bar__form">
+        <div
+          className={`search-bar__input-wrapper ${
+            isFocused ? "search-bar__input-wrapper--focused" : ""
+          }`}
+        >
+          <label htmlFor="website-description" className="sr-only">
+            Describe the website you want to build
+          </label>
           <textarea
-            ref={ref}
+            id="website-description"
+            ref={textareaRef}
+            placeholder={placeholder}
             value={value}
-            onChange={handleChange}
+            onChange={(e) => onChange(e.target.value)}
             onKeyDown={handleKeyDown}
-            onFocus={onFocus}
-            onBlur={handleBlur}
-            placeholder={showTypewriter ? "" : placeholder}
-            className={`search-bar__input ${
-              isOverMax ? "search-bar__input--error" : ""
-            }`}
-            rows={1}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setIsFocused(false)}
+            onInput={adjustHeight}
+            className="search-bar__input "
+            rows="1"
+            disabled={disabled}
+            style={{ resize: "none", overflow: "hidden" }}
           />
-          {showTypewriter && (
-            <div className="search-bar__typewriter-overlay">
-              <span className="search-bar__typewriter-text">
-                {typewriterText}
-                <span className="search-bar__typewriter-cursor">|</span>
-              </span>
-            </div>
-          )}
-
-          {!showExpandedState && !showTypewriter && value && (
-            <div className="search-bar__truncate-overlay">
-              <span className="search-bar__truncate-text">{value}</span>
-            </div>
-          )}
-
-          {showCharCounter && charCount > 0 && (
-            <div
-              className={`search-bar__char-counter ${
-                isUnderMin ? "search-bar__char-counter--warning" : ""
-              } ${isOverMax ? "search-bar__char-counter--error" : ""} ${
-                isValidLength ? "search-bar__char-counter--valid" : ""
-              }`}
-            >
-              {isUnderMin && (
-                <span className="search-bar__char-message">
-                  {charsRemaining} more character
-                  {charsRemaining !== 1 ? "s" : ""} needed
-                </span>
-              )}
-              {isOverMax && (
-                <span className="search-bar__char-message">
-                  {charsOver} character{charsOver !== 1 ? "s" : ""} over limit
-                </span>
-              )}
-              <span className="search-bar__char-count">
-                {charCount.toLocaleString()}/{MAX_CHARS.toLocaleString()}
-              </span>
-            </div>
-          )}
-        </div>
-
-        <div className="search-bar__right">
-          {(value.trim() || isExpanded) && (
-            <button
-              className={`search-bar__token-btn ${
-                showTokenOverlay ? "active" : ""
-              }`}
-              onClick={onTokenClick}
-              onMouseDown={handleButtonMouseDown}
-            >
-              <Coins size={14} />
-              <span className="search-bar__btn-text">-{tokenCost}</span>
-            </button>
-          )}
-
           <button
-            className={`search-bar__help-btn ${
-              showExpandedState ? "search-bar__help-btn--expanded" : ""
-            }`}
-            onClick={onHelpClick}
-            onMouseDown={handleButtonMouseDown}
-            title="Get Help"
-          >
-            <HelpCircle size={18} />
-            <span className="search-bar__btn-text">Help</span>
-          </button>
-
-          <button
-            className={`search-bar__gear-btn ${showOptions ? "active" : ""} ${
-              showExpandedState ? "search-bar__gear-btn--expanded" : ""
-            }`}
-            onClick={onOptionsClick}
-            onMouseDown={handleButtonMouseDown}
-          >
-            <Settings size={18} />
-            <span className="search-bar__btn-text">
-              Customize{hasActiveOptions ? ` (${activeCategories.length})` : ""}
-            </span>
-          </button>
-
-          <button
+            type="submit"
             className={`search-bar__submit ${
-              showExpandedState ? "search-bar__submit--expanded" : ""
+              canSubmit ? "search-bar__submit--active" : ""
             }`}
-            onClick={onGenerate}
-            onMouseDown={handleButtonMouseDown}
             disabled={!canSubmit}
-            title={
-              isUnderMin
-                ? `Need at least ${MIN_CHARS} characters`
-                : isOverMax
-                ? `Exceeds ${MAX_CHARS} character limit`
-                : ""
-            }
+            aria-label={isGenerating ? "Generating..." : "Generate website"}
           >
             {isGenerating ? (
-              <Loader2 size={16} className="spin" />
+              <RefreshCw className="search-bar__submit-icon search-bar__submit-icon--spinning" />
             ) : (
-              <Sparkles size={16} />
+              <ArrowRight className="search-bar__submit-icon" />
             )}
-            <span className="search-bar__btn-text">
-              {isGenerating ? "Generating" : "Generate"}
-            </span>
           </button>
         </div>
+      </form>
+
+      <div className="search-bar__examples">
+        <div className="search-bar__examples-label">
+          <Sparkles className="search-bar__examples-icon" />
+          <span>Try these prompts</span>
+        </div>
+        <div className="search-bar__examples-grid">
+          {EXAMPLE_PROMPTS.map((prompt, index) => (
+            <button
+              key={index}
+              className="search-bar__example"
+              onClick={() => handleExampleClick(prompt)}
+              disabled={disabled}
+            >
+              {prompt}
+            </button>
+          ))}
+        </div>
       </div>
-    );
-  }
-);
+    </div>
+  );
+}
 
-SearchBar.displayName = "SearchBar";
-
-export { MIN_CHARS, MAX_CHARS };
 export default SearchBar;
