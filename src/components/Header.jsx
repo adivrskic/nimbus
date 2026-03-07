@@ -127,7 +127,7 @@ function Header({ modalActive: externalModalActive = false }) {
         </div>
 
         <div className="header__section header__section--nav">
-          <nav className="header__nav">
+          <nav className="header__nav" aria-label="Main navigation">
             {isAuthenticated ? (
               <>
                 {isClickable && (
