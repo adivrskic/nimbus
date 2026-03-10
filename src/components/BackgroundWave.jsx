@@ -109,19 +109,18 @@ const ParticleWave = ({ isMenuOpen }) => {
     for (let i = 0; i < pos.count; i++) {
       const x = pos.getX(i);
       const y = pos.getY(i);
-      const z =
-        noiseStrength * simplex.noise3d(x * 0.22, y * 0.92, elapsedTime);
+      const z = noiseStrength * simplex.noise3d(x * 0.22, y * 1, elapsedTime);
       pos.setZ(i, z);
     }
     pos.needsUpdate = true;
 
     currentPosition.current.lerp(targetPosition, 0.14);
     currentRotation.current.x +=
-      (targetRotation.x - currentRotation.current.x) * 0.07;
+      (targetRotation.x - currentRotation.current.x) * 2.87;
     currentRotation.current.y +=
-      (targetRotation.y - currentRotation.current.y) * 0.37;
+      (targetRotation.y - currentRotation.current.y) * 0.17;
     currentRotation.current.z +=
-      (targetRotation.z - currentRotation.current.z) * 0.67;
+      (targetRotation.z - currentRotation.current.z) * 1.67;
 
     meshRef.current.position.copy(currentPosition.current);
     meshRef.current.rotation.set(
@@ -132,7 +131,7 @@ const ParticleWave = ({ isMenuOpen }) => {
 
     const baseColor = new THREE.Color(theme === "light" ? "#333" : "#ccc");
     materialRef.current.color.set(baseColor);
-    materialRef.current.size = isFooter ? baseSize : 0.01;
+    materialRef.current.size = isFooter ? baseSize : 0.02;
     materialRef.current.needsUpdate = true;
   });
 
@@ -160,10 +159,9 @@ const ParticleWave = ({ isMenuOpen }) => {
 
 const BackgroundWave = ({ isMenuOpen }) => {
   const [isMobile, setIsMobile] = useState(false);
-  const [loaded, setLoaded] = useState(false);
-  const [introComplete, setIntroComplete] = useState(false);
   const wrapRef = useRef(null);
   const rafRef = useRef(null);
+  const introCompleteRef = useRef(false);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -174,77 +172,84 @@ const BackgroundWave = ({ isMenuOpen }) => {
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
+  // Intro fade-in — purely imperative, no re-render
+  const handleCanvasCreated = useRef(() => {
+    requestAnimationFrame(() => {
+      const el = wrapRef.current;
+      if (!el) return;
+      // Trigger the CSS-transitioned intro
+      el.style.opacity = "1";
+      el.style.transform = "scale(1.06)";
+    });
+  }).current;
+
+  // After intro transition ends, hand off to scroll-driven transform
   useEffect(() => {
-    if (!loaded) return;
-    const timer = setTimeout(() => setIntroComplete(true), 3500);
-    return () => clearTimeout(timer);
-  }, [loaded]);
+    const el = wrapRef.current;
+    if (!el) return;
 
-  useEffect(() => {
-    if (!introComplete) return;
-
-    const maxShift = 80;
-
-    const onScroll = () => {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-      rafRef.current = requestAnimationFrame(() => {
-        const el = wrapRef.current;
-        if (!el) return;
-        const scrollY = window.scrollY;
-        const maxScroll =
-          document.documentElement.scrollHeight - window.innerHeight;
-        if (maxScroll <= 0) return;
-        const progress = Math.min(scrollY / maxScroll, 1);
-        const shift = progress * maxShift;
-        el.style.transform = `translateY(-${shift}vh) scale(1.06)`;
-      });
+    const onTransitionEnd = (e) => {
+      // Only fire once, on the longer transform transition
+      if (e.propertyName !== "transform") return;
+      introCompleteRef.current = true;
+      el.style.transition = "none";
+      el.style.willChange = "transform";
+      // Immediately apply scroll position so there's no jump
+      applyScroll();
     };
 
-    onScroll();
+    el.addEventListener("transitionend", onTransitionEnd);
+    return () => el.removeEventListener("transitionend", onTransitionEnd);
+  }, []);
+
+  // Scroll handler — always bound, but only writes when intro is done
+  const applyScroll = () => {
+    const el = wrapRef.current;
+    if (!el) return;
+    const maxShift = 80;
+    const scrollY = window.scrollY;
+    const maxScroll =
+      document.documentElement.scrollHeight - window.innerHeight;
+    if (maxScroll <= 0) return;
+    const progress = Math.min(scrollY / maxScroll, 1);
+    const shift = progress * maxShift;
+    el.style.transform = `translateY(-${shift}vh) scale(1.06)`;
+  };
+
+  useEffect(() => {
+    const onScroll = () => {
+      if (!introCompleteRef.current) return;
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      rafRef.current = requestAnimationFrame(applyScroll);
+    };
 
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => {
       window.removeEventListener("scroll", onScroll);
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
-  }, [introComplete]);
+  }, []);
 
   return (
     <div
       ref={wrapRef}
-      style={
-        introComplete
-          ? {
-              position: "absolute",
-              top: "33%",
-              left: 0,
-              width: "100%",
-              height: "100%",
-              pointerEvents: "none",
-              opacity: 1,
-              transform: "scale(1.06)",
-              willChange: "transform",
-            }
-          : {
-              position: "absolute",
-              top: "33%",
-              left: 0,
-              width: "100%",
-              height: "100%",
-              pointerEvents: "none",
-              opacity: loaded ? 1 : 0,
-              transform: loaded ? "scale(1.06)" : "scale(1)",
-              transition:
-                "opacity 2.8s cubic-bezier(0.16, 1, 0.3, 1), transform 3.4s cubic-bezier(0.16, 1, 0.3, 1)",
-              willChange: "opacity, transform",
-            }
-      }
+      style={{
+        position: "absolute",
+        top: "33%",
+        left: 0,
+        width: "100%",
+        height: "100%",
+        pointerEvents: "none",
+        opacity: 0,
+        transform: "scale(1)",
+        transition:
+          "opacity 2.8s cubic-bezier(0.16, 1, 0.3, 1), transform 3.4s cubic-bezier(0.16, 1, 0.3, 1)",
+        willChange: "opacity, transform",
+      }}
     >
       <Canvas
         camera={{ position: [0, 2, 8], fov: 30 }}
-        onCreated={() => {
-          requestAnimationFrame(() => setLoaded(true));
-        }}
+        onCreated={handleCanvasCreated}
         style={{ width: "100%", height: "100%" }}
         gl={{ alpha: true }}
       >

@@ -378,6 +378,7 @@ export function useGeneration({ onSuccess, onError, supabaseGenerate } = {}) {
     streamingPhase,
     fromCache,
     setEnhancePrompt,
+    setGeneratedFiles,
     updateCode,
     generate,
     enhance,

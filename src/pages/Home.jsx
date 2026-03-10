@@ -133,6 +133,7 @@ function Home() {
     enhance,
     reset: resetGeneration,
     updateCode,
+    setGeneratedFiles,
     isStreaming,
     isEnhancing,
     streamingPhase,
@@ -487,9 +488,9 @@ function Home() {
   );
 
   const previewVersions = useMemo(() => {
-    if (!currentProjectData && versionHistory.length === 0) return [];
-    return getDisplayVersions(currentProjectData);
-  }, [currentProjectData, versionHistory, getDisplayVersions]);
+    if (versionHistory.length === 0) return [];
+    return getDisplayVersions();
+  }, [versionHistory, getDisplayVersions]);
 
   const handleToggleEnhanceTokenOverlay = useCallback(
     () => setShowEnhanceTokenOverlay((prev) => !prev),
@@ -510,19 +511,19 @@ function Home() {
       resetProject();
       setCurrentProjectData(null);
 
-      if (fileKeys.length === 1) {
-        updateCode(primaryHtml);
+      updateCode(primaryHtml);
+
+      // Pass all files into the multi-page system so PreviewModal
+      // shows page tabs and the AI can edit any page
+      if (fileKeys.length > 1) {
+        setGeneratedFiles(files);
       } else {
-        // Multi-file import — primary goes into generatedCode,
-        // the full file map is available for multi-page preview
-        updateCode(primaryHtml);
-        // If useGeneration exposes setGeneratedFiles, wire it here
-        // to enable multi-page tab switching in PreviewModal.
+        setGeneratedFiles(null);
       }
 
       openPreview();
     },
-    [setPrompt, resetProject, updateCode, openPreview]
+    [setPrompt, resetProject, updateCode, setGeneratedFiles, openPreview]
   );
 
   return (

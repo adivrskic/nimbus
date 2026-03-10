@@ -23,6 +23,8 @@ import {
   fetchRepoTree,
   fetchFileContent,
   filterHtmlFiles,
+  countAssetFiles,
+  inlineExternalAssets,
   isStaticSite,
 } from "../../utils/githubApi";
 import "../../styles/modals.scss";
@@ -51,6 +53,8 @@ function GithubImportModal({ isOpen, onClose, onImport }) {
   // Selected repo + files
   const [selectedRepo, setSelectedRepo] = useState(null);
   const [htmlFiles, setHtmlFiles] = useState([]);
+  const [repoTree, setRepoTree] = useState([]);
+  const [assetCounts, setAssetCounts] = useState({ css: 0, js: 0 });
   const [siteInfo, setSiteInfo] = useState(null);
   const [filesLoading, setFilesLoading] = useState(false);
   const [filesError, setFilesError] = useState(null);
@@ -145,9 +149,13 @@ function GithubImportModal({ isOpen, onClose, onImport }) {
           repo.name,
           repo.default_branch || "main"
         );
-        const htmlList = filterHtmlFiles(tree.tree || []);
-        const info = isStaticSite(tree.tree || []);
+        const treeItems = tree.tree || [];
+        const htmlList = filterHtmlFiles(treeItems);
+        const info = isStaticSite(treeItems);
+        const assets = countAssetFiles(treeItems);
         setHtmlFiles(htmlList);
+        setRepoTree(treeItems);
+        setAssetCounts(assets);
         setSiteInfo(info);
 
         // Auto-select all HTML files
@@ -179,20 +187,34 @@ function GithubImportModal({ isOpen, onClose, onImport }) {
       setStep(STEPS.PREVIEW);
       setPreviewLoading(true);
       try {
-        const content = await fetchFileContent(
+        const rawContent = await fetchFileContent(
           ghToken,
           selectedRepo.owner.login,
           selectedRepo.name,
           file.path
         );
-        setPreviewHtml(content);
+
+        // Inline assets so preview renders correctly
+        const branch = selectedRepo.default_branch || "main";
+        const treePaths = repoTree.map((t) => t.path);
+        const { html: inlinedContent } = await inlineExternalAssets(
+          rawContent,
+          ghToken,
+          selectedRepo.owner.login,
+          selectedRepo.name,
+          branch,
+          file.path,
+          treePaths
+        );
+
+        setPreviewHtml(inlinedContent);
       } catch {
         setPreviewHtml("<!-- Failed to load preview -->");
       } finally {
         setPreviewLoading(false);
       }
     },
-    [ghToken, selectedRepo]
+    [ghToken, selectedRepo, repoTree]
   );
 
   const toggleFileSelection = useCallback((path) => {
@@ -215,19 +237,33 @@ function GithubImportModal({ isOpen, onClose, onImport }) {
     try {
       const filesToImport = htmlFiles.filter((f) => selectedFiles.has(f.path));
       const fileContents = {};
+      const branch = selectedRepo.default_branch || "main";
+      const treePaths = repoTree.map((t) => t.path);
 
       for (const file of filesToImport) {
-        const content = await fetchFileContent(
+        const rawContent = await fetchFileContent(
           ghToken,
           selectedRepo.owner.login,
           selectedRepo.name,
           file.path
         );
+
+        // Inline external CSS and JS so the file is self-contained
+        const { html: inlinedContent } = await inlineExternalAssets(
+          rawContent,
+          ghToken,
+          selectedRepo.owner.login,
+          selectedRepo.name,
+          branch,
+          file.path,
+          treePaths
+        );
+
         // Use just the filename, not full path
         const filename = file.path.includes("/")
           ? file.path.split("/").pop()
           : file.path;
-        fileContents[filename] = content;
+        fileContents[filename] = inlinedContent;
       }
 
       onImport?.({
@@ -245,7 +281,15 @@ function GithubImportModal({ isOpen, onClose, onImport }) {
     } finally {
       setImporting(false);
     }
-  }, [selectedRepo, selectedFiles, htmlFiles, ghToken, onImport, closeModal]);
+  }, [
+    selectedRepo,
+    selectedFiles,
+    htmlFiles,
+    repoTree,
+    ghToken,
+    onImport,
+    closeModal,
+  ]);
 
   const handleReconnect = useCallback(async () => {
     try {
@@ -339,11 +383,27 @@ function GithubImportModal({ isOpen, onClose, onImport }) {
           <div className="modal-subtitle">
             {step === STEPS.REPOS &&
               "Select a repository to import HTML files from."}
-            {step === STEPS.FILES &&
-              `${htmlFiles.length} HTML file${
-                htmlFiles.length !== 1 ? "s" : ""
-              } found`}
-            {step === STEPS.PREVIEW && "Preview the file before importing."}
+            {step === STEPS.FILES && (
+              <>
+                {`${htmlFiles.length} HTML file${
+                  htmlFiles.length !== 1 ? "s" : ""
+                } found`}
+                {(assetCounts.css > 0 || assetCounts.js > 0) && (
+                  <span style={{ opacity: 0.7 }}>
+                    {" · "}
+                    {[
+                      assetCounts.css > 0 && `${assetCounts.css} CSS`,
+                      assetCounts.js > 0 && `${assetCounts.js} JS`,
+                    ]
+                      .filter(Boolean)
+                      .join(", ")}{" "}
+                    will be bundled in
+                  </span>
+                )}
+              </>
+            )}
+            {step === STEPS.PREVIEW &&
+              "Preview with styles and scripts inlined."}
           </div>
         </div>
 
@@ -523,8 +583,8 @@ function GithubImportModal({ isOpen, onClose, onImport }) {
                     >
                       {importing ? (
                         <>
-                          <Loader2 size={14} className="spinning" />{" "}
-                          Importing...
+                          <Loader2 size={14} className="spinning" /> Bundling
+                          assets...
                         </>
                       ) : (
                         <>

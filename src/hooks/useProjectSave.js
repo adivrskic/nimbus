@@ -37,7 +37,6 @@ export function useProjectSave({
   const [versionHistory, setVersionHistory] = useState([]);
   const [currentVersionId, setCurrentVersionId] = useState(null);
 
-  const prevCodeRef = useRef(null);
   const isFirstSaveRef = useRef(true);
 
   useEffect(() => {
@@ -47,27 +46,6 @@ export function useProjectSave({
     }
   }, [saveSuccess]);
 
-  useEffect(() => {
-    if (generatedCode && generatedCode !== prevCodeRef.current) {
-      if (currentProjectId && prevCodeRef.current) {
-        const prevVersion = createVersionEntry({
-          prompt: "Previous version",
-          htmlContent: prevCodeRef.current,
-          files: null,
-          label: "Previous version",
-        });
-
-        setVersionHistory((prev) => {
-          if (prev.length === 0 && prevCodeRef.current) {
-            return [prevVersion];
-          }
-          return prev;
-        });
-      }
-      prevCodeRef.current = generatedCode;
-    }
-  }, [generatedCode, currentProjectId]);
-
   const handleSave = useCallback(async () => {
     if (!generatedCode || !isAuthenticated || !user) return;
 
@@ -75,19 +53,8 @@ export function useProjectSave({
     setSaveSuccess(false);
 
     try {
-      let updatedHistory = [...versionHistory];
-
-      if (currentProjectId && updatedHistory.length > 0) {
-        const newVersion = createVersionEntry({
-          prompt: prompt,
-          htmlContent: generatedCode,
-          files: generatedFiles,
-          label: prompt?.slice(0, 60) || "Enhancement",
-        });
-        updatedHistory.push(newVersion);
-        setCurrentVersionId(newVersion.id);
-      }
-
+      // Don't add a version on save — versions are only created
+      // explicitly by recordEnhancement / recordEnhancementResult.
       const projectData = {
         user_id: user.id,
         name: generateName(prompt),
@@ -98,13 +65,14 @@ export function useProjectSave({
           selections,
           persistentOptions,
           files: generatedFiles,
-          versionHistory: updatedHistory.map((v) => ({
+          versionHistory: versionHistory.map((v) => ({
             id: v.id,
             prompt: v.prompt,
             label: v.label,
             html_content: v.html_content,
             files: v.files,
             timestamp: v.timestamp,
+            isInitial: v.isInitial || false,
           })),
         },
       };
@@ -163,17 +131,17 @@ export function useProjectSave({
       if (!previousHtml) return;
 
       setVersionHistory((prev) => {
-        if (prev.length === 0) {
-          const initialVersion = createVersionEntry({
-            prompt: prompt || "Initial generation",
-            htmlContent: previousHtml,
-            files: previousFiles,
-            label: "Initial generation",
-          });
-          initialVersion.isInitial = true;
-          return [initialVersion];
-        }
-        return prev;
+        // Only add the initial version once
+        if (prev.some((v) => v.isInitial)) return prev;
+
+        const initialVersion = createVersionEntry({
+          prompt: prompt || "Initial generation",
+          htmlContent: previousHtml,
+          files: previousFiles,
+          label: "Initial generation",
+        });
+        initialVersion.isInitial = true;
+        return [...prev, initialVersion];
       });
     },
     [prompt]
@@ -215,38 +183,22 @@ export function useProjectSave({
     }
   }, []);
 
-  const getDisplayVersions = useCallback(
-    (project) => {
-      const history = [...versionHistory];
+  const getDisplayVersions = useCallback(() => {
+    if (versionHistory.length === 0) return [];
 
-      const sorted = history.sort(
-        (a, b) => new Date(b.timestamp) - new Date(a.timestamp)
-      );
+    // Return in chronological order (oldest first = v1)
+    const sorted = [...versionHistory].sort(
+      (a, b) => new Date(a.timestamp) - new Date(b.timestamp)
+    );
 
-      const hasInitial = sorted.some((v) => v.isInitial);
-      if (!hasInitial && project) {
-        sorted.push({
-          id: "initial",
-          label: "Initial generation",
-          prompt: project.prompt || "",
-          html_content: project.html_content,
-          files: project.customization?.files || null,
-          timestamp: project.created_at,
-          isInitial: true,
-        });
-      }
-
-      return sorted;
-    },
-    [versionHistory]
-  );
+    return sorted;
+  }, [versionHistory]);
 
   const resetProject = useCallback(() => {
     setCurrentProjectId(null);
     setSaveSuccess(false);
     setVersionHistory([]);
     setCurrentVersionId(null);
-    prevCodeRef.current = null;
     isFirstSaveRef.current = true;
   }, []);
 

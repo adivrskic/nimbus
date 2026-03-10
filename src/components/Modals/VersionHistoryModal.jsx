@@ -29,22 +29,25 @@ function VersionHistoryModal({ isOpen, onClose, project, onSelectVersion }) {
     setIsLoading(true);
     try {
       const history = project.customization?.versionHistory || [];
+
+      // Chronological order (oldest first = v1)
       const sorted = [...history].sort(
-        (a, b) => new Date(b.timestamp) - new Date(a.timestamp)
+        (a, b) => new Date(a.timestamp) - new Date(b.timestamp)
       );
 
-      const allVersions = [
-        ...sorted,
-        {
+      // Only add a synthetic initial if none exists in history
+      const hasInitial = sorted.some((v) => v.isInitial);
+      if (!hasInitial && sorted.length > 0) {
+        sorted.unshift({
           id: "initial",
           label: "Initial generation",
           prompt: project.prompt || project.customization?.prompt || "",
           timestamp: project.created_at,
           isInitial: true,
-        },
-      ];
+        });
+      }
 
-      setVersions(allVersions);
+      setVersions(sorted);
     } catch (err) {
       console.error("Error loading versions:", err);
     } finally {
@@ -73,8 +76,8 @@ function VersionHistoryModal({ isOpen, onClose, project, onSelectVersion }) {
     });
   };
 
-  const handleSelect = (version, index) => {
-    const versionNumber = versions.length - index;
+  const handleSelect = (version) => {
+    const versionNumber = versions.findIndex((v) => v.id === version.id) + 1;
     onSelectVersion?.({
       ...version,
       versionNumber,
@@ -120,13 +123,14 @@ function VersionHistoryModal({ isOpen, onClose, project, onSelectVersion }) {
                 <span>No version history yet</span>
               </div>
             ) : (
-              versions.map((version, index) => {
-                const versionNumber = versions.length - index;
+              [...versions].reverse().map((version) => {
+                const versionNumber =
+                  versions.findIndex((v) => v.id === version.id) + 1;
                 return (
                   <button
                     key={version.id}
                     className="version-item"
-                    onClick={() => handleSelect(version, index)}
+                    onClick={() => handleSelect(version)}
                   >
                     <div className="version-item__badge">v{versionNumber}</div>
                     <div className="version-item__info">

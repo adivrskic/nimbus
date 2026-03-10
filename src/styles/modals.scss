@@ -5035,7 +5035,7 @@ input:checked + .gh-import__file-check-visual::after {
   border-radius: 10px;
   border: none;
   background: var(--color-accent);
-  color: #fff;
+  color: var(--color-background);
   font-size: 0.8125rem;
   font-weight: 600;
   font-family: inherit;

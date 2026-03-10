@@ -329,7 +329,7 @@ function PreviewModal({
     if (!hasVersions) return null;
     if (!currentVersionId) return `v${versions.length}`;
     const idx = versions.findIndex((v) => v.id === currentVersionId);
-    if (idx >= 0) return `v${versions.length - idx}`;
+    if (idx >= 0) return `v${idx + 1}`;
     return `v${versions.length}`;
   };
 
@@ -376,6 +376,37 @@ function PreviewModal({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="pm-bar" ref={headerRef}>
+          {(isStreaming || isEnhancing) && (
+            <div
+              className="pm-bar__loading-bar"
+              style={{
+                position: "absolute",
+                top: "-8px",
+                left: 0,
+                right: 0,
+                height: "2px",
+                borderRadius: "1px",
+                overflow: "hidden",
+                transform: "translateY(-100%)",
+              }}
+            >
+              <div
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  background:
+                    "linear-gradient(90deg, transparent, var(--color-accent, #6366f1), transparent)",
+                  animation: "pm-loading-slide 1.5s ease-in-out infinite",
+                }}
+              />
+            </div>
+          )}
+          <style>{`
+            @keyframes pm-loading-slide {
+              0% { transform: translateX(-100%); }
+              100% { transform: translateX(100%); }
+            }
+          `}</style>
           <div className="pm-bar__brand">
             <Cloudy size={16} />
           </div>
@@ -558,11 +589,13 @@ function PreviewModal({
               {showVersionPicker && (
                 <div className="pm-bar__dropdown pm-bar__dropdown--versions">
                   <div className="pm-bar__dropdown-title">Version History</div>
-                  {versions.map((version, index) => {
-                    const vNum = versions.length - index;
+                  {[...versions].reverse().map((version) => {
+                    const vNum =
+                      versions.findIndex((v) => v.id === version.id) + 1;
                     const isActive =
                       version.id === currentVersionId ||
-                      (!currentVersionId && index === 0);
+                      (!currentVersionId &&
+                        version.id === versions[versions.length - 1]?.id);
                     return (
                       <button
                         key={version.id}
