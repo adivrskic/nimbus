@@ -128,7 +128,7 @@ function AuthModal({ isOpen, onClose, onAuthSuccess, onOpenLegal }) {
               )}
               <span>GitHub</span>
             </button>
-            <button
+            {/* <button
               className="auth-provider"
               onClick={() => handleOAuthSignIn("Facebook", signInWithFacebook)}
               disabled={isLoading}
@@ -141,7 +141,7 @@ function AuthModal({ isOpen, onClose, onAuthSuccess, onOpenLegal }) {
                 </svg>
               )}
               <span>Facebook</span>
-            </button>
+            </button> */}
           </div>
 
           <div className="auth-footer">
